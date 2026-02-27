@@ -58,6 +58,7 @@ import { setupFileUploadHandlers, loadPendingRequestsDropdown, loadProjectFiles 
 import { createSecondarySidebar, SECONDARY_TAB_ICONS, type SecondarySidebarController } from '../../../components/secondary-sidebar';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { makeEditable } from '../../../components/inline-edit';
@@ -127,11 +128,6 @@ type ProjectsDOMKeys = {
   uploadDropzone: string;
   fileInput: string;
   browseFilesBtn: string;
-  // Edit modal
-  editModal: string;
-  editForm: string;
-  editClose: string;
-  editCancel: string;
   // Add project modal
   addProjectModal: string;
   addProjectForm: string;
@@ -185,11 +181,6 @@ domCache.register({
   uploadDropzone: '#pd-upload-dropzone',
   fileInput: '#pd-file-input',
   browseFilesBtn: '#btn-pd-browse-files',
-  // Edit modal
-  editModal: '#edit-project-modal',
-  editForm: '#edit-project-form',
-  editClose: '#edit-project-close',
-  editCancel: '#edit-project-cancel',
   // Add project modal
   addProjectModal: '#add-project-modal',
   addProjectForm: '#add-project-form',
@@ -284,29 +275,29 @@ export function renderProjectsTab(container: HTMLElement): void {
   container.innerHTML = `
     <!-- Projects Stats -->
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="all" data-table="projects">
+      <button class="stat-card stat-card-clickable" data-filter="all" data-table="projects">
         <span class="stat-number" id="projects-total">-</span>
         <span class="stat-label">Total Projects</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="active" data-table="projects">
+      <button class="stat-card stat-card-clickable" data-filter="active" data-table="projects">
         <span class="stat-number" id="projects-active">-</span>
         <span class="stat-label">Active</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="completed" data-table="projects">
+      <button class="stat-card stat-card-clickable" data-filter="completed" data-table="projects">
         <span class="stat-number" id="projects-completed">-</span>
         <span class="stat-label">Completed</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-filter="on_hold" data-table="projects">
+      <button class="stat-card stat-card-clickable" data-filter="on_hold" data-table="projects">
         <span class="stat-number" id="projects-on-hold">-</span>
         <span class="stat-label">On Hold</span>
       </button>
     </div>
 
     <!-- Projects Table -->
-    <div class="admin-table-card" id="projects-card">
-      <div class="admin-table-header">
-        <h3>Projects</h3>
-        <div class="admin-table-actions" id="projects-filter-container">
+    <div class="data-table-card" id="projects-card">
+      <div class="data-table-header">
+        <h3><span class="title-full">All Projects</span><span class="title-mobile">Projects</span></h3>
+        <div class="data-table-actions" id="projects-filter-container">
           <button class="icon-btn" id="export-projects-btn" title="Export to CSV" aria-label="Export projects to CSV">
             ${RENDER_ICONS.EXPORT}
           </button>
@@ -320,9 +311,9 @@ export function renderProjectsTab(container: HTMLElement): void {
       </div>
       <!-- Bulk Action Toolbar (hidden initially) -->
       <div id="projects-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
-      <div class="admin-table-container projects-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table projects-table">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table">
           <thead>
             <tr>
               <th scope="col" class="bulk-select-cell">
@@ -330,10 +321,10 @@ export function renderProjectsTab(container: HTMLElement): void {
                   <input type="checkbox" id="projects-select-all" class="bulk-select-all" aria-label="Select all projects" />
                 </div>
               </th>
-              <th scope="col">Project</th>
+              <th scope="col" class="identity-col">Project</th>
               <th scope="col" class="type-col">Type</th>
               <th scope="col" class="status-col">Status</th>
-              <th scope="col" class="budget-col">Budget</th>
+              <th scope="col" class="amount-col">Budget</th>
               <th scope="col" class="timeline-col">Timeline</th>
               <th scope="col" class="date-col start-col">Start</th>
               <th scope="col" class="date-col target-col">Target</th>
@@ -577,7 +568,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
         <span class="budget-stacked">${formatDisplayValue(project.budget_range)}</span>
       </td>
       <td class="status-cell" data-label="Status"></td>
-      <td class="budget-cell inline-editable-cell" data-field="budget_range" data-project-id="${project.id}" data-label="Budget">
+      <td class="amount-cell inline-editable-cell" data-field="budget_range" data-project-id="${project.id}" data-label="Budget">
         <span class="budget-value">${formatDisplayValue(project.budget_range)}</span>
         <span class="timeline-stacked">${formatDisplayValue(project.timeline)}</span>
       </td>
@@ -590,11 +581,9 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
       </td>
       <td class="date-cell target-cell" data-label="Target">${formatDate(project.end_date)}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button class="icon-btn btn-view-project" data-project-id="${project.id}" title="View Project" aria-label="View project details">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('view', project.id, { className: 'btn-view-project', dataAttrs: { 'project-id': project.id }, title: 'View Project', ariaLabel: 'View project details' }),
+        ])}
       </td>
     `;
 
@@ -629,7 +618,7 @@ function renderProjectsTable(projects: LeadProject[], ctx: AdminDashboardContext
     }
 
     // Setup inline editing for budget cell
-    const budgetCell = row.querySelector('.budget-cell.inline-editable-cell') as HTMLElement;
+    const budgetCell = row.querySelector('.amount-cell.inline-editable-cell') as HTMLElement;
     if (budgetCell) {
       makeEditable(
         budgetCell,
@@ -935,9 +924,8 @@ export function showProjectDetails(
         loadProjectFilesFromModule(projectId);
       });
 
-      // Initialize keyboard shortcuts for detail view (E=edit, Esc=back, 1-9=tabs)
+      // Initialize keyboard shortcuts for detail view (Esc=back, 1-9=tabs)
       initDetailKeyboardNav({
-        editButtonSelector: '#pd-btn-edit',
         onBack: () => ctx.switchTab('projects'),
         tabContainerSelector: '.project-detail-tabs',
         containerSelector: '#tab-project-detail'
@@ -964,9 +952,8 @@ export function showProjectDetails(
     loadProjectFilesFromModule(projectId);
   });
 
-  // Initialize keyboard shortcuts for detail view (E=edit, Esc=back, 1-9=tabs)
+  // Initialize keyboard shortcuts for detail view (Esc=back, 1-9=tabs)
   initDetailKeyboardNav({
-    editButtonSelector: '#pd-btn-edit',
     onBack: () => ctx.switchTab('projects'),
     tabContainerSelector: '.project-detail-tabs',
     containerSelector: '#tab-project-detail'
@@ -1087,16 +1074,7 @@ function populateProjectDetailView(project: LeadProject): void {
     }
   });
 
-  // Setup edit button in header card
-  const headerEditBtn = document.getElementById('pd-btn-edit');
-  if (headerEditBtn) {
-    const newHeaderEditBtn = headerEditBtn.cloneNode(true) as HTMLElement;
-    headerEditBtn.parentNode?.replaceChild(newHeaderEditBtn, headerEditBtn);
-    newHeaderEditBtn.addEventListener('click', () => openEditProjectModal(project));
-  }
-
-  // Setup edit button
-  setupEditProjectButton(project);
+  // Note: Edit button removed - inline editing now used in project overview
 
   // Status badge - normalize to underscore format (use cached ref)
   const statusEl = domCache.get('status');
@@ -1304,279 +1282,7 @@ function setupDetailInlineEditing(project: LeadProject): void {
   }
 }
 
-/**
- * Setup edit project button and modal
- */
-function setupEditProjectButton(project: LeadProject): void {
-  const editBtn = domCache.get('editProjectBtn', true); // Force refresh since we clone
-  if (!editBtn) return;
-
-  // Clone to remove old listeners
-  const newEditBtn = editBtn.cloneNode(true) as HTMLElement;
-  editBtn.parentNode?.replaceChild(newEditBtn, editBtn);
-
-  newEditBtn.addEventListener('click', () => openEditProjectModal(project));
-}
-
-// Store current project ID for form submission
-let editingProjectId: number | null = null;
-
-/** Cleanup for edit modal focus trap */
-let editModalFocusCleanup: (() => void) | null = null;
-
-function closeEditProjectModal(): void {
-  const modal = domCache.get('editModal');
-  if (!modal) return;
-  editModalFocusCleanup?.();
-  editModalFocusCleanup = null;
-  modal.removeAttribute('aria-labelledby');
-  modal.removeAttribute('role');
-  modal.removeAttribute('aria-modal');
-  closeModalOverlay(modal);
-}
-
-/**
- * Open the edit project modal with current project data
- */
-function openEditProjectModal(project: LeadProject): void {
-  const modal = domCache.get('editModal');
-  if (!modal) return;
-
-  // Store project ID for form submission
-  editingProjectId = project.id;
-
-  // Populate form fields
-  const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
-  const descriptionInput = document.getElementById('edit-project-description') as HTMLTextAreaElement;
-  const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
-  const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
-  const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-  const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
-  const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
-  const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
-  const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
-  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
-  const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
-  const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
-  const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
-
-  // Decode HTML entities for text fields that may contain encoded characters
-  if (nameInput) nameInput.value = SanitizationUtils.decodeHtmlEntities(project.project_name || '');
-  if (descriptionInput) descriptionInput.value = SanitizationUtils.decodeHtmlEntities(project.description || '');
-  if (budgetInput) budgetInput.value = project.budget_range || '';
-  if (priceInput) priceInput.value = project.price?.toString() || '';
-  if (timelineInput) timelineInput.value = project.timeline || '';
-  // Date inputs need YYYY-MM-DD format
-  if (startDateInput) startDateInput.value = project.start_date ? project.start_date.split('T')[0] : '';
-  if (endDateInput) endDateInput.value = project.end_date ? project.end_date.split('T')[0] : '';
-  if (depositInput) depositInput.value = project.deposit_amount?.toString() || '';
-  if (contractDateInput) contractDateInput.value = project.contract_signed_date ? project.contract_signed_date.split('T')[0] : '';
-  // URL fields - decode HTML entities in case they were double-encoded
-  if (previewUrlInput) previewUrlInput.value = SanitizationUtils.decodeHtmlEntities(project.preview_url || '');
-  if (repoUrlInput) repoUrlInput.value = SanitizationUtils.decodeHtmlEntities(project.repo_url || '');
-  if (productionUrlInput) productionUrlInput.value = SanitizationUtils.decodeHtmlEntities(project.production_url || '');
-  // Admin notes field - decode entities
-  if (notesInput) notesInput.value = SanitizationUtils.decodeHtmlEntities(project.notes || '');
-
-  // Setup close handlers and create dropdown elements (only once per modal lifecycle)
-  // Must be called BEFORE initProjectModalDropdowns so the select elements exist
-  setupEditProjectModalHandlers(modal);
-
-  // Initialize custom dropdowns with current project values
-  initProjectModalDropdowns(project);
-
-  // Show modal and lock body scroll
-  openModalOverlay(modal);
-
-  // Focus trap and ARIA
-  editModalFocusCleanup?.();
-  modal.setAttribute('aria-labelledby', 'edit-project-modal-title');
-  editModalFocusCleanup = manageFocusTrap(modal, {
-    initialFocus: '#edit-project-name',
-    onClose: closeEditProjectModal
-  });
-}
-
-/**
- * Project type options for edit modal
- */
-const EDIT_PROJECT_TYPE_OPTIONS = [
-  { value: '', label: 'Select type...' },
-  { value: 'simple-site', label: 'Simple Website' },
-  { value: 'business-site', label: 'Business Website' },
-  { value: 'portfolio', label: 'Portfolio' },
-  { value: 'e-commerce', label: 'E-Commerce' },
-  { value: 'web-app', label: 'Web Application' },
-  { value: 'browser-extension', label: 'Browser Extension' },
-  { value: 'other', label: 'Other' }
-];
-
-/**
- * Project status options for edit modal
- */
-const EDIT_PROJECT_STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'active', label: 'Active' },
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'in-review', label: 'In Review' },
-  { value: 'on-hold', label: 'On Hold' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' }
-];
-
-/** Minimal interface for project modal dropdown initialization */
-interface ProjectDropdownData {
-  project_type?: string;
-  status: string;
-}
-
-/**
- * Initialize custom dropdowns for the edit project modal.
- * Uses createModalDropdown for modal-specific styling (48px height, form field bg).
- */
-export function initProjectModalDropdowns(project: ProjectDropdownData): void {
-  const typeMount = document.getElementById('edit-project-type-mount');
-  const statusMount = document.getElementById('edit-project-status-mount');
-
-  // Type dropdown: modal dropdown with placeholder
-  if (typeMount) {
-    typeMount.innerHTML = '';
-    const typeDropdown = createModalDropdown({
-      options: EDIT_PROJECT_TYPE_OPTIONS,
-      currentValue: project.project_type || '',
-      ariaLabelPrefix: 'Project type',
-      placeholder: 'Select type...'
-    });
-    typeMount.appendChild(typeDropdown);
-  }
-
-  // Status dropdown: modal dropdown
-  if (statusMount) {
-    const currentStatus = normalizeStatus(project.status);
-    statusMount.innerHTML = '';
-    const statusDropdown = createModalDropdown({
-      options: EDIT_PROJECT_STATUS_OPTIONS,
-      currentValue: currentStatus,
-      ariaLabelPrefix: 'Status'
-    });
-    statusMount.appendChild(statusDropdown);
-  }
-}
-
-/**
- * Setup modal close and form handlers (only attach once)
- */
-let editProjectModalInitialized = false;
-
-export function setupEditProjectModalHandlers(modal: HTMLElement): void {
-  if (editProjectModalInitialized) return;
-  editProjectModalInitialized = true;
-
-  // Type dropdown is now created in initProjectModalDropdowns with createTableDropdown
-  // Status is created in initProjectModalDropdowns with createTableDropdown (same as table)
-
-  const closeBtn = domCache.get('editClose');
-  const cancelBtn = domCache.get('editCancel');
-  const form = domCache.getAs<HTMLFormElement>('editForm');
-
-  closeBtn?.addEventListener('click', closeEditProjectModal);
-  cancelBtn?.addEventListener('click', closeEditProjectModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeEditProjectModal();
-  });
-
-  // Handle form submit
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (editingProjectId !== null) {
-        await saveProjectChanges(editingProjectId);
-        closeEditProjectModal();
-      }
-    });
-  }
-}
-
-/**
- * Save project changes from the edit modal
- */
-async function saveProjectChanges(projectId: number): Promise<void> {
-  if (!storedContext) return;
-
-  const nameInput = document.getElementById('edit-project-name') as HTMLInputElement;
-  const descriptionInput = document.getElementById('edit-project-description') as HTMLTextAreaElement;
-  const typeMount = document.getElementById('edit-project-type-mount');
-  const typeValue = typeMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
-  const budgetInput = document.getElementById('edit-project-budget') as HTMLInputElement;
-  const priceInput = document.getElementById('edit-project-price') as HTMLInputElement;
-  const timelineInput = document.getElementById('edit-project-timeline') as HTMLInputElement;
-  const statusMount = document.getElementById('edit-project-status-mount');
-  const statusValue = statusMount?.querySelector('.modal-dropdown')?.getAttribute('data-value') ?? '';
-  const startDateInput = document.getElementById('edit-project-start-date') as HTMLInputElement;
-  const endDateInput = document.getElementById('edit-project-end-date') as HTMLInputElement;
-  const depositInput = document.getElementById('edit-project-deposit') as HTMLInputElement;
-  const contractDateInput = document.getElementById('edit-project-contract-date') as HTMLInputElement;
-  const previewUrlInput = document.getElementById('edit-project-preview-url') as HTMLInputElement;
-  const repoUrlInput = document.getElementById('edit-project-repo-url') as HTMLInputElement;
-  const productionUrlInput = document.getElementById('edit-project-production-url') as HTMLInputElement;
-  const notesInput = document.getElementById('edit-project-notes') as HTMLTextAreaElement;
-
-  const updates: Record<string, string> = {};
-  if (nameInput?.value) updates.project_name = nameInput.value;
-  // Allow clearing description by sending empty string
-  if (descriptionInput) updates.description = descriptionInput.value || '';
-  if (typeValue) updates.project_type = typeValue;
-  if (budgetInput?.value) updates.budget = budgetInput.value;
-  // Strip commas from numeric fields before saving
-  if (priceInput?.value) updates.price = priceInput.value.replace(/,/g, '');
-  if (timelineInput?.value) updates.timeline = timelineInput.value;
-  if (statusValue) updates.status = statusValue;
-  // Allow clearing dates by sending empty string
-  if (startDateInput) updates.start_date = startDateInput.value || '';
-  if (endDateInput) updates.end_date = endDateInput.value || '';
-  // Deposit and contract date (allow clearing) - strip commas from deposit
-  if (depositInput) updates.deposit_amount = (depositInput.value || '').replace(/,/g, '');
-  if (contractDateInput) updates.contract_signed_date = contractDateInput.value || '';
-  // URL fields (allow clearing)
-  if (previewUrlInput) updates.preview_url = previewUrlInput.value || '';
-  if (repoUrlInput) updates.repo_url = repoUrlInput.value || '';
-  if (productionUrlInput) updates.production_url = productionUrlInput.value || '';
-  // Admin notes (allow clearing by sending empty string)
-  if (notesInput) updates.admin_notes = notesInput.value || '';
-
-  try {
-    const response = await apiPut(`/api/projects/${projectId}`, updates);
-    if (!response.ok) {
-      storedContext.showNotification('Failed to update project. Please try again.', 'error');
-      return;
-    }
-    const result = await response.json();
-
-    if (result.project) {
-      storedContext.showNotification('Project updated successfully', 'success');
-      // Update local project data with response (no need to reload all projects)
-      const projectIndex = projectsData.findIndex((p) => p.id === projectId);
-      if (projectIndex !== -1) {
-        // Preserve computed fields that the API might not return
-        const existingProject = projectsData[projectIndex];
-        projectsData[projectIndex] = {
-          ...existingProject,
-          ...result.project,
-          // Ensure computed fields are preserved
-          file_count: existingProject.file_count,
-          message_count: existingProject.message_count,
-          unread_count: existingProject.unread_count
-        };
-        populateProjectDetailView(projectsData[projectIndex]);
-      }
-    } else {
-      storedContext.showNotification('Failed to update project. Please try again.', 'error');
-    }
-  } catch (error) {
-    console.error('[AdminProjects] Error saving project:', error);
-    storedContext.showNotification('Failed to update project. Please try again.', 'error');
-  }
-}
+// Note: Edit modal removed - inline editing now used in project overview
 
 function setupProjectDetailTabs(ctx: AdminDashboardContext): void {
   // Set up inline tab buttons (hidden, but keep for compatibility)
@@ -1691,9 +1397,6 @@ function setupMoreMenu(ctx: AdminDashboardContext): void {
     if (!project) return;
 
     switch (action) {
-    case 'edit':
-      openEditProjectModal(project);
-      break;
     case 'duplicate':
       await duplicateProject(
         currentProjectId,
@@ -2073,17 +1776,18 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
   }
 
   container.innerHTML = `
-    <table class="files-table" aria-label="Project files">
-      <thead>
-        <tr>
-          <th scope="col" class="name-col">File</th>
-          <th scope="col" class="type-col">Size</th>
-          <th scope="col" class="date-col">Uploaded</th>
-          <th scope="col" class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${files
+    <div class="data-table-scroll-wrapper">
+      <table class="data-table files-table" aria-label="Project files">
+        <thead>
+          <tr>
+            <th scope="col" class="name-col">File</th>
+            <th scope="col" class="type-col">Size</th>
+            <th scope="col" class="date-col">Uploaded</th>
+            <th scope="col" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+          ${files
     .map((file) => {
       const safeName = SanitizationUtils.escapeHtml(file.original_filename || file.filename);
       const storageFilename = file.filename || ''; // Actual filename on disk for intake detection
@@ -2099,10 +1803,10 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
       const isPreviewable = /\.(json|txt|md|png|jpg|jpeg|gif|webp|svg|pdf)$/i.test(safeName) || isIntakeFile;
 
       const previewBtn = isPreviewable
-        ? `<button type="button" class="icon-btn btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}" title="Preview"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>`
+        ? `<button type="button" class="icon-btn btn-preview" data-file-id="${file.id}" data-file-url="${fileApiUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Preview ${safeName}" title="Preview">${ICONS.EYE}</button>`
         : '';
-      const downloadBtn = `<button type="button" class="icon-btn btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}" title="Download"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
-      const deleteBtn = `<button type="button" class="icon-btn icon-btn-danger btn-delete-file" data-file-id="${file.id}" data-file-name="${safeName}" aria-label="Delete ${safeName}" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`;
+      const downloadBtn = `<button type="button" class="icon-btn btn-download" data-file-url="${downloadUrl}" data-file-name="${safeName}" data-storage-filename="${storageFilename}" aria-label="Download ${safeName}" title="Download">${ICONS.DOWNLOAD}</button>`;
+      const deleteBtn = `<button type="button" class="icon-btn icon-btn-danger btn-delete-file" data-file-id="${file.id}" data-file-name="${safeName}" aria-label="Delete ${safeName}" title="Delete">${ICONS.TRASH}</button>`;
       return `
               <tr>
                 <td class="name-cell" data-label="File">${safeName}</td>
@@ -2119,8 +1823,9 @@ function renderProjectFiles(files: ProjectFile[], container: HTMLElement, projec
             `;
     })
     .join('')}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   `;
 
   // Add click handlers for preview buttons
@@ -2718,18 +2423,19 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
   }
 
   container.innerHTML = `
-    <table class="invoices-table" aria-label="Project invoices">
-      <thead>
-        <tr>
-          <th scope="col" class="type-col">Invoice #</th>
-          <th scope="col" class="budget-col">Amount</th>
-          <th scope="col" class="date-col">Due Date</th>
-          <th scope="col" class="status-col">Status</th>
-          <th scope="col" class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${invoices
+    <div class="data-table-scroll-wrapper">
+      <table class="data-table invoices-table" aria-label="Project invoices">
+        <thead>
+          <tr>
+            <th scope="col" class="name-col">Invoice #</th>
+            <th scope="col" class="amount-col">Amount</th>
+            <th scope="col" class="date-col">Due Date</th>
+            <th scope="col" class="status-col">Status</th>
+            <th scope="col" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+          ${invoices
     .map((invoice) => {
       const amount = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -2740,21 +2446,21 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
       const showSendBtn = isDraft;
       const showMarkPaidBtn = ['sent', 'viewed', 'partial', 'overdue'].includes(invoice.status);
 
-      const previewBtn = `<button type="button" class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview PDF" title="Preview PDF"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+      const previewBtn = `<button type="button" class="icon-btn btn-preview-invoice" data-invoice-id="${invoice.id}" aria-label="Preview PDF" title="Preview PDF">${ICONS.EYE}</button>`;
       const editBtn = isDraft
-        ? `<button type="button" class="icon-btn btn-edit-invoice" data-invoice-id="${invoice.id}" aria-label="Edit Invoice" title="Edit Invoice"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>`
+        ? `<button type="button" class="icon-btn btn-edit-invoice" data-invoice-id="${invoice.id}" aria-label="Edit Invoice" title="Edit Invoice">${ICONS.EDIT}</button>`
         : '';
-      const downloadBtn = `<button type="button" class="icon-btn btn-download-invoice" data-invoice-id="${invoice.id}" data-invoice-number="${invoice.invoice_number}" aria-label="Download PDF" title="Download PDF"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+      const downloadBtn = `<button type="button" class="icon-btn btn-download-invoice" data-invoice-id="${invoice.id}" data-invoice-number="${invoice.invoice_number}" aria-label="Download PDF" title="Download PDF">${ICONS.DOWNLOAD}</button>`;
       const sendBtn = showSendBtn
-        ? `<button type="button" class="icon-btn btn-send-invoice" data-invoice-id="${invoice.id}" aria-label="Send to Client" title="Send to Client"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>`
+        ? `<button type="button" class="icon-btn btn-send-invoice" data-invoice-id="${invoice.id}" aria-label="Send to Client" title="Send to Client">${ICONS.SEND}</button>`
         : '';
       const paidBtn = showMarkPaidBtn
-        ? `<button type="button" class="icon-btn btn-mark-paid" data-invoice-id="${invoice.id}" aria-label="Mark as Paid" title="Mark as Paid"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></button>`
+        ? `<button type="button" class="icon-btn btn-mark-paid" data-invoice-id="${invoice.id}" aria-label="Mark as Paid" title="Mark as Paid">${ICONS.CIRCLE_CHECK}</button>`
         : '';
       return `
               <tr>
                 <td class="type-cell" data-label="Invoice">${invoice.invoice_number}</td>
-                <td class="budget-cell" data-label="Amount">${amount}</td>
+                <td class="amount-cell" data-label="Amount">${amount}</td>
                 <td class="date-cell" data-label="Due Date">${dueDate}</td>
                 <td class="status-cell" data-label="Status">${getStatusDotHTML(invoice.status)}</td>
                 <td class="actions-cell" data-label="Actions">
@@ -2770,8 +2476,9 @@ function renderProjectInvoices(invoices: ProjectInvoice[], container: HTMLElemen
             `;
     })
     .join('')}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   `;
 
   // Add event listeners for preview and download buttons
@@ -3092,7 +2799,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
                   <input type="number" class="form-input line-item-qty" placeholder="Qty" value="${item.quantity}" min="1" style="width: 70px;">
                   <input type="number" class="form-input line-item-rate" placeholder="Rate" value="${item.rate}" min="0" step="0.01" style="width: 100px;">
                   <span class="line-item-amount">$${(item.quantity * item.rate).toFixed(2)}</span>
-                  ${lineItems.length > 1 ? `<button type="button" class="btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
+                  ${lineItems.length > 1 ? `<button type="button" class="icon-btn icon-btn-danger icon-btn-xs btn-remove-line" data-index="${index}" title="Remove">&times;</button>` : ''}
                 </div>
               `).join('')}
             </div>

@@ -19,6 +19,7 @@ import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 
 const QUESTIONNAIRES_API = '/api/questionnaires';
 
@@ -171,17 +172,11 @@ function renderQuestionnairesTable(questionnaires: Questionnaire[]): void {
         </span>
       </td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button type="button" class="icon-btn questionnaire-edit" data-id="${q.id}" title="Edit" aria-label="Edit">
-            ${ICONS.EDIT}
-          </button>
-          <button type="button" class="icon-btn icon-btn-primary questionnaire-send" data-id="${q.id}" title="Send to client" aria-label="Send to client">
-            ${ICONS.SEND}
-          </button>
-          <button type="button" class="icon-btn icon-btn-danger questionnaire-delete" data-id="${q.id}" data-name="${escapeHtml(q.name)}" title="Delete" aria-label="Delete">
-            ${ICONS.TRASH}
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('edit', q.id, { className: 'questionnaire-edit' }),
+          createAction('send', q.id, { className: 'questionnaire-send', title: 'Send to client', ariaLabel: 'Send to client' }),
+          createAction('delete', q.id, { className: 'questionnaire-delete', dataAttrs: { name: escapeHtml(q.name) } }),
+        ])}
       </td>
     </tr>
   `).join('');
@@ -214,17 +209,11 @@ function renderResponsesTable(responses: QuestionnaireResponse[]): void {
       </td>
       <td class="date-cell" data-label="Due Date">${formatDate(r.due_date)}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button type="button" class="icon-btn response-view" data-id="${r.id}" title="View" aria-label="View response">
-            ${ICONS.EYE}
-          </button>
-          <button type="button" class="icon-btn response-remind" data-id="${r.id}" title="Send reminder" aria-label="Send reminder">
-            ${ICONS.BELL}
-          </button>
-          <button type="button" class="icon-btn icon-btn-danger response-delete" data-id="${r.id}" title="Delete" aria-label="Delete response">
-            ${ICONS.TRASH}
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('view', r.id, { className: 'response-view', ariaLabel: 'View response' }),
+          createAction('remind', r.id, { className: 'response-remind' }),
+          createAction('delete', r.id, { className: 'response-delete', ariaLabel: 'Delete response' }),
+        ])}
       </td>
     </tr>
   `).join('');
@@ -358,7 +347,7 @@ function renderQuestionsBuilder(): void {
           <input type="checkbox" class="question-required" data-index="${index}" ${q.required ? 'checked' : ''} />
           Required
         </label>
-        <button type="button" class="icon-btn icon-btn-danger question-remove" data-index="${index}" title="Remove question">
+        <button type="button" class="icon-btn question-remove" data-index="${index}" title="Remove question">
           ${ICONS.TRASH}
         </button>
       </div>
@@ -858,21 +847,21 @@ const RENDER_ICONS = {
  */
 export function renderQuestionnairesTab(container: HTMLElement): void {
   container.innerHTML = `
-    <div class="admin-table-card portal-shadow">
-      <div class="admin-table-header">
+    <div class="data-table-card">
+      <div class="data-table-header">
         <h3>Questionnaires</h3>
-        <div class="admin-table-actions" id="questionnaires-filter-container">
+        <div class="data-table-actions" id="questionnaires-filter-container">
           <button type="button" class="icon-btn" id="questionnaires-refresh" title="Refresh" aria-label="Refresh questionnaires">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
-          <button type="button" class="icon-btn icon-btn-primary" id="questionnaires-add" title="Create Questionnaire" aria-label="Create questionnaire">
-            <span class="icon-btn-svg">${RENDER_ICONS.PLUS}</span>
+          <button type="button" class="icon-btn" id="questionnaires-add" title="Create Questionnaire" aria-label="Create questionnaire">
+            ${RENDER_ICONS.PLUS}
           </button>
         </div>
       </div>
-      <div class="admin-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table" aria-label="Questionnaires">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Questionnaires">
           <thead>
             <tr>
               <th scope="col" class="name-col">Name</th>
@@ -899,18 +888,18 @@ export function renderQuestionnairesTab(container: HTMLElement): void {
     </div>
 
     <!-- Pending Responses Card -->
-    <div class="admin-table-card portal-shadow">
-      <div class="admin-table-header">
+    <div class="data-table-card">
+      <div class="data-table-header">
         <h3>Pending Responses</h3>
-        <div class="admin-table-actions">
+        <div class="data-table-actions">
           <button type="button" class="icon-btn" id="responses-refresh" title="Refresh" aria-label="Refresh responses">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
         </div>
       </div>
-      <div class="admin-table-container">
-        <div class="admin-table-scroll-wrapper">
-        <table class="admin-table" aria-label="Pending questionnaire responses">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+        <table class="data-table" aria-label="Pending questionnaire responses">
           <thead>
             <tr>
               <th scope="col" class="name-col">Questionnaire</th>

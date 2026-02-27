@@ -16,6 +16,7 @@ import { confirmDialog, alertError } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import {
   saveFilterState,
   updateFilterStatusOptions,
@@ -212,17 +213,13 @@ function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
 
   row.innerHTML = `
     <td class="name-cell" data-label="Contract">
-      <div class="identity-cell">
-        <span class="identity-primary">${title}</span>
-        <span class="identity-secondary">${typeLabel}${amendmentLabel}</span>
-      </div>
+      <span class="identity-name">${title}</span>
+      <span class="identity-contact">${typeLabel}${amendmentLabel}</span>
     </td>
     <td class="name-cell" data-label="Project">${projectName}</td>
-    <td class="name-cell" data-label="Client">
-      <div class="identity-cell">
-        <span class="identity-primary">${clientName}</span>
-        <span class="identity-secondary">${clientEmail}</span>
-      </div>
+    <td class="identity-cell" data-label="Client">
+      <span class="identity-name">${clientName}</span>
+      <span class="identity-email">${clientEmail}</span>
     </td>
     <td class="status-cell" data-label="Status">${getStatusBadge(contract.status)}</td>
     <td class="date-cell" data-label="Sent">${formatDateSafe(contract.sentAt)}</td>
@@ -231,17 +228,11 @@ function buildContractRow(contract: ContractListItem): HTMLTableRowElement {
       <span class="expires-at-value">${formatDateSafe(contract.expiresAt)}</span>
     </td>
     <td class="actions-cell" data-label="Actions">
-      <div class="table-actions">
-        <button class="icon-btn" data-action="view" data-id="${contract.id}" title="View details" aria-label="View contract">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-        <button class="icon-btn" data-action="remind" data-id="${contract.id}" title="Resend reminder" aria-label="Resend reminder">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        </button>
-        <button class="icon-btn" data-action="expire" data-id="${contract.id}" title="Expire contract" aria-label="Expire contract">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </button>
-      </div>
+      ${renderActionsCell([
+        createAction('view', contract.id, { title: 'View details', ariaLabel: 'View contract' }),
+        createAction('remind', contract.id, { title: 'Resend reminder', ariaLabel: 'Resend reminder' }),
+        createAction('expire', contract.id, { title: 'Expire contract', ariaLabel: 'Expire contract' }),
+      ])}
     </td>
   `;
 
@@ -582,45 +573,45 @@ const RENDER_ICONS = {
 export function renderContractsTab(container: HTMLElement): void {
   container.innerHTML = `
     <div class="quick-stats">
-      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="all">
+      <button class="stat-card stat-card-clickable" data-contract-filter="all">
         <span class="stat-number" id="contracts-total">-</span>
         <span class="stat-label">Total Contracts</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="draft">
+      <button class="stat-card stat-card-clickable" data-contract-filter="draft">
         <span class="stat-number" id="contracts-draft">-</span>
         <span class="stat-label">Draft</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="sent">
+      <button class="stat-card stat-card-clickable" data-contract-filter="sent">
         <span class="stat-number" id="contracts-sent">-</span>
         <span class="stat-label">Sent</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="viewed">
+      <button class="stat-card stat-card-clickable" data-contract-filter="viewed">
         <span class="stat-number" id="contracts-viewed">-</span>
         <span class="stat-label">Viewed</span>
       </button>
-      <button class="stat-card stat-card-clickable portal-shadow" data-contract-filter="signed">
+      <button class="stat-card stat-card-clickable" data-contract-filter="signed">
         <span class="stat-number" id="contracts-signed">-</span>
         <span class="stat-label">Signed</span>
       </button>
     </div>
 
-    <div class="admin-table-card" id="contracts-table-card">
-      <div class="admin-table-header">
-        <h3>Contracts</h3>
-        <div class="admin-table-actions" id="contracts-filter-container">
+    <div class="data-table-card" id="contracts-table-card">
+      <div class="data-table-header">
+        <h3><span class="title-full">All Contracts</span><span class="title-mobile">Contracts</span></h3>
+        <div class="data-table-actions" id="contracts-filter-container">
           <button class="icon-btn" id="refresh-contracts-btn" title="Refresh" aria-label="Refresh contracts">
-            <span class="icon-btn-svg">${RENDER_ICONS.REFRESH}</span>
+            ${RENDER_ICONS.REFRESH}
           </button>
         </div>
       </div>
-      <div class="admin-table-container contracts-table-container">
-        <div class="admin-table-scroll-wrapper">
-          <table class="admin-table contracts-table">
+      <div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Contract</th>
-                <th scope="col">Project</th>
-                <th scope="col" class="contact-col">Client</th>
+                <th scope="col" class="name-col">Contract</th>
+                <th scope="col" class="name-col">Project</th>
+                <th scope="col" class="identity-col">Client</th>
                 <th scope="col" class="status-col">Status</th>
                 <th scope="col" class="date-col">Sent</th>
                 <th scope="col" class="date-col">Signed</th>

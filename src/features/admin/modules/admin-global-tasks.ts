@@ -17,7 +17,15 @@ import { getStatusDotHTML } from '../../../components/status-badge';
 import { createViewToggle } from '../../../components/view-toggle';
 import { createPortalModal } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
 import type { AdminDashboardContext } from '../admin-types';
+import {
+  type PaginationState,
+  getDefaultPaginationState,
+  loadPaginationState,
+  applyPagination,
+  createPaginationUI
+} from '../../../utils/table-pagination';
 
 // View toggle icons
 const BOARD_ICON =
@@ -49,6 +57,11 @@ let currentTasks: GlobalTask[] = [];
 let currentView: 'kanban' | 'list' = 'kanban';
 let kanbanBoard: ReturnType<typeof createKanbanBoard> | null = null;
 let moduleContext: AdminDashboardContext | null = null;
+
+// Pagination state - only show when > 10 items
+const PAGINATION_THRESHOLD = 10;
+const PAGINATION_STORAGE_KEY = 'global-tasks-pagination';
+let paginationState: PaginationState = getDefaultPaginationState({ tableId: 'global-tasks', defaultPageSize: 25 });
 
 // Status configuration - all colors use CSS variables
 const STATUS_CONFIG = {
@@ -124,10 +137,10 @@ export function renderGlobalTasksTab(container: HTMLElement): void {
       </div>
     </div>
 
-    <div class="admin-table-card portal-shadow tasks-main-container" id="global-tasks-card">
-      <div class="admin-table-header">
+    <div class="data-table-card tasks-main-container" id="global-tasks-card">
+      <div class="data-table-header">
         <h3>All Tasks</h3>
-        <div class="admin-table-actions">
+        <div class="data-table-actions">
           <div id="global-tasks-view-toggle-mount"></div>
           <button class="icon-btn" id="refresh-global-tasks-btn" title="Refresh" aria-label="Refresh tasks">
             ${RENDER_ICONS.REFRESH}
@@ -445,35 +458,72 @@ function renderListView(): void {
 
   if (activeTasks.length === 0) {
     listContainer.innerHTML = `
-      <div class="admin-table-container">
+      <div class="data-table-container">
         <div class="empty-state">No tasks found across any projects.</div>
       </div>
     `;
     return;
   }
 
+  // Check if pagination is needed (> 10 items)
+  const showPagination = activeTasks.length > PAGINATION_THRESHOLD;
+
+  // Load saved page size if needed
+  if (showPagination) {
+    const savedState = loadPaginationState(PAGINATION_STORAGE_KEY);
+    if (savedState.pageSize) {
+      paginationState.pageSize = savedState.pageSize;
+    }
+    paginationState.totalItems = activeTasks.length;
+    // Ensure current page is valid
+    const totalPages = Math.ceil(activeTasks.length / paginationState.pageSize) || 1;
+    if (paginationState.currentPage > totalPages) {
+      paginationState.currentPage = 1;
+    }
+  }
+
+  // Apply pagination if needed
+  const displayTasks = showPagination ? applyPagination(activeTasks, paginationState) : activeTasks;
+
   listContainer.innerHTML = `
-    <div class="admin-table-container">
-      <div class="admin-table-scroll-wrapper">
-        <table class="admin-table tasks-table">
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table tasks-table">
           <thead>
             <tr>
-              <th>Task</th>
-              <th>Project</th>
-              <th class="milestone-col">Milestone</th>
-              <th class="type-col">Priority</th>
-              <th class="status-col">Status</th>
-              <th class="date-col">Due Date</th>
-              <th class="actions-col">Actions</th>
+              <th scope="col" class="name-col">Task</th>
+              <th scope="col" class="name-col">Project</th>
+              <th scope="col" class="name-col">Milestone</th>
+              <th scope="col" class="type-col">Priority</th>
+              <th scope="col" class="status-col">Status</th>
+              <th scope="col" class="date-col">Due Date</th>
+              <th scope="col" class="actions-col">Actions</th>
             </tr>
           </thead>
-          <tbody id="global-tasks-table-body">
-            ${activeTasks.map(task => renderListItem(task)).join('')}
+          <tbody id="global-tasks-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            ${displayTasks.map(task => renderListItem(task)).join('')}
           </tbody>
         </table>
       </div>
+      ${showPagination ? '<div class="table-pagination" id="global-tasks-pagination"></div>' : ''}
     </div>
   `;
+
+  // Create pagination UI if needed
+  if (showPagination) {
+    const paginationContainer = listContainer.querySelector('#global-tasks-pagination');
+    if (paginationContainer) {
+      const paginationUI = createPaginationUI(
+        { tableId: 'global-tasks', storageKey: PAGINATION_STORAGE_KEY },
+        paginationState,
+        (newState) => {
+          paginationState = newState;
+          renderListView();
+        }
+      );
+      paginationContainer.appendChild(paginationUI);
+    }
+  }
 
   // Add click and keyboard handlers for accessibility
   const tableBody = listContainer.querySelector('#global-tasks-table-body');
@@ -530,14 +580,9 @@ function renderListItem(task: GlobalTask): string {
       <td class="status-cell" data-label="Status">${getStatusDotHTML(task.status)}</td>
       <td class="date-cell ${isOverdue ? 'overdue' : ''}" data-label="Due Date">${task.dueDate ? formatDate(task.dueDate) : ''}</td>
       <td class="actions-cell" data-label="Actions">
-        <div class="table-actions">
-          <button type="button" class="icon-btn icon-btn-danger" data-action="delete-task" data-task-id="${task.id}" title="Delete task">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
+        ${renderActionsCell([
+          createAction('delete', task.id, { dataAttrs: { 'task-id': task.id }, title: 'Delete task' }),
+        ])}
       </td>
     </tr>
   `;
@@ -725,6 +770,8 @@ export function cleanup(): void {
   }
   currentTasks = [];
   moduleContext = null;
+  // Reset pagination to first page
+  paginationState.currentPage = 1;
 }
 
 /**
