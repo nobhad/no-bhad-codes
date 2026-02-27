@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { PortalSidebar, type PortalNavigationProps } from './PortalSidebar';
+import { ErrorBoundary } from '../../../components/portal/ErrorBoundary';
 
 // Store roots for cleanup
 const roots = new Map<HTMLElement, Root>();
@@ -32,9 +33,7 @@ export function mountPortalNavigation(
     roots.delete(container);
   }
 
-  // Clear container
-  container.innerHTML = '';
-
+  // Note: React's unmount() clears the container, no innerHTML clearing needed
   const root = createRoot(container);
   roots.set(container, root);
 
@@ -42,7 +41,9 @@ export function mountPortalNavigation(
 
   root.render(
     <React.StrictMode>
-      <PortalSidebar {...props} />
+      <ErrorBoundary componentName="Navigation">
+        <PortalSidebar {...props} />
+      </ErrorBoundary>
     </React.StrictMode>
   );
 
@@ -70,7 +71,7 @@ export function unmountPortalNavigation(container: HTMLElement): void {
     root.unmount();
     roots.delete(container);
   }
-  container.innerHTML = '';
+  // Note: React's unmount() clears the container, no innerHTML clearing needed
 }
 
 /**
@@ -87,7 +88,9 @@ export function updatePortalNavigation(
     const { onMounted, ...props } = options;
     root.render(
       <React.StrictMode>
-        <PortalSidebar {...props} />
+        <ErrorBoundary componentName="Navigation">
+          <PortalSidebar {...props} />
+        </ErrorBoundary>
       </React.StrictMode>
     );
   }
@@ -107,15 +110,5 @@ export function isPortalNavigationMounted(container: HTMLElement): boolean {
  * @returns Whether to use React implementation
  */
 export function shouldUseReactPortalNavigation(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_portal_navigation') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_portal_navigation');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }

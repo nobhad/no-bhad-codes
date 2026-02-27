@@ -64,15 +64,5 @@ export function unmountPortalMessages(container: HTMLElement): void {
  * Check if React portal messages should be used
  */
 export function shouldUseReactPortalMessages(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_portal_messages') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_portal_messages');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }

@@ -124,15 +124,5 @@ export function unmountPortalProjectDetail(container: HTMLElement): void {
  * Check if React portal projects should be used
  */
 export function shouldUseReactPortalProjects(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_portal_projects') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_portal_projects');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
