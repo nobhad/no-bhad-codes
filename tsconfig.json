@@ -24,6 +24,13 @@
       "@factories/*": ["src/factories/*"]
     }
   },
-  "include": ["src/**/*", "src/**/*.tsx", "server/**/*", "tests/**/*", "*.ts", "*.js"],
+  "include": [
+    "src/**/*",
+    "src/**/*.tsx",
+    "server/**/*",
+    "tests/**/*",
+    "*.ts",
+    "*.js"
+  ],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

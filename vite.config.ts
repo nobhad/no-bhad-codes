@@ -120,7 +120,10 @@ export default defineConfig({
           proxy.on('error', (err, _req, res) => {
             // Log the proxy error and return a friendly 503 when possible
             // eslint-disable-next-line no-console
-            console.warn('[vite-proxy] proxy error:', err && (err as Error).message ? (err as Error).message : err);
+            console.warn(
+              '[vite-proxy] proxy error:',
+              err && (err as Error).message ? (err as Error).message : err
+            );
             if (res && 'writeHead' in res && typeof res.writeHead === 'function') {
               const response = res as import('http').ServerResponse;
               if (!response.headersSent) {
