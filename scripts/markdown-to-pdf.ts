@@ -18,14 +18,14 @@ const BUSINESS_INFO = {
   contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
   tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
   email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
-  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes'
+  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes',
 };
 
 // Page settings
 const PAGE_WIDTH = 612; // Letter size
 const PAGE_HEIGHT = 792;
 const PAGE_MARGIN = 45; // Slightly smaller margins
-const CONTENT_WIDTH = PAGE_WIDTH - (PAGE_MARGIN * 2);
+const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
 
 // Font sizes
 const FONT_SIZE_H1 = 18;
@@ -104,12 +104,17 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
   };
 
   // Helper to draw text
-  const drawText = (text: string, x: number, yPos: number, options: {
-    font?: PDFFont;
-    size?: number;
-    color?: { r: number; g: number; b: number };
-    maxWidth?: number;
-  } = {}) => {
+  const drawText = (
+    text: string,
+    x: number,
+    yPos: number,
+    options: {
+      font?: PDFFont;
+      size?: number;
+      color?: { r: number; g: number; b: number };
+      maxWidth?: number;
+    } = {}
+  ) => {
     const font = options.font || helvetica;
     const size = options.size || FONT_SIZE_BODY;
     const color = options.color || { r: 0, g: 0, b: 0 };
@@ -120,7 +125,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       size,
       font,
       color: rgb(color.r, color.g, color.b),
-      maxWidth: options.maxWidth
+      maxWidth: options.maxWidth,
     });
   };
 
@@ -143,10 +148,10 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
 
     // Draw cells
     tableData.forEach((row, rowIndex) => {
-      const rowY = startY - (rowIndex * rowHeight);
+      const rowY = startY - rowIndex * rowHeight;
 
       row.forEach((cell, colIndex) => {
-        const cellX = startX + (colIndex * colWidth);
+        const cellX = startX + colIndex * colWidth;
         const cellContent = stripMarkdownFormatting(cell);
 
         // Header row background
@@ -158,7 +163,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             height: rowHeight,
             color: rgb(0.94, 0.94, 0.94),
             borderColor: rgb(0, 0, 0),
-            borderWidth: 0.5
+            borderWidth: 0.5,
           });
         } else {
           page.drawRectangle({
@@ -167,7 +172,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             width: colWidth,
             height: rowHeight,
             borderColor: rgb(0, 0, 0),
-            borderWidth: 0.5
+            borderWidth: 0.5,
           });
         }
 
@@ -180,13 +185,13 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             start: { x: centerX - 4, y: centerY },
             end: { x: centerX - 1, y: centerY - 3 },
             thickness: 1.5,
-            color: rgb(0, 0, 0)
+            color: rgb(0, 0, 0),
           });
           page.drawLine({
             start: { x: centerX - 1, y: centerY - 3 },
             end: { x: centerX + 5, y: centerY + 4 },
             thickness: 1.5,
-            color: rgb(0, 0, 0)
+            color: rgb(0, 0, 0),
           });
         } else if (cellContent.trim() === '-' || cellContent.trim() === '') {
           // Center dash or empty cell
@@ -194,7 +199,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             const dashWidth = helvetica.widthOfTextAtSize('-', FONT_SIZE_SMALL);
             drawText('-', cellX + (colWidth - dashWidth) / 2, rowY - rowHeight + 5, {
               font: helvetica,
-              size: FONT_SIZE_SMALL
+              size: FONT_SIZE_SMALL,
             });
           }
         } else if (cellContent.includes('[SPROUT]') && sproutImage) {
@@ -205,7 +210,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             x: centerX - 6,
             y: centerY - 6,
             width: 12,
-            height: 12
+            height: 12,
           });
         } else {
           // Center content in columns 1+ (GOOD/BETTER/BEST columns), left-align first column
@@ -216,13 +221,13 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             const textWidth = font.widthOfTextAtSize(displayText, FONT_SIZE_SMALL);
             drawText(displayText, cellX + (colWidth - textWidth) / 2, rowY - rowHeight + 5, {
               font,
-              size: FONT_SIZE_SMALL
+              size: FONT_SIZE_SMALL,
             });
           } else {
             // Left align first column
             drawText(displayText, cellX + 4, rowY - rowHeight + 5, {
               font,
-              size: FONT_SIZE_SMALL
+              size: FONT_SIZE_SMALL,
             });
           }
         }
@@ -243,10 +248,15 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
   }
 
   // Helper to draw text with sprout support
-  const drawTextWithSprout = (text: string, x: number, yPos: number, options: {
-    font?: PDFFont;
-    size?: number;
-  } = {}) => {
+  const drawTextWithSprout = (
+    text: string,
+    x: number,
+    yPos: number,
+    options: {
+      font?: PDFFont;
+      size?: number;
+    } = {}
+  ) => {
     const font = options.font || helvetica;
     const size = options.size || FONT_SIZE_BODY;
 
@@ -272,7 +282,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
   const logoPaths = [
     join(process.cwd(), 'public/images/avatar_pdf.png'),
     join(process.cwd(), 'public/images/pdf-header-logo.png'),
-    join(process.cwd(), 'public/images/avatar_small-1.png')
+    join(process.cwd(), 'public/images/avatar_small-1.png'),
   ];
 
   let logoPath = '';
@@ -294,7 +304,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       x: logoX,
       y: PAGE_HEIGHT - 35 - logoHeight,
       width: logoWidth,
-      height: logoHeight
+      height: logoHeight,
     });
   }
 
@@ -302,7 +312,10 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
   y = PAGE_HEIGHT - 100;
   const headerText = `${BUSINESS_INFO.name}`;
   const headerWidth = helveticaBold.widthOfTextAtSize(headerText, FONT_SIZE_BODY);
-  drawText(headerText, (PAGE_WIDTH - headerWidth) / 2, y, { font: helveticaBold, size: FONT_SIZE_BODY });
+  drawText(headerText, (PAGE_WIDTH - headerWidth) / 2, y, {
+    font: helveticaBold,
+    size: FONT_SIZE_BODY,
+  });
 
   y -= LINE_HEIGHT;
   const subHeaderText = `${BUSINESS_INFO.contact} | ${BUSINESS_INFO.email} | ${BUSINESS_INFO.website}`;
@@ -339,8 +352,11 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
 
     // Table row
     if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-      const cells = trimmed.slice(1, -1).split('|').map(c => c.trim());
-      if (cells.every(c => /^[-:]+$/.test(c))) {
+      const cells = trimmed
+        .slice(1, -1)
+        .split('|')
+        .map((c) => c.trim());
+      if (cells.every((c) => /^[-:]+$/.test(c))) {
         continue;
       }
       inTable = true;
@@ -389,7 +405,10 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       checkPageBreak(22);
       const text = stripMarkdownFormatting(trimmed.slice(5));
       // More padding for special headings
-      if (text.toLowerCase().startsWith('everything in') || text.toLowerCase().includes("what's included")) {
+      if (
+        text.toLowerCase().startsWith('everything in') ||
+        text.toLowerCase().includes("what's included")
+      ) {
         y -= 12;
       } else {
         y -= 2; // Very tight subsection spacing
@@ -400,7 +419,11 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     }
 
     // Checkbox
-    if (trimmed.startsWith('- [x] ') || trimmed.startsWith('- [X] ') || trimmed.startsWith('- [ ] ')) {
+    if (
+      trimmed.startsWith('- [x] ') ||
+      trimmed.startsWith('- [X] ') ||
+      trimmed.startsWith('- [ ] ')
+    ) {
       checkPageBreak(14);
       const checked = trimmed.startsWith('- [x] ') || trimmed.startsWith('- [X] ');
       const content = stripMarkdownFormatting(trimmed.slice(6));
@@ -415,7 +438,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         height: 9,
         borderWidth: 1,
         borderColor: rgb(0, 0, 0),
-        backgroundColor: rgb(1, 1, 1)
+        backgroundColor: rgb(1, 1, 1),
       });
 
       if (checked) {
@@ -443,7 +466,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         start: { x: lineStartX, y: y - 2 },
         end: { x: lineEndX, y: y - 2 },
         thickness: 0.5,
-        color: rgb(0, 0, 0)
+        color: rgb(0, 0, 0),
       });
 
       y -= 28; // More spacing in signature section
@@ -464,7 +487,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         start: { x: fieldStartX, y: y - 2 },
         end: { x: fieldStartX + fieldWidth, y: y - 2 },
         thickness: 0.5,
-        color: rgb(0, 0, 0)
+        color: rgb(0, 0, 0),
       });
 
       // Create invisible text field over the line (no border, no background)
@@ -476,7 +499,7 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
         y: y - 4,
         width: fieldWidth,
         height: fieldHeight,
-        borderWidth: 0
+        borderWidth: 0,
       });
 
       y -= 28; // More spacing in signature section
@@ -563,7 +586,10 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       const indentPx = Math.min(indent * 4, 30);
 
       drawText('•', PAGE_MARGIN + 10 + indentPx, y, { size: FONT_SIZE_BODY });
-      drawText(content, PAGE_MARGIN + 20 + indentPx, y, { size: FONT_SIZE_BODY, maxWidth: CONTENT_WIDTH - 28 - indentPx });
+      drawText(content, PAGE_MARGIN + 20 + indentPx, y, {
+        size: FONT_SIZE_BODY,
+        maxWidth: CONTENT_WIDTH - 28 - indentPx,
+      });
       y -= LINE_HEIGHT; // Consistent line spacing
       continue;
     }
