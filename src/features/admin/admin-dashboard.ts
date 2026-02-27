@@ -2591,8 +2591,8 @@ class AdminDashboard {
       .map(
         (item) => `
       <div class="data-item">
-        <span>${item.label}</span>
-        <span>${String(item.value)}</span>
+        <span>${SanitizationUtils.escapeHtml(item.label)}</span>
+        <span>${SanitizationUtils.escapeHtml(String(item.value))}</span>
       </div>
     `
       )

@@ -152,6 +152,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
       '@react': resolve(__dirname, 'src/react'),
+      '@factories': resolve(__dirname, 'src/factories'),
       '@components': resolve(__dirname, 'src/components'),
       '@services': resolve(__dirname, 'src/services'),
       '@modules': resolve(__dirname, 'src/modules'),

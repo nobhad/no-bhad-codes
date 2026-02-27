@@ -19,7 +19,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@react/*": ["src/react/*"]
+      "@react/*": ["src/react/*"],
+      "@factories": ["src/factories"],
+      "@factories/*": ["src/factories/*"]
     }
   },
   "include": ["src/**/*", "src/**/*.tsx", "server/**/*", "tests/**/*", "*.ts", "*.js"],
