@@ -599,7 +599,7 @@ async function openViewResponseModal(responseId: number): Promise<void> {
       </div>
     `;
   } catch (err) {
-    bodyEl.innerHTML = `<div class="error-state"><span class="error-message">${(err as Error).message}</span></div>`;
+    bodyEl.innerHTML = `<div class="error-state"><span class="error-message">${escapeHtml((err as Error).message)}</span></div>`;
   }
 }
 
