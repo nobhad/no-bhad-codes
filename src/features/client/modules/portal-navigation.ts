@@ -15,9 +15,11 @@ import { renderView } from './portal-views';
 /** Tab titles mapping */
 const TAB_TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
+  projects: 'Projects',
   files: 'Files',
   messages: 'Messages',
   invoices: 'Invoices',
+  approvals: 'Approvals',
   settings: 'Settings',
   'new-project': 'New Project',
   requests: 'Requests',
@@ -37,8 +39,10 @@ const TAB_TITLES: Record<string, string> = {
 /** Route configuration mapping tabs to hash paths */
 const PORTAL_ROUTES: Record<string, string> = {
   'dashboard': '/dashboard',
+  'projects': '/projects',
   'files': '/files',
   'invoices': '/invoices',
+  'approvals': '/approvals',
   'documents': '/documents',
   'questionnaires': '/questionnaires',
   'requests': '/requests',
@@ -116,6 +120,8 @@ export function navigateTo(
     loadQuestionnaires?: () => Promise<void>;
     loadSettings?: () => Promise<void>;
     loadDashboard?: () => Promise<void>;
+    loadProjects?: () => Promise<void>;
+    loadApprovals?: () => Promise<void>;
   }
 ): void {
   // Update hash first
@@ -139,6 +145,8 @@ export function initHashRouter(callbacks: {
   loadQuestionnaires?: () => Promise<void>;
   loadSettings?: () => Promise<void>;
   loadDashboard?: () => Promise<void>;
+  loadProjects?: () => Promise<void>;
+  loadApprovals?: () => Promise<void>;
 }): void {
   // Handle browser back/forward navigation
   window.addEventListener('hashchange', () => {
@@ -352,6 +360,8 @@ export function switchTab(tabName: string, callbacks: {
   loadQuestionnaires?: () => Promise<void>;
   loadSettings?: () => Promise<void>;
   loadDashboard?: () => Promise<void>;
+  loadProjects?: () => Promise<void>;
+  loadApprovals?: () => Promise<void>;
 }, shouldUpdateHash = true): void {
   // Update URL hash if requested (default behavior)
   if (shouldUpdateHash) {
@@ -433,6 +443,10 @@ export function switchTab(tabName: string, callbacks: {
     callbacks.loadQuestionnaires();
   } else if (activeTab === 'settings' && callbacks.loadSettings) {
     callbacks.loadSettings();
+  } else if (activeTab === 'projects' && callbacks.loadProjects) {
+    callbacks.loadProjects();
+  } else if (activeTab === 'approvals' && callbacks.loadApprovals) {
+    callbacks.loadApprovals();
   }
 }
 

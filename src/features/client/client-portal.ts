@@ -2140,7 +2140,9 @@ export class ClientPortalModule extends BaseModule {
       loadAdHocRequests: () => this.loadAdHocRequests(),
       loadQuestionnaires: () => this.loadQuestionnaires(),
       loadSettings: () => this.loadUserSettings(),
-      loadDashboard: () => this.loadDashboardStats()
+      loadDashboard: () => this.loadDashboardStats(),
+      loadProjects: () => this.loadProjects(),
+      loadApprovals: () => this.loadApprovals()
     });
   }
 
@@ -2190,6 +2192,22 @@ export class ClientPortalModule extends BaseModule {
   private async loadQuestionnaires(): Promise<void> {
     const qModule = await loadQuestionnairesModule();
     await qModule.loadQuestionnaires(this.moduleContext);
+  }
+
+  /**
+   * Load Projects tab - delegates to projects module
+   */
+  private async loadProjects(): Promise<void> {
+    const projectsModule = await loadProjectsModule();
+    await projectsModule.loadProjects(this.moduleContext);
+  }
+
+  /**
+   * Load Approvals tab - delegates to approvals module
+   */
+  private async loadApprovals(): Promise<void> {
+    const approvalsModule = await loadApprovalsModule();
+    await approvalsModule.loadClientApprovals();
   }
 
   private async toggleAccountFolder(): Promise<void> {
