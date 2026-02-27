@@ -30,57 +30,6 @@ body[data-page="admin"] .nav .menu {
 }
 
 /* =====================================================
-   FORCE LIGHT MODE MENU STYLING ON PORTAL PAGES
-   Menu should look the same as main site
-   ===================================================== */
-
-/* Force light mode panel colors - override dark mode */
-/* Use actual hex values because CSS variables are redefined in dark mode */
-body[data-page="client-portal"] .bg-panel,
-body[data-page="admin"] .bg-panel {
-  background-color: #f5f5f5 !important; /* --color-gray-100 (off-white) */
-}
-
-body[data-page="client-portal"] .bg-panel.first,
-body[data-page="admin"] .bg-panel.first {
-  background-color: #dc2626 !important; /* Red accent (brand primary) */
-}
-
-body[data-page="client-portal"] .bg-panel.second,
-body[data-page="admin"] .bg-panel.second {
-  background-color: #d4d4d4 !important; /* --color-gray-300 (grey) */
-}
-
-/* Force light mode menu link text - dark text on light panels */
-body[data-page="client-portal"] .menu-link-heading,
-body[data-page="admin"] .menu-link-heading {
-  color: #171717 !important;
-  text-shadow: 0 1em 0 #f5f5f5, 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Match off-white panel */
-}
-
-/* Force light mode eyebrow text (red numbers) */
-body[data-page="client-portal"] .menu-link .eyebrow,
-body[data-page="admin"] .menu-link .eyebrow {
-  color: #dc2626 !important; /* Red accent */
-}
-
-/* Force light mode social links */
-body[data-page="client-portal"] .menu-details,
-body[data-page="admin"] .menu-details {
-  color: #171717 !important;
-}
-
-body[data-page="client-portal"] .menu-details .text-link,
-body[data-page="admin"] .menu-details .text-link {
-  color: #171717 !important;
-}
-
-body[data-page="client-portal"] .menu-details .p-small,
-body[data-page="admin"] .menu-details .p-small {
-  color: #171717 !important;
-}
-
-/* =====================================================
    HEADER & FOOTER VISIBILITY
    Show header/footer only on login page (before logged in)
    ===================================================== */
