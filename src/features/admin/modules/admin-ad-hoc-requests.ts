@@ -134,7 +134,7 @@ const adHocRequestsModule = createTableModule<AdHocRequest>({
   onTableRendered: (_filteredData: AdHocRequest[], _ctx: AdminDashboardContext) => {
     initTableKeyboardNav({
       tableSelector: '#ad-hoc-requests-table-body',
-      rowSelector: 'tr[data-request-id]',
+      rowSelector: 'tr[data-adhoc-request-id]',
       onRowSelect: (row) => {
         const viewBtn = row.querySelector('button[title="View request"]') as HTMLButtonElement;
         if (viewBtn) viewBtn.click();
@@ -153,7 +153,7 @@ export const loadAdHocRequests = adHocRequestsModule.load;
  */
 function buildRequestRow(request: AdHocRequest): HTMLTableRowElement {
   const row = document.createElement('tr');
-  row.dataset.requestId = String(request.id);
+  row.dataset.adhocRequestId = String(request.id);
 
   const title = SanitizationUtils.escapeHtml(request.title);
   const clientName = SanitizationUtils.escapeHtml(request.clientName || 'Client');

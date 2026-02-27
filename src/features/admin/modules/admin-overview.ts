@@ -186,7 +186,7 @@ function setupPanelClickHandlers(ctx: AdminDashboardContext): void {
  * Load and render active projects in the overview table
  */
 async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
-  const tbody = document.getElementById('overview-projects-tbody');
+  const tbody = document.getElementById('overview-projects-table-body');
   if (!tbody) return;
 
   try {
@@ -1184,7 +1184,7 @@ export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashb
                   <th scope="col" class="date-col">Due</th>
                 </tr>
               </thead>
-              <tbody id="overview-projects-tbody" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tbody id="overview-projects-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
                 <tr class="loading-row">
                   <td colspan="4">
                     <div class="loading-state">

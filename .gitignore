@@ -204,3 +204,6 @@ test-results/
 
 # Uploads (user data)
 uploads/
+
+# Generated Tailwind CSS for React components
+src/react/styles/tailwind-generated.css
