@@ -15,6 +15,9 @@ import {
   alertWarning,
   multiPromptDialog
 } from '../../../utils/confirm-dialog';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('InvoiceActions');
 
 /**
  * Edit a draft invoice
@@ -101,7 +104,7 @@ export async function editInvoice(
       alertError('Failed to update invoice');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error editing invoice:', error);
+    logger.error(' Error editing invoice:', error);
     alertError('Error editing invoice');
   }
 }
@@ -189,7 +192,7 @@ export async function showApplyCreditPrompt(
       alertError(errorData.error || 'Failed to apply credit');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error applying credit:', error);
+    logger.error(' Error applying credit:', error);
     alertError('Error applying credit');
   }
 }
@@ -215,7 +218,7 @@ export async function sendInvoice(
       alertError('Failed to send invoice');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error sending invoice:', error);
+    logger.error(' Error sending invoice:', error);
     alertError('Error sending invoice');
   }
 }
@@ -239,7 +242,7 @@ export async function markInvoicePaid(
       alertError('Failed to update invoice');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error marking invoice paid:', error);
+    logger.error(' Error marking invoice paid:', error);
     alertError('Error updating invoice');
   }
 }
@@ -259,7 +262,7 @@ export async function sendInvoiceReminder(invoiceId: number): Promise<void> {
       alertError('Failed to send reminder');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error sending reminder:', error);
+    logger.error(' Error sending reminder:', error);
     alertError('Error sending reminder');
   }
 }
@@ -293,7 +296,7 @@ export async function duplicateInvoice(
       alertError('Failed to duplicate invoice');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error duplicating invoice:', error);
+    logger.error(' Error duplicating invoice:', error);
     alertError('Error duplicating invoice');
   }
 }
@@ -333,7 +336,7 @@ export async function deleteInvoice(
       alertError(err.error || 'Failed to delete invoice');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error deleting invoice:', error);
+    logger.error(' Error deleting invoice:', error);
     alertError('Error deleting invoice');
   }
 }
@@ -405,7 +408,7 @@ export async function recordPayment(
       alertError(err.error || 'Failed to record payment');
     }
   } catch (error) {
-    console.error('[InvoiceActions] Error recording payment:', error);
+    logger.error(' Error recording payment:', error);
     alertError('Error recording payment');
   }
 }

@@ -18,6 +18,9 @@ import {
 } from '../../../utils/confirm-dialog';
 import { renderEmptyState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('InvoiceScheduling');
 
 /**
  * Process late fees for overdue invoices on a project
@@ -51,7 +54,7 @@ export async function processLateFees(
       alertError('Failed to process late fees');
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error processing late fees:', error);
+    logger.error(' Error processing late fees:', error);
     alertError('Error processing late fees');
   }
 }
@@ -115,7 +118,7 @@ export async function showScheduleInvoicePrompt(
       alertError('Failed to schedule invoice');
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error scheduling invoice:', error);
+    logger.error(' Error scheduling invoice:', error);
     alertError('Error scheduling invoice');
   }
 }
@@ -187,7 +190,7 @@ export async function showSetupRecurringPrompt(
       alertError('Failed to setup recurring invoice');
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error setting up recurring invoice:', error);
+    logger.error(' Error setting up recurring invoice:', error);
     alertError('Error setting up recurring invoice');
   }
 }
@@ -219,7 +222,7 @@ export async function loadScheduledInvoices(projectId: number): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error loading scheduled invoices:', error);
+    logger.error(' Error loading scheduled invoices:', error);
   }
 }
 
@@ -259,7 +262,7 @@ export async function loadRecurringInvoices(projectId: number): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error loading recurring invoices:', error);
+    logger.error(' Error loading recurring invoices:', error);
   }
 }
 
@@ -293,7 +296,7 @@ export async function cancelScheduledInvoice(
       alertError('Failed to cancel scheduled invoice');
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error cancelling scheduled invoice:', error);
+    logger.error(' Error cancelling scheduled invoice:', error);
     alertError('Error cancelling scheduled invoice');
   }
 }
@@ -319,7 +322,7 @@ export async function toggleRecurringInvoice(
       alertError(`Failed to ${action} recurring invoice`);
     }
   } catch (error) {
-    console.error('[InvoiceScheduling] Error toggling recurring invoice:', error);
+    logger.error(' Error toggling recurring invoice:', error);
     alertError('Error updating recurring invoice');
   }
 }

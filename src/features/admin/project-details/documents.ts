@@ -11,6 +11,9 @@ import { apiFetch, apiPost, parseApiResponse } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import { alertError, alertSuccess, confirmDialog } from '../../../utils/confirm-dialog';
 import { ICONS } from '../../../constants/icons';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('Documents');
 
 // ============================================
 // Project Report Functions
@@ -45,7 +48,7 @@ export async function downloadProjectReport(projectId: number): Promise<void> {
 
     showToast('Project report downloaded', 'success');
   } catch (error) {
-    console.error('[Documents] Error downloading project report:', error);
+    logger.error(' Error downloading project report:', error);
     alertError('Failed to download project report');
   }
 }
@@ -70,7 +73,7 @@ export async function previewProjectReport(projectId: number): Promise<void> {
     // Clean up URL after a delay
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (error) {
-    console.error('[Documents] Error previewing project report:', error);
+    logger.error(' Error previewing project report:', error);
     alertError('Failed to preview project report');
   }
 }
@@ -98,7 +101,7 @@ export async function saveProjectReportToFiles(
       onSuccess();
     }
   } catch (error) {
-    console.error('[Documents] Error saving project report:', error);
+    logger.error(' Error saving project report:', error);
     alertError('Failed to save project report to files');
   }
 }
@@ -140,7 +143,7 @@ export async function downloadSow(projectId: number): Promise<void> {
 
     showToast('Statement of Work downloaded', 'success');
   } catch (error) {
-    console.error('[Documents] Error downloading SOW:', error);
+    logger.error(' Error downloading SOW:', error);
     alertError('Failed to download Statement of Work');
   }
 }
@@ -169,7 +172,7 @@ export async function previewSow(projectId: number): Promise<void> {
     // Clean up URL after a delay
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (error) {
-    console.error('[Documents] Error previewing SOW:', error);
+    logger.error(' Error previewing SOW:', error);
     alertError('Failed to preview Statement of Work');
   }
 }
@@ -201,7 +204,7 @@ export async function saveSowToFiles(
       onSuccess();
     }
   } catch (error) {
-    console.error('[Documents] Error saving SOW:', error);
+    logger.error(' Error saving SOW:', error);
     alertError('Failed to save Statement of Work to files');
   }
 }

@@ -13,6 +13,9 @@ import { alertError, alertWarning } from '../../../utils/confirm-dialog';
 import { renderEmptyState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
 import type { ProjectResponse, MessageResponse, MessageThreadResponse } from '../../../types/api';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('ProjectMessages');
 
 /** Current thread ID for the active project */
 let currentThreadId: number | null = null;
@@ -103,7 +106,7 @@ export async function loadProjectMessages(
       messagesThread.scrollTop = messagesThread.scrollHeight;
     }
   } catch (error) {
-    console.error('[ProjectMessages] Error loading project messages:', error);
+    logger.error(' Error loading project messages:', error);
     renderEmptyState(messagesThread, 'Error loading messages.');
   }
 }
@@ -161,7 +164,7 @@ export async function sendProjectMessage(
     return false;
 
   } catch (error) {
-    console.error('[ProjectMessages] Error sending message:', error);
+    logger.error(' Error sending message:', error);
     alertError('Error sending message');
     return false;
   }
