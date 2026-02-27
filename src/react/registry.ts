@@ -4,7 +4,6 @@
  * This avoids the preamble detection issue with Vite's React plugin
  */
 
-
 type MountFunction = (container: HTMLElement, options: any) => void | (() => void);
 type UnmountFunction = (container: HTMLElement) => void;
 

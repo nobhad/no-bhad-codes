@@ -4,8 +4,4 @@
  */
 
 export { LeadsTable } from './LeadsTable';
-export {
-  mountLeadsTable,
-  unmountLeadsTable,
-  shouldUseReactLeadsTable
-} from './mount';
+export { mountLeadsTable, unmountLeadsTable, shouldUseReactLeadsTable } from './mount';

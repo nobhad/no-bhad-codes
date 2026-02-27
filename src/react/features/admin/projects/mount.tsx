@@ -82,15 +82,15 @@ export function unmountProjectsTable(): void {
  * Feature flag for gradual rollout
  */
 export function shouldUseReactProjectsTable(): boolean {
+  // Check URL parameter for vanilla fallback
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('vanilla_projects') === 'true') return false;
+
   // Check feature flag in localStorage
   const flag = localStorage.getItem('feature_react_projects_table');
-  if (flag === 'true') return true;
   if (flag === 'false') return false;
+  if (flag === 'true') return true;
 
-  // Check URL parameter for testing
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('react_projects') === 'true') return true;
-
-  // Default: disabled (vanilla implementation)
-  return false;
+  // Default: enabled (React implementation)
+  return true;
 }

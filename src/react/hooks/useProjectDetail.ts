@@ -409,9 +409,7 @@ export function useProjectDetail({
         if (result.success) {
           setData((prev) => ({
             ...prev,
-            milestones: prev.milestones.map((m) =>
-              m.id === id ? { ...m, ...updates } : m
-            )
+            milestones: prev.milestones.map((m) => (m.id === id ? { ...m, ...updates } : m))
           }));
           return true;
         }
@@ -558,9 +556,7 @@ export function useProjectDetail({
 
         setData((prev) => ({
           ...prev,
-          files: prev.files.map((f) =>
-            f.id === id ? { ...f, is_shared: !f.is_shared } : f
-          )
+          files: prev.files.map((f) => (f.id === id ? { ...f, is_shared: !f.is_shared } : f))
         }));
         return true;
       } catch (err) {

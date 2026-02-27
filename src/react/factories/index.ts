@@ -52,23 +52,13 @@ export {
 // STATE DISPLAY
 // ============================================
 
-export {
-  EmptyState,
-  LoadingState,
-  ErrorState,
-  Skeleton
-} from './StateDisplay';
+export { EmptyState, LoadingState, ErrorState, Skeleton } from './StateDisplay';
 
 // ============================================
 // RE-EXPORT FACTORY TYPES & CONSTANTS
 // ============================================
 
-export {
-  UI_CONTEXTS,
-  ICON_SIZES,
-  BUTTON_SIZES,
-  CONTEXT_DEFAULTS
-} from '../../factories/constants';
+export { UI_CONTEXTS, ICON_SIZES, BUTTON_SIZES, CONTEXT_DEFAULTS } from '../../factories/constants';
 
 export type {
   UIContext,

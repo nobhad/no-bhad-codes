@@ -162,8 +162,8 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           'tw-py-8 tw-px-4',
           'tw-border-2 tw-border-dashed tw-transition-colors tw-duration-200',
           isDragging
-            ? 'tw-border-white tw-bg-[rgba(255,255,255,0.05)]'
-            : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+            ? 'tw-border-white tw-bg-[var(--portal-bg-hover)]'
+            : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
         )}
       >
         <input
@@ -178,14 +178,14 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
         <Upload
           className={cn(
             'tw-h-8 tw-w-8 tw-mb-3',
-            isDragging ? 'tw-text-white' : 'tw-text-[rgba(255,255,255,0.46)]'
+            isDragging ? 'tw-text-white' : 'tw-text-[var(--portal-text-muted)]'
           )}
         />
 
         <p className="tw-text-[14px] tw-text-white tw-font-mono tw-mb-1">
           Drag and drop files here
         </p>
-        <p className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)] tw-mb-3">
+        <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)] tw-mb-3">
           or click to browse
         </p>
 
@@ -193,7 +193,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           Browse Files
         </button>
 
-        <p className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)] tw-mt-3">
+        <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)] tw-mt-3">
           Max 25MB per file. Supports images, PDFs, and documents.
         </p>
       </div>
@@ -220,12 +220,12 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
                   key={file.id}
                   className="tw-list-item"
                 >
-                  <FileIcon className="tw-h-4 tw-w-4 tw-text-[rgba(255,255,255,0.46)] tw-flex-shrink-0" />
+                  <FileIcon className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)] tw-flex-shrink-0" />
                   <div className="tw-flex-1 tw-min-w-0">
                     <p className="tw-text-[14px] tw-text-white tw-font-mono tw-truncate">
                       {file.name}
                     </p>
-                    <p className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)]">
+                    <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -253,7 +253,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
             'tw-border tw-transition-colors tw-w-fit',
             assets.logoProvided
               ? 'tw-border-white tw-bg-white tw-text-black'
-              : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+              : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
           )}
         >
           <div
@@ -316,7 +316,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           rows={2}
           className="tw-textarea"
         />
-        <span className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)]">
+        <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
           Never share passwords directly. We'll provide a secure way to share credentials if needed.
         </span>
       </div>

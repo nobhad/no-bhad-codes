@@ -8,11 +8,7 @@ export { PortalMessagesView } from './PortalMessagesView';
 export { MessageThread } from './MessageThread';
 
 // Mount functions
-export {
-  mountPortalMessages,
-  unmountPortalMessages,
-  shouldUseReactPortalMessages
-} from './mount';
+export { mountPortalMessages, unmountPortalMessages, shouldUseReactPortalMessages } from './mount';
 
 // Hook
 export { usePortalMessages } from './usePortalMessages';

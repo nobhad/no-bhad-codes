@@ -43,7 +43,7 @@ export function NavItem({
         'tw-border-none tw-bg-transparent',
         isActive
           ? 'tw-text-white tw-border-l-2 tw-border-l-white'
-          : 'tw-text-[rgba(255,255,255,0.46)] hover:tw-text-white',
+          : 'tw-text-[var(--portal-text-muted)] hover:tw-text-white',
         isCollapsed && 'tw-justify-center tw-px-2'
       )}
       title={isCollapsed ? label : undefined}

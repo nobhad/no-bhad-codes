@@ -67,7 +67,7 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
       type="button"
       onClick={onClick}
       className={cn('tw-list-item', isSelected && 'tw-table-row-selected')}
-      style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}
+      style={{ borderBottom: '1px solid var(--portal-border-subtle)' }}
     >
       {/* Icon */}
       <div className={hasUnread ? 'tw-text-primary' : 'tw-text-muted'}>

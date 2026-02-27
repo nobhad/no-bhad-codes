@@ -42,10 +42,7 @@ interface UseSelectionReturn<T> {
  * useSelection
  * Hook for managing selection state in tables/lists
  */
-export function useSelection<T>({
-  getId,
-  items
-}: UseSelectionOptions<T>): UseSelectionReturn<T> {
+export function useSelection<T>({ getId, items }: UseSelectionOptions<T>): UseSelectionReturn<T> {
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
 
   // Get IDs of all current items

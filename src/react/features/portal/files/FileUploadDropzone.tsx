@@ -273,7 +273,7 @@ export function FileUploadDropzone({
     return (
       <div
         className={cn('tw-panel', className)}
-        style={{ borderStyle: 'dashed', borderWidth: '2px', borderColor: '#ffffff' }}
+        style={{ borderStyle: 'dashed', borderWidth: '2px', borderColor: 'var(--portal-text-light)' }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
           <CheckCircle className="tw-h-6 tw-w-6" />
@@ -290,8 +290,8 @@ export function FileUploadDropzone({
       style={{
         borderStyle: 'dashed',
         borderWidth: '2px',
-        borderColor: state === 'drag-active' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
-        background: state === 'drag-active' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+        borderColor: state === 'drag-active' ? 'var(--portal-text-light)' : 'var(--portal-border-color)',
+        background: state === 'drag-active' ? 'var(--portal-bg-hover)' : 'transparent',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1
       }}

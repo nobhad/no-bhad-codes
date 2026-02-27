@@ -59,7 +59,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             Project Name <span className="tw-text-white">*</span>
           </label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <FolderKanban className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -132,7 +132,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">Target Launch Date</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <Calendar className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -142,7 +142,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="tw-input tw-pl-10"
             />
           </div>
-          <span className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)]">
+          <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
             When do you want to launch?
           </span>
         </div>
@@ -151,7 +151,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">Budget Range</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <DollarSign className="tw-h-4 tw-w-4" />
             </div>
             <select
@@ -167,7 +167,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               ))}
             </select>
           </div>
-          <span className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)]">
+          <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
             This helps us recommend the right scope
           </span>
         </div>
@@ -177,7 +177,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
         <label className="tw-field-label">Target Audience</label>
         <div className="tw-relative">
-          <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+          <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
             <Users className="tw-h-4 tw-w-4" />
           </div>
           <input

@@ -235,7 +235,7 @@ export function NewRequestForm({
               style={{
                 flex: 1,
                 fontSize: '11px',
-                color: priority === p ? '#ffffff' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
+                color: priority === p ? 'var(--portal-text-light)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
                 backgroundColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
                 borderColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : undefined
               }}
@@ -279,7 +279,7 @@ export function NewRequestForm({
             alignItems: 'center',
             gap: '0.5rem',
             padding: '1rem',
-            border: '2px dashed rgba(255, 255, 255, 0.2)',
+            border: '2px dashed var(--portal-border-color)',
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.5 : 1
           }}

@@ -31,10 +31,7 @@ interface UseLeadsReturn {
  * useLeads
  * Hook for fetching and managing leads data
  */
-export function useLeads({
-  getAuthToken,
-  autoFetch = true
-}: UseLeadsOptions = {}): UseLeadsReturn {
+export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {}): UseLeadsReturn {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -108,7 +105,7 @@ export function useLeads({
       // Handle different response formats
       if (data.success && data.data) {
         // Could be { leads: [...] } or direct array
-        const leadsArray = Array.isArray(data.data) ? data.data : (data.data.leads || []);
+        const leadsArray = Array.isArray(data.data) ? data.data : data.data.leads || [];
         setLeads(leadsArray);
       } else if (Array.isArray(data)) {
         setLeads(data);
@@ -140,9 +137,10 @@ export function useLeads({
         }
 
         // Use status endpoint if only updating status
-        const endpoint = Object.keys(updates).length === 1 && 'status' in updates
-          ? `/api/admin/leads/${id}/status`
-          : `/api/admin/leads/${id}`;
+        const endpoint =
+          Object.keys(updates).length === 1 && 'status' in updates
+            ? `/api/admin/leads/${id}/status`
+            : `/api/admin/leads/${id}`;
 
         const response = await fetch(endpoint, {
           method: 'PUT',
@@ -159,11 +157,7 @@ export function useLeads({
 
         if (data.success) {
           // Update local state optimistically
-          setLeads((prev) =>
-            prev.map((lead) =>
-              lead.id === id ? { ...lead, ...updates } : lead
-            )
-          );
+          setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...updates } : lead)));
           return true;
         }
 
@@ -205,9 +199,7 @@ export function useLeads({
         if (data.success) {
           // Update local state
           setLeads((prev) =>
-            prev.map((lead) =>
-              ids.includes(lead.id) ? { ...lead, status } : lead
-            )
+            prev.map((lead) => (ids.includes(lead.id) ? { ...lead, status } : lead))
           );
           return true;
         }

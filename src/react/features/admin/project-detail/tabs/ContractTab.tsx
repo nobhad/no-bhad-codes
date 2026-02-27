@@ -122,7 +122,7 @@ export function ContractTab({
                 'tw-w-12 tw-h-12 tw-flex tw-items-center tw-justify-center',
                 isSigned
                   ? 'tw-bg-white'
-                  : 'tw-border tw-border-[rgba(255,255,255,0.3)]'
+                  : 'tw-border tw-border-[var(--portal-border-color)]'
               )}
               style={{ borderRadius: 0 }}
             >
@@ -228,7 +228,7 @@ export function ContractTab({
 
       {/* Contract Files */}
       <div className="tw-panel" style={{ padding: 0 }}>
-        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3" style={{ borderBottom: '1px solid var(--portal-border-color)' }}>
           <div className="tw-flex tw-items-center tw-gap-2">
             <FileText className="tw-h-4 tw-w-4 tw-text-muted" />
             <span className="tw-heading" style={{ fontSize: '14px' }}>

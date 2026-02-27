@@ -79,7 +79,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white',
                 requirements.designStyle === style
                   ? 'tw-border-white tw-bg-white tw-text-black'
-                  : 'tw-border-[rgba(255,255,255,0.3)] tw-text-[rgba(255,255,255,0.8)] hover:tw-border-white'
+                  : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-white'
               )}
             >
               <Palette className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
@@ -114,7 +114,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             'tw-border tw-transition-colors',
             requirements.brandGuidelines
               ? 'tw-border-white tw-bg-white tw-text-black'
-              : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+              : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
           )}
         >
           <div
@@ -152,7 +152,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             'tw-border tw-transition-colors',
             requirements.contentReady
               ? 'tw-border-white tw-bg-white tw-text-black'
-              : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+              : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
           )}
         >
           <div
@@ -212,7 +212,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white',
                 isSelected
                   ? 'tw-border-white tw-bg-white tw-text-black'
-                  : 'tw-border-[rgba(255,255,255,0.3)] tw-text-[rgba(255,255,255,0.8)] hover:tw-border-white'
+                  : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-white'
               )}
             >
               <div

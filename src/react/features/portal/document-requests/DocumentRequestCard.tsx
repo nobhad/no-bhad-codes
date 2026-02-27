@@ -282,7 +282,7 @@ export function DocumentRequestCard({
   return (
     <div
       className={cn('tw-card', isDragging && 'tw-table-row-selected')}
-      style={{ borderColor: isDragging ? '#ffffff' : undefined }}
+      style={{ borderColor: isDragging ? 'var(--portal-text-light)' : undefined }}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -380,7 +380,7 @@ export function DocumentRequestCard({
 
       {/* Rejection Message */}
       {isRejected && (
-        <div className="tw-panel" style={{ marginTop: '0.5rem', borderColor: '#ffffff' }}>
+        <div className="tw-panel" style={{ marginTop: '0.5rem', borderColor: 'var(--portal-text-light)' }}>
           <p style={{ fontSize: '12px' }}>Please resubmit with the requested changes.</p>
         </div>
       )}

@@ -65,7 +65,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       <div className="tw-space-y-2">
         {items.map((item, index) => (
           <div key={index} className="tw-flex tw-gap-2 tw-text-[14px] tw-font-mono">
-            <span className="tw-text-[rgba(255,255,255,0.46)] tw-min-w-[100px] tw-flex-shrink-0">
+            <span className="tw-text-[var(--portal-text-muted)] tw-min-w-[100px] tw-flex-shrink-0">
               {item.label}:
             </span>
             <span className="tw-text-white">{item.value || '-'}</span>
@@ -268,7 +268,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
           <p className="tw-text-[14px] tw-font-bold tw-font-mono tw-text-white">
             Ready to submit
           </p>
-          <p className="tw-text-[14px] tw-text-[rgba(255,255,255,0.46)] tw-mt-1 tw-font-mono">
+          <p className="tw-text-[14px] tw-text-[var(--portal-text-muted)] tw-mt-1 tw-font-mono">
             Click "Complete Onboarding" below to submit your information. We'll review everything and
             get back to you within 1-2 business days.
           </p>

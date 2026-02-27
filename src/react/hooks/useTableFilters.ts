@@ -54,9 +54,7 @@ interface UseTableFiltersReturn<T> {
 /**
  * Hook for managing table filters, search, and sorting
  */
-export function useTableFilters<T>(
-  options: UseTableFiltersOptions<T>
-): UseTableFiltersReturn<T> {
+export function useTableFilters<T>(options: UseTableFiltersOptions<T>): UseTableFiltersReturn<T> {
   const { storageKey, filters, filterFn, sortFn, defaultSort } = options;
 
   // Initialize filter values from storage or defaults

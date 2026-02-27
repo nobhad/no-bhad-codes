@@ -330,7 +330,7 @@ export function ContactsTab({
               {/* Contact Header */}
               <div className="tw-flex tw-items-start tw-justify-between tw-mb-3">
                 <div className="tw-flex tw-items-center tw-gap-2">
-                  <div className="tw-w-10 tw-h-10 tw-border tw-border-[rgba(255,255,255,0.3)] tw-flex tw-items-center tw-justify-center" style={{ borderRadius: 0 }}>
+                  <div className="tw-w-10 tw-h-10 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center" style={{ borderRadius: 0 }}>
                     <User className="tw-h-5 tw-w-5 tw-text-muted" />
                   </div>
                   <div>
@@ -415,7 +415,7 @@ export function ContactsTab({
 
               {/* Notes */}
               {contact.notes && (
-                <p className="tw-text-muted tw-mt-3 tw-pt-3" style={{ fontSize: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <p className="tw-text-muted tw-mt-3 tw-pt-3" style={{ fontSize: '12px', borderTop: '1px solid var(--portal-border-subtle)' }}>
                   {contact.notes}
                 </p>
               )}

@@ -127,7 +127,7 @@ export function useInvoices({
       } else if (data.invoices && Array.isArray(data.invoices)) {
         setInvoices(data.invoices);
       } else if (data.success && data.data) {
-        const invoicesArray = Array.isArray(data.data) ? data.data : (data.data.invoices || []);
+        const invoicesArray = Array.isArray(data.data) ? data.data : data.data.invoices || [];
         setInvoices(invoicesArray);
       } else {
         throw new Error(data.error || 'Failed to load invoices');
@@ -161,9 +161,7 @@ export function useInvoices({
         if (data.success) {
           // Update local state optimistically
           setInvoices((prev) =>
-            prev.map((invoice) =>
-              invoice.id === id ? { ...invoice, ...updates } : invoice
-            )
+            prev.map((invoice) => (invoice.id === id ? { ...invoice, ...updates } : invoice))
           );
           return true;
         }

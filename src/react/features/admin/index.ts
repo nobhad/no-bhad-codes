@@ -7,32 +7,16 @@
 export * from './types';
 
 // Projects
-export {
-  ProjectsTable,
-  mountProjectsTable,
-  unmountProjectsTable
-} from './projects';
+export { ProjectsTable, mountProjectsTable, unmountProjectsTable } from './projects';
 
 // Leads
-export {
-  LeadsTable,
-  mountLeadsTable,
-  unmountLeadsTable
-} from './leads';
+export { LeadsTable, mountLeadsTable, unmountLeadsTable } from './leads';
 
 // Clients
-export {
-  ClientsTable,
-  mountClientsTable,
-  unmountClientsTable
-} from './clients';
+export { ClientsTable, mountClientsTable, unmountClientsTable } from './clients';
 
 // Invoices
-export {
-  InvoicesTable,
-  mountInvoicesTable,
-  unmountInvoicesTable
-} from './invoices';
+export { InvoicesTable, mountInvoicesTable, unmountInvoicesTable } from './invoices';
 
 // Project Detail
 export {

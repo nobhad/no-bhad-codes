@@ -210,10 +210,10 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
       style={{ display: 'flex', height: 'calc(100vh - 200px)', minHeight: '500px', overflow: 'hidden' }}
     >
       {/* Conversation List */}
-      <div style={{ width: '320px', flexShrink: 0, borderRight: '1px solid rgba(255,255,255,0.2)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ width: '320px', flexShrink: 0, borderRight: '1px solid var(--portal-border-color)', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-          <h2 className="tw-heading" style={{ fontSize: '16px', marginBottom: '0.75rem' }}>
+        <div style={{ padding: '1rem', borderBottom: '1px solid var(--portal-border-color)' }}>
+          <h2 className="tw-heading" style={{ fontSize: 'var(--font-size-base)', marginBottom: '0.75rem' }}>
             Messages
             {totalUnread > 0 && (
               <span className="tw-badge" style={{ marginLeft: '0.5rem' }}>
@@ -224,7 +224,7 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
 
           {/* Search */}
           <div style={{ position: 'relative' }}>
-            <Search style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+            <Search style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
             <input
               type="text"
               placeholder="Search conversations..."
@@ -247,7 +247,7 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                 key={tab.id}
                 onClick={() => setFilter(tab.id as typeof filter)}
                 className={filter === tab.id ? 'tw-tab-active' : 'tw-tab'}
-                style={{ padding: '0.25rem 0.5rem', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                style={{ padding: '0.25rem 0.5rem', fontSize: 'var(--font-size-2xs)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
               >
                 <tab.icon style={{ width: '0.75rem', height: '0.75rem' }} />
                 {tab.label}
@@ -276,27 +276,27 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                 )}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', width: '100%' }}>
-                  <div style={{ width: '2.5rem', height: '2.5rem', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255,255,255,0.46)' }} />
+                  <div style={{ width: '2.5rem', height: '2.5rem', border: '1px solid var(--portal-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'var(--portal-text-muted)' }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                       <span style={{ fontWeight: conv.unreadCount > 0 ? 700 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {conv.clientName}
                       </span>
-                      <span className="tw-text-muted" style={{ fontSize: '11px', flexShrink: 0 }}>
+                      <span className="tw-text-muted" style={{ fontSize: 'var(--font-size-2xs)', flexShrink: 0 }}>
                         {conv.lastMessageAt ? formatRelativeTime(conv.lastMessageAt) : ''}
                       </span>
                     </div>
                     {conv.projectName && (
-                      <span className="tw-text-muted" style={{ fontSize: '11px', display: 'block' }}>
+                      <span className="tw-text-muted" style={{ fontSize: 'var(--font-size-2xs)', display: 'block' }}>
                         {conv.projectName}
                       </span>
                     )}
                     {conv.lastMessage && (
                       <p
                         className={conv.unreadCount > 0 ? 'tw-text-primary' : 'tw-text-muted'}
-                        style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '0.25rem' }}
+                        style={{ fontSize: 'var(--font-size-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '0.25rem' }}
                       >
                         {conv.lastMessage}
                       </p>
@@ -317,16 +317,16 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
         {selectedConversation ? (
           <>
             {/* Conversation Header */}
-            <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '1rem', borderBottom: '1px solid var(--portal-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 className="tw-heading" style={{ fontSize: '14px' }}>
+                <h3 className="tw-heading" style={{ fontSize: 'var(--font-size-sm)' }}>
                   {selectedConversation.clientName}
                 </h3>
                 {selectedConversation.projectName && (
                   <button
                     onClick={() => onNavigate?.('projects', selectedConversation.projectId)}
                     className="tw-btn-ghost"
-                    style={{ padding: 0, fontSize: '12px' }}
+                    style={{ padding: 0, fontSize: 'var(--font-size-xs)' }}
                   >
                     {selectedConversation.projectName}
                   </button>
@@ -336,7 +336,7 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
                   className="tw-btn-icon"
-                  style={{ color: selectedConversation.isStarred ? '#ffffff' : 'rgba(255,255,255,0.46)' }}
+                  style={{ color: selectedConversation.isStarred ? 'var(--portal-text-light)' : 'var(--portal-text-muted)' }}
                 >
                   <Star
                     style={{ width: '1rem', height: '1rem', fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
@@ -364,20 +364,20 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                       style={{ display: 'flex', gap: '0.75rem', justifyContent: message.senderType === 'admin' ? 'flex-end' : 'flex-start' }}
                     >
                       {message.senderType === 'client' && (
-                        <div style={{ width: '2rem', height: '2rem', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <User style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+                        <div style={{ width: '2rem', height: '2rem', border: '1px solid var(--portal-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <User style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
                         </div>
                       )}
                       <div
                         style={{
                           maxWidth: '70%',
                           padding: '0.5rem 1rem',
-                          border: '1px solid rgba(255,255,255,0.3)',
-                          background: message.senderType === 'admin' ? '#ffffff' : 'transparent',
-                          color: message.senderType === 'admin' ? '#000000' : '#ffffff',
+                          border: '1px solid var(--portal-border-color)',
+                          background: message.senderType === 'admin' ? 'var(--portal-text-light)' : 'transparent',
+                          color: message.senderType === 'admin' ? 'var(--portal-bg-dark)' : 'var(--portal-text-light)',
                         }}
                       >
-                        <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>{message.content}</p>
+                        <p style={{ fontSize: 'var(--font-size-sm)', whiteSpace: 'pre-wrap' }}>{message.content}</p>
                         <div
                           style={{
                             display: 'flex',
@@ -385,8 +385,8 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                             justifyContent: 'flex-end',
                             gap: '0.25rem',
                             marginTop: '0.25rem',
-                            fontSize: '11px',
-                            color: message.senderType === 'admin' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.46)',
+                            fontSize: 'var(--font-size-2xs)',
+                            color: message.senderType === 'admin' ? 'var(--portal-text-dark)' : 'var(--portal-text-muted)',
                           }}
                         >
                           <span>{formatTime(message.timestamp)}</span>
@@ -411,7 +411,7 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
             </div>
 
             {/* Message Input */}
-            <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <div style={{ padding: '1rem', borderTop: '1px solid var(--portal-border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
                 <button className="tw-btn-icon">
                   <Paperclip style={{ width: '1.25rem', height: '1.25rem' }} />
@@ -446,7 +446,7 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
         ) : (
           <div className="tw-empty-state" style={{ flex: 1 }}>
             <Users style={{ width: '3rem', height: '3rem', opacity: 0.5 }} />
-            <p style={{ fontSize: '16px' }}>Select a conversation</p>
+            <p style={{ fontSize: 'var(--font-size-base)' }}>Select a conversation</p>
             <p className="tw-text-muted">Choose a conversation from the list to view messages</p>
           </div>
         )}

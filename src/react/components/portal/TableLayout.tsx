@@ -6,9 +6,9 @@ import { cn } from '@react/lib/utils';
  * Unified wrapper for all admin tables ensuring consistent structure.
  *
  * Structure:
- * - admin-table-card (outer container)
- *   - admin-table-header (title + stats + actions)
- *   - admin-table-container (scrollable table wrapper)
+ * - data-table-card (outer container)
+ *   - data-table-header (title + stats + actions)
+ *   - data-table-container (scrollable table wrapper)
  *   - table-pagination (if provided)
  */
 
@@ -46,18 +46,16 @@ export function TableLayout({
 }: TableLayoutProps) {
   return (
     <div ref={containerRef} className={cn(className)}>
-      <div className="admin-table-card">
+      <div className="data-table-card">
         {/* Table Header */}
-        <div className="admin-table-header">
-          <div className="admin-table-title-group">
-            <h3>
-              <span className="title-full">{title}</span>
-              <span className="title-mobile">{title}</span>
-            </h3>
-            {stats}
-          </div>
+        <div className="data-table-header">
+          <h3>
+            <span className="title-full">{title}</span>
+            <span className="title-mobile">{title}</span>
+          </h3>
+          {stats}
           {actions && (
-            <div className="admin-table-actions">
+            <div className="data-table-actions">
               {actions}
             </div>
           )}
@@ -70,8 +68,8 @@ export function TableLayout({
         {bulkActions}
 
         {/* Table Container */}
-        <div className="admin-table-container">
-          <div className="admin-table-scroll-wrapper">
+        <div className="data-table-container">
+          <div className="data-table-scroll-wrapper">
             {children}
           </div>
         </div>
@@ -135,7 +133,7 @@ export interface TableActionsProps {
 }
 
 export function TableActions({ children }: TableActionsProps) {
-  return <div className="admin-table-actions">{children}</div>;
+  return <div className="data-table-actions">{children}</div>;
 }
 
 export default TableLayout;

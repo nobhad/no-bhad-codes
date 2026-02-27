@@ -46,7 +46,7 @@ export function PortalHeader({
     <div
       className={cn(
         'tw-flex tw-items-center tw-gap-2 tw-p-3',
-        'tw-border-b tw-border-[rgba(255,255,255,0.2)]',
+        'tw-border-b tw-border-[var(--portal-border-color)]',
         'tw-bg-transparent',
         isCollapsed ? 'tw-flex-col' : 'tw-justify-between'
       )}
@@ -84,7 +84,7 @@ export function PortalHeader({
             <p className="tw-text-[12px] tw-font-bold tw-text-white tw-truncate tw-font-mono">
               {user.name}
             </p>
-            <p className="tw-text-[10px] tw-text-[rgba(255,255,255,0.46)] tw-truncate tw-font-mono">
+            <p className="tw-text-[10px] tw-text-[var(--portal-text-muted)] tw-truncate tw-font-mono">
               {user.email}
             </p>
           </div>

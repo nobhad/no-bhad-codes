@@ -134,14 +134,14 @@ export function DeliverablesTab({
                   className="tw-panel"
                 >
                   {/* Milestone Header */}
-                  <div className="tw-flex tw-items-center tw-justify-between tw-p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div className="tw-flex tw-items-center tw-justify-between tw-p-4" style={{ borderBottom: '1px solid var(--portal-border-subtle)' }}>
                     <div className="tw-flex tw-items-center tw-gap-3">
                       <div
                         className={cn(
                           'tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
                           milestone.is_completed
                             ? 'tw-bg-white'
-                            : 'tw-border tw-border-[rgba(255,255,255,0.3)]'
+                            : 'tw-border tw-border-[var(--portal-border-color)]'
                         )}
                         style={{ borderRadius: 0 }}
                       >
@@ -193,7 +193,7 @@ export function DeliverablesTab({
                               'tw-w-5 tw-h-5 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-mt-0.5',
                               item.isCompleted
                                 ? 'tw-bg-white'
-                                : 'tw-border tw-border-[rgba(255,255,255,0.3)]'
+                                : 'tw-border tw-border-[var(--portal-border-color)]'
                             )}
                             style={{ borderRadius: 0 }}
                           >
@@ -233,7 +233,7 @@ export function DeliverablesTab({
           <span>Completed</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-2">
-          <div className="tw-w-4 tw-h-4 tw-border tw-border-[rgba(255,255,255,0.3)] tw-flex tw-items-center tw-justify-center" style={{ borderRadius: 0 }}>
+          <div className="tw-w-4 tw-h-4 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center" style={{ borderRadius: 0 }}>
             <Clock className="tw-h-2.5 tw-w-2.5 tw-text-muted" />
           </div>
           <span>In Progress</span>

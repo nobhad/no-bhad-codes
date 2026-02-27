@@ -60,7 +60,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             Contact Name <span className="tw-text-white">*</span>
           </label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <User className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -82,7 +82,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             Email Address <span className="tw-text-white">*</span>
           </label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <Mail className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -102,7 +102,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">Phone Number</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <Phone className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -122,7 +122,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">Timezone</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <Clock className="tw-h-4 tw-w-4" />
             </div>
             <select
@@ -157,7 +157,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">Company Name</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <Building2 className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -174,7 +174,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">Current Website</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[rgba(255,255,255,0.46)]">
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
               <Globe className="tw-h-4 tw-w-4" />
             </div>
             <input
@@ -185,7 +185,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               className="tw-input tw-pl-10"
             />
           </div>
-          <span className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)]">
+          <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
             Leave blank if this is a new business
           </span>
         </div>
@@ -206,7 +206,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                 'tw-border tw-transition-colors',
                 basicInfo.preferredContactMethod === method
                   ? 'tw-border-white tw-bg-white tw-text-black'
-                  : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+                  : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
               )}
             >
               <input

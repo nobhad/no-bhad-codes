@@ -216,7 +216,7 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
           <div className="tw-panel">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Code style={{ width: '1rem', height: '1rem', color: 'rgba(255,255,255,0.46)' }} />
+                <Code style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
                 <span className="tw-section-title">Query</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

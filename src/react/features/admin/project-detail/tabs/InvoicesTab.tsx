@@ -266,7 +266,7 @@ export function InvoicesTab({
         <div className="tw-panel" style={{ padding: 0 }}>
           <table className="tw-w-full">
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+              <tr style={{ borderBottom: '1px solid var(--portal-border-color)' }}>
                 <th className="tw-label tw-text-left tw-px-4 tw-py-3">
                   Invoice #
                 </th>

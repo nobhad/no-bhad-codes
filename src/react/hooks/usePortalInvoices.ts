@@ -30,7 +30,10 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
   const { getAuthToken } = options;
 
   const [invoices, setInvoices] = useState<PortalInvoice[]>([]);
-  const [summary, setSummary] = useState<PortalInvoiceSummary>({ totalOutstanding: 0, totalPaid: 0 });
+  const [summary, setSummary] = useState<PortalInvoiceSummary>({
+    totalOutstanding: 0,
+    totalPaid: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

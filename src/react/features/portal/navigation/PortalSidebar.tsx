@@ -113,7 +113,7 @@ export function PortalSidebar({
       ref={containerRef}
       className={cn(
         'tw-flex tw-flex-col tw-h-full',
-        'tw-bg-transparent tw-border-r tw-border-[rgba(255,255,255,0.2)]',
+        'tw-bg-transparent tw-border-r tw-border-[var(--portal-border-color)]',
         'tw-transition-[width] tw-duration-200 tw-ease-out',
         isCollapsed ? 'tw-w-16' : 'tw-w-56'
       )}
@@ -148,7 +148,7 @@ export function PortalSidebar({
 
       {/* Footer - Version or branding if needed */}
       {!isCollapsed && (
-        <div className="tw-p-3 tw-border-t tw-border-[rgba(255,255,255,0.2)]">
+        <div className="tw-p-3 tw-border-t tw-border-[var(--portal-border-color)]">
           <p className="tw-section-title tw-text-center">
             Client Portal
           </p>

@@ -130,7 +130,7 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
       {/* Notification Preferences Section */}
       <div className="tw-panel">
         <div className="tw-flex tw-items-center tw-gap-2 tw-mb-4">
-          <Bell className="tw-h-4 tw-w-4 tw-text-[rgba(255,255,255,0.46)]" />
+          <Bell className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)]" />
           <h3 className="tw-section-title tw-m-0">
             Email Notifications
           </h3>
@@ -150,7 +150,7 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
                 key={option.key}
                 className={cn(
                   'tw-flex tw-items-start tw-justify-between tw-gap-4 tw-p-3',
-                  'tw-bg-transparent tw-border tw-border-[rgba(255,255,255,0.2)]',
+                  'tw-bg-transparent tw-border tw-border-[var(--portal-border-subtle)]',
                   'tw-transition-colors',
                   isChecked && 'tw-border-white'
                 )}
@@ -158,7 +158,7 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
                 <div className="tw-flex tw-items-start tw-gap-3">
                   <div className={cn(
                     'tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8',
-                    'tw-border tw-border-[rgba(255,255,255,0.3)]',
+                    'tw-border tw-border-[var(--portal-border-color)]',
                     isChecked ? 'tw-bg-white tw-text-black' : 'tw-bg-transparent'
                   )}>
                     <Icon className="tw-h-4 tw-w-4" />
@@ -167,7 +167,7 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
                     <span className="tw-text-[14px] tw-font-mono tw-text-white">
                       {option.label}
                     </span>
-                    <span className="tw-text-[12px] tw-text-[rgba(255,255,255,0.46)]">
+                    <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
                       {option.description}
                     </span>
                   </div>
@@ -184,7 +184,7 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
 
       {/* Info Note */}
       <div className="tw-card">
-        <p className="tw-text-[14px] tw-text-[rgba(255,255,255,0.46)] tw-m-0 tw-font-mono">
+        <p className="tw-text-[14px] tw-text-[var(--portal-text-muted)] tw-m-0 tw-font-mono">
           <strong className="tw-text-white">Note:</strong> Some critical notifications
           (such as security alerts and payment confirmations) cannot be disabled and will always be sent.
         </p>

@@ -268,7 +268,7 @@ export function TasksTab({
                       'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors tw-flex-shrink-0',
                       milestone.is_completed
                         ? 'tw-bg-white tw-border-white'
-                        : 'tw-border-[rgba(255,255,255,0.3)] hover:tw-border-white'
+                        : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
                     )}
                     style={{ borderRadius: 0 }}
                   >
@@ -332,7 +332,7 @@ export function TasksTab({
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                  <div className="tw-px-4 tw-pb-4 tw-pt-0" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div className="tw-px-4 tw-pb-4 tw-pt-0" style={{ borderTop: '1px solid var(--portal-border-color)' }}>
                     {/* Description */}
                     {milestone.description && (
                       <p className="tw-text-muted tw-mt-3" style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>
