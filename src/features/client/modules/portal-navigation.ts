@@ -340,7 +340,14 @@ export function updatePortalPageTitle(tabName: string): void {
   if (currentActiveTab === 'dashboard') {
     const { isFirstLogin } = authStore.getState();
     const welcomeText = isFirstLogin ? 'Welcome to the Portal' : 'Welcome Back';
-    titleEl.innerHTML = `${welcomeText}, <span id="client-name">${currentClientName}</span>!`;
+    // Use DOM methods instead of innerHTML to prevent XSS
+    titleEl.textContent = '';
+    titleEl.appendChild(document.createTextNode(`${welcomeText}, `));
+    const nameSpan = document.createElement('span');
+    nameSpan.id = 'client-name';
+    nameSpan.textContent = currentClientName || '';
+    titleEl.appendChild(nameSpan);
+    titleEl.appendChild(document.createTextNode('!'));
   } else {
     // Show the individual tab title (not group title)
     const title = TAB_TITLES[currentActiveTab] || 'Dashboard';

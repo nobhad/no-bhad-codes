@@ -20,15 +20,6 @@ let reactSettingsUnmountFn: (() => void) | null = null;
  * Check if React portal settings should be used
  */
 function shouldUseReactPortalSettings(): boolean {
-  const component = getReactComponent('portalSettings');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_settings') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_settings');
-  if (flag === 'false') return false;
-
   return true;
 }
 

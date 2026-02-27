@@ -77,16 +77,6 @@ async function loadReactDeletedItemsTable(): Promise<boolean> {
 
 /** Feature flag for React deleted items table */
 function shouldUseReactDeletedItemsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_deleted_items') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_deleted_items_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 

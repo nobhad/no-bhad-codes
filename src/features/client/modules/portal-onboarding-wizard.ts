@@ -32,15 +32,6 @@ let reactOnboardingUnmountFn: (() => void) | null = null;
  * Check if React portal onboarding should be used
  */
 function shouldUseReactPortalOnboarding(): boolean {
-  const component = getReactComponent('portalOnboarding');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_onboarding') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_onboarding');
-  if (flag === 'false') return false;
-
   return true;
 }
 

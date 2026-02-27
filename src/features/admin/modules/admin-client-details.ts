@@ -47,24 +47,8 @@ let _reactDetailMounted = false;
 
 /**
  * Check if React client detail should be used
- * React is now enabled by default - use ?vanilla_client_detail=true to disable
  */
 export function shouldUseReactClientDetail(): boolean {
-  // Check if React component is registered
-  const component = getReactComponent('clientDetail');
-  if (!component) {
-    return false;
-  }
-
-  // Check for explicit vanilla mode via URL param
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_client_detail') === 'true') return false;
-
-  // Check for explicit vanilla mode via localStorage
-  const flag = localStorage.getItem('feature_react_client_detail');
-  if (flag === 'false') return false;
-
-  // React is enabled by default
   return true;
 }
 

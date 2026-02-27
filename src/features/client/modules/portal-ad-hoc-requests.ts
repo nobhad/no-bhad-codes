@@ -22,15 +22,6 @@ let reactAdHocRequestsUnmountFn: (() => void) | null = null;
  * Check if React portal ad-hoc requests should be used
  */
 function shouldUseReactPortalAdHocRequests(): boolean {
-  const component = getReactComponent('portalAdHocRequests');
-  if (!component) return false;
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('vanilla_portal_ad_hoc_requests') === 'true') return false;
-
-  const flag = localStorage.getItem('feature_react_portal_ad_hoc_requests');
-  if (flag === 'false') return false;
-
   return true;
 }
 
