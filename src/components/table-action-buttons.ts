@@ -1,15 +1,25 @@
 /**
  * ===============================================
- * TABLE ACTION BUTTONS - Centralized Configuration
+ * TABLE ACTION BUTTONS - DEPRECATED
  * ===============================================
  * @file src/components/table-action-buttons.ts
  *
- * Single source of truth for all table action buttons.
- * Tables declare which actions they need, this module
- * renders them consistently.
+ * @deprecated This module is deprecated. All admin modules have been
+ * migrated to import directly from @/factories.
  *
- * NOTE: This module now uses the factory system internally.
- * For new code, consider importing directly from @/factories.
+ * MIGRATION COMPLETED: February 2026
+ * - All 16 admin modules now use direct factory imports
+ * - This file can be deleted once no external consumers exist
+ *
+ * DO NOT USE THIS FILE FOR NEW CODE.
+ * Instead, import directly from '@/factories':
+ *
+ * @example
+ * // OLD (deprecated):
+ * import { renderActionsCell, createAction } from '../components/table-action-buttons';
+ *
+ * // NEW (preferred):
+ * import { renderActionsCell, createAction } from '../factories';
  */
 
 import {

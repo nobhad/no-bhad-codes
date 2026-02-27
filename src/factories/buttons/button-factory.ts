@@ -9,9 +9,9 @@
  */
 
 import { ICON_SIZES, CONTEXT_DEFAULTS } from '../constants';
-import type { ButtonConfig, ButtonGroupConfig, UIContext, IconSizeKey } from '../types';
-import { renderIcon, resolveIconSize } from '../icons/icon-factory';
-import { getButtonAction, BUTTON_ACTIONS } from './button-actions';
+import type { ButtonConfig, ButtonGroupConfig, UIContext } from '../types';
+import { renderIcon } from '../icons/icon-factory';
+import { getButtonAction } from './button-actions';
 import { BUTTON_SETS, getButtonSet, type ButtonSetName } from './button-sets';
 
 // ============================================

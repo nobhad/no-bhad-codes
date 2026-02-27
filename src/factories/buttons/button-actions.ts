@@ -48,6 +48,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   email: { icon: 'mail', title: 'Email', ariaLabel: 'Send email' },
   reply: { icon: 'mail', title: 'Reply', ariaLabel: 'Reply via email' },
   message: { icon: 'message-square', title: 'Message', ariaLabel: 'Send message' },
+  call: { icon: 'phone', title: 'Call', ariaLabel: 'Call' },
 
   // ============================================
   // APPROVE / REJECT / REVIEW
@@ -56,6 +57,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   reject: { icon: 'circle-x', title: 'Reject', ariaLabel: 'Reject', variant: 'danger' },
   'start-review': { icon: 'check-square', title: 'Start Review', ariaLabel: 'Start review' },
   'mark-paid': { icon: 'circle-check', title: 'Mark as Paid', ariaLabel: 'Mark as paid', variant: 'success' },
+  markPaid: { icon: 'circle-check', title: 'Mark as Paid', ariaLabel: 'Mark as paid', variant: 'success' }, // Alias
   complete: { icon: 'check', title: 'Complete', ariaLabel: 'Mark as complete', variant: 'success' },
 
   // ============================================
@@ -63,6 +65,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   // ============================================
   download: { icon: 'download', title: 'Download', ariaLabel: 'Download' },
   export: { icon: 'download', title: 'Export', ariaLabel: 'Export' },
+  pdf: { icon: 'file-text', title: 'Download PDF', ariaLabel: 'Download PDF' },
   copy: { icon: 'copy', title: 'Copy', ariaLabel: 'Copy to clipboard' },
   'copy-link': { icon: 'copy', title: 'Copy Link', ariaLabel: 'Copy link to clipboard' },
 

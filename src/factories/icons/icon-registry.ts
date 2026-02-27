@@ -235,6 +235,11 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
     path: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
     category: 'communication'
   },
+  phone: {
+    path: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    category: 'communication',
+    aliases: ['call', 'telephone']
+  },
 
   // ============================================
   // MEDIA
@@ -353,6 +358,95 @@ export const ICON_REGISTRY: Record<string, IconDefinition> = {
     path: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
     category: 'action',
     aliases: ['logout', 'signout']
+  },
+
+  // ============================================
+  // ADDITIONAL UTILITY ICONS
+  // ============================================
+  loader: {
+    path: '<line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>',
+    category: 'interface',
+    aliases: ['spinner', 'loading']
+  },
+  calendar: {
+    path: '<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+    category: 'data',
+    aliases: ['date', 'schedule']
+  },
+  'dollar-sign': {
+    path: '<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    category: 'data',
+    aliases: ['money', 'currency', 'price']
+  },
+  link: {
+    path: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    category: 'interface',
+    aliases: ['url', 'hyperlink']
+  },
+  'link-2': {
+    path: '<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/>',
+    category: 'interface',
+    aliases: ['unlink']
+  },
+  play: {
+    path: '<polygon points="6 3 20 12 6 21 6 3"/>',
+    category: 'interface',
+    aliases: ['start', 'begin']
+  },
+  pause: {
+    path: '<rect height="16" width="4" x="6" y="4"/><rect height="16" width="4" x="14" y="4"/>',
+    category: 'interface',
+    aliases: ['stop']
+  },
+  pin: {
+    path: '<line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>',
+    category: 'interface',
+    aliases: ['pinned', 'sticky']
+  },
+  tag: {
+    path: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+    category: 'data',
+    aliases: ['label', 'category']
+  },
+  star: {
+    path: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    category: 'interface',
+    aliases: ['favorite', 'rating']
+  },
+  'star-off': {
+    path: '<path d="M8.34 8.34 2 9.27l5 4.87L5.82 21 12 17.77 18.18 21l-.59-3.43"/><path d="M18.42 12.76 22 9.27l-6.91-1L12 2l-1.44 2.91"/><line x1="2" x2="22" y1="2" y2="22"/>',
+    category: 'interface',
+    aliases: ['unfavorite']
+  },
+  alert: {
+    path: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>',
+    category: 'status',
+    aliases: ['warning', 'error']
+  },
+  info: {
+    path: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    category: 'status',
+    aliases: ['information']
+  },
+  hash: {
+    path: '<line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/>',
+    category: 'interface',
+    aliases: ['number', 'pound']
+  },
+  percent: {
+    path: '<line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    category: 'data',
+    aliases: ['percentage', 'discount']
+  },
+  lock: {
+    path: '<rect height="11" width="18" rx="2" ry="2" x="3" y="11"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    category: 'interface',
+    aliases: ['locked', 'secure']
+  },
+  unlock: {
+    path: '<rect height="11" width="18" rx="2" ry="2" x="3" y="11"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+    category: 'interface',
+    aliases: ['unlocked']
   }
 } as const;
 
@@ -366,7 +460,7 @@ export function getIconDefinition(name: string): IconDefinition | undefined {
   }
 
   // Search aliases
-  for (const [key, def] of Object.entries(ICON_REGISTRY)) {
+  for (const [_key, def] of Object.entries(ICON_REGISTRY)) {
     if (def.aliases?.includes(name)) {
       return def;
     }
