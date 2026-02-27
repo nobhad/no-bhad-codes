@@ -349,9 +349,9 @@
 
 /* Base table scroll wrapper styles in shared/portal-tables.css */
 
-/* Apply scroll to admin tables on mobile */
+/* Apply responsive behavior to admin tables on mobile */
 @media (--mobile) {
-  /* Table containers - scroll wrapper behavior */
+  /* Table containers - responsive behavior */
   .admin-table-container,
   .table-container,
   .data-table-container,
@@ -359,17 +359,18 @@
   .table-scroll-wrapper,
   .data-table-scroll-wrapper {
     width: 100%;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
   }
 
-  /* Tables inside containers get minimum width */
+  /* Tables collapse to fit - no minimum width */
   .admin-table-container > .data-table,
   .table-container > .data-table,
   .data-table-container > .data-table,
   .admin-table-scroll-wrapper > .data-table,
   .table-scroll-wrapper > .data-table,
   .data-table-scroll-wrapper > .data-table {
-    min-width: 600px;
+    min-width: 0;
+    width: 100%;
   }
 
   /* Invoice line items table */
@@ -403,17 +404,19 @@
   }
 }
 
-/* Small mobile - tighter minimum widths */
+/* Small mobile - responsive tables, no minimum width */
 @media (--small-mobile) {
   .table-scroll-wrapper > table,
   .table-scroll-wrapper > .data-table,
   .data-table-container > .data-table,
   .table-container > table {
-    min-width: 500px;
+    min-width: 0;
+    width: 100%;
   }
 
   .invoice-line-items {
-    min-width: 400px;
+    min-width: 0;
+    width: 100%;
   }
 }
 

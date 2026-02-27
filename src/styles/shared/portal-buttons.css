@@ -401,55 +401,108 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   }
 
   /* Table action buttons stay compact (28px) even on touch devices */
-  :is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn,
-  :is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn,
-  :is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
+  .data-table .icon-btn,
+  .data-table .table-actions .icon-btn,
+  .data-table .actions-cell .icon-btn,
+  .data-table td .icon-btn,
+  .table-actions .icon-btn,
+  .actions-cell .icon-btn {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn svg,
-  :is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn svg,
-  :is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn svg {
+  .data-table .icon-btn svg,
+  .data-table .table-actions .icon-btn svg,
+  .data-table .actions-cell .icon-btn svg,
+  .data-table td .icon-btn svg,
+  .table-actions .icon-btn svg,
+  .actions-cell .icon-btn svg {
     width: 16px !important;
     height: 16px !important;
   }
 }
 
 /* ============================================
- * TABLE ACTION BUTTONS - Compact sizing
+ * TABLE ACTION BUTTONS - UNIVERSAL RULE
  * ============================================
- * Table action buttons use smaller size (28px) for denser display.
- * These rules apply to both desktop and touch devices.
+ * ONE RULE FOR ALL TABLE ACTION BUTTONS
+ * Desktop: 36x36px button, 18x18px icon (design system)
+ * Gap: 8px (--space-1)
+ *
+ * MUST CATCH ALL POSSIBLE SCENARIOS:
+ * - Vanilla JS tables with renderActionsCell()
+ * - Vanilla JS tables with manual buttons
+ * - React tables with AdminTableCell
+ * - Tables with .table-actions wrapper
+ * - Tables without .table-actions wrapper
  */
-:is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
+
+/* MASTER SELECTOR: Every icon-btn in table contexts */
+td .icon-btn,
+td > .icon-btn,
+td button.icon-btn,
+.actions-cell .icon-btn,
+.actions-cell > .icon-btn,
+.actions-cell button.icon-btn,
+.table-actions .icon-btn,
+.table-actions > .icon-btn,
+.table-actions button.icon-btn,
+.data-table .icon-btn,
+.data-table td .icon-btn,
+.data-table .actions-cell .icon-btn,
+.data-table .table-actions .icon-btn,
+table .icon-btn,
+table td .icon-btn,
+[data-page="admin"] td .icon-btn,
+[data-page="admin"] .actions-cell .icon-btn,
+[data-page="admin"] .table-actions .icon-btn,
+[data-page="client-portal"] td .icon-btn,
+[data-page="client-portal"] .actions-cell .icon-btn,
+[data-page="client-portal"] .table-actions .icon-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .data-table .icon-btn svg {
-  /* !important needed to override inline SVG width/height attributes */
-  width: 16px !important;
-  height: 16px !important;
-}
-
-/* Also target buttons inside table-actions and actions-cell wrappers */
-:is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn,
-:is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .table-actions .icon-btn svg,
-:is([data-page="admin"], [data-page="client-portal"]) .actions-cell .icon-btn svg {
-  width: 16px !important;
-  height: 16px !important;
+/* MASTER SELECTOR: Every SVG in table icon buttons */
+td .icon-btn svg,
+td > .icon-btn svg,
+td button.icon-btn svg,
+.actions-cell .icon-btn svg,
+.actions-cell > .icon-btn svg,
+.actions-cell button.icon-btn svg,
+.table-actions .icon-btn svg,
+.table-actions > .icon-btn svg,
+.table-actions button.icon-btn svg,
+.data-table .icon-btn svg,
+.data-table td .icon-btn svg,
+.data-table .actions-cell .icon-btn svg,
+.data-table .table-actions .icon-btn svg,
+table .icon-btn svg,
+table td .icon-btn svg,
+[data-page="admin"] td .icon-btn svg,
+[data-page="admin"] .actions-cell .icon-btn svg,
+[data-page="admin"] .table-actions .icon-btn svg,
+[data-page="client-portal"] td .icon-btn svg,
+[data-page="client-portal"] .actions-cell .icon-btn svg,
+[data-page="client-portal"] .table-actions .icon-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  flex-shrink: 0 !important;
 }
 
 /* ============================================

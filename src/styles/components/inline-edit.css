@@ -8,19 +8,22 @@
  */
 
 /* Editable cell indicator */
-[data-page="admin"] .inline-editable {
+[data-page="admin"] .inline-editable,
+[data-page="admin"] .inline-editable-cell {
   position: relative;
   cursor: pointer;
   transition: background-color 0.1s ease;
 }
 
 /* Hover state - subtle edit hint */
-[data-page="admin"] .inline-editable:hover:not(.is-editing) {
+[data-page="admin"] .inline-editable:hover:not(.is-editing),
+[data-page="admin"] .inline-editable-cell:hover:not(.is-editing) {
   background: var(--portal-bg-hover);
 }
 
 /* Edit icon on hover (optional - uses ::after) */
-[data-page="admin"] .inline-editable:hover:not(.is-editing)::after {
+[data-page="admin"] .inline-editable:hover:not(.is-editing)::after,
+[data-page="admin"] .inline-editable-cell:hover:not(.is-editing)::after {
   content: '';
   position: absolute;
   right: 8px;
@@ -35,7 +38,8 @@
 }
 
 /* Editing state */
-[data-page="admin"] .inline-editable.is-editing {
+[data-page="admin"] .inline-editable.is-editing,
+[data-page="admin"] .inline-editable-cell.is-editing {
   padding: 0 !important;
   background: transparent !important;
 }
@@ -67,7 +71,8 @@
 }
 
 /* Placeholder text for empty values */
-[data-page="admin"] .inline-editable.placeholder {
+[data-page="admin"] .inline-editable.placeholder,
+[data-page="admin"] .inline-editable-cell.placeholder {
   color: var(--portal-text-muted);
   font-style: italic;
 }

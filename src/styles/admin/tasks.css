@@ -427,17 +427,17 @@
 
 /* Time Entries Table - Base styling from shared/portal-tables.css
    Only page-specific overrides here */
-.time-entries-table {
+#time-entries-list .data-table {
   background: transparent;
   border: 1px solid var(--table-border-color);
   overflow: hidden;
 }
 
-.time-entries-table th {
+#time-entries-list .data-table th {
   background: transparent;
 }
 
-.time-entries-table tr:last-child td {
+#time-entries-list .data-table tr:last-child td {
   border-bottom: none;
 }
 
@@ -497,7 +497,7 @@
    ============================================ */
 
 @media (--mobile) {
-  .time-entries-table {
+  #time-entries-list .data-table {
     display: block;
     overflow-x: auto;
   }
