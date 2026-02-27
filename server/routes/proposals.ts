@@ -11,11 +11,9 @@ import { logger } from '../services/logger.js';
 
 import express, { Request, Response } from 'express';
 import { PDFDocument as PDFLibDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
-import { join } from 'path';
-import { existsSync, readFileSync } from 'fs';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { canAccessProject } from '../middleware/access-control.js';
+import { canAccessProject, canAccessProposal, isUserAdmin } from '../middleware/access-control.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { proposalService } from '../services/proposal-service.js';
@@ -165,9 +163,34 @@ router.post(
       });
     }
 
+    const db = getDatabase();
+
+    // Verify project exists and get its client_id in one query
+    const project = await db.get(
+      'SELECT id, client_id FROM projects WHERE id = ? AND deleted_at IS NULL',
+      [submission.projectId]
+    );
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     // Authorization check: verify user can access the project
     if (!(await canAccessProject(req, submission.projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
+    // For non-admins, verify clientId matches the project's actual client
+    if (!(await isUserAdmin(req))) {
+      const projectClientId = (project as { client_id: number }).client_id;
+      if (projectClientId !== submission.clientId) {
+        return errorResponse(res, 'Client ID must match the project owner', 400, 'VALIDATION_ERROR');
+      }
+    }
+
+    // Verify client exists
+    const client = await db.get('SELECT id FROM clients WHERE id = ?', [submission.clientId]);
+    if (!client) {
+      return errorResponse(res, 'Client not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Validate project type
@@ -183,20 +206,6 @@ router.post(
     // Validate maintenance option if provided
     if (submission.maintenanceOption && !VALID_MAINTENANCE.includes(submission.maintenanceOption)) {
       return errorResponse(res, 'Invalid maintenance option', 400, 'VALIDATION_ERROR');
-    }
-
-    const db = getDatabase();
-
-    // Verify project exists
-    const project = await db.get('SELECT id FROM projects WHERE id = ?', [submission.projectId]);
-    if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
-    }
-
-    // Verify client exists
-    const client = await db.get('SELECT id FROM clients WHERE id = ?', [submission.clientId]);
-    if (!client) {
-      return errorResponse(res, 'Client not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     // Create proposal in transaction
@@ -247,7 +256,7 @@ router.post(
     });
 
     console.log(`[Proposals] Created proposal request ${result} for project ${submission.projectId}`);
-  await logger.info(`[Proposals] Created proposal request ${result} for project ${submission.projectId}`, { category: 'PROPOSALS' });
+    await logger.info(`[Proposals] Created proposal request ${result} for project ${submission.projectId}`, { category: 'PROPOSALS' });
 
     // Emit workflow event for proposal creation
     await workflowTriggerService.emit('proposal.created', {
@@ -278,25 +287,30 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
-    const db = getDatabase();
+    const proposalId = parseInt(id, 10);
 
+    // Validate ID
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check: only admin or owning client can view
+    if (!(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
+    const db = getDatabase();
     const proposal = await db.get(
       `SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
        FROM proposal_requests pr
        JOIN projects p ON pr.project_id = p.id AND ${notDeleted('p')}
        JOIN clients c ON pr.client_id = c.id AND ${notDeleted('c')}
        WHERE pr.id = ? AND ${notDeleted('pr')}`,
-      [id]
+      [proposalId]
     ) as ProposalRow | undefined;
 
     if (!proposal) {
       return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
-    }
-
-    // Authorization check: only admin or owning client can view
-    const proposalClientId = getNumber(proposal as unknown as Record<string, unknown>, 'client_id');
-    if (req.user!.type !== 'admin' && req.user!.id !== proposalClientId) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
     }
 
     // Get feature selections
@@ -501,7 +515,7 @@ router.put(
     );
 
     console.log(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`);
-  await logger.info(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`, { category: 'PROPOSALS' });
+    await logger.info(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`, { category: 'PROPOSALS' });
 
     // Emit workflow events for status changes
     if (status === 'accepted') {
@@ -603,7 +617,7 @@ router.post(
     });
 
     console.log(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`);
-  await logger.info(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`, { category: 'PROPOSALS' });
+    await logger.info(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`, { category: 'PROPOSALS' });
 
     sendSuccess(res, { invoiceId, invoiceNumber }, 'Proposal converted to invoice');
   })
@@ -618,6 +632,18 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
+    const proposalId = parseInt(id, 10);
+
+    // Validate ID
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check: only admin or owning client can download PDF
+    if (!(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const db = getDatabase();
 
     // Get proposal with full details including deposit percentage
@@ -629,7 +655,7 @@ router.get(
        JOIN projects p ON pr.project_id = p.id
        JOIN clients c ON pr.client_id = c.id
        WHERE pr.id = ?`,
-      [id]
+      [proposalId]
     ) as ProposalRow | undefined;
 
     if (!proposal) {
@@ -642,7 +668,7 @@ router.get(
     if (cachedPdf) {
       const projectName = (proposal.project_name || 'proposal').toString().replace(/[^a-zA-Z0-9]/g, '-');
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="proposal-${projectName}-${id}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="proposal-${projectName}-${proposalId}.pdf"`);
       res.setHeader('Content-Length', cachedPdf.length);
       res.setHeader('X-PDF-Cache', 'HIT');
       return res.send(Buffer.from(cachedPdf));
@@ -650,12 +676,6 @@ router.get(
 
     // Cast proposal for helper functions
     const p = proposal as unknown as Record<string, unknown>;
-
-    // Authorization check: only admin or owning client can download PDF
-    const proposalClientId = getNumber(p, 'client_id');
-    if (req.user!.type !== 'admin' && req.user!.id !== proposalClientId) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
-    }
 
     // Get feature selections
     const features = await db.all(
@@ -1112,7 +1132,7 @@ router.get(
     // Add page numbers if multiple pages
     if (ctx.pageNumber > 1) {
       await addPageNumbers(pdfDoc, {
-        format: (p, t) => `Page ${p} of ${t}`,
+        format: (pageNum, total) => `Page ${pageNum} of ${total}`,
         fontSize: 8,
         marginBottom: 20
       });

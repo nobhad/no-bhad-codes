@@ -222,7 +222,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found for this client', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     if (attachmentFileId) {
@@ -270,7 +270,7 @@ router.post(
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.clientId !== clientId) {
-      return errorResponse(res, 'Request not found for this client', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Request not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     if (request.status !== 'quoted') {
@@ -301,7 +301,7 @@ router.post(
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.clientId !== clientId) {
-      return errorResponse(res, 'Request not found for this client', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Request not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
     if (request.status !== 'quoted') {
@@ -577,7 +577,7 @@ router.put(
         }
       } catch (invoiceError) {
         // Log error but don't fail the request update
-         await logger.error('[AdHocRequests] Auto-invoice creation failed:', { error: invoiceError instanceof Error ? invoiceError : undefined, category: 'AD_HOC' });
+        await logger.error('[AdHocRequests] Auto-invoice creation failed:', { error: invoiceError instanceof Error ? invoiceError : undefined, category: 'AD_HOC' });
       }
     }
 

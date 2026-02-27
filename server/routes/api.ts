@@ -13,6 +13,7 @@ import { resolve, extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { rateLimit, requestSizeLimit, suspiciousActivityDetector } from '../middleware/security.js';
+import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
@@ -230,11 +231,14 @@ Received: ${new Date().toISOString()}
 );
 
 /**
- * File upload endpoint
+ * File upload endpoint (authenticated)
  * NOTE: Client intake form is handled by /routes/intake.ts (mounted at /api/intake)
  */
 router.post(
   '/upload',
+  // Require authentication
+  authenticateToken,
+
   // File upload rate limiting
   rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
@@ -245,7 +249,7 @@ router.post(
   // Add multer middleware for file handling
   upload.single('file'),
 
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       // Implement file upload handling
       if (!req.file) {
@@ -459,7 +463,7 @@ router.get(
         activeProjects = typeof activeProjectsRow?.count === 'number' ? activeProjectsRow.count : 0;
         totalInvoices = typeof invoicesRow?.count === 'number' ? invoicesRow.count : 0;
       } catch (err) {
-         await logger.error('Failed to gather metrics:', { error: err instanceof Error ? err : undefined, category: 'METRICS' });
+        await logger.error('Failed to gather metrics:', { error: err instanceof Error ? err : undefined, category: 'METRICS' });
         // Use default values of 0
       }
 

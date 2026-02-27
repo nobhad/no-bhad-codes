@@ -10,6 +10,7 @@
 import express, { Response } from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { canAccessContract } from '../middleware/access-control.js';
 import { contractService, type ContractStatus } from '../services/contract-service.js';
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
@@ -93,9 +94,19 @@ router.post(
 router.get(
   '/:contractId',
   authenticateToken,
-  requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId);
+
+    // Validate contractId is a valid number
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check: verify user can access this contract
+    if (!(await canAccessContract(req, contractId))) {
+      return errorResponse(res, 'Contract not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const contract = await contractService.getContract(contractId);
     sendSuccess(res, { contract });
   })
