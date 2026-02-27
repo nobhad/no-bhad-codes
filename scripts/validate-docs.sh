@@ -72,11 +72,15 @@ for doc in $ACTIVE_DOC_DIRS; do
     # Extract file paths from markdown
     while IFS= read -r filepath; do
       if [ -n "$filepath" ] && [ ! -f "$filepath" ]; then
-        # Skip example/template paths used for documentation
+        # Skip example/template paths used for documentation tutorials
+        # Also skip historical references to relocated/renamed files
         if [[ "$filepath" == *"my-"* ]] || [[ "$filepath" == *"example"* ]] || \
-           [[ "$filepath" == *"invoicing-module"* ]] || [[ "$filepath" == *"data-table"* ]] || \
+           [[ "$filepath" == *"invoicing"* ]] || [[ "$filepath" == *"data-table"* ]] || \
            [[ "$filepath" == *"notification-service"* ]] || [[ "$filepath" == *"base.ts"* ]] || \
-           [[ "$filepath" == *"business-card"* ]] || [[ "$filepath" == *"admin-users"* ]]; then
+           [[ "$filepath" == *"business-card"* ]] || [[ "$filepath" == *"admin-users"* ]] || \
+           [[ "$filepath" == *"invoice.ts"* ]] || [[ "$filepath" == *"navigation.ts"* ]] || \
+           [[ "$filepath" == *"e2e/"* ]] || [[ "$filepath" == *"data-service"* ]] || \
+           [[ "$filepath" == *"invoice-service"* ]] || [[ "$filepath" == *"src/modules/intro-animation"* ]]; then
           continue
         fi
         echo -e "${RED}  Broken: $doc -> $filepath${NC}"

@@ -397,7 +397,7 @@ POST /api/email-templates/:id/test
 | `server/routes/approvals.ts` | Approval endpoints |
 | `server/routes/triggers.ts` | Trigger endpoints |
 | `server/routes/email-templates.ts` | Email template endpoints |
-| `server/services/trigger-service.ts` | Trigger execution |
+| `server/services/workflow-trigger-service.ts` | Trigger execution |
 | `server/services/email-template-service.ts` | Email template service |
 | `server/database/migrations/064_email_templates.sql` | Email templates schema |
 | `src/styles/admin/workflows.css` | Workflow styles (includes email templates) |

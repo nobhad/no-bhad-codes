@@ -196,7 +196,7 @@ Two-column layout redesigned for better UX:
 |------|---------|
 | `src/features/admin/modules/admin-knowledge-base.ts` | Admin module |
 | `src/features/client/modules/portal-help.ts` | Client module |
-| `server/routes/kb.ts` | API endpoints |
+| `server/routes/knowledge-base.ts` | API endpoints |
 | `src/components/portal-modal.ts` | Modal component |
 
 ## Change Log

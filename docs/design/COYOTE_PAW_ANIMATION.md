@@ -170,7 +170,7 @@ const translateY = actualCardRect.top - (SVG_CARD_Y * scale);
 
 ## Implementation File
 
-`src/modules/intro-animation.ts`
+`src/modules/animation/intro-animation.ts`
 
 The implementation file contains extensive documentation including:
 

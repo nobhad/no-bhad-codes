@@ -22,7 +22,7 @@ try {
 ## Implementation
 
 - Backend: Use the existing logger service.
-- Frontend: Use `src/services/logger.ts` utility.
+- Frontend: Use `src/utils/logger.ts` utility or `server/services/logger.ts` for backend.
 - Replace direct `console.error` and silent catches with logger calls.
 
 ## Migration Checklist

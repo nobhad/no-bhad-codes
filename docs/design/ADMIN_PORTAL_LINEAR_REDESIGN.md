@@ -206,9 +206,7 @@ All tables (Clients, Projects, Invoices, Leads, Contracts):
 | `src/styles/shared/portal-layout.css` | Global header shadow |
 | `src/styles/client-portal/layout.css` | Page header shadow |
 | `src/styles/admin/index.css` | Layout imports |
-| `src/styles/admin/keyboard-help.css` | Help panel styles |
-| `src/styles/admin/sidebar-refinements.css` | Mobile drawer, tooltips |
-| `src/styles/admin/page-header-refinements.css` | Header tabs |
+| `src/styles/admin/index.css` | Admin styles (keyboard help, sidebar, header consolidated) |
 | `src/styles/admin/overview-layout.css` | Dashboard grid |
 
 ### TypeScript Files
@@ -216,7 +214,7 @@ All tables (Clients, Projects, Invoices, Leads, Contracts):
 | File | Changes |
 |------|---------|
 | `src/features/admin/admin-dashboard.ts` | Keyboard nav, mobile drawer, help panel init |
-| `src/modules/ui/keyboard-navigation.ts` | J/K navigation |
+| `src/features/admin/admin-dashboard.ts` | Keyboard navigation (J/K) integrated |
 | `src/components/command-palette.ts` | ⌘K palette |
 | `src/components/keyboard-help.ts` | `?` shortcut help panel |
 

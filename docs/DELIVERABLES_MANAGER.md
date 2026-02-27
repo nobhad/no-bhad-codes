@@ -349,5 +349,5 @@ All new modules pass TypeScript strict mode:
 
 - **Component API:** See JSDoc comments in module files
 - **Design System:** [docs/design/DESIGN_SYSTEM.md](./design/DESIGN_SYSTEM.md)
-- **Backend API:** See test file at [tests/server/deliverables.test.ts](../tests/server/deliverables.test.ts) (22 tests)
+- **Backend API:** See test file at [tests/unit/server/deliverables.test.ts](../tests/unit/server/deliverables.test.ts) (22 tests)
 - **Archive:** Changes from Phase 2 and earlier work in [archive/](./archive/)

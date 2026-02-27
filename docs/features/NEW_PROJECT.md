@@ -521,7 +521,7 @@ await emailService.sendAdminNotification({
 |`client/portal.html`|New Project form HTML (tab-new-project section)|
 |`src/features/client/client-portal.ts`|submitProjectRequest() method|
 |`src/features/client/modules/portal-projects.ts`|Project loading and display (~500 lines)|
-|`src/styles/client-portal/views.css`|Form styling|
+|`src/styles/shared/portal-forms.css`|Form styling|
 |`server/routes/projects.ts`|Project request API|
 |`server/services/email-service.ts`|Email notifications|
 

@@ -219,7 +219,7 @@ CREATE TABLE deliverable_approvals (
 - Version history panel
 - Design review modal integration
 
-### Design Review Modal (`src/features/admin/modules/design-review.ts`)
+### Design Review Modal (`src/react/features/admin/design-review/DesignReviewPanel.tsx`)
 
 - Annotation canvas overlay
 - Tool palette (draw, highlight, text)
@@ -227,7 +227,7 @@ CREATE TABLE deliverable_approvals (
 - Per-element approval checkboxes
 - PDF export button
 
-### Client Portal (`src/features/client/modules/portal-deliverables.ts`)
+### Client Portal (Deliverables View)
 
 - Deliverable gallery view
 - Annotation tools (simplified)
@@ -284,10 +284,10 @@ pending → reviewing → approved
 | `server/services/deliverable-service.ts` | Backend service |
 | `server/routes/deliverables.ts` | API routes |
 | `src/features/admin/modules/admin-deliverables.ts` | Admin UI |
-| `src/features/admin/modules/design-review.ts` | Review modal |
-| `src/features/client/modules/portal-deliverables.ts` | Client UI |
-| `src/styles/admin/deliverables.css` | Admin styling |
-| `src/styles/client-portal/deliverables.css` | Client styling |
+| `src/features/admin/modules/admin-design-review.ts` | Review modal |
+| `src/features/client/modules/portal-files.ts` | Client files UI (includes deliverables) |
+| `src/styles/admin/index.css` | Admin styling (includes deliverables) |
+| `src/styles/client-portal/documents.css` | Client styling (includes deliverables) |
 
 ---
 

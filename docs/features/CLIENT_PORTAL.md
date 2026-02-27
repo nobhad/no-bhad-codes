@@ -600,7 +600,7 @@ private updateMobileHeaderTitle(tabName: string): void {
 
 ### Mobile CSS
 
-Key mobile styles in `src/styles/pages/client-portal.css`:
+Key mobile styles in `src/styles/client-portal/layout.css`:
 
 ```css
 @media (max-width: 768px) {
