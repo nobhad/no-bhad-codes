@@ -1,0 +1,2 @@
+# Shadcn/ui components will be installed here via:
+# npx shadcn@latest add button badge dialog dropdown-menu table input select tabs
