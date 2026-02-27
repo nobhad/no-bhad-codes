@@ -16,7 +16,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDisplayValue, formatDate, formatDateTime } from '../../../utils/format-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, conditionalAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, conditionalAction } from '../../../factories';
 import { createTableDropdown, LEAD_STATUS_OPTIONS } from '../../../utils/table-dropdown';
 import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { LEADS_FILTER_CONFIG } from '../../../utils/table-filter';
@@ -132,6 +132,9 @@ const PIPELINE_STAGES = [
 // BULK ACTIONS
 // ============================================================================
 
+// Module reference holder - assigned after module creation to avoid forward references
+let _leadsModuleRef: ReturnType<typeof createTableModule<Lead, LeadsStats>> | null = null;
+
 const LEADS_BULK_CONFIG: BulkActionConfig = {
   tableId: 'leads',
   actions: [
@@ -142,8 +145,8 @@ const LEADS_BULK_CONFIG: BulkActionConfig = {
       variant: 'default',
       dropdownOptions: LEAD_STATUS_OPTIONS,
       handler: async (ids: number[], selectedStatus?: string) => {
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        const ctx = leadsModule.getContext();
+        if (!_leadsModuleRef) return;
+        const ctx = _leadsModuleRef.getContext();
         if (!selectedStatus || !ctx) return;
         try {
           const response = await apiPost('/api/admin/leads/bulk/status', {
@@ -153,8 +156,7 @@ const LEADS_BULK_CONFIG: BulkActionConfig = {
           if (response.ok) {
             ctx.showNotification(`Updated ${ids.length} lead${ids.length > 1 ? 's' : ''}`, 'success');
             resetSelection('leads');
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            await leadsModule.load(ctx);
+            await _leadsModuleRef.load(ctx);
           } else {
             ctx.showNotification('Failed to update leads', 'error');
           }
@@ -460,6 +462,9 @@ const leadsModule = createTableModule<Lead, LeadsStats>({
     setupBulkSelectionHandlers({ tableId: 'leads', actions: [] }, allRowIds);
   }
 });
+
+// Initialize module reference for bulk actions
+_leadsModuleRef = leadsModule;
 
 // ============================================================================
 // VIEW TOGGLE SETUP

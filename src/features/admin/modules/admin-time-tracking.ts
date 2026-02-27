@@ -14,7 +14,7 @@ import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { createBarChart } from '../../../components/chart-simple';
 import { exportToCsv, TIME_ENTRIES_EXPORT_CONFIG } from '../../../utils/table-export';
 import { showToast } from '../../../utils/toast-notifications';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { createLogger } from '../../../utils/logger';
 

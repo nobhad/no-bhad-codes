@@ -11,7 +11,7 @@
  */
 
 import { apiPost, apiDelete } from '../../../utils/api-client';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { confirmDialog } from '../../../utils/confirm-dialog';
 import { showToast } from '../../../utils/toast-notifications';
 import { formatDate } from '../../../utils/format-utils';

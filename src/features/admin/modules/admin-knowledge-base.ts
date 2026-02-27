@@ -17,7 +17,7 @@ import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
-import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { renderActionsCell, createAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
