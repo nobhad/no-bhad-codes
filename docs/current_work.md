@@ -8,6 +8,78 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
+### OpenTelemetry Observability Stack - COMPLETE
+
+Added full OpenTelemetry integration for distributed tracing and metrics collection.
+
+**Completed (Feb 26, 2026):**
+
+- [x] Installed OpenTelemetry packages (@opentelemetry/sdk-node, auto-instrumentations, exporters)
+- [x] Created `server/observability/index.ts` - Main OTEL initialization
+- [x] Created `server/observability/tracing.ts` - Span utilities for database queries
+- [x] Created `server/observability/metrics.ts` - HTTP/DB/memory metrics collectors
+- [x] Created `server/routes/health.ts` - Comprehensive health check endpoints
+- [x] Updated `server/instrument.ts` - Initialize OTEL before Sentry, link trace contexts
+- [x] Updated `server/app.ts` - Mount health routes, initialize metrics
+- [x] Updated `server/config/environment.ts` - Added OTEL_* env vars
+
+**New Health Endpoints:**
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /health` | Full diagnostic (DB, services, memory) |
+| `GET /health/live` | Kubernetes liveness probe |
+| `GET /health/ready` | Kubernetes readiness probe |
+| `GET /health/db` | Database-specific health |
+
+**Environment Variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OTEL_ENABLED` | `true` | Enable/disable OpenTelemetry |
+| `OTEL_SERVICE_NAME` | `client-portal` | Service name for traces |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | - | OTLP collector endpoint |
+| `OTEL_DEBUG` | `false` | Enable console trace output |
+
+---
+
+### Table Module Factory Enhancements - COMPLETE
+
+Enhanced the factory pattern with multi-source data and view toggle support.
+
+**Completed (Feb 26, 2026):**
+
+- [x] Added `fetchData` config option for custom data fetching (multi-endpoint scenarios)
+- [x] Added `viewModes` config for multi-view modules (table, kanban, grid)
+- [x] Added view mode persistence to localStorage
+- [x] Added `getCurrentViewMode()`, `setViewMode()`, `getViewModes()` to public API
+
+**New Factory Config Options:**
+
+```typescript
+interface TableModuleConfig<T, TStats = unknown> {
+  // New: Custom data fetcher for complex scenarios
+  fetchData?: (ctx: AdminDashboardContext) => Promise<{ data: T[]; stats?: TStats }>;
+
+  // New: View modes for multi-view modules
+  viewModes?: ViewModeConfig<T>[];
+  defaultViewMode?: string;
+}
+```
+
+**Module Migration Analysis:**
+
+| Module | Status | Reason |
+|--------|--------|--------|
+| admin-questionnaires | Not migrated | Two separate tables (questionnaires + responses) |
+| admin-time-tracking | Not migrated | Project-scoped with custom summary/chart |
+| admin-deleted-items | Not migrated | Button-based filters integrated with stats |
+| admin-tasks | Not migrated | Dual Kanban/List views with complex state |
+
+The factory is now ready for future modules. Existing modules were analyzed but kept as-is due to their specialized patterns that would require significant restructuring.
+
+---
+
 ### Remove Page-Specific Table CSS - COMPLETE
 
 Removed ALL page-specific table CSS selectors and consolidated to generic utility classes. This ensures ALL tables look identical using ONE source of truth.
@@ -1979,6 +2051,49 @@ Established clear UX pattern for inline editing vs modals.
 - [ ] Update feature docs if API/features changed
 - [ ] Update API_DOCUMENTATION.md if endpoints changed
 - [x] Verify no markdown violations
+
+---
+
+### Documents Tab Unification - COMPLETE
+
+Unified Documents tab to use single container with internal card switching, matching the Knowledge Base (support) tab pattern.
+
+**Completed (Feb 26, 2026):**
+
+- [x] Created `admin-documents.ts` module with unified document tab management
+- [x] Implemented `renderDocumentsTab()` to render all four document cards (Invoices, Contracts, Document Requests, Questionnaires)
+- [x] Implemented `loadDocuments()` to load all four modules in parallel
+- [x] Added `applyDocumentsSection()` to show/hide cards based on selected subtab
+- [x] Setup `documentsSubtabChange` event listener for subtab switching
+- [x] Added `loadDocumentsModule()` to modules index
+- [x] Added `case 'documents':` to loadTabData in admin-dashboard.ts
+- [x] Added documents breadcrumb in updateAdminBreadcrumbs
+- [x] Build and typecheck passing
+
+**Files Created:**
+
+- `src/features/admin/modules/admin-documents.ts` - Unified documents module
+
+**Files Modified:**
+
+- `src/features/admin/modules/index.ts` - Added loadDocumentsModule export
+- `src/features/admin/admin-dashboard.ts` - Added documents case, breadcrumbs, import
+
+**Pattern:**
+
+Documents tab now works exactly like Knowledge Base (support) tab:
+
+1. Single `tab-documents` container rendered by admin-dashboard
+2. All four subtab cards rendered inside container (invoices, contracts, document-requests, questionnaires)
+3. Subtab clicks dispatch `documentsSubtabChange` event (handled by admin-dashboard setupHeaderGroupNavigation)
+4. Event listener calls `applyDocumentsSection()` to show/hide appropriate card
+5. Header subtabs styled with `mode="primary"` but NOT in `ADMIN_TAB_GROUPS` (standalone tab with internal switching)
+
+**Impact:**
+
+- Consistent UX across Knowledge Base and Documents tabs
+- Single container load instead of separate tab switches
+- All document data loads at once for faster subtab switching
 
 ---
 
