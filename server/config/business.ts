@@ -45,19 +45,24 @@ export interface BusinessInfo {
  * All PDF generation, email templates, and client-facing
  * documents should import from here to ensure consistency.
  *
+ * IMPORTANT: BUSINESS_NAME and BUSINESS_EMAIL are required in .env
+ * Other fields are optional but should be set for complete branding.
+ *
  * @example
  * import { BUSINESS_INFO } from '../config/business.js';
  * page.drawText(BUSINESS_INFO.name, { ... });
  */
 export const BUSINESS_INFO: BusinessInfo = {
-  name: process.env.BUSINESS_NAME || 'No Bhad Codes',
-  owner: process.env.BUSINESS_OWNER || 'Noelle Bhaduri',
-  contact: process.env.BUSINESS_CONTACT || 'Noelle Bhaduri',
-  tagline: process.env.BUSINESS_TAGLINE || 'Web Development & Design',
-  email: process.env.BUSINESS_EMAIL || 'nobhaduri@gmail.com',
-  website: process.env.BUSINESS_WEBSITE || 'nobhad.codes',
-  venmoHandle: process.env.VENMO_HANDLE || '@nobhaduri',
-  zelleEmail: process.env.ZELLE_EMAIL || 'nobhaduri@gmail.com',
+  // Required fields (validated in environment.ts)
+  name: process.env.BUSINESS_NAME || '',
+  email: process.env.BUSINESS_EMAIL || '',
+  // Optional fields (fallback to empty or related field)
+  owner: process.env.BUSINESS_OWNER || process.env.BUSINESS_CONTACT || '',
+  contact: process.env.BUSINESS_CONTACT || process.env.BUSINESS_OWNER || '',
+  tagline: process.env.BUSINESS_TAGLINE || '',
+  website: process.env.BUSINESS_WEBSITE || '',
+  venmoHandle: process.env.VENMO_HANDLE || '',
+  zelleEmail: process.env.ZELLE_EMAIL || '',
   paypalEmail: process.env.PAYPAL_EMAIL || ''
 };
 
