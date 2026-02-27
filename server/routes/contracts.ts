@@ -124,6 +124,12 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId);
+
+    // Validate contract ID
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     const contract = await db.get('SELECT project_id FROM contracts WHERE id = ?', [contractId]);
@@ -132,12 +138,13 @@ router.get(
     }
 
     const projectId = getNumber(contract as Record<string, unknown>, 'project_id');
+    // Filter by BOTH project_id AND contract_id for proper isolation
     const logs = await db.all(
       `SELECT id, action, actor_email, actor_ip, actor_user_agent, details, created_at
        FROM contract_signature_log
-       WHERE project_id = ?
+       WHERE project_id = ? AND contract_id = ?
        ORDER BY created_at DESC`,
-      [projectId]
+      [projectId, contractId]
     );
 
     sendSuccess(res, { activity: logs });
@@ -229,8 +236,10 @@ router.post(
     const clientName = getString(p, 'contact_name') || 'there';
     const projectName = getString(p, 'project_name');
 
-    if (!clientEmail) {
-      return errorResponse(res, 'No client email on file', 400, 'VALIDATION_ERROR');
+    // Validate email exists and has valid format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!clientEmail || !emailRegex.test(clientEmail)) {
+      return errorResponse(res, 'No valid client email on file', 400, 'VALIDATION_ERROR');
     }
 
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';

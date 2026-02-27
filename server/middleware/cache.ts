@@ -47,9 +47,9 @@ function generateCacheKey(req: Request, varyBy: string[] = []): string {
 
   const fullKey = `${baseKey}:${query}:${headersString}:${userContext}`;
 
-  // Hash long keys to keep them manageable
+  // Hash long keys to keep them manageable (use SHA-256 instead of MD5)
   if (fullKey.length > 200) {
-    return `route:${crypto.createHash('md5').update(fullKey).digest('hex')}`;
+    return `route:${crypto.createHash('sha256').update(fullKey).digest('hex')}`;
   }
 
   return fullKey;
@@ -333,7 +333,7 @@ export class QueryCache {
   ): string {
     const conditionsStr =
       Object.keys(conditions).length > 0
-        ? crypto.createHash('md5').update(JSON.stringify(conditions)).digest('hex')
+        ? crypto.createHash('sha256').update(JSON.stringify(conditions)).digest('hex')
         : 'all';
 
     return `${table}:${conditionsStr}${suffix ? `:${suffix}` : ''}`;

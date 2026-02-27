@@ -300,6 +300,11 @@ app.use(
       if (req.path.includes('/uploads') && req.method === 'POST') return true;
       // Skip CSRF for intake form (public endpoint)
       if (req.path.includes('/intake')) return true;
+      // Skip CSRF for auth endpoints (login, register, password reset)
+      // These endpoints have their own rate limiting and validation
+      if (req.path.includes('/auth/')) return true;
+      // Skip CSRF for public proposal signature endpoints
+      if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//)) return true;
       return false;
     },
   })

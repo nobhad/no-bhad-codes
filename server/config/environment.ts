@@ -11,6 +11,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -371,9 +372,10 @@ function validateConfig(): void {
  */
 function generateDerivedConfig(): void {
   // Auto-generate secrets in development if not provided
+  // Use crypto.randomBytes for cryptographically secure random generation
   if ((config as any).NODE_ENV === 'development') {
     if (!(config as any).JWT_SECRET || (config as any).JWT_SECRET.includes('change-this')) {
-      (config as any).JWT_SECRET = `dev-jwt-secret-${Math.random().toString(36).substring(7)}`;
+      (config as any).JWT_SECRET = `dev-jwt-secret-${crypto.randomBytes(32).toString('hex')}`;
       console.warn('⚠️  Using auto-generated JWT_SECRET for development');
     }
 
@@ -382,12 +384,12 @@ function generateDerivedConfig(): void {
       (config as any).REFRESH_TOKEN_SECRET.includes('change-this')
     ) {
       (config as any).REFRESH_TOKEN_SECRET =
-        `dev-refresh-secret-${Math.random().toString(36).substring(7)}`;
+        `dev-refresh-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
 
     if (!(config as any).SESSION_SECRET || (config as any).SESSION_SECRET.includes('change-this')) {
       (config as any).SESSION_SECRET =
-        `dev-session-secret-${Math.random().toString(36).substring(7)}`;
+        `dev-session-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
   }
 

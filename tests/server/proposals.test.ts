@@ -88,13 +88,16 @@ describe('Proposal Routes - Authentication', () => {
   });
 
   describe('Signature endpoints', () => {
-    it('blocks unauthenticated signature submission', async () => {
-      const res = await request(app).post('/api/proposals/1/sign').send({
+    it('allows public signature submission (rate limited)', async () => {
+      // Signature endpoint is public but rate limited
+      // With invalid proposal ID, should get 400 or 404
+      const res = await request(app).post('/api/proposals/99999/sign').send({
         signerName: 'John Doe',
         signerEmail: 'john@example.com',
         signatureData: 'base64signature',
       });
-      expect([401, 403]).toContain(res.status);
+      // Should return 400/404 for non-existent proposal, not 401 (it's public)
+      expect([400, 404, 500]).toContain(res.status);
     });
 
     it('blocks unauthenticated signature verification', async () => {

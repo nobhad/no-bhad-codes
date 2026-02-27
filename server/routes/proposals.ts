@@ -10,6 +10,14 @@ import { logger } from '../services/logger.js';
  */
 
 import express, { Request, Response } from 'express';
+import { createRateLimiter } from '../middleware/rate-limiter.js';
+
+// Rate limiter for public signature endpoints (strict: 10 requests per 15 min)
+const signatureRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 10,
+  blockDurationMs: 60 * 60 * 1000, // 1 hour block
+});
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const FEATURE_SELECTION_COLUMNS = `
@@ -404,6 +412,11 @@ router.delete(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const deletedBy = req.user?.email || 'admin';
 
     const result = await softDeleteService.softDeleteProposal(proposalId, deletedBy);
@@ -1715,6 +1728,16 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check for non-admin users
+    if (req.user?.type !== 'admin' && !(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const versions = await proposalService.getVersions(proposalId);
     sendSuccess(res, { versions });
   })
@@ -1727,6 +1750,11 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { notes } = req.body;
     const version = await proposalService.createVersion(proposalId, req.user?.email, notes);
     sendCreated(res, { version }, 'Version created successfully');
@@ -1741,6 +1769,11 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
     const versionId = parseInt(req.params.versionId);
+
+    if (isNaN(proposalId) || proposalId <= 0 || isNaN(versionId) || versionId <= 0) {
+      return errorResponse(res, 'Invalid proposal or version ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.restoreVersion(proposalId, versionId);
     sendSuccess(res, undefined, 'Version restored successfully');
   })
@@ -1794,11 +1827,18 @@ router.post(
   })
 );
 
-// Record a signature
+// Record a signature (public endpoint with rate limiting)
 router.post(
   '/:id/sign',
+  signatureRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    // Validate proposal ID
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const signatureData = req.body;
     if (!signatureData.signerName || !signatureData.signerEmail || !signatureData.signatureData) {
       return errorResponse(
@@ -1808,9 +1848,18 @@ router.post(
         'VALIDATION_ERROR'
       );
     }
-    // Add IP and user agent
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(signatureData.signerEmail)) {
+      return errorResponse(res, 'Invalid email format', 400, 'VALIDATION_ERROR');
+    }
+
+    // Add IP and user agent (truncate user agent to prevent log bloat)
     signatureData.ipAddress = req.ip;
-    signatureData.userAgent = req.get('User-Agent');
+    const userAgent = req.get('User-Agent') || '';
+    signatureData.userAgent = userAgent.substring(0, 500);
+
     const signature = await proposalService.recordSignature(proposalId, signatureData);
     sendCreated(res, { signature }, 'Proposal signed successfully');
   })
@@ -1822,32 +1871,76 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check for non-admin users
+    if (req.user?.type !== 'admin' && !(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const status = await proposalService.getSignatureStatus(proposalId);
     sendSuccess(res, status);
   })
 );
 
-// Get signature by token (public)
+// Get signature by token (public with rate limiting)
 router.get(
   '/sign/:token',
+  signatureRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
     const { token } = req.params;
+
+    // Validate token format (should be a valid hex string)
+    if (!token || !/^[a-f0-9]{32,64}$/i.test(token)) {
+      return errorResponse(res, 'Invalid signature request', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const request = await proposalService.getSignatureRequestByToken(token);
     if (!request) {
       return errorResponse(res, 'Invalid or expired signature request', 404, 'RESOURCE_NOT_FOUND');
     }
+
+    // Check if token has expired
+    if (request.expiresAt && new Date(request.expiresAt) < new Date()) {
+      return errorResponse(res, 'Signature request has expired', 410, 'SIGNATURE_EXPIRED');
+    }
+
+    // Check if already signed or declined
+    if (request.status === 'signed') {
+      return errorResponse(res, 'This proposal has already been signed', 400, 'ALREADY_SIGNED');
+    }
+    if (request.status === 'declined') {
+      return errorResponse(res, 'This signature request was declined', 400, 'SIGNATURE_DECLINED');
+    }
+
     // Mark as viewed
     await proposalService.markSignatureViewed(token);
     sendSuccess(res, { request });
   })
 );
 
-// Decline signature
+// Decline signature (public with rate limiting)
 router.post(
   '/sign/:token/decline',
+  signatureRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
     const { token } = req.params;
+
+    // Validate token format
+    if (!token || !/^[a-f0-9]{32,64}$/i.test(token)) {
+      return errorResponse(res, 'Invalid signature request', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const { reason } = req.body;
+
+    // Validate reason length if provided
+    if (reason && typeof reason === 'string' && reason.length > 2000) {
+      return errorResponse(res, 'Reason is too long (max 2000 characters)', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.declineSignature(token, reason);
     sendSuccess(res, undefined, 'Signature declined');
   })
@@ -1863,6 +1956,16 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check for non-admin users
+    if (req.user?.type !== 'admin' && !(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const includeInternal = req.user!.type === 'admin' && req.query.includeInternal === 'true';
     const comments = await proposalService.getComments(proposalId, includeInternal);
     sendSuccess(res, { comments });
@@ -1875,6 +1978,16 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check for non-admin users
+    if (req.user?.type !== 'admin' && !(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const { content, isInternal, parentCommentId } = req.body;
     if (!content) {
       return errorResponse(res, 'Comment content is required', 400, 'VALIDATION_ERROR');
@@ -1921,12 +2034,21 @@ router.get(
   })
 );
 
-// Track view (public with access token)
+// Track view (public with rate limiting)
 router.post(
   '/:id/track-view',
+  signatureRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
     const proposalId = parseInt(req.params.id);
-    await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));
+
+    // Validate proposal ID
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Truncate user agent to prevent log bloat
+    const userAgent = req.get('User-Agent') || '';
+    await proposalService.trackView(proposalId, req.ip, userAgent.substring(0, 500));
     sendSuccess(res, undefined, 'View tracked');
   })
 );
@@ -1941,6 +2063,16 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
+    // Authorization check for non-admin users
+    if (req.user?.type !== 'admin' && !(await canAccessProposal(req, proposalId))) {
+      return errorResponse(res, 'Proposal not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
     const items = await proposalService.getCustomItems(proposalId);
     sendSuccess(res, { items });
   })
@@ -1953,6 +2085,11 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { description, unitPrice } = req.body;
     if (!description || unitPrice === undefined) {
       return errorResponse(res, 'description and unitPrice are required', 400, 'VALIDATION_ERROR');
@@ -1969,6 +2106,11 @@ router.put(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId);
+
+    if (isNaN(itemId) || itemId <= 0) {
+      return errorResponse(res, 'Invalid item ID', 400, 'VALIDATION_ERROR');
+    }
+
     const item = await proposalService.updateCustomItem(itemId, req.body);
     sendSuccess(res, { item }, 'Custom item updated successfully');
   })
@@ -1981,6 +2123,11 @@ router.delete(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId);
+
+    if (isNaN(itemId) || itemId <= 0) {
+      return errorResponse(res, 'Invalid item ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.deleteCustomItem(itemId);
     sendSuccess(res, undefined, 'Custom item deleted successfully');
   })
@@ -1997,6 +2144,11 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { type, value, reason } = req.body;
     if (!type || value === undefined) {
       return errorResponse(res, 'type and value are required', 400, 'VALIDATION_ERROR');
@@ -2016,6 +2168,11 @@ router.delete(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const proposalId = parseInt(req.params.id);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.removeDiscount(proposalId);
     sendSuccess(res, undefined, 'Discount removed successfully');
   })
@@ -2074,8 +2231,9 @@ router.get(
     if (!proposalId) {
       return errorResponse(res, 'Invalid access token', 404, 'RESOURCE_NOT_FOUND');
     }
-    // Track view
-    await proposalService.trackView(proposalId, req.ip, req.get('User-Agent'));
+    // Track view (truncate User-Agent to prevent log bloat)
+    const userAgent = (req.get('User-Agent') || '').substring(0, 500);
+    await proposalService.trackView(proposalId, req.ip, userAgent);
     sendSuccess(res, { proposalId });
   })
 );
@@ -2097,7 +2255,8 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const daysOld = req.query.daysOld ? parseInt(req.query.daysOld as string) : 7;
+    const daysOldParam = req.query.daysOld ? parseInt(req.query.daysOld as string, 10) : 7;
+    const daysOld = isNaN(daysOldParam) || daysOldParam < 1 || daysOldParam > 365 ? 7 : daysOldParam;
     const proposalIds = await proposalService.getProposalsDueForReminder(daysOld);
     sendSuccess(res, { proposalIds });
   })

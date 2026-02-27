@@ -356,15 +356,25 @@ router.post(
         if (client) {
           const clientEmail = getString(client, 'email');
           const clientContactName = getString(client, 'contact_name');
-          await emailService.sendMessageNotification(clientEmail, {
-            recipientName: clientContactName || 'Client',
-            senderName: sender_name,
-            subject: thread.subject,
-            message: message.trim(),
-            threadId: threadId,
-            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?thread=${threadId}`,
-            hasAttachments: attachments && attachments.length > 0,
-          });
+
+          // Validate email format before sending
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!clientEmail || !emailRegex.test(clientEmail)) {
+            logger.warn('Invalid client email, skipping notification', {
+              category: 'email',
+              metadata: { clientId, threadId },
+            });
+          } else {
+            await emailService.sendMessageNotification(clientEmail, {
+              recipientName: clientContactName || 'Client',
+              senderName: sender_name,
+              subject: thread.subject,
+              message: message.trim(),
+              threadId: threadId,
+              portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?thread=${threadId}`,
+              hasAttachments: attachments && attachments.length > 0,
+            });
+          }
         }
       } else {
         // Notify admin
@@ -716,7 +726,9 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userEmail = req.user!.email;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const limitParam = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    // Validate and bound limit
+    const limit = isNaN(limitParam) || limitParam < 1 ? 50 : Math.min(limitParam, 500);
     const mentions = await messageService.getMyMentions(userEmail, limit);
     sendSuccess(res, { mentions });
   })
@@ -1246,8 +1258,38 @@ router.get(
     const { filename } = req.params;
 
     // Security: Validate filename to prevent path traversal
-    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    // Check for encoded path traversal attempts as well
+    const decodedFilename = decodeURIComponent(filename);
+    if (
+      filename.includes('..') ||
+      filename.includes('/') ||
+      filename.includes('\\') ||
+      decodedFilename.includes('..') ||
+      decodedFilename.includes('/') ||
+      decodedFilename.includes('\\')
+    ) {
       return errorResponse(res, 'Invalid filename', 400, 'INVALID_FILENAME');
+    }
+
+    const db = getDatabase();
+
+    // First, find the message containing this attachment and verify access
+    // Use exact JSON match to prevent substring attacks
+    const messageQuery = req.user!.type === 'admin'
+      ? `SELECT m.id, m.attachments, m.thread_id FROM messages m WHERE m.attachments LIKE ?`
+      : `SELECT m.id, m.attachments, m.thread_id FROM messages m
+         JOIN message_threads mt ON m.thread_id = mt.id
+         WHERE m.attachments LIKE ? AND mt.client_id = ?`;
+
+    const params = req.user!.type === 'admin'
+      ? [`%"filename":"${filename}"%`]
+      : [`%"filename":"${filename}"%`, req.user!.id];
+
+    const message = await db.get(messageQuery, params);
+
+    if (!message) {
+      // Return 404 for both "not found" and "no access" to prevent enumeration
+      return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
     }
 
     const filePath = path.join(getUploadsSubdir(UPLOAD_DIRS.MESSAGES), filename);
@@ -1260,14 +1302,8 @@ router.get(
       return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
     }
 
-    // Get the original filename from the database if possible
-    const db = getDatabase();
-    const message = await db.get('SELECT attachments FROM messages WHERE attachments LIKE ?', [
-      `%${filename}%`,
-    ]);
-
     let originalName = filename;
-    if (message && message.attachments) {
+    if (message.attachments) {
       try {
         const attachments = JSON.parse(message.attachments as string);
         const attachment = attachments.find((a: { filename: string }) => a.filename === filename);

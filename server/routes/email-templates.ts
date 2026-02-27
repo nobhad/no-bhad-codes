@@ -388,7 +388,13 @@ router.get(
     const templateId = req.query.templateId ? parseInt(req.query.templateId as string) : undefined;
     const recipientEmail = req.query.recipientEmail as string | undefined;
     const status = req.query.status as string | undefined;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+    const limitParam = req.query.limit ? parseInt(req.query.limit as string) : 100;
+
+    // Validate numeric parameters
+    if (templateId !== undefined && (isNaN(templateId) || templateId <= 0)) {
+      return errorResponse(res, 'Invalid templateId', 400, 'VALIDATION_ERROR');
+    }
+    const limit = isNaN(limitParam) || limitParam < 1 ? 100 : Math.min(limitParam, 1000);
 
     const logs = await emailTemplateService.getSendLogs({
       templateId,

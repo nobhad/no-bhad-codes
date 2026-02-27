@@ -462,11 +462,16 @@ class KnowledgeBaseService {
       ]
     );
 
-    // Update article counts
-    const countField = data.isHelpful ? 'helpful_count' : 'not_helpful_count';
-    await db.run(`UPDATE kb_articles SET ${countField} = ${countField} + 1 WHERE id = ?`, [
-      data.articleId,
-    ]);
+    // Update article counts - use parameterized increment to avoid SQL injection
+    if (data.isHelpful) {
+      await db.run('UPDATE kb_articles SET helpful_count = helpful_count + 1 WHERE id = ?', [
+        data.articleId,
+      ]);
+    } else {
+      await db.run('UPDATE kb_articles SET not_helpful_count = not_helpful_count + 1 WHERE id = ?', [
+        data.articleId,
+      ]);
+    }
   }
 
   // =====================================================
