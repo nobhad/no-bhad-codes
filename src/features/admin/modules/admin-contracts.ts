@@ -89,18 +89,8 @@ async function loadReactContractsTable(): Promise<boolean> {
   }
 }
 
-/** Feature flag for React contracts table */
+/** Check if React contracts table should be used - always true */
 function shouldUseReactContractsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_contracts') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_contracts_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 

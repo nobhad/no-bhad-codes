@@ -83,18 +83,8 @@ async function loadReactContactsTable(): Promise<boolean> {
   }
 }
 
-/** Feature flag for React contacts table */
+/** Check if React contacts table should be used - always true */
 function shouldUseReactContactsTable(): boolean {
-  // Check URL parameter for vanilla fallback
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('vanilla_contacts') === 'true') return false;
-
-  // Check feature flag in localStorage
-  const flag = localStorage.getItem('feature_react_contacts_table');
-  if (flag === 'false') return false;
-  if (flag === 'true') return true;
-
-  // Default: enabled (React implementation)
   return true;
 }
 
