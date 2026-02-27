@@ -8,6 +8,104 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
+### CSS Architecture Refactor & Typography System - IN PROGRESS
+
+**Started:** February 27, 2026
+
+#### Phase 1: CSS Layer Architecture - COMPLETE
+
+Created single source of truth for cascade layer ordering:
+
+- [x] Created `src/styles/core/layer-order.css` - Single layer order declaration
+- [x] Created `src/styles/states/` - Visibility and interactive state classes
+- [x] Created `src/styles/layouts/` - Grid and flex layout patterns
+- [x] Created `src/styles/responsive/breakpoints.css` - Media query overrides
+- [x] Updated all bundles (foundation, admin, portal, site) to use layer-order.css
+- [x] Updated main.css to use layer-order.css
+- [x] Reduced !important declarations from 215 to 169 (46 removed)
+
+**Layer Order (Single Source of Truth):**
+
+```css
+@layer reset, tokens, base, components, layouts, pages, states, responsive, utilities;
+```
+
+#### Phase 2: Dual-Font Typography System - COMPLETE
+
+Implemented DISCOTHÈQUE-inspired dual-font system for visual hierarchy:
+
+- [x] Downloaded and self-hosted Inconsolata variable font (17.7KB)
+- [x] Downloaded and self-hosted Cormorant Garamond (105KB)
+- [x] Updated `src/styles/base/fonts.css` - Removed Google Fonts, added self-hosted @font-face
+- [x] Updated `src/styles/base/typography.css` - Serif headings with -0.09em letter-spacing
+- [x] Updated `src/design-system/tokens/typography.css` - Updated font family variables
+
+**Typography System:**
+
+| Element | Font Family | Purpose |
+|---------|-------------|---------|
+| Headings (h1-h6) | Cormorant Garamond | Classic serif for visual hierarchy |
+| Body/UI | Inconsolata | Monospace for brutalist aesthetic |
+| Code | Inconsolata | Consistent monospace |
+
+**Files Modified:**
+
+- `src/styles/core/layer-order.css` (NEW)
+- `src/styles/states/visibility.css` (NEW)
+- `src/styles/states/interactive.css` (NEW)
+- `src/styles/states/index.css` (NEW)
+- `src/styles/layouts/grid-systems.css` (NEW)
+- `src/styles/layouts/flex-patterns.css` (NEW)
+- `src/styles/layouts/index.css` (NEW)
+- `src/styles/responsive/breakpoints.css` (NEW)
+- `src/styles/bundles/foundation.css`
+- `src/styles/bundles/admin.css`
+- `src/styles/bundles/portal.css`
+- `src/styles/bundles/site.css`
+- `src/styles/main.css`
+- `src/styles/base/fonts.css`
+- `src/styles/base/typography.css`
+- `src/design-system/tokens/typography.css`
+- `public/fonts/Inconsolata/Inconsolata-Variable.woff2` (NEW)
+- `public/fonts/CormorantGaramond/CormorantGaramond-Regular.woff2` (NEW)
+
+---
+
+### DISCOTHÈQUE Design System Update - COMPLETE
+
+Applied DISCOTHÈQUE-inspired styling at root level - high contrast black/white palette with Inconsolata monospace typography.
+
+**Completed (Feb 26, 2026):**
+
+- [x] Updated `src/design-system/tokens/colors.css` - Pure black (#000000) backgrounds, white (#ffffff) text
+- [x] Updated `src/design-system/tokens/typography.css` - Inconsolata as primary font family
+- [x] Updated `src/design-system/tokens/buttons.css` - 2px white borders, inverted hover
+- [x] Updated `src/styles/base/typography.css` - Tight letter-spacing (-0.09em) for headings
+- [x] Updated `src/styles/variables.css` - Black background, white text body defaults
+- [x] Removed text shadows and border-radius from typography elements
+
+**Design System Changes:**
+
+| Element | Before | After |
+|---------|--------|-------|
+| Primary Background | #fafafa (light gray) | #000000 (pure black) |
+| Primary Text | #171717 (dark gray) | #ffffff (white) |
+| Primary Font | System UI sans-serif | Inconsolata monospace |
+| Heading Letter Spacing | 0 to 0.1em | -0.09em (tight) |
+| Button Border | 1px | 2px |
+| Border Radius | Various | 0 (sharp corners) |
+| Text Shadows | Present | Removed |
+
+**DISCOTHÈQUE Aesthetic Principles:**
+
+- High contrast black/white palette
+- Inconsolata monospace typography
+- Sharp corners (0 border radius)
+- Minimal, brutalist design
+- Inverted hover states (white bg, black text)
+
+---
+
 ### UI Factory Pattern System - COMPLETE
 
 Implemented a comprehensive factory system for UI components (icons, buttons, badges, states) across vanilla TypeScript and React.
