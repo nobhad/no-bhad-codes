@@ -36,6 +36,27 @@ import { userService } from '../services/user-service.js';
 import { errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const DUPLICATE_DETECTION_LOG_COLUMNS = `
+  id, scan_type, entity_type, source_id, source_type, duplicates_found,
+  matches_json, threshold_used, scanned_by, scan_duration_ms, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const DUPLICATE_RESOLUTION_LOG_COLUMNS = `
+  id, detection_log_id, primary_record_id, primary_record_type, merged_record_id,
+  merged_record_type, resolution_type, fields_merged, resolved_by, notes, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const DATA_QUALITY_METRICS_COLUMNS = `
+  id, metric_date, entity_type, total_records, valid_emails, valid_phones,
+  complete_records, duplicate_count, quality_score, details_json, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const VALIDATION_ERROR_LOG_COLUMNS = `
+  id, entity_type, entity_id, field_name, field_value, error_type,
+  error_message, was_sanitized, sanitized_value, source_ip, user_agent, created_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 // Apply authentication to all data-quality routes
@@ -209,8 +230,8 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
     const db = getDatabase();
 
     const [detectionLogs, resolutionLogs] = await Promise.all([
-      db.all('SELECT * FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100'),
-      db.all('SELECT * FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100'),
+      db.all(`SELECT ${DUPLICATE_DETECTION_LOG_COLUMNS} FROM duplicate_detection_log ORDER BY created_at DESC LIMIT 100`),
+      db.all(`SELECT ${DUPLICATE_RESOLUTION_LOG_COLUMNS} FROM duplicate_resolution_log ORDER BY created_at DESC LIMIT 100`),
     ]);
 
     sendSuccess(res, {
@@ -475,7 +496,7 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
     const db = getDatabase();
 
     const history = await db.all(
-      `SELECT * FROM data_quality_metrics
+      `SELECT ${DATA_QUALITY_METRICS_COLUMNS} FROM data_quality_metrics
        WHERE metric_date > date('now', '-' || ? || ' days')
        ORDER BY metric_date DESC, entity_type
        LIMIT 1000`,
@@ -585,7 +606,7 @@ router.get('/validation-errors', async (req: Request, res: Response) => {
     const errorTypeParam = req.query.errorType;
     const db = getDatabase();
 
-    let query = 'SELECT * FROM validation_error_log';
+    let query = `SELECT ${VALIDATION_ERROR_LOG_COLUMNS} FROM validation_error_log`;
     const params: (string | number)[] = [];
 
     if (errorTypeParam && typeof errorTypeParam === 'string') {

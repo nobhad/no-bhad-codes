@@ -89,6 +89,40 @@ type FileCategory =
   | 'invoice';
 
 // ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const FILE_COLUMNS = `
+  id, project_id, filename, original_filename, file_path, file_size, mime_type,
+  file_type, description, uploaded_by, created_at, folder_id, version, is_archived,
+  archived_at, archived_by, expires_at, access_count, last_accessed_at,
+  download_count, checksum, is_locked, locked_by, locked_at, category
+`.replace(/\s+/g, ' ').trim();
+
+const FILE_VERSION_COLUMNS = `
+  id, file_id, version_number, filename, original_filename, file_path, file_size,
+  mime_type, uploaded_by, comment, is_current, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const FILE_ACCESS_LOG_COLUMNS = `
+  id, file_id, user_email, user_type, access_type, ip_address, user_agent, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const FILE_COMMENT_COLUMNS = `
+  id, file_id, author_email, author_type, author_name, content, is_internal,
+  parent_comment_id, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DELIVERABLE_WORKFLOW_COLUMNS = `
+  id, file_id, project_id, status, version, submitted_at, submitted_by, reviewed_at,
+  reviewed_by, approved_at, approved_by, rejection_reason, notes, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const DELIVERABLE_REVIEW_COMMENT_COLUMNS = `
+  id, workflow_id, author_email, author_name, author_type, comment, comment_type, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// ============================================
 // File Service Class
 // ============================================
 
@@ -104,7 +138,7 @@ class FileService {
     fileId: number
   ): Promise<{ id: number; project_id: number; [key: string]: unknown } | null> {
     const db = getDatabase();
-    const file = await db.get('SELECT * FROM files WHERE id = ?', [fileId]);
+    const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ?`, [fileId]);
     return file as { id: number; project_id: number; [key: string]: unknown } | null;
   }
 
@@ -189,7 +223,7 @@ class FileService {
   async getVersions(fileId: number): Promise<FileVersion[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT * FROM file_versions
+      `SELECT ${FILE_VERSION_COLUMNS} FROM file_versions
        WHERE file_id = ?
        ORDER BY version_number DESC`,
       [fileId]
@@ -202,7 +236,7 @@ class FileService {
    */
   async getVersion(versionId: number): Promise<FileVersion> {
     const db = getDatabase();
-    const version = await db.get('SELECT * FROM file_versions WHERE id = ?', [versionId]);
+    const version = await db.get(`SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ?`, [versionId]);
     if (!version) {
       throw new Error('Version not found');
     }
@@ -215,7 +249,7 @@ class FileService {
   async restoreVersion(fileId: number, versionId: number): Promise<FileVersion> {
     const db = getDatabase();
 
-    const version = await db.get('SELECT * FROM file_versions WHERE id = ? AND file_id = ?', [
+    const version = await db.get(`SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ? AND file_id = ?`, [
       versionId,
       fileId,
     ]);
@@ -528,7 +562,7 @@ class FileService {
   async getAccessLog(fileId: number, limit: number = 50): Promise<FileAccessLog[]> {
     const db = getDatabase();
     const rows = await db.all(
-      `SELECT * FROM file_access_log
+      `SELECT ${FILE_ACCESS_LOG_COLUMNS} FROM file_access_log
        WHERE file_id = ?
        ORDER BY created_at DESC
        LIMIT ?`,
@@ -611,7 +645,7 @@ class FileService {
     const db = getDatabase();
 
     let query = `
-      SELECT * FROM file_comments
+      SELECT ${FILE_COMMENT_COLUMNS} FROM file_comments
       WHERE file_id = ? AND parent_comment_id IS NULL
     `;
     if (!includeInternal) {
@@ -624,7 +658,7 @@ class FileService {
     // Get replies for each comment
     for (const comment of comments) {
       let replyQuery = `
-        SELECT * FROM file_comments
+        SELECT ${FILE_COMMENT_COLUMNS} FROM file_comments
         WHERE parent_comment_id = ?
       `;
       if (!includeInternal) {
@@ -643,7 +677,7 @@ class FileService {
    */
   async getComment(commentId: number): Promise<FileComment> {
     const db = getDatabase();
-    const comment = await db.get('SELECT * FROM file_comments WHERE id = ?', [commentId]);
+    const comment = await db.get(`SELECT ${FILE_COMMENT_COLUMNS} FROM file_comments WHERE id = ?`, [commentId]);
     if (!comment) {
       throw new Error('Comment not found');
     }
@@ -690,7 +724,7 @@ class FileService {
   async getArchivedFiles(projectId: number): Promise<any[]> {
     const db = getDatabase();
     return db.all(
-      'SELECT * FROM files WHERE project_id = ? AND is_archived = TRUE ORDER BY archived_at DESC',
+      `SELECT ${FILE_COLUMNS} FROM files WHERE project_id = ? AND is_archived = TRUE ORDER BY archived_at DESC`,
       [projectId]
     );
   }
@@ -789,7 +823,7 @@ class FileService {
   async getFilesByCategory(projectId: number, category: FileCategory): Promise<any[]> {
     const db = getDatabase();
     return db.all(
-      'SELECT * FROM files WHERE project_id = ? AND category = ? AND is_archived = FALSE ORDER BY created_at DESC',
+      `SELECT ${FILE_COLUMNS} FROM files WHERE project_id = ? AND category = ? AND is_archived = FALSE ORDER BY created_at DESC`,
       [projectId, category]
     );
   }
@@ -915,7 +949,7 @@ class FileService {
     const db = getDatabase();
 
     // Check if workflow exists
-    let workflow = await db.get('SELECT * FROM deliverable_workflows WHERE file_id = ?', [fileId]);
+    let workflow = await db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`, [fileId]);
 
     if (!workflow) {
       // Create new workflow
@@ -923,7 +957,7 @@ class FileService {
         "INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, 'draft')",
         [fileId, projectId]
       );
-      workflow = await db.get('SELECT * FROM deliverable_workflows WHERE id = ?', [result.lastID]);
+      workflow = await db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE id = ?`, [result.lastID]);
     }
 
     return workflow;
@@ -934,7 +968,7 @@ class FileService {
    */
   async getDeliverableWorkflow(fileId: number): Promise<any> {
     const db = getDatabase();
-    return db.get('SELECT * FROM deliverable_workflows WHERE file_id = ?', [fileId]);
+    return db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`, [fileId]);
   }
 
   /**
@@ -1158,7 +1192,7 @@ class FileService {
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [workflowId, authorEmail, authorUserId, authorName || null, authorType, comment, commentType]
     );
-    return db.get('SELECT * FROM deliverable_review_comments WHERE id = ?', [result.lastID]);
+    return db.get(`SELECT ${DELIVERABLE_REVIEW_COMMENT_COLUMNS} FROM deliverable_review_comments WHERE id = ?`, [result.lastID]);
   }
 
   /**

@@ -41,6 +41,14 @@ export interface CreateUserData {
 }
 
 // =====================================================
+// COLUMN CONSTANTS - Explicit column lists for SELECT queries
+// =====================================================
+
+const USER_COLUMNS = `
+  id, email, display_name, role, avatar_url, is_active, last_active_at, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // SERVICE CLASS
 // =====================================================
 
@@ -113,7 +121,7 @@ class UserService {
    */
   async getUserById(id: number): Promise<User | null> {
     const db = await getDatabase();
-    const user = await db.get('SELECT * FROM users WHERE id = ?', [id]);
+    const user = await db.get(`SELECT ${USER_COLUMNS} FROM users WHERE id = ?`, [id]);
     return user ? this.mapUser(user) : null;
   }
 
@@ -122,7 +130,7 @@ class UserService {
    */
   async getUserByEmail(email: string): Promise<User | null> {
     const db = await getDatabase();
-    const user = await db.get('SELECT * FROM users WHERE LOWER(email) = ?', [
+    const user = await db.get(`SELECT ${USER_COLUMNS} FROM users WHERE LOWER(email) = ?`, [
       email.toLowerCase().trim(),
     ]);
     return user ? this.mapUser(user) : null;
@@ -133,7 +141,7 @@ class UserService {
    */
   async getActiveUsers(): Promise<User[]> {
     const db = await getDatabase();
-    const users = await db.all('SELECT * FROM users WHERE is_active = 1 ORDER BY display_name');
+    const users = await db.all(`SELECT ${USER_COLUMNS} FROM users WHERE is_active = 1 ORDER BY display_name`);
     return users.map((u: any) => this.mapUser(u));
   }
 
@@ -142,7 +150,7 @@ class UserService {
    */
   async getAllUsers(): Promise<User[]> {
     const db = await getDatabase();
-    const users = await db.all('SELECT * FROM users ORDER BY display_name');
+    const users = await db.all(`SELECT ${USER_COLUMNS} FROM users ORDER BY display_name`);
     return users.map((u: any) => this.mapUser(u));
   }
 

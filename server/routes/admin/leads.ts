@@ -9,6 +9,12 @@ import { leadService } from '../../services/lead-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const CONTACT_SUBMISSION_COLUMNS = `
+  id, name, email, subject, message, status, ip_address, user_agent,
+  message_id, created_at, updated_at, read_at, replied_at, client_id, converted_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 /**
@@ -231,7 +237,7 @@ router.post(
       const db = getDatabase();
 
       // Get the contact submission
-      const contact = await db.get('SELECT * FROM contact_submissions WHERE id = ?', [id]);
+      const contact = await db.get(`SELECT ${CONTACT_SUBMISSION_COLUMNS} FROM contact_submissions WHERE id = ?`, [id]);
 
       if (!contact) {
         return errorResponse(res, 'Contact submission not found', 404, 'RESOURCE_NOT_FOUND');

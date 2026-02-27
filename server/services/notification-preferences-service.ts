@@ -10,6 +10,30 @@
 import { getDatabase } from '../database/init.js';
 
 // =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const NOTIFICATION_PREFERENCES_COLUMNS = `
+  id, user_id, user_type, email_enabled, email_frequency, digest_time, digest_day,
+  notify_new_message, notify_message_reply, notify_invoice_created, notify_invoice_reminder,
+  notify_invoice_paid, notify_project_update, notify_project_milestone, notify_document_request,
+  notify_document_approved, notify_document_rejected, notify_deliverable_ready,
+  notify_proposal_created, notify_contract_ready, notify_file_uploaded,
+  quiet_hours_enabled, quiet_hours_start, quiet_hours_end,
+  marketing_emails, newsletter_emails, product_updates, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const NOTIFICATION_LOG_COLUMNS = `
+  id, user_id, user_type, notification_type, channel, subject, message_preview,
+  status, error_message, sent_at, delivered_at, read_at, metadata, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const NOTIFICATION_DIGEST_QUEUE_COLUMNS = `
+  id, user_id, user_type, notification_type, title, message, entity_type, entity_id,
+  priority, processed, processed_at, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // TYPES
 // =====================================================
 
@@ -122,7 +146,7 @@ class NotificationPreferencesService {
     const db = await getDatabase();
 
     let prefs = await db.get(
-      'SELECT * FROM notification_preferences WHERE user_id = ? AND user_type = ?',
+      `SELECT ${NOTIFICATION_PREFERENCES_COLUMNS} FROM notification_preferences WHERE user_id = ? AND user_type = ?`,
       [userId, userType]
     );
 
@@ -134,7 +158,7 @@ class NotificationPreferencesService {
       ]);
 
       prefs = await db.get(
-        'SELECT * FROM notification_preferences WHERE user_id = ? AND user_type = ?',
+        `SELECT ${NOTIFICATION_PREFERENCES_COLUMNS} FROM notification_preferences WHERE user_id = ? AND user_type = ?`,
         [userId, userType]
       );
     }
@@ -368,7 +392,7 @@ class NotificationPreferencesService {
     const db = await getDatabase();
 
     const logs = await db.all(
-      `SELECT * FROM notification_log
+      `SELECT ${NOTIFICATION_LOG_COLUMNS} FROM notification_log
        WHERE user_id = ? AND user_type = ?
        ORDER BY created_at DESC
        LIMIT ?`,
@@ -424,7 +448,7 @@ class NotificationPreferencesService {
     const db = await getDatabase();
 
     return db.all(
-      `SELECT * FROM notification_digest_queue
+      `SELECT ${NOTIFICATION_DIGEST_QUEUE_COLUMNS} FROM notification_digest_queue
        WHERE user_id = ? AND user_type = ? AND processed = 0
        ORDER BY priority DESC, created_at ASC`,
       [userId, userType]

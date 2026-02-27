@@ -26,6 +26,14 @@ import {
   toContract,
 } from '../database/entities/index.js';
 
+// =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const CONTRACT_TEMPLATE_COLUMNS = `
+  id, name, type, content, variables, is_default, is_active, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 // Re-export types for external usage
 export type { ContractTemplateType, ContractStatus };
 
@@ -122,7 +130,7 @@ class ContractService {
   async getTemplates(type?: string): Promise<ContractTemplate[]> {
     const db = getDatabase();
     const params: string[] = [];
-    let query = 'SELECT * FROM contract_templates WHERE is_active = TRUE';
+    let query = `SELECT ${CONTRACT_TEMPLATE_COLUMNS} FROM contract_templates WHERE is_active = TRUE`;
 
     if (type) {
       query += ' AND type = ?';
@@ -137,7 +145,7 @@ class ContractService {
 
   async getTemplate(templateId: number): Promise<ContractTemplate> {
     const db = getDatabase();
-    const row = await db.get('SELECT * FROM contract_templates WHERE id = ?', [templateId]);
+    const row = await db.get(`SELECT ${CONTRACT_TEMPLATE_COLUMNS} FROM contract_templates WHERE id = ?`, [templateId]);
 
     if (!row) {
       throw new Error('Template not found');

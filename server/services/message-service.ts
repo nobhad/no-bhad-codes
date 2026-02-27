@@ -115,6 +115,38 @@ function parseMentions(content: string): { type: 'user' | 'team' | 'all'; id?: s
 }
 
 // =====================================================
+// COLUMN CONSTANTS - Explicit column lists for SELECT queries
+// =====================================================
+
+const MESSAGE_MENTION_COLUMNS = `
+  id, message_id, mentioned_type, mentioned_id, notified, notified_at, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const MESSAGE_REACTION_COLUMNS = `
+  id, message_id, user_email, user_type, reaction, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const MESSAGE_SUBSCRIPTION_COLUMNS = `
+  id, project_id, user_email, user_type, notify_all, notify_mentions,
+  notify_replies, muted_until, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const MESSAGE_READ_RECEIPT_COLUMNS = `
+  id, message_id, user_email, user_type, read_at
+`.replace(/\s+/g, ' ').trim();
+
+const PINNED_MESSAGE_COLUMNS = `
+  id, thread_id, message_id, pinned_by, pinned_at
+`.replace(/\s+/g, ' ').trim();
+
+const MESSAGE_COLUMNS = `
+  id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
+  subject, message, message_type, priority, is_read, read_at, attachments,
+  parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
+  reaction_count, reply_count, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // MESSAGE SERVICE CLASS
 // =====================================================
 
@@ -139,7 +171,7 @@ class MessageService {
         [messageId, mention.type, mention.id || null]
       );
 
-      const row = await db.get('SELECT * FROM message_mentions WHERE id = ?', [result.lastID]);
+      const row = await db.get(`SELECT ${MESSAGE_MENTION_COLUMNS} FROM message_mentions WHERE id = ?`, [result.lastID]);
       if (row) {
         savedMentions.push(toMention(row as MentionRow));
       }
@@ -159,7 +191,7 @@ class MessageService {
    */
   async getMentions(messageId: number): Promise<Mention[]> {
     const db = getDatabase();
-    const rows = await db.all('SELECT * FROM message_mentions WHERE message_id = ?', [messageId]);
+    const rows = await db.all(`SELECT ${MESSAGE_MENTION_COLUMNS} FROM message_mentions WHERE message_id = ?`, [messageId]);
     return rows.map((row) => toMention(row as MentionRow));
   }
 
@@ -231,7 +263,7 @@ class MessageService {
       messageId,
     ]);
 
-    const row = await db.get('SELECT * FROM message_reactions WHERE id = ?', [result.lastID]);
+    const row = await db.get(`SELECT ${MESSAGE_REACTION_COLUMNS} FROM message_reactions WHERE id = ?`, [result.lastID]);
     return toReaction(row as ReactionRow);
   }
 
@@ -301,7 +333,7 @@ class MessageService {
     const db = getDatabase();
 
     let row = await db.get(
-      'SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?',
+      `SELECT ${MESSAGE_SUBSCRIPTION_COLUMNS} FROM message_subscriptions WHERE project_id = ? AND user_email = ?`,
       [projectId, userEmail]
     );
 
@@ -313,7 +345,7 @@ class MessageService {
       );
 
       row = await db.get(
-        'SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?',
+        `SELECT ${MESSAGE_SUBSCRIPTION_COLUMNS} FROM message_subscriptions WHERE project_id = ? AND user_email = ?`,
         [projectId, userEmail]
       );
     }
@@ -358,7 +390,7 @@ class MessageService {
     }
 
     const row = await db.get(
-      'SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?',
+      `SELECT ${MESSAGE_SUBSCRIPTION_COLUMNS} FROM message_subscriptions WHERE project_id = ? AND user_email = ?`,
       [projectId, userEmail]
     );
 
@@ -411,7 +443,7 @@ class MessageService {
     const db = getDatabase();
 
     const row = await db.get(
-      'SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?',
+      `SELECT ${MESSAGE_SUBSCRIPTION_COLUMNS} FROM message_subscriptions WHERE project_id = ? AND user_email = ?`,
       [projectId, userEmail]
     );
 
@@ -483,7 +515,7 @@ class MessageService {
   async getReadReceipts(messageId: number): Promise<ReadReceipt[]> {
     const db = getDatabase();
     const rows = await db.all(
-      'SELECT * FROM message_read_receipts WHERE message_id = ? ORDER BY read_at DESC',
+      `SELECT ${MESSAGE_READ_RECEIPT_COLUMNS} FROM message_read_receipts WHERE message_id = ? ORDER BY read_at DESC`,
       [messageId]
     );
     return rows.map((row) => toReadReceipt(row as ReadReceiptRow));
@@ -547,7 +579,7 @@ class MessageService {
     }
 
     const row = await db.get(
-      'SELECT * FROM pinned_messages WHERE thread_id = ? AND message_id = ?',
+      `SELECT ${PINNED_MESSAGE_COLUMNS} FROM pinned_messages WHERE thread_id = ? AND message_id = ?`,
       [threadId, messageId]
     );
 
@@ -680,8 +712,8 @@ class MessageService {
     const db = getDatabase();
 
     const query = parentMessageId
-      ? 'SELECT * FROM messages WHERE thread_id = ? AND parent_message_id = ? AND deleted_at IS NULL ORDER BY created_at ASC'
-      : 'SELECT * FROM messages WHERE thread_id = ? AND parent_message_id IS NULL AND deleted_at IS NULL ORDER BY created_at ASC';
+      ? `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE thread_id = ? AND parent_message_id = ? AND deleted_at IS NULL ORDER BY created_at ASC`
+      : `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE thread_id = ? AND parent_message_id IS NULL AND deleted_at IS NULL ORDER BY created_at ASC`;
 
     const params = parentMessageId ? [threadId, parentMessageId] : [threadId];
     const rows = await db.all(query, params);
@@ -786,7 +818,7 @@ class MessageService {
   async getSubscription(projectId: number, userEmail: string): Promise<Subscription | null> {
     const db = getDatabase();
     const row = await db.get(
-      'SELECT * FROM message_subscriptions WHERE project_id = ? AND user_email = ?',
+      `SELECT ${MESSAGE_SUBSCRIPTION_COLUMNS} FROM message_subscriptions WHERE project_id = ? AND user_email = ?`,
       [projectId, userEmail]
     );
 

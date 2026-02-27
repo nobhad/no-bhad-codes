@@ -11,6 +11,22 @@
 import { getDatabase, type SqlParam } from '../database/init.js';
 
 // ============================================
+// Column Constants - Explicit column lists for SELECT queries
+// ============================================
+
+const EMAIL_TEMPLATE_COLUMNS = `
+  id, name, description, category, subject, body_html, body_text, variables, is_active, is_system, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const EMAIL_TEMPLATE_VERSION_COLUMNS = `
+  id, template_id, version, subject, body_html, body_text, changed_by, change_reason, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const EMAIL_SEND_LOG_COLUMNS = `
+  id, template_id, template_name, recipient_email, recipient_name, subject, status, error_message, metadata, sent_at, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// ============================================
 // TYPES
 // ============================================
 
@@ -111,7 +127,7 @@ class EmailTemplateService {
   async getTemplates(category?: EmailTemplateCategory): Promise<EmailTemplate[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM email_templates';
+    let query = `SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates`;
     const params: SqlParam[] = [];
 
     if (category) {
@@ -130,7 +146,7 @@ class EmailTemplateService {
    */
   async getTemplate(id: number): Promise<EmailTemplate | null> {
     const db = getDatabase();
-    const template = (await db.get('SELECT * FROM email_templates WHERE id = ?', [id])) as
+    const template = (await db.get(`SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates WHERE id = ?`, [id])) as
       | Record<string, unknown>
       | undefined;
 
@@ -142,7 +158,7 @@ class EmailTemplateService {
    */
   async getTemplateByName(name: string): Promise<EmailTemplate | null> {
     const db = getDatabase();
-    const template = (await db.get('SELECT * FROM email_templates WHERE name = ?', [name])) as
+    const template = (await db.get(`SELECT ${EMAIL_TEMPLATE_COLUMNS} FROM email_templates WHERE name = ?`, [name])) as
       | Record<string, unknown>
       | undefined;
 
@@ -290,7 +306,7 @@ class EmailTemplateService {
   async getVersions(templateId: number): Promise<EmailTemplateVersion[]> {
     const db = getDatabase();
     const versions = (await db.all(
-      `SELECT * FROM email_template_versions
+      `SELECT ${EMAIL_TEMPLATE_VERSION_COLUMNS} FROM email_template_versions
        WHERE template_id = ?
        ORDER BY version DESC`,
       [templateId]
@@ -305,7 +321,7 @@ class EmailTemplateService {
   async getVersion(templateId: number, version: number): Promise<EmailTemplateVersion | null> {
     const db = getDatabase();
     const v = (await db.get(
-      `SELECT * FROM email_template_versions
+      `SELECT ${EMAIL_TEMPLATE_VERSION_COLUMNS} FROM email_template_versions
        WHERE template_id = ? AND version = ?`,
       [templateId, version]
     )) as EmailTemplateVersion | undefined;
@@ -570,7 +586,7 @@ class EmailTemplateService {
   ): Promise<EmailSendLog[]> {
     const db = getDatabase();
 
-    let query = 'SELECT * FROM email_send_logs WHERE 1=1';
+    let query = `SELECT ${EMAIL_SEND_LOG_COLUMNS} FROM email_send_logs WHERE 1=1`;
     const params: SqlParam[] = [];
 
     if (options.templateId) {

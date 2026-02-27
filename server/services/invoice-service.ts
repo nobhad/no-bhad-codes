@@ -58,6 +58,21 @@ export type {
 // Type definitions for database operations
 type SqlValue = string | number | boolean | null;
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const INVOICE_LINE_ITEM_COLUMNS = `
+  id, invoice_id, description, quantity, unit_price, amount, tax_rate, tax_amount,
+  discount_type, discount_value, discount_amount, sort_order, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PAYMENT_PLAN_TEMPLATE_COLUMNS = `
+  id, name, description, payments, is_default, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const PAYMENT_TERMS_PRESET_COLUMNS = `
+  id, name, days_until_due, description, late_fee_rate, late_fee_type,
+  late_fee_flat_amount, grace_period_days, is_default, created_at
+`.replace(/\s+/g, ' ').trim();
+
 interface IntakeRecord {
   id: number;
   project_type?: string;
@@ -650,7 +665,7 @@ export class InvoiceService {
    */
   async getLineItems(invoiceId: number): Promise<InvoiceLineItem[]> {
     const rows = await this.db.all(
-      'SELECT * FROM invoice_line_items WHERE invoice_id = ? ORDER BY sort_order ASC',
+      `SELECT ${INVOICE_LINE_ITEM_COLUMNS} FROM invoice_line_items WHERE invoice_id = ? ORDER BY sort_order ASC`,
       [invoiceId]
     );
 
@@ -698,7 +713,7 @@ export class InvoiceService {
 
     const placeholders = invoiceIds.map(() => '?').join(',');
     const rows = await this.db.all(
-      `SELECT * FROM invoice_line_items WHERE invoice_id IN (${placeholders}) ORDER BY invoice_id, sort_order ASC`,
+      `SELECT ${INVOICE_LINE_ITEM_COLUMNS} FROM invoice_line_items WHERE invoice_id IN (${placeholders}) ORDER BY invoice_id, sort_order ASC`,
       invoiceIds
     );
 
@@ -1080,7 +1095,7 @@ export class InvoiceService {
    * Get all payment plan templates
    */
   async getPaymentPlanTemplates(): Promise<PaymentPlanTemplate[]> {
-    const sql = 'SELECT * FROM payment_plan_templates ORDER BY is_default DESC, name ASC';
+    const sql = `SELECT ${PAYMENT_PLAN_TEMPLATE_COLUMNS} FROM payment_plan_templates ORDER BY is_default DESC, name ASC`;
     const rows = await this.db.all(sql);
 
     return rows.map((row: PaymentPlanTemplateRow) => ({
@@ -1097,7 +1112,7 @@ export class InvoiceService {
    * Get a single payment plan template by ID
    */
   async getPaymentPlanTemplate(id: number): Promise<PaymentPlanTemplate> {
-    const sql = 'SELECT * FROM payment_plan_templates WHERE id = ?';
+    const sql = `SELECT ${PAYMENT_PLAN_TEMPLATE_COLUMNS} FROM payment_plan_templates WHERE id = ?`;
     const row = await this.db.get(sql, [id]);
 
     if (!row) {
@@ -1668,7 +1683,7 @@ export class InvoiceService {
    * Get all payment terms presets
    */
   async getPaymentTermsPresets(): Promise<PaymentTermsPreset[]> {
-    const sql = 'SELECT * FROM payment_terms_presets ORDER BY days_until_due ASC';
+    const sql = `SELECT ${PAYMENT_TERMS_PRESET_COLUMNS} FROM payment_terms_presets ORDER BY days_until_due ASC`;
     const rows = await this.db.all(sql);
 
     return rows.map((row: PaymentTermsPresetRow) => ({
@@ -1689,7 +1704,7 @@ export class InvoiceService {
    * Get a single payment terms preset
    */
   async getPaymentTermsPreset(id: number): Promise<PaymentTermsPreset> {
-    const sql = 'SELECT * FROM payment_terms_presets WHERE id = ?';
+    const sql = `SELECT ${PAYMENT_TERMS_PRESET_COLUMNS} FROM payment_terms_presets WHERE id = ?`;
     const row = await this.db.get(sql, [id]);
 
     if (!row) {

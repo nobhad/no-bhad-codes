@@ -11,6 +11,20 @@
 import { getDatabase } from '../database/init.js';
 
 // =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const CLIENT_ONBOARDING_COLUMNS = `
+  id, client_id, project_id, current_step, step_data, status, completed_at, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const CLIENT_INFO_COMPLETENESS_COLUMNS = `
+  id, client_id, overall_percentage, profile_complete, documents_pending, documents_approved,
+  documents_total, questionnaires_pending, questionnaires_completed, questionnaires_total,
+  onboarding_complete, last_calculated_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // TYPES
 // =====================================================
 
@@ -246,7 +260,7 @@ class ClientInfoService {
   async getCompleteness(clientId: number): Promise<ClientInfoCompleteness | null> {
     const db = await getDatabase();
 
-    const row = await db.get('SELECT * FROM client_info_completeness WHERE client_id = ?', [
+    const row = await db.get(`SELECT ${CLIENT_INFO_COMPLETENESS_COLUMNS} FROM client_info_completeness WHERE client_id = ?`, [
       clientId,
     ]);
 
@@ -447,7 +461,7 @@ class ClientInfoService {
   async getOnboardingProgress(clientId: number): Promise<OnboardingProgress | null> {
     const db = await getDatabase();
 
-    const row = await db.get('SELECT * FROM client_onboarding WHERE client_id = ?', [clientId]);
+    const row = await db.get(`SELECT ${CLIENT_ONBOARDING_COLUMNS} FROM client_onboarding WHERE client_id = ?`, [clientId]);
 
     if (!row) return null;
 

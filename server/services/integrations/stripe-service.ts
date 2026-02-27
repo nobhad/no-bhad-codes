@@ -16,6 +16,14 @@
 import { getDatabase } from '../../database/init';
 import { logger } from '../logger.js';
 
+// =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const INVOICE_PAYMENT_LINK_COLUMNS = `
+  id, invoice_id, stripe_session_id, payment_url, amount, currency, status, created_at
+`.replace(/\s+/g, ' ').trim();
+
 // Stripe configuration
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -424,7 +432,7 @@ export async function getPaymentLink(invoiceId: number): Promise<PaymentLinkResp
   const db = getDatabase();
 
   const link = (await db.get(
-    "SELECT * FROM invoice_payment_links WHERE invoice_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1",
+    `SELECT ${INVOICE_PAYMENT_LINK_COLUMNS} FROM invoice_payment_links WHERE invoice_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1`,
     [invoiceId]
   )) as PaymentLinkRow | undefined;
 
@@ -489,9 +497,10 @@ export async function getOrCreatePaymentUrl(invoiceId: number): Promise<string |
 
   // Get invoice to create new link
   const db = getDatabase();
-  const invoice = (await db.get('SELECT * FROM invoices WHERE id = ?', [invoiceId])) as
-    | InvoiceRow
-    | undefined;
+  const invoice = (await db.get(
+    'SELECT id, invoice_number, client_id, total_amount, status FROM invoices WHERE id = ?',
+    [invoiceId]
+  )) as InvoiceRow | undefined;
 
   if (!invoice) {
     return null;

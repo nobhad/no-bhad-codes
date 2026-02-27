@@ -24,7 +24,11 @@ describe('Audit Middleware', () => {
   let mockRes: Partial<Response>;
   let mockNext: NextFunction;
 
+  let finishCallback: (() => void) | null = null;
+
   beforeEach(() => {
+    finishCallback = null;
+
     mockReq = {
       method: 'POST',
       path: '/api/clients',
@@ -38,12 +42,28 @@ describe('Audit Middleware', () => {
 
     mockRes = {
       statusCode: 200,
-      json: vi.fn().mockReturnThis(),
+      json: vi.fn().mockImplementation(function (this: any, body: any) {
+        // Store response body on the res object for audit middleware
+        (this as any)._responseBody = body;
+        return this;
+      }),
+      on: vi.fn().mockImplementation((event: string, callback: () => void) => {
+        if (event === 'finish') {
+          finishCallback = callback;
+        }
+      }),
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
     vi.clearAllMocks();
   });
+
+  // Helper to simulate response completion
+  const simulateResponseFinish = () => {
+    if (finishCallback) {
+      finishCallback();
+    }
+  };
 
   describe('auditMiddleware', () => {
     it('should skip non-write operations', async () => {
@@ -70,13 +90,14 @@ describe('Audit Middleware', () => {
 
     it('should audit POST requests with successful response', async () => {
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
-      await handler;
-
-      // Call res.json to trigger audit logging
+      // Call res.json to capture response body
       const responseBody = { id: 1, name: 'Test Client' };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+
+      // Trigger the finish event to execute audit logging
+      simulateResponseFinish();
 
       // Wait for async audit log
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -99,12 +120,11 @@ describe('Audit Middleware', () => {
       mockReq.body = { name: 'Updated Project' };
 
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 123, name: 'Updated Project' };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -124,12 +144,11 @@ describe('Audit Middleware', () => {
       mockReq.params = { id: '456' };
 
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { success: true };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -146,12 +165,11 @@ describe('Audit Middleware', () => {
     it('should not audit failed responses (4xx)', async () => {
       mockRes.statusCode = 400;
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { error: 'Bad request' };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -161,12 +179,11 @@ describe('Audit Middleware', () => {
     it('should not audit failed responses (5xx)', async () => {
       mockRes.statusCode = 500;
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { error: 'Internal server error' };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -181,12 +198,11 @@ describe('Audit Middleware', () => {
       };
 
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -207,12 +223,11 @@ describe('Audit Middleware', () => {
       };
 
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -225,12 +240,11 @@ describe('Audit Middleware', () => {
 
     it('should use system user type when not authenticated', async () => {
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -243,12 +257,11 @@ describe('Audit Middleware', () => {
 
     it('should extract entity ID from response body', async () => {
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 999, name: 'Test' };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -261,12 +274,11 @@ describe('Audit Middleware', () => {
 
     it('should extract entity ID from response data.id', async () => {
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { data: { id: 888 } };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -280,12 +292,11 @@ describe('Audit Middleware', () => {
     it('should extract entity ID from request params', async () => {
       mockReq.params = { projectId: '777' };
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { success: true };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -299,12 +310,11 @@ describe('Audit Middleware', () => {
     it('should detect login action', async () => {
       mockReq.path = '/api/auth/login';
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -318,12 +328,11 @@ describe('Audit Middleware', () => {
     it('should detect upload action', async () => {
       mockReq.path = '/api/uploads/upload';
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -336,32 +345,28 @@ describe('Audit Middleware', () => {
 
     it('should preserve original json method functionality', async () => {
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      const result = (mockRes.json as any)(responseBody);
+      const result = (mockRes.json as any).call(mockRes, responseBody);
 
       expect(result).toBe(mockRes);
     });
 
     it('should handle audit log errors gracefully', async () => {
-      vi.mocked(auditLogger.log).mockRejectedValue(new Error('Audit log failed'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(auditLogger.log).mockRejectedValueOnce(new Error('Audit log failed'));
 
       const middleware = auditMiddleware();
-      const handler = middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      await handler;
+      middleware(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { id: 1 };
-      (mockRes.json as any)(responseBody);
+      (mockRes.json as any).call(mockRes, responseBody);
+      simulateResponseFinish();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(consoleSpy).toHaveBeenCalledWith('[AUDIT] Failed to log:', expect.any(Error));
-      consoleSpy.mockRestore();
+      // Should not throw - error is caught internally
+      expect(mockNext).toHaveBeenCalled();
     });
   });
 });

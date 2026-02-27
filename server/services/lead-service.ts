@@ -31,6 +31,26 @@ import {
 type SqlValue = SqlParam;
 
 // =====================================================
+// Column Constants - Explicit column lists for SELECT queries
+// =====================================================
+
+const SCORING_RULE_COLUMNS = `
+  id, name, description, field_name, operator, threshold_value, points, is_active, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PIPELINE_STAGE_COLUMNS = `
+  id, name, description, color, sort_order, win_probability, is_won, is_lost, auto_convert_to_project, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const LEAD_SOURCE_COLUMNS = `
+  id, name, description, is_active, created_at
+`.replace(/\s+/g, ' ').trim();
+
+const LEAD_DUPLICATE_COLUMNS = `
+  id, lead_id_1, lead_id_2, similarity_score, match_fields, status, resolved_at, resolved_by, created_at
+`.replace(/\s+/g, ' ').trim();
+
+// =====================================================
 // INTERFACES - Scoring Rules
 // =====================================================
 
@@ -251,7 +271,7 @@ class LeadService {
    */
   async getScoringRules(includeInactive: boolean = false): Promise<ScoringRule[]> {
     const db = getDatabase();
-    let query = 'SELECT * FROM lead_scoring_rules';
+    let query = `SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules`;
     if (!includeInactive) {
       query += ' WHERE is_active = 1';
     }
@@ -279,7 +299,7 @@ class LeadService {
       ]
     );
 
-    const rule = await db.get('SELECT * FROM lead_scoring_rules WHERE id = ?', [result.lastID]);
+    const rule = await db.get(`SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules WHERE id = ?`, [result.lastID]);
 
     if (!rule) {
       throw new Error('Failed to create scoring rule');
@@ -332,7 +352,7 @@ class LeadService {
       await db.run(`UPDATE lead_scoring_rules SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const rule = await db.get('SELECT * FROM lead_scoring_rules WHERE id = ?', [ruleId]);
+    const rule = await db.get(`SELECT ${SCORING_RULE_COLUMNS} FROM lead_scoring_rules WHERE id = ?`, [ruleId]);
 
     if (!rule) {
       throw new Error('Scoring rule not found');
@@ -475,7 +495,7 @@ class LeadService {
    */
   async getPipelineStages(): Promise<PipelineStage[]> {
     const db = getDatabase();
-    const rows = await db.all('SELECT * FROM pipeline_stages ORDER BY sort_order ASC');
+    const rows = await db.all(`SELECT ${PIPELINE_STAGE_COLUMNS} FROM pipeline_stages ORDER BY sort_order ASC`);
     return rows.map((row) => toPipelineStage(row as unknown as PipelineStageRow));
   }
 
@@ -486,7 +506,7 @@ class LeadService {
     const db = getDatabase();
 
     // Get stage info
-    const stage = await db.get('SELECT * FROM pipeline_stages WHERE id = ?', [stageId]);
+    const stage = await db.get(`SELECT ${PIPELINE_STAGE_COLUMNS} FROM pipeline_stages WHERE id = ?`, [stageId]);
 
     if (!stage) {
       throw new Error('Pipeline stage not found');
@@ -954,7 +974,7 @@ class LeadService {
    */
   async getLeadSources(includeInactive: boolean = false): Promise<LeadSource[]> {
     const db = getDatabase();
-    let query = 'SELECT * FROM lead_sources';
+    let query = `SELECT ${LEAD_SOURCE_COLUMNS} FROM lead_sources`;
     if (!includeInactive) {
       query += ' WHERE is_active = 1';
     }
@@ -1103,7 +1123,7 @@ class LeadService {
       if (score >= 0.5) {
         // Check if already tracked
         const existing = await db.get(
-          `SELECT * FROM lead_duplicates
+          `SELECT ${LEAD_DUPLICATE_COLUMNS} FROM lead_duplicates
            WHERE (lead_id_1 = ? AND lead_id_2 = ?) OR (lead_id_1 = ? AND lead_id_2 = ?)`,
           [projectId, match.id, match.id, projectId]
         );
@@ -1180,7 +1200,7 @@ class LeadService {
   async getAllPendingDuplicates(): Promise<DuplicateResult[]> {
     const db = getDatabase();
     const rows = (await db.all(
-      "SELECT * FROM lead_duplicates WHERE status = 'pending' ORDER BY similarity_score DESC"
+      `SELECT ${LEAD_DUPLICATE_COLUMNS} FROM lead_duplicates WHERE status = 'pending' ORDER BY similarity_score DESC`
     )) as unknown as DuplicateRow[];
     return rows.map(toDuplicateResult);
   }
