@@ -7,25 +7,44 @@
    priority than 'components' layer, so most !important is not needed.
    ===================================================== */
 
-/* Base sidebar - applies to client portal and admin */
-[data-page="client-portal"] .sidebar,
-[data-page="admin"] .sidebar {
+/* Base sidebar - client portal */
+[data-page="client-portal"] .sidebar {
   width: clamp(200px, 18vw, 240px);
   min-width: 56px; /* Allow collapse to icon-only at breakpoints */
   background: var(--portal-bg-darkest);
   border-right: none;
   display: flex;
   flex-direction: column;
-  transition: width 0.15s ease-out, transform 0.15s ease-out; /* Smooth, no bounce */
+  transition: width 0.15s ease-out, transform 0.15s ease-out;
   position: relative;
   height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile */
+  height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
   z-index: 60;
   box-shadow: var(--shadow-sidebar);
   flex-shrink: 0;
-  overflow: visible; /* Allow toggle button to show outside sidebar bounds */
+  overflow: visible;
+}
+
+/* Admin sidebar - pitch black background */
+[data-page="admin"] .sidebar {
+  width: clamp(200px, 18vw, 240px);
+  min-width: 56px;
+  background: var(--portal-bg-pitch);
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.15s ease-out, transform 0.15s ease-out;
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  z-index: 60;
+  box-shadow: var(--shadow-sidebar);
+  flex-shrink: 0;
+  overflow: visible;
 }
 
 .sidebar.collapsed {
@@ -69,15 +88,7 @@
   border-top: none;
 }
 
-.sidebar-footer .btn-logout,
-.sidebar-footer button {
-  cursor: pointer;
-}
-
-/* Logout Button */
-.btn-logout {
-  width: 100%;
-}
+/* Logout button uses .sidebar-btn class - inherits all sidebar button styles */
 
 /* Theme Toggle Button in Sidebar */
 .btn-theme-toggle {
@@ -211,7 +222,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .client-name {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0;
@@ -263,7 +274,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   background: transparent;
   color: var(--portal-text-light);
   border: none;
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--portal-border);
   cursor: pointer;
   transition: all var(--transition-fast);
   font-weight: 600;
@@ -289,7 +300,6 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   background: transparent;
   color: var(--portal-text-light);
   border: var(--portal-border);
-  border-radius: var(--portal-radius-xs);
   padding: var(--space-1) var(--space-2);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -368,9 +378,9 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   padding: var(--space-3) 0;
 }
 
-/* Logout button hover - red color */
-[data-page="admin"] .sidebar-footer .btn-logout:hover,
-[data-page="admin"] .sidebar-footer .btn-logout:hover .btn-icon {
+/* Logout button hover - red color for destructive action */
+[data-page="admin"] .sidebar-btn.btn-logout:hover,
+[data-page="admin"] .sidebar-btn.btn-logout:hover .btn-icon {
   color: var(--color-error-400, #f87171);
 }
 
@@ -497,14 +507,29 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
   /* Sidebar logo styles in shared/portal-layout.css */
 
-  .portal .sidebar:not(.collapsed) .sidebar-footer {
+  /* Client portal sidebar footer */
+  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-footer {
     position: sticky;
     bottom: 0;
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
-    background: var(--portal-bg-dark);
+    background: transparent;
+    padding: 0.75rem 0;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  /* Admin sidebar footer - transparent to match sidebar */
+  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background: transparent;
     padding: 0.75rem 0;
     margin-top: auto;
     flex-shrink: 0;
@@ -647,4 +672,149 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Admin sidebar now uses same .sidebar-buttons pattern as client portal */
+}
+
+/* =====================================================
+   SIDEBAR NOTIFICATION BADGES
+   Consolidated from admin/sidebar-badges.css
+   ===================================================== */
+
+/* Ensure sidebar buttons have relative positioning for badge */
+[data-page="admin"] .sidebar-buttons .btn {
+  position: relative;
+  overflow: visible;
+}
+
+/* Base badge style */
+[data-page="admin"] .sidebar-badge {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 var(--space-0-5);
+  border-radius: var(--border-radius-full, 9999px);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* No pseudo-elements on badge */
+[data-page="admin"] .sidebar-badge::before,
+[data-page="admin"] .sidebar-badge::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Expanded sidebar: badge on right edge, vertically centered */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn .sidebar-badge {
+  top: 50%;
+  right: 0.5rem;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+/* Active button in expanded sidebar */
+[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+/* Collapsed sidebar: small circle at top-right */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
+  top: 2px;
+  right: 2px;
+  margin: 0;
+  min-width: var(--icon-size-md);
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: none;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: var(--color-white);
+  box-shadow: 0 0 0 2px var(--portal-bg-dark);
+}
+
+/* Collapsed - no scale on hover */
+[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
+  transform: none;
+}
+
+/* Laptop breakpoint - badge at top-right */
+@media (--laptop) {
+  [data-page="admin"] .sidebar .sidebar-buttons .btn .sidebar-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    margin: 0;
+    min-width: var(--icon-size-md);
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--color-danger);
+    color: var(--color-white);
+    box-shadow: 0 0 0 2px var(--portal-bg-dark);
+  }
+}
+
+/* =====================================================
+   SIDEBAR KEYBOARD SHORTCUTS
+   ===================================================== */
+
+[data-page="admin"] .sidebar-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted, #555);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 400;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Show shortcuts on sidebar hover */
+[data-page="admin"] .sidebar:hover .sidebar-shortcut,
+[data-page="admin"] .sidebar:focus-within .sidebar-shortcut {
+  opacity: 0.5;
+}
+
+/* Subtle on active button */
+[data-page="admin"] .sidebar .btn.active .sidebar-shortcut {
+  opacity: 0.3;
+}
+
+/* Collapsed sidebar - hide shortcuts */
+[data-page="admin"] .sidebar.collapsed .sidebar-shortcut {
+  display: none;
+}
+
+/* Mobile - hide shortcuts */
+@media (--mobile) {
+  [data-page="admin"] .sidebar-shortcut {
+    display: none;
+  }
 }

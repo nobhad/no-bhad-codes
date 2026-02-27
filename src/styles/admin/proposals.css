@@ -16,7 +16,6 @@
 
 .templates-panel {
   background-color: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-2);
 }
 
@@ -74,7 +73,6 @@
   font-size: var(--font-size-2xs);
   font-weight: 600;
   text-transform: uppercase;
-  border-radius: var(--portal-radius-sm);
 }
 
 .template-card-body {
@@ -139,7 +137,6 @@
 .template-editor-modal .modal-content {
   position: relative;
   background-color: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-lg);
   width: 100%;
   max-width: 960px;
   max-height: 90vh;
@@ -162,21 +159,7 @@
   margin: 0;
 }
 
-.template-editor-modal .btn-close {
-  width: var(--space-4);
-  height: var(--space-4);
-  border: none;
-  background: transparent;
-  font-size: var(--font-size-xl);
-  color: var(--portal-text-muted);
-  cursor: pointer;
-  border-radius: var(--portal-radius-sm);
-  transition: background-color var(--transition-fast);
-}
-
-.template-editor-modal .btn-close:hover {
-  background-color: var(--portal-bg-dark);
-}
+/* .template-editor-modal close button uses .icon-btn from portal-buttons.css */
 
 .template-editor-modal .modal-body {
   padding: var(--space-2);
@@ -197,7 +180,6 @@
   width: 100%;
   padding: var(--space-1) var(--space-1-5);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-sm);
   background-color: var(--portal-bg-dark);
   color: var(--portal-text-primary);
@@ -238,7 +220,6 @@
 .template-editor-section {
   background-color: var(--portal-bg-dark);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -269,7 +250,6 @@
   align-items: center;
   background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-sm);
   padding: var(--space-1);
 }
 
@@ -314,7 +294,6 @@
 .template-preview {
   background-color: var(--portal-bg-darker);
   border: 1px dashed var(--portal-border-color);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -330,7 +309,6 @@
   gap: var(--space-0-5);
   padding: var(--space-1);
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
 }
 
 .preview-label {
@@ -370,7 +348,6 @@
 
 .version-history {
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -397,7 +374,6 @@
   padding: var(--space-1);
   background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-sm);
 }
 
 .version-info {
@@ -437,19 +413,7 @@
   margin-bottom: 0;
 }
 
-.btn-link {
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-}
-
-.btn-link:hover {
-  color: var(--color-primary);
-}
+/* .btn-link: portal-buttons.css */
 
 /* ============================================================================
    SIGNATURE STATUS
@@ -457,7 +421,6 @@
 
 .signature-status {
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -477,7 +440,6 @@
   display: inline-flex;
   align-items: center;
   padding: var(--space-0-5) var(--space-1-5);
-  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-sm);
   font-weight: 600;
   width: fit-content;
@@ -531,7 +493,6 @@
 
 .custom-items-section {
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -549,7 +510,6 @@
   padding: var(--space-1);
   background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-sm);
 }
 
 .custom-item-row .item-info {
@@ -564,7 +524,6 @@
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-dark);
   color: var(--portal-text-secondary);
-  border-radius: var(--portal-radius-sm);
   text-transform: uppercase;
 }
 
@@ -606,7 +565,6 @@
 
 .discount-section {
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -635,7 +593,6 @@
 
 .comments-section {
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -652,7 +609,6 @@
   padding: var(--space-1);
   background-color: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-sm);
 }
 
 .comment-item.comment-internal {
@@ -678,7 +634,6 @@
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-dark);
   color: var(--portal-text-secondary);
-  border-radius: var(--portal-radius-sm);
   text-transform: uppercase;
 }
 
@@ -687,7 +642,6 @@
   padding: var(--space-0-5) var(--space-1);
   background: rgba(var(--color-warning-rgb), 0.2);
   color: var(--color-warning);
-  border-radius: var(--portal-radius-sm);
 }
 
 .comment-date {
@@ -708,7 +662,6 @@
   width: 100%;
   padding: var(--space-1);
   border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
   color: var(--portal-text-primary);
   font-size: var(--font-size-sm);
@@ -742,7 +695,6 @@
 
 .activity-section {
   background-color: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-1-5);
 }
 
@@ -787,7 +739,7 @@
    RESPONSIVE
    ============================================================================ */
 
-@media (max-width: 640px) {
+@media (--compact-mobile) {
   .templates-grid {
     grid-template-columns: 1fr;
   }

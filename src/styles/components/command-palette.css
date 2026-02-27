@@ -21,7 +21,7 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: 15vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--portal-alpha-black-60);
   backdrop-filter: blur(4px);
   animation: command-palette-fade-in 0.15s ease-out;
 }
@@ -52,8 +52,8 @@
   border: 1px solid var(--portal-border, #333);
   border-radius: var(--border-radius-lg, 8px);
   box-shadow:
-    0 16px 70px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 16px 70px var(--portal-alpha-black-50),
+    0 0 0 1px var(--portal-alpha-white-05);
   overflow: hidden;
   animation: command-palette-slide-in 0.15s ease-out;
 }
@@ -200,7 +200,7 @@
 }
 
 .command-palette-item.selected {
-  background: var(--color-primary-alpha, rgba(0, 111, 238, 0.15));
+  background: var(--color-primary-alpha, var(--color-primary-alpha-15));
 }
 
 .command-palette-item-icon {
@@ -244,7 +244,7 @@
 /* -----------------------------------------------------
    MOBILE ADJUSTMENTS
    ----------------------------------------------------- */
-@media (max-width: 640px) {
+@media (--compact-mobile) {
   .command-palette-overlay {
     padding-top: 10vh;
     padding-left: var(--space-2, 16px);

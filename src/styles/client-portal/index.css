@@ -7,7 +7,6 @@
 @import '../shared/portal-layout.css';
 @import '../shared/portal-buttons.css';
 @import '../shared/portal-messages.css';
-@import '../shared/search-bar.css';
 @import '../shared/portal-cards.css';
 @import '../shared/portal-tables.css';
 @import '../shared/portal-forms.css';
@@ -15,7 +14,7 @@
 @import '../shared/portal-dropdown.css';
 @import '../shared/portal-badges.css';
 @import '../shared/portal-tabs.css';
-@import '../shared/view-toggle.css';
+@import '../shared/portal-components.css';
 @import '../shared/confirm-dialog.css';
 
 /* Base Components (cp- prefixed reusable classes) */
@@ -23,15 +22,13 @@
 
 /* Layout & Structure */
 @import './layout.css';
-@import './sidebar.css';
+@import '../shared/portal-sidebar.css';
 
 /* Authentication */
 @import './login.css';
 
 /* Dashboard Views */
 @import './dashboard.css';
-@import './files.css';
-@import './invoices.css';
 @import './settings.css';
 
 /* Project Navigation & Details */

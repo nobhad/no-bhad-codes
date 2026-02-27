@@ -18,6 +18,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  border-radius: 0; /* Brutalist design: no rounded corners by default */
 }
 
 /* ============================================
@@ -329,7 +330,7 @@ details > summary:focus-visible {
 
 @media (prefers-contrast: high) {
   :root {
-    --color-shadow: rgba(0, 0, 0, 0.8);
+    --color-shadow: var(--portal-alpha-black-80);
   }
 }
 

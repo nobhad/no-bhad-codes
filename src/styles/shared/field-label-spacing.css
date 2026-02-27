@@ -1,39 +1,143 @@
 /**
- * Centralized field label / value spacing.
- * Value is slightly closer to its label than to the next field's label.
- * Uses: --field-label-value-gap, --field-group-gap (in variables.css).
+ * ===============================================
+ * FIELD LABELS & META VALUES - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/styles/shared/field-label-spacing.css
+ *
+ * ALL label and meta-value styling lives here.
+ * Do NOT define .field-label, .meta-label, .meta-value, .meta-item elsewhere.
+ *
+ * CSS Variables (defined in variables.css):
+ * - --field-label-value-gap: Gap between label and value (0.25rem)
+ * - --field-group-gap: Gap between field groups (1rem)
+ * - --portal-text-secondary: Label text color
+ * - --portal-text-light: Value text color
  */
 
-/* Single field block: tight gap between label and value */
+/* =====================================================
+   FIELD LABEL - Base styling for all labels
+   ===================================================== */
+.field-label,
+.meta-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--field-label-value-gap, 0.25rem);
+  line-height: 1.2;
+}
+
+/* Label variants */
+.field-label--lg { font-size: 0.875rem; }
+.field-label--sm { font-size: 0.625rem; }
+.field-label--normal-case { text-transform: none; letter-spacing: normal; }
+.field-label--muted { color: var(--portal-text-muted); }
+.field-label--light { color: var(--portal-text-light); font-weight: 600; }
+.field-label--primary { color: var(--color-primary); }
+
+/* =====================================================
+   META VALUE - Base styling for all values
+   ===================================================== */
+.meta-value {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--portal-text-light);
+  line-height: 1.4;
+}
+
+/* Value variants */
+.meta-value--sm { font-size: 0.875rem; }
+.meta-value--lg { font-size: 1.125rem; }
+.meta-value--secondary { color: var(--portal-text-secondary); }
+.meta-value--muted { color: var(--portal-text-muted); }
+.meta-value--primary { color: var(--color-primary); }
+.meta-value--success { color: var(--color-success); }
+.meta-value--warning { color: var(--color-warning); }
+.meta-value--danger { color: var(--color-danger); }
+
+/* Meta value links */
+.meta-value a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.meta-value a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* =====================================================
+   META ITEM - Label + Value container
+   ===================================================== */
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: var(--field-label-value-gap);
+  gap: var(--field-label-value-gap, 0.25rem);
 }
 
-.meta-value {
-  font-size: 1rem;
-  color: var(--portal-text-light);
-  font-weight: 400;
-}
-
+/* Remove margin-bottom from labels inside meta-item (gap handles spacing) */
 .meta-item .field-label,
 .meta-item .meta-label {
   margin-bottom: 0;
 }
 
-/* Standalone field labels (e.g. above inputs) */
-.field-label {
-  margin-bottom: var(--field-label-value-gap);
+/* Inline meta item variant */
+.meta-item--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1);
 }
 
-/* Containers that stack field groups: larger gap between one field and the next */
-.project-detail-meta {
-  row-gap: var(--field-group-gap);
+.meta-item--inline .field-label,
+.meta-item--inline .meta-label {
+  min-width: 80px;
 }
 
-.details-panel .project-detail-meta {
-  row-gap: var(--field-group-gap);
+/* =====================================================
+   META GRID - Layout for multiple meta items
+   ===================================================== */
+.meta-grid {
+  display: grid;
+  gap: var(--field-group-gap, 1rem);
 }
 
-/* .detail-grid and .detail-row spacing are set in admin/modals.css */
+.meta-grid--2col { grid-template-columns: repeat(2, 1fr); }
+.meta-grid--3col { grid-template-columns: repeat(3, 1fr); }
+.meta-grid--4col { grid-template-columns: repeat(4, 1fr); }
+
+/* Responsive: stack on mobile */
+@media (--compact-mobile) {
+  .meta-grid--2col,
+  .meta-grid--3col,
+  .meta-grid--4col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
+   STAT LABEL - Compact variant for stat cards
+   ===================================================== */
+.stat-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--portal-text-light);
+  line-height: 1.2;
+}
+
+.stat-value--sm { font-size: 1.25rem; }
+.stat-value--primary { color: var(--color-primary); }
+.stat-value--success { color: var(--color-success); }
+.stat-value--warning { color: var(--color-warning); }
+.stat-value--danger { color: var(--color-danger); }

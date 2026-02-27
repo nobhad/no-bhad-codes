@@ -11,7 +11,6 @@
   display: flex;
   flex-direction: column;
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
   overflow: hidden;
   background: var(--color-black);
 }
@@ -51,7 +50,6 @@
   padding: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-light);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
@@ -74,7 +72,6 @@
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
   cursor: pointer;
@@ -182,7 +179,6 @@
 .rich-text-content .ql-editor code {
   background: var(--portal-bg-medium);
   padding: var(--space-px) var(--space-0-5);
-  border-radius: var(--portal-radius-xs);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
 }
@@ -190,7 +186,6 @@
 .rich-text-content .ql-editor pre {
   background: var(--portal-bg-medium);
   padding: var(--space-2);
-  border-radius: var(--portal-radius-md);
   margin: var(--space-2) 0;
   overflow-x: auto;
 }
@@ -201,7 +196,6 @@
   background: rgba(var(--color-primary-rgb), 0.2);
   color: var(--color-primary);
   padding: var(--space-px) var(--space-0-5);
-  border-radius: var(--portal-radius-xs);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
 }
@@ -236,7 +230,6 @@
 .ql-snow .ql-tooltip {
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-lg);
 }
@@ -246,7 +239,6 @@
   border: 1px solid var(--portal-border);
   color: var(--portal-text-light);
   padding: var(--space-1);
-  border-radius: var(--portal-radius-sm);
 }
 
 .ql-snow .ql-tooltip a.ql-action,
@@ -280,7 +272,6 @@
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   color: var(--color-primary);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
@@ -297,7 +288,7 @@
    RESPONSIVE
    ===================================================== */
 
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   .rich-text-toolbar {
     padding: var(--space-0-5) var(--space-1);
   }

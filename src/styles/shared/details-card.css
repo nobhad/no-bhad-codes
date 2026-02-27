@@ -21,14 +21,12 @@
 
 .portal :is(.details-card, .system-details) {
   cursor: pointer;
-  border-radius: var(--portal-radius-lg, 12px);
 }
 
 /* Summary base styles */
 .portal :is(.details-card, .system-details) summary {
   padding: var(--space-4);
   margin: 0;
-  border-radius: var(--portal-radius-lg, 12px);
 }
 
 /* Caret: aligned with first line of heading */
@@ -67,14 +65,14 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: var(--portal-border);
   font-size: var(--font-size-sm);
 }
 
-/* Admin portal: use darker background to match admin table cells */
+/* Admin portal: same transparent background */
 [data-page="admin"] :is(.details-card-row, .system-info-row) {
-  background: var(--portal-bg-dark);
+  background: transparent;
 }
 
 .portal :is(.details-card-row, .system-info-row) span:first-child {

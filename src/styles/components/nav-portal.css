@@ -50,7 +50,7 @@
 /* Remove outline border from global focus-visible rule */
 .portal-button:focus-visible {
   color: var(--color-primary);
-  background-color: rgba(220, 38, 38, 0.1);
+  background-color: var(--color-danger-alpha-10);
   outline: none !important;
   box-shadow: none;
 }
@@ -540,11 +540,9 @@ html[data-theme="dark"] .portal-dropdown-header {
     top: 0;
     left: 0;
     transform: none;
-    border-radius: 0;
   }
 
   .intake-modal .terminal-window {
-    border-radius: 0;
   }
 
   .intake-modal-close {

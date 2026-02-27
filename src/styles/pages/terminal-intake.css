@@ -545,7 +545,7 @@ body[data-page="client-intake"] .terminal-window {
 }
 
 .chat-message.clickable-message:hover {
-  background-color: rgba(0, 255, 0, 0.1);
+  background-color: var(--color-terminal-alpha-10);
 }
 
 .chat-message.clickable-message:hover::after {
@@ -579,7 +579,6 @@ body[data-page="client-intake"] .terminal-window {
   background-color: transparent;
   border: none;
   box-shadow: none;
-  border-radius: 0;
   outline: none;
   padding: 0;
   max-width: none;
@@ -810,7 +809,6 @@ svg.terminal-avatar-img #Eye image {
 
 @media (--mobile) {
   .terminal-window {
-    border-radius: 0;
     border-left: none;
     border-right: none;
   }

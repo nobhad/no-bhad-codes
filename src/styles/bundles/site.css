@@ -17,9 +17,9 @@
 @layer reset, tokens, base, components, pages, page-states, mobile, utilities;
 
 /* ============================================
- * SHARED STYLES (reset, tokens, base, form components)
+ * FOUNDATION (reset, tokens, base, form components)
  * ============================================ */
-@import "./shared.css";
+@import "./foundation.css";
 
 /* ============================================
  * NAVIGATION COMPONENTS
@@ -62,10 +62,7 @@
  * ============================================ */
 @import "../mobile/index.css" layer(mobile);
 
-/* ============================================
- * UTILITIES (highest priority)
- * ============================================ */
-@import "../base/site-utilities.css" layer(utilities);
+/* Utilities merged into base/utilities.css */
 
 /* ============================================
  * UNLAYERED STYLES (global overrides - must be last)

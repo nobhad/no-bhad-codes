@@ -78,11 +78,11 @@
     font-size: 20px;
     gap: var(--icon-gap-xs);
     min-width: auto;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 4px var(--portal-alpha-black-20);
   }
 
   .menu-button-text {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 4px var(--portal-alpha-black-20);
   }
 
   .nav-logo__icon {

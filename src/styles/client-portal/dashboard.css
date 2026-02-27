@@ -8,13 +8,13 @@
 /* Project Status */
 .project-status {
   margin: 0 0 var(--space-1) 0;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Project Progress */
 .project-progress {
   margin: 0 0 var(--space-1) 0;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Progress bar - scoped to portal */
@@ -23,7 +23,6 @@
   height: 10px;
   background: var(--portal-bg-light);
   border: none;
-  border-radius: var(--portal-radius-sm);
   overflow: hidden;
   box-sizing: border-box;
   box-shadow: var(--shadow-inset);
@@ -32,7 +31,6 @@
 [data-page="client-portal"] .progress-fill {
   height: 100%;
   background: var(--color-primary);
-  border-radius: var(--portal-radius-sm);
   transition: width var(--transition-medium);
 }
 
@@ -47,7 +45,6 @@
   /* Card styling - explicit for reliability */
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
   padding: var(--space-3);
   color: var(--portal-text-light);
   box-shadow: var(--shadow-panel);
@@ -73,7 +70,6 @@
 [data-page="client-portal"] .project-progress-section .milestones-section {
   padding: 0;
   background: transparent;
-  border-radius: 0;
   box-shadow: none;
   border-top: 1px solid var(--portal-border-dark);
   padding-top: var(--space-4);
@@ -109,7 +105,6 @@
   padding: 0 var(--space-1);
   background: var(--color-danger);
   color: var(--portal-text-light);
-  border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
@@ -126,7 +121,6 @@
   align-items: center;
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
   transition: background-color var(--transition-fast);
 }
 
@@ -146,7 +140,6 @@
   width: 40px;
   height: 40px;
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   color: var(--color-primary);
   flex-shrink: 0;
 }
@@ -182,7 +175,6 @@
 [data-page="client-portal"] .approval-type {
   background: var(--portal-bg-dark);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -201,10 +193,7 @@
   flex-shrink: 0;
 }
 
-[data-page="client-portal"] .approval-actions .btn-sm {
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-}
+/* Approval action buttons use .btn-xs class */
 
 /* =====================================================
    MILESTONES SECTION
@@ -234,7 +223,6 @@
   padding: var(--space-2);
   background: var(--portal-bg-medium);
   border: none;
-  border-radius: var(--portal-radius-sm);
 }
 
 [data-page="client-portal"] .milestone-checkbox {
@@ -244,7 +232,6 @@
   cursor: default;
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-xs);
   position: relative;
   display: flex;
   align-items: center;
@@ -291,7 +278,7 @@
 }
 
 [data-page="client-portal"] .milestone-title {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -309,7 +296,7 @@
 
 [data-page="client-portal"] .milestone-description {
   color: var(--portal-text-light);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   margin: 0 0 var(--space-1) 0;
 }
 
@@ -321,11 +308,10 @@
 }
 
 [data-page="client-portal"] .milestone-due-date {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   background: var(--portal-bg-dark);
-  padding: 2px var(--space-1);
-  border-radius: var(--portal-radius-sm);
+  padding: var(--space-px) var(--space-1);
 }
 
 /* Legacy milestone-meta - keep for backwards compatibility */
@@ -340,12 +326,11 @@
 }
 
 [data-page="client-portal"] .milestone-project {
-  padding: 2px var(--space-1);
+  padding: var(--space-px) var(--space-1);
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-label, 0.05em);
 }
 
 [data-page="client-portal"] .milestone-deliverables {
@@ -356,7 +341,7 @@
 }
 
 [data-page="client-portal"] .milestone-deliverables li {
-  margin: 2px 0;
+  margin: var(--space-px) 0;
 }
 
 /* Uses universal empty state from loading.css, only unique margin */
@@ -365,7 +350,7 @@
 }
 
 /* Mobile responsive */
-@media (max-width: 576px) {
+@media (--sm-mobile) {
   [data-page="client-portal"] .approval-item {
     flex-wrap: wrap;
   }

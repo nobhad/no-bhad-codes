@@ -15,9 +15,9 @@
 @layer reset, tokens, base, components, admin, utilities;
 
 /* ============================================
- * SHARED STYLES (reset, tokens, base, form components)
+ * FOUNDATION (reset, tokens, base, form components)
  * ============================================ */
-@import "./shared.css";
+@import "./foundation.css";
 
 /* ============================================
  * NAVIGATION (full nav styles for admin login page)
@@ -42,10 +42,7 @@
 @import "../pages/admin.css" layer(admin);
 @import "../admin/index.css" layer(admin);
 
-/* ============================================
- * WIREFRAME MODE (greyscale when data-wireframe="true" on body)
- * ============================================ */
-@import "../shared/wireframe.css";
+/* Wireframe mode merged into base/utilities.css */
 
 /* ============================================
  * UTILITIES (highest priority)

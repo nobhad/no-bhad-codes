@@ -15,9 +15,30 @@
 /* Filter controls container */
 .table-filter-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1);
-  height: 36px;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   COMPACT FILTER SELECTS - React tables
+   Height matches buttons (28px), prevents full-width stretch
+   ===================================================== */
+
+[data-page="admin"] select[class*="tw-py-"],
+[data-page="admin"] .tw-flex select {
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--space-2);
+  padding-right: var(--space-6);
+  line-height: 26px;
+  flex-shrink: 0;
+  width: auto;
+  min-width: 120px;
+  max-width: 180px;
 }
 
 /* Search dropdown wrapper */
@@ -68,14 +89,24 @@
   position: relative;
 }
 
-/* Filter dropdown trigger */
+/* Filter dropdown trigger - styled as select-like button */
 .filter-dropdown-trigger {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 120px;
+  padding-right: var(--space-3);
+  cursor: pointer;
 }
 
-.filter-dropdown-trigger svg {
-  width: 18px;
-  height: 18px;
+/* .icon-btn styling: portal-buttons.css ONLY - NO overrides here */
+
+/* Filter active state - uses .has-value class */
+.filter-dropdown-trigger.has-value,
+.filter-search-trigger.has-value {
+  color: var(--color-primary);
 }
 
 .filter-count-badge {
@@ -88,9 +119,8 @@
   padding: 0 var(--space-0-5);
   background: var(--color-primary);
   color: white;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
-  border-radius: var(--portal-radius-md);
   line-height: 16px;
   text-align: center;
   z-index: 1;
@@ -110,7 +140,6 @@
   padding: var(--space-3) 0.75rem 0.75rem 0.75rem;
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-dropdown-xl);
   opacity: 0;
   visibility: hidden;
@@ -148,7 +177,6 @@
   gap: var(--space-1);
   padding: var(--space-1) var(--space-1);
   margin: 0 calc(-1 * var(--space-1));
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
@@ -164,7 +192,35 @@
 
 .filter-checkbox span {
   color: var(--portal-text-light);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
+}
+
+/* Filter options - simple clickable list items */
+.filter-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-option {
+  display: block;
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.filter-option:hover {
+  background: var(--portal-bg-hover);
+}
+
+.filter-option.active {
+  background: var(--portal-bg-medium);
+  color: var(--portal-text-light);
 }
 
 /* Date range inputs - stacked vertically */
@@ -175,9 +231,8 @@
   padding: var(--space-1) var(--space-1);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-light);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   height: 32px;
 }
 
@@ -196,9 +251,8 @@
   padding: var(--space-1) var(--space-2);
   background: transparent;
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
@@ -208,46 +262,7 @@
   border-color: var(--portal-accent);
 }
 
-/* ===============================================
-   SORTABLE TABLE HEADERS
-   =============================================== */
-
-.admin-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color var(--transition-faster);
-  position: relative;
-  padding-right: calc(var(--space-4) + 20px);
-}
-
-.admin-table th.sortable:hover {
-  background: var(--portal-bg-medium);
-}
-
-.admin-table th.sortable .sort-icon {
-  display: inline-flex;
-  align-items: center;
-  position: absolute;
-  right: var(--space-4);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.admin-table th.sortable .sort-icon svg {
-  width: 14px;
-  height: 14px;
-  color: var(--portal-text-muted);
-  transition: color var(--transition-faster);
-}
-
-.admin-table th.sortable:hover .sort-icon svg {
-  color: var(--portal-text);
-}
-
-.admin-table th.sortable .sort-icon svg.sort-asc,
-.admin-table th.sortable .sort-icon svg.sort-desc {
-  color: var(--portal-accent);
-}
+/* Sortable table headers - styles moved to shared/portal-tables.css */
 
 /* ===============================================
    MOBILE RESPONSIVE

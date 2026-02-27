@@ -1,20 +1,17 @@
-/**
- * ===============================================
- * ADMIN MODAL STYLES
- * ===============================================
- * @file src/styles/admin/modals.css
- *
- * Modal overlay, body, footer, and dropdown styles.
- */
+/* =====================================================
+   ADMIN - MODALS
+   Modal overlay, body, footer, dropdowns, previews
+   ===================================================== */
 
-/* Import shared styles (MUST be at top of file) */
+/* Import shared styles */
 @import '../shared/confirm-dialog.css';
 @import '../shared/portal-dropdown.css';
 @import '../shared/portal-forms.css';
 
-/* Admin Modal Styles */
+/* ==============================================
+   MODAL OVERLAY
+   ============================================== */
 
-/* Portal modal overlay (createPortalModal): fixed over viewport, centered */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -33,6 +30,13 @@
   transition: opacity var(--transition-faster);
 }
 
+.modal-overlay.closing { opacity: 0; }
+.modal-overlay.hidden { display: none; }
+
+/* ==============================================
+   MODAL CONTENT
+   ============================================== */
+
 .modal-content {
   position: relative;
   z-index: var(--z-index-portal-modal);
@@ -43,7 +47,6 @@
   display: flex;
   flex-direction: column;
   background: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-modal);
   animation: slideUp var(--transition-fast);
 }
@@ -54,9 +57,10 @@
   min-height: 0;
 }
 
-/* Portal modal header - matches admin-modal-header */
-[data-page="admin"] .modal-header,
-[data-page="client-portal"] .modal-header,
+/* ==============================================
+   MODAL HEADER
+   ============================================== */
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -66,8 +70,6 @@
   width: 100%;
 }
 
-[data-page="admin"] .modal-header h2,
-[data-page="client-portal"] .modal-header h2,
 .modal-header h2 {
   margin: 0;
   flex: 1;
@@ -82,9 +84,6 @@
   letter-spacing: 0.05em;
 }
 
-/* Modal heading icon - matches heading height */
-[data-page="admin"] .modal-header h2 .heading-icon,
-[data-page="client-portal"] .modal-header h2 .heading-icon,
 .modal-header h2 .heading-icon {
   display: flex;
   align-items: center;
@@ -92,30 +91,14 @@
   flex-shrink: 0;
 }
 
-[data-page="admin"] .modal-header h2 .heading-icon svg,
-[data-page="client-portal"] .modal-header h2 .heading-icon svg,
-.modal-header h2 .heading-icon svg {
-  width: 1.25em;
-  height: 1.25em;
-}
+.modal-header h2 .heading-icon svg { width: 1.25em; height: 1.25em; }
+.modal-header .modal-close { flex-shrink: 0; margin-left: auto; }
+.modal-close:hover { color: var(--color-primary); }
 
-/* Portal modal close button - higher specificity to override icon-btn */
-[data-page="admin"] .modal-header .modal-close,
-[data-page="client-portal"] .modal-header .modal-close,
-.modal-header .modal-close {
-  flex-shrink: 0;
-  margin-left: auto;
-}
+/* ==============================================
+   MODAL BODY & FOOTER
+   ============================================== */
 
-[data-page="admin"] .modal-close:hover,
-[data-page="client-portal"] .modal-close:hover,
-.modal-close:hover {
-  color: var(--color-primary);
-}
-
-/* Portal modal body */
-[data-page="admin"] .modal-body,
-[data-page="client-portal"] .modal-body,
 .modal-body {
   padding: var(--space-4) var(--space-5);
   overflow-y: auto;
@@ -127,30 +110,25 @@
   overscroll-behavior: contain;
 }
 
-/* Modal body with form - allow dropdown to overflow */
-[data-page="admin"] .modal-body:has(.modal-dropdown),
-[data-page="client-portal"] .modal-body:has(.modal-dropdown) {
-  overflow: visible;
-}
+.modal-body:has(.modal-dropdown) { overflow: visible; }
 
-/* Portal modal footer */
-[data-page="admin"] .modal-footer,
-[data-page="client-portal"] .modal-footer,
 .modal-footer {
   display: flex;
   justify-content: flex-end;
+  gap: var(--space-2);
   padding: var(--space-4) var(--space-5) var(--space-5);
   flex-shrink: 0;
   background: var(--portal-bg-darker);
   width: 100%;
 }
 
+/* ==============================================
+   ADMIN MODAL (Legacy Pattern)
+   ============================================== */
+
 .admin-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: var(--color-overlay-light);
   display: flex;
   align-items: center;
@@ -166,21 +144,11 @@
   transition: opacity var(--transition-faster);
 }
 
-.admin-modal-overlay.closing,
-.modal-overlay.closing {
-  opacity: 0;
-}
-
-/* Ensure hidden class always wins over admin modal display rules */
-.admin-modal-overlay.hidden,
-.modal-overlay.hidden {
-  display: none;
-}
+.admin-modal-overlay.closing { opacity: 0; }
+.admin-modal-overlay.hidden { display: none; }
 
 .admin-modal {
   background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: var(--modal-width-md, 560px);
@@ -191,10 +159,7 @@
   animation: slideUp var(--transition-fast);
 }
 
-/* Wide modal variant for detail views */
-.admin-modal.admin-modal--wide {
-  max-width: var(--modal-width-lg, 860px);
-}
+.admin-modal.admin-modal--wide { max-width: var(--modal-width-lg, 860px); }
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -202,14 +167,8 @@
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .admin-modal-header {
@@ -219,9 +178,6 @@
   padding: var(--space-5) var(--space-5) var(--space-4);
   flex-shrink: 0;
 }
-
-/* Modal title wrapper with icon */
-/* Uses utility classes: flex items-center */
 
 .admin-modal-title svg {
   width: var(--icon-size-sm);
@@ -248,11 +204,8 @@
   transition: color var(--transition-faster);
 }
 
-.admin-modal-close:hover {
-  color: var(--color-text-primary);
-}
+.admin-modal-close:hover { color: var(--color-text-primary); }
 
-/* Form wrapper inside modal */
 .admin-modal form {
   display: flex;
   flex-direction: column;
@@ -261,12 +214,7 @@
   overflow: hidden;
 }
 
-/* Fieldset for grouping related form fields (accessibility) */
-.admin-modal fieldset {
-  border: none;
-  padding: 0;
-  margin: 0 0 var(--space-4) 0;
-}
+.admin-modal fieldset { border: none; padding: 0; margin: 0 0 var(--space-4) 0; }
 
 .admin-modal legend {
   font-size: var(--font-size-sm);
@@ -280,7 +228,10 @@
   width: 100%;
 }
 
-/* Modal Tabs (for modals with multiple forms) */
+/* ==============================================
+   MODAL TABS
+   ============================================== */
+
 .admin-modal-tabs {
   display: flex;
   gap: 0;
@@ -301,13 +252,8 @@
   transition: color var(--transition-faster);
 }
 
-.admin-modal-tab:hover {
-  color: var(--color-text-primary);
-}
-
-.admin-modal-tab.active {
-  color: var(--color-primary);
-}
+.admin-modal-tab:hover { color: var(--color-text-primary); }
+.admin-modal-tab.active { color: var(--color-primary); }
 
 .admin-modal-tab.active::after {
   content: '';
@@ -330,59 +276,42 @@
   overscroll-behavior: contain;
 }
 
-.admin-modal-body .form-group {
-  margin-bottom: 0;
-}
-
-/* Nested form group containers (e.g., new client fields) */
-/* Uses utility classes: flex flex-col gap-4 */
-
-/* Modal inputs inherit base styling from portal-forms.css */
+.admin-modal-body .form-group { margin-bottom: 0; }
 
 .admin-modal-body .form-row {
   display: flex;
   gap: var(--space-4);
 }
 
-.admin-modal-body .form-row .form-group {
-  flex: 1;
+.admin-modal-body .form-row .form-group { flex: 1; }
+
+.admin-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  flex-shrink: 0;
+  background: var(--portal-bg-darker);
+  position: relative;
+  z-index: 1;
 }
 
-/* ================================================
-   File Preview Modals
-   ================================================ */
+/* ==============================================
+   FILE PREVIEW MODAL
+   ============================================== */
 
-/* Base preview modal content */
-.file-preview-modal-content {
-  max-width: 700px;
-}
+.file-preview-modal-content { max-width: 700px; }
+.file-preview-modal-content.file-preview-modal-content--wide { max-width: 900px; }
+.file-preview-modal-content .modal-body { max-height: 60vh; overflow: auto; }
 
-/* Wide variant for image previews */
-.file-preview-modal-content.file-preview-modal-content--wide {
-  max-width: 900px;
-}
-
-/* Preview modal body - scrollable with constrained height */
-.file-preview-modal-content .modal-body {
-  max-height: 60vh;
-  overflow: auto;
-}
-
-/* Image preview body - centered */
 .file-preview-modal-content .modal-body.file-preview-modal-body {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Preview image */
-.file-preview-image {
-  max-width: 100%;
-  max-height: 50vh;
-  object-fit: contain;
-}
+.file-preview-image { max-width: 100%; max-height: 50vh; object-fit: contain; }
 
-/* Code/text preview */
 .file-preview-code {
   white-space: pre-wrap;
   word-break: break-word;
@@ -393,13 +322,11 @@
   font-family: var(--font-family-mono, 'Consolas', 'Monaco', monospace);
 }
 
-/* ================================================
-   Markdown Preview Styles
-   ================================================ */
+/* ==============================================
+   MARKDOWN PREVIEW
+   ============================================== */
 
-.md-preview-body {
-  padding: var(--space-4);
-}
+.md-preview-body { padding: var(--space-4); }
 
 .md-preview {
   color: var(--portal-text-light);
@@ -407,65 +334,19 @@
   line-height: 1.7;
 }
 
-.md-preview .md-h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--portal-text-light);
-  margin: 0 0 var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-border);
-}
-
-.md-preview .md-h2 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--portal-text-light);
-  margin: var(--space-4) 0 var(--space-2);
-}
-
-.md-preview .md-h3 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--portal-text-light);
-  margin: var(--space-3) 0 var(--space-2);
-}
-
-.md-preview .md-h4 {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--portal-text-secondary);
-  margin: var(--space-2) 0 var(--space-1);
-}
-
-.md-preview .md-paragraph {
-  margin: 0 0 var(--space-2);
-  color: var(--portal-text-secondary);
-}
-
-.md-preview strong {
-  font-weight: 600;
-  color: var(--portal-text-light);
-}
-
-.md-preview em {
-  font-style: italic;
-}
-
-.md-preview .md-list {
-  margin: var(--space-2) 0;
-  padding-left: var(--space-4);
-  list-style: disc;
-}
-
-.md-preview .md-list li {
-  margin-bottom: var(--space-1);
-  color: var(--portal-text-secondary);
-}
+.md-preview .md-h1 { font-size: var(--font-size-2xl); font-weight: 700; color: var(--portal-text-light); margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--portal-border); }
+.md-preview .md-h2 { font-size: var(--font-size-xl); font-weight: 600; color: var(--portal-text-light); margin: var(--space-4) 0 var(--space-2); }
+.md-preview .md-h3 { font-size: var(--font-size-lg); font-weight: 600; color: var(--portal-text-light); margin: var(--space-3) 0 var(--space-2); }
+.md-preview .md-h4 { font-size: var(--font-size-base); font-weight: 600; color: var(--portal-text-secondary); margin: var(--space-2) 0 var(--space-1); }
+.md-preview .md-paragraph { margin: 0 0 var(--space-2); color: var(--portal-text-secondary); }
+.md-preview strong { font-weight: 600; color: var(--portal-text-light); }
+.md-preview em { font-style: italic; }
+.md-preview .md-list { margin: var(--space-2) 0; padding-left: var(--space-4); list-style: disc; }
+.md-preview .md-list li { margin-bottom: var(--space-1); color: var(--portal-text-secondary); }
 
 .md-preview .md-code-block {
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   padding: var(--space-3);
   margin: var(--space-2) 0;
   overflow-x: auto;
@@ -480,105 +361,52 @@
 
 .md-preview .md-inline-code {
   font-family: var(--font-family-mono, 'Consolas', 'Monaco', monospace);
-  font-size: 0.9em;
+  font-size: var(--font-size-sm);
   background: var(--portal-bg-medium);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-xs);
   color: var(--app-color-primary);
 }
 
-.md-preview .md-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: var(--space-3) 0;
-  font-size: var(--font-size-sm);
-}
-
+.md-preview .md-table { width: 100%; border-collapse: collapse; margin: var(--space-3) 0; font-size: var(--font-size-sm); }
 .md-preview .md-table th,
-.md-preview .md-table td {
-  padding: var(--space-2) var(--space-3);
-  text-align: left;
-  border: 1px solid var(--portal-border);
-}
+.md-preview .md-table td { padding: var(--space-2) var(--space-3); text-align: left; border: 1px solid var(--portal-border); }
+.md-preview .md-table th { background: var(--portal-bg-medium); font-weight: 600; color: var(--portal-text-light); }
+.md-preview .md-table td { color: var(--portal-text-secondary); }
+.md-preview .md-table tr:nth-child(even) td { background: var(--portal-bg-darker); }
+.md-preview .md-hr { border: none; border-top: 1px solid var(--portal-border); margin: var(--space-4) 0; }
 
-.md-preview .md-table th {
-  background: var(--portal-bg-medium);
-  font-weight: 600;
-  color: var(--portal-text-light);
-}
-
-.md-preview .md-table td {
-  color: var(--portal-text-secondary);
-}
-
-.md-preview .md-table tr:nth-child(even) td {
-  background: var(--portal-bg-darker);
-}
-
-.md-preview .md-hr {
-  border: none;
-  border-top: 1px solid var(--portal-border);
-  margin: var(--space-4) 0;
-}
-
-.admin-modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: var(--space-4) var(--space-5) var(--space-5);
-  flex-shrink: 0;
-  background: var(--portal-bg-darker);
-}
-
-/* ================================================
-   Modal Dropdown - Context Overrides
-   ================================================
-   Sets CSS variables for modal context.
-   All structural styles come from portal-dropdown.css
-   ================================================ */
+/* ==============================================
+   MODAL DROPDOWN
+   ============================================== */
 
 .admin-modal .custom-dropdown[data-modal-dropdown] {
-  /* Override dropdown variables for modal context */
   --dropdown-bg: var(--color-black);
   --dropdown-border-color: var(--portal-border-dark);
   --dropdown-border-width: 1px;
   --dropdown-radius: var(--portal-radius-lg);
 }
 
-.admin-modal-footer {
-  position: relative;
-  z-index: 1;
-  background: var(--portal-bg-darker);
-}
-
-/* Closed state - default border */
 .admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
   border: 1px solid var(--dropdown-border-color);
-  border-radius: var(--portal-radius-lg);
 }
 
-/* Closed state - focus adds primary color */
 .admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
 .admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus-visible {
   outline: none;
   border-color: var(--color-primary);
 }
 
-/* Open state - trigger: primary border, no bottom, top corners rounded */
 .admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
   border: 1px solid var(--color-primary);
   border-bottom: none;
-  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   outline: none;
 }
 
-/* Open state - menu: primary border, no top, bottom corners rounded */
 .admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
   border: 1px solid var(--color-primary);
   border-top: none;
-  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
 }
 
-/* Menu - force position relative to trigger, not fixed */
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
   position: absolute !important;
   top: 100% !important;
@@ -589,28 +417,21 @@
   z-index: var(--z-index-portal-dropdown);
 }
 
-/* Flip-above: when dropdown opens upward (near bottom of modal) */
 .admin-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
-  border-radius: 0 0 var(--portal-radius-lg) var(--portal-radius-lg);
   border-bottom: 1px solid var(--color-primary);
   border-top: none;
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
-  border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
   border-bottom: none;
   border-top: 1px solid var(--color-primary);
 }
 
-/* Heavier caret for admin modal dropdowns */
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-caret {
-  stroke-width: 3;
-}
+.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-caret { stroke-width: 3; }
 
-/* Reduced padding for trigger and items (matches Messages dropdown) */
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   padding: var(--space-2) var(--space-3);
-  padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
+  padding-right: var(--space-1-5);
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
@@ -619,9 +440,10 @@
   justify-content: flex-start;
 }
 
-/* Native selects inherit styling from portal-forms.css */
+/* ==============================================
+   DETAIL GRID
+   ============================================== */
 
-/* Modal Detail Grid - row gap = space between fields, column gap = label-to-value */
 .detail-grid {
   display: grid;
   row-gap: var(--field-group-gap);
@@ -660,78 +482,14 @@
   overflow-y: auto;
 }
 
-.detail-value a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
+.detail-value a { color: var(--color-primary); text-decoration: none; }
+.detail-value a:hover { text-decoration: underline; }
 
-.detail-value a:hover {
-  text-decoration: underline;
-}
+/* ==============================================
+   INVOICE MODAL
+   ============================================== */
 
-/* ================================================
-   MOBILE RESPONSIVE - Full width modals
-   ================================================ */
-
-@media (max-width: 479px) {
-  /* Modal overlay - no padding on small mobile */
-  [data-page="admin"] .modal-overlay,
-  [data-page="admin"] .admin-modal-overlay {
-    padding: 0;
-    align-items: flex-start;
-  }
-
-  /* Modal content - full width, full height */
-  [data-page="admin"] .modal-content,
-  [data-page="admin"] .admin-modal {
-    max-width: 100%;
-    width: 100%;
-    max-height: 100vh;
-    min-height: 100vh;
-    border-radius: 0;
-    margin: 0;
-  }
-
-  /* Modal body - fill available space */
-  [data-page="admin"] .admin-modal-body,
-  [data-page="admin"] .modal-body {
-    padding: var(--space-3);
-    min-height: 0;
-    flex: 1;
-  }
-
-  /* Modal header - tighter padding */
-  [data-page="admin"] .admin-modal-header,
-  [data-page="admin"] .modal-header {
-    padding: var(--space-3);
-  }
-
-  /* Modal footer - tighter padding */
-  [data-page="admin"] .admin-modal-footer,
-  [data-page="admin"] .modal-footer {
-    padding: var(--space-3);
-  }
-
-  /* Detail grid - single column */
-  [data-page="admin"] .detail-row {
-    grid-template-columns: 1fr;
-    gap: var(--space-0-5);
-  }
-
-  [data-page="admin"] .detail-label {
-    margin-bottom: 0;
-  }
-}
-
-/* ================================================
-   Invoice View/Edit Modal Styles
-   ================================================ */
-
-.invoice-modal-content {
-  max-width: var(--modal-width-lg, 700px);
-}
-
-/* Uses utility classes: flex flex-col gap-4 */
+.invoice-modal-content { max-width: var(--modal-width-lg, 700px); }
 
 .invoice-header-info {
   display: flex;
@@ -746,17 +504,12 @@
   gap: var(--space-4);
 }
 
-/* Uses utility classes: flex flex-col gap-1 */
-
 .invoice-info-item .field-value {
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
 }
 
-.invoice-line-items-section {
-  display: flex;
-  flex-direction: column;
-}
+.invoice-line-items-section { display: flex; flex-direction: column; }
 
 .section-title {
   font-size: var(--font-size-sm);
@@ -788,53 +541,22 @@
   letter-spacing: 0.5px;
 }
 
-.invoice-line-items td {
-  color: var(--portal-text-light);
-}
-
-.invoice-line-items .text-right {
-  text-align: right;
-}
-
-/* Editable line items table */
+.invoice-line-items td { color: var(--portal-text-light); }
+.invoice-line-items .text-right { text-align: right; }
 .invoice-line-items.editable th,
-.invoice-line-items.editable td {
-  padding: var(--space-1-5) var(--space-2);
-}
-
-.invoice-line-items.editable td:first-child {
-  padding-left: 0;
-}
-
-.invoice-line-items.editable td:last-child {
-  padding-right: 0;
-}
-
-.invoice-line-items.editable .form-input {
-  padding: var(--space-1-5) var(--space-2);
-  font-size: var(--font-size-sm);
-}
-
-.invoice-line-items.editable .line-item-desc {
-  min-width: 200px;
-}
-
+.invoice-line-items.editable td { padding: var(--space-1-5) var(--space-2); }
+.invoice-line-items.editable td:first-child { padding-left: 0; }
+.invoice-line-items.editable td:last-child { padding-right: 0; }
+.invoice-line-items.editable .form-input { padding: var(--space-1-5) var(--space-2); font-size: var(--font-size-sm); }
+.invoice-line-items .col-qty { width: 80px; }
+.invoice-line-items .col-rate,
+.invoice-line-items .col-amount { width: 100px; }
+.invoice-line-items .col-actions { width: 50px; }
+.invoice-line-items.editable .line-item-desc { min-width: 200px; }
 .invoice-line-items.editable .line-item-qty,
-.invoice-line-items.editable .line-item-rate {
-  width: 80px;
-  text-align: right;
-}
-
-.invoice-line-items.editable .line-item-amount {
-  text-align: right;
-  font-weight: var(--font-weight-medium);
-}
-
-.invoice-line-items.editable .remove-line-item {
-  padding: var(--space-1);
-  width: 28px;
-  height: 28px;
-}
+.invoice-line-items.editable .line-item-rate { width: 80px; text-align: right; }
+.invoice-line-items.editable .line-item-amount { text-align: right; font-weight: var(--font-weight-medium); }
+.invoice-line-items.editable .remove-line-item { padding: var(--space-1); width: 28px; height: 28px; }
 
 .invoice-totals,
 .invoice-totals-edit {
@@ -846,71 +568,248 @@
   padding-top: var(--space-3);
 }
 
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-}
-
-.total-row.total-main {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base);
-  color: var(--portal-text-light);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-border-dark);
-}
-
-.total-row.total-due {
-  color: var(--color-warning-500);
-  font-weight: var(--font-weight-medium);
-}
+.total-row { display: flex; justify-content: space-between; font-size: var(--font-size-sm); color: var(--portal-text-secondary); }
+.total-row.total-main { font-weight: var(--font-weight-semibold); font-size: var(--font-size-base); color: var(--portal-text-light); padding-top: var(--space-2); border-top: 1px solid var(--portal-border-dark); }
+.total-row.total-due { color: var(--color-warning-500); font-weight: var(--font-weight-medium); }
 
 .invoice-notes,
-.invoice-terms {
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--portal-border-dark);
-}
-
+.invoice-terms { padding-top: var(--space-3); border-top: 1px solid var(--portal-border-dark); }
 .invoice-notes p,
-.invoice-terms p {
+.invoice-terms p { margin: 0; color: var(--portal-text-secondary); font-size: var(--font-size-sm); white-space: pre-wrap; }
+
+.invoice-edit-modal { max-width: var(--modal-width-lg, 800px); }
+.invoice-edit-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+/* Invoice edit form buttons use .btn-sm class - layout wrapper handles spacing */
+
+/* ==============================================
+   KNOWLEDGE BASE MODAL
+   ============================================== */
+
+.modal-content.kb-article-modal-content { max-width: 36rem; }
+
+#kb-article-modal .modal-header h2#kb-article-modal-title {
   margin: 0;
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  white-space: pre-wrap;
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 600;
+  color: var(--portal-text-primary);
+  text-transform: none;
+  letter-spacing: normal;
 }
 
-.invoice-edit-modal {
-  max-width: var(--modal-width-lg, 800px);
+.kb-article-modal-content .form-group-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1-5);
 }
 
-.invoice-edit-form .form-row {
+.kb-article-modal-content .form-group-inline label { margin: 0; font-weight: 400; }
+
+/* ==============================================
+   DOCUMENT REQUEST MODAL
+   ============================================== */
+
+.dr-templates-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+}
+
+.dr-templates-checkboxes label.dr-template-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  transition: background-color var(--transition-faster);
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+.dr-templates-checkboxes label.dr-template-option:hover { background-color: var(--color-state-hover); }
+.dr-templates-checkboxes label.dr-template-option .portal-checkbox { flex-shrink: 0; }
+.dr-templates-checkboxes label.dr-template-option .dr-template-label { color: var(--color-text-primary); font-size: var(--font-size-sm); font-weight: 400; }
+
+#dr-create-modal .admin-modal { height: 860px; }
+
+.dr-detail-dl {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-4);
 }
 
-.invoice-edit-form .btn-small {
-  margin-top: var(--space-2);
+.dr-detail-dl dt { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
+.dr-detail-dl dd { margin: 0; color: var(--color-text-primary); }
+
+.dr-history-list { margin: 0; padding-left: var(--space-5); color: var(--color-text-primary); font-size: var(--font-size-sm); }
+.dr-history-list li { margin-bottom: var(--space-2); }
+
+/* ==============================================
+   KEYBOARD HELP OVERLAY
+   ============================================== */
+
+.keyboard-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--portal-alpha-black-70);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Mobile responsive */
-@media (max-width: 640px) {
-  .invoice-info-row {
-    grid-template-columns: 1fr;
-  }
+.keyboard-help-overlay.open { display: flex; }
 
-  .invoice-edit-form .form-row {
-    grid-template-columns: 1fr;
-  }
+.keyboard-help-panel {
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-bg-light);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
 
+.keyboard-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--portal-bg-medium);
+}
+
+.keyboard-help-title { font-family: var(--font-family-sans); font-size: var(--font-size-lg); font-weight: 600; color: var(--portal-text-light); margin: 0; }
+
+.keyboard-help-close { background: transparent; border: none; color: var(--portal-text-muted); font-size: var(--font-size-xl); cursor: pointer; padding: var(--space-1); line-height: 1; }
+.keyboard-help-close:hover { color: var(--portal-text-light); }
+
+.keyboard-help-section { margin-bottom: var(--space-4); }
+.keyboard-help-section:last-child { margin-bottom: 0; }
+.keyboard-help-section-title { font-family: var(--font-family-sans); font-size: var(--font-size-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--portal-text-muted); margin: 0 0 var(--space-2) 0; }
+
+.keyboard-help-list { list-style: none; margin: 0; padding: 0; }
+
+.keyboard-help-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1-5) 0;
+  border-bottom: 1px solid var(--portal-bg-medium);
+}
+
+.keyboard-help-item:last-child { border-bottom: none; }
+.keyboard-help-action { font-size: var(--font-size-sm); color: var(--portal-text-secondary); }
+.keyboard-help-keys { display: flex; align-items: center; gap: var(--space-1); }
+
+.keyboard-help-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--space-1-5);
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-bg-light);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--portal-text-light);
+}
+
+.keyboard-help-separator { color: var(--portal-text-muted); font-size: var(--font-size-xs); }
+
+/* ==============================================
+   DETAILS PANEL (Slide-in)
+   ============================================== */
+
+.details-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay-light);
+  z-index: 999;
+  animation: fadeIn var(--transition-fast);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.details-overlay.hidden { display: none; }
+
+.details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 500px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--portal-bg-readonly);
+  box-shadow: var(--shadow-2xl);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+.details-panel.hidden { display: none; }
+
+.details-panel .details-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+
+.details-panel .close-btn { background: none; border: none; font-size: var(--font-size-2xl); color: var(--portal-text-secondary); cursor: pointer; padding: var(--space-2); line-height: 1; }
+.details-panel .close-btn:hover { color: var(--portal-text-light); }
+.details-panel .details-content p { color: var(--portal-text-light); margin-bottom: var(--space-3); font-size: var(--font-size-sm); }
+.details-panel .details-content strong { color: var(--color-primary); }
+.details-panel .details-divider { border: none; border-top: 1px solid var(--portal-border-light); margin: var(--space-4) 0; }
+
+.details-panel .message-box {
+  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.details-panel .actions { margin-top: var(--space-6); display: flex; }
+.details-panel .project-detail-meta { grid-template-columns: 1fr; row-gap: var(--field-group-gap); column-gap: var(--space-4); }
+.details-panel .project-description-row { margin-top: var(--space-2); }
+.details-panel .details-actions { display: flex; align-items: center; justify-content: flex-end; margin-top: 0; margin-bottom: var(--space-3); }
+
+#contact-details-panel .details-header { margin-bottom: 0; }
+#contact-details-panel .details-actions { justify-content: flex-start; }
+#contact-details-panel .contact-details-created { font-size: var(--font-size-sm); color: var(--portal-text-muted); margin-top: -0.5rem; margin-bottom: var(--space-2); padding-top: 0; }
+
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+
+@media (--small-mobile) {
+  .modal-overlay,
+  .admin-modal-overlay { padding: 0; align-items: flex-start; }
+
+  .modal-content,
+  .admin-modal { max-width: 100%; width: 100%; max-height: 100vh; min-height: 100vh; margin: 0; }
+
+  .admin-modal-body,
+  .modal-body { padding: var(--space-3); min-height: 0; flex: 1; }
+
+  .admin-modal-header,
+  .modal-header { padding: var(--space-3); }
+
+  .admin-modal-footer,
+  .modal-footer { padding: var(--space-3); }
+
+  .detail-row { grid-template-columns: 1fr; gap: var(--space-0-5); }
+  .detail-label { margin-bottom: 0; }
+}
+
+@media (--compact-mobile) {
+  .invoice-info-row { grid-template-columns: 1fr; }
+  .invoice-edit-form .form-row { grid-template-columns: 1fr; }
   .invoice-totals,
-  .invoice-totals-edit {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .invoice-line-items.editable .line-item-desc {
-    min-width: 120px;
-  }
+  .invoice-totals-edit { width: 100%; margin-left: 0; }
+  .invoice-line-items.editable .line-item-desc { min-width: 120px; }
 }

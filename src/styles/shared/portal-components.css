@@ -27,22 +27,21 @@
 .kanban-column {
   flex: 1 1 0;
   min-width: 200px;
-  background: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   display: flex;
   flex-direction: column;
   max-height: 600px;
-  box-shadow: var(--portal-shadow);
+  box-shadow: none;
 }
 
 .kanban-column-header {
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--portal-radius-md) var(--portal-radius-md) 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--portal-bg-dark);
-  border-bottom: 1px solid var(--portal-border);
+  background: transparent;
+  border-bottom: var(--portal-border);
   border-left: 3px solid transparent;
   padding-left: calc(var(--space-3) - 3px);
 }
@@ -76,7 +75,8 @@
 }
 
 .kanban-column-count {
-  background: var(--portal-bg-medium);
+  background: transparent;
+  border: var(--portal-border);
   color: var(--portal-text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -85,7 +85,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
 }
 
 .kanban-column-content {
@@ -103,18 +102,16 @@
 }
 
 .kanban-card {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
   padding: var(--space-3);
   cursor: grab;
-  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease, border-color var(--transition-fast) ease;
-  border: 1px solid var(--portal-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: border-color var(--transition-fast) ease;
+  border: var(--portal-border);
+  box-shadow: none;
 }
 
 .kanban-card:hover {
-  border-color: var(--app-color-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: var(--portal-border-color);
   transform: translateY(-2px);
 }
 
@@ -163,7 +160,7 @@
   justify-content: space-between;
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: var(--portal-border);
 }
 
 .kanban-card-badges {
@@ -176,7 +173,6 @@
   font-size: 0.6875rem;
   font-weight: 700;
   padding: var(--space-0-5) var(--space-1-5);
-  border-radius: var(--portal-radius-sm);
   color: var(--color-white);
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -208,8 +204,7 @@
   gap: var(--icon-gap-sm);
   padding: 8px;
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
+  border: var(--portal-border);
   min-height: 42px;
   align-items: center;
 }
@@ -271,8 +266,7 @@
   right: 0;
   margin-top: 4px;
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
+  border: var(--portal-border);
   max-height: 200px;
   overflow-y: auto;
   z-index: 100;
@@ -309,7 +303,7 @@
 }
 
 .tag-create-item {
-  border-top: 1px solid var(--portal-border);
+  border-top: var(--portal-border);
   color: var(--color-primary);
 }
 
@@ -364,9 +358,8 @@
 .timeline-event-content {
   flex: 1;
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-sm);
   padding: var(--space-1) var(--space-1-5);
-  border: 1px solid var(--portal-border);
+  border: var(--portal-border);
 }
 
 .timeline-event-header {
@@ -499,7 +492,6 @@
   gap: var(--space-1-5);
   padding: var(--space-1-5);
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   border-top: 3px solid var(--color-primary);
 }
 
@@ -641,7 +633,6 @@
 .portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
   margin-bottom: var(--space-0-5);
 }
@@ -671,7 +662,6 @@
   gap: var(--space-1-5);
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
@@ -687,7 +677,6 @@
   gap: var(--space-1);
   padding: var(--space-1-5) var(--space-2);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
@@ -720,9 +709,9 @@
    BORDER RADIUS UTILITIES
    ===================================================== */
 
-.rounded-sm { border-radius: var(--portal-radius-sm); }
-.rounded-md { border-radius: var(--portal-radius-md); }
-.rounded-lg { border-radius: var(--portal-radius-lg); }
+.rounded-sm { border-radius: 0; }
+.rounded-md { border-radius: 0; }
+.rounded-lg { border-radius: 0; }
 .rounded-full { border-radius: 9999px; }
 
 /* =====================================================
@@ -841,23 +830,23 @@ a.text-danger:hover {
    ===================================================== */
 
 .border-bottom {
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--portal-border);
 }
 
 .border-bottom-dark {
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--portal-border);
 }
 
 .border-bottom-light {
-  border-bottom: 1px solid var(--portal-border-light);
+  border-bottom: var(--portal-border);
 }
 
 .border-top {
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--portal-border);
 }
 
 .border-all {
-  border: 1px solid var(--portal-border-color);
+  border: var(--portal-border);
 }
 
 .border-none {
@@ -928,4 +917,202 @@ a.text-danger:hover {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* =====================================================
+   TOOLTIPS (CSS-only)
+   Consolidated from admin/tooltips.css
+   ===================================================== */
+
+/* Info icons */
+[data-page="admin"] .info-icon-wrapper {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  margin-left: var(--space-0-5);
+  cursor: default;
+}
+
+[data-page="admin"] .info-icon {
+  display: inline-block;
+  vertical-align: middle;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+[data-page="admin"] .info-icon-wrapper:hover .info-icon {
+  opacity: 1;
+}
+
+[data-page="admin"] .vital-card h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+/* Tooltip container - elements with data-tooltip attribute */
+[data-page="admin"] [data-tooltip] {
+  position: relative;
+}
+
+/* Tooltip pseudo-element */
+[data-page="admin"] [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-1) var(--space-1-5);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-family: var(--font-family-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: pre-line;
+  width: max-content;
+  max-width: 280px;
+  text-align: left;
+  box-shadow: var(--shadow-elevated-sm);
+  z-index: var(--z-index-portal-dropdown);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+
+/* Show tooltip on hover */
+[data-page="admin"] [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip arrow */
+[data-page="admin"] [data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--portal-bg-darker);
+  z-index: var(--z-index-portal-dropdown);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+
+[data-page="admin"] [data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Table cell tooltips - avoid overflow */
+[data-page="admin"] td[data-tooltip]::after,
+[data-page="admin"] .table-cell[data-tooltip]::after {
+  left: 0;
+  transform: none;
+  white-space: normal;
+  max-width: 250px;
+}
+
+[data-page="admin"] td[data-tooltip]::before,
+[data-page="admin"] .table-cell[data-tooltip]::before {
+  left: 20px;
+  transform: none;
+}
+
+/* =====================================================
+   COPY EMAIL PATTERN
+   (Merged from shared/copy-email.css)
+   Button size is proportional to text so it does not increase row height or gap.
+   Overrides admin .icon-btn (36x36) in detail panels so the row stays tight.
+   ===================================================== */
+
+.meta-value-with-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Compact button so it doesn't create a larger gap */
+.meta-value-with-copy .copy-email-btn,
+.portal .meta-value-with-copy .copy-email-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  min-width: 1.15em;
+  min-height: 1.15em;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 1em;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--portal-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.meta-value-with-copy .copy-email-btn svg,
+.portal .meta-value-with-copy .copy-email-btn svg {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+.meta-value-with-copy .copy-email-btn:hover {
+  color: var(--color-primary);
+}
+
+/* =====================================================
+   PROGRESS BAR COMPONENT
+   (Merged from shared/progress.css)
+   Reusable progress bar component for admin and portal.
+   ===================================================== */
+
+.progress-bar {
+  height: 12px;
+  background: var(--portal-bg-light);
+  overflow: hidden;
+  box-shadow: var(--shadow-inset-light);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width var(--transition-normal) ease;
+  border-radius: inherit;
+}
+
+/* Small progress bar */
+.progress-bar.progress-sm {
+  height: 8px;
+}
+
+/* Large progress bar */
+.progress-bar.progress-lg {
+  height: 16px;
+}
+
+/* Success state */
+.progress-fill.progress-success {
+  background: var(--color-success);
+}
+
+/* Warning state */
+.progress-fill.progress-warning {
+  background: var(--color-warning);
+}
+
+/* Danger state */
+.progress-fill.progress-danger {
+  background: var(--color-danger);
 }

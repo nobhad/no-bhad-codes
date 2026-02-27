@@ -26,7 +26,7 @@
   padding: var(--space-2);
   background: var(--portal-bg-light);
   border-radius: var(--space-1);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
 }
 
 .toolbar-left,
@@ -57,7 +57,7 @@
   flex: 1;
   overflow-y: auto;
   border-radius: var(--space-1);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
 }
 
 .deliverables-list {
@@ -72,7 +72,7 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-2);
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--portal-border);
   transition: background-color var(--transition-fast);
 }
 
@@ -97,14 +97,14 @@
 
 .deliverable-title {
   margin: 0 0 var(--space-1) 0;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--portal-text-light);
 }
 
 .deliverable-description {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   line-height: 1.4;
 }
@@ -123,7 +123,7 @@
   display: inline-block;
   padding: var(--space-1) calc(var(--space-1) * 1.5);
   border-radius: var(--portal-radius-xs);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   background-color: var(--portal-bg-medium);
   color: var(--portal-text-secondary);
@@ -190,7 +190,7 @@
 
 .file-upload-area p {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
@@ -227,7 +227,7 @@
   flex-direction: column;
   gap: var(--space-1);
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: var(--space-1);
   overflow: hidden;
 }
@@ -237,7 +237,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2);
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--portal-border);
   background: var(--portal-bg-light);
 }
 
@@ -261,7 +261,7 @@
   align-items: center;
   justify-content: center;
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: 3px;
   color: var(--portal-text-light);
   cursor: pointer;
@@ -288,17 +288,17 @@
 }
 
 .round-selector label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
 
 .round-selector select {
   padding: var(--space-1) var(--space-1);
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: 3px;
   color: var(--portal-text-light);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   cursor: pointer;
 }
 
@@ -316,9 +316,9 @@
   max-width: 100%;
   max-height: 100%;
   height: auto;
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: var(--portal-radius-xs);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--portal-alpha-black-15);
   cursor: crosshair;
 }
 
@@ -329,7 +329,7 @@
   flex-direction: column;
   gap: var(--space-2);
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: var(--space-1);
   padding: var(--space-2);
   overflow-y: auto;
@@ -344,7 +344,7 @@
 }
 
 .design-tools-label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--portal-text-light);
   text-transform: uppercase;
@@ -364,7 +364,7 @@
   align-items: center;
   justify-content: center;
   background: var(--portal-bg-light);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
   cursor: pointer;
@@ -433,10 +433,10 @@
   width: 100%;
   padding: var(--space-1) var(--space-2);
   background: var(--portal-bg-light);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   cursor: pointer;
   transition: all var(--transition-fast);
   margin-top: var(--space-1);
@@ -489,7 +489,7 @@
   padding: var(--space-1);
   background: var(--portal-bg-light);
   border-radius: var(--portal-radius-xs);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   transition: all var(--transition-fast);
 }
 
@@ -498,7 +498,7 @@
 }
 
 .element-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-light);
   margin: 0;
@@ -512,7 +512,7 @@
 .approval-btn {
   flex: 1;
   padding: 4px 8px;
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
   background: var(--portal-bg-dark);
   border-radius: 3px;
   color: var(--portal-text-secondary);
@@ -551,16 +551,17 @@
   flex-direction: column;
   gap: var(--space-1);
   padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-bg-medium);
+  border-top: var(--portal-border);
   margin-top: auto;
 }
 
-.action-btn {
+/* Design review action buttons - scoped to avoid conflict with admin .action-btn */
+.design-review-actions .action-btn {
   width: 100%;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--portal-radius-xs);
   border: 1px solid transparent;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -568,37 +569,37 @@
   white-space: nowrap;
 }
 
-.action-btn.primary {
+.design-review-actions .action-btn.primary {
   background-color: var(--color-brand-primary);
   color: white;
 }
 
-.action-btn.primary:hover {
+.design-review-actions .action-btn.primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
 }
 
-.action-btn.secondary {
+.design-review-actions .action-btn.secondary {
   background-color: var(--portal-bg-light);
   color: var(--portal-text-light);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--portal-border);
 }
 
-.action-btn.secondary:hover {
+.design-review-actions .action-btn.secondary:hover {
   background-color: var(--portal-bg-medium);
 }
 
-.action-btn.warning {
+.design-review-actions .action-btn.warning {
   background-color: var(--color-warning-500);
   color: white;
 }
 
-.action-btn.warning:hover {
+.design-review-actions .action-btn.warning:hover {
   opacity: 0.9;
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (--desktop-wide) {
   .design-review-modal-content {
     flex-direction: column;
     min-height: auto;
@@ -620,7 +621,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (--mobile) {
   .deliverables-modal-content {
     min-height: 400px;
   }

@@ -3,17 +3,11 @@
    Use these portal- prefixed classes for consistency
    ===================================================== */
 
-/* ----- UTILITY: Subtle Shadow ----- */
-.portal-shadow {
-  box-shadow: var(--shadow-card);
-}
-
 /* ----- COMPONENT: Panel - No border, panel shadow ----- */
 /* Use for main container divs in admin and client portals */
 .portal-panel {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-panel);
 }
 
@@ -21,7 +15,6 @@
 .portal-card {
   background: var(--portal-bg-dark);
   border: none;
-  border-radius: var(--portal-radius-md);
   padding: var(--space-3);
   margin-bottom: var(--space-3);
   box-shadow: var(--shadow-panel);
@@ -82,7 +75,6 @@
   gap: var(--space-2);
   padding: var(--space-2);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
   margin-bottom: var(--space-1);
   transition: background-color var(--transition-fast);
 }
@@ -108,7 +100,6 @@
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  border-radius: var(--portal-radius-xs);
 }
 
 .portal-badge-pending {
@@ -124,14 +115,13 @@
 /* ----- COMPONENT: Stat Card - Child element (no border per hierarchy) ----- */
 .portal-stat {
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-3);
   text-align: center;
 }
 
 .portal-stat-number {
   display: block;
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: 2rem;
   color: var(--color-primary);
   line-height: 1;
@@ -191,14 +181,12 @@
 .portal-project-card .progress-bar {
   background: var(--portal-bg-medium);
   border: none;
-  border-radius: var(--portal-radius-sm);
   height: 12px;
   overflow: hidden;
 }
 
 .portal-project-card .progress-fill {
   background: var(--color-primary);
-  border-radius: var(--portal-radius-sm);
   height: 100%;
 }
 
@@ -226,7 +214,6 @@
 
 .upload-request-modal-content {
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
   width: 100%;
   max-width: 500px;
   max-height: 80vh;
@@ -275,7 +262,6 @@
   gap: var(--space-1);
   padding: var(--space-1-5);
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   transition: background-color var(--transition-faster);
 }
@@ -321,7 +307,6 @@
   font-size: 0.625rem;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: var(--portal-radius-xs);
   text-transform: uppercase;
 }
 
@@ -346,7 +331,6 @@
   padding: var(--space-1);
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
   color: var(--portal-text-primary);
   font-size: 0.875rem;
   resize: vertical;

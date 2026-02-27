@@ -15,6 +15,214 @@
  */
 
 /* ================================================
+   Radix UI Portal Dropdown (PortalDropdown.tsx)
+   ================================================ */
+
+/* Dropdown content - the popup menu */
+.portal-dropdown-content {
+  z-index: 50;
+  min-width: 8rem;
+  overflow: hidden;
+  border: var(--portal-border);
+  background-color: var(--portal-bg-pitch);
+  padding: 4px;
+  box-shadow: none;
+}
+
+/* Sub content - same styling as main content */
+.portal-dropdown-sub-content {
+  z-index: 50;
+  min-width: 8rem;
+  overflow: hidden;
+  border: var(--portal-border);
+  background-color: var(--portal-bg-pitch);
+  padding: 4px;
+  box-shadow: none;
+}
+
+/* Dropdown item - base styles */
+.portal-dropdown-item {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: var(--table-cell-font-size, 12px);
+  outline: none;
+  transition: background-color var(--transition-faster);
+  color: var(--portal-text-primary);
+}
+
+/* Ensure status indicators in dropdown items match font size */
+.portal-dropdown-item .status-indicator {
+  font-size: inherit;
+}
+
+.portal-dropdown-item:focus {
+  background-color: var(--portal-bg-hover);
+}
+
+.portal-dropdown-item[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.portal-dropdown-item.inset {
+  padding-left: 32px;
+}
+
+/* Destructive/danger item variant */
+.portal-dropdown-item.destructive,
+.dropdown-item-danger {
+  color: var(--status-cancelled);
+}
+
+.portal-dropdown-item.destructive:focus,
+.portal-dropdown-item.destructive:hover,
+.dropdown-item-danger:hover {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+}
+
+/* Sub trigger - item that opens submenu */
+.portal-dropdown-sub-trigger {
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: var(--table-cell-font-size, 12px);
+  color: var(--portal-text-primary);
+  outline: none;
+}
+
+.portal-dropdown-sub-trigger:focus {
+  background-color: var(--portal-bg-hover);
+}
+
+.portal-dropdown-sub-trigger[data-state="open"] {
+  background-color: var(--portal-bg-hover);
+}
+
+.portal-dropdown-sub-trigger.inset {
+  padding-left: 32px;
+}
+
+.portal-dropdown-sub-trigger .chevron-icon {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+}
+
+/* Checkbox item */
+.portal-dropdown-checkbox-item {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  padding: 4px 8px 4px 28px;
+  font-size: 12px;
+  color: var(--portal-text-primary);
+  outline: none;
+  transition: background-color var(--transition-faster);
+}
+
+.portal-dropdown-checkbox-item:focus {
+  background-color: var(--portal-bg-hover);
+}
+
+.portal-dropdown-checkbox-item[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.portal-dropdown-checkbox-item .indicator-wrapper {
+  position: absolute;
+  left: 8px;
+  display: flex;
+  width: 12px;
+  height: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-dropdown-checkbox-item .check-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Radio item */
+.portal-dropdown-radio-item {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  padding: 4px 8px 4px 28px;
+  font-size: 12px;
+  color: var(--portal-text-primary);
+  outline: none;
+  transition: background-color var(--transition-faster);
+}
+
+.portal-dropdown-radio-item:focus {
+  background-color: var(--portal-bg-hover);
+}
+
+.portal-dropdown-radio-item[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.portal-dropdown-radio-item .indicator-wrapper {
+  position: absolute;
+  left: 8px;
+  display: flex;
+  width: 12px;
+  height: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-dropdown-radio-item .radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Label */
+.portal-dropdown-label {
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--portal-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.portal-dropdown-label.inset {
+  padding-left: 28px;
+}
+
+/* Separator */
+.portal-dropdown-separator {
+  margin: 4px -4px;
+  height: 1px;
+  background-color: var(--portal-border-dark);
+}
+
+/* Shortcut text */
+.portal-dropdown-shortcut {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--portal-text-muted);
+}
+
+/* ================================================
    Modal/Form Dropdown Component
    ================================================ */
 
@@ -24,12 +232,11 @@
   width: 100%;
   background: transparent;
   border: none;
-  border-radius: 0;
 
-  --dropdown-bg: var(--color-black);
-  --dropdown-border-color: var(--portal-border-dark);
+  --dropdown-bg: transparent;
+  --dropdown-border-color: var(--portal-alpha-white-15);
   --dropdown-border-width: 1px;
-  --dropdown-radius: var(--portal-radius-lg);
+  --dropdown-radius: 0;
 }
 
 /* Dropdown trigger button - CLOSED state */
@@ -202,7 +409,6 @@
   min-width: 0;
   padding: var(--space-2) var(--space-3);
   padding-right: var(--space-1-5);
-  border-radius: var(--portal-radius-lg);
   box-sizing: border-box;
   text-align: left;
 }
@@ -233,14 +439,13 @@
   min-width: 100%;
   max-height: 300px;
   overflow-y: auto;
-  background-color: var(--dropdown-bg, var(--color-surface-primary));
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-md);
+  background-color: var(--portal-bg-pitch);
+  border: var(--portal-border);
   z-index: var(--z-index-portal-dropdown);
   list-style: none;
   margin: 4px 0 0 0;
   padding: var(--space-1) 0;
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   text-align: left;
 }
 
@@ -277,7 +482,7 @@
    ================================================ */
 
 /* Ensure status cells allow dropdown overflow */
-[data-page="admin"] .admin-table td.status-cell {
+[data-page="admin"] .data-table td.status-cell {
   overflow: visible;
   position: relative;
   vertical-align: middle;
@@ -287,7 +492,7 @@
 }
 
 /* Allow dropdown to escape table containers */
-[data-page="admin"] :is(.admin-table-card, .admin-table-scroll-wrapper, .admin-table-container, .admin-table, .admin-table tbody) {
+[data-page="admin"] :is(.admin-table-card, .admin-table-scroll-wrapper, .admin-table-container, .data-table, .data-table tbody) {
   overflow: visible;
 }
 
@@ -306,8 +511,8 @@
   justify-content: space-between;
   padding: var(--space-2) var(--space-3);
   padding-right: var(--space-1-5);
-  border: 2px solid transparent;
-  background-color: var(--table-bg);
+  border: 1px solid transparent;
+  background-color: var(--portal-bg-pitch);
   color: var(--portal-text-light);
   font-size: var(--table-cell-font-size, 12px);
   font-weight: 400;
@@ -319,7 +524,6 @@
   height: 32px;
   margin: 0;
   text-align: left;
-  border-radius: var(--portal-radius-sm, 4px);
 }
 
 /* Status dropdowns: trigger text aligns with menu item text */
@@ -327,16 +531,16 @@
   padding-left: calc(var(--space-3) - 8px - var(--space-1));
 }
 
-/* Hover state - red border (only when closed) */
+/* Hover state - show border (only when closed) */
 [data-page="admin"] .table-dropdown:not(.open) .custom-dropdown-trigger:hover {
-  border-color: var(--color-primary);
+  border-color: var(--table-border-color);
 }
 
 /* Focus state - only show border when closed */
 [data-page="admin"] .table-dropdown:not(.open) .custom-dropdown-trigger:is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
-  border-color: var(--color-primary);
+  border-color: var(--table-border-color);
   box-shadow: none;
 }
 
@@ -344,12 +548,11 @@
 [data-page="admin"] .table-dropdown.open .custom-dropdown-trigger,
 [data-page="admin"] .table-dropdown.open .custom-dropdown-trigger:is(:hover, :focus, :focus-visible) {
   outline: none;
-  border: 2px solid var(--color-primary);
+  border: var(--portal-border);
   border-bottom: none;
-  border-radius: var(--portal-radius-sm, 4px) var(--portal-radius-sm, 4px) 0 0;
   z-index: 1001;
   position: relative;
-  background-color: var(--table-bg);
+  background-color: var(--portal-bg-pitch);
   box-shadow: none;
 }
 
@@ -391,13 +594,12 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  background-color: var(--portal-bg-darker);
-  border: 2px solid var(--color-primary);
+  background-color: var(--portal-bg-pitch);
+  border: var(--portal-border);
   border-top: none;
-  border-radius: 0 0 var(--portal-radius-sm, 4px) var(--portal-radius-sm, 4px);
   z-index: 1000;
   display: none;
-  box-shadow: var(--shadow-elevated, 0 8px 24px rgba(0, 0, 0, 0.4));
+  box-shadow: none;
   clip-path: none;
   max-height: none;
   box-sizing: border-box;
@@ -406,11 +608,11 @@
 
 /* Details panel dropdown override */
 [data-page="admin"] .details-panel .table-dropdown .custom-dropdown-trigger {
-  background-color: var(--color-black);
+  background-color: var(--portal-bg-pitch);
 }
 
 [data-page="admin"] .details-panel .table-dropdown .custom-dropdown-menu {
-  background-color: var(--portal-bg-readonly);
+  background-color: var(--portal-bg-pitch);
   left: 0;
   right: auto;
   min-width: 100%;
@@ -418,17 +620,16 @@
 
 [data-page="admin"] .table-dropdown.custom-dropdown.open .custom-dropdown-menu {
   display: block;
-  margin-top: -2px;
+  margin-top: -1px;
 }
 
 /* Open upward when near bottom */
 [data-page="admin"] .table-dropdown.dropdown-open-up.open .custom-dropdown-trigger,
 [data-page="admin"] .table-dropdown.dropdown-open-up.open .custom-dropdown-trigger:is(:hover, :focus, :focus-visible) {
   outline: none;
-  border: 2px solid var(--color-primary);
+  border: var(--portal-border);
   border-top: none;
-  border-radius: 0 0 var(--portal-radius-sm, 4px) var(--portal-radius-sm, 4px);
-  background-color: var(--table-bg);
+  background-color: var(--portal-bg-pitch);
   box-shadow: none;
 }
 
@@ -436,11 +637,10 @@
   top: auto;
   bottom: 100%;
   margin-top: 0;
-  margin-bottom: -2px;
-  border-top: 2px solid var(--color-primary);
+  margin-bottom: -1px;
+  border-top: var(--portal-border);
   border-bottom: none;
-  border-radius: var(--portal-radius-sm, 4px) var(--portal-radius-sm, 4px) 0 0;
-  background-color: var(--portal-bg-darker);
+  background-color: var(--portal-bg-pitch);
 }
 
 /* Dropdown items */
@@ -461,8 +661,9 @@
   text-align: left;
 }
 
+/* Table dropdown item hover - subtle highlight, NO primary color */
 [data-page="admin"] .table-dropdown .custom-dropdown-item:hover {
-  background-color: var(--color-primary);
+  background-color: var(--portal-bg-hover);
 }
 
 /* Filter dropdown with checkmarks */
@@ -495,6 +696,83 @@
 
 [data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-trigger {
   padding-left: calc(var(--space-3) / 2 + 1rem + var(--space-0-5) / 2);
+}
+
+/* ================================================
+   Pagination Page Size Dropdown
+   - 28px height to match pagination buttons
+   - No rounded corners (border-radius: 0)
+   - No blue/primary color on hover
+   - No gap between trigger and menu
+   ================================================ */
+
+/* Container - match button height */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown {
+  height: 28px;
+  min-width: 60px;
+}
+
+/* Trigger - base state */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-trigger {
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding: 0 var(--space-2);
+  border: var(--portal-border);
+  background-color: var(--portal-bg-pitch);
+  color: var(--portal-text-secondary);
+  font-size: var(--table-cell-font-size, 12px);
+  box-sizing: border-box;
+}
+
+/* Trigger - hover (no color change) */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-trigger:hover {
+  border-color: var(--table-border-color);
+}
+
+/* Trigger - open state (dropdown opens UPWARD) */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown.open .custom-dropdown-trigger {
+  border: var(--portal-border);
+  border-top: none;
+  background-color: var(--portal-bg-pitch);
+  position: relative;
+  z-index: 2;
+}
+
+/* Menu - opens UPWARD, flush with trigger */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-menu {
+  position: absolute;
+  bottom: 100%;
+  top: auto;
+  left: 0;
+  right: auto;
+  min-width: 100%;
+  background-color: var(--portal-bg-pitch);
+  border: var(--portal-border);
+  border-bottom: none;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  z-index: 1;
+}
+
+/* Menu items */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--portal-text-secondary);
+  font-size: var(--table-cell-font-size, 12px);
+  height: 28px;
+  padding: 0 var(--space-2);
+  cursor: pointer;
+}
+
+/* Menu item hover - NO blue, use subtle highlight */
+[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown .custom-dropdown-item:hover {
+  background-color: var(--portal-bg-hover);
+  color: var(--portal-text-light);
 }
 
 /* ================================================
@@ -628,7 +906,6 @@
   padding: 0 16px;
   background-color: var(--color-black);
   border: 1px solid transparent;
-  border-radius: var(--portal-radius-lg);
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

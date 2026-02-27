@@ -226,7 +226,6 @@
 /* Child element - no border per shadow hierarchy */
 .cp-question-item {
   background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
   padding: var(--space-4);
 }
 
@@ -280,7 +279,6 @@
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-medium);
-  border-radius: var(--portal-radius-sm);
   cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
@@ -309,7 +307,7 @@
    RESPONSIVE
    ============================================================================ */
 
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   .cp-questionnaires-stats {
     flex-direction: column;
   }
@@ -338,7 +336,5 @@
     flex-direction: column;
   }
 
-  .cp-questionnaire-form-actions .btn {
-    width: 100%;
-  }
+  /* Mobile buttons should use .btn-full class */
 }

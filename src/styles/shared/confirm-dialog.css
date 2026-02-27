@@ -47,7 +47,6 @@
 
 .confirm-dialog {
   background: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-lg);
   box-shadow: var(--shadow-modal);
   width: 100%;
   max-width: var(--modal-width-sm, 400px);
@@ -144,7 +143,6 @@
   letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
   border: none;
-  border-radius: var(--portal-radius-lg);
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--btn-portal-shadow, var(--shadow-panel));
@@ -237,8 +235,7 @@
   width: 100%;
   padding: var(--space-3);
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--portal-radius-md);
+  border: var(--portal-border);
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
   transition: border-color var(--transition-mouse) ease, box-shadow var(--transition-mouse) ease;

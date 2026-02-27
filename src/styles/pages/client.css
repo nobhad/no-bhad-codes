@@ -59,13 +59,7 @@
   flex-wrap: wrap;
 }
 
-/* Client buttons - minimal styling to work with GSAP animations */
-.client-content .btn {
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  display: inline-block;
-}
+/* Client buttons use .btn-animated class for GSAP compatibility */
 
 /* Hide focus state on buttons when dynamic content is present */
 .client-buttons:has(.dynamic-content) .btn:focus {
@@ -445,15 +439,7 @@ body[data-page="client-landing"] .client-login .client-content {
   color: var(--color-dark);
 }
 
-/* Loading spinner - animation controlled by GSAP */
-.btn-loader {
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top-color: currentColor;
-  border-radius: 50%;
-  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
-}
+/* .btn-loader: components/loading.css */
 
 /* Login footer styling now controlled from main.css universal system */
 
@@ -610,7 +596,7 @@ body[data-page="client-landing"] .intake-modal {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--portal-alpha-black-80);
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -655,11 +641,9 @@ body[data-page="client-landing"] .intake-modal-content {
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    border-radius: 0;
   }
 
   body[data-page="client-landing"] .intake-modal-content .terminal-window {
-    border-radius: 0;
     border: none;
   }
 }
@@ -735,5 +719,4 @@ body[data-page="client-landing"] .intake-modal.fullscreen .intake-modal-content 
   width: 100%;
   height: 100%;
   margin: 0;
-  border-radius: 0;
 }

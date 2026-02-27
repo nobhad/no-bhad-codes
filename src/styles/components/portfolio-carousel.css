@@ -84,7 +84,7 @@
   font-size: 0.9rem;
   color: var(--color-primary);
   font-weight: 700;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 8px var(--portal-alpha-black-80);
 }
 
 .portfolio-item h3 {

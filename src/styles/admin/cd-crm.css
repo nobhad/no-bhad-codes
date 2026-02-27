@@ -70,13 +70,11 @@
 .health-factor-bar {
   height: 6px;
   background: var(--portal-bg-lighter);
-  border-radius: var(--portal-radius-xs);
   overflow: hidden;
 }
 
 .health-factor-fill {
   height: 100%;
-  border-radius: var(--portal-radius-xs);
   transition: width var(--transition-normal);
 }
 
@@ -137,7 +135,6 @@
   align-items: center;
   gap: var(--icon-gap-xs);
   padding: 4px 10px;
-  border-radius: var(--portal-radius-lg);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 }
@@ -193,7 +190,6 @@
   background: var(--portal-accent);
   color: var(--color-dark);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-xs);
   margin-left: var(--space-1);
   text-transform: uppercase;
 }
@@ -232,7 +228,6 @@
   font-size: 0.75rem;
   font-weight: var(--font-weight-semibold);
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-xs);
   text-transform: uppercase;
   background: var(--color-neutral-500);
   color: var(--color-white);
@@ -429,7 +424,6 @@
 .table-tag-mini {
   font-size: 0.75rem;
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-md);
 }
 
 /* Responsive */

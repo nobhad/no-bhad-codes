@@ -1,10 +1,10 @@
 /**
  * ===============================================
- * SHARED CSS BUNDLE
+ * FOUNDATION CSS BUNDLE
  * ===============================================
- * @file src/styles/bundles/shared.css
+ * @file src/styles/bundles/foundation.css
  *
- * Common styles shared by all apps (main site, admin, client portal).
+ * Core foundation styles shared by all apps (main site, admin, client portal).
  * Contains base reset, design tokens, typography, layout, and form components.
  */
 
@@ -48,7 +48,6 @@
 @import "../components/form-buttons.css" layer(components);
 @import "../components/form-validation.css" layer(components);
 @import "../components/loading.css" layer(components);
-@import "../shared/progress.css" layer(components);
 @import "../shared/toast-notifications.css" layer(components);
-@import "../shared/copy-email.css" layer(components);
 @import "../shared/field-label-spacing.css" layer(components);
+/* progress.css and copy-email.css merged into portal-components.css */

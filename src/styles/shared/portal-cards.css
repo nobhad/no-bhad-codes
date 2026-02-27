@@ -199,9 +199,9 @@
 
 /* Base card container - main content containers */
 .portal .portal-card {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
-  box-shadow: var(--shadow-panel);
+  background: transparent;
+  border: var(--portal-border);
+  box-shadow: none;
   padding: var(--space-4);
 }
 
@@ -215,7 +215,7 @@
   margin-top: var(--space-3);
 }
 
-/* Card header - ACME font, uppercase */
+/* Card header - Sans-serif font, uppercase */
 .portal .portal-card-header {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 1.1rem;
@@ -228,8 +228,8 @@
 
 /* Inner card - nested content with lighter background, no shadow */
 .portal .portal-card-inner {
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--space-3);
   box-shadow: none;
 }
@@ -268,11 +268,13 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--portal-section-gap);
   max-width: 100%;
+  align-items: stretch;
 }
 
-/* Ensure grid children don't overflow */
+/* Ensure grid children don't overflow and fill cell height */
 .portal :is(.quick-stats, .attention-grid, .card-grid-4) > * {
   min-width: 0;
+  height: 100%;
 }
 
 @media (--tablet-landscape) {
@@ -281,7 +283,7 @@
   }
 }
 
-@media (max-width: 500px) {
+@media (--narrow-mobile) {
   .portal :is(.quick-stats, .attention-grid, .card-grid-4) {
     grid-template-columns: 1fr;
   }
@@ -313,7 +315,7 @@
   }
 }
 
-@media (max-width: 500px) {
+@media (--narrow-mobile) {
   .portal .dashboard-stats-grid {
     grid-template-columns: 1fr;
   }
@@ -325,37 +327,32 @@
    No accent bars, no visual noise - just clear hierarchy.
    ALL stat cards use this pattern for consistency.
    ===================================================== */
-.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
+.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
   padding: var(--portal-card-padding);
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
-  transition: background 0.15s;
+  background: transparent;
+  border: var(--portal-border);
+  transition: border-color 0.15s;
   position: relative;
   overflow: hidden;
 }
 
-/* Subtle gradient overlay for depth */
-.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
-  pointer-events: none;
+/* Remove gradient overlay - brutalist flat design */
+.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::after {
+  display: none;
 }
 
 /* Remove any accent lines - keep it clean */
-.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::before {
+.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card)::before {
   display: none;
 }
 
 /* Hover state for clickable stat cards */
-.portal :is(.stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card):hover {
-  background: var(--portal-bg-dark);
+.portal :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card):hover {
+  border-color: var(--portal-border-color);
 }
 
 /* =====================================================
@@ -364,9 +361,8 @@
    Hover effect with border color change.
    ===================================================== */
 .portal :is(.content-card, .template-card, .preview-card) {
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-color);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--space-2);
   transition: border-color var(--transition-fast);
 }
@@ -391,7 +387,7 @@
 }
 
 /* Layout-only styling for stat labels (typography from unified label system) */
-.portal :is(.stat-label, .stat-card .field-label) {
+.portal :is(.stat-label, .stat-card .field-label, .tw-stat-card .field-label) {
   display: block;
   line-height: 1.3;
   margin: 0;
@@ -399,8 +395,8 @@
 
 /* Stat icon */
 .portal .stat-card-icon,
-.portal .stat-card .stat-icon,
-.portal .stat-card svg:not(.btn-icon) {
+.portal :is(.stat-card, .tw-stat-card) .stat-icon,
+.portal :is(.stat-card, .tw-stat-card) svg:not(.btn-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -413,14 +409,14 @@
 
 /* Clickable stat cards */
 .portal .stat-card-clickable,
-.portal a.stat-card {
+.portal a:is(.stat-card, .tw-stat-card) {
   cursor: pointer;
   text-decoration: none;
 }
 
 .portal .stat-card-clickable:hover,
-.portal a.stat-card:hover {
-  background: var(--portal-bg-dark);
+.portal a:is(.stat-card, .tw-stat-card):hover {
+  border-color: var(--portal-border-color);
 }
 
 .portal .stat-card-clickable:hover .stat-number {
@@ -429,17 +425,17 @@
 
 /* Active/selected state - subtle primary accent */
 .portal .stat-card-clickable.active,
-.portal .stat-card.active {
+.portal :is(.stat-card, .tw-stat-card).active {
   border-color: var(--color-primary);
 }
 
 .portal .stat-card-clickable.active .stat-number,
-.portal .stat-card.active .stat-number {
+.portal :is(.stat-card, .tw-stat-card).active .stat-number {
   color: var(--color-primary);
 }
 
 /* Stat card secondary text */
-.portal .stat-card :is(.stat-secondary, .stat-change, .stat-meta) {
+.portal :is(.stat-card, .tw-stat-card) :is(.stat-secondary, .stat-change, .stat-meta) {
   font-size: 0.7rem;
   color: var(--portal-text-muted);
   letter-spacing: 0.02em;
@@ -447,11 +443,11 @@
   line-height: 1.3;
 }
 
-.portal .stat-card .stat-change.positive {
+.portal :is(.stat-card, .tw-stat-card) .stat-change.positive {
   color: var(--color-success);
 }
 
-.portal .stat-card .stat-change.negative {
+.portal :is(.stat-card, .tw-stat-card) .stat-change.negative {
   color: var(--color-danger);
 }
 
@@ -485,13 +481,12 @@
    OVERVIEW CARD
    ===================================================== */
 .portal .overview-card {
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
 
 .portal .overview-card h3 {
@@ -503,13 +498,12 @@
    All main content sections use identical flat card styling
    ===================================================== */
 .portal :is(.recent-activity, .project-progress-section, .milestones-section, .pending-approvals-section) {
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
 
 .portal :is(.recent-activity, .project-progress-section, .milestones-section, .pending-approvals-section, .analytics-overview) h3 {
@@ -529,8 +523,8 @@
   width: 32px;
   height: 32px;
   min-width: 32px;
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   color: var(--portal-text-muted);
 }
 
@@ -577,9 +571,8 @@
    UPCOMING TASKS WIDGET
    ===================================================== */
 .portal .upcoming-tasks {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--space-3);
 }
 
@@ -657,24 +650,27 @@
   font-weight: 600;
   text-transform: uppercase;
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-darker);
+  background: transparent;
+  border: var(--portal-border);
   color: var(--portal-text-muted);
 }
 
 .portal .dashboard-tasks-kanban .task-priority.task-priority-urgent {
-  background: var(--status-cancelled);
-  color: var(--portal-text-light);
+  background: transparent;
+  border-color: var(--status-cancelled);
+  color: var(--status-cancelled);
 }
 
 .portal .dashboard-tasks-kanban .task-priority.task-priority-high {
-  background: var(--status-on-hold);
-  color: var(--portal-text-dark);
+  background: transparent;
+  border-color: var(--status-on-hold);
+  color: var(--status-on-hold);
 }
 
 .portal .dashboard-tasks-kanban .task-priority.task-priority-medium {
-  background: var(--app-color-primary);
-  color: var(--portal-text-dark);
+  background: transparent;
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
 }
 
 .portal .dashboard-tasks-kanban .task-due-date {
@@ -695,15 +691,15 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   margin-bottom: var(--space-0-5);
   cursor: pointer;
-  transition: background-color var(--transition-mouse) ease;
+  transition: border-color var(--transition-mouse) ease;
 }
 
 .portal .upcoming-tasks-list .task-item:hover {
-  background: var(--portal-bg-light);
+  border-color: var(--portal-border-color);
 }
 
 .portal .upcoming-tasks-list .task-item:last-child {
@@ -718,7 +714,7 @@
 }
 
 .portal .upcoming-tasks-list .task-item.empty:hover {
-  background: var(--portal-bg-medium);
+  border-color: var(--portal-border-color);
 }
 
 .portal .task-item-content {
@@ -772,28 +768,32 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   padding: var(--space-0-5) var(--space-1);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-darker);
+  background: transparent;
+  border: var(--portal-border);
   color: var(--portal-text-muted);
 }
 
 .portal :is(.task-priority, .task-priority-badge).task-priority-urgent {
-  background: var(--status-cancelled);
-  color: var(--portal-text-light);
+  background: transparent;
+  border-color: var(--status-cancelled);
+  color: var(--status-cancelled);
 }
 
 .portal :is(.task-priority, .task-priority-badge).task-priority-high {
-  background: var(--status-on-hold);
-  color: var(--portal-text-dark);
+  background: transparent;
+  border-color: var(--status-on-hold);
+  color: var(--status-on-hold);
 }
 
 .portal :is(.task-priority, .task-priority-badge).task-priority-medium {
-  background: var(--app-color-primary);
-  color: var(--portal-text-dark);
+  background: transparent;
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
 }
 
 .portal :is(.task-priority, .task-priority-badge).task-priority-low {
-  background: var(--portal-bg-darker);
+  background: transparent;
+  border-color: var(--portal-text-secondary);
   color: var(--portal-text-secondary);
 }
 
@@ -804,7 +804,7 @@
 }
 
 /* Responsive for upcoming tasks */
-@media (max-width: 480px) {
+@media (--small-mobile) {
   .portal .upcoming-tasks {
     padding: 0.75rem;
   }
@@ -835,13 +835,12 @@
    ===================================================== */
 .portal .portal-project-card {
   display: block;
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
 
 .portal .portal-project-card h3 {
@@ -883,12 +882,11 @@
    Used for invoice totals, stats summaries
    ===================================================== */
 .portal .summary-card {
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: var(--portal-border);
   padding: 11px 14px;
   color: var(--portal-text-light);
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
 
 .portal .summary-card .summary-label {
@@ -942,16 +940,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 14px;
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-sm);
-  border: none;
+  background: transparent;
+  border: var(--portal-border);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
 
 .portal :is(.list-item, .data-item, .report-item, .alert-item, .bundle-item, .history-request-item):hover {
-  background: var(--portal-bg-light);
+  border-color: var(--portal-border-color);
 }
 
 /* =====================================================
@@ -959,13 +956,12 @@
    Container for invoice history items
    ===================================================== */
 .portal .invoices-list {
-  background: var(--portal-bg-darker);
-  border: none;
-  border-radius: var(--portal-radius-sm, 8px);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
 
 .portal .invoices-list h3 {
@@ -978,9 +974,8 @@
 .portal .progress-card .progress-bar {
   width: 100%;
   height: 16px;
-  background: var(--portal-bg-light);
+  background: var(--portal-alpha-white-10);
   border: none;
-  border-radius: var(--portal-radius-md);
   margin: var(--space-2) 0;
   overflow: hidden;
 }
@@ -988,7 +983,6 @@
 .portal .progress-card .progress-fill {
   height: 100%;
   background: var(--color-primary);
-  border-radius: var(--portal-radius-md);
   transition: width var(--transition-normal) ease;
 }
 
@@ -1002,11 +996,11 @@
    Generic wrapper for content groups that need containment
    ===================================================== */
 .portal .content-section-card {
-  background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 .portal .content-section-card .section-title {
@@ -1038,7 +1032,6 @@
     .pending-approvals-section
   ) {
     padding: var(--space-2);
-    border-radius: var(--portal-radius-md);
   }
 
   /* Tighter gap on grids for mobile */
@@ -1059,7 +1052,7 @@
 }
 
 @media (--small-mobile) {
-  .portal .stat-card {
+  .portal :is(.stat-card, .tw-stat-card) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -1067,12 +1060,12 @@
     gap: 0.5rem;
   }
 
-  .portal .stat-card :is(.stat-number, .stat-value, .stat-card-value) {
+  .portal :is(.stat-card, .tw-stat-card) :is(.stat-number, .stat-value, .stat-card-value) {
     font-size: var(--font-size-lg);
     margin: 0;
   }
 
-  .portal .stat-card .stat-label {
+  .portal :is(.stat-card, .tw-stat-card) .stat-label {
     font-size: var(--font-size-xs);
     text-align: right;
     margin-top: 0;
@@ -1106,8 +1099,8 @@
    ===================================================== */
 .portal .dashboard-overview-card {
   padding: var(--space-6);
-  border-radius: var(--portal-radius-md);
-  background: var(--portal-bg-medium);
+  background: transparent;
+  border: var(--portal-border);
 }
 
 /* =====================================================
@@ -1142,19 +1135,18 @@
   gap: var(--space-1);
   padding: var(--space-4);
   min-height: 88px;
-  background: var(--portal-bg-dark);
-  border: none;
-  border-radius: var(--portal-radius-md);
+  background: transparent;
+  border: var(--portal-border);
   color: var(--portal-text-light);
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast);
   text-align: center;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 .portal .attention-card:hover {
-  background: var(--portal-bg-readonly);
+  border-color: var(--portal-border-color);
 }
 
 /* Attention icon container - no background, just colored icon */
@@ -1216,5 +1208,37 @@
 
   .portal .attention-count {
     font-size: 1.25rem;
+  }
+}
+
+/* =====================================================
+   INVOICE SUMMARY GRID
+   (Merged from client-portal/invoices.css)
+   ===================================================== */
+
+/* Invoice Summary Grid */
+.invoice-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-bottom: var(--space-3);
+}
+
+/* Summary Card - client-portal specific overrides */
+[data-page="client-portal"] .summary-card {
+  text-align: center;
+}
+
+/* No Invoices Message */
+.no-invoices-message {
+  color: var(--portal-text-secondary);
+  font-style: italic;
+  text-align: left;
+  padding: var(--space-2) 0;
+}
+
+/* Invoice Summary Responsive */
+@media (--compact-mobile) {
+  .invoice-summary {
+    grid-template-columns: 1fr;
   }
 }

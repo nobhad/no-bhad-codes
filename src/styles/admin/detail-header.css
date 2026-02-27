@@ -52,6 +52,47 @@
 }
 
 /* ===============================================
+   DETAIL VIEW CONTAINER (React)
+   Main wrapper for detail views with consistent spacing
+   =============================================== */
+
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+}
+
+.detail-meta .meta-item {
+  display: inline;
+}
+
+.detail-meta .meta-value {
+  color: var(--portal-text-secondary);
+}
+
+/* Dropdown danger item styling moved to shared/portal-dropdown.css */
+
+/* ===============================================
    MORE MENU DROPDOWN
    Three-dot menu for secondary actions
    High specificity to override .table-dropdown styles
@@ -73,7 +114,6 @@
   justify-content: center;
   background: transparent;
   border: 1px solid var(--portal-border-dark);
-  border-radius: var(--portal-radius-md);
   color: var(--portal-text-light);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -112,7 +152,6 @@
   list-style: none;
   margin: 0;
   padding: var(--space-0-5) 0;
-  border-radius: var(--portal-radius-md);
   box-shadow: var(--shadow-dropdown);
   z-index: 1000;
   overflow: visible;
@@ -300,11 +339,8 @@
 }
 
 @media (--small-mobile) {
+  /* On small mobile, buttons become icon-only - use .icon-btn or .btn-xs classes */
   .detail-actions .btn span {
     display: none;
-  }
-
-  .detail-actions .btn {
-    padding: var(--space-1);
   }
 }

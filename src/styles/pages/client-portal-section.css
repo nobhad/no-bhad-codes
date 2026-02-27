@@ -73,7 +73,6 @@ section.client-portal-section {
   margin: 0;
   padding: 0;
   border: none;
-  border-radius: 0;
   background-color: transparent;
   box-sizing: border-box;
   box-shadow: none;
@@ -137,47 +136,10 @@ section.client-portal-section {
   overflow: visible;
 }
 
-/* Portal sign-in button - exact match to toggle button sizing */
-section.client-portal-section .btn.btn-primary,
+/* Portal sign-in button - use .btn .btn-lg .btn-full classes */
 section.client-portal-section .portal-login-submit button,
 section.client-portal-section button[type="submit"] {
-  background-color: var(--color-border);
-  color: var(--color-text-inverse);
-  border: 3px solid var(--color-border);
-  border-radius: 0;
-  height: 60px;
-  padding: 0 1.5rem;
-  font-family: var(--font-family-acme);
-  font-size: 0.9rem;
-  font-weight: normal;
-  line-height: 60px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  box-shadow: none;
-  text-shadow: none;
-  outline: none;
-  width: 100%;
   max-width: 400px;
-}
-
-section.client-portal-section .btn.btn-primary:hover,
-section.client-portal-section .btn.btn-primary:focus,
-section.client-portal-section .portal-login-submit button:hover,
-section.client-portal-section .portal-login-submit button:focus,
-section.client-portal-section button[type="submit"]:hover,
-section.client-portal-section button[type="submit"]:focus {
-  background-color: var(--color-primary);
-  color: var(--color-black);
-  border: 3px solid var(--color-primary);
-  box-shadow: none;
-  outline: none;
-}
-
-/* Dark mode button */
-html[data-theme="dark"] .client-portal-section .btn.btn-primary {
-  background-color: var(--color-bg-inverse);
-  color: var(--color-text-inverse);
 }
 
 /* Password toggle in portal */

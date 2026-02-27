@@ -161,7 +161,6 @@ body[data-page="client-portal"] .dashboard-container.hidden * {
 /* Auth Gate Container */
 body[data-page="client-portal"] .auth-gate-container {
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-lg);
   border: none;
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
@@ -170,7 +169,7 @@ body[data-page="client-portal"] .auth-gate-container {
 }
 
 /* Mobile: Login container takes full width - edge to edge, transparent bg, no shadow */
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   body[data-page="client-portal"] .auth-gate {
     padding: 0;
     align-items: stretch;
@@ -179,7 +178,6 @@ body[data-page="client-portal"] .auth-gate-container {
   body[data-page="client-portal"] .auth-gate-container {
     max-width: 100%;
     width: 100%;
-    border-radius: 0;
     padding: var(--space-3);
     min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 40px));
     display: flex;
@@ -206,7 +204,7 @@ body[data-page="client-portal"] .auth-gate-header {
 }
 
 body[data-page="client-portal"] .auth-gate-header h1 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   color: var(--portal-text-light);
@@ -248,7 +246,6 @@ body[data-page="client-portal"] .auth-gate .auth-error {
   font-size: 0.875rem;
   margin-bottom: 1rem;
   padding: 0.75rem;
-  border-radius: var(--portal-radius-md, 8px);
   background-color: transparent;
   border: 1px solid var(--color-danger);
   font-weight: 500;
@@ -267,11 +264,10 @@ body[data-page="client-portal"] .auth-gate .auth-submit {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
   border: 2px solid var(--portal-border-light);
-  border-radius: var(--portal-radius-lg);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   letter-spacing: 1px;
   transition: all var(--transition-fast);
   text-transform: uppercase;
@@ -352,7 +348,7 @@ body[data-page="client-portal"] .auth-divider {
 }
 
 .client-login h1 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   text-align: center;
@@ -364,7 +360,6 @@ body[data-page="client-portal"] .auth-divider {
 .login-form {
   background: var(--portal-bg-dark);
   padding: clamp(1rem, 3vw, 2rem);
-  border-radius: var(--portal-radius-md);
   border: 1px solid var(--portal-border-medium);
   max-width: 100%;
   width: 100%;
@@ -428,19 +423,8 @@ body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:act
   transition: background-color 5000s ease-in-out 0s;
 }
 
+/* Login form button layout - styling via .btn-filled class */
 .login-form .btn {
-  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-sm);
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-  text-transform: uppercase;
-  box-sizing: border-box;
-  background-color: var(--color-primary);
-  color: var(--portal-text-light);
   margin-top: clamp(8px, 2vw, 16px);
 }
 
@@ -476,7 +460,6 @@ body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:act
 
 .set-password-card {
   background: var(--portal-bg-dark);
-  border-radius: var(--portal-radius-lg);
   border: none;
   padding: clamp(1.5rem, 4vw, 2.5rem);
   box-shadow: var(--shadow-button-dark);
@@ -491,7 +474,7 @@ body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:act
 }
 
 .set-password-header h1 {
-  font-family: var(--font-family-acme);
+  font-family: 'Inconsolata', 'JetBrains Mono', monospace;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   color: var(--portal-text-light);
@@ -524,7 +507,6 @@ body[data-page="client-portal"] .auth-gate-form .form-input:-webkit-autofill:act
   font-size: 0.875rem;
   padding: 0.75rem;
   background-color: var(--color-danger-bg);
-  border-radius: var(--portal-radius-lg);
   text-align: center;
 }
 

@@ -1,50 +1,32 @@
-/**
- * ===============================================
- * ADMIN - CLIENT DETAIL STYLES
- * ===============================================
- * @file src/styles/admin/client-detail.css
- *
- * Styles for the client detail view including:
- * - Client information display
- * - Billing details section
- * - Client projects list
- * - Edit modals
- */
+/* =====================================================
+   ADMIN - CLIENT DETAIL
+   Client information, billing, projects, CRM
+   Relies on: portal-cards.css, portal-layout.css, field-label-spacing.css
+   ===================================================== */
 
 /* Split modules */
 @import './cd-crm.css';
 
-/* ===============================================
-   CLIENT DETAIL VIEW
-   Matches project detail: shared rules live in project-detail.css
-   (page title, overview card, tab content transparent cards, h3, text colors).
-   This file only adds client-specific layout and components.
-   =============================================== */
+/* ==============================================
+   HEADER CARD
+   ============================================== */
 
-/* Header Card - scoped to admin client detail */
-[data-page="admin"] #tab-client-detail .cd-header-card {
+#tab-client-detail .cd-header-card {
   margin-bottom: var(--space-3);
   padding: var(--space-4) var(--space-5);
 }
 
-[data-page="admin"] #tab-client-detail .cd-header-card .detail-title-row {
-  margin-bottom: 0;
-}
+#tab-client-detail .cd-header-card .detail-title-row { margin-bottom: 0; }
+#tab-client-detail .cd-header-card .detail-title { margin: 0; font-size: var(--font-size-xl); }
 
-[data-page="admin"] #tab-client-detail .cd-header-card .detail-title {
-  margin: 0;
-  font-size: var(--font-size-xl);
-}
-
-/* Header Contact Row - inline contact info with icons */
-[data-page="admin"] #tab-client-detail .header-contact-row {
+.header-contact-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
   margin-top: var(--space-3);
 }
 
-[data-page="admin"] #tab-client-detail .contact-inline-item {
+.contact-inline-item {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -52,13 +34,9 @@
   color: var(--portal-text-secondary);
 }
 
-[data-page="admin"] #tab-client-detail .contact-inline-item svg {
-  color: var(--portal-text-muted);
-  flex-shrink: 0;
-}
+.contact-inline-item svg { color: var(--portal-text-muted); flex-shrink: 0; }
 
-/* Header Account Row - uses unified .meta-item, .field-label, .meta-value */
-[data-page="admin"] #tab-client-detail .header-account-row {
+.header-account-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
@@ -67,14 +45,11 @@
   border-top: 1px solid var(--portal-border-dark);
 }
 
-[data-page="admin"] #tab-client-detail .header-account-row .meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+/* ==============================================
+   HEADER TAGS
+   ============================================== */
 
-/* Header Tags Container - unified pattern */
-:is([data-page="admin"], [data-page="client-portal"]) .header-tags-container {
+.header-tags-container {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -83,14 +58,14 @@
   border-top: 1px solid var(--portal-border-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .header-tags-container:empty {
+.header-tags-container:empty {
   display: none;
   margin-top: 0;
   padding-top: 0;
   border-top: none;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .header-tags-container .tag-input-wrapper {
+.header-tags-container .tag-input-wrapper {
   background: var(--portal-bg-medium);
   border: 1px solid var(--portal-border-dark);
   border-radius: var(--border-radius-md);
@@ -99,48 +74,31 @@
   width: 100%;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .header-tags-container .tag-input-wrapper:focus-within {
+.header-tags-container .tag-input-wrapper:focus-within {
   border-color: var(--portal-accent);
   background: var(--portal-bg-darker);
 }
 
-/* Two-Column Overview Grid - uses unified .overview-grid, .overview-col-main, .overview-col-aside from portal-layout.css */
-/* Additional client-detail specific overrides only */
-[data-page="admin"] #tab-client-detail .overview-grid {
-  grid-template-columns: 1fr 300px;
-}
+/* ==============================================
+   OVERVIEW GRID
+   ============================================== */
 
-/* Cards in all client detail tabs - consistent padding */
-[data-page="admin"] #tab-client-detail .portal-project-card {
-  padding: var(--space-4);
-}
+#tab-client-detail .overview-grid { grid-template-columns: 1fr 300px; }
+#tab-client-detail .portal-project-card { padding: var(--space-4); }
 
-/* Card header with action - uses unified rule from portal-cards.css */
-
-/* Contact Info Grid - CRM details section */
-[data-page="admin"] #tab-client-detail .cd-contact-grid {
+.cd-contact-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--portal-section-gap) var(--space-4);
 }
 
-[data-page="admin"] #tab-client-detail .cd-contact-grid .meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--field-label-value-gap);
-}
+.cd-projects-summary { min-height: 60px; }
 
-/* Contact grid uses unified .field-label and .meta-value from portal-cards.css */
+/* ==============================================
+   PROJECT ITEM COMPACT
+   ============================================== */
 
-/* Projects Summary in Overview */
-[data-page="admin"] #tab-client-detail .cd-projects-summary {
-  min-height: 60px;
-}
-
-/* Compact Projects List - reusable pattern */
-/* Uses utility classes: flex flex-col gap-2 */
-
-:is([data-page="admin"], [data-page="client-portal"]) .project-item-compact {
+.project-item-compact {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -151,18 +109,16 @@
   transition: background var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .project-item-compact:hover {
-  background: var(--portal-bg-darker);
-}
+.project-item-compact:hover { background: var(--portal-bg-darker); }
 
-:is([data-page="admin"], [data-page="client-portal"]) .project-item-info {
+.project-item-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .project-item-name {
+.project-item-name {
   font-size: var(--font-size-sm);
   color: var(--portal-text-light);
   white-space: nowrap;
@@ -170,37 +126,30 @@
   text-overflow: ellipsis;
 }
 
-/* Project progress bar - unified pattern */
-:is([data-page="admin"], [data-page="client-portal"]) .project-progress-bar-wrapper {
+.project-progress-bar-wrapper {
   height: 3px;
   background: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-xs);
   overflow: hidden;
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .project-progress-bar-fill {
+.project-progress-bar-fill {
   height: 100%;
   background: var(--portal-accent);
-  border-radius: var(--portal-radius-xs);
 }
 
+/* ==============================================
+   HEALTH STATS CARD
+   ============================================== */
 
-/* ===============================================
-   HEALTH & STATS SIDEBAR CARD
-   =============================================== */
+#tab-client-detail .cd-health-stats-card { padding: var(--space-4) !important; }
 
-[data-page="admin"] #tab-client-detail .cd-health-stats-card {
-  padding: var(--space-4) !important;
-}
-
-/* Health Score - Large Badge */
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-score-container {
+.health-score-container {
   display: flex;
   justify-content: center;
   margin-bottom: var(--space-3);
 }
 
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-score-badge {
+.health-score-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -214,14 +163,13 @@
   letter-spacing: 0.05em;
 }
 
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-score-value {
-  font-size: 2rem;
+.health-score-value {
+  font-size: var(--font-size-3xl);
   line-height: 1;
   margin-bottom: 2px;
 }
 
-/* Health Factors - 2x2 Grid */
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-factors {
+.health-factors {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
@@ -230,7 +178,7 @@
   border-top: 1px solid var(--portal-border-dark);
 }
 
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-factor {
+.health-factor {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
@@ -239,25 +187,21 @@
   border-radius: var(--border-radius-sm);
 }
 
-/* Health factor label - styling from unified rule in portal-cards.css */
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-factor-label {
-  text-align: center;
-}
+.health-factor-label { text-align: center; }
 
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-factor-bar {
+.health-factor-bar {
   height: 4px;
   background: var(--portal-bg-darker);
-  border-radius: var(--portal-radius-xs);
   overflow: hidden;
 }
 
-[data-page="admin"] #tab-client-detail .cd-health-stats-card .health-factor-fill {
-  height: 100%;
-  border-radius: var(--portal-radius-xs);
-}
+.health-factor-fill { height: 100%; }
 
-/* Compact Stats - 2x2 Grid Below Health - unified pattern */
-:is([data-page="admin"], [data-page="client-portal"]) .stats-compact {
+/* ==============================================
+   COMPACT STATS
+   ============================================== */
+
+.stats-compact {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
@@ -266,58 +210,37 @@
   border-top: 1px solid var(--portal-border-dark);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stats-compact .stat-item {
+.stats-compact .stat-item {
   text-align: center;
   padding: var(--space-2);
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .stats-compact .stat-value {
+.stats-compact .stat-value {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   line-height: 1.2;
 }
 
-/* Stat label - uses unified .field-label from portal-cards.css */
-:is([data-page="admin"], [data-page="client-portal"]) .stats-compact .field-label {
-  margin-top: 2px;
-}
+.stats-compact .field-label { margin-top: 2px; }
 
-/* ===============================================
-   RECENT ACTIVITY - Unified pattern
-   Uses .activity-item, .activity-icon, etc. from portal-cards.css
-   Only layout overrides here for client detail context
-   =============================================== */
+/* ==============================================
+   RECENT ACTIVITY
+   ============================================== */
 
-/* Compact activity list - reusable pattern */
-/* Uses utility classes: flex flex-col gap-2 */
-
-/* Smaller activity items for compact lists */
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity-list .activity-item {
+.recent-activity-list .activity-item {
   padding: var(--space-2);
   background: var(--portal-bg-medium);
   border-radius: var(--border-radius-sm);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity-list .activity-icon {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-}
+.recent-activity-list .activity-icon { width: 24px; height: 24px; min-width: 24px; }
+.recent-activity-list .activity-icon svg { width: 12px; height: 12px; }
+.recent-activity-list .activity-title { font-size: var(--font-size-xs); }
 
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity-list .activity-icon svg {
-  width: 12px;
-  height: 12px;
-}
-
-:is([data-page="admin"], [data-page="client-portal"]) .recent-activity-list .activity-title {
-  font-size: var(--font-size-xs);
-}
-
-/* View all activity link */
-:is([data-page="admin"], [data-page="client-portal"]) .activity-view-all {
+.activity-view-all {
   display: block;
   margin-top: var(--space-3);
   padding-top: var(--space-2);
@@ -329,189 +252,76 @@
   transition: color var(--transition-fast);
 }
 
-:is([data-page="admin"], [data-page="client-portal"]) .activity-view-all:hover {
-  color: var(--portal-accent-hover);
-}
+.activity-view-all:hover { color: var(--portal-accent-hover); }
 
-/* Full-Width Recent Activity - spans both grid columns */
-[data-page="admin"] #tab-client-detail .cd-recent-activity-full {
-  grid-column: 1 / -1;
-}
+#tab-client-detail .cd-recent-activity-full { grid-column: 1 / -1; }
 
-[data-page="admin"] #tab-client-detail .cd-recent-activity-full .recent-activity-list {
+#tab-client-detail .cd-recent-activity-full .recent-activity-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-[data-page="admin"] #tab-client-detail .cd-recent-activity-full .activity-item {
-  padding: var(--space-3);
-}
+#tab-client-detail .cd-recent-activity-full .activity-item { padding: var(--space-3); }
+#tab-client-detail .cd-recent-activity-full .activity-title { white-space: normal; font-size: var(--font-size-sm); }
+#tab-client-detail .cd-recent-activity-full .activity-time { font-size: var(--font-size-xs); }
 
-[data-page="admin"] #tab-client-detail .cd-recent-activity-full .activity-title {
-  white-space: normal;
-  font-size: var(--font-size-sm);
-}
+/* ==============================================
+   CRM INFO GRID
+   ============================================== */
 
-[data-page="admin"] #tab-client-detail .cd-recent-activity-full .activity-time {
-  font-size: var(--font-size-xs);
-}
-
-/* Client detail tab panels - uses base .portal-tab-panel from portal-tabs.css */
-
-@media (--tablet-landscape) {
-  [data-page="admin"] #tab-client-detail .overview-grid {
-    grid-template-columns: 1fr;
-  }
-
-  [data-page="admin"] #tab-client-detail .overview-col-aside {
-    position: static;
-  }
-
-  [data-page="admin"] #tab-client-detail .cd-contact-grid,
-  [data-page="admin"] .billing-summary {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Mobile - prevent overflow and adjust card layouts */
-@media (--mobile) {
-  /* Health stats card - smaller badge on mobile */
-  [data-page="admin"] #tab-client-detail .cd-health-stats-card .health-score-badge {
-    width: 80px;
-    height: 80px;
-  }
-
-  [data-page="admin"] #tab-client-detail .cd-health-stats-card .health-score-value {
-    font-size: 1.5rem;
-  }
-
-  /* Compact stats - stack on very small screens */
-  :is([data-page="admin"], [data-page="client-portal"]) .stats-compact {
-    gap: var(--space-1);
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .stats-compact .stat-item {
-    padding: var(--space-1-5);
-  }
-
-  :is([data-page="admin"], [data-page="client-portal"]) .stats-compact .stat-value {
-    font-size: var(--font-size-sm);
-  }
-
-  /* Header card - reduce padding */
-  [data-page="admin"] #tab-client-detail .cd-header-card {
-    padding: var(--space-3);
-  }
-
-  [data-page="admin"] #tab-client-detail .header-contact-row {
-    gap: var(--space-2);
-  }
-
-  [data-page="admin"] #tab-client-detail .header-account-row {
-    gap: var(--space-2);
-  }
-}
-
-/* Account Actions moved to header More Menu - styles deprecated */
-
-/* Labels & meta items - uses unified rules from portal-cards.css */
-
-/* CRM / billing info grid: same as project detail meta layout */
 #tab-client-detail .crm-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4);
 }
 
-@media (--mobile) {
-  #tab-client-detail .crm-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* ==============================================
+   CLICKABLE ELEMENTS
+   ============================================== */
 
-/* .empty-state, .loading-state, .error-state styling from components/loading.css */
-
-/* Clickable links in meta values - scoped to admin */
-[data-page="admin"] .clickable-link {
+.clickable-link {
   color: var(--portal-accent);
   cursor: pointer;
   transition: color var(--transition-fast);
 }
 
-[data-page="admin"] .clickable-link:hover {
+.clickable-link:hover {
   color: var(--portal-accent-hover, var(--portal-accent));
   text-decoration: underline;
 }
 
-/* Clickable client items in project details - scoped to admin */
-[data-page="admin"] .clickable-client {
+.clickable-client {
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }
 
-[data-page="admin"] .clickable-client:hover {
-  opacity: 0.8;
-}
+.clickable-client:hover { opacity: 0.8; }
+.clickable-client:hover .meta-value { color: var(--portal-accent); text-decoration: underline; }
 
-[data-page="admin"] .clickable-client:hover .meta-value {
-  color: var(--portal-accent);
-  text-decoration: underline;
-}
-
-/* Back button in client detail - scoped to admin */
-[data-page="admin"] .btn-back {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-md);
-  padding: var(--space-2) var(--space-3);
-  background: transparent;
-  border: 1px solid var(--portal-border-dark);
-  border-radius: var(--border-radius-md);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+/* .btn-back: portal-buttons.css - only layout overrides here */
+.client-detail .btn-back {
   margin-right: var(--space-3);
 }
 
-[data-page="admin"] .btn-back:hover {
-  background: var(--portal-bg-lighter);
-  border-color: var(--portal-border-light);
-}
+/* ==============================================
+   CLIENT PROJECT ITEMS
+   ============================================== */
 
-[data-page="admin"] .btn-back svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Client projects list in client detail - scoped to admin */
-/* Uses utility classes: flex flex-col gap-2 */
-
-[data-page="admin"] .client-project-item {
+.client-project-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-1-5);
   background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--portal-radius-md);
   margin-bottom: var(--space-1);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-[data-page="admin"] .client-project-item:hover {
-  background: var(--portal-bg-darker);
-}
+.client-project-item:hover { background: var(--portal-bg-darker); }
+.client-project-item .project-name { color: var(--portal-text-light); font-weight: var(--font-weight-medium); }
 
-/* Uses utility classes: flex flex-col gap-1 */
-
-[data-page="admin"] .client-project-item .project-name {
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-medium);
-}
-
-[data-page="admin"] .client-project-item .project-status {
+.client-project-item .project-status {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -520,7 +330,7 @@
   text-transform: capitalize;
 }
 
-[data-page="admin"] .client-project-item .project-status::before {
+.client-project-item .project-status::before {
   content: '';
   width: 8px;
   height: 8px;
@@ -529,48 +339,28 @@
   flex-shrink: 0;
 }
 
-/* Status dot colors - uses centralized status variables from colors.css */
-[data-page="admin"] .client-project-item .project-status.status-active::before,
-[data-page="admin"] .client-project-item .project-status.status-in-progress::before {
-  background: var(--status-active);
-}
+/* Status dot colors */
+.client-project-item .project-status.status-active::before,
+.client-project-item .project-status.status-in-progress::before { background: var(--status-active); }
 
-[data-page="admin"] .client-project-item .project-status.status-pending::before,
-[data-page="admin"] .client-project-item .project-status.status-new::before,
-[data-page="admin"] .client-project-item .project-status.status-on-hold::before {
-  background: var(--status-pending);
-}
+.client-project-item .project-status.status-pending::before,
+.client-project-item .project-status.status-new::before,
+.client-project-item .project-status.status-on-hold::before { background: var(--status-pending); }
 
-[data-page="admin"] .client-project-item .project-status.status-completed::before {
-  background: var(--status-completed);
-}
+.client-project-item .project-status.status-completed::before { background: var(--status-completed); }
 
-[data-page="admin"] .client-project-item .project-status.status-cancelled::before,
-[data-page="admin"] .client-project-item .project-status.status-archived::before {
-  background: var(--status-cancelled);
-}
+.client-project-item .project-status.status-cancelled::before,
+.client-project-item .project-status.status-archived::before { background: var(--status-cancelled); }
 
-[data-page="admin"] .client-project-item .project-date {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-}
+.client-project-item .project-date { color: var(--portal-text-secondary); font-size: var(--font-size-sm); }
 
-/* Client account actions moved to header More Menu - styles deprecated */
+/* ==============================================
+   BILLING
+   ============================================== */
 
-/* Danger button variant - scoped to admin */
-[data-page="admin"] .btn-danger {
-  background: transparent;
-  border: 1px solid var(--color-danger);
-  color: var(--color-danger);
-}
+/* .btn-danger: portal-buttons.css */
 
-[data-page="admin"] .btn-danger:hover {
-  background: var(--color-danger);
-  color: var(--color-white);
-}
-
-/* Billing details section - scoped to admin */
-[data-page="admin"] .billing-summary {
+.billing-summary {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -578,7 +368,7 @@
   margin-bottom: var(--space-4);
 }
 
-[data-page="admin"] .billing-summary > .meta-item {
+.billing-summary > .meta-item {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -587,101 +377,77 @@
   gap: 0.25rem;
 }
 
-/* Uses utility classes: flex flex-col gap-1 */
-
-/* Billing label - styling from unified rule in portal-cards.css */
-
-[data-page="admin"] .billing-value {
+.billing-value {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
-/* Client invoices list - scoped to admin */
-/* Uses utility classes: flex flex-col gap-2 */
+/* ==============================================
+   CLIENT INVOICES
+   ============================================== */
 
-[data-page="admin"] .client-invoice-item {
+.client-invoice-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-1-5);
   background: var(--portal-bg-medium);
-  border: none;
-  border-radius: var(--portal-radius-md);
   margin-bottom: var(--space-1);
   transition: background var(--transition-fast);
 }
 
-[data-page="admin"] .client-invoice-item:hover {
-  background: var(--portal-bg-darker);
-}
+.client-invoice-item:hover { background: var(--portal-bg-darker); }
+.client-invoice-item .invoice-number { color: var(--portal-text-light); font-weight: var(--font-weight-medium); }
+.client-invoice-item .invoice-date { color: var(--portal-text-secondary); font-size: var(--font-size-sm); }
+.client-invoice-item .invoice-amount { font-weight: var(--font-weight-semibold); color: var(--portal-text-light); }
+.client-invoice-item .invoice-status { font-size: var(--font-size-sm); text-transform: capitalize; }
+.client-invoice-item .invoice-status.status-paid { color: var(--color-success); }
+.client-invoice-item .invoice-status.status-pending { color: var(--color-warning); }
+.client-invoice-item .invoice-status.status-overdue { color: var(--color-danger); }
 
-/* Uses utility classes: flex flex-col gap-1 */
-
-[data-page="admin"] .client-invoice-item .invoice-number {
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-medium);
-}
-
-[data-page="admin"] .client-invoice-item .invoice-date {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-[data-page="admin"] .client-invoice-item .invoice-amount {
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
-}
-
-[data-page="admin"] .client-invoice-item .invoice-status {
-  font-size: var(--font-size-sm);
-  text-transform: capitalize;
-}
-
-[data-page="admin"] .client-invoice-item .invoice-status.status-paid {
-  color: var(--color-success);
-}
-
-[data-page="admin"] .client-invoice-item .invoice-status.status-pending {
-  color: var(--color-warning);
-}
-
-[data-page="admin"] .client-invoice-item .invoice-status.status-overdue {
-  color: var(--color-danger);
-}
-
-@media (--mobile) {
-  [data-page="admin"] .billing-summary {
-    flex-direction: column;
-  }
-}
-
-/* Billing info grid - scoped to admin */
-[data-page="admin"] .billing-info-grid {
+.billing-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4);
 }
 
-@media (--mobile) {
-  [data-page="admin"] .billing-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Card header with action - uses unified rule from portal-cards.css */
-
-/* Overview header with edit button - scoped to admin */
-[data-page="admin"] .overview-header {
+.overview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* Modal form labels - inherits from label variables */
+/* Modal form labels */
 .admin-modal .form-group label {
   display: block;
   margin-bottom: var(--space-2);
 }
 
-/* CRM styles moved to cd-crm.css */
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+
+@media (--tablet-landscape) {
+  #tab-client-detail .overview-grid { grid-template-columns: 1fr; }
+  #tab-client-detail .overview-col-aside { position: static; }
+  .cd-contact-grid,
+  .billing-summary { grid-template-columns: 1fr; }
+}
+
+@media (--mobile) {
+  .health-score-badge { width: 80px; height: 80px; }
+  .health-score-value { font-size: var(--font-size-2xl); }
+
+  .stats-compact { gap: var(--space-1); }
+  .stats-compact .stat-item { padding: var(--space-1-5); }
+  .stats-compact .stat-value { font-size: var(--font-size-sm); }
+
+  #tab-client-detail .cd-header-card { padding: var(--space-3); }
+  .header-contact-row { gap: var(--space-2); }
+  .header-account-row { gap: var(--space-2); }
+
+  #tab-client-detail .crm-info-grid { grid-template-columns: 1fr; }
+  .billing-summary { flex-direction: column; }
+  .billing-info-grid { grid-template-columns: 1fr; }
+}
