@@ -8,6 +8,67 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
+### UI Factory Pattern System - COMPLETE
+
+Implemented a comprehensive factory system for UI components (icons, buttons, badges, states) across vanilla TypeScript and React.
+
+**Completed (Feb 26, 2026):**
+
+- [x] Created `src/factories/` directory structure
+- [x] Created core constants (`ICON_SIZES`, `CONTEXT_DEFAULTS`, `UI_CONTEXTS`)
+- [x] Created TypeScript interfaces (`IconConfig`, `ButtonConfig`, `BadgeConfig`, etc.)
+- [x] Created icon registry with 60+ icons including paths, categories, and aliases
+- [x] Created icon factory (`renderIcon`, `getIconSvg`, `createIconElement`)
+- [x] Created button actions registry (40+ actions with icons, titles, aria-labels)
+- [x] Created button sets for common patterns (CRUD, file actions, approval, etc.)
+- [x] Created button factory (`renderButton`, `renderButtonGroup`, `renderActionsCell`)
+- [x] Created badge factory (`renderBadge`, `renderDot`)
+- [x] Created state factory (`renderEmptyState`, `renderLoadingState`, `renderErrorState`)
+- [x] Created React IconButton component with action-based rendering
+- [x] Created React hooks (`useButtonFactory`, `useIconSize`, `useTableActions`)
+- [x] Created React StatusBadge and StateDisplay components
+- [x] Migrated existing components to use factory internally
+- [x] Migrated 19 admin React tables to use IconButton
+- [x] Added `@factories` path alias to tsconfig.json and vite.config.ts
+- [x] Created comprehensive documentation (`docs/design/FACTORY_SYSTEM.md`)
+
+**Directory Structure:**
+
+```text
+src/factories/
+├── index.ts                    # Central export hub
+├── types.ts                    # Shared TypeScript interfaces
+├── constants.ts                # UI constants (sizes, contexts)
+├── icons/
+│   ├── icon-factory.ts         # Core icon rendering
+│   └── icon-registry.ts        # Icon definitions (60+ icons)
+├── buttons/
+│   ├── button-factory.ts       # Core button rendering
+│   ├── button-actions.ts       # Action definitions (40+)
+│   └── button-sets.ts          # Predefined button combinations
+└── components/
+    ├── badge-factory.ts        # Status badges
+    └── state-factory.ts        # Empty/loading/error states
+
+src/react/factories/
+├── index.ts                    # React factory exports
+├── IconButton.tsx              # React icon button component
+├── useFactory.ts               # React hooks
+├── StatusBadge.tsx             # React badge components
+└── StateDisplay.tsx            # React state components
+```
+
+**Key Features:**
+
+| Feature | Description |
+|---------|-------------|
+| Context-aware sizing | Tables: 18px icons, Modals: 24px icons |
+| Action registry | 40+ predefined actions with icons/titles |
+| Button sets | Predefined combinations (CRUD, file, approval) |
+| React integration | IconButton component, hooks for tables |
+
+---
+
 ### Admin Portal Security Audit - XSS Fixes - COMPLETE
 
 Comprehensive security audit of innerHTML assignments identified and fixed XSS vulnerabilities.
@@ -39,6 +100,45 @@ Comprehensive security audit of innerHTML assignments identified and fixed XSS v
 |--------|--------|-------|
 | Unescaped user data in innerHTML | 12+ instances | 0 |
 | Security Grade | B- (72/100) | B+ (85/100) |
+
+---
+
+### CSRF Token Protection - COMPLETE
+
+Implemented full CSRF (Cross-Site Request Forgery) protection for all API state-changing requests.
+
+**Completed (Feb 26, 2026):**
+
+- [x] Added CSRF token cookie middleware to `server/app.ts`
+- [x] Applied `csrfProtection` middleware to all `/api` routes
+- [x] Updated `src/utils/api-client.ts` with CSRF token extraction and header injection
+- [x] Updated CORS config to allow `x-csrf-token` header
+
+**Implementation Details:**
+
+| Component | File | Description |
+|-----------|------|-------------|
+| Cookie Setter | `server/app.ts` | Sets `csrf-token` cookie (JS-readable) on first request |
+| Validation | `server/middleware/security.ts` | Validates `x-csrf-token` header matches cookie |
+| Client Extraction | `src/utils/api-client.ts` | `getCsrfToken()` reads cookie value |
+| Header Injection | `src/utils/api-client.ts` | `addCsrfHeader()` adds token to POST/PUT/DELETE |
+
+**Endpoints Exempt from CSRF:**
+
+| Endpoint Pattern | Reason |
+|------------------|--------|
+| `/webhooks/*` | Uses signature verification |
+| `/uploads` (POST) | FormData uploads |
+| `/intake` | Public form submission |
+
+**Security Flow:**
+
+```text
+1. Client makes first request → Server sets csrf-token cookie
+2. Client reads csrf-token cookie via JavaScript
+3. Client sends x-csrf-token header with POST/PUT/DELETE
+4. Server validates header matches cookie → Request proceeds
+```
 
 ---
 
