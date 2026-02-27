@@ -764,14 +764,14 @@ router.post(
     const requests = await Promise.all(requestIds.map((id: number) => adHocRequestService.getRequest(Number(id))));
 
     const [first] = requests;
-    const sameProject = requests.every((req) => req.projectId === first.projectId);
-    const sameClient = requests.every((req) => req.clientId === first.clientId);
+    const sameProject = requests.every((r) => r.projectId === first.projectId);
+    const sameClient = requests.every((r) => r.clientId === first.clientId);
 
     if (!sameProject || !sameClient) {
       return errorResponse(res, 'All requests must belong to the same project and client', 400, 'VALIDATION_ERROR');
     }
 
-    const incomplete = requests.find((req) => req.status !== 'completed');
+    const incomplete = requests.find((r) => r.status !== 'completed');
     if (incomplete) {
       return errorResponse(
         res,

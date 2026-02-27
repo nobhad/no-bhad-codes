@@ -20,6 +20,7 @@ import { notDeleted } from '../database/query-helpers.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
 import { notificationPreferencesService } from '../services/notification-preferences-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { clientService } from '../services/client-service.js';
 
 const router = express.Router();
 
@@ -1051,8 +1052,6 @@ router.delete(
 // =====================================================
 // CRM ENHANCEMENT ENDPOINTS
 // =====================================================
-
-import { clientService } from '../services/client-service.js';
 
 // =====================================================
 // CONTACT MANAGEMENT
