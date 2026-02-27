@@ -26,6 +26,9 @@ import {
   type SecondarySidebarController
 } from '../../components/secondary-sidebar';
 import { renderEmptyState } from '../../components/empty-state';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('AdminProjectDetails');
 
 // Import from sub-modules
 import {
@@ -620,7 +623,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
     // Find the project in data
     const project = projectsData.find((p: ProjectResponse) => p.id === projectId);
     if (!project) {
-      console.error('[AdminProjectDetails] Project not found:', projectId);
+      logger.error(' Project not found:', projectId);
       return;
     }
 
@@ -728,7 +731,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
           alertError('Failed to update project notes');
         }
       } catch (error) {
-        console.error('[ProjectDetails] Error updating notes:', error);
+        logger.error(' Error updating notes:', error);
         const { alertError } = await import('../../utils/confirm-dialog');
         alertError('Error updating project notes');
       }
