@@ -423,10 +423,10 @@ class FileService {
         if (parentId === folderId) {
           throw new Error('Cannot move folder into its own subfolder');
         }
-        const parent: { parent_folder_id: number | null } | undefined = await db.get(
+        const parent = await db.get(
           'SELECT parent_folder_id FROM file_folders WHERE id = ?',
           [parentId]
-        );
+        ) as { parent_folder_id: number | null } | undefined;
         parentId = parent?.parent_folder_id ?? null;
       }
     }

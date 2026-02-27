@@ -22,8 +22,10 @@ export type SqlParam = string | number | boolean | null | undefined;
 type SqlParams = SqlParam[];
 
 interface TransactionContext {
-  get<T = DatabaseRow>(sql: string, params?: SqlParams): Promise<T | undefined>;
-  all<T = DatabaseRow>(sql: string, params?: SqlParams): Promise<T[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get<T = any>(sql: string, params?: SqlParams): Promise<T | undefined>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  all<T = any>(sql: string, params?: SqlParams): Promise<T[]>;
   run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
 }
 
