@@ -15,8 +15,42 @@ import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { createEmptyState, createErrorState } from '../../../components/empty-state';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { getReactComponent } from '../../../react/registry';
 
 const INVOICES_API_BASE = '/api/invoices';
+
+// Track React unmount function
+let reactUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal invoices should be used
+ */
+function shouldUseReactPortalInvoices(): boolean {
+  const component = getReactComponent('portalInvoices');
+  if (!component) return false;
+
+  // Check URL parameter for vanilla fallback
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_invoices') === 'true') return false;
+
+  // Check localStorage flag
+  const flag = localStorage.getItem('feature_react_portal_invoices');
+  if (flag === 'false') return false;
+
+  // Default: enabled
+  return true;
+}
+
+/**
+ * Cleanup React portal invoices
+ */
+export function cleanupPortalInvoices(): void {
+  if (reactUnmountFn) {
+    reactUnmountFn();
+    reactUnmountFn = null;
+  }
+}
 
 /**
  * Load invoices from API and render the list
@@ -28,8 +62,36 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
 
   if (!invoicesContainer) return;
 
+  // Check if React component should be used
+  if (shouldUseReactPortalInvoices()) {
+    const component = getReactComponent('portalInvoices');
+    if (component) {
+      // Hide vanilla summary cards - React renders its own
+      const summaryContainer = document.querySelector('.invoices-summary');
+      if (summaryContainer) {
+        (summaryContainer as HTMLElement).style.display = 'none';
+      }
+
+      // Mount React component
+      const unmountResult = component.mount(invoicesContainer as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
+
   // Show loading state - remove existing table or items
-  const existingTable = invoicesContainer.querySelector('.invoices-table');
+  const existingTable = invoicesContainer.querySelector('.data-table');
   if (existingTable) existingTable.remove();
   const noInvoicesMsg = invoicesContainer.querySelector('.no-invoices-message');
   if (noInvoicesMsg) noInvoicesMsg.remove();
@@ -90,7 +152,7 @@ function renderInvoicesList(
   ctx: ClientPortalContext
 ): void {
   // Clear existing content
-  const existingTable = container.querySelector('.invoices-table');
+  const existingTable = container.querySelector('.data-table');
   if (existingTable) existingTable.remove();
 
   const noInvoicesMsg = container.querySelector('.no-invoices-message');
@@ -122,7 +184,7 @@ function renderInvoicesList(
     return `
       <tr data-invoice-id="${invoice.id}">
         <td class="name-cell" data-label="Invoice">${ctx.escapeHtml(invoice.invoice_number)}</td>
-        <td data-label="Project">${ctx.escapeHtml(invoice.project_name || 'Project')}</td>
+        <td class="name-cell" data-label="Project">${ctx.escapeHtml(invoice.project_name || 'Project')}</td>
         <td class="date-cell" data-label="Date">${ctx.formatDate(invoice.created_at)}</td>
         <td class="amount-cell" data-label="Amount">${formatCurrency(invoice.amount_total)}</td>
         <td class="status-cell" data-label="Status">${getStatusBadgeHTML(statusLabel, invoice.status)}</td>
@@ -144,25 +206,39 @@ function renderInvoicesList(
 
   // Create table HTML
   const tableHtml = `
-    <table class="admin-table invoices-table" aria-label="Invoices">
-      <thead>
-        <tr>
-          <th scope="col" class="name-col">Invoice #</th>
-          <th scope="col">Project</th>
-          <th scope="col" class="date-col">Date</th>
-          <th scope="col" class="amount-col">Amount</th>
-          <th scope="col" class="status-col">Status</th>
-          <th scope="col" class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="portal-invoices-body">
-        ${tableRows}
-      </tbody>
-    </table>
+    <div class="data-table-scroll-wrapper">
+      <table class="data-table" aria-label="Invoices">
+        <thead>
+          <tr>
+            <th scope="col" class="name-col">Invoice #</th>
+            <th scope="col" class="name-col">Project</th>
+            <th scope="col" class="date-col">Date</th>
+            <th scope="col" class="amount-col">Amount</th>
+            <th scope="col" class="status-col">Status</th>
+            <th scope="col" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="portal-invoices-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>
   `;
 
   container.insertAdjacentHTML('beforeend', tableHtml);
   attachInvoiceActionListeners(container, ctx);
+
+  // Initialize keyboard navigation
+  initTableKeyboardNav({
+    tableSelector: '#portal-invoices-body',
+    rowSelector: 'tr[data-invoice-id]',
+    onRowSelect: (row) => {
+      const previewBtn = row.querySelector('.btn-preview-invoice') as HTMLButtonElement;
+      if (previewBtn) previewBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 }
 
 /**

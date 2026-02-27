@@ -12,6 +12,36 @@ import { apiFetch, apiPost, parseJsonResponse } from '../../../utils/api-client'
 import { showToast } from '../../../utils/toast-notifications';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { getReactComponent } from '../../../react/registry';
+
+// Track React unmount function
+let reactApprovalsUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal approvals should be used
+ */
+function shouldUseReactPortalApprovals(): boolean {
+  const component = getReactComponent('portalApprovals');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_approvals') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_approvals');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal approvals
+ */
+export function cleanupPortalApprovals(): void {
+  if (reactApprovalsUnmountFn) {
+    reactApprovalsUnmountFn();
+    reactApprovalsUnmountFn = null;
+  }
+}
 
 // ============================================
 // TYPES
@@ -89,6 +119,27 @@ export async function loadClientApprovals(): Promise<void> {
   const list = el('client-approvals-list');
   if (!section || !list) return;
 
+  // Check if React component should be used
+  if (shouldUseReactPortalApprovals()) {
+    const component = getReactComponent('portalApprovals');
+    if (component) {
+      // Mount React component
+      const unmountResult = component.mount(list as HTMLElement, {
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactApprovalsUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
+
   try {
     const res = await apiFetch(`${APPROVALS_API}/pending`);
     if (!res.ok) {
@@ -154,7 +205,7 @@ function renderApprovalsList(): void {
           </div>
         </div>
         <div class="approval-actions">
-          <button type="button" class="btn btn-primary btn-sm approval-review-btn" data-request-id="${approval.request_id}" data-entity-type="${approval.entity_type}" data-entity-id="${approval.entity_id}">
+          <button type="button" class="btn btn-primary btn-xs approval-review-btn" data-request-id="${approval.request_id}" data-entity-type="${approval.entity_type}" data-entity-id="${approval.entity_id}">
             Review
           </button>
         </div>

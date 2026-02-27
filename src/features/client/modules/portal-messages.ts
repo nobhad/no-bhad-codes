@@ -14,6 +14,36 @@ import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { confirmDanger, promptDialog } from '../../../utils/confirm-dialog';
+import { getReactComponent } from '../../../react/registry';
+
+// Track React unmount function
+let reactMessagesUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal messages should be used
+ */
+function shouldUseReactPortalMessages(): boolean {
+  const component = getReactComponent('portalMessages');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_messages') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_messages');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal messages
+ */
+export function cleanupReactPortalMessages(): void {
+  if (reactMessagesUnmountFn) {
+    reactMessagesUnmountFn();
+    reactMessagesUnmountFn = null;
+  }
+}
 
 const MESSAGES_API_BASE = '/api/messages';
 const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
@@ -93,6 +123,31 @@ export async function loadMessagesFromAPI(ctx: ClientPortalContext, bustCache: b
   const threadList = domCache.get('threadList', true);
   const messagesContainer = domCache.get('messagesThread', true);
   if (!messagesContainer) return;
+
+  // Check if React component should be used
+  if (shouldUseReactPortalMessages()) {
+    const component = getReactComponent('portalMessages');
+    if (component) {
+      // Hide vanilla thread list - React renders its own
+      if (threadList) (threadList as HTMLElement).style.display = 'none';
+
+      // Mount React component
+      const unmountResult = component.mount(messagesContainer as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactMessagesUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
 
   // Show loading state
   if (threadList) {

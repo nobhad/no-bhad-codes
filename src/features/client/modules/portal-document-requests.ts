@@ -11,6 +11,37 @@
 import type { ClientPortalContext } from '../portal-types';
 import { escapeHtml } from '../../../../shared/validation/validators';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
+
+// Track React unmount function
+let reactDocRequestsUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal document requests should be used
+ */
+function shouldUseReactPortalDocumentRequests(): boolean {
+  const component = getReactComponent('portalDocumentRequests');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_document_requests') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_document_requests');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal document requests
+ */
+export function cleanupPortalDocumentRequests(): void {
+  if (reactDocRequestsUnmountFn) {
+    reactDocRequestsUnmountFn();
+    reactDocRequestsUnmountFn = null;
+  }
+}
 
 const DOC_REQUESTS_API = '/api/document-requests';
 const UPLOADS_API = '/api/uploads';
@@ -415,9 +446,31 @@ function setupListeners(ctx: ClientPortalContext): void {
 // ---------------------------------------------------------------------------
 
 export async function loadDocumentRequests(ctx: ClientPortalContext): Promise<void> {
+  const list = el('documents-list');
+
+  // Check if React component should be used
+  if (shouldUseReactPortalDocumentRequests()) {
+    const component = getReactComponent('portalDocumentRequests');
+    if (component && list) {
+      // Mount React component
+      const unmountResult = component.mount(list as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactDocRequestsUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
   setupListeners(ctx);
 
-  const list = el('documents-list');
   const empty = el('documents-empty');
   const errEl = el('documents-load-error');
   if (list) list.innerHTML = '<p class="documents-loading">Loading...</p>';

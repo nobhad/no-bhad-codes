@@ -22,6 +22,65 @@ import {
   updateStepIndicators,
   animateStepTransition
 } from './portal-onboarding-ui';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
+
+// Track React unmount function
+let reactOnboardingUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal onboarding should be used
+ */
+function shouldUseReactPortalOnboarding(): boolean {
+  const component = getReactComponent('portalOnboarding');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_onboarding') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_onboarding');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal onboarding
+ */
+export function cleanupPortalOnboarding(): void {
+  if (reactOnboardingUnmountFn) {
+    reactOnboardingUnmountFn();
+    reactOnboardingUnmountFn = null;
+  }
+}
+
+/**
+ * Mount React onboarding wizard if available
+ */
+export function mountReactOnboarding(
+  container: HTMLElement,
+  ctx: ClientPortalContext,
+  options?: { onComplete?: () => void }
+): boolean {
+  if (!shouldUseReactPortalOnboarding()) return false;
+
+  const component = getReactComponent('portalOnboarding');
+  if (!component) return false;
+
+  const unmountResult = component.mount(container, {
+    getAuthToken: ctx.getAuthToken,
+    onComplete: options?.onComplete,
+    showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+      showToast(message, type);
+    }
+  });
+
+  if (typeof unmountResult === 'function') {
+    reactOnboardingUnmountFn = unmountResult;
+  }
+
+  return true;
+}
 
 // =====================================================
 // TYPES

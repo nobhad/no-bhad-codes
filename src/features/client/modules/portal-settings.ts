@@ -10,6 +10,37 @@
 
 import type { ClientPortalContext } from '../portal-types';
 import { apiFetch, apiPut } from '../../../utils/api-client';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
+
+// Track React unmount function
+let reactSettingsUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal settings should be used
+ */
+function shouldUseReactPortalSettings(): boolean {
+  const component = getReactComponent('portalSettings');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_settings') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_settings');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal settings
+ */
+export function cleanupPortalSettings(): void {
+  if (reactSettingsUnmountFn) {
+    reactSettingsUnmountFn();
+    reactSettingsUnmountFn = null;
+  }
+}
 
 // ============================================================================
 // TYPES
@@ -81,6 +112,29 @@ function getInput<T extends HTMLInputElement | HTMLSelectElement = HTMLInputElem
  * Setup settings forms
  */
 export function setupSettingsForms(ctx: ClientPortalContext): void {
+  // Check if React component should be used
+  if (shouldUseReactPortalSettings()) {
+    const component = getReactComponent('portalSettings');
+    const settingsContainer = document.getElementById('settings-content') || document.querySelector('.settings-content');
+    if (component && settingsContainer) {
+      // Mount React component
+      const unmountResult = component.mount(settingsContainer as HTMLElement, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactSettingsUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation below
+
   // Profile/Account form (settings page)
   const profileForm = getForm('profile-form');
   if (profileForm) {

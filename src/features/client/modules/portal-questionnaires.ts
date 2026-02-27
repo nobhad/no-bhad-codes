@@ -12,6 +12,37 @@ import { gsap } from 'gsap';
 import type { ClientPortalContext } from '../portal-types';
 import { ICONS } from '../../../constants/icons';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { getReactComponent } from '../../../react/registry';
+import { showToast } from '../../../utils/toast-notifications';
+
+// Track React unmount function
+let reactQuestionnairesUnmountFn: (() => void) | null = null;
+
+/**
+ * Check if React portal questionnaires should be used
+ */
+function shouldUseReactPortalQuestionnaires(): boolean {
+  const component = getReactComponent('portalQuestionnaires');
+  if (!component) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('vanilla_portal_questionnaires') === 'true') return false;
+
+  const flag = localStorage.getItem('feature_react_portal_questionnaires');
+  if (flag === 'false') return false;
+
+  return true;
+}
+
+/**
+ * Cleanup React portal questionnaires
+ */
+export function cleanupPortalQuestionnaires(): void {
+  if (reactQuestionnairesUnmountFn) {
+    reactQuestionnairesUnmountFn();
+    reactQuestionnairesUnmountFn = null;
+  }
+}
 
 // =====================================================
 // TYPES
@@ -772,6 +803,29 @@ function setupEventListeners(): void {
 
 export async function loadQuestionnaires(context: ClientPortalContext): Promise<void> {
   ctx = context;
+
+  // Check if React component should be used
+  if (shouldUseReactPortalQuestionnaires()) {
+    const component = getReactComponent('portalQuestionnaires');
+    const container = el('questionnaires-list') || document.querySelector('.questionnaires-section');
+    if (component && container) {
+      // Mount React component
+      const unmountResult = component.mount(container as HTMLElement, {
+        getAuthToken: context.getAuthToken,
+        showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+          showToast(message, type);
+        }
+      });
+
+      if (typeof unmountResult === 'function') {
+        reactQuestionnairesUnmountFn = unmountResult;
+      }
+
+      return;
+    }
+  }
+
+  // Vanilla implementation
   setupEventListeners();
   await refreshQuestionnaires();
 }
