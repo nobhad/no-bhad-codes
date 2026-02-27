@@ -15,6 +15,10 @@ import { createBarChart } from '../../../components/chart-simple';
 import { exportToCsv, TIME_ENTRIES_EXPORT_CONFIG } from '../../../utils/table-export';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderActionsCell, createAction } from '../../../components/table-action-buttons';
+import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('TimeTracking');
 
 // Time entry interfaces
 interface TimeEntry {
@@ -69,7 +73,7 @@ async function loadTimeEntries(): Promise<void> {
       currentEntries = [];
     }
   } catch (error) {
-    console.error('[TimeTracking] Error loading time entries:', error);
+    logger.error(' Error loading time entries:', error);
     currentEntries = [];
   }
 }
@@ -215,22 +219,38 @@ function renderEntriesTable(): void {
   );
 
   container.innerHTML = `
-    <table class="time-entries-table">
-      <thead>
-        <tr>
-          <th scope="col" class="date-col">Date</th>
-          <th scope="col" class="name-col">Description</th>
-          <th scope="col" class="name-col">Task</th>
-          <th scope="col" class="type-col">Duration</th>
-          <th scope="col" class="status-col">Billable</th>
-          <th scope="col" class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-        ${sortedEntries.map(entry => renderEntryRow(entry)).join('')}
-      </tbody>
-    </table>
+    <div class="data-table-container">
+      <div class="data-table-scroll-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col" class="date-col">Date</th>
+              <th scope="col" class="name-col">Description</th>
+              <th scope="col" class="name-col">Task</th>
+              <th scope="col" class="type-col">Duration</th>
+              <th scope="col" class="status-col">Billable</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="time-entries-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+            ${sortedEntries.map(entry => renderEntryRow(entry)).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
   `;
+
+  // Initialize keyboard navigation for time entries table
+  initTableKeyboardNav({
+    tableSelector: '#time-entries-table-body',
+    rowSelector: 'tr[data-entry-id]',
+    onRowSelect: (row) => {
+      const editBtn = row.querySelector('.btn-edit-entry') as HTMLButtonElement;
+      if (editBtn) editBtn.click();
+    },
+    focusClass: 'row-focused',
+    selectedClass: 'row-selected'
+  });
 
   // Add click handlers for edit/delete
   container.querySelectorAll('.btn-edit-entry').forEach(btn => {
@@ -254,7 +274,7 @@ function renderEntriesTable(): void {
  */
 function renderEntryRow(entry: TimeEntry): string {
   return `
-    <tr>
+    <tr data-entry-id="${entry.id}">
       <td class="date-cell" data-label="Date">${formatDate(entry.date)}</td>
       <td class="name-cell" data-label="Description">${SanitizationUtils.escapeHtml(entry.description)}</td>
       <td class="name-cell" data-label="Task">${entry.task_title ? SanitizationUtils.escapeHtml(entry.task_title) : '-'}</td>
@@ -331,7 +351,7 @@ export async function showLogTimeModal(): Promise<void> {
       alertError('Failed to log time');
     }
   } catch (error) {
-    console.error('[TimeTracking] Error logging time:', error);
+    logger.error(' Error logging time:', error);
     alertError('Error logging time');
   }
 }
@@ -394,7 +414,7 @@ async function showEditTimeModal(entry: TimeEntry): Promise<void> {
       alertError('Failed to update time entry');
     }
   } catch (error) {
-    console.error('[TimeTracking] Error updating time entry:', error);
+    logger.error(' Error updating time entry:', error);
     alertError('Error updating time entry');
   }
 }
@@ -421,7 +441,7 @@ async function deleteTimeEntry(entryId: number): Promise<void> {
       alertError('Failed to delete time entry');
     }
   } catch (error) {
-    console.error('[TimeTracking] Error deleting time entry:', error);
+    logger.error(' Error deleting time entry:', error);
     alertError('Error deleting time entry');
   }
 }

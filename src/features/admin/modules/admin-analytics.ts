@@ -26,6 +26,9 @@ import { showToast } from '../../../utils/toast-notifications';
 import { loadLeadAnalytics, loadScoringRules } from './admin-leads';
 import { loadAdHocAnalytics } from './admin-ad-hoc-analytics';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminAnalytics');
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -213,11 +216,11 @@ async function loadBusinessKPIs(): Promise<void> {
         }
       }
     } catch (e) {
-      console.warn('[AdminAnalytics] Could not load invoice KPIs:', e);
+      logger.warn(' Could not load invoice KPIs:', e);
     }
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading business KPIs:', error);
+    logger.error(' Error loading business KPIs:', error);
   }
 }
 
@@ -262,7 +265,7 @@ async function loadRevenueChart(): Promise<void> {
       }
     }
   } catch (error) {
-    console.warn('[AdminAnalytics] Failed to load revenue chart data:', error);
+    logger.warn(' Failed to load revenue chart data:', error);
   }
 
   // If no data, show placeholder months
@@ -374,7 +377,7 @@ async function loadProjectStatusChart(): Promise<void> {
       }
     }
   } catch (error) {
-    console.warn('[AdminAnalytics] Failed to load project status chart data:', error);
+    logger.warn(' Failed to load project status chart data:', error);
   }
 
   // Remove skeleton and show canvas
@@ -431,7 +434,7 @@ async function loadLeadFunnel(): Promise<void> {
     updateElement('funnel-avg-value', `Avg Deal Value: ${formatCurrencyCompact(avgValue)}`);
 
   } catch (error) {
-    console.warn('[AdminAnalytics] Failed to load lead funnel:', error);
+    logger.warn(' Failed to load lead funnel:', error);
   }
 }
 
@@ -508,7 +511,7 @@ async function loadSavedReports(): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading saved reports:', error);
+    logger.error(' Error loading saved reports:', error);
     container.innerHTML = '<div class="report-empty">Error loading reports</div>';
   }
 }
@@ -556,7 +559,7 @@ async function showScheduleReportDialog(reportId: number, reportName: string): P
       showToast(error.error || 'Failed to schedule report', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error scheduling report:', error);
+    logger.error(' Error scheduling report:', error);
     showToast('Failed to schedule report', 'error');
   }
 }
@@ -582,7 +585,7 @@ async function deleteReport(reportId: number): Promise<void> {
       showToast('Failed to delete report', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error deleting report:', error);
+    logger.error(' Error deleting report:', error);
     showToast('Failed to delete report', 'error');
   }
 }
@@ -604,7 +607,7 @@ async function runReport(reportId: number): Promise<void> {
       throw new Error('Failed to run report');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error running report:', error);
+    logger.error(' Error running report:', error);
     showToast('Failed to run report', 'error');
   }
 }
@@ -666,7 +669,7 @@ async function showCreateReportDialog(): Promise<void> {
       showToast(error.error || 'Failed to create report', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error creating report:', error);
+    logger.error(' Error creating report:', error);
     showToast('Failed to create report', 'error');
   }
 }
@@ -770,7 +773,7 @@ async function loadScheduledReports(): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading scheduled reports:', error);
+    logger.error(' Error loading scheduled reports:', error);
     container.innerHTML = '<div class="report-empty">Error loading scheduled reports</div>';
   }
 }
@@ -788,7 +791,7 @@ async function toggleSchedule(scheduleId: number, activate: boolean): Promise<vo
       showToast('Failed to update schedule', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error toggling schedule:', error);
+    logger.error(' Error toggling schedule:', error);
     showToast('Failed to update schedule', 'error');
   }
 }
@@ -813,7 +816,7 @@ async function deleteSchedule(scheduleId: number): Promise<void> {
       showToast('Failed to delete schedule', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error deleting schedule:', error);
+    logger.error(' Error deleting schedule:', error);
     showToast('Failed to delete schedule', 'error');
   }
 }
@@ -898,7 +901,7 @@ async function loadMetricAlerts(): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading metric alerts:', error);
+    logger.error(' Error loading metric alerts:', error);
     container.innerHTML = '<div class="report-empty">Error loading alerts</div>';
   }
 }
@@ -997,7 +1000,7 @@ async function showCreateAlertDialog(): Promise<void> {
       showToast(error.error || 'Failed to create alert', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error creating alert:', error);
+    logger.error(' Error creating alert:', error);
     showToast('Failed to create alert', 'error');
   }
 }
@@ -1015,7 +1018,7 @@ async function toggleAlert(alertId: number, activate: boolean): Promise<void> {
       showToast('Failed to update alert', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error toggling alert:', error);
+    logger.error(' Error toggling alert:', error);
     showToast('Failed to update alert', 'error');
   }
 }
@@ -1040,7 +1043,7 @@ async function deleteAlert(alertId: number): Promise<void> {
       showToast('Failed to delete alert', 'error');
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error deleting alert:', error);
+    logger.error(' Error deleting alert:', error);
     showToast('Failed to delete alert', 'error');
   }
 }
@@ -1058,7 +1061,7 @@ async function loadAnalyticsSummary(): Promise<void> {
     if (!response.ok) {
       // 401 handled by apiFetch, only show defaults for other errors
       if (response.status !== 401) {
-        console.warn('[AdminAnalytics] Failed to load analytics summary');
+        logger.warn(' Failed to load analytics summary');
         showOverviewDefaults();
       }
       return;
@@ -1121,7 +1124,7 @@ async function loadAnalyticsSummary(): Promise<void> {
     }
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading analytics summary:', error);
+    logger.error(' Error loading analytics summary:', error);
     showOverviewDefaults();
   }
 }
@@ -1188,7 +1191,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
       updateElement('performance-score', `${Math.round(perfData.score)}/100`);
     }
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading performance data:', error);
+    logger.error(' Error loading performance data:', error);
   }
 
   // Load bundle stats from API
@@ -1203,7 +1206,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
     }
     // 401 handled by apiFetch
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading bundle stats:', error);
+    logger.error(' Error loading bundle stats:', error);
   }
 }
 
@@ -1213,7 +1216,7 @@ export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<vo
 
     if (!response.ok) {
       if (response.status !== 401) {
-        console.warn('[AdminAnalytics] Failed to load analytics data');
+        logger.warn(' Failed to load analytics data');
         showEmptyStates();
       }
       return;
@@ -1282,7 +1285,7 @@ export async function loadAnalyticsData(_ctx: AdminDashboardContext): Promise<vo
     }
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading analytics data:', error);
+    logger.error(' Error loading analytics data:', error);
     showEmptyStates();
   }
 }
@@ -1385,7 +1388,7 @@ export async function loadVisitorsData(_ctx: AdminDashboardContext): Promise<voi
     });
 
   } catch (error) {
-    console.error('[AdminAnalytics] Error loading visitors data:', error);
+    logger.error(' Error loading visitors data:', error);
     showTableError(
       container,
       6,
@@ -1437,7 +1440,7 @@ async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay> {
       };
     }
   } catch (error) {
-    console.warn('[AdminAnalytics] Could not get performance service data:', error);
+    logger.warn(' Could not get performance service data:', error);
   }
 
   // Try browser Performance API as fallback
@@ -1492,7 +1495,7 @@ async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay> {
       grade: lcp && ttfb ? getGradeFromScore(calculatePerformanceScore(lcp, ttfb)) : 'N/A'
     };
   } catch (error) {
-    console.warn('[AdminAnalytics] Could not get browser performance data:', error);
+    logger.warn(' Could not get browser performance data:', error);
   }
 
   // No data available
@@ -1534,7 +1537,7 @@ async function getAnalyticsData(): Promise<AnalyticsData> {
       return formatAnalyticsData(data);
     }
   } catch (error) {
-    console.warn('[AdminAnalytics] Could not get live analytics data:', error);
+    logger.warn(' Could not get live analytics data:', error);
   }
 
   return {};
@@ -1958,7 +1961,7 @@ async function loadVisitorsChart(): Promise<void> {
     }
     // 401 handled by apiFetch
   } catch (error) {
-    console.warn('[AdminAnalytics] Failed to load chart data:', error);
+    logger.warn(' Failed to load chart data:', error);
   }
 
   // Remove skeleton and show canvas
@@ -2065,7 +2068,7 @@ async function loadSourcesChart(): Promise<void> {
     }
     // 401 handled by apiFetch
   } catch (error) {
-    console.warn('[AdminAnalytics] Failed to load sources chart data:', error);
+    logger.warn(' Failed to load sources chart data:', error);
   }
 
   // Remove skeleton and show canvas

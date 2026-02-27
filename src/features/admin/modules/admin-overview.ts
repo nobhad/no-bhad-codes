@@ -18,6 +18,9 @@ import { createKanbanBoard, type KanbanColumn, type KanbanItem } from '../../../
 import { getStatusDotHTML as _getStatusDotHTML } from '../../../components/status-badge';
 import { showTableEmpty } from '../../../utils/loading-utils';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminOverview');
 
 // React mount functions - lazy loaded
 let mountOverviewDashboard: ((element: HTMLElement, options: any) => () => void) | null = null;
@@ -34,7 +37,7 @@ async function loadReactOverview(): Promise<boolean> {
     unmountOverviewDashboard = module.unmountOverviewDashboard;
     return true;
   } catch (err) {
-    console.error('[AdminOverview] Failed to load React module:', err);
+    logger.error(' Failed to load React module:', err);
     return false;
   }
 }
@@ -162,7 +165,7 @@ export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void
     renderRevenueChart();
 
   } catch (error) {
-    console.error('[AdminOverview] Error loading overview data:', error);
+    logger.error(' Error loading overview data:', error);
     showNoDataMessage();
   }
 }
@@ -235,8 +238,8 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
       return `
         <tr class="overview-table-row" data-project-id="${p.id}">
           <td class="identity-cell" data-label="Project">
-            <span class="identity-name">${SanitizationUtils.escapeHtml(projectName)}</span>
-            <span class="identity-contact">${SanitizationUtils.escapeHtml(clientName)}</span>
+            <span class="identity-name" data-field="primary-name">${SanitizationUtils.escapeHtml(projectName)}</span>
+            ${clientName ? `<span class="identity-contact" data-field="secondary-name">${SanitizationUtils.escapeHtml(clientName)}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
           </td>
           <td class="status-cell" data-label="Status"><span class="status-pill ${statusClass}">${statusLabel}</span></td>
           <td class="type-cell" data-label="Progress">
@@ -269,7 +272,7 @@ async function loadActiveProjects(ctx: AdminDashboardContext): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminOverview] Error loading projects:', error);
+    logger.error(' Error loading projects:', error);
     tbody.innerHTML = '<tr><td colspan="4" class="error-cell">Failed to load projects</td></tr>';
   }
 }
@@ -343,7 +346,7 @@ async function loadRecentLeads(ctx: AdminDashboardContext): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminOverview] Error loading leads:', error);
+    logger.error(' Error loading leads:', error);
     list.innerHTML = '<li class="leads-item-error">Failed to load leads</li>';
   }
 }
@@ -408,7 +411,7 @@ async function loadProjectHealth(): Promise<void> {
     `;
 
   } catch (error) {
-    console.error('[AdminOverview] Error loading project health:', error);
+    logger.error(' Error loading project health:', error);
     container.innerHTML = '<div class="health-error">Failed to load</div>';
   }
 }
@@ -729,7 +732,7 @@ async function loadRecentActivity(): Promise<void> {
     }).join('');
 
   } catch (error) {
-    console.error('[AdminOverview] Error loading recent activity:', error);
+    logger.error(' Error loading recent activity:', error);
     listEl.innerHTML = '<li class="activity-item-error">Failed to load activity</li>';
   }
 }
@@ -856,7 +859,7 @@ async function _loadUpcomingTasks(ctx: AdminDashboardContext): Promise<void> {
     renderDashboardTasksView();
 
   } catch (error) {
-    console.error('[AdminOverview] Error loading upcoming tasks:', error);
+    logger.error(' Error loading upcoming tasks:', error);
     const listEl = document.getElementById('upcoming-tasks-list');
     if (listEl) {
       listEl.innerHTML = '<li class="task-item empty">Failed to load tasks</li>';
@@ -1119,10 +1122,10 @@ export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashb
           ctx?.switchTab?.(tab);
         }
       });
-      console.log('[AdminOverview] Mounted React OverviewDashboard');
+      logger.log(' Mounted React OverviewDashboard');
       return;
     }
-    console.warn('[AdminOverview] Failed to load React, falling back to vanilla');
+    logger.warn(' Failed to load React, falling back to vanilla');
 
   }
 
@@ -1186,8 +1189,9 @@ export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashb
             <button type="button" class="overview-panel-action" data-tab="projects">View all</button>
           </div>
           <div class="overview-panel-body">
-            <div class="data-table-scroll-wrapper">
-            <table class="data-table" id="overview-projects-table">
+            <div class="data-table-container">
+              <div class="data-table-scroll-wrapper">
+                <table class="data-table" id="overview-projects-table">
               <thead>
                 <tr>
                   <th scope="col" class="identity-col">Project</th>
@@ -1206,7 +1210,8 @@ export async function renderOverviewTab(container: HTMLElement, ctx?: AdminDashb
                   </td>
                 </tr>
               </tbody>
-            </table>
+                </table>
+              </div>
             </div>
           </div>
         </div>

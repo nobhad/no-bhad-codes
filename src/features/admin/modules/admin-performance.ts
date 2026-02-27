@@ -11,6 +11,9 @@
 
 import type { AdminDashboardContext, PerformanceMetricsDisplay, PerformanceMetricDisplay } from '../admin-types';
 import { renderEmptyState } from '../../../components/empty-state';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminPerformance');
 
 interface WebVitalsResult {
   lcp: number | null;
@@ -48,7 +51,7 @@ export async function loadPerformanceData(_ctx: AdminDashboardContext): Promise<
     }
 
   } catch (error) {
-    console.error('[AdminPerformance] Error loading performance data:', error);
+    logger.error(' Error loading performance data:', error);
     showNoDataMessage();
   }
 }
@@ -65,7 +68,7 @@ export async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay
         return formatPerformanceReport(report);
       }
     } catch (error) {
-      console.warn('[AdminPerformance] Could not get data from opener:', error);
+      logger.warn(' Could not get data from opener:', error);
     }
   }
 
@@ -77,7 +80,7 @@ export async function getPerformanceMetrics(): Promise<PerformanceMetricsDisplay
         return formatPerformanceReport(report);
       }
     } catch (error) {
-      console.warn('[AdminPerformance] Could not get data from window:', error);
+      logger.warn(' Could not get data from window:', error);
     }
   }
 

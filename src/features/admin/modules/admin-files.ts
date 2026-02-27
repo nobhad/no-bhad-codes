@@ -17,6 +17,9 @@ import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils'
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminFiles');
 
 interface Folder {
   id: number;
@@ -308,7 +311,7 @@ async function loadFolders(): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading folders:', error);
+    logger.error(' Error loading folders:', error);
   }
 }
 
@@ -411,7 +414,7 @@ async function loadFiles(): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading files:', error);
+    logger.error(' Error loading files:', error);
     renderErrorState(filesList, 'Error loading files.', { type: 'general' });
   }
 }
@@ -608,7 +611,7 @@ async function loadFileInfo(fileId: number): Promise<void> {
     }
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading file info:', error);
+    logger.error(' Error loading file info:', error);
     container.innerHTML = '<p>Error loading file info</p>';
   }
 }
@@ -665,7 +668,7 @@ async function loadFileVersions(fileId: number): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading versions:', error);
+    logger.error(' Error loading versions:', error);
     renderErrorState(container, 'Error loading versions', { type: 'general' });
   }
 }
@@ -693,7 +696,7 @@ async function restoreVersion(fileId: number, versionId: number): Promise<void> 
       alertError('Failed to restore version');
     }
   } catch (error) {
-    console.error('[AdminFiles] Error restoring version:', error);
+    logger.error(' Error restoring version:', error);
     alertError('Failed to restore version');
   }
 }
@@ -733,7 +736,7 @@ async function loadFileComments(fileId: number): Promise<void> {
     `).join('');
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading comments:', error);
+    logger.error(' Error loading comments:', error);
     renderErrorState(container, 'Error loading comments', { type: 'general' });
   }
 }
@@ -761,7 +764,7 @@ async function addFileComment(): Promise<void> {
       alertError('Failed to add comment');
     }
   } catch (error) {
-    console.error('[AdminFiles] Error adding comment:', error);
+    logger.error(' Error adding comment:', error);
     alertError('Failed to add comment');
   }
 }
@@ -799,7 +802,7 @@ async function loadFileAccessLog(fileId: number): Promise<void> {
     `).join('');
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading access log:', error);
+    logger.error(' Error loading access log:', error);
     renderErrorState(container, 'Error loading access log', { type: 'general' });
   }
 }
@@ -853,7 +856,7 @@ async function toggleFileLock(): Promise<void> {
       alertError('Failed to update lock status');
     }
   } catch (error) {
-    console.error('[AdminFiles] Error toggling lock:', error);
+    logger.error(' Error toggling lock:', error);
     alertError('Failed to update lock status');
   }
 }
@@ -885,7 +888,7 @@ async function toggleFileSharing(): Promise<void> {
       alertError('Failed to update sharing status');
     }
   } catch (error) {
-    console.error('[AdminFiles] Error toggling sharing:', error);
+    logger.error(' Error toggling sharing:', error);
     alertError('Failed to update sharing status');
   }
 }
@@ -916,7 +919,7 @@ async function deleteCurrentFile(): Promise<void> {
       alertError('Failed to delete file');
     }
   } catch (error) {
-    console.error('[AdminFiles] Error deleting file:', error);
+    logger.error(' Error deleting file:', error);
     alertError('Failed to delete file');
   }
 }
@@ -941,7 +944,7 @@ async function showCreateFolderDialog(): Promise<void> {
       alertError('Failed to create folder');
     }
   } catch (error) {
-    console.error('[AdminFiles] Error creating folder:', error);
+    logger.error(' Error creating folder:', error);
     alertError('Failed to create folder');
   }
 }
@@ -997,7 +1000,7 @@ async function loadPendingRequests(): Promise<void> {
     });
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading pending requests:', error);
+    logger.error(' Error loading pending requests:', error);
     renderErrorState(pendingList, 'Error loading pending requests.', { type: 'general' });
   }
 }
@@ -1076,7 +1079,7 @@ async function handlePendingRequestAction(requestId: number, action: string): Pr
       }
     }
   } catch (error) {
-    console.error('[AdminFiles] Error handling pending request action:', error);
+    logger.error(' Error handling pending request action:', error);
     alertError('An error occurred');
   }
 }
@@ -1115,7 +1118,7 @@ async function loadPendingRequestsDropdown(): Promise<void> {
     }
 
   } catch (error) {
-    console.error('[AdminFiles] Error loading pending requests dropdown:', error);
+    logger.error(' Error loading pending requests dropdown:', error);
   }
 }
 
@@ -1132,7 +1135,7 @@ async function linkFileToRequest(fileId: number, requestId: number): Promise<boo
     }
     return false;
   } catch (error) {
-    console.error('[AdminFiles] Error linking file to request:', error);
+    logger.error(' Error linking file to request:', error);
     return false;
   }
 }

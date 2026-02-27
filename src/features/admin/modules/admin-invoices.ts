@@ -33,6 +33,9 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminInvoices');
 
 // ============================================
 // REACT INTEGRATION (ISLAND ARCHITECTURE)
@@ -71,7 +74,7 @@ async function loadReactInvoicesTable(): Promise<boolean> {
     unmountInvoicesTable = module.unmountInvoicesTable;
     return true;
   } catch (err) {
-    console.error('[AdminInvoices] Failed to load React module:', err);
+    logger.error('Failed to load React module:', err);
     return false;
   }
 }
@@ -159,7 +162,7 @@ const invoicesModule = createTableModule<InvoiceWithDetails, InvoiceStats>({
               showToast(error.error || 'Failed to export invoices', 'error');
             }
           } catch (error) {
-            console.error('[AdminInvoices] Export error:', error);
+            logger.error('Export error:', error);
             showToast('Failed to export invoices', 'error');
           }
         },
@@ -336,7 +339,7 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
         reactMountContainer = mountContainer;
         reactMountSuccess = true;
       } else {
-        console.error('[AdminInvoices] React module failed to load, falling back to vanilla');
+        logger.error('React module failed to load, falling back to vanilla');
       }
     }
 
@@ -515,10 +518,10 @@ function buildInvoiceRow(invoice: InvoiceWithDetails, _ctx: AdminDashboardContex
 
   row.innerHTML = `
     ${createRowCheckbox('invoices', invoice.id)}
-    <td class="name-cell" data-label="Invoice"><strong>${safeInvoiceNumber}</strong></td>
-    <td class="identity-cell" data-label="Client/Project">
-      <span class="identity-name">${safeClientName}</span>
-      <span class="identity-contact">${safeProjectName}</span>
+    <td class="name-cell invoice-number-cell" data-label="Invoice #">${safeInvoiceNumber}</td>
+    <td class="identity-cell" data-label="Client / Project">
+      <span class="identity-name" data-field="primary-name">${safeClientName}</span>
+      <span class="identity-contact" data-field="secondary-name">${safeProjectName}</span>
     </td>
     <td class="amount-cell" data-label="Amount">${amount}</td>
     <td class="status-cell" data-label="Status">
@@ -621,7 +624,7 @@ async function handleSendInvoice(invoiceId: number, ctx: AdminDashboardContext):
       showToast(error.error || 'Failed to send invoice', 'error');
     }
   } catch (error) {
-    console.error('[AdminInvoices] Send error:', error);
+    logger.error('Send error:', error);
     showToast('Failed to send invoice', 'error');
   }
 }
@@ -640,7 +643,7 @@ async function handleMarkPaid(invoiceId: number, ctx: AdminDashboardContext): Pr
       showToast(error.error || 'Failed to update invoice', 'error');
     }
   } catch (error) {
-    console.error('[AdminInvoices] Mark paid error:', error);
+    logger.error('Mark paid error:', error);
     showToast('Failed to update invoice', 'error');
   }
 }
@@ -665,7 +668,7 @@ async function handleDownloadPdf(invoiceId: number): Promise<void> {
       showToast('Failed to download PDF', 'error');
     }
   } catch (error) {
-    console.error('[AdminInvoices] Download error:', error);
+    logger.error('Download error:', error);
     showToast('Failed to download PDF', 'error');
   }
 }
@@ -690,7 +693,7 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
       }
       invoice = await response.json();
     } catch (error) {
-      console.error('[AdminInvoices] View invoice error:', error);
+      logger.error('View invoice error:', error);
       showToast('Failed to load invoice', 'error');
       return;
     }
@@ -716,27 +719,29 @@ async function showViewInvoiceModal(invoiceId: number, _ctx: AdminDashboardConte
   // Build line items table
   const lineItems = invoice.line_items || [];
   const lineItemsHTML = lineItems.length > 0
-    ? `<div class="data-table-scroll-wrapper">
-        <table class="data-table invoice-line-items">
-          <thead>
-            <tr>
-              <th scope="col" class="name-col">Description</th>
-              <th scope="col" class="count-col">Qty</th>
-              <th scope="col" class="amount-col">Rate</th>
-              <th scope="col" class="amount-col">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${lineItems.map((item: InvoiceLineItem) => `
+    ? `<div class="data-table-container">
+        <div class="data-table-scroll-wrapper">
+          <table class="data-table invoice-line-items">
+            <thead>
               <tr>
-                <td data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
-                <td class="text-right" data-label="Qty">${item.quantity || 1}</td>
-                <td class="text-right" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
-                <td class="text-right" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+                <th scope="col" class="name-col">Description</th>
+                <th scope="col" class="count-col">Qty</th>
+                <th scope="col" class="amount-col">Rate</th>
+                <th scope="col" class="amount-col">Amount</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${lineItems.map((item: InvoiceLineItem) => `
+                <tr>
+                  <td class="name-cell" data-label="Description">${SanitizationUtils.escapeHtml(item.description || '')}</td>
+                  <td class="count-cell" data-label="Qty">${item.quantity || 1}</td>
+                  <td class="amount-cell" data-label="Rate">${formatCurrency(item.rate || 0)}</td>
+                  <td class="amount-cell" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       </div>`
     : '<p class="text-muted">No line items</p>';
 
@@ -882,7 +887,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
       }
       invoice = await response.json();
     } catch (error) {
-      console.error('[AdminInvoices] Edit invoice error:', error);
+      logger.error('Edit invoice error:', error);
       showToast('Failed to load invoice', 'error');
       return;
     }
@@ -919,20 +924,20 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
   function buildLineItemRow(item: InvoiceLineItem, index: number): string {
     return `
       <tr class="line-item-row" data-index="${index}">
-        <td data-label="Description">
+        <td class="name-cell" data-label="Description">
           <input type="text" class="form-input line-item-desc" name="line_items[${index}][description]"
             value="${SanitizationUtils.escapeHtml(item.description || '')}" placeholder="Description" required>
         </td>
-        <td data-label="Qty">
+        <td class="count-cell" data-label="Qty">
           <input type="number" class="form-input line-item-qty" name="line_items[${index}][quantity]"
             value="${item.quantity || 1}" min="1" step="1" required>
         </td>
-        <td data-label="Rate">
+        <td class="amount-cell" data-label="Rate">
           <input type="number" class="form-input line-item-rate" name="line_items[${index}][rate]"
             value="${item.rate || 0}" min="0" step="0.01" required>
         </td>
-        <td class="line-item-amount" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
-        <td data-label="">
+        <td class="amount-cell line-item-amount" data-label="Amount">${formatCurrency(item.amount || 0)}</td>
+        <td class="actions-cell" data-label="Actions">
           <button type="button" class="icon-btn remove-line-item" data-index="${index}" title="Remove">${GLOBAL_ICONS.X}</button>
         </td>
       </tr>
@@ -952,24 +957,26 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
 
       <div class="form-group">
         <label class="field-label">Line Items</label>
-        <div class="data-table-scroll-wrapper">
-          <table class="data-table invoice-line-items editable">
-            <thead>
-              <tr>
-                <th scope="col" class="name-col">Description</th>
-                <th scope="col" class="count-col">Qty</th>
-                <th scope="col" class="amount-col">Rate</th>
-                <th scope="col" class="amount-col">Amount</th>
-                <th scope="col" class="actions-col"></th>
-              </tr>
-            </thead>
-            <tbody id="line-items-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-              ${lineItems.map((item, idx) => {
+        <div class="data-table-container">
+          <div class="data-table-scroll-wrapper">
+            <table class="data-table invoice-line-items">
+              <thead>
+                <tr>
+                  <th scope="col" class="name-col">Description</th>
+                  <th scope="col" class="count-col">Qty</th>
+                  <th scope="col" class="amount-col">Rate</th>
+                  <th scope="col" class="amount-col">Amount</th>
+                  <th scope="col" class="actions-col"></th>
+                </tr>
+              </thead>
+              <tbody id="invoice-line-items-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+                ${lineItems.map((item, idx) => {
     lineItemIndex = idx + 1;
     return buildLineItemRow(item, idx);
   }).join('')}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
         <button type="button" id="add-line-item" class="btn btn-secondary btn-sm">
           Add Line Item
@@ -1018,7 +1025,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
 
   // Add line item
   function addLineItem(): void {
-    const tbody = document.getElementById('line-items-body');
+    const tbody = document.getElementById('invoice-line-items-table-body');
     if (!tbody) return;
 
     const _newItem: InvoiceLineItem = { description: '', quantity: 1, rate: 0, amount: 0 };
@@ -1026,20 +1033,20 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
     row.className = 'line-item-row';
     row.dataset.index = String(lineItemIndex);
     row.innerHTML = `
-      <td data-label="Description">
+      <td class="name-cell" data-label="Description">
         <input type="text" class="form-input line-item-desc" name="line_items[${lineItemIndex}][description]"
           value="" placeholder="Description" required>
       </td>
-      <td data-label="Qty">
+      <td class="count-cell" data-label="Qty">
         <input type="number" class="form-input line-item-qty" name="line_items[${lineItemIndex}][quantity]"
           value="1" min="1" step="1" required>
       </td>
-      <td data-label="Rate">
+      <td class="amount-cell" data-label="Rate">
         <input type="number" class="form-input line-item-rate" name="line_items[${lineItemIndex}][rate]"
           value="0" min="0" step="0.01" required>
       </td>
-      <td class="line-item-amount" data-label="Amount">${formatCurrency(0)}</td>
-      <td data-label="">
+      <td class="amount-cell line-item-amount" data-label="Amount">${formatCurrency(0)}</td>
+      <td class="actions-cell" data-label="Actions">
         <button type="button" class="icon-btn remove-line-item" data-index="${lineItemIndex}" title="Remove">${GLOBAL_ICONS.X}</button>
       </td>
     `;
@@ -1133,7 +1140,7 @@ async function showEditInvoiceModal(invoiceId: number, ctx: AdminDashboardContex
           showToast(error.error || 'Failed to update invoice', 'error');
         }
       } catch (error) {
-        console.error('[AdminInvoices] Update error:', error);
+        logger.error('Update error:', error);
         showToast('Failed to update invoice', 'error');
       }
     }, 'Saving...');

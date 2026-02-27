@@ -12,6 +12,9 @@ import { createModalDropdown } from '../../../components/modal-dropdown';
 import { openDesignReview } from './admin-design-review';
 import { showToast } from '../../../utils/toast-notifications';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('Deliverables');
 
 // Simple DOM helper
 function el(id: string): HTMLElement | null {
@@ -174,7 +177,7 @@ async function loadDeliverables(projectId: number): Promise<void> {
     renderDeliverables(deliverables);
   } catch (error) {
     showToast('Failed to load deliverables', 'error');
-    console.error(error);
+    logger.error(error);
   }
 }
 

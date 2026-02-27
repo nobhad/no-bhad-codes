@@ -39,6 +39,9 @@ import { getStatusBadgeHTML } from '../../../components/status-badge';
 // See: src/react/admin-entry.tsx for registration
 
 import { getReactComponent } from '../../../react/registry';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminClientDetails');
 
 let _reactDetailMounted = false;
 
@@ -75,7 +78,7 @@ async function mountReactClientDetail(
 ): Promise<boolean> {
   const component = getReactComponent('clientDetail');
   if (!component) {
-    console.warn('[AdminClientDetails] React client detail not registered');
+    logger.warn(' React client detail not registered');
     return false;
   }
 
@@ -108,7 +111,7 @@ async function mountReactClientDetail(
     _reactDetailMounted = true;
     return true;
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to mount React client detail:', error);
+    logger.error(' Failed to mount React client detail:', error);
     return false;
   }
 }
@@ -258,14 +261,14 @@ export async function initClientDetailView(
         const mounted = await mountReactClientDetail(mountContainer, clientId, ctx);
         if (mounted) {
           _reactDetailMounted = true;
-          console.log('[AdminClientDetails] React client detail mounted');
+          logger.log(' React client detail mounted');
           return;
         }
         // Fall back to vanilla if mount fails - restore header tabs
         if (headerTabs) {
           headerTabs.style.display = '';
         }
-        console.warn('[AdminClientDetails] React mount failed, falling back to vanilla');
+        logger.warn(' React mount failed, falling back to vanilla');
       }
     }
   }
@@ -393,7 +396,7 @@ async function loadClientHealth(clientId: number): Promise<void> {
       clientHealth = data.health || null;
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load health:', error);
+    logger.error(' Failed to load health:', error);
     clientHealth = null;
   }
 }
@@ -407,7 +410,7 @@ async function loadClientContacts(clientId: number): Promise<void> {
       clientContacts = data.contacts || [];
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load contacts:', error);
+    logger.error(' Failed to load contacts:', error);
     clientContacts = [];
   }
 }
@@ -421,7 +424,7 @@ async function loadClientActivities(clientId: number): Promise<void> {
       clientActivities = data.activities || [];
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load activities:', error);
+    logger.error(' Failed to load activities:', error);
     clientActivities = [];
   }
 }
@@ -435,7 +438,7 @@ async function loadClientNotes(clientId: number): Promise<void> {
       clientNotes = data.notes || [];
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load notes:', error);
+    logger.error(' Failed to load notes:', error);
     clientNotes = [];
   }
 }
@@ -453,7 +456,7 @@ async function loadClientTags(clientId: number): Promise<void> {
       }));
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load client tags:', error);
+    logger.error(' Failed to load client tags:', error);
     clientTags = [];
   }
 }
@@ -471,7 +474,7 @@ async function loadAvailableTags(): Promise<void> {
       }));
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load available tags:', error);
+    logger.error(' Failed to load available tags:', error);
     availableTags = [];
   }
 }
@@ -485,7 +488,7 @@ async function loadClientStats(clientId: number): Promise<void> {
       clientStats = data.stats || null;
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load stats:', error);
+    logger.error(' Failed to load stats:', error);
     clientStats = null;
   }
 }
@@ -499,7 +502,7 @@ async function loadClientProjects(clientId: number): Promise<void> {
       clientProjects = data.projects || [];
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load projects:', error);
+    logger.error(' Failed to load projects:', error);
     clientProjects = [];
   }
 }
@@ -541,7 +544,7 @@ async function loadClientCRMFields(clientId: number): Promise<void> {
       };
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load CRM fields:', error);
+    logger.error(' Failed to load CRM fields:', error);
     clientCRMData = null;
   }
 }
@@ -555,7 +558,7 @@ async function loadClientCustomFields(clientId: number): Promise<void> {
       clientCustomFields = data.values || [];
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Failed to load custom fields:', error);
+    logger.error(' Failed to load custom fields:', error);
     clientCustomFields = [];
   }
 }
@@ -599,7 +602,7 @@ function renderHealthScore(): void {
           storedContext?.showNotification('Health score calculated', 'success');
         }
       } catch (error) {
-        console.error('[ClientDetails] Failed to calculate health:', error);
+        logger.error('ClientDetails: Failed to calculate health:', error);
         storedContext?.showNotification('Failed to calculate health', 'error');
       }
     });
@@ -713,7 +716,7 @@ function renderHeaderTags(): void {
         }
         return null;
       } catch (error) {
-        console.error('[ClientDetails] Failed to create tag:', error);
+        logger.error('ClientDetails: Failed to create tag:', error);
         storedContext?.showNotification('Failed to create tag', 'error');
         return null;
       }
@@ -985,7 +988,7 @@ async function showEditCRMDialog(): Promise<void> {
       storedContext?.showNotification('Failed to update CRM details', 'error');
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Error updating CRM:', error);
+    logger.error(' Error updating CRM:', error);
     storedContext?.showNotification('Error updating CRM details', 'error');
   }
 }
@@ -1111,7 +1114,7 @@ async function showEditCustomFieldsDialog(): Promise<void> {
       storedContext?.showNotification('Failed to update custom fields', 'error');
     }
   } catch (error) {
-    console.error('[AdminClientDetails] Error updating custom fields:', error);
+    logger.error(' Error updating custom fields:', error);
     storedContext?.showNotification('Error updating custom fields', 'error');
   }
 }
@@ -1288,7 +1291,7 @@ async function addContact(): Promise<void> {
       storedContext?.showNotification('Contact added', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to add contact:', error);
+    logger.error('ClientDetails: Failed to add contact:', error);
     storedContext?.showNotification('Failed to add contact', 'error');
   }
 }
@@ -1345,7 +1348,7 @@ async function editContact(contactId: number): Promise<void> {
       storedContext?.showNotification('Contact updated', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to update contact:', error);
+    logger.error('ClientDetails: Failed to update contact:', error);
     storedContext?.showNotification('Failed to update contact', 'error');
   }
 }
@@ -1368,7 +1371,7 @@ async function deleteContact(contactId: number): Promise<void> {
       storedContext?.showNotification('Contact deleted', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to delete contact:', error);
+    logger.error('ClientDetails: Failed to delete contact:', error);
     storedContext?.showNotification('Failed to delete contact', 'error');
   }
 }
@@ -1399,7 +1402,7 @@ async function setContactPrimary(contactId: number): Promise<void> {
       storedContext?.showNotification('Primary contact updated', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to update primary contact:', error);
+    logger.error('ClientDetails: Failed to update primary contact:', error);
     storedContext?.showNotification('Failed to update primary contact', 'error');
   }
 }
@@ -1509,7 +1512,7 @@ async function logActivity(): Promise<void> {
       storedContext?.showNotification('Activity logged', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to log activity:', error);
+    logger.error('ClientDetails: Failed to log activity:', error);
     storedContext?.showNotification('Failed to log activity', 'error');
   }
 }
@@ -1593,7 +1596,7 @@ function setupNoteEventListeners(): void {
         storedContext?.showNotification('Note added', 'success');
       }
     } catch (error) {
-      console.error('[ClientDetails] Failed to add note:', error);
+      logger.error('ClientDetails: Failed to add note:', error);
       storedContext?.showNotification('Failed to add note', 'error');
     }
   });
@@ -1631,7 +1634,7 @@ async function toggleNotePin(noteId: number): Promise<void> {
       storedContext?.showNotification(note.is_pinned ? 'Note pinned' : 'Note unpinned', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to update note:', error);
+    logger.error('ClientDetails: Failed to update note:', error);
     storedContext?.showNotification('Failed to update note', 'error');
   }
 }
@@ -1648,7 +1651,7 @@ async function deleteNote(noteId: number): Promise<void> {
       storedContext?.showNotification('Note deleted', 'success');
     }
   } catch (error) {
-    console.error('[ClientDetails] Failed to delete note:', error);
+    logger.error('ClientDetails: Failed to delete note:', error);
     storedContext?.showNotification('Failed to delete note', 'error');
   }
 }

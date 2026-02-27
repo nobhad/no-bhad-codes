@@ -17,6 +17,9 @@ import {
   type AnnotationColor
 } from '../../../components/annotation-canvas';
 import { showToast } from '../../../utils/toast-notifications';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('DesignReview');
 
 // Simple DOM helper
 function el(id: string): HTMLElement | null {
@@ -75,7 +78,7 @@ export async function openDesignReview(deliverableId: number): Promise<void> {
     showDesignReviewModal();
   } catch (error) {
     showToast('Failed to load design review', 'error');
-    console.error(error);
+    logger.error(error);
   }
 }
 
@@ -90,7 +93,7 @@ async function loadDesignElements(deliverableId: number): Promise<void> {
       designElements = elements || [];
     }
   } catch (error) {
-    console.warn('Failed to load design elements:', error);
+    logger.warn('Failed to load design elements:', error);
     designElements = [];
   }
 }
@@ -257,7 +260,7 @@ async function setupDesignViewer(): Promise<void> {
       if (zoomLevel) zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
     });
   } catch (error) {
-    console.error('Failed to setup design viewer:', error);
+    logger.error('Failed to setup design viewer:', error);
     const fallbackContainer = el('design-canvas-container');
     if (fallbackContainer) {
       fallbackContainer.innerHTML = '<div class="error-state"><span class="error-message">Failed to load design file</span></div>';
@@ -318,7 +321,7 @@ function setupAnnotationTools(): void {
         })
       });
     } catch (error) {
-      console.error('Failed to save annotation:', error);
+      logger.error('Failed to save annotation:', error);
     }
   });
 }
@@ -375,7 +378,7 @@ function setupElementApproval(): void {
             body: JSON.stringify({ approvalStatus: status })
           });
         } catch (error) {
-          console.error('Failed to update element approval:', error);
+          logger.error('Failed to update element approval:', error);
         }
       }
     });
@@ -497,7 +500,7 @@ async function exportFeedbackPDF(): Promise<void> {
     showToast('PDF ready - use your browser\'s print dialog to save as PDF', 'success');
   } catch (error) {
     showToast('Failed to prepare PDF export', 'error');
-    console.error(error);
+    logger.error(error);
   }
 }
 

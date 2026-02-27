@@ -38,6 +38,9 @@ import {
   createPaginationConfig,
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('AdminLeads');
 
 // ============================================================================
 // TYPES
@@ -110,7 +113,7 @@ async function loadReactLeadsTable(): Promise<boolean> {
     unmountLeadsTable = module.unmountLeadsTable;
     return true;
   } catch (err) {
-    console.error('[AdminLeads] Failed to load React module:', err);
+    logger.error(' Failed to load React module:', err);
     return false;
   }
 }
@@ -156,7 +159,7 @@ const LEADS_BULK_CONFIG: BulkActionConfig = {
             ctx.showNotification('Failed to update leads', 'error');
           }
         } catch (error) {
-          console.error('[AdminLeads] Bulk status update error:', error);
+          logger.error(' Bulk status update error:', error);
           ctx.showNotification('Error updating leads', 'error');
         }
       }
@@ -201,9 +204,9 @@ function buildLeadRow(
 
   row.innerHTML = `
     ${createRowCheckbox('leads', lead.id)}
-    <td class="identity-cell inline-editable-cell" data-lead-id="${lead.id}" data-label="Lead">
-      ${primaryContent ? `<span class="identity-name" data-field="primary-name">${primaryContent}</span>` : '<span class="identity-name" data-field="primary-name" style="display:none;"></span>'}
-      ${secondaryContent ? `<span class="identity-contact" data-field="secondary-name">${secondaryContent}</span>` : '<span class="identity-contact" data-field="secondary-name" style="display:none;"></span>'}
+    <td class="identity-cell inline-editable-cell" data-label="Lead">
+      ${primaryContent ? `<span class="identity-name" data-field="primary-name">${primaryContent}</span>` : '<span class="identity-name hidden" data-field="primary-name"></span>'}
+      ${secondaryContent ? `<span class="identity-contact" data-field="secondary-name">${secondaryContent}</span>` : '<span class="identity-contact hidden" data-field="secondary-name"></span>'}
       <span class="identity-email">${safeEmail}</span>
     </td>
     <td class="type-cell" data-label="Type">
@@ -692,33 +695,33 @@ export function cleanupLeadsTab(): void {
 }
 
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
-  console.log('[AdminLeads] loadLeads called');
+  logger.log(' loadLeads called');
   setLeadsContext(ctx);
 
   // Check if React implementation should be used
   const useReact = shouldUseReactLeadsTable();
-  console.log('[AdminLeads] useReact:', useReact);
+  logger.log(' useReact:', useReact);
   let reactMountSuccess = false;
 
   if (useReact) {
     // Check if React table is already properly mounted
     if (isReactTableActuallyMounted()) {
-      console.log('[AdminLeads] React table already mounted, returning');
+      logger.log(' React table already mounted, returning');
       return; // Already mounted and working
     }
 
     // Lazy load and mount React LeadsTable
     const mountContainer = document.getElementById('react-leads-mount');
-    console.log('[AdminLeads] Mount container found:', !!mountContainer);
+    logger.log(' Mount container found:', !!mountContainer);
     if (mountContainer) {
       const loaded = await loadReactLeadsTable();
-      console.log('[AdminLeads] React module loaded:', loaded, 'mountLeadsTable:', !!mountLeadsTable);
+      logger.log(' React module loaded:', loaded, 'mountLeadsTable:', !!mountLeadsTable);
       if (loaded && mountLeadsTable) {
         // Unmount first if previously mounted to a different container
         if (reactTableMounted && unmountLeadsTable) {
           unmountLeadsTable();
         }
-        console.log('[AdminLeads] Mounting React LeadsTable...');
+        logger.log(' Mounting React LeadsTable...');
         mountLeadsTable(mountContainer, {
           getAuthToken: ctx.getAuthToken,
           onViewLead: (leadId: number) => showLeadDetails(leadId),
@@ -727,12 +730,12 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
         reactTableMounted = true;
         reactMountContainer = mountContainer;
         reactMountSuccess = true;
-        console.log('[AdminLeads] React LeadsTable mounted successfully');
+        logger.log(' React LeadsTable mounted successfully');
       } else {
-        console.error('[AdminLeads] React module failed to load, falling back to vanilla');
+        logger.error(' React module failed to load, falling back to vanilla');
       }
     } else {
-      console.log('[AdminLeads] No mount container found, falling back to vanilla');
+      logger.log(' No mount container found, falling back to vanilla');
     }
 
     if (reactMountSuccess) {
@@ -810,7 +813,7 @@ async function updateLeadStatus(id: number, status: string, ctx: AdminDashboardC
       ctx.showNotification(message, 'error');
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to update status:', error);
+    logger.error(' Failed to update status:', error);
     ctx.showNotification('Failed to update status. Please try again.', 'error');
   }
 }
@@ -1215,7 +1218,7 @@ export async function activateLead(leadId: number, ctx: AdminDashboardContext): 
       ctx.showNotification('Failed to activate lead. Please try again.', 'error');
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to activate lead:', error);
+    logger.error(' Failed to activate lead:', error);
     ctx.showNotification('Failed to activate lead. Please try again.', 'error');
   }
 }
@@ -1230,7 +1233,7 @@ export async function inviteLead(leadId: number, email: string, ctx: AdminDashbo
       ctx.showNotification('Failed to send invitation. Please try again.', 'error');
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to invite lead:', error);
+    logger.error(' Failed to invite lead:', error);
     ctx.showNotification('Failed to send invitation. Please try again.', 'error');
   }
 }
@@ -1266,7 +1269,7 @@ async function loadConversionFunnel(): Promise<void> {
       renderErrorState(container, 'Unable to load funnel data', { type: 'general' });
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to load conversion funnel:', error);
+    logger.error(' Failed to load conversion funnel:', error);
     renderErrorState(container, 'Error loading funnel', { type: 'general' });
   }
 }
@@ -1324,7 +1327,7 @@ async function loadSourcePerformance(): Promise<void> {
       renderErrorState(container, 'Unable to load source data', { type: 'general' });
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to load source performance:', error);
+    logger.error(' Failed to load source performance:', error);
     renderErrorState(container, 'Error loading sources', { type: 'general' });
   }
 }
@@ -1372,7 +1375,7 @@ export async function loadScoringRules(): Promise<void> {
       renderErrorState(container, 'Unable to load scoring rules', { type: 'general' });
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to load scoring rules:', error);
+    logger.error(' Failed to load scoring rules:', error);
     renderErrorState(container, 'Error loading rules', { type: 'general' });
   }
 }
@@ -1451,7 +1454,7 @@ async function showAddScoringRuleDialog(): Promise<void> {
         showToast('Failed to add rule', 'error');
       }
     } catch (error) {
-      console.error('[AdminLeads] Failed to add scoring rule:', error);
+      logger.error(' Failed to add scoring rule:', error);
       showToast('Error adding rule', 'error');
     }
   }
@@ -1467,7 +1470,7 @@ async function toggleScoringRule(ruleId: number): Promise<void> {
       showToast('Failed to update rule', 'error');
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to toggle scoring rule:', error);
+    logger.error(' Failed to toggle scoring rule:', error);
     showToast('Error updating rule', 'error');
   }
 }
@@ -1484,7 +1487,7 @@ async function deleteScoringRule(ruleId: number): Promise<void> {
         showToast('Failed to delete rule', 'error');
       }
     } catch (error) {
-      console.error('[AdminLeads] Failed to delete scoring rule:', error);
+      logger.error(' Failed to delete scoring rule:', error);
       showToast('Error deleting rule', 'error');
     }
   }
@@ -1504,7 +1507,7 @@ async function loadLeadTasks(leadId: number): Promise<LeadTask[]> {
       return data.tasks || [];
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to load tasks:', error);
+    logger.error(' Failed to load tasks:', error);
   }
   return [];
 }
@@ -1549,7 +1552,7 @@ async function showAddTaskDialog(leadId: number): Promise<void> {
         showToast('Failed to add task', 'error');
       }
     } catch (error) {
-      console.error('[AdminLeads] Failed to add task:', error);
+      logger.error(' Failed to add task:', error);
       showToast('Error adding task', 'error');
     }
   }
@@ -1565,7 +1568,7 @@ async function completeTask(taskId: number, leadId: number): Promise<void> {
       showToast('Failed to complete task', 'error');
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to complete task:', error);
+    logger.error(' Failed to complete task:', error);
     showToast('Error completing task', 'error');
   }
 }
@@ -1584,7 +1587,7 @@ async function loadLeadNotes(leadId: number): Promise<LeadNote[]> {
       return data.notes || [];
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to load notes:', error);
+    logger.error(' Failed to load notes:', error);
   }
   return [];
 }
@@ -1616,7 +1619,7 @@ async function showAddNoteDialog(leadId: number): Promise<void> {
         showToast('Failed to add note', 'error');
       }
     } catch (error) {
-      console.error('[AdminLeads] Failed to add note:', error);
+      logger.error(' Failed to add note:', error);
       showToast('Error adding note', 'error');
     }
   }
@@ -1632,7 +1635,7 @@ async function toggleNotePin(noteId: number, leadId: number): Promise<void> {
       showToast('Failed to update note', 'error');
     }
   } catch (error) {
-    console.error('[AdminLeads] Failed to toggle pin:', error);
+    logger.error(' Failed to toggle pin:', error);
     showToast('Error updating note', 'error');
   }
 }
@@ -1649,7 +1652,7 @@ const RENDER_ICONS = {
 export function renderLeadsTab(container: HTMLElement): void {
   // Check if React implementation should be used
   const useReact = shouldUseReactLeadsTable();
-  console.log('[AdminLeads] renderLeadsTab called, useReact:', useReact, 'container:', !!container);
+  logger.log(' renderLeadsTab called, useReact:', useReact, 'container:', !!container);
 
   leadsModule.resetCache();
   currentView = 'table';
@@ -1661,7 +1664,7 @@ export function renderLeadsTab(container: HTMLElement): void {
       <!-- React Leads Table Mount Point -->
       <div id="react-leads-mount" class="react-data-table"></div>
     `;
-    console.log('[AdminLeads] React mount container created');
+    logger.log(' React mount container created');
     return;
   }
 
@@ -1678,26 +1681,49 @@ export function renderLeadsTab(container: HTMLElement): void {
         <h3><span class="title-full">Intake Submissions</span><span class="title-mobile">Leads</span></h3>
         <div class="data-table-actions" id="leads-filter-container">
           <div id="leads-view-toggle"></div>
-          <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">${RENDER_ICONS.EXPORT}</button>
-          <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">${RENDER_ICONS.REFRESH}</button>
+          <button class="icon-btn" id="export-leads-btn" title="Export to CSV" aria-label="Export leads to CSV">
+            ${RENDER_ICONS.EXPORT}
+          </button>
+          <button class="icon-btn" id="refresh-leads-btn" title="Refresh" aria-label="Refresh leads">
+            ${RENDER_ICONS.REFRESH}
+          </button>
         </div>
       </div>
+      <!-- Bulk Action Toolbar (hidden initially) -->
       <div id="leads-bulk-toolbar" class="bulk-action-toolbar hidden"></div>
       <div class="leads-pipeline-container hidden" id="leads-pipeline-container"></div>
       <div class="data-table-container" id="leads-table-view">
         <div class="data-table-scroll-wrapper">
-        <table class="data-table">
-          <thead><tr>
-            <th scope="col" class="bulk-select-cell"><div class="portal-checkbox"><input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" /></div></th>
-            <th scope="col" class="identity-col">Lead</th><th scope="col" class="type-col">Type</th><th scope="col" class="status-col">Status</th>
-            <th scope="col" class="budget-col">Budget</th><th scope="col" class="date-col">Date</th><th scope="col" class="actions-col">Actions</th>
-          </tr></thead>
-          <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
-            <tr class="loading-row"><td colspan="7"><div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading leads...</span></div></td></tr>
-          </tbody>
-        </table>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col" class="bulk-select-cell">
+                  <div class="portal-checkbox">
+                    <input type="checkbox" id="leads-select-all" class="bulk-select-all" aria-label="Select all leads" />
+                  </div>
+                </th>
+                <th scope="col" class="identity-col">Lead</th>
+                <th scope="col" class="type-col">Type</th>
+                <th scope="col" class="status-col">Status</th>
+                <th scope="col" class="amount-col">Budget</th>
+                <th scope="col" class="date-col">Date</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leads-table-body" aria-live="polite" aria-atomic="false" aria-relevant="additions removals">
+              <tr class="loading-row">
+                <td colspan="7">
+                  <div class="loading-state">
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    <span class="loading-message">Loading leads...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+      <!-- Pagination -->
       <div id="leads-pagination" class="table-pagination"></div>
     </div>
   `;
