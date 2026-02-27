@@ -6,7 +6,12 @@
  *
  * Admin authentication wrapper.
  * Delegates to centralized authStore for state management.
- * Adds AdminSecurity rate limiting and fallback hash authentication.
+ *
+ * SECURITY NOTES:
+ * - Authentication is handled SERVER-SIDE via authStore.adminLogin()
+ * - JWT tokens are stored in HttpOnly cookies (not accessible via JS)
+ * - Client-side rate limiting is for UX only (not actual security)
+ * - No fallback authentication in production - server auth is required
  *
  * @deprecated Consider using authStore directly for new code.
  * This class is maintained for backward compatibility.
@@ -18,8 +23,11 @@ import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('AdminAuth');
 
-// Legacy storage keys for fallback mode
+// Legacy storage keys for fallback mode (development only)
 const LEGACY_SESSION_KEY = 'nbw_admin_session';
+
+// Check if we're in development mode
+const isDevelopment = import.meta.env?.MODE === 'development' || import.meta.env?.DEV;
 
 /**
  * Admin authentication wrapper
@@ -46,14 +54,20 @@ export class AdminAuth {
 
   /**
    * Authenticate with backend JWT API
-   * Falls back to client-side hash for offline/development mode
+   *
+   * SECURITY: Authentication is server-side only.
+   * - In production: Only server authentication is allowed
+   * - In development: Falls back to client-side hash if server is unavailable
+   *
+   * The fallback exists ONLY for local development when the backend may not be running.
+   * In production, if the server is unavailable, authentication fails.
    */
   static async authenticate(inputKey: string): Promise<boolean> {
     try {
-      // Check rate limiting first
+      // Check rate limiting first (UX enhancement, not security - easily bypassed)
       AdminSecurity.checkRateLimit();
 
-      // Try backend authentication via authStore
+      // Try backend authentication via authStore (REQUIRED for production)
       try {
         const result = await authStore.adminLogin({ password: inputKey });
 
@@ -63,21 +77,37 @@ export class AdminAuth {
           return true;
         }
 
-        // Invalid credentials
+        // Invalid credentials from server
         AdminSecurity.recordFailedAttempt();
         return false;
       } catch (fetchError) {
-        logger.warn('Backend auth failed, using fallback:', fetchError);
+        // In production, server auth is required - no fallback
+        if (!isDevelopment) {
+          logger.error('Server authentication failed. Backend server may be unavailable.');
+          AdminSecurity.recordFailedAttempt();
+          return false;
+        }
+
+        // Development only: warn and try fallback
+        logger.warn('Backend auth unavailable in development, trying fallback');
       }
 
-      // Fallback: Client-side hash authentication for development only
-      // SECURITY: No hardcoded fallback - must use environment variable
-      const fallbackHash = import.meta.env && import.meta.env.VITE_ADMIN_PASSWORD_HASH;
-
-      if (!fallbackHash) {
-        logger.error('VITE_ADMIN_PASSWORD_HASH not configured - admin access disabled');
+      // DEVELOPMENT ONLY: Client-side hash authentication fallback
+      // This allows local development without a running backend
+      // SECURITY: This code path is DISABLED in production (checked above)
+      if (!isDevelopment) {
+        logger.error('Fallback authentication is disabled in production');
         return false;
       }
+
+      const fallbackHash = import.meta.env?.VITE_ADMIN_PASSWORD_HASH;
+
+      if (!fallbackHash) {
+        logger.error('Development fallback: VITE_ADMIN_PASSWORD_HASH not configured');
+        return false;
+      }
+
+      logger.warn('Using development-only fallback authentication');
 
       const encoder = new TextEncoder();
       const data = encoder.encode(inputKey);
@@ -87,11 +117,12 @@ export class AdminAuth {
 
       if (hashHex === fallbackHash) {
         AdminSecurity.clearAttempts();
-        // Store fallback session for legacy compatibility
+        // Store fallback session for legacy compatibility (development only)
         const session = {
           authenticated: true,
           timestamp: Date.now(),
-          fallback: true
+          fallback: true,
+          isDev: true
         };
         sessionStorage.setItem(LEGACY_SESSION_KEY, JSON.stringify(session));
         return true;
@@ -129,14 +160,26 @@ export class AdminAuth {
       }
     }
 
-    // Fallback: Check legacy session storage (for fallback hash auth)
+    // Fallback: Check legacy session storage (for development fallback hash auth only)
+    // In production, this should never be the authentication path
+    if (!isDevelopment) {
+      return false;
+    }
+
     try {
       const sessionData = sessionStorage.getItem(LEGACY_SESSION_KEY);
       if (!sessionData) return false;
 
       const session = JSON.parse(sessionData);
-      const sessionDuration = 60 * 60 * 1000; // 1 hour
-      const isValid = session.authenticated && Date.now() - session.timestamp < sessionDuration;
+
+      // Only accept sessions explicitly marked as development
+      if (!session.isDev && !session.fallback) {
+        sessionStorage.removeItem(LEGACY_SESSION_KEY);
+        return false;
+      }
+
+      const SESSION_DURATION_MS = 60 * 60 * 1000; // 1 hour
+      const isValid = session.authenticated && Date.now() - session.timestamp < SESSION_DURATION_MS;
 
       if (!isValid) {
         sessionStorage.removeItem(LEGACY_SESSION_KEY);
@@ -144,7 +187,7 @@ export class AdminAuth {
 
       return isValid;
     } catch (error) {
-      console.warn('[AdminAuth] Legacy session validation failed:', error);
+      logger.warn('Legacy session validation failed:', error);
       return false;
     }
   }

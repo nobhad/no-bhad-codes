@@ -14,6 +14,9 @@
 import { showToast } from '../../../utils/toast-notifications';
 import { exportToCsv, type ExportConfig } from '../../../utils/table-export';
 import { apiFetch, apiPut, apiDelete } from '../../../utils/api-client';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('UniversalHandlers');
 
 // =====================================================
 // TYPES
@@ -250,7 +253,7 @@ export function createBulkActionHandler(config: BulkActionConfig) {
 
       return { success: successCount, failed: failCount };
     } catch (error) {
-      console.error('[BulkAction] Error:', error);
+      logger.error('BulkAction: Error:', error);
       showToast(`Error ${config.actionName.toLowerCase()} ${config.entityName}s`, 'error');
       return { success: 0, failed: ids.length };
     }
@@ -416,7 +419,7 @@ export function createStatusUpdateHandler(config: StatusUpdateConfig) {
       return false;
 
     } catch (error) {
-      console.error('[StatusUpdate] Error:', error);
+      logger.error('StatusUpdate: Error:', error);
       showToast(`Error updating ${config.entityName} status`, 'error');
       return false;
     }

@@ -59,6 +59,7 @@ import {
   loadSystemStatusModule,
   loadProposalsModule,
   loadKnowledgeBaseModule,
+  loadDocumentsModule,
   loadDocumentRequestsModule,
   loadAdHocRequestsModule,
   loadGlobalTasksModule,
@@ -147,15 +148,9 @@ const ADMIN_TAB_GROUPS = {
     label: 'CRM',
     tabs: ['leads', 'contacts', 'messages', 'clients'],
     defaultTab: 'leads'
-  },
-  documents: {
-    label: 'Documents',
-    tabs: ['invoices', 'contracts', 'document-requests', 'questionnaires'],
-    defaultTab: 'invoices'
   }
-  // Note: 'support' is NOT in ADMIN_TAB_GROUPS because it uses a single tab container
-  // with internal card switching (categories/articles), unlike other groups that have
-  // separate tab containers for each subtab.
+  // Note: 'documents' and 'support' are NOT in ADMIN_TAB_GROUPS because they use
+  // single tab containers with internal card switching, not separate tab containers.
 } as const;
 
 type AdminTabGroup = keyof typeof ADMIN_TAB_GROUPS;
@@ -547,7 +542,7 @@ class AdminDashboard {
             if (authError) authError.textContent = data.error || 'Invalid password';
           }
         } catch (error) {
-          console.error('[AdminDashboard] Login error:', error);
+          logger.error(' Login error:', error);
           if (authError) authError.textContent = 'Connection error. Please try again.';
         } finally {
           if (submitBtn) submitBtn.disabled = false;
@@ -934,7 +929,7 @@ class AdminDashboard {
         this.updateContactsDisplay(data);
       }
     } catch (error) {
-      console.error('[AdminDashboard] Failed to load contact submissions:', error);
+      logger.error(' Failed to load contact submissions:', error);
     }
   }
 
@@ -1037,10 +1032,10 @@ class AdminDashboard {
         // Refresh to update counts
         this.loadContactSubmissions();
       } else {
-        console.error('[AdminDashboard] Failed to update contact status');
+        logger.error(' Failed to update contact status');
       }
     } catch (error) {
-      console.error('[AdminDashboard] Error updating contact status:', error);
+      logger.error(' Error updating contact status:', error);
     }
   }
 
@@ -1080,7 +1075,7 @@ class AdminDashboard {
         }
       }
     } catch (error) {
-      console.error('[AdminDashboard] Error inviting lead:', error);
+      logger.error(' Error inviting lead:', error);
       await alertError('An error occurred. Please try again.');
       if (inviteBtn) {
         inviteBtn.disabled = false;
@@ -1197,11 +1192,11 @@ class AdminDashboard {
         this.loadLeads();
         this.loadProjects();
       } else {
-        console.error('[AdminDashboard] Failed to update project status');
+        logger.error(' Failed to update project status');
         alertError('Failed to update project status');
       }
     } catch (error) {
-      console.error('[AdminDashboard] Error updating project status:', error);
+      logger.error(' Error updating project status:', error);
     }
   }
 
@@ -1320,7 +1315,7 @@ class AdminDashboard {
         totalPageViews
       });
     } catch (error) {
-      console.error('[AdminDashboard] Failed to load visitor stats:', error);
+      logger.error(' Failed to load visitor stats:', error);
 
       // Set defaults on error
       const statVisitors = this.domCache.get('statVisitors');
@@ -1401,7 +1396,7 @@ class AdminDashboard {
           '<div class="empty-state-message">Failed to load messages</div>';
       }
     } catch (error) {
-      console.error('[AdminDashboard] Failed to load messages:', error);
+      logger.error(' Failed to load messages:', error);
       container.innerHTML =
         '<div class="empty-state-message">Error loading messages</div>';
     }
@@ -1488,11 +1483,11 @@ class AdminDashboard {
         this.loadClientThreads();
       } else {
         const error = await response.json();
-        console.error('[AdminDashboard] Failed to send message:', error);
+        logger.error(' Failed to send message:', error);
         alertError('Failed to send message. Please try again.');
       }
     } catch (error) {
-      console.error('[AdminDashboard] Error sending message:', error);
+      logger.error(' Error sending message:', error);
       alertError('Error sending message. Please try again.');
     } finally {
       input.disabled = false;
@@ -1592,7 +1587,17 @@ class AdminDashboard {
         return;
       }
 
-      // PRIMARY subtabs (work, CRM, documents): switch main tabs
+      // DOCUMENTS subtabs - check BEFORE primary mode
+      // Documents uses mode="primary" for styling but handles subtabs via events
+      if (forTab === 'documents') {
+        const subtab = target.dataset.subtab;
+        if (!subtab) return;
+        updateSubtabActiveState(group, subtab, 'subtab');
+        document.dispatchEvent(new CustomEvent('documentsSubtabChange', { detail: { subtab } }));
+        return;
+      }
+
+      // PRIMARY subtabs (work, CRM): switch main tabs
       if (mode === 'primary') {
         const subtab = target.dataset.subtab;
         if (!subtab || subtab === dashboard.currentTab) return;
@@ -1848,6 +1853,10 @@ class AdminDashboard {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Knowledge Base', href: false });
       break;
+    case 'documents':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Documents', href: false });
+      break;
     case 'document-requests':
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Document Requests', href: false });
@@ -1995,7 +2004,7 @@ class AdminDashboard {
         this.loadSystemData()
       ]);
     } catch (error) {
-      console.error('[AdminDashboard] Error loading data:', error);
+      logger.error(' Error loading data:', error);
     } finally {
       this.showLoading(false);
     }
@@ -2204,6 +2213,21 @@ class AdminDashboard {
         await kbModule.loadKnowledgeBase(this.moduleContext);
         break;
       }
+      case 'documents': {
+        // Unified documents tab - single container with internal card switching
+        // Pattern matches support/knowledge-base tab
+        const tabContainer = document.getElementById('tab-documents');
+        const documentsModule = await loadDocumentsModule();
+
+        // Render the tab structure dynamically (creates all subtab cards)
+        if (tabContainer) {
+          documentsModule.renderDocumentsTab(tabContainer);
+        }
+
+        // Load all documents subtab data
+        await documentsModule.loadDocuments(this.moduleContext);
+        break;
+      }
       case 'document-requests': {
         // Dynamically render document-requests tab, then load data
         const tabContainer = document.getElementById('tab-document-requests');
@@ -2265,7 +2289,7 @@ class AdminDashboard {
       }
       }
     } catch (error) {
-      console.error(`[AdminDashboard] Error loading ${tabName} data:`, error);
+      logger.error(`Error loading ${tabName} data:`, error);
     } finally {
       this.showLoading(false);
     }
@@ -2290,7 +2314,7 @@ class AdminDashboard {
       const performanceModule = await loadPerformanceModule();
       await performanceModule.loadPerformanceData(this.moduleContext);
     } catch (error) {
-      console.error('[AdminDashboard] Error loading performance data:', error);
+      logger.error(' Error loading performance data:', error);
     }
   }
 
@@ -2346,7 +2370,7 @@ class AdminDashboard {
         };
       }
     } catch (error) {
-      console.warn('[AdminDashboard] Could not get live performance data:', error);
+      logger.warn(' Could not get live performance data:', error);
     }
 
     // Fallback - data unavailable
@@ -2601,7 +2625,7 @@ class AdminDashboard {
         dashboardContainer.innerHTML = '<div class="empty-state">Performance dashboard coming soon</div>';
       }
     } catch (error) {
-      console.warn('[AdminDashboard] Failed to initialize performance dashboard component:', error);
+      logger.warn(' Failed to initialize performance dashboard component:', error);
     }
   }
 
@@ -2618,7 +2642,7 @@ class AdminDashboard {
           <span class="alert-metric">${alert.metric.toUpperCase()}</span>
           <span class="alert-value">${Math.round(alert.value)}</span>
         </div>
-        <div class="alert-message">${alert.message}</div>
+        <div class="alert-message">${SanitizationUtils.escapeHtml(alert.message)}</div>
         ${
   alert.suggestions && alert.suggestions.length > 0
     ? `
@@ -2626,7 +2650,7 @@ class AdminDashboard {
             <ul>
               ${alert.suggestions
     .slice(0, 2)
-    .map((suggestion: string) => `<li>${suggestion}</li>`)
+    .map((suggestion: string) => `<li>${SanitizationUtils.escapeHtml(suggestion)}</li>`)
     .join('')}
             </ul>
           </div>
@@ -2652,8 +2676,8 @@ class AdminDashboard {
 
   private showNotification(message: string, type: 'success' | 'error' | 'info' | 'warning'): void {
     // Log notification to console
-    const logFn = type === 'error' ? console.error : console.log;
-    logFn(`[AdminDashboard] ${type.toUpperCase()}: ${message}`);
+    const logFn = type === 'error' ? logger.error : logger.log;
+    logFn(`${type.toUpperCase()}: ${message}`);
 
     // Use toast notifications for success/info/warning, dialogs only for errors that need attention
     if (type === 'error') {
@@ -2688,7 +2712,7 @@ class AdminDashboard {
         }
       }
     } catch (error) {
-      console.error('[AdminDashboard] Error fetching sidebar counts:', error);
+      logger.error(' Error fetching sidebar counts:', error);
     }
   }
 
@@ -2722,7 +2746,7 @@ class AdminDashboard {
         filename = `performance-${new Date().toISOString().split('T')[0]}.json`;
         break;
       default:
-        console.error(`[AdminDashboard] Unknown export type requested: ${type}`);
+        logger.error(`Unknown export type requested: ${type}`);
         this.showNotification(`Export type '${type}' is not supported`, 'error');
         return;
       }
@@ -2738,7 +2762,7 @@ class AdminDashboard {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(`[AdminDashboard] Error exporting ${type} data:`, error);
+      logger.error(`Error exporting ${type} data:`, error);
       alertError(`Failed to export ${type} data. Please try again.`);
     }
   }
@@ -2781,7 +2805,7 @@ class AdminDashboard {
       // Clear old data logic here
       this.showNotification('Old data cleared successfully', 'success');
     } catch (error) {
-      console.error('[AdminDashboard] Error clearing old data:', error);
+      logger.error(' Error clearing old data:', error);
       this.showNotification('Failed to clear old data', 'error');
     }
   }
@@ -2807,7 +2831,7 @@ class AdminDashboard {
       this.showNotification('Analytics data has been reset', 'success');
       window.location.reload();
     } catch (error) {
-      console.error('[AdminDashboard] Error resetting analytics:', error);
+      logger.error(' Error resetting analytics:', error);
       this.showNotification('Failed to reset analytics', 'error');
     }
   }

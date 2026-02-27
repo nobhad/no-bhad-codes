@@ -21,6 +21,9 @@ import {
   type TableKeyboardNavConfig
 } from '../../components/table-keyboard-nav';
 import { ICONS } from '../../constants/icons';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('CommandPalette');
 
 // ============================================================================
 // TYPES
@@ -394,7 +397,7 @@ function createKeyboardHandler(config: AdminCommandPaletteConfig): (e: KeyboardE
     if (e.key === '?' && e.shiftKey) {
       e.preventDefault();
       // TODO: Show keyboard shortcuts help panel
-      console.log('Keyboard shortcuts: ⌘K (command palette), 1-8 (navigation)');
+      logger.log('Keyboard shortcuts: ⌘K (command palette), 1-8 (navigation)');
     }
   };
 }
