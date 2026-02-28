@@ -23,6 +23,7 @@ import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { APP_CONSTANTS } from '../../../config/constants';
 import type { AdminDashboardContext } from '../admin-types';
 import { formatDateTime, formatCurrency, formatDate } from '../../../utils/format-utils';
+import { formatTimeAgo } from '../../../utils/time-utils';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import { confirmDialog, confirmDanger, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { createTimeline, type TimelineEvent } from '../../../components/timeline';
@@ -844,18 +845,7 @@ function renderRecentActivity(): void {
   };
 
   const formatRelativeTime = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return formatDate(dateStr);
+    return formatTimeAgo(dateStr);
   };
 
   container.innerHTML = `

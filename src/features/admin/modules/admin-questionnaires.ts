@@ -19,6 +19,7 @@ import { initModalDropdown } from '../../../utils/modal-dropdown';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { ICONS } from '../../../constants/icons';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { renderActionsCell, createAction } from '../../../factories';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
@@ -79,7 +80,7 @@ function shouldUseReactQuestionnairesTable(): boolean {
   return true;
 }
 
-const QUESTIONNAIRES_API = '/api/questionnaires';
+const QUESTIONNAIRES_API = API_ENDPOINTS.QUESTIONNAIRES;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1224,6 +1225,8 @@ export async function loadQuestionnairesModule(ctx: AdminDashboardContext): Prom
           unmountQuestionnairesTable();
         }
         mountQuestionnairesTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

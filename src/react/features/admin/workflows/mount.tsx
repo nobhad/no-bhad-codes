@@ -1,52 +1,21 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Workflows Manager Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { WorkflowsManager } from './WorkflowsManager';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface WorkflowsMountOptions {
-  onNavigate?: (tab: string, entityId?: string) => void;
+export interface WorkflowsMountOptions extends BaseMountOptions {
+  /** Callback when workflow is clicked for detail view */
+  onViewWorkflow?: (workflowId: number) => void;
 }
 
-export function mountWorkflowsManager(
-  element: HTMLElement,
-  options: WorkflowsMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <WorkflowsManager onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountWorkflowsManager(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountWorkflowsManager,
+  unmount: unmountWorkflowsManager,
+  shouldUseReact: shouldUseReactWorkflowsManager
+} = createMountWrapper<WorkflowsMountOptions>({
+  Component: WorkflowsManager,
+  displayName: 'WorkflowsManager'
+});

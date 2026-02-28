@@ -16,9 +16,12 @@ import { createStatusBadge } from '../../../components/status-badge';
 import { renderEmptyState } from '../../../components/empty-state';
 import { getReactComponent } from '../../../react/registry';
 import { showToast } from '../../../utils/toast-notifications';
+import { createLogger } from '../../../utils/logger';
+import { apiFetch } from '../../../utils/api-client';
+import { getCachedElement, invalidateCachedElement } from '../../../utils/dom-helpers';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 
-/** API endpoints */
-const PROJECTS_API_BASE = '/api/projects';
+const logger = createLogger('PortalProjects');
 
 // Track React unmount function
 let reactProjectsUnmountFn: (() => void) | null = null;
@@ -70,9 +73,7 @@ export async function loadProjects(ctx: ClientPortalContext): Promise<void> {
 
   // Vanilla implementation - load projects and populate list
   try {
-    const response = await fetch(PROJECTS_API_BASE, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(API_ENDPOINTS.PROJECTS);
 
     if (!response.ok) {
       throw new Error('Failed to load projects');
@@ -85,26 +86,21 @@ export async function loadProjects(ctx: ClientPortalContext): Promise<void> {
     if (projectsList && projects.length > 0) {
       populateProjectsList(projectsList, projects, (project) => {
         // Handle project selection
-        console.log('Project selected:', project);
+        logger.log('Project selected:', project);
       });
     }
   } catch (error) {
-    console.error('Error loading projects:', error);
+    logger.error('Error loading projects:', error);
   }
 }
 
 // ============================================================================
-// CACHED DOM REFERENCES
+// CACHED DOM REFERENCES - Using shared dom-helpers utility
 // ============================================================================
 
-const cachedElements: Map<string, HTMLElement | null> = new Map();
-
-/** Get cached element by ID */
+/** Get cached element by ID - wrapper for shared utility */
 function getElement(id: string): HTMLElement | null {
-  if (!cachedElements.has(id)) {
-    cachedElements.set(id, document.getElementById(id));
-  }
-  return cachedElements.get(id) ?? null;
+  return getCachedElement(id);
 }
 
 /** Callbacks for project interactions */
@@ -157,12 +153,10 @@ export async function fetchProjectDetails(
   currentProject: ClientProject
 ): Promise<ClientProject> {
   try {
-    const response = await fetch(`${PROJECTS_API_BASE}/${projectId}`, {
-      credentials: 'include'
-    });
+    const response = await apiFetch(`${API_ENDPOINTS.PROJECTS}/${projectId}`);
 
     if (!response.ok) {
-      console.warn('[ClientPortal] Failed to fetch project details:', response.status);
+      logger.warn('Failed to fetch project details:', response.status);
       return currentProject;
     }
 
@@ -197,7 +191,7 @@ export async function fetchProjectDetails(
 
     return currentProject;
   } catch (error) {
-    console.warn('[ClientPortal] Error fetching project details:', error);
+    logger.warn('Error fetching project details:', error);
     return currentProject;
   }
 }
@@ -223,7 +217,7 @@ export function populateProjectDetails(
     newBadge.id = 'project-status';
     statusElement.replaceWith(newBadge);
     // Clear cache so next getElement fetches the new element
-    cachedElements.delete('project-status');
+    invalidateCachedElement('project-status');
   }
 
   // Populate project description (use innerHTML with sanitized line breaks)
@@ -351,9 +345,7 @@ export async function loadProjectPreview(_ctx: ClientPortalContext): Promise<voi
 
   try {
     // Get client's projects to find one with a preview URL
-    const response = await fetch(PROJECTS_API_BASE, {
-      credentials: 'include' // Include HttpOnly cookies
-    });
+    const response = await apiFetch(API_ENDPOINTS.PROJECTS);
 
     if (!response.ok) {
       throw new Error('Failed to load projects');
@@ -389,7 +381,7 @@ export async function loadProjectPreview(_ctx: ClientPortalContext): Promise<voi
       if (urlDisplay) urlDisplay.textContent = 'No preview available for your projects yet';
     }
   } catch (error) {
-    console.error('Error loading project preview:', error);
+    logger.error('Error loading project preview:', error);
     iframe.src = '';
     if (urlDisplay) urlDisplay.textContent = 'Error loading preview';
   }

@@ -17,6 +17,7 @@ import { manageFocusTrap } from '../../../utils/focus-trap';
 import { createFilterSelect, type FilterSelectInstance } from '../../../components/filter-select';
 import { createPortalModal, type PortalModalInstance } from '../../../components/portal-modal';
 import { ICONS } from '../../../constants/icons';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { renderActionsCell, createAction } from '../../../factories';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { formatDate } from '../../../utils/format-utils';
@@ -42,7 +43,7 @@ import {
 
 import { createLogger } from '../../../utils/logger';
 
-const KB_API = '/api/kb';
+const KB_API = API_ENDPOINTS.KNOWLEDGE_BASE;
 
 const logger = createLogger('AdminKnowledgeBase');
 
@@ -96,6 +97,7 @@ async function loadReactKnowledgeBase(): Promise<boolean> {
 
 /** Feature flag for React knowledge base table */
 function shouldUseReactKnowledgeBaseTable(): boolean {
+  // React component now supports Categories/Articles subtabs via knowledgeBaseSubtabChange event
   return true;
 }
 
@@ -908,7 +910,10 @@ export async function loadKnowledgeBase(ctx: AdminDashboardContext): Promise<voi
         if (reactTableMounted && unmountKnowledgeBase) {
           unmountKnowledgeBase();
         }
-        mountKnowledgeBase(mountContainer, {});
+        mountKnowledgeBase(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification
+        });
         reactTableMounted = true;
         reactMountContainer = mountContainer;
         return;

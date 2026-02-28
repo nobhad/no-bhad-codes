@@ -14,7 +14,7 @@
 import { authStore } from '../../../auth';
 import type { AnyUser, ClientUser } from '../../../auth/auth-types';
 import { isClientUser } from '../../../auth/auth-types';
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 import { validateEmail } from '../../../../shared/validation/validators';
 
 const logger = createLogger('PortalAuth');

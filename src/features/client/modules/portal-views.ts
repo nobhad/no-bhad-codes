@@ -10,6 +10,9 @@
 
 import { ICONS } from '../../../constants/icons';
 import { BUSINESS_INFO } from '../../../constants/business';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('PortalViews');
 
 // ============================================================================
 // VIEW CONTAINER
@@ -181,57 +184,57 @@ export function renderMessagesView(): void {
         </div>
       </div>
 
-      <!-- Left Column: Contact Info & Tips -->
-      <div class="messages-clients-column">
-        <section class="messages-contact-card" aria-label="Contact information">
-          <h3>Contact</h3>
-          <div class="messages-contact-info">
-            <p class="messages-contact-item">
-              <span class="messages-contact-icon">${ICONS.MAIL}</span>
-              <span>${BUSINESS_INFO.email}</span>
-            </p>
-            <p class="messages-contact-note">Responses within 24 hours</p>
-          </div>
-        </section>
+      <!-- Two Columns Grid -->
+      <div class="messages-columns">
+        <!-- Left Column: Contact Info & Tips -->
+        <div class="messages-clients-column">
+          <section class="messages-contact-card" aria-label="Contact information">
+            <div class="thread-list-header"><h3>Contact</h3></div>
+            <div class="messages-contact-info">
+              <p class="messages-contact-item">
+                <span class="messages-contact-icon">${ICONS.MAIL}</span>
+                <span>${BUSINESS_INFO.email}</span>
+              </p>
+              <p class="messages-contact-note">Responses within 24 hours</p>
+            </div>
+          </section>
 
-        <section class="messages-tips-card" aria-label="Tips">
-          <h3>Tips</h3>
-          <ul class="messages-tips-list">
-            <li>Include project details for faster responses</li>
-            <li>Attach screenshots when reporting issues</li>
-            <li>Check your email for notifications</li>
-          </ul>
-        </section>
-      </div>
-
-      <!-- Right Column: Thread + Compose -->
-      <div class="messages-thread-column">
-        <div class="messages-thread-header" id="messages-thread-header">
-          <span class="thread-title">Conversation with Noelle</span>
-        </div>
-        <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
-          <div class="no-messages">
-            <p>No messages yet. Send a message to Noelle to get started.</p>
-          </div>
+          <section class="messages-tips-card" aria-label="Tips">
+            <div class="thread-list-header"><h3>Tips</h3></div>
+            <ul class="messages-tips-list">
+              <li>Include project details for faster responses</li>
+              <li>Attach screenshots when reporting issues</li>
+              <li>Check your email for notifications</li>
+            </ul>
+          </section>
         </div>
 
-        <!-- Compose Message -->
-        <div class="message-compose">
-          <div id="attachment-preview" class="attachment-preview hidden"></div>
-          <div class="message-input-wrapper">
-            <label for="message-input" class="sr-only">Message</label>
-            <textarea
-              id="message-input"
-              class="form-textarea"
-              placeholder="Type your message or drop files here..."
-              aria-label="Type your message"
-            ></textarea>
+        <!-- Right Column: Thread + Compose -->
+        <div class="messages-thread-column">
+          <div class="messages-thread" id="messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread">
+            <div class="no-messages">
+              <p>No messages yet. Send a message to Noelle to get started.</p>
+            </div>
           </div>
-          <div class="message-compose-actions">
-            <button type="button" class="icon-btn btn-attach" id="btn-attach-file" title="Attach files">${ICONS.PAPERCLIP}</button>
-            <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+
+          <!-- Compose Message -->
+          <div class="message-compose">
+            <div id="attachment-preview" class="attachment-preview hidden"></div>
+            <div class="message-input-wrapper">
+              <label for="message-input" class="sr-only">Message</label>
+              <textarea
+                id="message-input"
+                class="form-textarea"
+                placeholder="Type your message or drop files here..."
+                aria-label="Type your message"
+              ></textarea>
+            </div>
+            <div class="message-compose-actions">
+              <button type="button" class="icon-btn btn-attach" id="btn-attach-file" title="Attach files">${ICONS.PAPERCLIP}</button>
+              <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
+            </div>
+            <input type="file" id="attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
           </div>
-          <input type="file" id="attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" />
         </div>
       </div>
     </div>
@@ -541,141 +544,13 @@ export function renderSettingsView(): void {
   const container = getContentContainer();
   if (!container) return;
 
+  // Render container for React component to mount into
+  // The React PortalSettings component handles all settings UI with inline editing
   container.innerHTML = `
-    <div class="settings-grid">
-      <!-- Account Section (Profile) -->
-      <div class="settings-section">
-        <h3>Account</h3>
-        <form class="settings-form" id="profile-form">
-          <div class="form-group">
-            <label for="settings-name" class="field-label">Full Name</label>
-            <input type="text" id="settings-name" name="name" class="form-input" placeholder="Your full name" />
-          </div>
-          <div class="form-group">
-            <label for="settings-email" class="field-label">Email</label>
-            <input
-              type="email"
-              id="settings-email"
-              name="email"
-              class="form-input"
-              placeholder="your@email.com"
-              autocomplete="email"
-              readonly
-            />
-            <span class="form-help-text">Contact <a href="#/messages" class="email-change-link text-danger" data-action="email-change">Noelle</a> to change your email address</span>
-          </div>
-          <div class="form-group">
-            <label for="settings-company" class="field-label">Company</label>
-            <input
-              type="text"
-              id="settings-company"
-              name="company"
-              class="form-input"
-              placeholder="Your company name"
-            />
-          </div>
-          <div class="form-group">
-            <label for="settings-phone" class="field-label">Phone</label>
-            <input
-              type="tel"
-              id="settings-phone"
-              name="phone"
-              class="form-input"
-              placeholder="(555) 555-5555"
-            />
-          </div>
-          <button type="submit" class="btn btn-secondary">Save Changes</button>
-        </form>
-      </div>
-
-      <!-- Change Password Section -->
-      <div class="settings-section" id="password-section-container">
-        <h3>Change Password</h3>
-        <form class="settings-form" id="password-form" data-form-type="change-password" autocomplete="off">
-          <!-- Hidden username for password managers - truly hidden with type="hidden" -->
-          <input type="hidden" id="password-form-username" name="username" autocomplete="username" />
-          <div class="form-group">
-            <label for="current-password" class="field-label">Current Password</label>
-            <div class="portal-password-wrapper">
-              <input type="password" id="current-password" name="current-password" class="form-input" autocomplete="current-password" />
-              <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="current-password" aria-label="Toggle password visibility">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="new-password" class="field-label">New Password</label>
-            <div class="portal-password-wrapper">
-              <input type="password" id="new-password" name="new-password" class="form-input" autocomplete="new-password" />
-              <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="new-password" aria-label="Toggle password visibility">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="confirm-password" class="field-label">Confirm New Password</label>
-            <div class="portal-password-wrapper">
-              <input type="password" id="confirm-password" name="confirm-password" class="form-input" autocomplete="off" />
-              <button type="button" class="portal-password-toggle password-toggle" data-password-toggle="confirm-password" aria-label="Toggle password visibility">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-secondary">Update Password</button>
-        </form>
-      </div>
-
-      <!-- Billing Info Section -->
-      <div class="settings-section settings-section-wide">
-        <h3>Billing Information</h3>
-        <form class="settings-form billing-form-grid" id="billing-form">
-          <div class="billing-column">
-            <div class="form-group">
-              <label for="billing-name" class="field-label">Billing Name</label>
-              <input type="text" id="billing-name" name="name" class="form-input" placeholder="Name on invoices" />
-            </div>
-            <div class="form-group">
-              <label for="billing-company" class="field-label">Company Name</label>
-              <input type="text" id="billing-company" name="company" class="form-input" placeholder="Your company name" />
-            </div>
-            <div class="form-group">
-              <label for="billing-address" class="field-label">Street Address</label>
-              <input type="text" id="billing-address" name="address" class="form-input" placeholder="123 Main St" />
-            </div>
-            <div class="form-group">
-              <label for="billing-address2" class="field-label">Address Line 2</label>
-              <input type="text" id="billing-address2" name="address2" class="form-input" placeholder="Apt, Suite, etc." />
-            </div>
-          </div>
-          <div class="billing-column">
-            <div class="form-group">
-              <label for="billing-city" class="field-label">City</label>
-              <input type="text" id="billing-city" name="city" class="form-input" placeholder="City" />
-            </div>
-            <div class="form-group">
-              <label for="billing-state" class="field-label">State / Province</label>
-              <input type="text" id="billing-state" name="state" class="form-input" placeholder="State" />
-            </div>
-            <div class="form-group">
-              <label for="billing-zip" class="field-label">ZIP / Postal Code</label>
-              <input type="text" id="billing-zip" name="zip" class="form-input" placeholder="12345" />
-            </div>
-            <div class="form-group">
-              <label for="billing-country" class="field-label">Country</label>
-              <input type="text" id="billing-country" name="country" class="form-input" placeholder="United States" />
-            </div>
-          </div>
-          <button type="submit" class="btn btn-secondary billing-submit">Save Billing Info</button>
-        </form>
+    <div class="settings-content" id="settings-content">
+      <div class="loading-state">
+        <span class="loading-spinner"></span>
+        <span>Loading settings...</span>
       </div>
     </div>
   `;
@@ -794,7 +669,7 @@ export function renderView(viewName: string): void {
     clearView();
     renderer();
   } else {
-    console.warn(`[PortalViews] Unknown view: ${viewName}, rendering dashboard`);
+    logger.warn(`Unknown view: ${viewName}, rendering dashboard`);
     clearView();
     renderDashboardView();
   }

@@ -449,6 +449,8 @@ export async function loadProposals(ctx: AdminDashboardContext): Promise<void> {
           unmountProposalsTable();
         }
         mountProposalsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

@@ -1,56 +1,21 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Contracts Table Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { ContractsTable } from './ContractsTable';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface ContractsMountOptions {
-  onNavigate?: (tab: string, entityId?: string) => void;
+export interface ContractsMountOptions extends BaseMountOptions {
+  /** Callback when contract is clicked for detail view */
+  onViewContract?: (contractId: number) => void;
 }
 
-export function mountContractsTable(
-  element: HTMLElement,
-  options: ContractsMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  // Add brutalist styling class
-  element.classList.add('react-portal-mount');
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <ContractsTable onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountContractsTable(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.classList.remove('react-portal-mount');
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountContractsTable,
+  unmount: unmountContractsTable,
+  shouldUseReact: shouldUseReactContractsTable
+} = createMountWrapper<ContractsMountOptions>({
+  Component: ContractsTable,
+  displayName: 'ContractsTable'
+});

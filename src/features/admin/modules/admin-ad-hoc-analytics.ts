@@ -10,8 +10,9 @@
 import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch } from '../../../utils/api-client';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { formatCurrency } from '../../../utils/format-utils';
+import { formatCurrency, formatDate } from '../../../utils/format-utils';
 import { createLogger } from '../../../utils/logger';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 
 const logger = createLogger('AdHocAnalytics');
 
@@ -39,7 +40,7 @@ interface ClientAdHocData {
   lastInvoiceDate: string;
 }
 
-const ANALYTICS_API = '/api/ad-hoc-requests';
+const ANALYTICS_API = API_ENDPOINTS.AD_HOC_REQUESTS;
 
 const DEFAULT_METRICS: AdHocRevenueData = {
   invoiceCount: 0,
@@ -123,14 +124,17 @@ export async function loadAdHocAnalytics(_ctx: AdminDashboardContext): Promise<v
       fetchTopClientsAdHoc()
     ]);
 
+    // Remove loading state class now that we have data
+    container.classList.remove('loading-state');
+
     // Check if we have any real data (with safety check for undefined metrics)
     const hasData =
       (metrics?.invoiceCount ?? 0) > 0 || monthlyData.length > 0 || clientData.length > 0;
 
     if (!hasData) {
       container.innerHTML = `
-        <div class="ad-hoc-analytics-empty">
-          <p class="text-muted">No ad hoc request data available yet.</p>
+        <div class="empty-state">
+          <p>No ad hoc request data available yet.</p>
         </div>
       `;
       return;
@@ -221,19 +225,12 @@ export async function loadAdHocAnalytics(_ctx: AdminDashboardContext): Promise<v
     }
   } catch (error) {
     logger.error(' Failed to load analytics:', error);
+    container.classList.remove('loading-state');
     container.innerHTML = `
-      <div class="ad-hoc-analytics-error">
+      <div class="error-state">
         <p>Unable to load ad hoc analytics. Please try again.</p>
       </div>
     `;
   }
 }
 
-function formatDate(dateString: string): string {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  } catch {
-    return dateString;
-  }
-}

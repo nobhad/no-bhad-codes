@@ -12,12 +12,19 @@ import type { PortalMessage, ClientPortalContext } from '../portal-types';
 import { createDOMCache } from '../../../utils/dom-cache';
 import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { confirmDanger, promptDialog } from '../../../utils/confirm-dialog';
 import { getReactComponent } from '../../../react/registry';
+import { formatTimeAgo } from '../../../utils/time-utils';
+import { createReactCleanupHandler } from '../../../utils/react-cleanup';
+import { apiFetch } from '../../../utils/api-client';
+import { createLogger } from '../../../utils/logger';
 
-// Track React unmount function
-let reactMessagesUnmountFn: (() => void) | null = null;
+const logger = createLogger('PortalMessages');
+
+// React cleanup handler
+const reactMessagesCleanup = createReactCleanupHandler();
 
 /**
  * Check if React portal messages should be used
@@ -30,13 +37,10 @@ function shouldUseReactPortalMessages(): boolean {
  * Cleanup React portal messages
  */
 export function cleanupReactPortalMessages(): void {
-  if (reactMessagesUnmountFn) {
-    reactMessagesUnmountFn();
-    reactMessagesUnmountFn = null;
-  }
+  reactMessagesCleanup.cleanup();
 }
 
-const MESSAGES_API_BASE = '/api/messages';
+const MESSAGES_API = API_ENDPOINTS.MESSAGES;
 const CLIENT_THREAD_TITLE = 'Conversation with Noelle';
 
 // Attachment configuration
@@ -146,11 +150,18 @@ export async function loadMessagesFromAPI(
       });
 
       if (typeof unmountResult === 'function') {
-        reactMessagesUnmountFn = unmountResult;
+        reactMessagesCleanup.setUnmount(unmountResult);
       }
 
       return;
     }
+    // React component not available - show error state instead of loading forever
+    logger.error('React component not found');
+    renderErrorState(messagesContainer as HTMLElement, 'Unable to load messages. Please refresh the page.', {
+      onRetry: () => window.location.reload()
+    });
+    return;
+
   }
 
   // Vanilla implementation below
@@ -166,11 +177,9 @@ export async function loadMessagesFromAPI(
   try {
     // Add cache-busting parameter when needed (e.g., after sending a message)
     const threadsUrl = bustCache
-      ? `${MESSAGES_API_BASE}/threads?_=${Date.now()}`
-      : `${MESSAGES_API_BASE}/threads`;
-    const threadsResponse = await fetch(threadsUrl, {
-      credentials: 'include' // Include HttpOnly cookies
-    });
+      ? `${MESSAGES_API}/threads?_=${Date.now()}`
+      : `${MESSAGES_API}/threads`;
+    const threadsResponse = await apiFetch(threadsUrl);
 
     if (!threadsResponse.ok) {
       throw new Error('Failed to load message threads');
@@ -204,7 +213,7 @@ export async function loadMessagesFromAPI(
     // Check for pending email change message from settings page
     checkPendingEmailChangeMessage();
   } catch (error) {
-    console.error('Error loading messages:', error);
+    logger.error('Error loading messages:', error);
     renderErrorState(messagesContainer, 'Unable to load messages. Please try again later.', {
       className: 'no-messages',
       type: 'network'
@@ -356,11 +365,9 @@ async function loadThreadMessages(
 
   try {
     const messagesUrl = bustCache
-      ? `${MESSAGES_API_BASE}/threads/${threadId}/messages?_=${Date.now()}`
-      : `${MESSAGES_API_BASE}/threads/${threadId}/messages`;
-    const messagesResponse = await fetch(messagesUrl, {
-      credentials: 'include'
-    });
+      ? `${MESSAGES_API}/threads/${threadId}/messages?_=${Date.now()}`
+      : `${MESSAGES_API}/threads/${threadId}/messages`;
+    const messagesResponse = await apiFetch(messagesUrl);
 
     if (!messagesResponse.ok) {
       throw new Error('Failed to load messages');
@@ -370,9 +377,8 @@ async function loadThreadMessages(
     renderMessages(messagesContainer, messagesData.messages || [], ctx);
 
     // Mark as read
-    await fetch(`${MESSAGES_API_BASE}/threads/${threadId}/read`, {
-      method: 'PUT',
-      credentials: 'include'
+    await apiFetch(`${MESSAGES_API}/threads/${threadId}/read`, {
+      method: 'PUT'
     });
 
     // Update unread count in thread list
@@ -386,7 +392,7 @@ async function loadThreadMessages(
       }
     }
   } catch (error) {
-    console.error('Error loading thread messages:', error);
+    logger.error('Error loading thread messages:', error);
     renderErrorState(messagesContainer, 'Unable to load messages.', {
       className: 'no-messages',
       type: 'network'
@@ -395,25 +401,10 @@ async function loadThreadMessages(
 }
 
 /**
- * Format relative time (e.g., "2h ago", "Yesterday", "Dec 15")
+ * Format relative time using shared utility
  */
 function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'Now';
-  if (diffMins < 60) return `${diffMins}m`;
-  if (diffHours < 24) return `${diffHours}h`;
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays}d`;
-
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
+  return formatTimeAgo(date);
 }
 
 /**
@@ -431,7 +422,7 @@ function renderMessageAttachments(
       const displayName = name.length > 25 ? `${name.substring(0, 22)}...` : name;
 
       return `
-      <a href="${MESSAGES_API_BASE}/attachments/${att.filename}/download"
+      <a href="${MESSAGES_API}/attachments/${att.filename}/download"
          class="message-attachment"
          target="_blank"
          rel="noopener noreferrer"
@@ -584,10 +575,9 @@ async function handleEditMessage(
   }
 
   try {
-    const response = await fetch(`${MESSAGES_API_BASE}/messages/${messageId}`, {
+    const response = await apiFetch(`${MESSAGES_API}/messages/${messageId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ message: newText.trim() })
     });
 
@@ -600,7 +590,7 @@ async function handleEditMessage(
     // Reload messages to reflect the change
     await loadMessagesFromAPI(ctx, true);
   } catch (error) {
-    console.error('Error editing message:', error);
+    logger.error('Error editing message:', error);
     showToast('Failed to edit message. Please try again.', 'error');
   }
 }
@@ -620,9 +610,8 @@ async function handleDeleteMessage(messageId: number, ctx: ClientPortalContext):
   }
 
   try {
-    const response = await fetch(`${MESSAGES_API_BASE}/messages/${messageId}`, {
-      method: 'DELETE',
-      credentials: 'include'
+    const response = await apiFetch(`${MESSAGES_API}/messages/${messageId}`, {
+      method: 'DELETE'
     });
 
     if (!response.ok) {
@@ -634,7 +623,7 @@ async function handleDeleteMessage(messageId: number, ctx: ClientPortalContext):
     // Reload messages to reflect the change
     await loadMessagesFromAPI(ctx, true);
   } catch (error) {
-    console.error('Error deleting message:', error);
+    logger.error('Error deleting message:', error);
     showToast('Failed to delete message. Please try again.', 'error');
   }
 }
@@ -667,30 +656,28 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
       });
 
       url = currentThreadId
-        ? `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`
-        : `${MESSAGES_API_BASE}/inquiry`;
+        ? `${MESSAGES_API}/threads/${currentThreadId}/messages`
+        : `${MESSAGES_API}/inquiry`;
 
       requestInit = {
         method: 'POST',
-        credentials: 'include',
         body: formData
       };
     } else {
       const body = currentThreadId ? { message } : { subject: 'General Inquiry', message };
 
       url = currentThreadId
-        ? `${MESSAGES_API_BASE}/threads/${currentThreadId}/messages`
-        : `${MESSAGES_API_BASE}/inquiry`;
+        ? `${MESSAGES_API}/threads/${currentThreadId}/messages`
+        : `${MESSAGES_API}/inquiry`;
 
       requestInit = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(body)
       };
     }
 
-    const response = await fetch(url, requestInit);
+    const response = await apiFetch(url, requestInit);
 
     if (!response.ok) {
       const error = await response.json();
@@ -710,7 +697,7 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
     // Use cache busting to ensure we get the latest messages after sending
     await loadMessagesFromAPI(ctx, true);
   } catch (error) {
-    console.error('Error sending message:', error);
+    logger.error('Error sending message:', error);
     showToast('Failed to send message. Please try again.', 'error');
   }
 }

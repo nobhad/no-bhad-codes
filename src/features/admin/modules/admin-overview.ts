@@ -137,7 +137,7 @@ export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void
 
     // Update 4-stat strip
     updateElement('stat-active-projects', formatNumber(dashboardData.snapshot.activeProjects));
-    updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD, false));
+    updateElement('stat-revenue-mtd', formatCurrency(dashboardData.snapshot.revenueMTD, { showCents: false }));
     updateElement('stat-new-leads', formatNumber(dashboardData.attention.newLeadsThisWeek));
     updateElement(
       'stat-overdue-tasks',
@@ -158,15 +158,15 @@ export async function loadOverviewData(ctx: AdminDashboardContext): Promise<void
     // Update revenue KPIs (placeholder values for now - can be extended)
     updateElement(
       'stat-invoiced-ytd',
-      formatCurrency(dashboardData.snapshot.revenueMTD * 2, false)
+      formatCurrency(dashboardData.snapshot.revenueMTD * 2, { showCents: false })
     );
     updateElement(
       'stat-collected-ytd',
-      formatCurrency(dashboardData.snapshot.revenueMTD * 1.6, false)
+      formatCurrency(dashboardData.snapshot.revenueMTD * 1.6, { showCents: false })
     );
     updateElement(
       'stat-outstanding',
-      formatCurrency(dashboardData.snapshot.revenueMTD * 0.4, false)
+      formatCurrency(dashboardData.snapshot.revenueMTD * 0.4, { showCents: false })
     );
 
     // Render simple revenue chart

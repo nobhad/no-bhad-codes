@@ -4,5 +4,5 @@
  */
 
 export { ClientDetail } from './ClientDetail';
-export { mountClientDetail, unmountClientDetail, isClientDetailMounted } from './mount';
+export { mountClientDetail, unmountClientDetail, shouldUseReactClientDetail } from './mount';
 export type { ClientDetailMountOptions } from './mount';

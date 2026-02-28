@@ -112,8 +112,9 @@ import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 
-const DR_API = '/api/document-requests';
+const DR_API = API_ENDPOINTS.DOCUMENT_REQUESTS;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1243,6 +1244,8 @@ export async function loadDocumentRequests(ctx: AdminDashboardContext): Promise<
           unmountDocumentRequestsTable();
         }
         mountDocumentRequestsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

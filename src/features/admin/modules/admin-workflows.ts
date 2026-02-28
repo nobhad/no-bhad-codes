@@ -26,6 +26,7 @@ import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { getPortalCheckboxHTML } from '../../../components/portal-checkbox';
 import { loadEmailTemplatesData } from './admin-email-templates';
 import { createLogger } from '../../../utils/logger';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 
 const logger = createLogger('AdminWorkflows');
 
@@ -78,6 +79,7 @@ async function loadReactWorkflowsManager(): Promise<boolean> {
 
 /** Feature flag for React workflows table */
 function shouldUseReactWorkflowsTable(): boolean {
+  // React component now supports Approvals/Triggers/Email Templates subtabs via workflowsSubtabChange event
   return true;
 }
 
@@ -168,8 +170,8 @@ interface ApprovalInstance {
 // CONSTANTS
 // ============================================
 
-const APPROVALS_API = '/api/approvals';
-const TRIGGERS_API = '/api/triggers';
+const APPROVALS_API = API_ENDPOINTS.APPROVALS;
+const TRIGGERS_API = API_ENDPOINTS.TRIGGERS;
 
 const ENTITY_TYPES: EntityType[] = ['proposal', 'invoice', 'contract', 'deliverable', 'project'];
 const WORKFLOW_TYPES: WorkflowType[] = ['sequential', 'parallel', 'any_one'];
@@ -253,7 +255,10 @@ export async function loadWorkflowsData(ctx: AdminDashboardContext): Promise<voi
         if (reactTableMounted && unmountWorkflowsManager) {
           unmountWorkflowsManager();
         }
-        mountWorkflowsManager(mountContainer, {});
+        mountWorkflowsManager(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification
+        });
         reactTableMounted = true;
         reactMountContainer = mountContainer;
         return;
