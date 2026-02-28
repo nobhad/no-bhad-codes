@@ -1,12 +1,287 @@
 # Current Work
 
-**Last Updated:** February 27, 2026
+**Last Updated:** February 28, 2026
 
 This file tracks active development work and TODOs. Completed items are archived in `archive/ARCHIVED_WORK_2026-02.md`.
 
 ---
 
 ## Active TODOs
+
+### Portal Audit Security Fixes - IN PROGRESS
+
+**Started:** February 28, 2026
+
+Comprehensive audit of portal codebase identified and fixed critical security and stability issues.
+
+**Completed Fixes:**
+
+1. **JSON.parse Safety (Task #1) - COMPLETE**
+   - Created `server/utils/safe-json.ts` utility with `safeJsonParse`, `safeJsonParseArray`, `safeJsonParseObject`, `safeJsonParseOrNull`, `parseIfString` functions
+   - Updated 12+ service files to use safe JSON parsing:
+     - `analytics-service.ts` - 12 JSON.parse calls fixed
+     - `audit-logger.ts` - 4 JSON.parse calls fixed
+     - `invoice-service.ts` - 2 JSON.parse calls fixed
+     - `questionnaire-service.ts` - 2 JSON.parse calls fixed
+     - `email-template-service.ts` - 2 JSON.parse calls fixed
+     - `notification-preferences-service.ts` - 1 JSON.parse call fixed
+     - `deliverable-service.ts` - 1 JSON.parse call fixed
+     - `workflow-trigger-service.ts` - 2 JSON.parse calls fixed
+     - `client-info-service.ts` - 1 JSON.parse call fixed
+     - `recurring-service.ts` - 4 JSON.parse calls fixed
+     - `webhook-service.ts` - 2 JSON.parse calls fixed
+
+2. **Authorization Bypass Fix (Task #3) - COMPLETE**
+   - Fixed IDOR vulnerability in `server/routes/deliverables.ts`
+   - Added validation that `commentId` belongs to specified `deliverableId` before operations
+   - Added validation that `elementId` belongs to specified `deliverableId` before operations
+   - Prevents users from manipulating resources they don't have access to
+
+3. **Rate Limiting (Task #2) - COMPLETE**
+   - Added rate limiting to `/me/password` endpoint in `clients.ts` (5 attempts/hour per user)
+   - Added rate limiting to `/reset-password` endpoint in `auth.ts` (10 attempts/15 min per IP)
+   - Added rate limiting to `/set-password` endpoint in `auth.ts` (10 attempts/15 min per IP)
+
+**Remaining Tasks:**
+
+- Task #4: Create CSS z-index scale design tokens
+- Task #5: Standardize API response formats
+- Task #6: Move hardcoded colors to design tokens
+- Task #7: Fix React component issues (accessibility, error handling)
+- Task #8: Fix service type safety and logging
+
+---
+
+### Inline Style Refactoring to CSS Classes - IN PROGRESS
+
+**Started:** February 28, 2026
+
+Refactoring inline `style={{}}` attributes in React components to CSS classes for better maintainability and consistency.
+
+**Progress:**
+
+- Starting count: 733 inline styles
+- Current count: 74 inline styles
+- Removed: 659 (90% reduction)
+
+**CSS Classes Added to:**
+
+- `src/styles/shared/portal-components.css` - Overview dashboard, tasks, deliverables, files, questionnaire, client detail, contract, messages, contacts, invoices, notes, ad-hoc requests component classes
+- `src/styles/shared/portal-forms.css` - Questionnaire form classes
+- `src/styles/shared/portal-messages.css` - Messaging panel classes
+- `src/styles/client-portal/projects.css` - Portal project detail and list classes
+
+**Files Refactored:**
+
+- MessagingPanel.tsx
+- QuestionnaireForm.tsx
+- SystemStatusPanel.tsx
+- PerformanceMetrics.tsx
+- AdHocAnalytics.tsx
+- AnalyticsDashboard.tsx
+- OverviewTab.tsx (project detail)
+- OverviewTab.tsx (client detail)
+- PortalProjectDetail.tsx
+- PortalQuestionnairesView.tsx
+- TasksTab.tsx
+- DeliverablesTab.tsx
+- FilesTab.tsx
+- ContractTab.tsx
+- OverviewDashboard.tsx
+- ProjectsTab.tsx (client detail)
+- ActivityTab.tsx
+- PortalMessagesView.tsx
+- MessagesTab.tsx (project detail)
+- ContactsTab.tsx
+- PortalProjectsList.tsx
+- InvoicesTab.tsx
+- NotesTab.tsx (project detail)
+- PortalAdHocRequests.tsx
+
+**Remaining:** ~74 inline styles (mostly dynamic styles for progress bars, conditional colors, grid column counts)
+
+---
+
+### React Subtab Support for Knowledge Base & Workflows - COMPLETE
+
+**Completed:** February 28, 2026
+
+Updated React components to support subtab navigation (matching vanilla implementation behavior).
+
+**Problem:**
+React components for Knowledge Base and Workflows were single-view implementations that didn't respond to header subtab clicks. When clicking "Categories" vs "Articles" in Knowledge Base, or "Approvals"/"Triggers"/"Email Templates" in Workflows, the content didn't change.
+
+**Solution:**
+Updated both React components to:
+1. Listen for custom subtab change events from the header
+2. Maintain internal subtab state
+3. Render different content based on active subtab
+
+**Files Modified:**
+
+- `src/react/features/admin/knowledge-base/KnowledgeBase.tsx` - Added subtab support (categories/articles)
+- `src/react/features/admin/workflows/WorkflowsManager.tsx` - Added subtab support (approvals/triggers/email-templates)
+- `src/features/admin/modules/admin-knowledge-base.ts` - Re-enabled React flag
+- `src/features/admin/modules/admin-workflows.ts` - Re-enabled React flag
+
+**Events Handled:**
+
+- `knowledgeBaseSubtabChange` → switches between Categories table and Articles table
+- `workflowsSubtabChange` → switches between Approvals table, Triggers table, and Email Templates
+
+---
+
+### React Component Race Condition Fix - COMPLETE
+
+**Completed:** February 28, 2026
+
+Fixed critical race condition where pages failed to load on first visit but worked on subsequent loads.
+
+**Root Cause:**
+
+React component registration (`admin-entry.tsx`, `portal-entry.tsx`) was happening AFTER the admin dashboard and client portal tried to use them. The module import order was:
+1. `admin.ts` → `core/app.ts` → AdminDashboard init → tries `getReactComponent()` → **FAILS** (components not registered yet)
+2. Eventually `admin-entry.tsx` loads and registers components
+
+**Fix:**
+
+Added explicit imports of React entry files at the TOP of both entry points, before `app` is imported:
+
+```typescript
+// CRITICAL: Register React components BEFORE app initialization
+import './react/admin-entry';  // in admin.ts
+import './react/portal-entry'; // in portal.ts
+```
+
+This ensures components are registered BEFORE the initialization chain starts.
+
+**Files Modified:**
+
+- `src/admin.ts` - Added `import './react/admin-entry'` as first import
+- `src/portal.ts` - Added `import './react/portal-entry'` as first import
+
+---
+
+### Additional Bulk API Endpoints - COMPLETE
+
+**Completed:** February 28, 2026
+
+Added 13 missing bulk/action API endpoints that frontend React components were calling but didn't exist on backend.
+
+**Endpoints Added:**
+
+| Endpoint | File | Description |
+|----------|------|-------------|
+| `POST /api/admin/tasks/bulk-delete` | misc.ts | Bulk delete tasks |
+| `POST /api/admin/workflows/bulk-delete` | workflows.ts | Bulk delete workflow triggers |
+| `POST /api/admin/workflows/bulk-status` | workflows.ts | Bulk update workflow status |
+| `POST /api/admin/deliverables/bulk-delete` | misc.ts | Bulk delete deliverables |
+| `POST /api/admin/proposals/bulk-delete` | misc.ts | Soft delete proposals |
+| `POST /api/admin/deleted-items/bulk-delete` | misc.ts | Permanently delete multiple items |
+| `POST /api/admin/deleted-items/bulk-restore` | misc.ts | Restore multiple items |
+| `POST /api/contracts/bulk-delete` | contracts.ts | Cancel multiple contracts |
+| `POST /api/contracts/:contractId/send` | contracts.ts | Send contract for signature |
+| `POST /api/ad-hoc-requests/bulk-delete` | ad-hoc-requests.ts | Soft delete multiple requests |
+| `POST /api/document-requests/bulk-delete` | document-requests.ts | Delete multiple document requests |
+| `POST /api/questionnaires/bulk-delete` | questionnaires.ts | Delete multiple questionnaires |
+| `GET /api/document-requests` | document-requests.ts | Get all document requests (admin) |
+
+**Files Modified:**
+
+- `server/routes/admin/misc.ts` - Tasks, deliverables, proposals, deleted-items bulk endpoints
+- `server/routes/admin/workflows.ts` - Workflow bulk delete and status endpoints
+- `server/routes/contracts.ts` - Contract bulk delete and send endpoints
+- `server/routes/ad-hoc-requests.ts` - Bulk delete endpoint
+- `server/routes/document-requests.ts` - Bulk delete and GET / endpoint
+- `server/routes/questionnaires.ts` - Bulk delete endpoint
+- `server/services/document-request-service.ts` - Added getAllRequests() and getAdminStats()
+
+---
+
+### Portal Architecture Consolidation - PHASE 3 COMPLETE
+
+**Started:** February 27, 2026
+
+Consolidated two separate portals (admin + client) into a single shell with dynamically rendered navigation, features, and capabilities based on user role.
+
+**Phase 1: Foundation - COMPLETE**
+
+- [x] Created `/server/config/unified-navigation.ts` - Single source of truth for all tabs, subtabs, features, and capabilities
+- [x] Created `/src/features/shared/types.ts` - Shared type definitions for portal context
+- [x] Created `/src/features/shared/PortalFeatureModule.ts` - Base class with capability-driven rendering
+- [x] Created `/src/features/shared/index.ts` - Module exports
+- [x] Verified CSS already uses variables with fallbacks - no hardcoded colors to fix
+- [x] Theme toggle already exists in portal-header.ejs
+
+**Phase 2: Portal Shell - COMPLETE**
+
+- [x] Created `PortalShell.ts` - Main controller with role-based config
+- [x] Created `PortalModuleLoader.ts` - Dynamic module loading with caching
+- [x] Created `/src/features/portal/index.ts` - Module exports
+- [x] Updated `navigation.ts` to use unified-navigation.ts as source of truth
+- [ ] Update EJS templates to use unified navigation rendering (optional - backward compatible)
+
+**Phase 3: Consolidate Modules - COMPLETE**
+
+All role-adaptive portal modules created:
+
+- [x] PortalMessaging - Thread list (admin) / simple view (client)
+- [x] PortalFiles - Folder management (admin) / upload only (client)
+- [x] PortalInvoices - Full CRUD (admin) / view & pay (client)
+- [x] PortalProjects - Full management (admin) / view status (client)
+- [x] PortalRequests - Manage all (admin) / submit & track (client)
+- [x] PortalDashboard - Metrics & activity (admin) / project overview (client)
+- [x] PortalSettings - System settings (admin) / profile & preferences (client)
+- [x] PortalQuestionnaires - Templates & assignments (admin) / complete questionnaires (client)
+
+**Phase 4: Cleanup - IN PROGRESS**
+
+- [x] Integrate portal shell with main entry point (`modules-config.ts`)
+- [x] Added `PortalShellModule` registration for both admin and client pages
+- [x] Added `getPortalModules()` function
+- [x] Fixed all ESLint errors in portal files
+- [ ] Delete deprecated modules (requires user confirmation - see note below)
+- [ ] Remove old navigation configs (backward compatible - can be done later)
+- [ ] Update tests
+- [ ] Update documentation
+
+**Note on Deprecated Modules:**
+
+The new portal architecture is ready but runs alongside the existing system. The following modules can be deprecated once the new system is fully tested:
+
+- `src/features/admin/admin-dashboard.ts` - Replaced by PortalShell
+- `src/features/client/client-portal.ts` - Replaced by PortalShell
+- Individual module files in `admin/modules/` and `client/modules/` that duplicate shared modules
+
+To use the new portal architecture, use `getPortalModules()` instead of `getAdminModules()` or `getClientPortalModules()` in the entry points.
+
+**Files Created:**
+
+| Path | Description |
+|------|-------------|
+| `server/config/unified-navigation.ts` | Single source of truth for navigation |
+| `src/features/shared/types.ts` | Shared portal types |
+| `src/features/shared/PortalFeatureModule.ts` | Base class with capability-driven UI |
+| `src/features/shared/PortalMessaging.ts` | Role-adaptive messaging |
+| `src/features/shared/PortalFiles.ts` | Role-adaptive file management |
+| `src/features/shared/PortalInvoices.ts` | Role-adaptive invoices |
+| `src/features/shared/PortalProjects.ts` | Role-adaptive projects |
+| `src/features/shared/PortalRequests.ts` | Role-adaptive requests |
+| `src/features/shared/PortalDashboard.ts` | Role-adaptive dashboard |
+| `src/features/shared/PortalSettings.ts` | Role-adaptive settings |
+| `src/features/shared/PortalQuestionnaires.ts` | Role-adaptive questionnaires |
+| `src/features/shared/index.ts` | Module exports |
+| `src/features/portal/PortalShell.ts` | Main controller |
+| `src/features/portal/PortalModuleLoader.ts` | Dynamic module loading |
+| `src/features/portal/index.ts` | Module exports |
+
+**Files Modified:**
+
+| Path | Description |
+|------|-------------|
+| `src/core/modules-config.ts` | Added PortalShellModule and getPortalModules() |
+
+---
 
 ### CSS Separation: Main Site vs Portal - COMPLETE
 
@@ -131,11 +406,99 @@ Stripped `src/styles/shared/portal-messages.css` down to minimal layout-only CSS
 - [x] Removed all hardcoded `background` declarations
 - [x] Changed all borders to use `var(--portal-border)`
 - [x] Kept only essential layout properties (display, flex, grid, overflow, positioning)
-- [x] Reduced file from ~855 lines to ~418 lines
+- [x] Reduced file from ~855 lines to ~95 lines
+
+**Files Modified:**
+
+- `src/styles/shared/portal-messages.css`
+
+---
+
+### Subtab Spacing Uniformity - COMPLETE
+
+**Completed:** February 27, 2026
+
+Made `.content-wrapper` a flex container with gap so spacing between subtabs (Leads/Contacts/Messages/Clients) and tab content is consistent across all tabs using the `--portal-section-gap` variable.
+
+**Root Cause:**
+
+The `.content-wrapper` element only had `width: 100%` and no flex layout, causing inconsistent spacing between the subtabs (`portal-header-subtabs`) and the tab content below.
+
+**Fix:**
+
+Added flex container with gap to `.portal .content-wrapper`:
+
+```css
+.portal .content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+  width: 100%;
+}
+```
 
 **File Modified:**
 
-- `src/styles/shared/portal-messages.css`
+- `src/styles/shared/portal-layout.css`
+
+---
+
+### Messages Layout Consistency - COMPLETE
+
+**Completed:** February 27, 2026
+
+Fixed inconsistent spacing and borders in the messages layout. Unified structure for both admin and client portal.
+
+**Root Cause:**
+
+The universal gap rule in `portal-layout.css` applied `gap: var(--portal-section-gap)` to all elements matching `[class*="-layout"]`, which included `.messages-layout`. This created unwanted spacing between the search bar and columns.
+
+**Changes Made:**
+
+- [x] Excluded `.messages-layout` from universal gap rule using `:not(.messages-layout)`
+- [x] Added `.messages-columns` wrapper to client portal HTML (matching admin structure)
+- [x] Fixed empty-state icon to use CSS variable via mask-image (was hardcoded gray)
+- [x] Removed unnecessary `.messages-thread-header` from client portal
+- [x] Removed padding from `.messages-thread-header` CSS
+- [x] Added Contact & Tips card styling for client portal
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css` - Excluded messages-layout from universal gap
+- `src/styles/shared/portal-messages.css` - Layout-only CSS, no hardcoded values
+- `src/styles/client-portal/layout.css` - Added gap:0 rule for messages-layout
+- `src/styles/components/loading.css` - Fixed empty-state icon to use mask-image
+- `src/features/client/modules/portal-views.ts` - Fixed HTML structure, removed thread header
+
+---
+
+### Client Portal Settings Inline Edit - COMPLETE
+
+**Completed:** February 27, 2026
+
+Converted client portal settings from traditional form inputs to inline-edit pattern matching admin panel. Click on a field value to edit it in place, Enter/blur to save, Escape to cancel.
+
+**Changes Made:**
+
+- [x] Created `InlineEditField` React component for text/email/phone inputs
+- [x] Created `InlineEditSelect` React component for dropdown selections
+- [x] Converted `ProfileForm` to use inline-edit fields
+- [x] Converted `BillingForm` to use inline-edit fields
+- [x] Updated `NotificationsForm` to save immediately on toggle (removed Save button)
+- [x] Added CSS styles for inline-edit rows in portal settings
+- [x] Simplified `PortalSettings` header (removed redundant heading)
+
+**Files Created:**
+
+- `src/react/components/portal/InlineEditField.tsx` - React inline-edit components
+
+**Files Modified:**
+
+- `src/react/features/portal/settings/ProfileForm.tsx` - Converted to inline-edit
+- `src/react/features/portal/settings/BillingForm.tsx` - Converted to inline-edit
+- `src/react/features/portal/settings/NotificationsForm.tsx` - Instant save on toggle
+- `src/react/features/portal/settings/PortalSettings.tsx` - Simplified header
+- `src/styles/components/inline-edit.css` - Added portal settings inline-edit styles
 
 ---
 
@@ -224,6 +587,170 @@ Full audit of backend documentation for accuracy. Fixed inconsistencies across 4
 
 ---
 
+### Admin API Bulk Delete Endpoints - COMPLETE
+
+**Completed:** February 28, 2026
+
+Added missing bulk delete endpoints for leads and projects that frontend components were calling but backend didn't have.
+
+**Endpoints Added:**
+
+| Endpoint | Method | Request Body | Response |
+|----------|--------|--------------|----------|
+| `/api/admin/leads/bulk/delete` | POST | `{ leadIds: number[] }` | `{ success: true, data: { deleted: number } }` |
+| `/api/admin/projects/bulk/delete` | POST | `{ projectIds: number[] }` | `{ success: true, data: { deleted: number } }` |
+
+**Implementation Details:**
+
+- Both endpoints use soft delete (30-day recovery via deleted items trash)
+- Projects endpoint uses `softDeleteService.softDeleteProject()` for cascade behavior
+- Leads endpoint directly updates projects table (leads are stored as projects)
+- Both validate array input and handle string/number ID coercion
+- Both require admin authentication
+
+**Files Modified:**
+
+- `server/routes/admin/leads.ts` - Added `/leads/bulk/delete` endpoint (lines 1273-1313)
+- `server/routes/admin/projects.ts` - Added `/projects/bulk/delete` endpoint and imports
+
+---
+
+### Comprehensive Codebase Audit Fixes - COMPLETE
+
+**Completed:** February 28, 2026
+
+Full audit across admin API routes, client portal routes, CSS, navigation, TypeScript, and database layer. Fixed all critical and high priority issues.
+
+**1. SQL Injection Fixes:**
+
+- `server/services/soft-delete-service.ts:122-132` - Replaced `${projectIds.join(',')}` with parameterized queries using placeholders
+- `server/services/invoice/recurring-service.ts:343-357` - Replaced unsafe CASE WHEN SQL construction with individual parameterized updates
+
+**2. Missing API Endpoints Created:**
+
+| Endpoint | File | Description |
+|----------|------|-------------|
+| `GET /api/admin/clients` | misc.ts | List all clients with stats |
+| `POST /api/admin/contacts/bulk-delete` | misc.ts | Bulk delete contacts |
+| `PUT /api/admin/tasks/:taskId` | misc.ts | Update global task |
+| `GET /api/admin/files` | misc.ts | List all files |
+| `DELETE /api/admin/files/:fileId` | misc.ts | Delete a file |
+| `GET /api/admin/deliverables` | misc.ts | List all deliverables |
+| `GET /api/admin/analytics` | misc.ts | Get analytics with date range |
+| `GET /api/portal/projects` | app.ts | Portal projects alias |
+
+**3. CSS Fixes:**
+
+- `src/styles/bundles/admin.css` - Fixed light mode: replaced hardcoded `#000000` with proper gray scale variables
+- `src/styles/shared/portal-layout.css` - Removed `!important` overrides, using CSS variables for text colors
+- `src/styles/components/nav-portal.css` - Fixed z-index 20000/20001 to use `--z-index-portal-overlay`/`--z-index-portal-modal`
+- `src/styles/bundles/portal.css` - Fixed z-index 9999 to use `--z-index-portal-confirm`
+- `src/styles/bundles/admin.css` - Fixed z-index 9999 to use `--z-index-portal-confirm`
+- `src/styles/base/utilities.css` - Fixed z-index 9999 to use `--z-index-portal-confirm`
+- `src/styles/main.css` - Fixed z-index 9999 to use `--z-index-portal-confirm`
+- `src/styles/components/command-palette.css` - Fixed z-index 9999 to use `--z-index-portal-confirm`
+- `src/styles/admin/modals.css` - Fixed z-index 9999/1000 to use design tokens
+- `src/styles/base/layout.css` - Fixed z-index 10000 to use `--z-index-fixed`
+- `src/styles/shared/portal-dropdown.css` - Fixed z-index 1000 to use `--z-index-portal-dropdown`
+- `src/styles/shared/portal-sidebar.css` - Fixed z-index 1000 to use `--z-index-portal-dropdown`
+
+**4. Route Ordering Fixes:**
+
+- `server/routes/admin/leads.ts` - Moved `/leads/duplicates` route BEFORE `/leads/:id/duplicates` to prevent incorrect matching
+
+**Files Modified:**
+
+- `server/services/soft-delete-service.ts`
+- `server/services/invoice/recurring-service.ts`
+- `server/routes/admin/misc.ts` (added 8 new endpoints)
+- `server/routes/admin/leads.ts` (route ordering)
+- `server/app.ts` (portal route alias)
+- 12 CSS files (z-index and color fixes)
+
+---
+
+### Console Statements → Logger Refactoring - COMPLETE
+
+**Completed:** February 28, 2026
+
+Refactored frontend services to use the centralized logger utility instead of raw console statements for consistent logging behavior.
+
+**Services Updated:**
+
+| File | Changes |
+|------|---------|
+| `src/services/performance-service.ts` | Replaced 7 `console.warn`/`console.error` with `logger.warn`/`logger.error` |
+| `src/services/visitor-tracking.ts` | Added logger import, replaced 3 `console.log`/`console.warn` calls |
+| `src/services/base-service.ts` | Updated to use `createLogger` pattern instead of raw console |
+| `src/services/router-service.ts` | Removed duplicate `console.error`, now uses inherited `this.error()` |
+
+**Note:** React hooks retain `console.error` for API error logging - these are intentional error handlers that should always be visible regardless of debug mode.
+
+**Files Modified:**
+
+- `src/services/performance-service.ts`
+- `src/services/visitor-tracking.ts`
+- `src/services/base-service.ts`
+- `src/services/router-service.ts`
+
+---
+
+### Portal Consistency Plan - STATUS
+
+**Reviewed:** February 28, 2026
+
+The plan at `/Users/noellebhaduri/.claude/plans/logical-moseying-bengio.md` has been reviewed. Most items are already complete:
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Phase 1: Generic Mount Factory | ✅ Complete | Mount files already use `createTableMount` (~10-15 lines each) |
+| Phase 2: Theme Bleed | ✅ Complete | Light mode properly scoped to `[data-page]`, gray scale correct |
+| Phase 3: Navigation Fixes | ⏸️ Deferred | ID renaming would affect 42+ files, high risk |
+| Phase 4: Wrapper Standardization | ⏸️ Deferred | `[data-page]` already in use |
+| Phase 5: Dashboard Spacing | ✅ Complete | Tokens exist in spacing.css, sidebar font already correct |
+
+---
+
+### Knowledge Base & Workflows Subtabs Fix - COMPLETE
+
+**Completed:** February 28, 2026
+
+Fixed subtab buttons not displaying when clicking on Knowledge Base or Workflows tabs in the admin dashboard.
+
+**Root Cause:**
+
+CSS specificity issue. The hide rule had higher specificity than the show rules:
+
+```css
+/* Hide rule (specificity 0,4,0): */
+.portal .portal-header-subtabs .header-subtabs .header-subtab-group {
+  display: none;
+}
+
+/* Show rules (specificity 0,4,0 - same, but missing .portal ancestor): */
+[data-page="admin"][data-active-group="support"] .header-subtab-group[data-for-tab="support"] {
+  display: flex;
+}
+```
+
+Both rules had equal specificity, but due to CSS layer ordering, the hide rule was winning.
+
+**Fix:**
+
+Added `.portal` to all show rule selectors to increase specificity:
+
+```css
+[data-page="admin"][data-active-group="support"] .portal .header-subtab-group[data-for-tab="support"] {
+  display: flex;
+}
+```
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css` - Added `.portal` to all subtab visibility rules (lines 333-346)
+
+---
+
 ### Input Validation Hardening - Remaining Phases (Lower Priority)
 
 **Started:** February 27, 2026
@@ -248,6 +775,74 @@ These tasks require substantial effort and are documented for future work:
 - [ ] Standardize error handling pattern across all services
 - [ ] Create response builder utility (deferred - api-response.ts already comprehensive)
 - [ ] Standardize service singleton pattern (deferred - low priority)
+
+---
+
+### React Component Auth Headers Audit - COMPLETE
+
+**Completed:** February 28, 2026
+
+Comprehensive audit ensuring all React components in admin portal properly use authentication headers for API calls.
+
+**Root Cause:**
+
+Many React table components were making fetch requests without Authorization headers, causing API calls to fail for authenticated endpoints. The `createTableMount` factory base interface didn't include `getAuthToken` or `showNotification` props.
+
+**Fixes Applied:**
+
+1. **Updated createTableMount factory** (`src/react/factories/createTableMount.tsx`):
+   - Added `getAuthToken?: () => string | null` to `TableMountOptions`
+   - Added `showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void`
+
+2. **Updated TasksManager.tsx**:
+   - Added `useCallback` import
+   - Added `getAuthToken` and `showNotification` to props
+   - Added `getHeaders()` helper with Authorization header
+   - Updated fetch call to use headers
+
+3. **Updated PortalInvoicesTable.tsx** (client portal):
+   - Added `useCallback` import
+   - Added `getHeaders()` helper
+   - Updated 3 fetch calls for PDF downloads to use auth headers
+
+**Auth Pattern Used:**
+
+```typescript
+const getHeaders = useCallback(() => {
+  const token = getAuthToken?.();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}, [getAuthToken]);
+
+// Usage:
+const response = await fetch(url, {
+  headers: getHeaders(),
+  credentials: 'include',
+});
+```
+
+**Components Already Properly Configured:**
+
+- GlobalTasksTable.tsx
+- SystemStatusPanel.tsx
+- AdHocAnalytics.tsx
+- OverviewDashboard.tsx
+- PerformanceMetrics.tsx
+- TimeTrackingPanel.tsx
+- ProjectDetail.tsx (via useProjectDetail hook)
+- ClientDetail.tsx (via useClientDetail hook)
+- All other admin table components
+
+**Files Modified:**
+
+- `src/react/factories/createTableMount.tsx`
+- `src/react/features/admin/tasks/TasksManager.tsx`
+- `src/react/features/portal/invoices/PortalInvoicesTable.tsx`
 
 ---
 
@@ -293,7 +888,37 @@ Converted React tables to use vanilla CSS classes. Added all required tw-* utili
 
 ---
 
-### Brutalist Design System - MOSTLY COMPLETE
+### CSS Consolidation - COMPLETE
+
+Consolidated all tw-* component classes from brutalist.css and globals.css into the main portal-*.css stylesheets.
+
+**Completed (Feb 28, 2026):**
+
+- [x] Moved tw-btn-* button classes to `portal-buttons.css`
+- [x] Moved tw-input, tw-select, tw-textarea, tw-checkbox to `portal-forms.css`
+- [x] Moved tw-tab-list, tw-tab, tw-tab-active to `portal-tabs.css`
+- [x] Moved tw-empty-state, tw-loading, tw-error, tw-modal-*, tw-dropdown-*, tw-badge, tw-status-dot to `portal-components.css`
+- [x] Moved tw-stat-card, tw-stat-value, tw-stat-label to `portal-stat-cards.css`
+- [x] Moved tw-dropzone-* to `portal-files.css`
+- [x] Moved all tw-* layout/typography utilities to `portal-layout.css`
+- [x] Trimmed globals.css to only Tailwind/Shadcn setup
+- [x] Deleted brutalist.css (content consolidated)
+
+**Files Modified:**
+
+- `src/styles/shared/portal-buttons.css` - Added tw-btn-* classes
+- `src/styles/shared/portal-forms.css` - Added tw-input, tw-select, tw-textarea, tw-checkbox
+- `src/styles/shared/portal-tabs.css` - Added tw-tab-list, tw-tab, tw-tab-active
+- `src/styles/shared/portal-components.css` - Added tw-empty-state, tw-loading, tw-modal-*, tw-dropdown-*, tw-badge
+- `src/styles/shared/portal-stat-cards.css` - Added tw-stat-card, tw-stat-value, tw-stat-label
+- `src/styles/shared/portal-files.css` - Added tw-dropzone-*
+- `src/styles/shared/portal-layout.css` - Added tw-container, tw-section, tw-card, typography, colors, dividers, grids, scrolling, borders
+- `src/react/styles/globals.css` - Trimmed to only Tailwind/Shadcn setup (~60 lines)
+- `src/react/styles/brutalist.css` - DELETED
+
+---
+
+### Brutalist Design System - COMPLETE
 
 Implemented a brutalist/minimalist design system for React components inspired by discothequefragrances.com.
 
@@ -305,16 +930,17 @@ Implemented a brutalist/minimalist design system for React components inspired b
 - High contrast white on black
 - Minimal borders
 
-**Completed (Feb 25-27, 2026):**
+**Completed (Feb 25-28, 2026):**
 
-- [x] Created `src/react/styles/brutalist.css` with complete component class library
+- [x] Created tw-* component class library (now in portal-*.css files)
 - [x] Updated `tailwind.config.js` with brutalist tokens (no border-radius, no shadows)
 - [x] Added Inconsolata font family to Tailwind config
-- [x] Imported brutalist.css in React entry points
 - [x] Modified `admin-overview.ts` to mount React OverviewDashboard with feature flag
 - [x] Made `renderOverviewTab` async and pass context for navigation
 - [x] Added `/api/admin/dashboard` endpoint
-- [x] Added comprehensive utility classes to brutalist.css (layout, spacing, typography, colors)
+- [x] Added comprehensive utility classes (layout, spacing, typography, colors)
+- [x] Consolidated all tw-* classes into portal-*.css files
+- [x] Removed duplicate code from globals.css and brutalist.css
 
 **Pending User Testing:**
 
