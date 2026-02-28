@@ -15,12 +15,12 @@ export interface PortalButtonProps
 
 /**
  * PortalButton
- * Button component matching the brutalist design system
- * Uses CSS classes from brutalist.css
+ * Button component matching the portal design system
+ * Uses CSS classes from portal styles
  */
 export const PortalButton = React.forwardRef<HTMLButtonElement, PortalButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, icon, children, disabled, ...props }, ref) => {
-    // Build class list based on variant and size - brutalist classes
+    // Build class list based on variant and size
     const variantClasses: Record<string, string> = {
       primary: 'tw-btn-primary',
       secondary: 'tw-btn-secondary',
