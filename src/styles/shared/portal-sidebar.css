@@ -7,32 +7,10 @@
    priority than 'components' layer, so most !important is not needed.
    ===================================================== */
 
-/* Base sidebar - client portal */
-[data-page="client-portal"] .sidebar {
+/* Shared sidebar - same for both admin and client portal */
+.portal .sidebar {
   width: clamp(200px, 18vw, 240px);
   min-width: 56px; /* Allow collapse to icon-only at breakpoints */
-  background: var(--portal-bg-darkest);
-  border-right: none;
-  display: flex;
-  flex-direction: column;
-  transition:
-    width 0.15s ease-out,
-    transform 0.15s ease-out;
-  position: relative;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
-  z-index: 60;
-  box-shadow: var(--shadow-sidebar);
-  flex-shrink: 0;
-  overflow: visible;
-}
-
-/* Admin sidebar - pitch black background */
-[data-page="admin"] .sidebar {
-  width: clamp(200px, 18vw, 240px);
-  min-width: 56px;
   background: var(--portal-bg-pitch);
   border-right: none;
   display: flex;
@@ -45,8 +23,8 @@
   height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
-  z-index: 60;
-  box-shadow: var(--shadow-sidebar);
+  z-index: var(--z-index-nav);
+  box-shadow: none;
   flex-shrink: 0;
   overflow: visible;
 }
@@ -130,13 +108,9 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 /* Sidebar button and icon styles now in shared/portal-buttons.css */
 
-/* Badge color on hover - match text color (client portal only) */
-[data-page="client-portal"] .sidebar-buttons .btn:hover .sidebar-badge {
-  color: var(--portal-bg-dark);
-}
-
-/* Badge color when active - match text color (client portal only) */
-[data-page="client-portal"] .sidebar-buttons .btn.active .sidebar-badge {
+/* Badge color on hover/active - shared for both portals */
+.portal .sidebar-buttons .btn:hover .sidebar-badge,
+.portal .sidebar-buttons .btn.active .sidebar-badge {
   color: var(--portal-bg-dark);
 }
 
@@ -171,7 +145,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   width: 24px;
   height: 24px;
   cursor: pointer;
-  z-index: 10;
+  z-index: var(--z-index-10);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,7 +242,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   background: var(--portal-bg-dark);
   border: var(--portal-border);
   min-width: 180px;
-  z-index: 1000;
+  z-index: var(--z-index-portal-dropdown, 9700);
 }
 
 /* Base display/alignment/gap from reset.css universal icon-text rule */
@@ -368,12 +342,12 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* =====================================================
-   ADMIN SIDEBAR - Uses shared .sidebar-buttons .btn pattern
+   SHARED SIDEBAR - Uses .sidebar-buttons .btn pattern
    All button styles are in portal-buttons.css
    ===================================================== */
 
-/* Admin sidebar footer - proper positioning at bottom */
-[data-page="admin"] .sidebar-footer {
+/* Sidebar footer - proper positioning at bottom */
+.portal .sidebar-footer {
   position: relative;
   margin-top: auto;
   bottom: auto;
@@ -383,8 +357,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* Logout button hover - red color for destructive action */
-[data-page="admin"] .sidebar-btn.btn-logout:hover,
-[data-page="admin"] .sidebar-btn.btn-logout:hover .btn-icon {
+.portal .sidebar-btn.btn-logout:hover,
+.portal .sidebar-btn.btn-logout:hover .btn-icon {
   color: var(--color-error-400, #f87171);
 }
 
@@ -415,7 +389,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   opacity: 1;
   cursor: pointer;
   transition: color var(--transition-fast);
-  z-index: 70;
+  z-index: var(--z-index-nav);
 }
 
 .portal .sidebar > .sidebar-toggle-btn:hover {
@@ -446,8 +420,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 @layer responsive {
   @media (--wide-down) {
     /* Only auto-collapse sidebars that aren't manually collapsed */
-    [data-page="client-portal"] .sidebar:not(.collapsed),
-    [data-page="admin"] .sidebar:not(.collapsed) {
+    .portal .sidebar:not(.collapsed) {
       width: 56px;
       min-width: 56px;
       max-width: 56px;
@@ -457,8 +430,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 @media (--wide-down) {
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
+  .portal .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
     flex-direction: column;
     padding: 0.75rem 0.5rem;
@@ -473,31 +445,12 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Hide scrollbar for Chrome/Safari */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar {
+  .portal .sidebar:not(.collapsed) .sidebar-content::-webkit-scrollbar {
     display: none;
   }
 
   /* Buttons section should grow but allow scroll */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 1;
-    min-height: 0; /* Allow shrinking for scroll */
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Admin sidebar auto-collapse - uses .sidebar-buttons pattern (same as client portal) */
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
+  .portal .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -510,28 +463,14 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     -ms-overflow-style: none;
   }
 
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
+  .portal .sidebar:not(.collapsed) .sidebar-buttons::-webkit-scrollbar {
     display: none;
   }
 
   /* Sidebar logo styles in shared/portal-layout.css */
 
-  /* Client portal sidebar footer */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-footer {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    background: transparent;
-    padding: 0.75rem 0;
-    margin-top: auto;
-    flex-shrink: 0;
-  }
-
-  /* Admin sidebar footer - transparent to match sidebar */
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-footer {
+  /* Sidebar footer - shared for both portals */
+  .portal .sidebar:not(.collapsed) .sidebar-footer {
     position: sticky;
     bottom: 0;
     left: 0;
@@ -545,25 +484,21 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   }
 
   /* Hide text elements - only for non-collapsed auto-collapse */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .subitem-name,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .account-item-title,
-  [data-page="client-portal"] .sidebar:not(.collapsed) h3,
-  [data-page="admin"] .sidebar:not(.collapsed) .client-name,
-  [data-page="admin"] .sidebar:not(.collapsed) .project-name,
-  [data-page="admin"] .sidebar:not(.collapsed) h3 {
+  .portal .sidebar:not(.collapsed) .client-name,
+  .portal .sidebar:not(.collapsed) .project-name,
+  .portal .sidebar:not(.collapsed) .subitem-name,
+  .portal .sidebar:not(.collapsed) .account-item-title,
+  .portal .sidebar:not(.collapsed) h3 {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar:not(.collapsed) .project-subitems,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
-  [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
+  .portal .sidebar:not(.collapsed) .project-subitems,
+  .portal .sidebar:not(.collapsed) .account-list {
     display: none;
   }
 
-  /* Badge positioning when sidebar auto-collapses - client portal only */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-badge {
+  /* Badge positioning when sidebar auto-collapses */
+  .portal .sidebar:not(.collapsed) .sidebar-badge {
     position: absolute;
     top: -2px;
     right: -2px;
@@ -590,14 +525,12 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
    ===================================================== */
 @media (--compact-mobile) {
   /* Only auto-collapse sidebars that aren't manually collapsed */
-  [data-page="client-portal"] .sidebar:not(.collapsed),
-  [data-page="admin"] .sidebar:not(.collapsed) {
+  .portal .sidebar:not(.collapsed) {
     width: 56px;
     min-width: 56px;
   }
 
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-content,
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-content {
+  .portal .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
     padding: 0.5rem;
     padding-top: 1rem;
@@ -608,35 +541,11 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   /* Sidebar logo styles in shared/portal-layout.css */
 
   /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-buttons {
+  .portal .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-
-  /* Admin sidebar mobile - uses .sidebar-buttons pattern (same as client portal) */
-  [data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* Badge positioning on mobile - client portal only */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .sidebar-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    min-width: 14px;
-    height: 14px;
-    font-size: 9px;
-    padding: 0 3px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
   }
 
   /* Footer positioning - for non-collapsed */
@@ -655,8 +564,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 /* Collapsed sidebar mobile - uses responsive layer for priority over auto-collapse */
 @layer responsive {
   @media (--mobile) {
-    [data-page="client-portal"] .sidebar.collapsed,
-    [data-page="admin"] .sidebar.collapsed {
+    .portal .sidebar.collapsed {
       transform: translateX(-100%);
       width: 0;
       min-width: 0;
@@ -668,39 +576,33 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 @media (--mobile) {
   /* Hide text elements in auto-collapsed state (not manually collapsed) */
-  [data-page="client-portal"] .sidebar:not(.collapsed) .client-name,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .project-name,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .subitem-name,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .account-item-title,
-  [data-page="client-portal"] .sidebar:not(.collapsed) h3,
-  [data-page="admin"] .sidebar:not(.collapsed) .client-name,
-  [data-page="admin"] .sidebar:not(.collapsed) .project-name,
-  [data-page="admin"] .sidebar:not(.collapsed) h3 {
+  .portal .sidebar:not(.collapsed) .client-name,
+  .portal .sidebar:not(.collapsed) .project-name,
+  .portal .sidebar:not(.collapsed) .subitem-name,
+  .portal .sidebar:not(.collapsed) .account-item-title,
+  .portal .sidebar:not(.collapsed) h3 {
     display: none;
   }
 
-  [data-page="client-portal"] .sidebar:not(.collapsed) .project-subitems,
-  [data-page="client-portal"] .sidebar:not(.collapsed) .account-list,
-  [data-page="admin"] .sidebar:not(.collapsed) .project-subitems {
+  .portal .sidebar:not(.collapsed) .project-subitems,
+  .portal .sidebar:not(.collapsed) .account-list {
     display: none;
   }
-
-  /* Admin sidebar now uses same .sidebar-buttons pattern as client portal */
 }
 
 /* =====================================================
    SIDEBAR NOTIFICATION BADGES
-   Consolidated from admin/sidebar-badges.css
+   Shared between admin and client portals
    ===================================================== */
 
 /* Ensure sidebar buttons have relative positioning for badge */
-[data-page="admin"] .sidebar-buttons .btn {
+.portal .sidebar-buttons .btn {
   position: relative;
   overflow: visible;
 }
 
 /* Base badge style */
-[data-page="admin"] .sidebar-badge {
+.portal .sidebar-badge {
   position: absolute;
   display: inline-flex;
   align-items: center;
@@ -729,14 +631,14 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* No pseudo-elements on badge */
-[data-page="admin"] .sidebar-badge::before,
-[data-page="admin"] .sidebar-badge::after {
+.portal .sidebar-badge::before,
+.portal .sidebar-badge::after {
   display: none !important;
   content: none !important;
 }
 
 /* Expanded sidebar: badge on right edge, vertically centered */
-[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn .sidebar-badge {
+.portal .sidebar:not(.collapsed) .sidebar-buttons .btn .sidebar-badge {
   top: 50%;
   right: 0.5rem;
   margin: 0;
@@ -744,13 +646,13 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* Active button in expanded sidebar */
-[data-page="admin"] .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
+.portal .sidebar:not(.collapsed) .sidebar-buttons .btn.active .sidebar-badge {
   background: var(--color-danger);
   color: var(--color-text-inverse);
 }
 
 /* Collapsed sidebar: small circle at top-right */
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
+.portal .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
   top: 2px;
   right: 2px;
   margin: 0;
@@ -769,13 +671,13 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* Collapsed - no scale on hover */
-[data-page="admin"] .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
+.portal .sidebar.collapsed .sidebar-buttons .btn:hover .sidebar-badge {
   transform: none;
 }
 
 /* Laptop breakpoint - badge at top-right */
 @media (--laptop) {
-  [data-page="admin"] .sidebar .sidebar-buttons .btn .sidebar-badge {
+  .portal .sidebar .sidebar-buttons .btn .sidebar-badge {
     position: absolute;
     top: 2px;
     right: 2px;
@@ -794,9 +696,10 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 /* =====================================================
    SIDEBAR KEYBOARD SHORTCUTS
+   Shared between admin and client portals
    ===================================================== */
 
-[data-page="admin"] .sidebar-shortcut {
+.portal .sidebar-shortcut {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -818,24 +721,24 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 /* Show shortcuts on sidebar hover */
-[data-page="admin"] .sidebar:hover .sidebar-shortcut,
-[data-page="admin"] .sidebar:focus-within .sidebar-shortcut {
+.portal .sidebar:hover .sidebar-shortcut,
+.portal .sidebar:focus-within .sidebar-shortcut {
   opacity: 0.5;
 }
 
 /* Subtle on active button */
-[data-page="admin"] .sidebar .btn.active .sidebar-shortcut {
+.portal .sidebar .btn.active .sidebar-shortcut {
   opacity: 0.3;
 }
 
 /* Collapsed sidebar - hide shortcuts */
-[data-page="admin"] .sidebar.collapsed .sidebar-shortcut {
+.portal .sidebar.collapsed .sidebar-shortcut {
   display: none;
 }
 
 /* Mobile - hide shortcuts */
 @media (--mobile) {
-  [data-page="admin"] .sidebar-shortcut {
+  .portal .sidebar-shortcut {
     display: none;
   }
 }

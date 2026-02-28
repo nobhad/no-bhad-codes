@@ -270,7 +270,7 @@
   max-height: 200px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: var(--shadow-lg);
+  box-shadow: none;
 }
 
 .tag-dropdown.hidden {
@@ -659,7 +659,7 @@
 /* Universal list item styling for portal lists */
 .portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
+  background: transparent;
   color: var(--portal-text-light);
   margin-bottom: var(--space-0-5);
 }
@@ -679,7 +679,7 @@
 .portal
   :is(.activity-list, .notes-list, .files-list, .tasks-list)
   > li:is(.clickable, .clickable-activity):hover {
-  background: var(--portal-bg-light);
+  background: var(--portal-bg-hover);
 }
 
 /* =====================================================
@@ -1114,7 +1114,7 @@ a.text-danger:hover {
   width: max-content;
   max-width: 280px;
   text-align: left;
-  box-shadow: var(--shadow-elevated-sm);
+  box-shadow: none;
   z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
   opacity: 0;
@@ -1226,6 +1226,18 @@ a.text-danger:hover {
   background: var(--portal-bg-light);
   overflow: hidden;
   box-shadow: var(--shadow-inset-light);
+  margin: var(--space-2) 0;
+}
+
+/* Progress overview container */
+.progress-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.progress-overview .progress-bar {
+  margin: 0;
 }
 
 .progress-fill {
@@ -1344,4 +1356,1492 @@ a.text-danger:hover {
 .error-boundary-retry-icon {
   width: 16px;
   height: 16px;
+}
+
+/* =====================================================
+   TW-* COMPONENT CLASSES - React Component Styles
+   These classes are used by React components
+   ===================================================== */
+
+/* States - Loading, empty, error */
+.tw-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 0;
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+}
+
+.tw-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 0;
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+}
+
+.tw-error {
+  padding: 1rem;
+  background: transparent;
+  border: 1px solid var(--portal-border-color);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+}
+
+/* Progress bars */
+.tw-progress-track {
+  height: 4px;
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  overflow: hidden;
+}
+
+.tw-progress-bar {
+  height: 100%;
+  background: var(--portal-text-light);
+  transition: width 0.3s;
+}
+
+/* List items */
+.tw-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: transparent;
+  border-bottom: 1px solid var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.tw-list-item:hover {
+  background: var(--portal-alpha-white-05, rgba(255, 255, 255, 0.05));
+}
+
+.tw-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Modals/Popups */
+.tw-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--portal-alpha-black-80, rgba(0, 0, 0, 0.8));
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.tw-modal {
+  background: var(--portal-bg-pitch, #000000);
+  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
+  padding: 1.5rem;
+  max-width: 32rem;
+  width: 100%;
+  position: relative;
+}
+
+.tw-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.tw-modal-title {
+  font-size: var(--btn-portal-font-size, 16px);
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-light);
+  font-weight: 400;
+}
+
+/* Dropdown menus */
+.tw-dropdown {
+  background: var(--portal-bg-pitch, #000000);
+  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
+  padding: 0.25rem 0;
+}
+
+.tw-dropdown-item {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tw-dropdown-item:hover {
+  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  color: var(--portal-text-light);
+}
+
+.tw-dropdown-item-active {
+  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  color: var(--portal-text-light);
+}
+
+/* Badges/Status */
+.tw-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 0;
+}
+
+.tw-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Table row selected state */
+.tw-table-row-selected {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* =====================================================
+   SYSTEM STATUS PANEL COMPONENT CLASSES
+   Used by SystemStatusPanel.tsx
+   ===================================================== */
+
+/* Header row */
+.status-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.status-panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-panel-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.status-panel-last-update {
+  font-size: 12px;
+}
+
+.status-panel-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-panel-auto-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 12px;
+}
+
+.status-panel-refresh-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.status-panel-refresh-icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Service card */
+.status-service-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.status-service-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-service-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.status-service-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.status-service-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 12px;
+}
+
+.status-service-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.status-text-capitalize {
+  text-transform: capitalize;
+}
+
+/* Metric card */
+.status-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.status-metric-value {
+  margin-bottom: 0.5rem;
+}
+
+.status-metric-threshold {
+  font-size: 11px;
+  margin-top: 0.25rem;
+}
+
+/* Incidents */
+.status-incidents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.status-incident-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.status-incident-content {
+  flex: 1;
+}
+
+.status-incident-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.status-incident-severity {
+  text-transform: uppercase;
+}
+
+.status-incident-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.status-incident-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 12px;
+}
+
+.status-incident-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-incident-status-text {
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+/* Section title with margin */
+.status-section-title {
+  margin-bottom: 1rem;
+}
+
+/* Retry button */
+.status-retry-btn {
+  margin-left: 1rem;
+}
+
+/* Grid with 4 columns */
+.tw-grid-4-cols {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Grid with 6 columns */
+.tw-grid-6-cols {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* Grid with 2 columns */
+.tw-grid-2-cols {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Span all columns */
+.tw-col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* =====================================================
+   PERFORMANCE METRICS COMPONENT CLASSES
+   Used by PerformanceMetrics.tsx
+   ===================================================== */
+
+/* Performance header */
+.perf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.perf-heading {
+  font-size: 16px;
+}
+
+.perf-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.perf-tab-list {
+  border-bottom: none;
+}
+
+.perf-tab-capitalize {
+  text-transform: capitalize;
+}
+
+/* KPI card */
+.perf-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.perf-kpi-value {
+  margin-bottom: 0.25rem;
+}
+
+.perf-kpi-trend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.perf-kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.perf-kpi-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.perf-trend-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.perf-progress-mt {
+  margin-top: 0.5rem;
+}
+
+/* Card with padding */
+.perf-card {
+  padding: 1.25rem;
+}
+
+/* Card header */
+.perf-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.perf-card-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--portal-text-muted);
+}
+
+/* Team member row */
+.perf-rank {
+  width: 1.5rem;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.perf-member-info {
+  flex: 1;
+}
+
+.perf-member-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.perf-member-role {
+  font-size: 11px;
+}
+
+.perf-member-stats {
+  text-align: right;
+}
+
+.perf-member-revenue {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.perf-member-projects {
+  font-size: 11px;
+}
+
+/* Project performance */
+.perf-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.perf-project-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.perf-project-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.perf-project-client {
+  font-size: 11px;
+}
+
+.perf-project-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 11px;
+}
+
+.perf-ml-auto {
+  margin-left: auto;
+}
+
+/* =====================================================
+   ANALYTICS COMPONENT CLASSES
+   Used by AdHocAnalytics.tsx, AnalyticsDashboard.tsx
+   ===================================================== */
+
+/* Grid layout for analytics sidebar + main */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 1.5rem;
+}
+
+/* Analytics main content column */
+.analytics-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Section title with margin */
+.analytics-section-title {
+  margin-bottom: 0.75rem;
+}
+
+/* Small muted text */
+.analytics-empty-text {
+  font-size: 12px;
+}
+
+/* Saved query card */
+.analytics-query-card {
+  margin-bottom: 0.5rem;
+}
+
+.analytics-query-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.analytics-query-content {
+  flex: 1;
+}
+
+.analytics-query-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.analytics-query-date {
+  display: block;
+  font-size: 11px;
+}
+
+.analytics-trash-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Query editor header */
+.analytics-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.analytics-editor-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analytics-editor-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--portal-text-muted);
+}
+
+.analytics-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analytics-name-input {
+  width: 200px;
+  padding: 0.25rem 0.5rem;
+  font-size: 12px;
+}
+
+/* Query footer */
+.analytics-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+
+.analytics-hint {
+  font-size: 11px;
+}
+
+.analytics-action-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Results header */
+.analytics-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.analytics-results-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 14px;
+}
+
+.analytics-results-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analytics-view-toggle {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Table overflow container */
+.analytics-table-container {
+  overflow-x: auto;
+}
+
+.analytics-pagination {
+  font-size: 11px;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Chart empty state */
+.analytics-chart-empty {
+  height: 16rem;
+}
+
+.analytics-chart-icon {
+  width: 3rem;
+  height: 3rem;
+  opacity: 0.3;
+}
+
+.analytics-chart-hint {
+  font-size: 11px;
+}
+
+/* ============================================
+   OVERVIEW TAB COMPONENT
+   ============================================ */
+
+/* Section title with margin */
+.overview-section-title {
+  margin-bottom: 1rem;
+}
+
+/* Text size variants */
+.overview-text-sm {
+  font-size: 12px;
+}
+
+.overview-text-base {
+  font-size: 14px;
+}
+
+/* Description text with pre-wrap */
+.overview-description {
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+/* Label with block display */
+.overview-label-block {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Divider with top margin */
+.overview-divider-top {
+  margin-top: 1rem;
+}
+
+/* Link item without padding/border */
+.overview-link-item {
+  padding: 0.5rem 0;
+  border-bottom: none;
+}
+
+/* Input height for inline forms */
+.overview-input-sm {
+  height: 32px;
+}
+
+/* Empty state with custom padding */
+.overview-empty-state {
+  padding: 2rem 0;
+}
+
+/* Checkbox without border radius */
+.overview-checkbox {
+  border-radius: 0;
+}
+
+/* Expanded content with top border */
+.overview-expanded-content {
+  border-top: 1px solid var(--portal-border-subtle);
+}
+
+/* Inline stat card (no border, no padding) */
+.overview-stat-inline {
+  border: none;
+  padding: 0;
+}
+
+/* Grid 2 columns */
+.overview-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ============================================
+   TASKS TAB COMPONENT
+   ============================================ */
+
+/* Text size variants */
+.tasks-text-xs {
+  font-size: 12px;
+}
+
+.tasks-text-base {
+  font-size: 14px;
+}
+
+/* Text with font weight */
+.tasks-text-semibold {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tasks-text-medium {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Form heading */
+.tasks-form-heading {
+  font-size: 14px;
+  margin-bottom: 0.75rem;
+}
+
+/* Textarea height */
+.tasks-textarea {
+  min-height: 60px;
+}
+
+/* Date input width */
+.tasks-date-input {
+  width: auto;
+}
+
+/* Drag handle opacity */
+.tasks-drag-handle {
+  opacity: 0.5;
+}
+
+/* Checkbox no radius */
+.tasks-checkbox {
+  border-radius: 0;
+}
+
+/* Progress track with styling */
+.tasks-progress-track {
+  margin-top: 0.5rem;
+  max-width: 200px;
+}
+
+/* Expanded content border */
+.tasks-expanded-content {
+  border-top: 1px solid var(--portal-border-color);
+}
+
+/* Description with pre-wrap */
+.tasks-description {
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+/* ============================================
+   CLIENT DETAIL COMPONENT
+   ============================================ */
+
+/* Panel with larger padding */
+.cdetail-panel-lg {
+  padding: 1.5rem;
+}
+
+/* Grid 3 columns */
+.cdetail-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Empty state italic */
+.cdetail-empty-italic {
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Tag color dot */
+.cdetail-tag-dot {
+  border-radius: 0;
+}
+
+/* ============================================
+   CONTRACT TAB COMPONENT
+   ============================================ */
+
+/* Icon container without border radius */
+.contract-icon-box {
+  border-radius: 0;
+}
+
+/* Large heading */
+.contract-heading-lg {
+  font-size: 18px;
+}
+
+/* Panel without padding */
+.contract-panel-no-padding {
+  padding: 0;
+}
+
+/* Header with bottom border */
+.contract-files-header {
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+/* Empty state with custom padding */
+.contract-empty-state {
+  padding: 2rem;
+}
+
+/* Warning card with white border */
+.contract-warning {
+  border-color: white;
+}
+
+/* ============================================
+   QUESTIONNAIRE VIEW COMPONENT
+   ============================================ */
+
+/* Status colors */
+.qview-status-completed {
+  color: var(--status-completed);
+}
+
+.qview-status-active {
+  color: var(--status-active);
+}
+
+.qview-status-cancelled {
+  color: var(--status-cancelled);
+}
+
+/* Section without gap */
+.qview-no-gap {
+  gap: 0;
+}
+
+/* Card layout */
+.qview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* Left section */
+.qview-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Icon container */
+.qview-icon {
+  flex-shrink: 0;
+}
+
+/* Info column */
+.qview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+/* Title text */
+.qview-title {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Small text (10px) */
+.qview-text-xs {
+  font-size: 10px;
+}
+
+/* Progress section */
+.qview-progress-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Progress track fixed width */
+.qview-progress-track {
+  width: 64px;
+}
+
+/* Right section */
+.qview-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Status column */
+.qview-status-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+}
+
+/* ============================================
+   DELIVERABLES TAB COMPONENT
+   ============================================ */
+
+/* Milestone header border */
+.deliv-milestone-header {
+  border-bottom: 1px solid var(--portal-border-subtle);
+}
+
+/* Icon box no radius */
+.deliv-icon-box {
+  border-radius: 0;
+}
+
+/* Milestone description */
+.deliv-milestone-desc {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ============================================
+   FILES TAB COMPONENT
+   ============================================ */
+
+/* Upload area */
+.files-upload-area {
+  border-radius: 0;
+  padding: 1.5rem;
+}
+
+/* Category select */
+.files-category-select {
+  height: 32px;
+  width: auto;
+}
+
+/* Spinner */
+.files-spinner {
+  border-radius: 50%;
+}
+
+/* Table header row */
+.files-table-header {
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+/* Table row display */
+.files-table-row {
+  display: table-row;
+}
+
+/* ============================================
+   REACT MOUNT ERROR STATE
+   ============================================ */
+
+.mount-error-container {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--portal-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.mount-error-message {
+  margin-bottom: var(--space-4);
+  color: var(--portal-text-muted);
+}
+
+.mount-error-button {
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.mount-error-button:hover {
+  background: var(--portal-text-muted);
+  color: var(--portal-bg);
+}
+
+.mount-error-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* React portal mount point */
+.react-portal-mount {
+  min-height: var(--space-12);
+}
+
+/* ============================================
+   OVERVIEW DASHBOARD COMPONENT
+   ============================================ */
+
+/* Error state panel */
+.ovdash-error-panel {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+/* Error message spacing */
+.ovdash-error-message {
+  margin-bottom: var(--space-2);
+}
+
+/* Clickable list item */
+.ovdash-clickable {
+  cursor: pointer;
+}
+
+/* Flex grow body */
+.ovdash-flex-1 {
+  flex: 1;
+}
+
+/* Progress bar container width */
+.ovdash-progress-width {
+  width: var(--space-7);
+}
+
+/* Quick actions 2x2 grid */
+.ovdash-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}
+
+/* ============================================
+   CLIENT PROJECTS TAB COMPONENT
+   ============================================ */
+
+/* Text size variants */
+.proj-text-xs {
+  font-size: var(--font-size-2xs);
+}
+
+.proj-text-sm {
+  font-size: var(--font-size-xs);
+}
+
+.proj-text-base {
+  font-size: var(--font-size-sm);
+}
+
+.proj-text-lg {
+  font-size: var(--font-size-lg);
+}
+
+/* Section title spacing */
+.proj-section-title {
+  margin-bottom: var(--space-1-5);
+}
+
+/* Empty state italic text */
+.proj-empty-italic {
+  font-style: italic;
+}
+
+/* ============================================
+   ACTIVITY TAB COMPONENT
+   ============================================ */
+
+/* Horizontal divider line */
+.activity-divider-line {
+  background-color: var(--portal-border-color);
+}
+
+/* Vertical timeline line */
+.activity-timeline-line {
+  background-color: var(--portal-border-color);
+}
+
+/* Timeline dot container */
+.activity-timeline-dot {
+  background-color: transparent;
+  border-radius: 0;
+}
+
+/* Metadata border top */
+.activity-border-top {
+  border-top: 1px solid var(--portal-border-subtle);
+}
+
+/* ============================================
+   PORTAL MESSAGES COMPONENT
+   ============================================ */
+
+/* Thread list item border */
+.msg-thread-item {
+  border-bottom: 1px solid var(--portal-border-subtle);
+}
+
+/* Thread content flex */
+.msg-thread-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Thread header/footer row */
+.msg-thread-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Thread preview row with top margin */
+.msg-thread-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.125rem;
+}
+
+/* Thread list no gap */
+.msg-thread-list {
+  gap: 0;
+}
+
+/* Header flex layout */
+.msg-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Time text no shrink */
+.msg-time-noshrink {
+  flex-shrink: 0;
+}
+
+/* ============================================
+   MESSAGES TAB COMPONENT (Project Detail)
+   ============================================ */
+
+/* Container height */
+.msgtab-container {
+  height: 500px;
+}
+
+/* Panel no radius */
+.msgtab-panel {
+  border-radius: 0;
+}
+
+/* Spinner circle */
+.msgtab-spinner {
+  border-radius: 50%;
+}
+
+/* Avatar no radius */
+.msgtab-avatar {
+  border-radius: 0;
+}
+
+/* Message bubble no radius */
+.msgtab-bubble {
+  border-radius: 0;
+}
+
+/* Message content */
+.msgtab-content {
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+/* Input panel with top border */
+.msgtab-input-panel {
+  border-top: 1px solid var(--portal-border-color);
+  border-radius: 0;
+}
+
+/* Textarea min height */
+.msgtab-textarea {
+  min-height: 60px;
+}
+
+/* Keyboard shortcut badge */
+.msgtab-kbd {
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+/* ============================================
+   CONTACTS TAB COMPONENT
+   ============================================ */
+
+/* Avatar no radius */
+.contacts-avatar {
+  border-radius: 0;
+}
+
+/* Checkbox no radius */
+.contacts-checkbox {
+  border-radius: 0;
+}
+
+/* Notes with border top */
+.contacts-notes {
+  font-size: 12px;
+  border-top: 1px solid var(--portal-border-subtle);
+}
+
+/* ============================================
+   PORTAL PROJECTS LIST COMPONENT
+   ============================================ */
+
+/* Card header row */
+.projlist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Name container */
+.projlist-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* Project name text */
+.projlist-name {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* Status container */
+.projlist-status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Description */
+.projlist-desc {
+  font-size: 12px;
+  margin-bottom: 0.5rem;
+}
+
+/* Progress section */
+.projlist-progress {
+  margin-bottom: 0.5rem;
+}
+
+/* Progress header row */
+.projlist-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+/* Footer row */
+.projlist-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ============================================
+   INVOICES TAB COMPONENT
+   ============================================ */
+
+/* Stats container */
+.invtab-stats {
+  font-size: 14px;
+}
+
+/* Bold amount text */
+.invtab-amount-bold {
+  font-weight: 600;
+}
+
+/* Filter select */
+.invtab-filter {
+  height: 36px;
+  width: auto;
+}
+
+/* Panel no padding */
+.invtab-panel {
+  padding: 0;
+}
+
+/* Header row border */
+.invtab-header-row {
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+/* Table row display */
+.invtab-row {
+  display: table-row;
+}
+
+/* Cell bold text */
+.invtab-cell-bold {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ============================================
+   NOTES TAB COMPONENT
+   ============================================ */
+
+/* Panel with small padding */
+.notes-panel {
+  padding: 0.25rem;
+}
+
+/* Textarea borderless */
+.notes-textarea {
+  border: none;
+  min-height: 300px;
+}
+
+/* Hint text aligned right */
+.notes-hint {
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ============================================
+   AD-HOC REQUESTS COMPONENT
+   ============================================ */
+
+/* Header row */
+.adhoc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* Description text */
+.adhoc-desc {
+  font-size: 11px;
+  margin-top: 0.125rem;
+}
+
+/* Button with icon */
+.adhoc-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Modal backdrop */
+.adhoc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--portal-bg-overlay);
+}
+
+/* Modal content */
+.adhoc-modal-content {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+/* Modal header */
+.adhoc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ============================================
+   PORTAL APPROVALS COMPONENT
+   ============================================ */
+
+/* Header row */
+.approvals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Filter container */
+.approvals-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Tab list no border */
+.approvals-tabs {
+  border-bottom: none;
+}
+
+/* Tab button compact */
+.approvals-tab {
+  padding: 0.25rem 0.5rem;
+  font-size: 12px;
+  border-bottom: none;
+}
+
+/* Count badge */
+.approvals-count {
+  margin-left: 0.25rem;
+  opacity: 0.6;
+}
+
+/* Summary divider */
+.approvals-summary {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }

@@ -104,7 +104,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--icon-gap-sm);
   margin-bottom: var(--space-1);
+}
+
+.portal .overview-stat-card svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--portal-text-secondary);
 }
 
 /* .stat-card-label removed - using .field-label from unified rule in portal-cards.css */
@@ -169,7 +177,36 @@
   margin: 0;
 }
 
-/* .panel-icon base styles in shared/portal-cards.css */
+/* Remove margin from panel-icon when inside title (gap handles spacing) */
+.overview-panel-title > .panel-icon {
+  margin-right: 0;
+}
+
+/* Panel action button - flex for icon alignment */
+.overview-panel-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-faster);
+  font-family: inherit;
+  padding: 0;
+}
+
+.overview-panel-action:hover {
+  color: var(--color-primary);
+}
+
+/* Remove margin from panel-icon in action buttons (gap handles spacing) */
+.overview-panel-action > .panel-icon {
+  margin-right: 0;
+  width: 12px;
+  height: 12px;
+}
 
 .panel-badge {
   font-family: var(--font-family-mono);
@@ -190,22 +227,12 @@
   color: var(--status-cancelled);
 }
 
-.overview-panel-action {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color var(--transition-faster);
-  font-family: inherit;
-  padding: 0;
-}
-
-.overview-panel-action:hover {
-  color: var(--color-primary);
-}
-
 .overview-panel-body {
+  padding: var(--space-1-5) var(--portal-panel-padding-x, 14px);
+}
+
+/* No padding for activity feeds - they have their own item padding */
+.overview-panel-body:has(.activity-feed) {
   padding: 0;
 }
 
@@ -471,6 +498,51 @@
 /* Uses universal empty/loading/error state from loading.css */
 
 /* =====================================================
+   QUICK ACTIONS GRID
+   ===================================================== */
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}
+
+/* =====================================================
+   KANBAN VIEW
+   ===================================================== */
+
+.kanban-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.kanban-column h4 {
+  margin-bottom: var(--space-1);
+}
+
+.kanban-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.kanban-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--portal-border-subtle);
+}
+
+.empty-state-small {
+  font-size: var(--font-size-2xs);
+  color: var(--portal-text-muted);
+  text-align: center;
+  padding: var(--space-3) 0;
+}
+
+/* =====================================================
    LEADS LIST
    ===================================================== */
 
@@ -634,15 +706,153 @@
 }
 
 /* =====================================================
+   OVERVIEW DASHBOARD - NEW LAYOUT STRUCTURE
+   Quick Stats Strip → Attention Banner → Two-Column Grid
+   ===================================================== */
+
+/* Main dashboard container - use block to prevent flex expansion */
+.overview-dashboard {
+  display: block;
+}
+
+.overview-dashboard > * + * {
+  margin-top: var(--portal-section-gap);
+}
+
+/* Quick stats grid - 4 equal columns */
+.overview-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--portal-section-gap);
+}
+
+/* Individual stat panel - matches portal card styling */
+.overview-stat-panel {
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  padding: var(--portal-card-padding);
+}
+
+.overview-stat-panel .stat-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+.overview-stat-panel .stat-label {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-muted);
+}
+
+.overview-stat-panel .stat-value {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: 300;
+  color: var(--portal-text-light);
+  letter-spacing: -0.5px;
+}
+
+/* Attention banner - matches .overview-panel */
+.overview-attention-banner {
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  padding: var(--portal-card-padding);
+}
+
+.overview-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--portal-section-gap);
+}
+
+.attention-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: transparent;
+  border: 1px solid var(--portal-border-subtle);
+  cursor: pointer;
+  transition: border-color var(--transition-faster);
+}
+
+.attention-item:hover {
+  border-color: var(--portal-text-muted);
+}
+
+.attention-item .count {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: 300;
+  color: var(--portal-text-light);
+}
+
+.attention-item .label {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-muted);
+}
+
+/* Two-column main grid - equal widths */
+.overview-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--portal-section-gap);
+}
+
+/* Column stacks */
+.overview-column {
+  display: block;
+}
+
+.overview-column > * + * {
+  margin-top: var(--portal-section-gap);
+}
+
+/* Quick actions panel */
+.overview-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1);
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: transparent;
+  border: 1px solid var(--table-border-color);
+  color: var(--portal-text-light);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-faster);
+}
+
+.quick-action-btn:hover {
+  background: var(--portal-text-light);
+  color: var(--portal-bg-pitch);
+}
+
+/* =====================================================
    RESPONSIVE - TABLET/MOBILE
    ===================================================== */
 
 @media (--laptop) {
-  .overview-stats-strip {
+  .overview-stats-strip,
+  .overview-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .overview-grid {
+  .overview-grid,
+  .overview-main-grid {
     grid-template-columns: 1fr;
   }
 
@@ -650,14 +860,21 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .overview-attention-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (--compact-mobile) {
-  .overview-linear {
+  .overview-linear,
+  .overview-dashboard {
     padding-bottom: 20px;
+    gap: var(--space-4);
   }
 
-  .overview-stats-strip {
+  .overview-stats-strip,
+  .overview-stats-grid {
     grid-template-columns: 1fr;
   }
 
@@ -678,6 +895,18 @@
   /* .stat-card-value font-size controlled by portal-cards.css */
 
   .revenue-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-attention-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-quick-actions {
     grid-template-columns: 1fr;
   }
 }

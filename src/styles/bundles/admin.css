@@ -64,7 +64,7 @@
     top: -100%;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 9999;
+    z-index: var(--z-index-portal-confirm, 9900);
     padding: 12px 24px;
     background-color: var(--portal-bg-darker, #0a0a0a);
     color: var(--portal-text-primary, #ffffff);
@@ -102,6 +102,59 @@ html:has(body.admin-logged-in[data-page="admin"]) {
   background-color: var(--portal-bg-pitch, #000000);
   /* Fixed height to constrain body */
   height: 100%;
+}
+
+/* ============================================
+ * ADMIN LIGHT MODE - Direct overrides
+ * Ensures light mode colors apply to body/html
+ * Uses proper gray scale for visual hierarchy
+ * ============================================ */
+html[data-theme="light"] body[data-page="admin"] {
+  background-color: var(--color-light-bg, #ffffff);
+  color: var(--color-light-text, #171717);
+
+  /* Portal text colors - proper hierarchy */
+  --portal-text-light: var(--color-light-text, #171717);
+  --portal-text-primary: var(--color-light-text, #171717);
+  --portal-text-secondary: var(--color-light-text-secondary, #525252);
+  --portal-text-muted: var(--color-light-text-muted, #737373);
+
+  /* Generic text colors - proper hierarchy */
+  --color-dark: var(--color-light-text, #171717);
+  --color-white: var(--color-light-bg, #ffffff);
+  --color-text-primary: var(--color-light-text, #171717);
+  --color-text-secondary: var(--color-light-text-secondary, #525252);
+  --color-text-tertiary: var(--color-light-text-muted, #737373);
+
+  /* Gray scale - proper light mode values */
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+
+  /* Portal backgrounds - light mode */
+  --portal-bg-pitch: var(--color-light-bg, #ffffff);
+  --portal-bg-darkest: var(--color-light-bg, #ffffff);
+  --portal-bg-darker: #f5f5f5;
+  --portal-bg-dark: #e5e5e5;
+  --portal-bg-medium: #d5d5d5;
+  --portal-bg-light: #c5c5c5;
+  --portal-bg-hover: #e5e5e5;
+  --portal-bg-readonly: #f5f5f5;
+
+  /* Portal borders - visible but not harsh */
+  --portal-border-color: var(--color-light-border, #d4d4d4);
+}
+
+html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
+  background-color: var(--color-light-bg, #ffffff);
 }
 
 /* Scrollbar styling */

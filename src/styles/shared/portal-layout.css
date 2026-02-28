@@ -13,14 +13,10 @@ body:has(.portal) {
   overscroll-behavior: none;
 }
 
+/* Allow sidebar badge to sit up/right of button without clipping */
 .portal .sidebar {
-  overflow: hidden;
-  overscroll-behavior: contain;
-}
-
-/* Admin: allow sidebar badge to sit up/right of button without clipping */
-[data-page="admin"] .sidebar {
   overflow: visible;
+  overscroll-behavior: contain;
 }
 
 .portal .dashboard-content {
@@ -46,14 +42,11 @@ body:has(.portal) {
   padding: 0 24px;
   box-sizing: border-box;
   z-index: var(--z-index-portal-header, 9100);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Admin backend: transparent header, no shadow */
-[data-page="admin"] .portal-global-header {
-  background: transparent;
   box-shadow: none;
 }
+
+/* NOTE: Header background is consistent across all portals
+   Both admin and client use --portal-bg-darker */
 
 .portal-global-header-left {
   display: flex;
@@ -93,6 +86,11 @@ body:has(.portal) {
   flex-shrink: 0;
 }
 
+/* Light mode: don't invert avatar (keep it black) */
+html[data-theme="light"] .portal-global-header .header-avatar {
+  filter: invert(0);
+}
+
 .portal-global-header .header-logo-text {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: 16px;
@@ -120,18 +118,6 @@ body:has(.portal) {
 .portal-global-header .header-logo:hover {
   color: var(--color-primary);
   text-decoration: none;
-}
-
-/* Separator between logo and breadcrumbs - hidden on admin */
-[data-page="admin"] .portal-global-header .header-separator {
-  display: none;
-}
-
-.portal-global-header .header-separator {
-  width: 1px;
-  height: 24px;
-  background: var(--portal-border-medium);
-  margin: 0 var(--space-1);
 }
 
 /* Sidebar toggle button in header */
@@ -299,10 +285,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Dashboard content - top padding matches sidebar branding position */
+/* GAP APPLIED AT BASE LEVEL - not at tab-content level */
 .portal .dashboard-content {
   display: flex;
   flex-direction: column;
   padding: var(--portal-header-top, 20px) 24px var(--space-3) 24px;
+  gap: var(--portal-section-gap);
 }
 
 /* Page header - no extra spacing */
@@ -341,21 +329,20 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: none;
 }
 
-/* Show header subtab groups based on active group - UNIVERSAL styling */
-[data-page="admin"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
-[data-page="admin"][data-active-group="crm"] .header-subtab-group[data-for-tab="crm"],
-[data-page="admin"][data-active-group="documents"] .header-subtab-group[data-for-tab="documents"],
-[data-page="admin"][data-active-group="support"] .header-subtab-group[data-for-tab="support"],
-[data-page="admin"][data-active-group="analytics"] .header-subtab-group[data-for-tab="analytics"],
-[data-page="admin"][data-active-group="workflows"] .header-subtab-group[data-for-tab="workflows"],
-[data-page="client-portal"][data-active-group="work"] .header-subtab-group[data-for-tab="work"],
-[data-page="client-portal"][data-active-group="docs"] .header-subtab-group[data-for-tab="docs"],
-[data-page="client-portal"][data-active-group="support"]
-  .header-subtab-group[data-for-tab="support"],
-[data-page="admin"][data-active-tab="project-detail"]
-  .header-subtab-group[data-for-tab="project-detail"],
-[data-page="admin"][data-active-tab="client-detail"]
-  .header-subtab-group[data-for-tab="client-detail"] {
+/* Show header subtab groups based on active group - UNIVERSAL styling
+   IMPORTANT: Selectors include full path to exceed hide rule specificity (0,4,0)
+   Show rules have specificity (0,7,0): 3 attrs + 4 classes */
+[data-page="admin"][data-active-group="work"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="work"],
+[data-page="admin"][data-active-group="crm"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="crm"],
+[data-page="admin"][data-active-group="documents"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="documents"],
+[data-page="admin"][data-active-group="support"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="support"],
+[data-page="admin"][data-active-group="analytics"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="analytics"],
+[data-page="admin"][data-active-group="workflows"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="workflows"],
+[data-page="client-portal"][data-active-group="work"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="work"],
+[data-page="client-portal"][data-active-group="docs"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="docs"],
+[data-page="client-portal"][data-active-group="support"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="support"],
+[data-page="admin"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
+[data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"] {
   display: flex;
   gap: var(--space-1);
   align-items: center;
@@ -433,19 +420,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border-bottom: none;
 }
 
-/* Tab content - UNIVERSAL top spacing below header subtabs (except messages) */
-.portal .tab-content.active:not(#tab-messages) {
+/* Content wrapper - flex container with gap for consistent spacing below subtabs */
+.portal .content-wrapper {
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
-  padding-top: var(--space-3);
+  width: 100%;
 }
 
-/* Messages tab - block display, no extra spacing (has own layout) */
-.portal #tab-messages.tab-content.active {
-  display: block;
-  padding: 0;
-  margin: 0;
+/* Tab content - UNIVERSAL layout for all tabs */
+.portal .tab-content.active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
 }
 
 /* Subtab content panels inside tab-content - no additional padding */
@@ -454,22 +441,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Adjust dashboard container when using new layout */
-/* Client portal: subtract header height since global header is visible */
-[data-page="client-portal"] .portal-body .sidebar {
+/* Subtract header height since global header is visible */
+.portal .portal-body .sidebar,
+.portal .portal-body .dashboard-content {
   height: calc(100vh - var(--portal-header-height, 56px));
   min-height: calc(100vh - var(--portal-header-height, 56px));
-}
-
-[data-page="client-portal"] .portal-body .dashboard-content {
-  height: calc(100vh - var(--portal-header-height, 56px));
-  min-height: calc(100vh - var(--portal-header-height, 56px));
-}
-
-/* Admin: fill portal-body container (accounts for header) */
-[data-page="admin"] .portal-body .sidebar,
-[data-page="admin"] .portal-body .dashboard-content {
-  height: 100%;
-  min-height: 100%;
 }
 
 /* =====================================================
@@ -494,29 +470,27 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    Standard gap between major content sections
    ===================================================== */
 
-/* UNIVERSAL SECTION GAP - applies to all flex-column and grid containers */
+/* SECTION GAP NOTE:
+   Gap is applied at BASE LEVEL (.dashboard-content) - NOT at tab level.
+   This ensures consistent spacing without duplication.
+
+   Specific containers that need their own internal gap: */
 .portal
   :is(
-    .tab-content.active,
-    .portal-tab-panel.active,
-    .portal-subtab-content.active,
-    .analytics-subtab-content.active,
-    .overview-linear,
     .overview-grid,
     .overview-col-main,
     .overview-col-aside,
-    .overview-stats-strip,
-    .portal-view-content,
-    #portal-view-content,
     .content-cards,
     .analytics-dashboard,
     .analytics-breakdown,
-    .workflows-content,
-    .admin-table-card + .admin-table-card,
     [class*="-grid"],
-    [class*="-stack"],
-    [class*="-layout"]
+    [class*="-stack"]
   ) {
+  gap: var(--portal-section-gap);
+}
+
+/* Layout containers with their own internal spacing */
+.portal :is([class*="-layout"]):not(.messages-layout) {
   gap: var(--portal-section-gap);
 }
 
@@ -889,7 +863,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   visibility: hidden;
   pointer-events: none;
   z-index: var(--z-nav, 100);
-  box-shadow: var(--shadow-elevated-sm);
+  box-shadow: none;
   transition:
     opacity var(--transition-faster),
     visibility var(--transition-faster);
@@ -1120,4 +1094,831 @@ td {
   overflow-wrap: anywhere;
   white-space: normal;
   padding: clamp(0.25rem, 2vw, 1rem) clamp(0.5rem, 3vw, 2rem);
+}
+
+/* =====================================================
+   PORTAL MAIN CONTAINERS
+   Dashboard structure, containers, page framework
+   ===================================================== */
+
+/* Prevent horizontal scroll on mobile */
+.portal {
+  overflow-x: hidden;
+}
+
+/* Portal Main Container */
+.portal-main,
+.client-portal-main {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: auto;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.portal-main .dashboard-container,
+.client-portal-main .dashboard-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Dashboard Base - no background, inherits from body */
+.portal-dashboard,
+.client-dashboard {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dashboard Layout - Flex Container */
+.dashboard-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Dashboard Content Area (right side) */
+.dashboard-content {
+  flex: 1;
+  padding: 0 clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  min-width: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Reduced padding on smallest screens */
+@media (--xs-mobile) {
+  .dashboard-content {
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+  }
+
+  .portal-header-subtabs {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* Messages layout - no gap between search bar and columns */
+.portal .messages-layout {
+  gap: 0;
+}
+
+/* =====================================================
+   PORTAL TYPOGRAPHY - DISCOTHÈQUE THEME
+   ===================================================== */
+.portal h1,
+.portal h2,
+.portal h3,
+.portal h4,
+.portal h5,
+.portal h6 {
+  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
+  letter-spacing: var(--letter-spacing-tightest, -0.09em);
+  text-shadow: none;
+  color: var(--portal-text-light, #ffffff);
+}
+
+.portal .page-header h2,
+.portal .client-name {
+  text-shadow: none;
+}
+
+/* =====================================================
+   PORTAL LIGHT MODE - Typography and base colors
+   Uses CSS variables for proper theming without !important overrides
+   ===================================================== */
+
+/* Base text color in light mode - uses CSS variables */
+html[data-theme="light"] .portal {
+  color: var(--portal-text-primary, var(--color-light-text, #171717));
+}
+
+/* Headings in light mode */
+html[data-theme="light"] .portal h1,
+html[data-theme="light"] .portal h2,
+html[data-theme="light"] .portal h3,
+html[data-theme="light"] .portal h4,
+html[data-theme="light"] .portal h5,
+html[data-theme="light"] .portal h6 {
+  color: var(--portal-text-primary, var(--color-light-text, #171717));
+}
+
+html[data-theme="light"] .portal hr {
+  background-color: var(--portal-border-color, var(--color-light-border, #d4d4d4));
+}
+
+/* Secondary text elements - use muted color for hierarchy */
+html[data-theme="light"] .portal .stat-label,
+html[data-theme="light"] .portal .stat-secondary,
+html[data-theme="light"] .portal .stat-meta,
+html[data-theme="light"] .portal .field-label,
+html[data-theme="light"] .portal .section-label,
+html[data-theme="light"] .portal .meta-label,
+html[data-theme="light"] .portal .kpi-card-label,
+html[data-theme="light"] .portal .summary-label,
+html[data-theme="light"] .portal .funnel-stage-label,
+html[data-theme="light"] .portal .funnel-stage,
+html[data-theme="light"] .portal .funnel-value {
+  color: var(--portal-text-secondary, var(--color-light-text-secondary, #525252));
+}
+
+/* =====================================================
+   PORTAL BRUTALIST DESIGN - SHARP CORNERS
+   ===================================================== */
+.portal *,
+.portal *::before,
+.portal *::after {
+  border-radius: 0;
+}
+
+.portal hr {
+  height: 2px;
+  border-radius: 0;
+  background-color: var(--portal-text-light, #ffffff);
+}
+
+/* =====================================================
+   PORTAL CARD/SECTION BACKGROUNDS
+   ===================================================== */
+.portal .file-section,
+.portal .content-section {
+  /* No shadows - flat design */
+}
+
+.portal .content-section > div {
+  box-shadow: none;
+}
+
+.portal .card,
+.portal .cp-card,
+.portal .cp-stat,
+.portal .content-section,
+.portal .timeline-content,
+.portal .update-item,
+.portal .content-item,
+.portal .settings-form {
+  background: transparent;
+  border: none;
+}
+
+/* =====================================================
+   MOBILE MENU TOGGLE
+   ===================================================== */
+.mobile-menu-toggle {
+  display: none !important;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--portal-text-light);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mobile-menu-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (--compact-mobile) {
+  .portal .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
+    display: flex !important;
+  }
+}
+
+/* =====================================================
+   LEGACY BREADCRUMB STYLING
+   ===================================================== */
+.breadcrumb-nav {
+  flex: 1;
+  min-width: 0;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.breadcrumb-link {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.breadcrumb-link:hover {
+  color: var(--portal-text-light);
+}
+
+/* =====================================================
+   ERROR AND LOADING STATES
+   ===================================================== */
+.error-message {
+  padding: var(--space-2);
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border: 2px solid var(--color-error);
+  text-align: center;
+  margin: var(--space-2) 0;
+}
+
+.login-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   REACT COMPONENT LAYOUT CLASSES (tw-*)
+   Migrated from brutalist.css for consolidation
+   ===================================================== */
+
+/* Container and section layout */
+.tw-container {
+  background: transparent;
+  padding: var(--space-4, 1rem);
+}
+
+.tw-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+  background: transparent;
+}
+
+.tw-panel {
+  background: transparent;
+  border: 1px solid var(--portal-border-color, rgba(255, 255, 255, 0.2));
+  padding: var(--space-4, 1rem);
+}
+
+.tw-card {
+  background: transparent;
+  border: 1px solid var(--portal-border-color, rgba(255, 255, 255, 0.3));
+  padding: var(--space-4, 1rem);
+}
+
+.tw-card-hover {
+  background: transparent;
+  border: 1px solid var(--portal-border-color, rgba(255, 255, 255, 0.3));
+  padding: var(--space-4, 1rem);
+  transition: border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.tw-card-hover:hover {
+  border-color: var(--portal-text-light, rgba(255, 255, 255, 0.6));
+}
+
+/* Dividers */
+.tw-divider {
+  height: 1px;
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  margin: var(--space-4, 1rem) 0;
+}
+
+.tw-divider-vertical {
+  width: 1px;
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  margin: 0 var(--space-2, 0.5rem);
+  align-self: stretch;
+}
+
+/* Grid layouts */
+.tw-grid-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4, 1rem);
+}
+
+@media (min-width: 768px) {
+  .tw-grid-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tw-grid-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4, 1rem);
+}
+
+@media (min-width: 768px) {
+  .tw-grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tw-grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Scrolling container */
+.tw-scroll-container {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tw-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tw-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tw-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+}
+
+.tw-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--portal-alpha-white-30, rgba(255, 255, 255, 0.4));
+}
+
+/* =====================================================
+   REACT UTILITY CLASSES (tw-*)
+   Flexbox, grid, spacing utilities
+   ===================================================== */
+
+/* Flexbox */
+.tw-flex { display: flex; }
+.tw-inline-flex { display: inline-flex; }
+.tw-flex-col { flex-direction: column; }
+.tw-flex-row { flex-direction: row; }
+.tw-flex-1 { flex: 1 1 0%; }
+.tw-flex-wrap { flex-wrap: wrap; }
+.tw-flex-shrink-0 { flex-shrink: 0; }
+.tw-shrink-0 { flex-shrink: 0; }
+.tw-items-center { align-items: center; }
+.tw-items-start { align-items: flex-start; }
+.tw-items-end { align-items: flex-end; }
+.tw-justify-center { justify-content: center; }
+.tw-justify-between { justify-content: space-between; }
+.tw-justify-end { justify-content: flex-end; }
+.tw-justify-start { justify-content: flex-start; }
+.tw-self-end { align-self: flex-end; }
+
+/* Grid */
+.tw-grid { display: grid; }
+.tw-grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.tw-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tw-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tw-grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tw-col-span-2 { grid-column: span 2 / span 2; }
+
+@media (min-width: 1024px) {
+  .lg\:tw-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lg\:tw-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lg\:tw-col-span-2 { grid-column: span 2 / span 2; }
+}
+
+/* Gap */
+.tw-gap-0 { gap: 0; }
+.tw-gap-1 { gap: var(--space-0-5, 0.25rem); }
+.tw-gap-2 { gap: var(--space-1, 0.5rem); }
+.tw-gap-3 { gap: var(--space-1-5, 0.75rem); }
+.tw-gap-4 { gap: var(--space-2, 1rem); }
+.tw-gap-5 { gap: var(--space-2-5, 1.25rem); }
+.tw-gap-6 { gap: var(--space-3, 1.5rem); }
+
+/* Margin */
+.tw-m-0 { margin: 0; }
+.tw-mb-1 { margin-bottom: var(--space-0-5, 0.25rem); }
+.tw-mb-2 { margin-bottom: var(--space-1, 0.5rem); }
+.tw-mb-3 { margin-bottom: var(--space-1-5, 0.75rem); }
+.tw-mb-4 { margin-bottom: var(--space-2, 1rem); }
+.tw-mt-1 { margin-top: var(--space-0-5, 0.25rem); }
+.tw-mt-2 { margin-top: var(--space-1, 0.5rem); }
+.tw-mt-3 { margin-top: var(--space-1-5, 0.75rem); }
+.tw-mt-4 { margin-top: var(--space-2, 1rem); }
+.tw-ml-1 { margin-left: var(--space-0-5, 0.25rem); }
+.tw-ml-2 { margin-left: var(--space-1, 0.5rem); }
+.tw-ml-8 { margin-left: var(--space-4, 2rem); }
+.tw-mr-1 { margin-right: var(--space-0-5, 0.25rem); }
+.tw-mr-2 { margin-right: var(--space-1, 0.5rem); }
+
+/* Padding */
+.tw-p-0 { padding: 0; }
+.tw-p-1 { padding: var(--space-0-5, 0.25rem); }
+.tw-p-2 { padding: var(--space-1, 0.5rem); }
+.tw-p-3 { padding: var(--space-1-5, 0.75rem); }
+.tw-p-4 { padding: var(--space-2, 1rem); }
+.tw-px-1 { padding-left: var(--space-0-5, 0.25rem); padding-right: var(--space-0-5, 0.25rem); }
+.tw-px-2 { padding-left: var(--space-1, 0.5rem); padding-right: var(--space-1, 0.5rem); }
+.tw-px-3 { padding-left: var(--space-1-5, 0.75rem); padding-right: var(--space-1-5, 0.75rem); }
+.tw-px-4 { padding-left: var(--space-2, 1rem); padding-right: var(--space-2, 1rem); }
+.tw-px-6 { padding-left: var(--space-3, 1.5rem); padding-right: var(--space-3, 1.5rem); }
+.tw-py-1 { padding-top: var(--space-0-5, 0.25rem); padding-bottom: var(--space-0-5, 0.25rem); }
+.tw-py-2 { padding-top: var(--space-1, 0.5rem); padding-bottom: var(--space-1, 0.5rem); }
+.tw-py-3 { padding-top: var(--space-1-5, 0.75rem); padding-bottom: var(--space-1-5, 0.75rem); }
+.tw-py-4 { padding-top: var(--space-2, 1rem); padding-bottom: var(--space-2, 1rem); }
+.tw-py-8 { padding-top: var(--space-4, 2rem); padding-bottom: var(--space-4, 2rem); }
+.tw-pt-0 { padding-top: 0; }
+.tw-pt-2 { padding-top: var(--space-1, 0.5rem); }
+.tw-pt-3 { padding-top: var(--space-1-5, 0.75rem); }
+.tw-pt-4 { padding-top: var(--space-2, 1rem); }
+.tw-pb-3 { padding-bottom: var(--space-1-5, 0.75rem); }
+
+/* Width/Height */
+.tw-w-full { width: 100%; }
+.tw-w-fit { width: fit-content; }
+.tw-w-px { width: 1px; }
+.tw-w-1 { width: var(--space-0-5, 0.25rem); }
+.tw-w-2 { width: var(--space-1, 0.5rem); }
+.tw-w-3 { width: var(--space-1-5, 0.75rem); }
+.tw-w-4 { width: var(--space-2, 1rem); }
+.tw-w-5 { width: var(--space-2-5, 1.25rem); }
+.tw-w-6 { width: var(--space-3, 1.5rem); }
+.tw-w-7 { width: var(--space-3-5, 1.75rem); }
+.tw-w-8 { width: var(--space-4, 2rem); }
+.tw-w-9 { width: 2.25rem; }
+.tw-w-10 { width: 2.5rem; }
+.tw-w-12 { width: var(--space-6, 3rem); }
+.tw-w-16 { width: var(--space-8, 4rem); }
+.tw-w-56 { width: 14rem; }
+.tw-h-full { height: 100%; }
+.tw-h-px { height: 1px; }
+.tw-h-1 { height: var(--space-0-5, 0.25rem); }
+.tw-h-2 { height: var(--space-1, 0.5rem); }
+.tw-h-3 { height: var(--space-1-5, 0.75rem); }
+.tw-h-4 { height: var(--space-2, 1rem); }
+.tw-h-5 { height: var(--space-2-5, 1.25rem); }
+.tw-h-6 { height: var(--space-3, 1.5rem); }
+.tw-h-7 { height: var(--space-3-5, 1.75rem); }
+.tw-h-8 { height: var(--space-4, 2rem); }
+.tw-h-9 { height: 2.25rem; }
+.tw-h-10 { height: 2.5rem; }
+.tw-h-12 { height: var(--space-6, 3rem); }
+.tw-h-64 { height: 16rem; }
+
+/* Space between children */
+.tw-space-y-0 > * + * { margin-top: 0; }
+.tw-space-y-1 > * + * { margin-top: var(--space-0-5, 0.25rem); }
+.tw-space-y-2 > * + * { margin-top: var(--space-1, 0.5rem); }
+.tw-space-y-3 > * + * { margin-top: var(--space-1-5, 0.75rem); }
+.tw-space-x-2 > * + * { margin-left: var(--space-1, 0.5rem); }
+
+/* Additional margin utilities */
+.tw-mt-0\.5 { margin-top: 0.125rem; }
+.tw-gap-1\.5 { gap: 0.375rem; }
+.tw-gap-0\.5 { gap: 0.125rem; }
+.tw-h-3\.5 { height: 0.875rem; }
+.tw-w-3\.5 { width: 0.875rem; }
+
+/* Card content truncation helper */
+.card-content-truncate {
+  min-width: 0;
+}
+
+/* Positioning */
+.tw-relative { position: relative; }
+.tw-absolute { position: absolute; }
+.tw-fixed { position: fixed; }
+.tw-top-0 { top: 0; }
+.tw-top-1 { top: var(--space-0-5, 0.25rem); }
+.tw-right-1 { right: var(--space-0-5, 0.25rem); }
+.tw-bottom-0 { bottom: 0; }
+.tw-inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.tw-z-50 { z-index: 50; }
+.tw--left-5 { left: -1.25rem; }
+
+/* Misc layout */
+.tw-hidden { display: none; }
+.tw-inline-block { display: inline-block; }
+.tw-overflow-hidden { overflow: hidden; }
+.tw-cursor-pointer { cursor: pointer; }
+.tw-cursor-not-allowed { cursor: not-allowed; }
+
+/* Transitions */
+.tw-transition-colors {
+  transition: color var(--transition-fast),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast);
+}
+.tw-transition-all { transition: all var(--transition-fast); }
+.tw-transition-opacity { transition: opacity var(--transition-fast); }
+.tw-transition-transform { transition: transform var(--transition-fast); }
+
+/* Transform */
+.tw-rotate-180 { transform: rotate(180deg); }
+
+/* Animation */
+.tw-animate-spin {
+  animation: tw-spin 1s linear infinite;
+}
+
+@keyframes tw-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =====================================================
+   TW-* CONTAINER/CARD CLASSES
+   ===================================================== */
+.tw-container {
+  background: transparent;
+  padding: var(--space-2, 1rem);
+}
+
+.tw-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 1rem);
+  background: transparent;
+}
+
+.tw-panel {
+  background: transparent;
+  border: 1px solid var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  padding: var(--space-2, 1rem);
+}
+
+.tw-card {
+  background: transparent;
+  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
+  padding: var(--space-2, 1rem);
+}
+
+.tw-card-hover {
+  background: transparent;
+  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
+  padding: var(--space-2, 1rem);
+  transition: border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.tw-card-hover:hover {
+  border-color: var(--portal-alpha-white-50, rgba(255, 255, 255, 0.6));
+}
+
+/* =====================================================
+   TW-* TYPOGRAPHY CLASSES
+   ===================================================== */
+.tw-heading {
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-light);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+.tw-section-title {
+  font-size: var(--font-size-2xs, 11px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--portal-text-muted);
+}
+
+.tw-label {
+  font-size: var(--font-size-xs, 12px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-muted);
+}
+
+.tw-field-label {
+  font-size: var(--font-size-sm, 14px);
+  font-weight: 700;
+  color: var(--portal-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.tw-text-muted {
+  color: var(--portal-text-muted) !important;
+}
+
+.tw-text-primary {
+  color: var(--portal-text-light) !important;
+}
+
+/* Font sizes */
+.tw-text-xs { font-size: var(--font-size-xs, 0.75rem); }
+.tw-text-sm { font-size: var(--font-size-sm, 0.875rem); }
+.tw-text-base { font-size: var(--font-size-base, 1rem); }
+.tw-text-lg { font-size: var(--font-size-lg, 1.125rem); }
+.tw-text-xl { font-size: var(--font-size-xl, 1.25rem); }
+
+/* Font weight */
+.tw-font-bold { font-weight: 700; }
+.tw-font-semibold { font-weight: 600; }
+.tw-font-mono { font-family: var(--font-family-mono, monospace); }
+
+/* Text alignment */
+.tw-text-center { text-align: center; }
+.tw-text-left { text-align: left; }
+.tw-text-right { text-align: right; }
+
+/* Text transforms */
+.tw-capitalize { text-transform: capitalize; }
+.tw-uppercase { text-transform: uppercase; }
+.tw-lowercase { text-transform: lowercase; }
+
+/* Text wrapping */
+.tw-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tw-whitespace-nowrap { white-space: nowrap; }
+.tw-whitespace-pre-wrap { white-space: pre-wrap; }
+.tw-break-words { word-wrap: break-word; }
+.tw-line-through { text-decoration: line-through; }
+.tw-italic { font-style: italic; }
+
+/* Status colors - semantic colors for status indicators */
+.tw-text-green-400 { color: var(--status-active, #4ade80); }
+.tw-text-yellow-400 { color: var(--status-pending, #facc15); }
+.tw-text-orange-400 { color: var(--status-on-hold, #fb923c); }
+.tw-text-blue-400 { color: var(--color-primary, #60a5fa); }
+.tw-text-purple-400 { color: var(--color-purple, #c084fc); }
+.tw-text-pink-400 { color: var(--color-pink, #f472b6); }
+.tw-text-cyan-400 { color: var(--color-cyan, #22d3ee); }
+.tw-text-white { color: var(--portal-text-light); }
+.tw-text-black { color: var(--portal-bg-pitch, #000000); }
+.tw-text-secondary { color: var(--portal-text-secondary); }
+
+/* Background colors */
+.tw-bg-white { background-color: var(--portal-text-light); }
+.tw-bg-black { background-color: var(--portal-bg-pitch, #000000); }
+.tw-bg-transparent { background: transparent; }
+
+/* =====================================================
+   TW-* DIVIDER CLASSES
+   ===================================================== */
+.tw-divider {
+  height: 1px;
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  margin: var(--space-2, 1rem) 0;
+}
+
+.tw-divider-vertical {
+  width: 1px;
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  margin: 0 var(--space-1, 0.5rem);
+  align-self: stretch;
+}
+
+/* =====================================================
+   TW-* GRID LAYOUT CLASSES
+   ===================================================== */
+.tw-grid-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2, 1rem);
+}
+
+@media (min-width: 768px) {
+  .tw-grid-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tw-grid-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2, 1rem);
+}
+
+@media (min-width: 768px) {
+  .tw-grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tw-grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* =====================================================
+   TW-* SCROLL CONTAINER CLASSES
+   ===================================================== */
+.tw-scroll-container {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tw-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tw-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tw-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+}
+
+.tw-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--portal-alpha-white-30, rgba(255, 255, 255, 0.4));
+}
+
+/* =====================================================
+   TW-* BORDER CLASSES
+   ===================================================== */
+.tw-border { border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-border-2 { border-width: 2px; }
+.tw-border-b { border-bottom: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-border-t { border-top: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-border-r { border-right: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-border-l-2 { border-left: 2px solid; }
+.tw-border-l-white { border-left-color: var(--portal-border-color); }
+.tw-border-none { border: none; }
+.tw-border-dashed { border-style: dashed; }
+.tw-border-current { border-color: currentColor; }
+.tw-border-white { border-color: var(--portal-border-color); }
+.tw-border-black { border-color: var(--portal-bg-pitch, #000000); }
+.tw-border-t-transparent { border-top-color: transparent; }
+
+/* Border radius - brutalist style is 0 */
+.tw-rounded { border-radius: 0; }
+.tw-rounded-lg { border-radius: 0; }
+
+/* Ring (focus outline) */
+.tw-ring-0 { box-shadow: none; }
+.tw-ring-1 { box-shadow: 0 0 0 1px var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-ring-2 { box-shadow: 0 0 0 2px var(--ring); }
+.tw-ring-white { --ring: var(--portal-border-color); }
+
+/* Shadows - disabled for brutalist */
+.tw-shadow { box-shadow: none; }
+
+/* =====================================================
+   TW-* MISC UTILITY CLASSES
+   ===================================================== */
+.tw-fill-current { fill: currentColor; }
+.tw-resize-none { resize: none; }
+.tw-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.tw-group { /* Group container for hover states */ }
+
+/* GSAP animation targets */
+.gsap-fade-target {
+  opacity: 0;
+}
+
+.gsap-slide-target {
+  opacity: 0;
+  transform: translateY(20px);
 }

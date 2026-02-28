@@ -61,6 +61,19 @@
   overflow: hidden;
 }
 
+/* Ad Hoc Analytics Widget - consistent min-height with chart containers */
+#ad-hoc-analytics-widget {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+#ad-hoc-analytics-widget .empty-state,
+#ad-hoc-analytics-widget .loading-state,
+#ad-hoc-analytics-widget .error-state {
+  min-height: 100px;
+}
+
 /* ============================================
    Charts
    ============================================ */

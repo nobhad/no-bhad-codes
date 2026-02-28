@@ -29,7 +29,7 @@
   overflow: hidden;
 }
 
-/* Remove gradient overlay - brutalist flat design */
+/* Remove gradient overlay - flat design */
 .portal
   :is(
     .stat-card,
@@ -116,15 +116,14 @@
    ===================================================== */
 
 .portal .stat-card-icon,
-.portal :is(.stat-card, .tw-stat-card) .stat-icon,
-.portal :is(.stat-card, .tw-stat-card) svg:not(.btn-icon) {
+.portal :is(.stat-card, .tw-stat-card, .overview-stat-card) .stat-icon,
+.portal :is(.stat-card, .tw-stat-card, .overview-stat-card) svg:not(.btn-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 18px;
   height: 18px;
-  color: var(--portal-text-muted);
-  opacity: 0.5;
+  color: var(--portal-text-light);
   flex-shrink: 0;
 }
 
@@ -237,4 +236,32 @@
     text-align: right;
     margin-top: 0;
   }
+}
+
+/* =====================================================
+   TW-* STAT CARD CLASSES - React Component Styles
+   ===================================================== */
+
+.tw-stat-card {
+  background: transparent;
+  border: 1px solid var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  padding: var(--space-2, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tw-stat-value {
+  font-size: var(--font-size-2xl, 24px);
+  font-weight: 400;
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-light);
+}
+
+.tw-stat-label {
+  font-size: var(--font-size-2xs, 11px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--portal-text-muted);
 }

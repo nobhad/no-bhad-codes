@@ -2,42 +2,42 @@
    CLIENT PORTAL - AD HOC REQUESTS
    ===================================================== */
 
-[data-page="client-portal"] .requests-grid {
+.portal .requests-grid {
   display: grid;
 }
 
 @media (min-width: 960px) {
-  [data-page="client-portal"] .requests-grid {
+  .portal .requests-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
   }
 }
 
 /* Uses .portal-card from shared styles - only layout overrides here */
-[data-page="client-portal"] .requests-form,
-[data-page="client-portal"] .requests-list {
+.portal .requests-form,
+.portal .requests-list {
   padding: var(--space-3);
 }
 
 /* h3 styling comes from shared .section-header-with-actions */
 
-[data-page="client-portal"] .requests-intro {
+.portal .requests-intro {
   margin: 0 0 var(--space-2) 0;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
 }
 
-[data-page="client-portal"] .requests-form-body .form-group {
+.portal .requests-form-body .form-group {
   margin-bottom: var(--space-1-5);
 }
 
-[data-page="client-portal"] .requests-attachment-note {
+.portal .requests-attachment-note {
   margin: var(--space-0-5) 0 0 0;
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
-[data-page="client-portal"] .requests-list-header {
+.portal .requests-list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,21 +45,21 @@
   margin-bottom: var(--space-1-5);
 }
 
-[data-page="client-portal"] .requests-list-body {
+.portal .requests-list-body {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
 /* Request cards use shared list item styling */
-[data-page="client-portal"] .requests-card.portal-list-item {
+.portal .requests-card.portal-list-item {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
   margin-bottom: 0;
 }
 
-[data-page="client-portal"] .requests-card-header {
+.portal .requests-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -67,16 +67,16 @@
   margin-bottom: var(--space-0-5);
 }
 
-[data-page="client-portal"] .requests-card-title {
+.portal .requests-card-title {
   font-weight: 600;
   color: var(--portal-text-light);
 }
 
-[data-page="client-portal"] .requests-card-status {
+.portal .requests-card-status {
   flex-shrink: 0;
 }
 
-[data-page="client-portal"] .requests-card-meta {
+.portal .requests-card-meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
@@ -85,31 +85,30 @@
   margin-bottom: var(--space-0-5);
 }
 
-[data-page="client-portal"] .requests-card-description {
+.portal .requests-card-description {
   margin: 0 0 var(--space-1) 0;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
 }
 
-[data-page="client-portal"] .requests-quote {
+.portal .requests-quote {
   display: grid;
   gap: var(--space-0-5);
   margin: 0 0 var(--space-1) 0;
   padding: var(--space-1);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-color);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
 }
 
-[data-page="client-portal"] .requests-quote-actions {
+.portal .requests-quote-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
   margin-bottom: var(--space-1);
 }
 
-[data-page="client-portal"] .requests-quote-modal .requests-quote-modal-body {
+.portal .requests-quote-modal .requests-quote-modal-body {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -117,35 +116,34 @@
   font-size: var(--font-size-sm);
 }
 
-[data-page="client-portal"] .requests-quote-modal-summary {
+.portal .requests-quote-modal-summary {
   display: grid;
   gap: var(--space-0-5);
   padding: var(--space-1);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-color);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
 }
 
-[data-page="client-portal"] .requests-quote-modal-note {
+.portal .requests-quote-modal-note {
   margin: 0;
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
-[data-page="client-portal"] .requests-card-footer {
+.portal .requests-card-footer {
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
-[data-page="client-portal"] .requests-empty,
-[data-page="client-portal"] .requests-error {
+.portal .requests-empty,
+.portal .requests-error {
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
-[data-page="client-portal"] .requests-error {
+.portal .requests-error {
   color: var(--color-error-500);
 }
 
@@ -154,36 +152,36 @@
    ===================================================== */
 
 @media (--mobile) {
-  [data-page="client-portal"] .requests-form,
-  [data-page="client-portal"] .requests-list {
+  .portal .requests-form,
+  .portal .requests-list {
     padding: var(--space-2);
   }
 
-  [data-page="client-portal"] .requests-card-header {
+  .portal .requests-card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
   }
 
-  [data-page="client-portal"] .requests-quote-actions {
+  .portal .requests-quote-actions {
     flex-direction: column;
   }
 
-  [data-page="client-portal"] .requests-quote-actions button {
+  .portal .requests-quote-actions button {
     width: 100%;
   }
 }
 
 @media (--compact-mobile) {
-  [data-page="client-portal"] .requests-grid {
+  .portal .requests-grid {
     gap: var(--space-2);
   }
 
-  [data-page="client-portal"] .requests-card.portal-list-item {
+  .portal .requests-card.portal-list-item {
     padding: var(--space-2);
   }
 
-  [data-page="client-portal"] .requests-card-meta {
+  .portal .requests-card-meta {
     flex-direction: column;
     gap: var(--space-0-5);
   }

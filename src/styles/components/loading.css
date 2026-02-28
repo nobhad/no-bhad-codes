@@ -227,15 +227,15 @@ td.error-cell,
 div.empty-row,
 div.loading-row,
 div.error-row,
-[data-page="admin"] .data-table td.error-row,
-[data-page="admin"] .data-table td.loading-row,
-[data-page="admin"] .data-table td.empty-row,
-[data-page="admin"] .data-table td.empty-cell,
-[data-page="admin"] .data-table tr.error-row td,
-[data-page="admin"] .data-table tr.loading-row td,
-[data-page="admin"] .data-table tr.empty-row td,
-[data-page="admin"] .data-table tbody td[colspan],
-[data-page="client-portal"] table td[colspan] {
+.portal .data-table td.error-row,
+.portal .data-table td.loading-row,
+.portal .data-table td.empty-row,
+.portal .data-table td.empty-cell,
+.portal .data-table tr.error-row td,
+.portal .data-table tr.loading-row td,
+.portal .data-table tr.empty-row td,
+.portal .data-table tbody td[colspan],
+.portal table td[colspan] {
   text-align: center !important;
   color: var(--portal-text-muted);
   padding: var(--space-2) var(--space-3);
@@ -258,7 +258,7 @@ tr.empty-row > td {
   width: 100%;
 }
 
-/* Error row corners - no rounding for brutalist design */
+/* Error row corners - no rounding for portal design */
 td.error-row,
 td.loading-row,
 td.empty-row {
@@ -288,16 +288,16 @@ td.empty-row {
 }
 
 /* Cards need position relative for loading state positioning */
-:is([data-page="admin"], [data-page="client-portal"]) .portal-card,
-:is([data-page="admin"], [data-page="client-portal"]) .dashboard-card,
-:is([data-page="admin"], [data-page="client-portal"]) [class*="card"]:not(.business-card) {
+.portal .portal-card,
+.portal .dashboard-card,
+.portal [class*="card"]:not(.business-card) {
   position: relative;
 }
 
 /* Portal-specific adjustments - compact styling */
-:is([data-page="admin"], [data-page="client-portal"]) .loading-state,
-:is([data-page="admin"], [data-page="client-portal"]) .empty-state,
-:is([data-page="admin"], [data-page="client-portal"]) .error-state {
+.portal .loading-state,
+.portal .empty-state,
+.portal .error-state {
   min-height: 48px;
   padding: var(--space-3); /* Uniform padding on all sides */
 }
@@ -333,8 +333,8 @@ td.empty-row {
 }
 
 /* Specific containers that need flex for loading/empty state centering */
-:is([data-page="admin"], [data-page="client-portal"]) .funnel-container,
-:is([data-page="admin"], [data-page="client-portal"]) .source-list {
+.portal .funnel-container,
+.portal .source-list {
   display: flex;
   flex-direction: column;
   min-height: 100px;
@@ -457,15 +457,21 @@ p.empty-state {
 }
 
 /* Empty state with automatic icon (Lucide inbox icon) */
+/* Uses mask-image so color can be controlled via background-color variable */
 .empty-state::before {
   content: "";
   display: block;
   width: 24px;
   height: 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background-color: var(--color-text-primary, #888);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
   opacity: 0.6;
   flex-shrink: 0;
 }
@@ -523,7 +529,7 @@ p.empty-state {
 }
 
 /* Portal-specific adjustments for content wrapper */
-:is([data-page="admin"], [data-page="client-portal"]) .empty-state-content {
+.portal .empty-state-content {
   min-height: 48px;
   padding: var(--space-3); /* Uniform padding on all sides */
 }
@@ -602,7 +608,7 @@ p.empty-state {
   border: 1px solid var(--color-danger);
   border-radius: 8px;
   box-shadow: var(--shadow-elevated-sm);
-  z-index: 1000;
+  z-index: var(--z-index-loading);
   animation: slide-in-right 0.3s ease;
 }
 

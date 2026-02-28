@@ -8,14 +8,15 @@
  * Main site has its own creative button aesthetic and does NOT use these.
  */
 
-:root {
-  /* ============================================
-   * PORTAL BUTTON TOKENS - BRUTALIST DESIGN
-   * ============================================
-   * Used by admin and client portal buttons.
-   * Design: Black background, white border, monospace font
-   */
-
+/* ============================================
+ * PORTAL BUTTON TOKENS - BRUTALIST DESIGN
+ * ============================================
+ * Used by admin and client portal buttons.
+ * Design: Black background, white border, monospace font
+ * SCOPED to portal pages only to prevent main site bleed
+ */
+[data-page="admin"],
+[data-page="client-portal"] {
   /* Button sizing */
   --btn-portal-padding-y: var(--space-2);
   --btn-portal-padding-x: var(--space-4);
@@ -34,18 +35,18 @@
   --btn-portal-border-radius: 0;
   --btn-portal-border-color: rgb(255, 255, 255);
 
-  /* Button colors - base (black bg, white text/border) */
-  --btn-portal-bg: rgb(0, 0, 0);
+  /* Button colors - base (transparent bg, white text/border) */
+  --btn-portal-bg: transparent;
   --btn-portal-color: rgb(255, 255, 255);
   --btn-portal-border: rgb(255, 255, 255);
 
-  /* Button colors - hover (inverted) */
+  /* Button colors - hover (inverted to white bg) */
   --btn-portal-hover-bg: rgb(255, 255, 255);
   --btn-portal-hover-color: rgb(0, 0, 0);
   --btn-portal-hover-border: rgb(255, 255, 255);
 
   /* Button colors - secondary (same as base) */
-  --btn-portal-secondary-bg: rgb(0, 0, 0);
+  --btn-portal-secondary-bg: transparent;
   --btn-portal-secondary-color: rgb(255, 255, 255);
   --btn-portal-secondary-border: rgb(255, 255, 255);
 
@@ -55,7 +56,7 @@
   --btn-portal-secondary-hover-border: rgb(255, 255, 255);
 
   /* Button colors - primary (same as base) */
-  --btn-portal-primary-bg: rgb(0, 0, 0);
+  --btn-portal-primary-bg: transparent;
   --btn-portal-primary-color: rgb(255, 255, 255);
   --btn-portal-primary-border: rgb(255, 255, 255);
 
@@ -64,8 +65,8 @@
   --btn-portal-primary-hover-color: rgb(0, 0, 0);
   --btn-portal-primary-hover-border: rgb(255, 255, 255);
 
-  /* Button colors - danger (black bg, red text/border) */
-  --btn-portal-danger-bg: rgb(0, 0, 0);
+  /* Button colors - danger (transparent bg, red text/border) */
+  --btn-portal-danger-bg: transparent;
   --btn-portal-danger-color: var(--color-error-500, #ef4444);
   --btn-portal-danger-border: var(--color-error-500, #ef4444);
 
@@ -95,6 +96,52 @@
   /* Icon sizes within buttons */
   --btn-portal-icon-inner-size: var(--icon-size-lg);
   --btn-portal-icon-inner-size-sm: var(--icon-size-md);
+}
+
+/* ============================================
+ * PORTAL LIGHT MODE - Button colors inverted
+ * ============================================
+ * Transparent background, black text/border (matches dark mode pattern)
+ */
+html[data-theme="light"] body[data-page="client-portal"],
+html[data-theme="light"] body[data-page="admin"],
+html[data-theme="light"] [data-page="client-portal"],
+html[data-theme="light"] [data-page="admin"] {
+  /* Button borders - black in light mode */
+  --btn-portal-border-color: rgb(0, 0, 0);
+
+  /* Button colors - base (transparent bg, black text/border) */
+  --btn-portal-bg: transparent;
+  --btn-portal-color: rgb(0, 0, 0);
+  --btn-portal-border: rgb(0, 0, 0);
+
+  /* Button colors - hover (black bg, white text) */
+  --btn-portal-hover-bg: rgb(0, 0, 0);
+  --btn-portal-hover-color: rgb(255, 255, 255);
+  --btn-portal-hover-border: rgb(0, 0, 0);
+
+  /* Button colors - secondary (same as base) */
+  --btn-portal-secondary-bg: transparent;
+  --btn-portal-secondary-color: rgb(0, 0, 0);
+  --btn-portal-secondary-border: rgb(0, 0, 0);
+
+  /* Button colors - secondary hover */
+  --btn-portal-secondary-hover-bg: rgb(0, 0, 0);
+  --btn-portal-secondary-hover-color: rgb(255, 255, 255);
+  --btn-portal-secondary-hover-border: rgb(0, 0, 0);
+
+  /* Button colors - primary (same as base) */
+  --btn-portal-primary-bg: transparent;
+  --btn-portal-primary-color: rgb(0, 0, 0);
+  --btn-portal-primary-border: rgb(0, 0, 0);
+
+  /* Button colors - primary hover */
+  --btn-portal-primary-hover-bg: rgb(0, 0, 0);
+  --btn-portal-primary-hover-color: rgb(255, 255, 255);
+  --btn-portal-primary-hover-border: rgb(0, 0, 0);
+
+  /* Button colors - danger (transparent bg, red text/border) */
+  --btn-portal-danger-bg: transparent;
 }
 
 /* ============================================

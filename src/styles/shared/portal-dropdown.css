@@ -20,7 +20,7 @@
 
 /* Dropdown content - the popup menu */
 .portal-dropdown-content {
-  z-index: 50;
+  z-index: var(--z-index-50);
   min-width: 8rem;
   overflow: hidden;
   border: var(--portal-border);
@@ -31,7 +31,7 @@
 
 /* Sub content - same styling as main content */
 .portal-dropdown-sub-content {
-  z-index: 50;
+  z-index: var(--z-index-50);
   min-width: 8rem;
   overflow: hidden;
   border: var(--portal-border);
@@ -549,7 +549,7 @@
   outline: none;
   border: var(--portal-border);
   border-bottom: none;
-  z-index: 1001;
+  z-index: var(--z-index-loading);
   position: relative;
   background-color: transparent;
   box-shadow: none;
@@ -596,7 +596,7 @@
   background-color: var(--portal-bg-pitch);
   border: var(--portal-border);
   border-top: none;
-  z-index: 1000;
+  z-index: var(--z-index-portal-dropdown, 9700);
   display: none;
   box-shadow: none;
   clip-path: none;

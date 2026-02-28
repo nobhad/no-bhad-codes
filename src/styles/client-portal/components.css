@@ -1,34 +1,7 @@
 /* =====================================================
    CLIENT PORTAL - STANDARDIZED COMPONENTS
-   Use these portal- prefixed classes for consistency
+   Use shared portal styles - minimal client-specific overrides
    ===================================================== */
-
-/* ----- COMPONENT: Panel - No border, panel shadow ----- */
-/* Use for main container divs in admin and client portals */
-.portal-panel {
-  background: var(--portal-bg-dark);
-  border: none;
-  box-shadow: var(--shadow-panel);
-}
-
-/* ----- COMPONENT: Card - Main container with shadow (no border) ----- */
-.portal-card {
-  background: var(--portal-bg-dark);
-  border: none;
-  padding: var(--space-3);
-  margin-bottom: var(--space-3);
-  box-shadow: var(--shadow-panel);
-}
-
-.portal-card:last-child {
-  margin-bottom: 0;
-}
-
-/* ----- COMPONENT: Card Header ----- */
-/* Use shared .section-header-with-actions from portal-cards.css */
-
-/* ----- COMPONENT: Buttons ----- */
-/* All portal button styles consolidated in buttons.css */
 
 /* ----- COMPONENT: Form Row ----- */
 .portal-form-row {
@@ -68,25 +41,6 @@
   color: var(--color-primary);
 }
 
-/* ----- COMPONENT: List Item - Child element (no border/shadow per hierarchy) ----- */
-.portal-list-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  background: var(--portal-bg-medium);
-  margin-bottom: var(--space-1);
-  transition: background-color var(--transition-fast);
-}
-
-.portal-list-item:hover {
-  background: var(--portal-bg-hover);
-}
-
-.portal-list-item:last-child {
-  margin-bottom: 0;
-}
-
 /* ----- COMPONENT: Item Actions ----- */
 .portal-item-actions {
   display: flex;
@@ -94,56 +48,10 @@
   flex-shrink: 0;
 }
 
-/* ----- COMPONENT: Status Badge ----- */
-/* Use .status-badge from shared/portal-badges.css */
-
-/* ----- COMPONENT: Stat Card - Child element (no border per hierarchy) ----- */
-.portal-stat {
-  background: var(--portal-bg-medium);
-  padding: var(--space-3);
-  text-align: center;
-}
-
-.portal-stat-number {
-  display: block;
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
-  font-size: 2rem;
-  color: var(--color-primary);
-  line-height: 1;
-  font-weight: 700;
-}
-
-/* Label styling from unified rule in portal-forms.css - only layout here */
-.portal-stat-label {
-  display: block;
-  margin-top: var(--space-1);
-}
-
-/* ----- COMPONENT: Empty State Message ----- */
-/* Use .empty-state from components/loading.css */
-
 /* ----- COMPONENT: Project Cards ----- */
 .portal-project-cards {
   display: block;
   margin-bottom: var(--space-2);
-}
-
-/* Base styles in shared/portal-cards.css - only client-specific overrides here */
-[data-page="client-portal"] .portal-project-card {
-  transition: background-color var(--transition-fast);
-  position: relative;
-}
-
-/* Cards have no hover by default. Add .portal-project-card-clickable for link/button cards that should show hover. */
-.portal-project-card-clickable:hover {
-  background: var(--portal-bg-hover);
-}
-
-/* h3 styling from unified rule in portal-cards.css - only layout here */
-[data-page="client-portal"] .portal-project-card h3 {
-  margin: 0 0 var(--space-2) 0;
-  padding-right: 120px;
-  white-space: nowrap;
 }
 
 .portal-project-card .project-status {
@@ -159,8 +67,7 @@
 }
 
 .portal-project-card .progress-bar {
-  background: var(--portal-bg-medium);
-  border: none;
+  border: 1px solid var(--portal-border-color);
   height: 12px;
   overflow: hidden;
 }
@@ -193,7 +100,7 @@
 }
 
 .upload-request-modal-content {
-  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border-color);
   width: 100%;
   max-width: 500px;
   max-height: 80vh;
@@ -207,10 +114,9 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: 1px solid var(--portal-border-color);
 }
 
-/* h3 styling from unified rule in portal-cards.css - only layout here */
 .upload-request-modal-content .modal-header h2,
 .upload-request-modal-content .modal-header h3 {
   margin: 0;
@@ -223,7 +129,7 @@
 }
 
 .upload-request-modal-description {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin: 0 0 var(--space-2) 0;
 }
@@ -235,19 +141,18 @@
   margin-bottom: var(--space-2);
 }
 
-/* Child element - no border per shadow hierarchy */
 .upload-request-option {
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
   padding: var(--space-1-5);
-  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-color);
   cursor: pointer;
-  transition: background-color var(--transition-faster);
+  transition: border-color var(--transition-faster);
 }
 
 .upload-request-option:hover {
-  background: var(--portal-bg-hover);
+  border-color: var(--color-primary);
 }
 
 .upload-request-option input[type="radio"] {
@@ -264,7 +169,7 @@
 }
 
 .upload-request-option-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
   display: flex;
@@ -274,7 +179,7 @@
 }
 
 .upload-request-option-desc {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
 }
 
@@ -284,7 +189,7 @@
 }
 
 .upload-request-badge {
-  font-size: 0.625rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   padding: 2px 6px;
   text-transform: uppercase;
@@ -296,7 +201,7 @@
 }
 
 .upload-request-other-wrap {
-  border-top: 1px solid var(--portal-border);
+  border-top: 1px solid var(--portal-border-color);
   padding-top: var(--space-1-5);
 }
 
@@ -309,10 +214,10 @@
   width: 100%;
   min-height: 60px;
   padding: var(--space-1);
-  background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
+  background: transparent;
+  border: 1px solid var(--portal-border-color);
   color: var(--portal-text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   resize: vertical;
 }
 
@@ -326,10 +231,9 @@
   justify-content: flex-end;
   gap: var(--space-1);
   padding: var(--space-2);
-  border-top: 1px solid var(--portal-border);
+  border-top: 1px solid var(--portal-border-color);
 }
 
-/* Responsive */
 @media (--mobile) {
   .upload-request-modal {
     padding: var(--space-1);

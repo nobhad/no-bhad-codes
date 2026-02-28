@@ -38,8 +38,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
  * This is critical for Lucide icons which use stroke="currentColor".
  * Without this, SVGs appear grey instead of matching button text.
  */
-:is([data-page="admin"], [data-page="client-portal"]) :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg,
-:is([data-page="admin"], [data-page="client-portal"]) button:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > svg {
+.portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, .form-button) > svg,
+.portal button:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > svg {
   color: inherit;
 }
 
@@ -245,7 +245,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   width: 100%;
   padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem)
     var(--sidebar-icon-indent, 18px);
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: 500;
   text-align: left;
@@ -315,6 +315,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 }
 .icon-btn:hover {
   color: var(--color-primary);
+  background: transparent;
 }
 .icon-btn.icon-btn-danger:hover {
   color: var(--color-error-500);
@@ -396,7 +397,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
  * WCAG 2.1 requires 44x44px touch targets
  */
 @media (pointer: coarse) {
-  :is([data-page="admin"], [data-page="client-portal"]) .icon-btn {
+  .portal .icon-btn {
     width: var(--space-5);
     height: var(--space-5);
     min-width: var(--space-5);
@@ -480,12 +481,9 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   .data-table .table-actions .icon-btn,
   table .icon-btn,
   table td .icon-btn,
-  [data-page="admin"] td .icon-btn,
-  [data-page="admin"] .actions-cell .icon-btn,
-  [data-page="admin"] .table-actions .icon-btn,
-  [data-page="client-portal"] td .icon-btn,
-  [data-page="client-portal"] .actions-cell .icon-btn,
-  [data-page="client-portal"] .table-actions .icon-btn {
+.portal td .icon-btn,
+  .portal .actions-cell .icon-btn,
+  .portal .table-actions .icon-btn {
     width: var(--btn-portal-icon-size);
     height: var(--btn-portal-icon-size);
     min-width: var(--btn-portal-icon-size);
@@ -514,17 +512,19 @@ button > :is(.icon-wrap, .tab-icon, svg) {
     background: transparent;
   }
 
-  /* Hover state - ALL table buttons hover to primary, no colored hover states */
+  /* Hover state - ALL table buttons hover to primary, no backgrounds */
   td .icon-btn:hover,
   .actions-cell .icon-btn:hover,
   .table-actions .icon-btn:hover,
   .data-table .icon-btn:hover,
   table .icon-btn:hover {
     color: var(--color-primary);
-    background: transparent;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none;
   }
 
-  /* MASTER SELECTOR: Every SVG in table icon buttons */
+  /* MASTER SELECTOR: Every SVG in table icon buttons - matches text size */
   td .icon-btn svg,
   td > .icon-btn svg,
   td button.icon-btn svg,
@@ -540,14 +540,11 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   .data-table .table-actions .icon-btn svg,
   table .icon-btn svg,
   table td .icon-btn svg,
-  [data-page="admin"] td .icon-btn svg,
-  [data-page="admin"] .actions-cell .icon-btn svg,
-  [data-page="admin"] .table-actions .icon-btn svg,
-  [data-page="client-portal"] td .icon-btn svg,
-  [data-page="client-portal"] .actions-cell .icon-btn svg,
-  [data-page="client-portal"] .table-actions .icon-btn svg {
-    width: var(--btn-portal-icon-inner-size);
-    height: var(--btn-portal-icon-inner-size);
+  .portal td .icon-btn svg,
+  .portal .actions-cell .icon-btn svg,
+  .portal .table-actions .icon-btn svg {
+    width: var(--btn-portal-icon-inner-size) !important;
+    height: var(--btn-portal-icon-inner-size) !important;
     min-width: var(--btn-portal-icon-inner-size);
     min-height: var(--btn-portal-icon-inner-size);
     max-width: var(--btn-portal-icon-inner-size);
@@ -706,4 +703,188 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 .toggle-btn.active {
   background: var(--color-white);
   color: var(--color-black);
+}
+
+/* ============================================
+ * TW-BTN-* CLASSES - React Component Button Styles
+ * These classes are used by React components via PortalButton
+ * They use CSS variables for theming support (dark/light mode)
+ * ============================================ */
+
+/* Base button */
+.tw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--btn-portal-font-size, 16px);
+  font-weight: 400;
+  font-family: var(--font-family-mono, monospace);
+  background: transparent;
+  color: var(--portal-text-light);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.tw-btn:hover {
+  opacity: 0.6;
+}
+
+.tw-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Primary button - solid border, inverts on hover */
+.tw-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--btn-portal-font-size, 16px);
+  font-weight: 400;
+  font-family: var(--font-family-mono, monospace);
+  background: transparent;
+  color: var(--btn-portal-color, var(--portal-text-light));
+  border: var(--btn-portal-border-width, 2px) solid var(--btn-portal-border-color, var(--portal-border-color));
+  border-radius: 0;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tw-btn-primary:hover {
+  background: var(--btn-portal-hover-bg, var(--portal-text-light));
+  color: var(--btn-portal-hover-color, var(--portal-bg-pitch));
+}
+
+.tw-btn-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Secondary button - solid border, subtle hover */
+.tw-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--btn-portal-font-size, 16px);
+  font-weight: 400;
+  font-family: var(--font-family-mono, monospace);
+  background: transparent;
+  color: var(--btn-portal-color, var(--portal-text-light));
+  border: var(--btn-portal-border-width, 2px) solid var(--btn-portal-border-color, var(--portal-border-color));
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.tw-btn-secondary:hover {
+  border-color: var(--btn-portal-hover-border, var(--portal-text-light));
+}
+
+.tw-btn-secondary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Ghost button - no border, underline on hover */
+.tw-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm, 14px);
+  font-weight: 400;
+  font-family: var(--font-family-mono, monospace);
+  background: transparent;
+  color: var(--btn-portal-color, var(--portal-text-light));
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.tw-btn-ghost:hover {
+  text-decoration: underline;
+}
+
+.tw-btn-ghost:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Danger button - error/destructive actions */
+.tw-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--btn-portal-font-size, 16px);
+  font-weight: 400;
+  font-family: var(--font-family-mono, monospace);
+  background: transparent;
+  color: var(--btn-portal-danger-color, var(--color-error-500));
+  border: var(--btn-portal-border-width, 2px) solid var(--btn-portal-danger-border, var(--color-error-500));
+  border-radius: 0;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tw-btn-danger:hover {
+  background: var(--btn-portal-danger-hover-bg, var(--color-error-500));
+  color: var(--btn-portal-danger-hover-color, var(--portal-bg-pitch));
+}
+
+.tw-btn-danger:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Icon button - compact, icon-only */
+.tw-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: transparent;
+  color: var(--portal-text-secondary, rgba(255, 255, 255, 0.5));
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.tw-btn-icon:hover {
+  color: var(--btn-portal-color, var(--portal-text-light));
+}
+
+.tw-btn-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Close button - for modals/dialogs */
+.tw-btn-close {
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--portal-text-light);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.tw-btn-close:hover {
+  opacity: 0.6;
 }

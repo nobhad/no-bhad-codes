@@ -86,6 +86,13 @@
   box-shadow: none;
 }
 
+/* Icon sizing in tab buttons - CSS controls sizing, not inline styles */
+.portal-tabs button svg {
+  width: var(--icon-size-xs, 14px);
+  height: var(--icon-size-xs, 14px);
+  flex-shrink: 0;
+}
+
 /* Hide icons in tabs - use text only like header subtabs */
 .portal-tabs button .tab-icon {
   display: none;
@@ -365,4 +372,44 @@
     width: var(--icon-size-xs);
     height: var(--icon-size-xs);
   }
+}
+
+/* =====================================================
+   TW-* TAB CLASSES - React Component Tab Styles
+   These classes are used by React components
+   ===================================================== */
+
+.tw-tab-list {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+}
+
+.tw-tab {
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  margin-bottom: -1px;
+}
+
+.tw-tab:hover {
+  color: var(--portal-text-light);
+}
+
+.tw-tab-active {
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-light);
+  border: none;
+  border-bottom: 2px solid var(--portal-border-color);
+  background: transparent;
+  cursor: pointer;
+  margin-bottom: -1px;
 }

@@ -119,8 +119,8 @@
 }
 
 .portal .inline-edit-btn svg {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-size-xs, 14px);
+  height: var(--icon-size-xs, 14px);
 }
 
 .portal .inline-edit-btn-save {
@@ -288,4 +288,234 @@
   outline: none;
   cursor: pointer;
   min-width: 140px;
+}
+
+/* ===============================================
+ * PORTAL SETTINGS INLINE EDITING
+ * React InlineEditField component styles
+ * =============================================== */
+
+/* Settings fields container */
+.portal .settings-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Row layout - label and value */
+.portal .inline-edit-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--table-cell-padding-y, 12px) 0;
+  border-bottom: var(--portal-border);
+  gap: var(--space-4);
+}
+
+.portal .inline-edit-row:last-child {
+  border-bottom: none;
+}
+
+/* Label column */
+.portal .inline-edit-label {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-sm, 6px);
+  flex-shrink: 0;
+  min-width: 140px;
+}
+
+.portal .inline-edit-label .inline-edit-icon {
+  width: var(--icon-size-sm, 16px);
+  height: var(--icon-size-sm, 16px);
+  color: var(--portal-text-muted);
+  opacity: 1;
+}
+
+.portal .inline-edit-label .inline-edit-icon svg {
+  width: var(--icon-size-sm, 16px);
+  height: var(--icon-size-sm, 16px);
+}
+
+.portal .inline-edit-required {
+  color: var(--color-primary);
+  margin-left: 2px;
+}
+
+/* Value column - display mode */
+.portal .inline-edit-row .inline-edit-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--icon-gap-xs, 4px);
+  text-align: right;
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base, 14px);
+  min-height: 24px;
+  padding: var(--space-0-5) var(--space-1);
+  margin: calc(-1 * var(--space-0-5)) calc(-1 * var(--space-1));
+}
+
+.portal .inline-edit-row .inline-edit-value.editable {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.portal .inline-edit-row .inline-edit-value.editable:hover {
+  background: var(--portal-bg-hover);
+}
+
+.portal .inline-edit-row .inline-edit-value.editable:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.portal .inline-edit-row .inline-edit-value.placeholder {
+  color: var(--portal-text-muted);
+  font-style: italic;
+}
+
+/* Pencil icon - shows on hover */
+.portal .inline-edit-row .inline-edit-pencil {
+  width: var(--icon-size-xs, 12px);
+  height: var(--icon-size-xs, 12px);
+  color: var(--portal-text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.portal .inline-edit-row .inline-edit-value.editable:hover .inline-edit-pencil,
+.portal .inline-edit-row .inline-edit-value.editable:focus .inline-edit-pencil {
+  opacity: 1;
+}
+
+/* Input wrapper - edit mode */
+.portal .inline-edit-input-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.portal .inline-edit-row .inline-edit-input {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-primary);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base, 14px);
+  font-family: inherit;
+  text-align: right;
+  outline: none;
+}
+
+.portal .inline-edit-row .inline-edit-input:focus {
+  border-color: var(--color-primary);
+}
+
+.portal .inline-edit-row .inline-edit-input::placeholder {
+  color: var(--portal-text-muted);
+  opacity: 0.6;
+}
+
+.portal .inline-edit-row .inline-edit-input.has-error {
+  border-color: var(--color-error);
+}
+
+.portal .inline-edit-row .inline-edit-input:disabled {
+  opacity: 0.6;
+}
+
+/* Select in edit mode */
+.portal .inline-edit-row .inline-edit-select {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--color-primary);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-base, 14px);
+  font-family: inherit;
+  text-align: right;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Action buttons in edit mode */
+.portal .inline-edit-row .inline-edit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.portal .inline-edit-row .inline-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-0-5);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.portal .inline-edit-row .inline-edit-btn svg {
+  width: var(--icon-size-sm, 16px);
+  height: var(--icon-size-sm, 16px);
+}
+
+.portal .inline-edit-row .inline-edit-btn.save {
+  color: var(--status-completed, var(--color-success));
+}
+
+.portal .inline-edit-row .inline-edit-btn.save:hover {
+  background: var(--status-completed-bg, var(--color-success-alpha-15));
+}
+
+.portal .inline-edit-row .inline-edit-btn.cancel {
+  color: var(--status-cancelled, var(--color-error));
+}
+
+.portal .inline-edit-row .inline-edit-btn.cancel:hover {
+  background: var(--status-cancelled-bg, var(--color-error-alpha-15));
+}
+
+/* Spinner */
+.portal .inline-edit-row .inline-edit-spinner {
+  width: 16px;
+  height: 16px;
+  color: var(--portal-text-muted);
+  animation: spin 1s linear infinite;
+}
+
+/* Error message */
+.portal .inline-edit-row .inline-edit-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm, 12px);
+  text-align: right;
+}
+
+/* Responsive - stack on mobile */
+@media (--compact-mobile) {
+  .portal .inline-edit-row {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .portal .inline-edit-label {
+    min-width: auto;
+  }
+
+  .portal .inline-edit-row .inline-edit-value {
+    justify-content: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+
+  .portal .inline-edit-row .inline-edit-input,
+  .portal .inline-edit-row .inline-edit-select {
+    text-align: left;
+  }
 }
