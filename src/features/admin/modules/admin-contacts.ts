@@ -26,6 +26,10 @@ import type { ContactSubmission, AdminDashboardContext } from '../admin-types';
 import { createRowCheckbox, type BulkActionConfig } from '../../../utils/table-bulk-actions';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
+import {
+  executeActionWithToast,
+  executeBulkWithToast
+} from '../../../utils/api-wrappers';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import {
@@ -34,6 +38,7 @@ import {
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
 import { createLogger } from '../../../utils/logger';
+import { createReactTableIntegration } from '../shared/reactTableIntegration';
 
 const logger = createLogger('AdminContacts');
 
@@ -41,52 +46,13 @@ const logger = createLogger('AdminContacts');
 // REACT INTEGRATION (ISLAND ARCHITECTURE)
 // ============================================
 
-// React bundle only loads when feature flag is enabled
-type ReactMountFn = typeof import('../../../react/features/admin/contacts').mountContactsTable;
-type ReactUnmountFn = typeof import('../../../react/features/admin/contacts').unmountContactsTable;
-
-let mountContactsTable: ReactMountFn | null = null;
-let unmountContactsTable: ReactUnmountFn | null = null;
-let reactTableMounted = false;
-let reactMountContainer: HTMLElement | null = null;
-
-/**
- * Check if React table is actually mounted (container exists and has content)
- */
-function isReactTableActuallyMounted(): boolean {
-  if (!reactTableMounted) return false;
-  // Check if the container still exists in the DOM and has content
-  if (
-    !reactMountContainer ||
-    !reactMountContainer.isConnected ||
-    reactMountContainer.children.length === 0
-  ) {
-    reactTableMounted = false;
-    reactMountContainer = null;
-    return false;
-  }
-  return true;
-}
-
-/** Lazy load React mount functions */
-async function loadReactContactsTable(): Promise<boolean> {
-  if (mountContactsTable && unmountContactsTable) return true;
-
-  try {
-    const module = await import('../../../react/features/admin/contacts');
-    mountContactsTable = module.mountContactsTable;
-    unmountContactsTable = module.unmountContactsTable;
-    return true;
-  } catch (err) {
-    logger.error(' Failed to load React module:', err);
-    return false;
-  }
-}
-
-/** Check if React contacts table should be used - always true */
-function shouldUseReactContactsTable(): boolean {
-  return true;
-}
+// React integration using factory pattern - eliminates ~50 lines of boilerplate
+const reactIntegration = createReactTableIntegration({
+  modulePath: () => import('../../../react/features/admin/contacts'),
+  mountFnName: 'mountContactsTable',
+  unmountFnName: 'unmountContactsTable',
+  displayName: 'Contacts'
+});
 
 // ============================================================================
 // TYPES
@@ -112,23 +78,21 @@ let _contactsModuleRef: ReturnType<
  * Bulk update status for multiple contacts
  */
 async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
-  try {
-    const promises = ids.map((id) =>
-      apiPut(`/api/admin/contact-submissions/${id}/status`, { status })
-    );
-    await Promise.all(promises);
+  const operations = ids.map(
+    (id) => () => apiPut(`/api/admin/contact-submissions/${id}/status`, { status })
+  );
 
-    // Update local data via module
-    if (_contactsModuleRef) {
-      ids.forEach((id) => {
-        _contactsModuleRef!.updateItem(id, { status: status as ContactSubmission['status'] });
-      });
-    }
+  const { successCount } = await executeBulkWithToast(operations, {
+    success: `Updated {count} contacts to ${status}`,
+    error: 'Failed to update contacts',
+    partial: 'Updated {successCount} of {totalCount} contacts'
+  });
 
-    showToast(`Updated ${ids.length} contacts to ${status}`, 'success');
-  } catch (error) {
-    logger.error(' Bulk status update failed:', error);
-    showToast('Failed to update some contacts', 'error');
+  // Update local data via module for successful updates
+  if (_contactsModuleRef && successCount > 0) {
+    ids.slice(0, successCount).forEach((id) => {
+      _contactsModuleRef!.updateItem(id, { status: status as ContactSubmission['status'] });
+    });
   }
 }
 
@@ -136,24 +100,22 @@ async function bulkUpdateStatus(ids: number[], status: string): Promise<void> {
  * Bulk delete contacts
  */
 async function bulkDeleteContacts(ids: number[]): Promise<void> {
-  try {
-    const promises = ids.map((id) =>
-      apiFetch(`/api/admin/contact-submissions/${id}`, { method: 'DELETE' })
-    );
-    await Promise.all(promises);
+  const operations = ids.map(
+    (id) => () => apiFetch(`/api/admin/contact-submissions/${id}`, { method: 'DELETE' })
+  );
 
-    showToast(`Deleted ${ids.length} contacts`, 'success');
+  await executeBulkWithToast(operations, {
+    success: 'Deleted {count} contacts',
+    error: 'Failed to delete contacts',
+    partial: 'Deleted {successCount} of {totalCount} contacts'
+  });
 
-    // Reload data to reflect deletions
-    if (_contactsModuleRef) {
-      const ctx = _contactsModuleRef.getContext();
-      if (ctx) {
-        await _contactsModuleRef.load(ctx);
-      }
+  // Reload data to reflect deletions
+  if (_contactsModuleRef) {
+    const ctx = _contactsModuleRef.getContext();
+    if (ctx) {
+      await _contactsModuleRef.load(ctx);
     }
-  } catch (error) {
-    logger.error(' Bulk delete failed:', error);
-    showToast('Failed to delete some contacts', 'error');
   }
 }
 
@@ -394,10 +356,7 @@ _contactsModuleRef = contactsModule;
  * Unmounts React components if they were mounted
  */
 export function cleanupContactsTab(): void {
-  if (reactTableMounted && unmountContactsTable) {
-    unmountContactsTable();
-    reactTableMounted = false;
-  }
+  reactIntegration.cleanup();
 }
 
 /**
@@ -405,45 +364,27 @@ export function cleanupContactsTab(): void {
  */
 export async function loadContacts(ctx: AdminDashboardContext): Promise<void> {
   // Check if React implementation should be used
-  const useReact = shouldUseReactContactsTable();
-  let reactMountSuccess = false;
-
-  if (useReact) {
+  if (reactIntegration.shouldUseReact()) {
     // Check if React table is already properly mounted
-    if (isReactTableActuallyMounted()) {
+    if (reactIntegration.isActuallyMounted()) {
       return; // Already mounted and working
     }
 
     // Lazy load and mount React ContactsTable
     const mountContainer = document.getElementById('react-contacts-mount');
     if (mountContainer) {
-      const loaded = await loadReactContactsTable();
-      if (loaded && mountContactsTable) {
-        // Unmount first if previously mounted to a different container
-        if (reactTableMounted && unmountContactsTable) {
-          unmountContactsTable();
+      const success = await reactIntegration.mount(mountContainer, {
+        getAuthToken: ctx.getAuthToken,
+        showNotification: ctx.showNotification,
+        onNavigate: (tab: string) => {
+          ctx.switchTab(tab);
         }
-        mountContactsTable(mountContainer, {
-          onNavigate: (tab: string, entityId?: string) => {
-            if (entityId) {
-              ctx.switchTab(tab);
-            } else {
-              ctx.switchTab(tab);
-            }
-          }
-        });
-        reactTableMounted = true;
-        reactMountContainer = mountContainer;
-        reactMountSuccess = true;
-      } else {
-        logger.error(' React module failed to load, falling back to vanilla');
+      });
+      if (success) {
+        return;
       }
+      // Fall through to vanilla implementation if React failed
     }
-
-    if (reactMountSuccess) {
-      return;
-    }
-    // Fall through to vanilla implementation if React failed
   }
 
   // Vanilla implementation
@@ -750,18 +691,10 @@ export async function updateContactStatus(
   status: string,
   _ctx: AdminDashboardContext
 ): Promise<void> {
-  try {
-    const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });
-
-    if (response.ok) {
-      showToast('Status updated', 'success');
-    } else if (response.status !== 401) {
-      showToast('Failed to update status. Please try again.', 'error');
-    }
-  } catch (error) {
-    logger.error(' Failed to update status:', error);
-    showToast('Failed to update status. Please try again.', 'error');
-  }
+  await executeActionWithToast(
+    () => apiPut(`/api/admin/contact-submissions/${id}/status`, { status }),
+    { success: 'Status updated', error: 'Failed to update status. Please try again.' }
+  );
 }
 
 // ============================================================================
@@ -860,7 +793,7 @@ const RENDER_ICONS = {
  */
 export function renderContactsTab(container: HTMLElement): void {
   // Check if React implementation should be used
-  const useReact = shouldUseReactContactsTable();
+  const useReact = reactIntegration.shouldUseReact();
 
   if (useReact) {
     // React implementation - render minimal container

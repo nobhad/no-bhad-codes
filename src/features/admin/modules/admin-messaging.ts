@@ -12,6 +12,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDateTime } from '../../../utils/format-utils';
+import { formatTimeAgo } from '../../../utils/time-utils';
 import type { Message, AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut, apiDelete, parseApiResponse } from '../../../utils/api-client';
 import type { ClientResponse, MessageThreadResponse, MessageResponse } from '../../../types/api';
@@ -19,28 +20,20 @@ import { ICONS } from '../../../constants/icons';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { createLogger } from '../../../utils/logger';
+import { formatFileSize } from '../../../utils/file-validation';
+import { createMessagingAttachmentManager, AttachmentManager } from '../../../utils/attachment-manager';
+import { getCachedElement, clearDOMCache } from '../../../utils/dom-helpers';
+import {
+  setupLongPress,
+  setupSearchInput
+} from '../../../utils/event-handlers';
 
 const logger = createLogger('AdminMessaging');
 
-// Attachment configuration
-const MAX_ATTACHMENTS = 5;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_EXTENSIONS = [
-  'pdf',
-  'doc',
-  'docx',
-  'xls',
-  'xlsx',
-  'png',
-  'jpg',
-  'jpeg',
-  'gif',
-  'txt',
-  'zip'
-];
-
-// Pending attachments for current message
-let pendingAttachments: File[] = [];
+// Attachment manager instance for admin messaging
+const attachmentManager: AttachmentManager = createMessagingAttachmentManager({
+  onError: (msg) => showToast(msg, 'error')
+});
 
 let selectedClientId: number | null = null;
 let selectedThreadId: number | null = null;
@@ -60,15 +53,8 @@ interface MessageReaction {
 // CACHED DOM REFERENCES
 // ============================================================================
 
-const cachedElements: Map<string, HTMLElement | null> = new Map();
-
-/** Get cached element by ID */
-function getElement(id: string): HTMLElement | null {
-  if (!cachedElements.has(id)) {
-    cachedElements.set(id, document.getElementById(id));
-  }
-  return cachedElements.get(id) ?? null;
-}
+// Use the shared getElement function from dom-helpers
+const getElement = getCachedElement;
 
 /** Get messages container (checks two possible IDs) */
 function getMessagesContainer(): HTMLElement | null {
@@ -121,7 +107,7 @@ export function renderMessagesTab(container: HTMLElement): void {
   container.innerHTML = `<div class="messages-layout"><div class="messages-global-search"><div class="search-bar"><span class="search-bar-icon" aria-hidden="true">${RENDER_ICONS.SEARCH}</span><input type="text" id="messages-search-input" class="search-bar-input" placeholder="Search clients and messages..." aria-label="Search clients and messages" /></div></div><div class="messages-columns"><div class="messages-clients-column"><div class="thread-list-header"><h3>Clients</h3></div><div class="thread-list" id="admin-thread-list" role="listbox" aria-label="Client conversations"></div></div><div class="messages-thread-column"><h3 class="sr-only" id="admin-thread-header">Conversation</h3><div class="pinned-messages hidden" id="pinned-messages-section"><div class="pinned-messages-header">${RENDER_ICONS.PIN}<span>Pinned</span></div><div class="pinned-message-preview" id="pinned-message-preview"></div></div><div class="messages-thread" id="admin-messages-thread" aria-live="polite" aria-atomic="false" aria-label="Messages thread"><div class="empty-state">No conversation selected</div></div><div class="message-compose" id="admin-compose-area"><div id="admin-attachment-preview" class="attachment-preview hidden"></div><div class="message-input-wrapper"><label for="admin-message-text" class="sr-only">Message</label><textarea id="admin-message-text" class="form-textarea" placeholder="Type a message or drop files here..." aria-label="Type your message to the client" tabindex="0" disabled></textarea></div><div class="message-compose-actions"><button type="button" class="icon-btn btn-attach" id="admin-attach-btn" title="Attach files">${RENDER_ICONS.ATTACH}</button><button class="btn btn-secondary" id="admin-send-message" tabindex="0" disabled>Send Message</button></div><input type="file" id="admin-attachment-input" class="attachment-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip" /></div></div></div></div>`;
 
   // Clear cached elements so they get re-queried after render
-  cachedElements.clear();
+  clearDOMCache();
 }
 
 export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
@@ -206,25 +192,10 @@ export async function loadClientThreads(ctx: AdminDashboardContext): Promise<voi
 }
 
 /**
- * Format relative time (e.g., "2h ago", "Yesterday", "Dec 15")
+ * Format relative time using shared utility
  */
 function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'Now';
-  if (diffMins < 60) return `${diffMins}m`;
-  if (diffHours < 24) return `${diffHours}h`;
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays}d`;
-
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
+  return formatTimeAgo(date);
 }
 
 /**
@@ -638,7 +609,6 @@ function renderReactionsHtml(messageId: number, reactions: MessageReaction[]): s
  */
 function setupMessageInteractions(container: HTMLElement): void {
   const LONG_PRESS_DURATION = 500;
-  let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Helper to toggle reaction picker for a message
   const toggleReactionPicker = (messageId: string) => {
@@ -659,34 +629,18 @@ function setupMessageInteractions(container: HTMLElement): void {
     }
   };
 
-  // Long press on message content (iMessage style)
+  // Long press on message content (iMessage style) - using shared utility
   container.querySelectorAll('.message-content').forEach((content) => {
     const message = content.closest('.message') as HTMLElement;
     const messageId = message?.dataset.messageId;
     if (!messageId) return;
 
-    const startLongPress = () => {
-      longPressTimer = setTimeout(() => {
-        toggleReactionPicker(messageId);
-      }, LONG_PRESS_DURATION);
-    };
-
-    const cancelLongPress = () => {
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        longPressTimer = null;
-      }
-    };
-
-    // Touch events for mobile
-    content.addEventListener('touchstart', startLongPress, { passive: true });
-    content.addEventListener('touchend', cancelLongPress);
-    content.addEventListener('touchmove', cancelLongPress);
-
-    // Mouse events for desktop
-    content.addEventListener('mousedown', startLongPress);
-    content.addEventListener('mouseup', cancelLongPress);
-    content.addEventListener('mouseleave', cancelLongPress);
+    // Use shared setupLongPress utility for touch/mouse long press handling
+    setupLongPress(
+      content as HTMLElement,
+      () => toggleReactionPicker(messageId),
+      LONG_PRESS_DURATION
+    );
   });
 
   // Add reaction button clicks (toggles picker)
@@ -855,7 +809,8 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
   if (!input || !selectedThreadId) return;
 
   const message = input.value.trim();
-  if (!message && pendingAttachments.length === 0) return;
+  const hasAttachments = attachmentManager.hasFiles();
+  if (!message && !hasAttachments) return;
 
   input.value = '';
   input.disabled = true;
@@ -864,24 +819,24 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
     let response: Response;
 
     // Use FormData if we have attachments, otherwise use JSON
-    if (pendingAttachments.length > 0) {
+    if (hasAttachments) {
       const formData = new FormData();
       formData.append('message', message || '(Attachment)');
 
-      pendingAttachments.forEach((file) => {
+      attachmentManager.getRawFiles().forEach((file) => {
         formData.append('attachments', file);
       });
 
-      response = await fetch(`/api/messages/threads/${selectedThreadId}/messages`, {
+      response = await apiFetch(`/api/messages/threads/${selectedThreadId}/messages`, {
         method: 'POST',
-        credentials: 'include',
         body: formData
       });
     } else {
-      response = await fetch(`/api/messages/threads/${selectedThreadId}/messages`, {
+      response = await apiFetch(`/api/messages/threads/${selectedThreadId}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ message })
       });
     }
@@ -908,7 +863,7 @@ export async function sendMessage(ctx: AdminDashboardContext): Promise<void> {
  * Clear pending attachments
  */
 function clearAdminAttachments(): void {
-  pendingAttachments = [];
+  attachmentManager.clear();
   const preview = getElement('admin-attachment-preview');
   if (preview) {
     preview.innerHTML = '';
@@ -921,115 +876,40 @@ function clearAdminAttachments(): void {
 }
 
 /**
- * Format file size for display
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-/**
- * Get file extension from filename
- */
-function getFileExtension(filename: string): string {
-  return filename.split('.').pop()?.toLowerCase() || '';
-}
-
-/**
- * Validate a file for attachment
- */
-function validateAdminFile(file: File): string | null {
-  const ext = getFileExtension(file.name);
-
-  if (!ALLOWED_EXTENSIONS.includes(ext)) {
-    return `File type .${ext} is not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`;
-  }
-
-  if (file.size > MAX_FILE_SIZE) {
-    return `File ${file.name} is too large. Maximum size is 10MB.`;
-  }
-
-  return null;
-}
-
-/**
- * Handle file selection in admin
+ * Handle file selection in admin using AttachmentManager
  */
 function handleAdminFileSelection(files: FileList | null): void {
   if (!files || files.length === 0) return;
 
-  const remainingSlots = MAX_ATTACHMENTS - pendingAttachments.length;
-  if (remainingSlots <= 0) {
-    showToast(`Maximum ${MAX_ATTACHMENTS} attachments allowed`, 'error');
-    return;
-  }
-
-  const filesToAdd = Array.from(files).slice(0, remainingSlots);
-
-  for (const file of filesToAdd) {
-    const error = validateAdminFile(file);
-    if (error) {
-      showToast(error, 'error');
-      continue;
-    }
-    pendingAttachments.push(file);
-  }
-
-  if (files.length > remainingSlots) {
-    showToast(`Only ${remainingSlots} more files can be added`, 'warning');
-  }
-
+  // Add files through the attachment manager (handles validation and error notifications)
+  attachmentManager.add(files);
   renderAdminAttachmentPreview();
 }
 
 /**
- * Remove a single attachment by index
- */
-function removeAdminAttachment(index: number): void {
-  pendingAttachments.splice(index, 1);
-  renderAdminAttachmentPreview();
-}
-
-/**
- * Render attachment preview chips
+ * Render attachment preview chips using AttachmentManager
  */
 function renderAdminAttachmentPreview(): void {
   const preview = getElement('admin-attachment-preview');
   if (!preview) return;
 
-  if (pendingAttachments.length === 0) {
+  if (!attachmentManager.hasFiles()) {
     preview.innerHTML = '';
     preview.classList.add('hidden');
     return;
   }
 
   preview.classList.remove('hidden');
-  preview.innerHTML = pendingAttachments
-    .map((file, index) => {
-      const size = formatFileSize(file.size);
-      const name = file.name.length > 20 ? `${file.name.substring(0, 17)}...` : file.name;
+  preview.innerHTML = attachmentManager.renderPreview();
 
-      return `
-      <div class="attachment-chip" data-index="${index}">
-        <span class="attachment-chip-icon">${ICONS.FILE}</span>
-        <span class="attachment-chip-name" title="${SanitizationUtils.escapeHtml(file.name)}">${SanitizationUtils.escapeHtml(name)}</span>
-        <span class="attachment-chip-size">(${size})</span>
-        <button type="button" class="attachment-chip-remove" data-index="${index}" aria-label="Remove attachment">
-          ${ICONS.X_SMALL}
-        </button>
-      </div>
-    `;
-    })
-    .join('');
-
-  // Add remove button handlers
+  // Setup remove button event listeners
   preview.querySelectorAll('.attachment-chip-remove').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       const index = parseInt((btn as HTMLElement).dataset.index || '0');
-      removeAdminAttachment(index);
+      attachmentManager.removeByIndex(index);
+      renderAdminAttachmentPreview();
     });
   });
 }
@@ -1116,24 +996,17 @@ export function setupMessagingListeners(ctx: AdminDashboardContext): void {
     });
   }
 
-  // Global search input (searches both clients and messages)
+  // Global search input (searches both clients and messages) - using shared utility
   const searchInput = getElement('messages-search-input') as HTMLInputElement;
   if (searchInput) {
-    let searchDebounce: ReturnType<typeof setTimeout>;
-    searchInput.addEventListener('input', () => {
-      clearTimeout(searchDebounce);
-      searchDebounce = setTimeout(() => {
-        handleGlobalSearch(searchInput.value.trim(), ctx);
-      }, 300);
-    });
-
-    // Clear search on Escape
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        searchInput.value = '';
-        handleGlobalSearch('', ctx);
+    setupSearchInput(
+      searchInput,
+      (query) => handleGlobalSearch(query, ctx),
+      {
+        debounceMs: 300,
+        clearOnEscape: true
       }
-    });
+    );
   }
 
   // Setup attachment listeners

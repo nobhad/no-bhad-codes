@@ -12,8 +12,9 @@
 
 import type { ClientPortalContext } from '../portal-types';
 import { ICONS } from '../../../constants/icons';
-
-const KB_API_BASE = '/api/kb';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
+import { apiFetch } from '../../../utils/api-client';
+import { getCachedElement, clearDOMCache } from '../../../utils/dom-helpers';
 
 // ---------------------------------------------------------------------------
 // Types (match API responses)
@@ -74,28 +75,20 @@ function getCategoryIcon(slug: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// DOM cache
+// DOM cache - Using shared dom-helpers utility
 // ---------------------------------------------------------------------------
 
-const cache = new Map<string, HTMLElement | null>();
-
+/** Get cached element by ID - wrapper for shared utility */
 function el(id: string): HTMLElement | null {
-  if (!cache.has(id)) {
-    cache.set(id, document.getElementById(id));
-  }
-  return cache.get(id) ?? null;
-}
-
-function clearCache(): void {
-  cache.clear();
+  return getCachedElement(id);
 }
 
 // ---------------------------------------------------------------------------
-// Fetch helpers (credentials: include for auth cookies)
+// Fetch helpers - Using shared api-client utility
 // ---------------------------------------------------------------------------
 
 async function kbFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${KB_API_BASE}${path}`, { credentials: 'include' });
+  const res = await apiFetch(`${API_ENDPOINTS.KNOWLEDGE_BASE}${path}`);
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error((err as { error?: string }).error || res.statusText);
@@ -720,7 +713,7 @@ function setupListeners(ctx: ClientPortalContext): void {
 
 export async function loadHelp(ctx: ClientPortalContext): Promise<void> {
   // Clear cache on load to ensure fresh DOM references
-  clearCache();
+  clearDOMCache();
   categoryArticlesCache.clear();
 
   setupListeners(ctx);

@@ -34,6 +34,7 @@ import {
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
 import { createLogger } from '../../../utils/logger';
+import { createReactTableIntegration } from '../shared/reactTableIntegration';
 
 const logger = createLogger('AdminInvoices');
 
@@ -41,52 +42,13 @@ const logger = createLogger('AdminInvoices');
 // REACT INTEGRATION (ISLAND ARCHITECTURE)
 // ============================================
 
-// React bundle only loads when feature flag is enabled
-type ReactMountFn = typeof import('../../../react/features/admin/invoices').mountInvoicesTable;
-type ReactUnmountFn = typeof import('../../../react/features/admin/invoices').unmountInvoicesTable;
-
-let mountInvoicesTable: ReactMountFn | null = null;
-let unmountInvoicesTable: ReactUnmountFn | null = null;
-let reactTableMounted = false;
-let reactMountContainer: HTMLElement | null = null;
-
-/**
- * Check if React table is actually mounted (container exists and has content)
- */
-function isReactTableActuallyMounted(): boolean {
-  if (!reactTableMounted) return false;
-  // Check if the container still exists in the DOM and has content
-  if (
-    !reactMountContainer ||
-    !reactMountContainer.isConnected ||
-    reactMountContainer.children.length === 0
-  ) {
-    reactTableMounted = false;
-    reactMountContainer = null;
-    return false;
-  }
-  return true;
-}
-
-/** Lazy load React mount functions */
-async function loadReactInvoicesTable(): Promise<boolean> {
-  if (mountInvoicesTable && unmountInvoicesTable) return true;
-
-  try {
-    const module = await import('../../../react/features/admin/invoices');
-    mountInvoicesTable = module.mountInvoicesTable;
-    unmountInvoicesTable = module.unmountInvoicesTable;
-    return true;
-  } catch (err) {
-    logger.error('Failed to load React module:', err);
-    return false;
-  }
-}
-
-/** Check if React invoices table should be used - always true */
-function shouldUseReactInvoicesTable(): boolean {
-  return true;
-}
+// React integration using factory pattern - eliminates ~50 lines of boilerplate
+const reactIntegration = createReactTableIntegration({
+  modulePath: () => import('../../../react/features/admin/invoices'),
+  mountFnName: 'mountInvoicesTable',
+  unmountFnName: 'unmountInvoicesTable',
+  displayName: 'Invoices'
+});
 
 // ============================================
 // TYPES
@@ -296,10 +258,7 @@ export const getInvoicesData = invoicesModule.getData;
  * Unmounts React components if they were mounted
  */
 export function cleanupInvoicesTab(): void {
-  if (reactTableMounted && unmountInvoicesTable) {
-    unmountInvoicesTable();
-    reactTableMounted = false;
-  }
+  reactIntegration.cleanup();
 }
 
 /**
@@ -307,41 +266,25 @@ export function cleanupInvoicesTab(): void {
  */
 export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void> {
   // Check if React implementation should be used
-  const useReact = shouldUseReactInvoicesTable();
-  let reactMountSuccess = false;
-
-  if (useReact) {
+  if (reactIntegration.shouldUseReact()) {
     // Check if React table is already properly mounted
-    if (isReactTableActuallyMounted()) {
+    if (reactIntegration.isActuallyMounted()) {
       return; // Already mounted and working
     }
 
     // Lazy load and mount React InvoicesTable
     const mountContainer = document.getElementById('react-invoices-mount');
     if (mountContainer) {
-      const loaded = await loadReactInvoicesTable();
-      if (loaded && mountInvoicesTable) {
-        // Unmount first if previously mounted to a different container
-        if (reactTableMounted && unmountInvoicesTable) {
-          unmountInvoicesTable();
-        }
-        mountInvoicesTable(mountContainer, {
-          getAuthToken: ctx.getAuthToken,
-          onViewInvoice: (invoiceId: number) => showViewInvoiceModal(invoiceId, ctx),
-          showNotification: ctx.showNotification
-        });
-        reactTableMounted = true;
-        reactMountContainer = mountContainer;
-        reactMountSuccess = true;
-      } else {
-        logger.error('React module failed to load, falling back to vanilla');
+      const success = await reactIntegration.mount(mountContainer, {
+        getAuthToken: ctx.getAuthToken,
+        onViewInvoice: (invoiceId: number) => showViewInvoiceModal(invoiceId, ctx),
+        showNotification: ctx.showNotification
+      });
+      if (success) {
+        return;
       }
+      // Fall through to vanilla implementation if React failed
     }
-
-    if (reactMountSuccess) {
-      return;
-    }
-    // Fall through to vanilla implementation if React failed
   }
 
   // Vanilla implementation
@@ -358,7 +301,7 @@ export async function loadInvoicesData(ctx: AdminDashboardContext): Promise<void
  */
 export function renderInvoicesTab(container: HTMLElement): void {
   // Check if React implementation should be used
-  const useReact = shouldUseReactInvoicesTable();
+  const useReact = reactIntegration.shouldUseReact();
 
   if (useReact) {
     // React implementation - render minimal container (no extra classes - React component has its own structure)

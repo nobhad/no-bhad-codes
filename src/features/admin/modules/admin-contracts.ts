@@ -223,14 +223,14 @@ function getStatusBadge(status: string): string {
   return getStatusBadgeHTML(label, variant);
 }
 
+/** Format date with '-' fallback for display in tables */
 function formatDateSafe(value?: string | null): string {
-  if (!value) return '-';
-  return formatDate(value);
+  return formatDate(value) || '-';
 }
 
+/** Format datetime with '-' fallback for display in modals */
 function formatDateTimeSafe(value?: string | null): string {
-  if (!value) return '-';
-  return formatDateTime(value);
+  return formatDateTime(value) || '-';
 }
 
 // ============================================
@@ -347,6 +347,8 @@ export async function loadContracts(ctx: AdminDashboardContext): Promise<void> {
           unmountContractsTable();
         }
         mountContractsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

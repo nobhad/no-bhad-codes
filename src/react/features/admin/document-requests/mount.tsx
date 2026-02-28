@@ -1,56 +1,21 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Document Requests Table Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { DocumentRequestsTable } from './DocumentRequestsTable';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface DocumentRequestsMountOptions {
-  onNavigate?: (tab: string, entityId?: string) => void;
+export interface DocumentRequestsMountOptions extends BaseMountOptions {
+  /** Callback when document request is clicked for detail view */
+  onViewDocumentRequest?: (documentRequestId: number) => void;
 }
 
-export function mountDocumentRequestsTable(
-  element: HTMLElement,
-  options: DocumentRequestsMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  // Add brutalist styling class
-  element.classList.add('react-portal-mount');
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <DocumentRequestsTable onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountDocumentRequestsTable(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.classList.remove('react-portal-mount');
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountDocumentRequestsTable,
+  unmount: unmountDocumentRequestsTable,
+  shouldUseReact: shouldUseReactDocumentRequestsTable
+} = createMountWrapper<DocumentRequestsMountOptions>({
+  Component: DocumentRequestsTable,
+  displayName: 'DocumentRequestsTable'
+});

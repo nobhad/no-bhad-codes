@@ -24,6 +24,10 @@ import {
 } from './portal-onboarding-ui';
 import { getReactComponent } from '../../../react/registry';
 import { showToast } from '../../../utils/toast-notifications';
+import { apiFetch } from '../../../utils/api-client';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('OnboardingWizard');
 
 // Track React unmount function
 let reactOnboardingUnmountFn: (() => void) | null = null;
@@ -185,7 +189,7 @@ export class OnboardingWizardModule {
    */
   private async loadProgress(): Promise<void> {
     try {
-      const res = await fetch(`${API_BASE}/onboarding`, { credentials: 'include' });
+      const res = await apiFetch(`${API_BASE}/onboarding`);
       if (!res.ok) return;
 
       const data = (await res.json()) as {
@@ -444,9 +448,8 @@ export class OnboardingWizardModule {
    */
   private async saveProgressToServer(): Promise<void> {
     try {
-      await fetch(`${API_BASE}/onboarding/save`, {
+      await apiFetch(`${API_BASE}/onboarding/save`, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           step: this.state.currentStep,
@@ -454,7 +457,7 @@ export class OnboardingWizardModule {
         })
       });
     } catch (err) {
-      console.error('[OnboardingWizard] Failed to save progress:', err);
+      logger.error('Failed to save progress:', err);
     }
   }
 
@@ -500,7 +503,7 @@ export class OnboardingWizardModule {
         }
       }
     } catch (error) {
-      console.error('[OnboardingWizard] Failed to load draft:', error);
+      logger.error('Failed to load draft:', error);
     }
   }
 
@@ -574,9 +577,8 @@ export class OnboardingWizardModule {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/onboarding/complete`, {
+      const res = await apiFetch(`${API_BASE}/onboarding/complete`, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           finalData: this.state.stepData

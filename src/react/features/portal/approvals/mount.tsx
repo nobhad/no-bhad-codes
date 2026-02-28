@@ -1,71 +1,18 @@
 /**
  * Portal Approvals Mount
- * Island architecture mount function for PortalApprovals
+ * Island architecture mount using createMountWrapper factory
  */
 
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { PortalApprovals, type PortalApprovalsProps } from './PortalApprovals';
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
+import { PortalApprovals } from './PortalApprovals';
 
-// Store root for cleanup
-const roots = new Map<HTMLElement, Root>();
+export interface PortalApprovalsMountOptions extends BaseMountOptions {}
 
-export interface PortalApprovalsMountOptions {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Callback to navigate to entity detail */
-  onNavigate?: (entityType: string, entityId: string) => void;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
-
-/**
- * Mount the PortalApprovals component into a container element
- */
-export function mountPortalApprovals(
-  container: HTMLElement,
-  options: PortalApprovalsMountOptions = {}
-): () => void {
-  // Clean up existing root if present
-  const existingRoot = roots.get(container);
-  if (existingRoot) {
-    existingRoot.unmount();
-    roots.delete(container);
-  }
-
-  const root = createRoot(container);
-  roots.set(container, root);
-
-  root.render(
-    <React.StrictMode>
-      <PortalApprovals
-        getAuthToken={options.getAuthToken}
-        onNavigate={options.onNavigate}
-        showNotification={options.showNotification}
-      />
-    </React.StrictMode>
-  );
-
-  // Return cleanup function
-  return () => {
-    unmountPortalApprovals(container);
-  };
-}
-
-/**
- * Unmount the PortalApprovals component from a container element
- */
-export function unmountPortalApprovals(container: HTMLElement): void {
-  const root = roots.get(container);
-  if (root) {
-    root.unmount();
-    roots.delete(container);
-  }
-}
-
-/**
- * Check if React portal approvals should be used
- */
-export function shouldUseReactPortalApprovals(): boolean {
-  return true;
-}
+export const {
+  mount: mountPortalApprovals,
+  unmount: unmountPortalApprovals,
+  shouldUseReact: shouldUseReactPortalApprovals
+} = createMountWrapper<PortalApprovalsMountOptions>({
+  Component: PortalApprovals,
+  displayName: 'PortalApprovals'
+});

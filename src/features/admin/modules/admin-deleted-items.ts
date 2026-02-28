@@ -377,6 +377,8 @@ export async function loadDeletedItems(ctx: AdminDashboardContext): Promise<void
           unmountDeletedItemsTable();
         }
         mountDeletedItemsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

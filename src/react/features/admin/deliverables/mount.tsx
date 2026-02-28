@@ -1,57 +1,23 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Deliverables Table Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { DeliverablesTable } from './DeliverablesTable';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface DeliverablesMountOptions {
+export interface DeliverablesMountOptions extends BaseMountOptions {
+  /** Filter by project ID */
   projectId?: string;
-  onNavigate?: (tab: string, entityId?: string) => void;
+  /** Callback when deliverable is clicked for detail view */
+  onViewDeliverable?: (deliverableId: number) => void;
 }
 
-export function mountDeliverablesTable(
-  element: HTMLElement,
-  options: DeliverablesMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  // Add brutalist styling class
-  element.classList.add('react-portal-mount');
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <DeliverablesTable projectId={options.projectId} onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountDeliverablesTable(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.classList.remove('react-portal-mount');
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountDeliverablesTable,
+  unmount: unmountDeliverablesTable,
+  shouldUseReact: shouldUseReactDeliverablesTable
+} = createMountWrapper<DeliverablesMountOptions>({
+  Component: DeliverablesTable,
+  displayName: 'DeliverablesTable'
+});

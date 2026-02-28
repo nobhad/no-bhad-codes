@@ -1,60 +1,27 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Tasks Manager Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { TasksManager } from './TasksManager';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface TasksMountOptions {
+export interface TasksMountOptions extends BaseMountOptions {
+  /** Filter by client ID */
   clientId?: string;
+  /** Filter by project ID */
   projectId?: string;
+  /** Filter by assignee ID */
   assigneeId?: string;
-  onNavigate?: (tab: string, entityId?: string) => void;
+  /** Callback when task is clicked for detail view */
+  onViewTask?: (taskId: number) => void;
 }
 
-export function mountTasksManager(
-  element: HTMLElement,
-  options: TasksMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <TasksManager
-        clientId={options.clientId}
-        projectId={options.projectId}
-        assigneeId={options.assigneeId}
-        onNavigate={options.onNavigate}
-      />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountTasksManager(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountTasksManager,
+  unmount: unmountTasksManager,
+  shouldUseReact: shouldUseReactTasksManager
+} = createMountWrapper<TasksMountOptions>({
+  Component: TasksManager,
+  displayName: 'TasksManager'
+});

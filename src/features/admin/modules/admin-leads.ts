@@ -24,6 +24,11 @@ import type { Lead, AdminDashboardContext } from '../admin-types';
 import { confirmDialog, multiPromptDialog } from '../../../utils/confirm-dialog';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
 import { showToast } from '../../../utils/toast-notifications';
+import {
+  executeActionWithToast,
+  executeDeleteWithToast,
+  executeCreateWithToast
+} from '../../../utils/api-wrappers';
 import { getCopyEmailButtonHtml } from '../../../utils/copy-email';
 import {
   createKanbanBoard,
@@ -48,6 +53,7 @@ import {
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
 import { createLogger } from '../../../utils/logger';
+import { createReactTableIntegration } from '../shared/reactTableIntegration';
 
 const logger = createLogger('AdminLeads');
 
@@ -74,52 +80,13 @@ let pipelineLinkHandlersAttached = false;
 // REACT INTEGRATION (island architecture)
 // ============================================================================
 
-// React mount functions - dynamically imported for code splitting
-type ReactMountFn = typeof import('../../../react/features/admin/leads').mountLeadsTable;
-type ReactUnmountFn = typeof import('../../../react/features/admin/leads').unmountLeadsTable;
-
-let mountLeadsTable: ReactMountFn | null = null;
-let unmountLeadsTable: ReactUnmountFn | null = null;
-let reactTableMounted = false;
-let reactMountContainer: HTMLElement | null = null;
-
-/**
- * Check if React table is actually mounted (container exists and has content)
- */
-function isReactTableActuallyMounted(): boolean {
-  if (!reactTableMounted) return false;
-  // Check if the container still exists in the DOM and has content
-  if (
-    !reactMountContainer ||
-    !reactMountContainer.isConnected ||
-    reactMountContainer.children.length === 0
-  ) {
-    reactTableMounted = false;
-    reactMountContainer = null;
-    return false;
-  }
-  return true;
-}
-
-/** Check if React leads table should be used - always true */
-function shouldUseReactLeadsTable(): boolean {
-  return true;
-}
-
-/** Lazy load React mount functions */
-async function loadReactLeadsTable(): Promise<boolean> {
-  if (mountLeadsTable && unmountLeadsTable) return true;
-
-  try {
-    const module = await import('../../../react/features/admin/leads');
-    mountLeadsTable = module.mountLeadsTable;
-    unmountLeadsTable = module.unmountLeadsTable;
-    return true;
-  } catch (err) {
-    logger.error(' Failed to load React module:', err);
-    return false;
-  }
-}
+// React integration using factory pattern - eliminates ~50 lines of boilerplate
+const reactIntegration = createReactTableIntegration({
+  modulePath: () => import('../../../react/features/admin/leads'),
+  mountFnName: 'mountLeadsTable',
+  unmountFnName: 'unmountLeadsTable',
+  displayName: 'Leads'
+});
 
 // Pipeline stage configuration
 const PIPELINE_STAGES = [
@@ -757,10 +724,7 @@ async function handleLeadStageChange(
  * Unmounts React components if they were mounted
  */
 export function cleanupLeadsTab(): void {
-  if (reactTableMounted && unmountLeadsTable) {
-    unmountLeadsTable();
-    reactTableMounted = false;
-  }
+  reactIntegration.cleanup();
 }
 
 export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
@@ -768,13 +732,11 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
   setLeadsContext(ctx);
 
   // Check if React implementation should be used
-  const useReact = shouldUseReactLeadsTable();
-  logger.log(' useReact:', useReact);
-  let reactMountSuccess = false;
+  if (reactIntegration.shouldUseReact()) {
+    logger.log(' useReact: true');
 
-  if (useReact) {
     // Check if React table is already properly mounted
-    if (isReactTableActuallyMounted()) {
+    if (reactIntegration.isActuallyMounted()) {
       logger.log(' React table already mounted, returning');
       return; // Already mounted and working
     }
@@ -783,34 +745,20 @@ export async function loadLeads(ctx: AdminDashboardContext): Promise<void> {
     const mountContainer = document.getElementById('react-leads-mount');
     logger.log(' Mount container found:', !!mountContainer);
     if (mountContainer) {
-      const loaded = await loadReactLeadsTable();
-      logger.log(' React module loaded:', loaded, 'mountLeadsTable:', !!mountLeadsTable);
-      if (loaded && mountLeadsTable) {
-        // Unmount first if previously mounted to a different container
-        if (reactTableMounted && unmountLeadsTable) {
-          unmountLeadsTable();
-        }
-        logger.log(' Mounting React LeadsTable...');
-        mountLeadsTable(mountContainer, {
-          getAuthToken: ctx.getAuthToken,
-          onViewLead: (leadId: number) => showLeadDetails(leadId),
-          showNotification: ctx.showNotification
-        });
-        reactTableMounted = true;
-        reactMountContainer = mountContainer;
-        reactMountSuccess = true;
+      logger.log(' Mounting React LeadsTable...');
+      const success = await reactIntegration.mount(mountContainer, {
+        getAuthToken: ctx.getAuthToken,
+        onViewLead: (leadId: number) => showLeadDetails(leadId),
+        showNotification: ctx.showNotification
+      });
+      if (success) {
         logger.log(' React LeadsTable mounted successfully');
-      } else {
-        logger.error(' React module failed to load, falling back to vanilla');
+        return;
       }
+      // Fall through to vanilla implementation if React failed
     } else {
       logger.log(' No mount container found, falling back to vanilla');
     }
-
-    if (reactMountSuccess) {
-      return;
-    }
-    // Fall through to vanilla implementation if React failed
   }
 
   // Vanilla implementation
@@ -1601,42 +1549,27 @@ async function showAddScoringRuleDialog(): Promise<void> {
   });
 
   if (result) {
-    try {
-      const response = await apiPost('/api/admin/leads/scoring-rules', {
-        name: result.name,
-        field_name: result.field_name,
-        operator: result.operator,
-        threshold_value: result.threshold_value,
-        points: parseInt(result.points) || 0
-      });
-      if (response.ok) {
-        showToast('Scoring rule added', 'success');
-        await loadScoringRules();
-      } else {
-        showToast('Failed to add rule', 'error');
-      }
-    } catch (error) {
-      logger.error(' Failed to add scoring rule:', error);
-      showToast('Error adding rule', 'error');
-    }
+    await executeCreateWithToast(
+      'scoring rule',
+      () =>
+        apiPost('/api/admin/leads/scoring-rules', {
+          name: result.name,
+          field_name: result.field_name,
+          operator: result.operator,
+          threshold_value: result.threshold_value,
+          points: parseInt(result.points) || 0
+        }),
+      () => loadScoringRules()
+    );
   }
 }
 
 async function toggleScoringRule(ruleId: number): Promise<void> {
-  try {
-    const response = await apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, {
-      toggleActive: true
-    });
-    if (response.ok) {
-      showToast('Rule updated', 'success');
-      await loadScoringRules();
-    } else {
-      showToast('Failed to update rule', 'error');
-    }
-  } catch (error) {
-    logger.error(' Failed to toggle scoring rule:', error);
-    showToast('Error updating rule', 'error');
-  }
+  await executeActionWithToast(
+    () => apiPut(`/api/admin/leads/scoring-rules/${ruleId}`, { toggleActive: true }),
+    { success: 'Rule updated', error: 'Failed to update rule' }
+  );
+  await loadScoringRules();
 }
 
 async function deleteScoringRule(ruleId: number): Promise<void> {
@@ -1647,18 +1580,11 @@ async function deleteScoringRule(ruleId: number): Promise<void> {
     danger: true
   });
   if (confirmed) {
-    try {
-      const response = await apiDelete(`/api/admin/leads/scoring-rules/${ruleId}`);
-      if (response.ok) {
-        showToast('Rule deleted', 'success');
-        await loadScoringRules();
-      } else {
-        showToast('Failed to delete rule', 'error');
-      }
-    } catch (error) {
-      logger.error(' Failed to delete scoring rule:', error);
-      showToast('Error deleting rule', 'error');
-    }
+    await executeDeleteWithToast(
+      'rule',
+      () => apiDelete(`/api/admin/leads/scoring-rules/${ruleId}`),
+      () => loadScoringRules()
+    );
   }
 }
 
@@ -1744,39 +1670,26 @@ async function showAddTaskDialog(leadId: number): Promise<void> {
   });
 
   if (result) {
-    try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/tasks`, {
-        title: result.title,
-        taskType: result.task_type,
-        dueDate: result.due_date || null,
-        priority: result.priority || 'medium'
-      });
-      if (response.ok) {
-        showToast('Task added', 'success');
-        showLeadDetails(leadId);
-      } else {
-        showToast('Failed to add task', 'error');
-      }
-    } catch (error) {
-      logger.error(' Failed to add task:', error);
-      showToast('Error adding task', 'error');
-    }
+    await executeCreateWithToast(
+      'task',
+      () =>
+        apiPost(`/api/admin/leads/${leadId}/tasks`, {
+          title: result.title,
+          taskType: result.task_type,
+          dueDate: result.due_date || null,
+          priority: result.priority || 'medium'
+        }),
+      () => showLeadDetails(leadId)
+    );
   }
 }
 
 async function completeTask(taskId: number, leadId: number): Promise<void> {
-  try {
-    const response = await apiPost(`/api/admin/leads/tasks/${taskId}/complete`);
-    if (response.ok) {
-      showToast('Task completed', 'success');
-      showLeadDetails(leadId);
-    } else {
-      showToast('Failed to complete task', 'error');
-    }
-  } catch (error) {
-    logger.error(' Failed to complete task:', error);
-    showToast('Error completing task', 'error');
-  }
+  await executeActionWithToast(
+    () => apiPost(`/api/admin/leads/tasks/${taskId}/complete`),
+    { success: 'Task completed', error: 'Failed to complete task' }
+  );
+  showLeadDetails(leadId);
 }
 
 // ============================================================================
@@ -1832,37 +1745,24 @@ async function showAddNoteDialog(leadId: number): Promise<void> {
     cancelText: 'Cancel'
   });
   if (result && result.content) {
-    try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/notes`, {
-        content: result.content,
-        author: 'Admin'
-      });
-      if (response.ok) {
-        showToast('Note added', 'success');
-        showLeadDetails(leadId);
-      } else {
-        showToast('Failed to add note', 'error');
-      }
-    } catch (error) {
-      logger.error(' Failed to add note:', error);
-      showToast('Error adding note', 'error');
-    }
+    await executeCreateWithToast(
+      'note',
+      () =>
+        apiPost(`/api/admin/leads/${leadId}/notes`, {
+          content: result.content,
+          author: 'Admin'
+        }),
+      () => showLeadDetails(leadId)
+    );
   }
 }
 
 async function toggleNotePin(noteId: number, leadId: number): Promise<void> {
-  try {
-    const response = await apiPost(`/api/admin/leads/notes/${noteId}/toggle-pin`);
-    if (response.ok) {
-      showToast('Note updated', 'success');
-      showLeadDetails(leadId);
-    } else {
-      showToast('Failed to update note', 'error');
-    }
-  } catch (error) {
-    logger.error(' Failed to toggle pin:', error);
-    showToast('Error updating note', 'error');
-  }
+  await executeActionWithToast(
+    () => apiPost(`/api/admin/leads/notes/${noteId}/toggle-pin`),
+    { success: 'Note updated', error: 'Failed to update note' }
+  );
+  showLeadDetails(leadId);
 }
 
 // ============================================================================
@@ -1878,7 +1778,7 @@ const RENDER_ICONS = {
 
 export function renderLeadsTab(container: HTMLElement): void {
   // Check if React implementation should be used
-  const useReact = shouldUseReactLeadsTable();
+  const useReact = reactIntegration.shouldUseReact();
   logger.log(' renderLeadsTab called, useReact:', useReact, 'container:', !!container);
 
   leadsModule.resetCache();

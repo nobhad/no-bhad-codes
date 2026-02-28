@@ -306,6 +306,8 @@ export async function loadGlobalTasks(ctx: AdminDashboardContext): Promise<void>
           unmountGlobalTasksTable();
         }
         mountGlobalTasksTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

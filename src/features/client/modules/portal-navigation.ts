@@ -11,6 +11,9 @@
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../../components/breadcrumbs';
 import { authStore } from '../../../auth/auth-store';
 import { renderView } from './portal-views';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('PortalNavigation');
 
 /** Tab titles mapping */
 const TAB_TITLES: Record<string, string> = {
@@ -674,7 +677,7 @@ export function toggleSidebar(): void {
   const sidebar = getSidebar();
 
   if (!sidebar) {
-    console.error('Sidebar element not found');
+    logger.error('Sidebar element not found');
     return;
   }
 

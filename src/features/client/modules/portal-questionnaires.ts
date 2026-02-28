@@ -14,6 +14,8 @@ import { ICONS } from '../../../constants/icons';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { getReactComponent } from '../../../react/registry';
 import { showToast } from '../../../utils/toast-notifications';
+import { apiFetch } from '../../../utils/api-client';
+import { formatDate } from '../../../utils/format-utils';
 
 // Track React unmount function
 let reactQuestionnairesUnmountFn: (() => void) | null = null;
@@ -116,10 +118,9 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
-function formatDate(dateStr: string | undefined): string {
-  if (!dateStr) return '—';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+/** Format date with em-dash fallback for display */
+function formatDateDisplay(dateStr: string | undefined): string {
+  return formatDate(dateStr) || '—';
 }
 
 function getStatusLabel(status: ResponseStatus): string {
@@ -182,7 +183,7 @@ async function loadMyResponses(): Promise<{
   responses: QuestionnaireResponse[];
   stats: QuestionnaireStats;
 }> {
-  const res = await fetch(`${API_BASE}/my-responses`, { credentials: 'include' });
+  const res = await apiFetch(`${API_BASE}/my-responses`);
   if (!res.ok) throw new Error('Failed to load questionnaires');
   return await res.json();
 }
@@ -190,15 +191,14 @@ async function loadMyResponses(): Promise<{
 async function loadResponseDetails(
   responseId: number
 ): Promise<{ response: QuestionnaireResponse; questionnaire: Questionnaire }> {
-  const res = await fetch(`${API_BASE}/responses/${responseId}`, { credentials: 'include' });
+  const res = await apiFetch(`${API_BASE}/responses/${responseId}`);
   if (!res.ok) throw new Error('Failed to load questionnaire');
   return await res.json();
 }
 
 async function saveProgress(responseId: number, answers: Record<string, unknown>): Promise<void> {
-  const res = await fetch(`${API_BASE}/responses/${responseId}/save`, {
+  const res = await apiFetch(`${API_BASE}/responses/${responseId}/save`, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ answers })
   });
@@ -210,9 +210,8 @@ async function saveProgress(responseId: number, answers: Record<string, unknown>
 }
 
 async function submitResponse(responseId: number, answers: Record<string, unknown>): Promise<void> {
-  const res = await fetch(`${API_BASE}/responses/${responseId}/submit`, {
+  const res = await apiFetch(`${API_BASE}/responses/${responseId}/submit`, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ answers })
   });
@@ -308,8 +307,8 @@ function renderQuestionnaireCard(response: QuestionnaireResponse): string {
       </div>
       ${response.project_name ? `<p class="cp-questionnaire-project">For: ${escapeHtml(response.project_name)}</p>` : ''}
       <div class="cp-questionnaire-meta">
-        ${response.due_date ? `<span class="cp-questionnaire-due ${dueClass}">Due: ${formatDate(response.due_date)}</span>` : ''}
-        ${response.completed_at ? `<span class="cp-questionnaire-completed">Completed: ${formatDate(response.completed_at)}</span>` : ''}
+        ${response.due_date ? `<span class="cp-questionnaire-due ${dueClass}">Due: ${formatDateDisplay(response.due_date)}</span>` : ''}
+        ${response.completed_at ? `<span class="cp-questionnaire-completed">Completed: ${formatDateDisplay(response.completed_at)}</span>` : ''}
       </div>
       <div class="cp-questionnaire-actions">
         ${

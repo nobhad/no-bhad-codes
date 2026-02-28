@@ -209,7 +209,7 @@ export function renderEmailTemplatesTab(container: HTMLElement): void {
 // MAIN ENTRY POINT
 // ============================================
 
-export async function loadEmailTemplatesData(_ctx: AdminDashboardContext): Promise<void> {
+export async function loadEmailTemplatesData(ctx: AdminDashboardContext): Promise<void> {
   // Check if React implementation should be used
   const useReact = shouldUseReactEmailTemplatesTable();
 
@@ -228,7 +228,10 @@ export async function loadEmailTemplatesData(_ctx: AdminDashboardContext): Promi
         if (reactTableMounted && unmountEmailTemplatesManager) {
           unmountEmailTemplatesManager();
         }
-        mountEmailTemplatesManager(mountContainer, {});
+        mountEmailTemplatesManager(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification
+        });
         reactTableMounted = true;
         reactMountContainer = mountContainer;
         return;

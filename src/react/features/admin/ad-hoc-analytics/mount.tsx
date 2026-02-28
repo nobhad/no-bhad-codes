@@ -1,52 +1,18 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Ad Hoc Analytics Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { AdHocAnalytics } from './AdHocAnalytics';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
+export interface AdHocAnalyticsMountOptions extends BaseMountOptions {}
 
-export interface AdHocAnalyticsMountOptions {
-  onNavigate?: (tab: string, entityId?: string) => void;
-}
-
-export function mountAdHocAnalytics(
-  element: HTMLElement,
-  options: AdHocAnalyticsMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <AdHocAnalytics onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountAdHocAnalytics(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountAdHocAnalytics,
+  unmount: unmountAdHocAnalytics,
+  shouldUseReact: shouldUseReactAdHocAnalytics
+} = createMountWrapper<AdHocAnalyticsMountOptions>({
+  Component: AdHocAnalytics,
+  displayName: 'AdHocAnalytics'
+});

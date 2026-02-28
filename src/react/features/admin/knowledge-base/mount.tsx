@@ -1,52 +1,21 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Knowledge Base Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { KnowledgeBase } from './KnowledgeBase';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface KnowledgeBaseMountOptions {
-  onNavigate?: (tab: string, entityId?: string) => void;
+export interface KnowledgeBaseMountOptions extends BaseMountOptions {
+  /** Callback when article is clicked for detail view */
+  onViewArticle?: (articleId: number) => void;
 }
 
-export function mountKnowledgeBase(
-  element: HTMLElement,
-  options: KnowledgeBaseMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <KnowledgeBase onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountKnowledgeBase(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountKnowledgeBase,
+  unmount: unmountKnowledgeBase,
+  shouldUseReact: shouldUseReactKnowledgeBase
+} = createMountWrapper<KnowledgeBaseMountOptions>({
+  Component: KnowledgeBase,
+  displayName: 'KnowledgeBase'
+});

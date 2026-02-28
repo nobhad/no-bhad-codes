@@ -48,6 +48,7 @@ import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { alertWarning, multiPromptDialog, confirmDanger } from '../../../utils/confirm-dialog';
 import { manageFocusTrap } from '../../../utils/focus-trap';
 import { openModalOverlay, closeModalOverlay } from '../../../utils/modal-utils';
+import { URL_REVOKE_DELAY } from '../../../utils/time-utils';
 import {
   createRowCheckbox,
   createBulkActionToolbar,
@@ -1038,6 +1039,11 @@ export function showProjectDetails(projectId: number, ctx: AdminDashboardContext
 
   currentProjectId = projectId;
   storedContext = ctx;
+
+  // Set context for time tracking module (for auth token access)
+  import('./admin-time-tracking').then(({ setTimeTrackingContext }) => {
+    setTimeTrackingContext(ctx);
+  });
 
   // Switch to project-detail tab
   ctx.switchTab('project-detail');
@@ -2238,7 +2244,7 @@ async function openFilePreview(
       const blobUrl = URL.createObjectURL(blob);
       window.open(blobUrl, '_blank');
       // Revoke blob URL after delay to free memory (browser will have loaded PDF by then)
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), URL_REVOKE_DELAY);
     } else {
       // For other files, try to download via authenticated fetch
       const response = await apiFetch(`${fileUrl}?download=true`);

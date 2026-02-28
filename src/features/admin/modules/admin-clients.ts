@@ -29,6 +29,10 @@ import { getHealthBadgeHtml } from './admin-client-details';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { getEmailWithCopyHtml } from '../../../utils/copy-email';
 import { showToast } from '../../../utils/toast-notifications';
+import {
+  executeActionWithToast,
+  executeBulkWithToast
+} from '../../../utils/api-wrappers';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { ICONS } from '../../../constants/icons';
 import { renderActionsCell, createAction, conditionalAction } from '../../../factories';
@@ -41,6 +45,7 @@ import {
   type TableModuleHelpers
 } from '../../../utils/table-module-factory';
 import { createLogger } from '../../../utils/logger';
+import { createReactTableIntegration } from '../shared/reactTableIntegration';
 
 const logger = createLogger('AdminClients');
 
@@ -48,52 +53,13 @@ const logger = createLogger('AdminClients');
 // REACT INTEGRATION (ISLAND ARCHITECTURE)
 // ============================================
 
-// React bundle only loads when feature flag is enabled
-type ReactMountFn = typeof import('../../../react/features/admin/clients').mountClientsTable;
-type ReactUnmountFn = typeof import('../../../react/features/admin/clients').unmountClientsTable;
-
-let mountClientsTable: ReactMountFn | null = null;
-let unmountClientsTable: ReactUnmountFn | null = null;
-let reactTableMounted = false;
-let reactMountContainer: HTMLElement | null = null;
-
-/**
- * Check if React table is actually mounted (container exists and has content)
- */
-function isReactTableActuallyMounted(): boolean {
-  if (!reactTableMounted) return false;
-  // Check if the container still exists in the DOM and has content
-  if (
-    !reactMountContainer ||
-    !reactMountContainer.isConnected ||
-    reactMountContainer.children.length === 0
-  ) {
-    reactTableMounted = false;
-    reactMountContainer = null;
-    return false;
-  }
-  return true;
-}
-
-/** Lazy load React mount functions */
-async function loadReactClientsTable(): Promise<boolean> {
-  if (mountClientsTable && unmountClientsTable) return true;
-
-  try {
-    const module = await import('../../../react/features/admin/clients');
-    mountClientsTable = module.mountClientsTable;
-    unmountClientsTable = module.unmountClientsTable;
-    return true;
-  } catch (err) {
-    logger.error(' Failed to load React module:', err);
-    return false;
-  }
-}
-
-/** Check if React clients table should be used - always true */
-function shouldUseReactClientsTable(): boolean {
-  return true;
-}
+// React integration using factory pattern - eliminates ~50 lines of boilerplate
+const reactIntegration = createReactTableIntegration({
+  modulePath: () => import('../../../react/features/admin/clients'),
+  mountFnName: 'mountClientsTable',
+  unmountFnName: 'unmountClientsTable',
+  displayName: 'Clients'
+});
 
 // ============================================
 // DOM CACHE - Cached element references for detail view
@@ -338,10 +304,7 @@ export const getClientsData = clientsModule.getData;
  * Unmounts React components if they were mounted
  */
 export function cleanupClientsTab(): void {
-  if (reactTableMounted && unmountClientsTable) {
-    unmountClientsTable();
-    reactTableMounted = false;
-  }
+  reactIntegration.cleanup();
 }
 
 /**
@@ -349,41 +312,25 @@ export function cleanupClientsTab(): void {
  */
 export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
   // Check if React implementation should be used
-  const useReact = shouldUseReactClientsTable();
-  let reactMountSuccess = false;
-
-  if (useReact) {
+  if (reactIntegration.shouldUseReact()) {
     // Check if React table is already properly mounted
-    if (isReactTableActuallyMounted()) {
+    if (reactIntegration.isActuallyMounted()) {
       return; // Already mounted and working
     }
 
     // Lazy load and mount React ClientsTable
     const mountContainer = document.getElementById('react-clients-mount');
     if (mountContainer) {
-      const loaded = await loadReactClientsTable();
-      if (loaded && mountClientsTable) {
-        // Unmount first if previously mounted to a different container
-        if (reactTableMounted && unmountClientsTable) {
-          unmountClientsTable();
-        }
-        mountClientsTable(mountContainer, {
-          getAuthToken: ctx.getAuthToken,
-          onViewClient: (clientId: number) => showClientDetails(clientId),
-          showNotification: ctx.showNotification
-        });
-        reactTableMounted = true;
-        reactMountContainer = mountContainer;
-        reactMountSuccess = true;
-      } else {
-        logger.error(' React module failed to load, falling back to vanilla');
+      const success = await reactIntegration.mount(mountContainer, {
+        getAuthToken: ctx.getAuthToken,
+        onViewClient: (clientId: number) => showClientDetails(clientId),
+        showNotification: ctx.showNotification
+      });
+      if (success) {
+        return;
       }
+      // Fall through to vanilla implementation if React failed
     }
-
-    if (reactMountSuccess) {
-      return;
-    }
-    // Fall through to vanilla implementation if React failed
   }
 
   // Vanilla implementation
@@ -400,7 +347,7 @@ export async function loadClients(ctx: AdminDashboardContext): Promise<void> {
  */
 export function renderClientsTab(container: HTMLElement): void {
   // Check if React implementation should be used
-  const useReact = shouldUseReactClientsTable();
+  const useReact = reactIntegration.shouldUseReact();
 
   if (useReact) {
     // React implementation - render minimal container (no extra classes - React component has its own structure)
@@ -1330,19 +1277,11 @@ async function resetClientPassword(clientId: number): Promise<void> {
   });
   if (!confirmed) return;
 
-  try {
-    // Backend uses send-invite which sends a link to set/change password (same outcome for client)
-    const response = await apiPost(`/api/clients/${clientId}/send-invite`);
-
-    if (response.ok) {
-      showToast('Password reset link sent to client', 'success');
-    } else {
-      showToast('Failed to send password reset', 'error');
-    }
-  } catch (error) {
-    logger.error(' Error resetting password:', error);
-    showToast('Error sending password reset', 'error');
-  }
+  // Backend uses send-invite which sends a link to set/change password (same outcome for client)
+  await executeActionWithToast(
+    () => apiPost(`/api/clients/${clientId}/send-invite`),
+    { success: 'Password reset link sent to client', error: 'Failed to send password reset' }
+  );
 }
 
 async function resendClientInvite(clientId: number): Promise<void> {
@@ -1354,18 +1293,10 @@ async function resendClientInvite(clientId: number): Promise<void> {
   });
   if (!confirmed) return;
 
-  try {
-    const response = await apiPost(`/api/clients/${clientId}/send-invite`);
-
-    if (response.ok) {
-      showToast('Invitation resent successfully', 'success');
-    } else {
-      showToast('Failed to resend invitation', 'error');
-    }
-  } catch (error) {
-    logger.error(' Error resending invite:', error);
-    showToast('Error resending invitation', 'error');
-  }
+  await executeActionWithToast(
+    () => apiPost(`/api/clients/${clientId}/send-invite`),
+    { success: 'Invitation resent successfully', error: 'Failed to resend invitation' }
+  );
 }
 
 /**
@@ -1388,19 +1319,14 @@ async function sendClientInvitation(clientId: number): Promise<void> {
   });
   if (!confirmed) return;
 
-  try {
-    const response = await apiPost(`/api/clients/${clientId}/send-invite`);
+  const success = await executeActionWithToast(
+    () => apiPost(`/api/clients/${clientId}/send-invite`),
+    { success: 'Invitation sent successfully', error: 'Failed to send invitation. Please try again.' }
+  );
 
-    if (response.ok) {
-      showToast('Invitation sent successfully', 'success');
-      // Update local client data and re-render
-      clientsModule.updateItem(clientId, { invitation_sent_at: new Date().toISOString() });
-    } else {
-      showToast('Failed to send invitation. Please try again.', 'error');
-    }
-  } catch (error) {
-    logger.error(' Error sending invite:', error);
-    showToast('Failed to send invitation. Please try again.', 'error');
+  if (success) {
+    // Update local client data and re-render
+    clientsModule.updateItem(clientId, { invitation_sent_at: new Date().toISOString() });
   }
 }
 
@@ -1829,32 +1755,18 @@ async function bulkArchiveClients(clientIds: number[]): Promise<void> {
   const ctx = clientsModule.getContext();
   if (!ctx) return;
 
-  try {
-    // Archive each client (set status to inactive)
-    const results = await Promise.all(
-      clientIds.map((id) =>
-        apiPut(`/api/clients/${id}`, { status: 'inactive' })
-          .then((res) => ({ id, success: res.ok }))
-          .catch(() => ({ id, success: false }))
-      )
-    );
+  const operations = clientIds.map(
+    (id) => () => apiPut(`/api/clients/${id}`, { status: 'inactive' })
+  );
 
-    const successCount = results.filter((r) => r.success).length;
-    const failCount = results.filter((r) => !r.success).length;
+  const { successCount } = await executeBulkWithToast(operations, {
+    success: 'Archived {count} clients',
+    error: 'Failed to archive clients',
+    partial: 'Archived {successCount} of {totalCount} clients'
+  });
 
-    if (successCount > 0) {
-      showToast(
-        `Archived ${successCount} client${successCount > 1 ? 's' : ''}${failCount > 0 ? ` (${failCount} failed)` : ''}`,
-        failCount > 0 ? 'warning' : 'success'
-      );
-      // Reload clients
-      await clientsModule.load(ctx);
-    } else {
-      showToast('Failed to archive clients', 'error');
-    }
-  } catch (error) {
-    logger.error(' Bulk archive error:', error);
-    showToast('Error archiving clients', 'error');
+  if (successCount > 0) {
+    await clientsModule.load(ctx);
   }
 }
 
@@ -1865,31 +1777,15 @@ async function bulkDeleteClients(clientIds: number[]): Promise<void> {
   const ctx = clientsModule.getContext();
   if (!ctx) return;
 
-  try {
-    // Delete each client
-    const results = await Promise.all(
-      clientIds.map((id) =>
-        apiDelete(`/api/clients/${id}`)
-          .then((res) => ({ id, success: res.ok }))
-          .catch(() => ({ id, success: false }))
-      )
-    );
+  const operations = clientIds.map((id) => () => apiDelete(`/api/clients/${id}`));
 
-    const successCount = results.filter((r) => r.success).length;
-    const failCount = results.filter((r) => !r.success).length;
+  const { successCount } = await executeBulkWithToast(operations, {
+    success: 'Deleted {count} clients',
+    error: 'Failed to delete clients',
+    partial: 'Deleted {successCount} of {totalCount} clients'
+  });
 
-    if (successCount > 0) {
-      showToast(
-        `Deleted ${successCount} client${successCount > 1 ? 's' : ''}${failCount > 0 ? ` (${failCount} failed)` : ''}`,
-        failCount > 0 ? 'warning' : 'success'
-      );
-      // Reload clients
-      await clientsModule.load(ctx);
-    } else {
-      showToast('Failed to delete clients', 'error');
-    }
-  } catch (error) {
-    logger.error(' Bulk delete error:', error);
-    showToast('Error deleting clients', 'error');
+  if (successCount > 0) {
+    await clientsModule.load(ctx);
   }
 }

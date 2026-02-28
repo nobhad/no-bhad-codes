@@ -17,11 +17,20 @@ import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { createEmptyState, createErrorState } from '../../../components/empty-state';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { getReactComponent } from '../../../react/registry';
+import { getInvoiceStatusLabel } from '../../../utils/status-utils';
+import {
+  downloadInvoicePdf,
+  downloadReceiptPdf
+} from '../../../utils/file-download';
+import { createReactCleanupHandler } from '../../../utils/react-cleanup';
+import { apiFetch } from '../../../utils/api-client';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
+import { createLogger } from '../../../utils/logger';
 
-const INVOICES_API_BASE = '/api/invoices';
+const logger = createLogger('PortalInvoices');
 
-// Track React unmount function
-let reactUnmountFn: (() => void) | null = null;
+// React cleanup handler
+const reactInvoicesCleanup = createReactCleanupHandler();
 
 /**
  * Check if React portal invoices should be used
@@ -34,10 +43,7 @@ function shouldUseReactPortalInvoices(): boolean {
  * Cleanup React portal invoices
  */
 export function cleanupPortalInvoices(): void {
-  if (reactUnmountFn) {
-    reactUnmountFn();
-    reactUnmountFn = null;
-  }
+  reactInvoicesCleanup.cleanup();
 }
 
 /**
@@ -69,11 +75,26 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
       });
 
       if (typeof unmountResult === 'function') {
-        reactUnmountFn = unmountResult;
+        reactInvoicesCleanup.setUnmount(unmountResult);
       }
 
       return;
     }
+    // React component not available - show error state instead of loading forever
+    logger.error('React component not found');
+    const errorState = createErrorState('Unable to load invoices component. Please refresh the page.', {
+      className: 'no-invoices-message',
+      onRetry: () => window.location.reload()
+    });
+    const listContent = invoicesContainer.querySelector('#invoices-list-content');
+    if (listContent) {
+      listContent.innerHTML = '';
+      listContent.appendChild(errorState);
+    } else {
+      invoicesContainer.appendChild(errorState);
+    }
+    return;
+
   }
 
   // Vanilla implementation below
@@ -90,9 +111,7 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
   invoicesContainer.appendChild(loadingEl);
 
   try {
-    const response = await fetch(`${INVOICES_API_BASE}/me`, {
-      credentials: 'include' // Include HttpOnly cookies
-    });
+    const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/me`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch invoices');
@@ -116,7 +135,7 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
     // Remove loading indicator on error
     const loading = invoicesContainer.querySelector('.invoices-loading');
     if (loading) loading.remove();
-    console.error('Error loading invoices:', error);
+    logger.error('Error loading invoices:', error);
     if (summaryOutstanding) summaryOutstanding.textContent = '$0.00';
     if (summaryPaid) summaryPaid.textContent = '$0.00';
     const errorState = createErrorState('Unable to load invoices. Please try again later.', {
@@ -231,21 +250,7 @@ function renderInvoicesList(
   });
 }
 
-/**
- * Get display label for invoice status
- */
-function getInvoiceStatusLabel(status: string): string {
-  const labelMap: Record<string, string> = {
-    draft: 'Draft',
-    sent: 'Sent',
-    viewed: 'Viewed',
-    partial: 'Partial',
-    paid: 'Paid',
-    overdue: 'Overdue',
-    cancelled: 'Cancelled'
-  };
-  return labelMap[status] || 'Pending';
-}
+// NOTE: getInvoiceStatusLabel is now imported from status-utils.ts
 
 /**
  * Attach event listeners to invoice action buttons
@@ -265,7 +270,7 @@ function attachInvoiceActionListeners(container: HTMLElement, ctx: ClientPortalC
       const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
       const invoiceNumber = (e.currentTarget as HTMLElement).dataset.invoiceNumber || 'invoice';
       if (invoiceId) {
-        downloadInvoice(parseInt(invoiceId), invoiceNumber, ctx);
+        downloadInvoicePdf(parseInt(invoiceId), invoiceNumber);
       }
     });
   });
@@ -276,7 +281,7 @@ function attachInvoiceActionListeners(container: HTMLElement, ctx: ClientPortalC
       const invoiceId = (e.currentTarget as HTMLElement).dataset.invoiceId;
       const invoiceNumber = (e.currentTarget as HTMLElement).dataset.invoiceNumber || 'receipt';
       if (invoiceId) {
-        downloadReceipt(parseInt(invoiceId), invoiceNumber);
+        handleReceiptDownload(parseInt(invoiceId), invoiceNumber);
       }
     });
   });
@@ -286,54 +291,21 @@ function attachInvoiceActionListeners(container: HTMLElement, ctx: ClientPortalC
  * Preview invoice (open in new tab or modal)
  */
 function previewInvoice(invoiceId: number, _ctx: ClientPortalContext): void {
-  const url = `${INVOICES_API_BASE}/${invoiceId}/pdf?preview=true`;
+  const url = `${API_ENDPOINTS.INVOICES}/${invoiceId}/pdf?preview=true`;
   window.open(url, '_blank');
 }
 
 /**
- * Download invoice as PDF
+ * Handle receipt download - fetches the latest receipt for an invoice and downloads it
  */
-async function downloadInvoice(
-  invoiceId: number,
-  invoiceNumber: string,
-  _ctx: ClientPortalContext
-): Promise<void> {
-  try {
-    const response = await fetch(`${INVOICES_API_BASE}/${invoiceId}/pdf`, {
-      credentials: 'include' // Include HttpOnly cookies
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to download invoice');
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${invoiceNumber}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error downloading invoice:', error);
-    showToast('Failed to download invoice. Please try again.', 'error');
-  }
-}
-
-/**
- * Download receipt PDF for a paid invoice
- */
-async function downloadReceipt(invoiceId: number, invoiceNumber: string): Promise<void> {
+async function handleReceiptDownload(invoiceId: number, invoiceNumber: string): Promise<void> {
   try {
     // First, get receipts for this invoice
-    const receiptsResponse = await fetch(`/api/receipts/invoice/${invoiceId}`, {
-      credentials: 'include'
-    });
+    const receiptsResponse = await apiFetch(`/api/receipts/invoice/${invoiceId}`);
 
     if (!receiptsResponse.ok) {
-      throw new Error('Failed to fetch receipts');
+      showToast('Failed to fetch receipts', 'error');
+      return;
     }
 
     const receiptsData = await receiptsResponse.json();
@@ -344,29 +316,11 @@ async function downloadReceipt(invoiceId: number, invoiceNumber: string): Promis
       return;
     }
 
-    // Download the most recent receipt
+    // Download the most recent receipt using the shared utility
     const latestReceipt = receipts[0];
-    const pdfResponse = await fetch(`/api/receipts/${latestReceipt.id}/pdf`, {
-      credentials: 'include'
-    });
-
-    if (!pdfResponse.ok) {
-      throw new Error('Failed to download receipt');
-    }
-
-    const blob = await pdfResponse.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `receipt-${latestReceipt.receipt_number || invoiceNumber}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
-    showToast('Receipt downloaded successfully', 'success');
+    await downloadReceiptPdf(latestReceipt.id, latestReceipt.receipt_number || invoiceNumber);
   } catch (error) {
-    console.error('Error downloading receipt:', error);
+    logger.error('Error downloading receipt:', error);
     showToast('Failed to download receipt. Please try again.', 'error');
   }
 }

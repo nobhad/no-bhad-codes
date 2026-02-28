@@ -7,6 +7,7 @@
  * Time entry management for projects.
  */
 
+import type { AdminDashboardContext } from '../admin-types';
 import { apiFetch, apiPost, apiPut, apiDelete } from '../../../utils/api-client';
 import {
   confirmDanger,
@@ -24,6 +25,19 @@ import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('TimeTracking');
+
+// ============================================
+// STORED CONTEXT FOR AUTH
+// ============================================
+
+let _storedContext: AdminDashboardContext | null = null;
+
+/**
+ * Set the admin dashboard context for auth token access
+ */
+export function setTimeTrackingContext(ctx: AdminDashboardContext): void {
+  _storedContext = ctx;
+}
 
 // ============================================
 // REACT INTEGRATION (ISLAND ARCHITECTURE)
@@ -155,7 +169,9 @@ export async function initTimeTrackingModule(projectId: number): Promise<void> {
           unmountTimeTrackingPanel();
         }
         mountTimeTrackingPanel(mountContainer, {
-          projectId: String(projectId)
+          projectId: String(projectId),
+          getAuthToken: _storedContext?.getAuthToken,
+          showNotification: _storedContext?.showNotification
         });
         reactTableMounted = true;
         reactMountContainer = mountContainer;

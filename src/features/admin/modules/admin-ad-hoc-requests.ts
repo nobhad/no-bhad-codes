@@ -21,6 +21,7 @@ import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../../../utils/table-filter';
 import { createTableModule, createPaginationConfig } from '../../../utils/table-module-factory';
 import { createLogger } from '../../../utils/logger';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 
 const logger = createLogger('AdHocRequests');
 
@@ -77,7 +78,7 @@ function shouldUseReactAdHocRequestsTable(): boolean {
   return true;
 }
 
-const REQUESTS_API = '/api/ad-hoc-requests';
+const REQUESTS_API = API_ENDPOINTS.AD_HOC_REQUESTS;
 
 interface AdHocRequest {
   id: number;
@@ -231,6 +232,8 @@ export async function loadAdHocRequests(ctx: AdminDashboardContext): Promise<voi
           unmountAdHocRequestsTable();
         }
         mountAdHocRequestsTable(mountContainer, {
+          getAuthToken: ctx.getAuthToken,
+          showNotification: ctx.showNotification,
           onNavigate: (tab: string, entityId?: string) => {
             if (entityId) {
               ctx.switchTab(tab);

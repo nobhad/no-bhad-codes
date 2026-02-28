@@ -14,6 +14,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { createLogger } from '../../../utils/logger';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { apiFetch } from '../../../utils/api-client';
 
 const logger = createLogger('Deliverables');
 
@@ -169,7 +170,7 @@ function setupDeliverablesEvents(): void {
  */
 async function loadDeliverables(projectId: number): Promise<void> {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}/list`);
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/list`);
     if (!res.ok) throw new Error('Failed to load deliverables');
 
     const { deliverables: data } = await res.json();

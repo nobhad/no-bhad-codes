@@ -1,53 +1,23 @@
-import * as React from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+/**
+ * Design Review Panel Mount
+ * Island architecture mount using createMountWrapper factory
+ */
+
+import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { DesignReviewPanel } from './DesignReviewPanel';
 
-let root: Root | null = null;
-let mountedContainer: HTMLElement | null = null;
-
-export interface DesignReviewMountOptions {
+export interface DesignReviewMountOptions extends BaseMountOptions {
+  /** Filter by project ID */
   projectId?: string;
-  onNavigate?: (tab: string, entityId?: string) => void;
+  /** Callback when design item is clicked for detail view */
+  onViewDesignItem?: (itemId: number) => void;
 }
 
-export function mountDesignReviewPanel(
-  element: HTMLElement,
-  options: DesignReviewMountOptions = {}
-): () => void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-
-  mountedContainer = element;
-  element.innerHTML = '';
-
-  root = createRoot(element);
-  root.render(
-    <React.StrictMode>
-      <DesignReviewPanel projectId={options.projectId} onNavigate={options.onNavigate} />
-    </React.StrictMode>
-  );
-
-  return () => {
-    if (root) {
-      root.unmount();
-      root = null;
-    }
-    if (mountedContainer) {
-      mountedContainer.innerHTML = '';
-      mountedContainer = null;
-    }
-  };
-}
-
-export function unmountDesignReviewPanel(): void {
-  if (root) {
-    root.unmount();
-    root = null;
-  }
-  if (mountedContainer) {
-    mountedContainer.innerHTML = '';
-    mountedContainer = null;
-  }
-}
+export const {
+  mount: mountDesignReviewPanel,
+  unmount: unmountDesignReviewPanel,
+  shouldUseReact: shouldUseReactDesignReviewPanel
+} = createMountWrapper<DesignReviewMountOptions>({
+  Component: DesignReviewPanel,
+  displayName: 'DesignReviewPanel'
+});

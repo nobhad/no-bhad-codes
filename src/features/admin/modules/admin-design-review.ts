@@ -19,13 +19,10 @@ import {
 import { showToast } from '../../../utils/toast-notifications';
 import { createLogger } from '../../../utils/logger';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { apiFetch } from '../../../utils/api-client';
+import { el } from '../../../utils/dom-helpers';
 
 const logger = createLogger('DesignReview');
-
-// Simple DOM helper
-function el(id: string): HTMLElement | null {
-  return document.getElementById(id);
-}
 
 interface Deliverable {
   id: number;
@@ -65,7 +62,7 @@ export async function initializeDesignReview(): Promise<void> {
 export async function openDesignReview(deliverableId: number): Promise<void> {
   try {
     // Fetch deliverable
-    const res = await fetch(`${API_BASE}/${deliverableId}`);
+    const res = await apiFetch(`${API_BASE}/${deliverableId}`);
     if (!res.ok) throw new Error('Failed to fetch deliverable');
 
     const { deliverable } = await res.json();
@@ -88,7 +85,7 @@ export async function openDesignReview(deliverableId: number): Promise<void> {
  */
 async function loadDesignElements(deliverableId: number): Promise<void> {
   try {
-    const res = await fetch(`${API_BASE}/${deliverableId}/design-elements`);
+    const res = await apiFetch(`${API_BASE}/${deliverableId}/design-elements`);
     if (res.ok) {
       const { elements } = await res.json();
       designElements = elements || [];
@@ -232,7 +229,7 @@ async function setupDesignViewer(): Promise<void> {
 
   try {
     // Fetch latest version
-    const res = await fetch(`${API_BASE}/${currentDeliverable.id}/versions/latest`);
+    const res = await apiFetch(`${API_BASE}/${currentDeliverable.id}/versions/latest`);
     if (!res.ok) {
       container.innerHTML = '<div class="empty-state">No design files uploaded</div>';
       return;
@@ -310,9 +307,11 @@ function setupAnnotationTools(): void {
 
     try {
       const userId = localStorage.getItem('adminUserId') || '1';
-      await fetch(`${API_BASE}/${currentDeliverable.id}/comments`, {
+      await apiFetch(`${API_BASE}/${currentDeliverable.id}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           authorId: userId,
           text: annotation.text || `${annotation.type} annotation (${annotation.color})`,
@@ -372,9 +371,11 @@ function setupElementApproval(): void {
       // Save to server
       if (currentDeliverable && elementId) {
         try {
-          await fetch(`${API_BASE}/${currentDeliverable.id}/design-elements/${elementId}`, {
+          await apiFetch(`${API_BASE}/${currentDeliverable.id}/design-elements/${elementId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ approvalStatus: status })
           });
         } catch (error) {

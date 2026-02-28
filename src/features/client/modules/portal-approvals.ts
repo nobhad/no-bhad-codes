@@ -13,6 +13,10 @@ import { showToast } from '../../../utils/toast-notifications';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { getReactComponent } from '../../../react/registry';
+import { API_ENDPOINTS } from '../../../constants/api-endpoints';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('PortalApprovals');
 
 // Track React unmount function
 let reactApprovalsUnmountFn: (() => void) | null = null;
@@ -55,7 +59,7 @@ interface PendingApproval {
 // CONSTANTS
 // ============================================
 
-const APPROVALS_API = '/api/approvals';
+const APPROVALS_API = API_ENDPOINTS.APPROVALS;
 
 const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   proposal: 'Proposal',
@@ -156,7 +160,7 @@ export async function loadClientApprovals(): Promise<void> {
     renderApprovalsList();
     setupApprovalHandlers();
   } catch (error) {
-    console.error('[PortalApprovals] Error loading approvals:', error);
+    logger.error('Error loading approvals:', error);
     section.classList.add('hidden');
   }
 }
@@ -289,7 +293,7 @@ export async function submitApprovalDecision(
     await loadClientApprovals(); // Refresh list
     return true;
   } catch (error) {
-    console.error('[PortalApprovals] Decision error:', error);
+    logger.error('Decision error:', error);
     showToast(error instanceof Error ? error.message : 'Error submitting decision', 'error');
     return false;
   }
