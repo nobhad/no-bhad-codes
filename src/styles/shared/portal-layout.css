@@ -232,7 +232,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 }
 
 .portal-global-header .header-theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--portal-alpha-white-08);
   color: var(--portal-text-light);
 }
 
@@ -749,7 +749,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .sidebar-nav .sidebar-toggle-btn:hover {
   opacity: 1;
   color: var(--portal-text-light);
-  background: var(--portal-bg-hover, rgba(255, 255, 255, 0.04));
+  background: var(--portal-bg-hover);
 }
 
 .portal .sidebar-nav .sidebar-toggle-btn:is(.active, :focus) {
@@ -1025,7 +1025,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--portal-alpha-black-60);
     z-index: calc(var(--z-nav, 100) - 1);
   }
 
@@ -1666,45 +1666,6 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* =====================================================
-   TW-* CONTAINER/CARD CLASSES
-   ===================================================== */
-.tw-container {
-  background: transparent;
-  padding: var(--space-2, 1rem);
-}
-
-.tw-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2, 1rem);
-  background: transparent;
-}
-
-.tw-panel {
-  background: transparent;
-  border: 1px solid var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
-  padding: var(--space-2, 1rem);
-}
-
-.tw-card {
-  background: transparent;
-  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
-  padding: var(--space-2, 1rem);
-}
-
-.tw-card-hover {
-  background: transparent;
-  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
-  padding: var(--space-2, 1rem);
-  transition: border-color var(--transition-fast);
-  cursor: pointer;
-}
-
-.tw-card-hover:hover {
-  border-color: var(--portal-alpha-white-50, rgba(255, 255, 255, 0.6));
-}
-
-/* =====================================================
    TW-* TYPOGRAPHY CLASSES
    ===================================================== */
 .tw-heading {
@@ -1789,81 +1750,8 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Background colors */
 .tw-bg-white { background-color: var(--portal-text-light); }
-.tw-bg-black { background-color: var(--portal-bg-pitch, #000000); }
+.tw-bg-black { background-color: var(--portal-bg-pitch); }
 .tw-bg-transparent { background: transparent; }
-
-/* =====================================================
-   TW-* DIVIDER CLASSES
-   ===================================================== */
-.tw-divider {
-  height: 1px;
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
-  margin: var(--space-2, 1rem) 0;
-}
-
-.tw-divider-vertical {
-  width: 1px;
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
-  margin: 0 var(--space-1, 0.5rem);
-  align-self: stretch;
-}
-
-/* =====================================================
-   TW-* GRID LAYOUT CLASSES
-   ===================================================== */
-.tw-grid-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2, 1rem);
-}
-
-@media (min-width: 768px) {
-  .tw-grid-stats {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.tw-grid-cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-2, 1rem);
-}
-
-@media (min-width: 768px) {
-  .tw-grid-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .tw-grid-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* =====================================================
-   TW-* SCROLL CONTAINER CLASSES
-   ===================================================== */
-.tw-scroll-container {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.tw-scroll-container::-webkit-scrollbar {
-  width: 4px;
-}
-
-.tw-scroll-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.tw-scroll-container::-webkit-scrollbar-thumb {
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
-}
-
-.tw-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: var(--portal-alpha-white-30, rgba(255, 255, 255, 0.4));
-}
 
 /* =====================================================
    TW-* BORDER CLASSES
