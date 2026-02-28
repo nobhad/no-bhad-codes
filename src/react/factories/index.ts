@@ -4,7 +4,28 @@
  * ===============================================
  * @file src/react/factories/index.ts
  *
- * Central export hub for React factory components.
+ * Central export hub for React factory components and hooks.
+ *
+ * ## Available Factories
+ *
+ * ### Mount Factories
+ * - `createTableMount` - Basic mount/unmount for table components
+ * - `createMountWrapper` - Full-featured mount with selector support
+ * - `createSimpleMount` - Quick mount for simple components
+ *
+ * ### Component Factories
+ * - `IconButton` - Icon button with action registry
+ * - `StatusBadge` - Status display badges
+ * - `StateDisplay` - Empty/Loading/Error states
+ *
+ * ### Hook Factories
+ * - `useButtonFactory` - Button rendering utilities
+ * - `useTableActions` - Table action rendering
+ * - `useConditionalActions` - Conditional action rendering
+ * - `useActionHandlers` - Unified action handling
+ * - `useBulkAction` - Bulk operation handling
+ * - `useDataFetch` - Standardized API fetching
+ * - `useCrud` - CRUD operations
  */
 
 // ============================================
@@ -21,7 +42,7 @@ export {
 } from './IconButton';
 
 // ============================================
-// HOOKS
+// BUTTON & ACTION HOOKS
 // ============================================
 
 export {
@@ -32,6 +53,43 @@ export {
   useConditionalActions,
   useActionHandlers
 } from './useFactory';
+
+// ============================================
+// BULK ACTION HOOK
+// ============================================
+
+export {
+  useBulkAction,
+  BULK_ACTION_PRESETS,
+  createStatusChangeAction
+} from './useBulkAction';
+
+export type {
+  BulkOperationResult,
+  BulkActionConfig,
+  UseBulkActionOptions,
+  UseBulkActionReturn,
+  SelectionState,
+  NotificationFn
+} from './useBulkAction';
+
+// ============================================
+// DATA FETCH HOOKS
+// ============================================
+
+export {
+  useDataFetch,
+  useListFetch,
+  useCrud
+} from './useDataFetch';
+
+export type {
+  FetchState,
+  UseDataFetchOptions,
+  UseDataFetchReturn,
+  ListFetchResult,
+  UseCrudOptions
+} from './useDataFetch';
 
 // ============================================
 // STATUS BADGE
@@ -71,3 +129,19 @@ export type {
 
 export { BUTTON_ACTIONS } from '../../factories/buttons/button-actions';
 export { BUTTON_SETS } from '../../factories/buttons/button-sets';
+
+// ============================================
+// MOUNT FACTORIES
+// ============================================
+
+// Legacy table mount (still widely used)
+export { createTableMount } from './createTableMount';
+export type { TableMountOptions, TableMountResult } from './createTableMount';
+
+// New streamlined mount wrapper
+export { createMountWrapper, createSimpleMount } from './createMountWrapper';
+export type {
+  BaseMountOptions,
+  MountWrapperConfig,
+  MountWrapperResult
+} from './createMountWrapper';

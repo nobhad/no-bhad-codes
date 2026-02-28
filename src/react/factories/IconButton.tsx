@@ -94,7 +94,7 @@ import {
   Unlock,
   type LucideIcon
 } from 'lucide-react';
-import { ICON_SIZES, CONTEXT_DEFAULTS } from '../../factories/constants';
+// Icon/button sizes controlled by CSS variables - no JS constants needed
 import { BUTTON_ACTIONS } from '../../factories/buttons/button-actions';
 import type { UIContext, ButtonVariant, IconSizeKey } from '../../factories/types';
 
@@ -312,16 +312,8 @@ export function IconButton({
     return null;
   }
 
-  // Resolve icon size
-  const contextDefaults = CONTEXT_DEFAULTS[context];
-  let resolvedSize: number;
-  if (typeof iconSize === 'number') {
-    resolvedSize = iconSize;
-  } else if (iconSize) {
-    resolvedSize = ICON_SIZES[iconSize];
-  } else {
-    resolvedSize = ICON_SIZES[contextDefaults.iconSize];
-  }
+  // Icon size is controlled by CSS variables (--btn-portal-icon-inner-size)
+  // No hardcoded sizes passed to icons
 
   // Resolve button properties
   const buttonTitle = title ?? actionDef?.title;
@@ -347,8 +339,8 @@ export function IconButton({
       data-id={dataId}
       {...props}
     >
+      {/* Don't pass size for table context - let CSS control icon size */}
       <IconComponent
-        size={resolvedSize}
         aria-hidden="true"
         className={loading ? 'spinning' : undefined}
       />
@@ -398,12 +390,9 @@ interface TableActionButtonProps {
   dataId?: string | number;
 }
 
-/** Standard icon size for table actions (desktop: 18px per design system) */
-const TABLE_ICON_SIZE = 18;
-
 /**
  * TableActionButton - Legacy-compatible component for table row actions.
- * Automatically applies size={18} to the Lucide icon.
+ * Icon sizing is controlled by CSS variables (--btn-portal-icon-inner-size).
  *
  * @deprecated Use IconButton with action prop instead
  */
@@ -417,11 +406,10 @@ export function TableActionButton({
   dataAction,
   dataId
 }: TableActionButtonProps) {
-  // Clone the icon element with forced size prop
-  const sizedIcon = React.cloneElement(icon, {
-    size: TABLE_ICON_SIZE,
+  // Clone the icon element with aria-hidden only - CSS controls sizing
+  const accessibleIcon = React.cloneElement(icon, {
     'aria-hidden': true
-  } as React.Attributes & { size: number; 'aria-hidden': boolean });
+  } as React.Attributes & { 'aria-hidden': boolean });
 
   return (
     <button
@@ -434,7 +422,7 @@ export function TableActionButton({
       data-action={dataAction}
       data-id={dataId}
     >
-      {sizedIcon}
+      {accessibleIcon}
     </button>
   );
 }
