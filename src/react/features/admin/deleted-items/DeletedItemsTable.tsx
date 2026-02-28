@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Trash2,
   AlertTriangle,
@@ -10,11 +10,14 @@ import {
   MessageSquare,
   Inbox,
   Clock,
+  RotateCcw,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import {
@@ -29,6 +32,11 @@ import {
 } from '@react/components/portal/AdminTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useSelection } from '@react/hooks/useSelection';
+import { formatDate } from '@react/utils/formatDate';
+import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filterConfigs';
+import type { SortConfig } from '@react/features/admin/types';
 
 interface DeletedItem {
   id: string;
@@ -51,6 +59,10 @@ interface DeletedItemsStats {
 }
 
 interface DeletedItemsTableProps {
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
@@ -63,19 +75,64 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   contact: <User className="cell-icon" />,
 };
 
-const TYPE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Types' },
-  { value: 'client', label: 'Clients' },
-  { value: 'project', label: 'Projects' },
-  { value: 'invoice', label: 'Invoices' },
-  { value: 'file', label: 'Files' },
-  { value: 'message', label: 'Messages' },
-  { value: 'contact', label: 'Contacts' },
-];
+// Filter function for deleted items
+function filterDeletedItem(
+  item: DeletedItem,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  // Search filter
+  if (search) {
+    const query = search.toLowerCase();
+    const matchesSearch =
+      item.name.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query) ||
+      item.type.toLowerCase().includes(query);
+    if (!matchesSearch) return false;
+  }
 
-export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
+  // Type filter
+  if (filters.type && filters.type !== 'all') {
+    if (item.type !== filters.type) return false;
+  }
+
+  return true;
+}
+
+// Sort function for deleted items
+function sortDeletedItems(a: DeletedItem, b: DeletedItem, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+    case 'name':
+      return a.name.localeCompare(b.name) * multiplier;
+    case 'type':
+      return a.type.localeCompare(b.type) * multiplier;
+    case 'deletedAt':
+      return (new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime()) * multiplier;
+    case 'expiresAt':
+      return (new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()) * multiplier;
+    default:
+      return 0;
+  }
+}
+
+export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }: DeletedItemsTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<DeletedItem[]>([]);
   const [stats, setStats] = useState<DeletedItemsStats>({
@@ -86,144 +143,234 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
     files: 0,
     expiringIn7Days: 0,
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>({
-    column: 'deletedAt',
-    direction: 'desc',
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Use centralized table filters hook
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters,
+  } = useTableFilters<DeletedItem>({
+    storageKey: 'admin_deleted_items',
+    filters: DELETED_ITEMS_FILTER_CONFIG,
+    filterFn: filterDeletedItem,
+    sortFn: sortDeletedItems,
+    defaultSort: { column: 'deletedAt', direction: 'desc' },
   });
 
-  useEffect(() => {
-    loadDeletedItems();
-  }, []);
+  // Apply filters and sorting
+  const filteredItems = useMemo(() => applyFilters(items), [applyFilters, items]);
 
-  async function loadDeletedItems() {
+  // Pagination
+  const pagination = usePagination({
+    storageKey: 'admin_deleted_items_pagination',
+    totalItems: filteredItems.length,
+    defaultPageSize: 25,
+  });
+
+  const paginatedItems = useMemo(
+    () => pagination.paginate(filteredItems),
+    [pagination, filteredItems]
+  );
+
+  // Selection for bulk actions
+  const selection = useSelection({
+    getId: (item: DeletedItem) => item.id,
+    items: paginatedItems,
+  });
+
+  // Filter change handler
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => setFilter(key, value),
+    [setFilter]
+  );
+
+  const loadDeletedItems = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/deleted-items');
+      const response = await fetch('/api/admin/deleted-items', {
+        method: 'GET',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to load deleted items');
       const data = await response.json();
-      setItems(data.items || []);
-      setStats(data.stats || stats);
+      const payload = data.data || data;
+      setItems(payload.items || []);
+      setStats(payload.stats || {
+        total: 0,
+        clients: 0,
+        projects: 0,
+        invoices: 0,
+        files: 0,
+        expiringIn7Days: 0,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load deleted items');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  const filteredItems = useMemo(() => {
-    let result = [...items];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.name.toLowerCase().includes(query) ||
-          item.description?.toLowerCase().includes(query) ||
-          item.type.toLowerCase().includes(query)
-      );
-    }
-    if (typeFilter !== 'all') {
-      result = result.filter((item) => item.type === typeFilter);
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string = '';
-        let bVal: string = '';
-        switch (sort.column) {
-          case 'name': aVal = a.name; bVal = b.name; break;
-          case 'type': aVal = a.type; bVal = b.type; break;
-          case 'deletedAt': aVal = a.deletedAt; bVal = b.deletedAt; break;
-          case 'expiresAt': aVal = a.expiresAt; bVal = b.expiresAt; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [items, searchQuery, typeFilter, sort]);
+  useEffect(() => {
+    loadDeletedItems();
+  }, [loadDeletedItems]);
 
-  const pagination = usePagination({ totalItems: filteredItems.length });
-  const paginatedItems = filteredItems.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize
-  );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  async function handleRestore(itemId: string) {
+  const handleRestore = useCallback(async (itemId: string) => {
     try {
       const response = await fetch(`/api/admin/deleted-items/${itemId}/restore`, {
         method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to restore item');
       setItems((prev) => prev.filter((item) => item.id !== itemId));
+      showNotification?.('Item restored', 'success');
     } catch (err) {
       console.error('Failed to restore item:', err);
+      showNotification?.('Failed to restore item', 'error');
     }
-  }
+  }, [getHeaders, showNotification]);
 
-  async function handlePermanentDelete(itemId: string) {
-    if (!confirm('Are you sure you want to permanently delete this item? This action cannot be undone.')) {
+  const handlePermanentDelete = useCallback(async (itemId: string) => {
+    if (
+      !confirm(
+        'Are you sure you want to permanently delete this item? This action cannot be undone.'
+      )
+    ) {
       return;
     }
     try {
       const response = await fetch(`/api/admin/deleted-items/${itemId}`, {
         method: 'DELETE',
+        headers: getHeaders(),
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to delete item');
       setItems((prev) => prev.filter((item) => item.id !== itemId));
+      showNotification?.('Item permanently deleted', 'success');
     } catch (err) {
       console.error('Failed to delete item:', err);
+      showNotification?.('Failed to delete item', 'error');
     }
-  }
+  }, [getHeaders, showNotification]);
 
-  async function handleEmptyTrash() {
-    if (!confirm('Are you sure you want to permanently delete all items? This action cannot be undone.')) {
+  const handleEmptyTrash = useCallback(async () => {
+    if (
+      !confirm(
+        'Are you sure you want to permanently delete all items? This action cannot be undone.'
+      )
+    ) {
       return;
     }
     try {
       const response = await fetch('/api/admin/deleted-items/empty', {
         method: 'DELETE',
+        headers: getHeaders(),
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to empty trash');
       setItems([]);
+      showNotification?.('Trash emptied', 'success');
     } catch (err) {
       console.error('Failed to empty trash:', err);
+      showNotification?.('Failed to empty trash', 'error');
     }
-  }
+  }, [getHeaders, showNotification]);
+
+  // Bulk restore
+  const handleBulkRestore = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
+
+    if (
+      !confirm(`Are you sure you want to restore ${selection.selectedCount} item(s)?`)
+    ) {
+      return;
+    }
+
+    setBulkLoading(true);
+    try {
+      const ids = Array.from(selection.selectedIds);
+      const response = await fetch('/api/admin/deleted-items/bulk-restore', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      });
+      if (!response.ok) throw new Error('Failed to restore items');
+      setItems((prev) => prev.filter((item) => !selection.selectedIds.has(item.id)));
+      selection.clearSelection();
+      showNotification?.(`Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to bulk restore:', err);
+      showNotification?.('Failed to restore items', 'error');
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [selection, getHeaders, showNotification]);
+
+  // Bulk permanent delete
+  const handleBulkDelete = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete ${selection.selectedCount} item(s)? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setBulkLoading(true);
+    try {
+      const ids = Array.from(selection.selectedIds);
+      const response = await fetch('/api/admin/deleted-items/bulk-delete', {
+        method: 'DELETE',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      });
+      if (!response.ok) throw new Error('Failed to delete items');
+      setItems((prev) => prev.filter((item) => !selection.selectedIds.has(item.id)));
+      selection.clearSelection();
+      showNotification?.(`Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to bulk delete:', err);
+      showNotification?.('Failed to delete items', 'error');
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [selection, getHeaders, showNotification]);
 
   function isExpiringSoon(expiresAt: string): boolean {
-    const daysUntilExpiry = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    const daysUntilExpiry = Math.ceil(
+      (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
     return daysUntilExpiry <= 7;
   }
 
-  function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-
   function getDaysUntilExpiry(expiresAt: string): string {
-    const days = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil(
+      (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
     if (days < 0) return 'Expired';
     if (days === 0) return 'Today';
     if (days === 1) return '1 day';
     return `${days} days`;
   }
 
-  const hasActiveFilters = searchQuery || typeFilter !== 'all';
+  // Build filter dropdown sections from config
+  const filterSections = DELETED_ITEMS_FILTER_CONFIG.map((config) => ({
+    key: config.key,
+    label: config.label,
+    options: config.options,
+  }));
 
   return (
     <TableLayout
@@ -237,7 +384,12 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
             { value: stats.projects, label: 'projects', hideIfZero: true },
             { value: stats.invoices, label: 'invoices', hideIfZero: true },
             { value: stats.files, label: 'files', hideIfZero: true },
-            { value: stats.expiringIn7Days, label: 'expiring', variant: 'overdue', hideIfZero: true },
+            {
+              value: stats.expiringIn7Days,
+              label: 'expiring',
+              variant: 'overdue',
+              hideIfZero: true,
+            },
           ]}
           tooltip={`${stats.total} Total • ${stats.clients} Clients • ${stats.projects} Projects • ${stats.invoices} Invoices • ${stats.files} Files`}
         />
@@ -245,16 +397,14 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search deleted items..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'type', label: 'TYPE', options: TYPE_FILTER_OPTIONS },
-            ]}
-            values={{ type: typeFilter }}
-            onChange={(key, value) => setTypeFilter(value)}
+            sections={filterSections}
+            values={filterValues}
+            onChange={handleFilterChange}
           />
           {items.length > 0 && (
             <PortalButton
@@ -280,11 +430,31 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
         ) : undefined
       }
       bulkActions={
-        stats.expiringIn7Days > 0 ? (
+        selection.selectedCount > 0 ? (
+          <BulkActionsToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={filteredItems.length}
+            onClearSelection={selection.clearSelection}
+            onSelectAll={selection.selectAll}
+            allSelected={selection.allSelected}
+            actions={[
+              {
+                id: 'restore',
+                label: 'Restore',
+                icon: <RotateCcw className="icon-sm" />,
+                onClick: handleBulkRestore,
+                loading: bulkLoading,
+              },
+            ]}
+            onDelete={handleBulkDelete}
+            deleteLoading={bulkLoading}
+          />
+        ) : stats.expiringIn7Days > 0 ? (
           <div className="table-warning-banner">
             <AlertTriangle className="cell-icon" />
             <span>
-              {stats.expiringIn7Days} item(s) will be permanently deleted within the next 7 days.
+              {stats.expiringIn7Days} item(s) will be permanently deleted within the next 7
+              days.
             </span>
           </div>
         ) : undefined
@@ -308,96 +478,120 @@ export function DeletedItemsTable({ onNavigate }: DeletedItemsTableProps) {
       }
     >
       {!error && (
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
-              sortable
-              sortDirection={sort?.column === 'name' ? sort.direction : null}
-              onClick={() => toggleSort('name')}
-            >
-              Item
-            </AdminTableHead>
-            <AdminTableHead
-              sortable
-              sortDirection={sort?.column === 'type' ? sort.direction : null}
-              onClick={() => toggleSort('type')}
-            >
-              Type
-            </AdminTableHead>
-            <AdminTableHead>Deleted By</AdminTableHead>
-            <AdminTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'deletedAt' ? sort.direction : null}
-              onClick={() => toggleSort('deletedAt')}
-            >
-              Deleted
-            </AdminTableHead>
-            <AdminTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'expiresAt' ? sort.direction : null}
-              onClick={() => toggleSort('expiresAt')}
-            >
-              Expires In
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+        <AdminTable>
+          <AdminTableHeader>
+            <AdminTableRow>
+              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </AdminTableHead>
+              <AdminTableHead
+                className="name-col"
+                sortable
+                sortDirection={sort?.column === 'name' ? sort.direction : null}
+                onClick={() => toggleSort('name')}
+              >
+                Item
+              </AdminTableHead>
+              <AdminTableHead
+                className="type-col"
+                sortable
+                sortDirection={sort?.column === 'type' ? sort.direction : null}
+                onClick={() => toggleSort('type')}
+              >
+                Type
+              </AdminTableHead>
+              <AdminTableHead className="user-col">Deleted By</AdminTableHead>
+              <AdminTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'deletedAt' ? sort.direction : null}
+                onClick={() => toggleSort('deletedAt')}
+              >
+                Deleted
+              </AdminTableHead>
+              <AdminTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'expiresAt' ? sort.direction : null}
+                onClick={() => toggleSort('expiresAt')}
+              >
+                Expires In
+              </AdminTableHead>
+              <AdminTableHead className="actions-col">Actions</AdminTableHead>
+            </AdminTableRow>
+          </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
-            <AdminTableLoading colSpan={6} rows={5} />
-          ) : paginatedItems.length === 0 ? (
-            <AdminTableEmpty
-              colSpan={6}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No items match your filters' : 'Trash is empty'}
-            />
-          ) : (
-            paginatedItems.map((item) => (
-              <AdminTableRow key={item.id}>
-                <AdminTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    {TYPE_ICONS[item.type]}
-                    <div className="cell-content">
-                      <span className="cell-title">{item.name}</span>
-                      {item.description && (
-                        <span className="cell-subtitle">{item.description}</span>
-                      )}
+          <AdminTableBody animate={!isLoading}>
+            {isLoading ? (
+              <AdminTableLoading colSpan={7} rows={5} />
+            ) : paginatedItems.length === 0 ? (
+              <AdminTableEmpty
+                colSpan={7}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No items match your filters' : 'Trash is empty'}
+              />
+            ) : (
+              paginatedItems.map((item) => (
+                <AdminTableRow
+                  key={item.id}
+                  selected={selection.isSelected(item)}
+                >
+                  <AdminTableCell
+                    className="bulk-select-cell"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Checkbox
+                      checked={selection.isSelected(item)}
+                      onCheckedChange={() => selection.toggleSelection(item)}
+                      aria-label={`Select ${item.name}`}
+                    />
+                  </AdminTableCell>
+                  <AdminTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      {TYPE_ICONS[item.type]}
+                      <div className="cell-content">
+                        <span className="cell-title">{item.name}</span>
+                        {item.description && (
+                          <span className="cell-subtitle">{item.description}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </AdminTableCell>
-                <AdminTableCell className="type-cell">{item.type}</AdminTableCell>
-                <AdminTableCell>{item.deletedBy}</AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(item.deletedAt)}</AdminTableCell>
-                <AdminTableCell className="date-cell">
-                  <span className={cn(isExpiringSoon(item.expiresAt) && 'text-danger')}>
-                    <span className="cell-with-icon">
-                      {isExpiringSoon(item.expiresAt) && <Clock className="cell-icon-sm" />}
-                      {getDaysUntilExpiry(item.expiresAt)}
+                  </AdminTableCell>
+                  <AdminTableCell className="type-cell">{item.type}</AdminTableCell>
+                  <AdminTableCell className="user-cell">{item.deletedBy}</AdminTableCell>
+                  <AdminTableCell className="date-cell">
+                    {formatDate(item.deletedAt)}
+                  </AdminTableCell>
+                  <AdminTableCell className="date-cell">
+                    <span className={cn(isExpiringSoon(item.expiresAt) && 'text-danger')}>
+                      <span className="cell-with-icon">
+                        {isExpiringSoon(item.expiresAt) && <Clock className="cell-icon-sm" />}
+                        {getDaysUntilExpiry(item.expiresAt)}
+                      </span>
                     </span>
-                  </span>
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell">
-                  <div className="table-actions">
-                    <IconButton
-                      action="restore"
-                      onClick={() => handleRestore(item.id)}
-                    />
-                    <IconButton
-                      action="delete"
-                      title="Delete Permanently"
-                      onClick={() => handlePermanentDelete(item.id)}
-                    />
-                  </div>
-                </AdminTableCell>
-              </AdminTableRow>
-            ))
-          )}
-        </AdminTableBody>
-      </AdminTable>
+                  </AdminTableCell>
+                  <AdminTableCell className="actions-cell">
+                    <div className="table-actions">
+                      <IconButton
+                        action="restore"
+                        onClick={() => handleRestore(item.id)}
+                      />
+                      <IconButton
+                        action="delete"
+                        title="Delete Permanently"
+                        onClick={() => handlePermanentDelete(item.id)}
+                      />
+                    </div>
+                  </AdminTableCell>
+                </AdminTableRow>
+              ))
+            )}
+          </AdminTableBody>
+        </AdminTable>
       )}
     </TableLayout>
   );

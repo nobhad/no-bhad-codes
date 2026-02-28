@@ -35,6 +35,7 @@ import { useExport, LEADS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import type { Lead, LeadStatus, SortConfig } from '../types';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
+import { LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS } from '../shared/filterConfigs';
 
 interface LeadsTableProps {
   /** Auth token getter for API calls */
@@ -50,29 +51,13 @@ const FILTER_CONFIG = [
   {
     key: 'status',
     label: 'Status',
-    options: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'new', label: 'New' },
-      { value: 'contacted', label: 'Contacted' },
-      { value: 'qualified', label: 'Qualified' },
-      { value: 'in-progress', label: 'In Progress' },
-      { value: 'converted', label: 'Converted' },
-      { value: 'lost', label: 'Lost' },
-      { value: 'on-hold', label: 'On Hold' }
-    ]
+    options: LEAD_STATUS_OPTIONS,
   },
   {
     key: 'source',
     label: 'Source',
-    options: [
-      { value: 'all', label: 'All Sources' },
-      { value: 'website', label: 'Website' },
-      { value: 'referral', label: 'Referral' },
-      { value: 'social', label: 'Social Media' },
-      { value: 'direct', label: 'Direct' },
-      { value: 'ad-campaign', label: 'Ad Campaign' }
-    ]
-  }
+    options: LEAD_SOURCE_OPTIONS,
+  },
 ];
 
 // Filter sections for FilterDropdown component
@@ -80,29 +65,13 @@ const FILTER_SECTIONS = [
   {
     key: 'status',
     label: 'STATUS',
-    options: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'new', label: 'New' },
-      { value: 'contacted', label: 'Contacted' },
-      { value: 'qualified', label: 'Qualified' },
-      { value: 'in-progress', label: 'In Progress' },
-      { value: 'converted', label: 'Converted' },
-      { value: 'lost', label: 'Lost' },
-      { value: 'on-hold', label: 'On Hold' }
-    ]
+    options: LEAD_STATUS_OPTIONS,
   },
   {
     key: 'source',
     label: 'SOURCE',
-    options: [
-      { value: 'all', label: 'All Sources' },
-      { value: 'website', label: 'Website' },
-      { value: 'referral', label: 'Referral' },
-      { value: 'social', label: 'Social Media' },
-      { value: 'direct', label: 'Direct' },
-      { value: 'ad-campaign', label: 'Ad Campaign' }
-    ]
-  }
+    options: LEAD_SOURCE_OPTIONS,
+  },
 ];
 
 // Filter function
@@ -229,6 +198,12 @@ export function LeadsTable({
     }
   });
 
+  // Filter change handler
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => setFilter(key, value),
+    [setFilter]
+  );
+
   // Bulk action loading state
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
@@ -349,7 +324,7 @@ export function LeadsTable({
             <FilterDropdown
               sections={FILTER_SECTIONS}
               values={filterValues}
-              onChange={setFilter}
+              onChange={handleFilterChange}
             />
             <IconButton
               action="download"
@@ -409,7 +384,7 @@ export function LeadsTable({
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
-              <AdminTableHead className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
@@ -432,6 +407,7 @@ export function LeadsTable({
               >
                 Company
               </AdminTableHead>
+              <AdminTableHead className="type-col">Project Type</AdminTableHead>
               <AdminTableHead
                 className="status-col"
                 sortable
@@ -440,7 +416,6 @@ export function LeadsTable({
               >
                 Status
               </AdminTableHead>
-              <AdminTableHead className="type-col">Project Type</AdminTableHead>
               <AdminTableHead
                 className="source-col"
                 sortable
@@ -479,7 +454,7 @@ export function LeadsTable({
                   onClick={() => handleRowClick(lead)}
                 >
                   {/* Checkbox */}
-                  <AdminTableCell className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+                  <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(lead)}
                       onCheckedChange={() => selection.toggleSelection(lead)}
@@ -519,6 +494,11 @@ export function LeadsTable({
                     </div>
                   </AdminTableCell>
 
+                  {/* Project Type */}
+                  <AdminTableCell className="type-cell">
+                    {PROJECT_TYPE_LABELS[lead.project_type || ''] || lead.project_type || '-'}
+                  </AdminTableCell>
+
                   {/* Status */}
                   <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
@@ -543,11 +523,6 @@ export function LeadsTable({
                         ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
-                  </AdminTableCell>
-
-                  {/* Project Type */}
-                  <AdminTableCell className="type-cell">
-                    {PROJECT_TYPE_LABELS[lead.project_type || ''] || lead.project_type || '-'}
                   </AdminTableCell>
 
                   {/* Source */}

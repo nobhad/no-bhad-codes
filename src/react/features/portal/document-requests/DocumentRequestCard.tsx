@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Clock, CheckCircle, AlertCircle, FileText, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { formatDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 
@@ -43,51 +44,6 @@ interface DocumentRequestCardProps {
   onUploadSuccess: (requestId: number) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-/**
- * Check if a due date is overdue
- */
-function isOverdue(dueDate: string | undefined): boolean {
-  if (!dueDate) return false;
-  const due = new Date(dueDate);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return due < today;
-}
-
-/**
- * Get days until due date
- */
-function getDaysUntilDue(dueDate: string | undefined): number | null {
-  if (!dueDate) return null;
-  const due = new Date(dueDate);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  due.setHours(0, 0, 0, 0);
-  const diffTime = due.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
-/**
- * Format file size for display
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /**
@@ -289,11 +245,11 @@ export function DocumentRequestCard({
       onDrop={handleDrop}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 className="tw-text-primary" style={{ fontSize: '14px' }}>{request.title}</h3>
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-mb-2">
+        <div className="tw-flex-1 card-content-truncate">
+          <h3 className="tw-text-primary tw-text-sm">{request.title}</h3>
           {request.description && (
-            <p className="tw-text-muted" style={{ fontSize: '12px', marginTop: '0.25rem' }}>
+            <p className="tw-text-muted tw-text-sm tw-mt-1">
               {request.description}
             </p>
           )}
@@ -303,9 +259,9 @@ export function DocumentRequestCard({
 
       {/* Due Date */}
       {request.due_date && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.5rem' }}>
+        <div className="tw-flex tw-items-center tw-gap-1 tw-mb-2">
           <Clock className="tw-h-4 tw-w-4 tw-text-muted" />
-          <span className={overdue ? 'tw-text-primary' : 'tw-text-muted'} style={{ fontSize: '12px' }}>
+          <span className={cn('tw-text-sm', overdue ? 'tw-text-primary' : 'tw-text-muted')}>
             Due {formatDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
@@ -315,12 +271,12 @@ export function DocumentRequestCard({
 
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
-        <div className="tw-panel" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', marginBottom: '0.5rem' }}>
+        <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2 tw-mb-2">
           <FileText className="tw-h-4 tw-w-4 tw-text-muted" />
-          <span className="tw-text-primary" style={{ flex: 1, fontSize: '12px' }}>
+          <span className="tw-text-primary tw-flex-1 tw-text-sm">
             {request.uploaded_file.filename}
           </span>
-          <span className="tw-text-muted" style={{ fontSize: '11px' }}>
+          <span className="tw-text-muted tw-text-xs">
             {formatFileSize(request.uploaded_file.file_size)}
           </span>
         </div>
@@ -328,33 +284,26 @@ export function DocumentRequestCard({
 
       {/* Upload Area (for pending/rejected) */}
       {canUpload && (
-        <div style={{ marginTop: '0.5rem' }}>
+        <div className="tw-mt-2">
           {selectedFile ? (
-            <div className="tw-panel" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
+            <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2">
               <FileText className="tw-h-4 tw-w-4" />
-              <span className="tw-text-primary" style={{ flex: 1, fontSize: '12px' }}>{selectedFile.name}</span>
-              <span className="tw-text-muted" style={{ fontSize: '11px' }}>{formatFileSize(selectedFile.size)}</span>
+              <span className="tw-text-primary tw-flex-1 tw-text-sm">{selectedFile.name}</span>
+              <span className="tw-text-muted tw-text-xs">{formatFileSize(selectedFile.size)}</span>
               <button className="tw-btn-icon" onClick={clearSelectedFile} disabled={isUploading}>
                 <X className="tw-h-4 tw-w-4" />
               </button>
             </div>
           ) : (
             <div
-              className="tw-panel"
-              style={{
-                borderStyle: 'dashed',
-                borderWidth: '2px',
-                padding: '1rem',
-                textAlign: 'center',
-                cursor: 'pointer'
-              }}
+              className="tw-dropzone"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="tw-h-5 tw-w-5 tw-text-muted" style={{ margin: '0 auto 0.25rem' }} />
-              <p className="tw-text-muted" style={{ fontSize: '12px' }}>
+              <Upload className="tw-h-5 tw-w-5 tw-text-muted" />
+              <p className="tw-text-muted tw-text-sm">
                 Drop file here or <span className="tw-text-primary">browse</span>
               </p>
-              <p className="tw-text-muted" style={{ fontSize: '11px', marginTop: '0.25rem' }}>
+              <p className="tw-text-muted tw-text-xs tw-mt-1">
                 PDF, DOC, DOCX, TXT, JPG, PNG (max 10MB)
               </p>
             </div>
@@ -369,8 +318,8 @@ export function DocumentRequestCard({
           />
 
           {selectedFile && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <button className="tw-btn-primary" onClick={handleUpload} disabled={isUploading} style={{ width: '100%' }}>
+            <div className="tw-mt-2">
+              <button className="tw-btn-primary tw-w-full" onClick={handleUpload} disabled={isUploading}>
                 {isUploading ? 'Uploading...' : 'Upload Document'}
               </button>
             </div>
@@ -380,8 +329,8 @@ export function DocumentRequestCard({
 
       {/* Rejection Message */}
       {isRejected && (
-        <div className="tw-panel" style={{ marginTop: '0.5rem', borderColor: 'var(--portal-text-light)' }}>
-          <p style={{ fontSize: '12px' }}>Please resubmit with the requested changes.</p>
+        <div className="tw-panel tw-mt-2" style={{ borderColor: 'var(--portal-text-light)' }}>
+          <p className="tw-text-sm">Please resubmit with the requested changes.</p>
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@
  */
 
 import * as React from 'react';
+import { useCallback } from 'react';
 import { Eye, Download, FileText, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -55,6 +56,16 @@ export function PortalInvoicesTable({
     getAuthToken,
   });
 
+  // Auth headers helper for downloads
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
+
   // Handle preview invoice
   const handlePreview = (invoice: PortalInvoice) => {
     window.open(`/api/invoices/${invoice.id}/pdf?preview=true`, '_blank');
@@ -64,6 +75,7 @@ export function PortalInvoicesTable({
   const handleDownload = async (invoice: PortalInvoice) => {
     try {
       const response = await fetch(`/api/invoices/${invoice.id}/pdf`, {
+        headers: getHeaders(),
         credentials: 'include',
       });
 
@@ -90,6 +102,7 @@ export function PortalInvoicesTable({
   const handleDownloadReceipt = async (invoice: PortalInvoice) => {
     try {
       const receiptsResponse = await fetch(`/api/receipts/invoice/${invoice.id}`, {
+        headers: getHeaders(),
         credentials: 'include',
       });
 
@@ -107,6 +120,7 @@ export function PortalInvoicesTable({
 
       const latestReceipt = receipts[0];
       const pdfResponse = await fetch(`/api/receipts/${latestReceipt.id}/pdf`, {
+        headers: getHeaders(),
         credentials: 'include',
       });
 

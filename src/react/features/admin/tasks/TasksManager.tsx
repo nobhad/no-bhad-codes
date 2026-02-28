@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Inbox, CheckSquare } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -20,14 +20,15 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
 import { usePagination } from '@react/hooks/usePagination';
+import { TASK_STATUS_OPTIONS, TASK_PRIORITY_OPTIONS } from '../shared/filterConfigs';
 
 interface Task {
-  id: string;
+  id: number;
   title: string;
   description: string | null;
   status: 'todo' | 'in_progress' | 'review' | 'completed' | 'blocked';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  assignee_id: string | null;
+  assignee_id: number | null;
   assignee_name: string | null;
   client_name: string | null;
   project_name: string | null;
@@ -44,28 +45,14 @@ interface TasksManagerProps {
   projectId?: string;
   assigneeId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 type SortField = 'title' | 'status' | 'priority' | 'assignee_name' | 'due_date' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 type ViewMode = 'list' | 'board';
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'todo', label: 'To Do' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'review', label: 'In Review' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'blocked', label: 'Blocked' },
-];
-
-const PRIORITY_OPTIONS = [
-  { value: 'all', label: 'All Priorities' },
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'urgent', label: 'Urgent' },
-];
 
 const PRIORITY_COLORS: Record<Task['priority'], string> = {
   low: 'var(--portal-text-muted)',
@@ -74,10 +61,22 @@ const PRIORITY_COLORS: Record<Task['priority'], string> = {
   urgent: 'var(--status-danger)',
 };
 
-export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: TasksManagerProps) {
+export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getAuthToken, showNotification }: TasksManagerProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -101,11 +100,15 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
       if (projectId) params.append('project_id', projectId);
       if (assigneeId) params.append('assignee_id', assigneeId);
 
-      const response = await fetch(`/api/admin/tasks?${params}`);
+      const response = await fetch(`/api/admin/tasks?${params}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to fetch tasks');
 
       const data = await response.json();
-      setTasks(data.tasks || []);
+      // API wraps response in { success, data: { tasks } }
+      setTasks(data.data?.tasks || data.tasks || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -269,7 +272,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
                 <div
                   key={task.id}
                   className="board-card"
-                  onClick={() => onNavigate?.('task-detail', task.id)}
+                  onClick={() => onNavigate?.('task-detail', String(task.id))}
                 >
                   <div className="board-card-header">
                     <div
@@ -328,8 +331,8 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
           />
           <FilterDropdown
             sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_OPTIONS },
-              { key: 'priority', label: 'PRIORITY', options: PRIORITY_OPTIONS },
+              { key: 'status', label: 'STATUS', options: TASK_STATUS_OPTIONS },
+              { key: 'priority', label: 'PRIORITY', options: TASK_PRIORITY_OPTIONS },
             ]}
             values={{ status: statusFilter, priority: priorityFilter }}
             onChange={handleFilterChange}
@@ -505,14 +508,14 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate }: Ta
                       <PortalButton
                         variant="ghost"
                         size="sm"
-                        onClick={() => onNavigate?.('task-detail', task.id)}
+                        onClick={() => onNavigate?.('task-detail', String(task.id))}
                       >
                         View
                       </PortalButton>
                       <PortalButton
                         variant="secondary"
                         size="sm"
-                        onClick={() => onNavigate?.('task-edit', task.id)}
+                        onClick={() => onNavigate?.('task-edit', String(task.id))}
                       >
                         Edit
                       </PortalButton>

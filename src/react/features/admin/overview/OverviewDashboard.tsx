@@ -1,11 +1,10 @@
 /**
  * OverviewDashboard
- * Admin dashboard overview with brutalist design
- * Transparent backgrounds, no border-radius, monospace font
+ * Admin dashboard overview using existing portal CSS classes
  */
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   AlertTriangle,
   FileText,
@@ -13,479 +12,265 @@ import {
   TrendingUp,
   DollarSign,
   Clock,
-  CheckCircle,
   Mail,
   Briefcase,
   ArrowRight,
   LayoutGrid,
   List,
   RefreshCw,
+  Plus,
+  FileUp,
+  Send,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-
-interface AttentionItem {
-  type: 'overdue_invoice' | 'pending_contract' | 'new_lead' | 'unread_message';
-  count: number;
-  label: string;
-  icon: React.ReactNode;
-  action: () => void;
-}
-
-interface SnapshotMetric {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-}
-
-interface RecentActivity {
-  id: string;
-  type: string;
-  description: string;
-  timestamp: string;
-  entityType: string;
-  entityId: string;
-}
-
-interface ActiveProject {
-  id: string;
-  name: string;
-  client: string;
-  status: string;
-  progress: number;
-  dueDate?: string;
-}
-
-interface UpcomingTask {
-  id: string;
-  title: string;
-  projectName: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: string;
-  dueDate?: string;
-}
+import { formatTimeAgo } from '../../../../utils/time-utils';
+import { formatCurrency } from '../../../../utils/format-utils';
 
 interface OverviewDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-// Brutalist panel styles
-const panelStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid var(--portal-border-color)',
-  padding: 'var(--space-4)',
-};
-
-const panelHoverStyle: React.CSSProperties = {
-  ...panelStyle,
-  cursor: 'pointer',
-  transition: 'border-color var(--transition-faster)',
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: 'var(--font-size-2xs)',
-  fontWeight: 500,
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase' as const,
-  color: 'var(--portal-text-muted)',
-  marginBottom: 'var(--space-4)',
-  fontFamily: 'var(--font-mono)',
-};
-
-const statValueStyle: React.CSSProperties = {
-  fontSize: 'var(--font-size-2xl)',
-  fontWeight: 600,
-  color: 'var(--portal-text-light)',
-  fontFamily: 'var(--font-mono)',
-  lineHeight: 1.2,
-};
-
-const statLabelStyle: React.CSSProperties = {
-  fontSize: 'var(--font-size-2xs)',
-  color: 'var(--portal-text-muted)',
-  fontFamily: 'var(--font-mono)',
-  marginTop: 'var(--space-1)',
-};
-
-export function OverviewDashboard({ onNavigate }: OverviewDashboardProps) {
+export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }: OverviewDashboardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tasksView, setTasksView] = useState<'list' | 'kanban'>('list');
 
-  // Dashboard data state
-  const [attention, setAttention] = useState({
-    overdueInvoices: 0,
-    pendingContracts: 0,
-    newLeadsThisWeek: 0,
-    unreadMessages: 0,
-  });
-  const [snapshot, setSnapshot] = useState({
-    activeProjects: 0,
-    totalClients: 0,
-    revenueMTD: 0,
-    conversionRate: 0,
-  });
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-  const [activeProjects, setActiveProjects] = useState<ActiveProject[]>([]);
-  const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTask[]>([]);
+  const [attention, setAttention] = useState({ overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
+  const [snapshot, setSnapshot] = useState({ activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [activeProjects, setActiveProjects] = useState<any[]>([]);
+  const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadDashboardData() {
+  const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
-      const response = await fetch('/api/admin/dashboard');
+      const response = await fetch('/api/admin/dashboard', {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load dashboard data');
-
       const data = await response.json();
-
-      setAttention(data.attention || {
-        overdueInvoices: 0,
-        pendingContracts: 0,
-        newLeadsThisWeek: 0,
-        unreadMessages: 0,
-      });
-      setSnapshot(data.snapshot || {
-        activeProjects: 0,
-        totalClients: 0,
-        revenueMTD: 0,
-        conversionRate: 0,
-      });
-      setRecentActivity(data.recentActivity || []);
-      setActiveProjects(data.activeProjects || []);
-      setUpcomingTasks(data.upcomingTasks || []);
+      const payload = data.data || data;
+      setAttention(payload.attention || { overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
+      setSnapshot(payload.snapshot || { activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
+      setRecentActivity(payload.recentActivity || []);
+      setActiveProjects(payload.activeProjects || []);
+      setUpcomingTasks(payload.upcomingTasks || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dashboard');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  const attentionItems: AttentionItem[] = [
-    {
-      type: 'overdue_invoice',
-      count: attention.overdueInvoices,
-      label: 'Overdue Invoices',
-      icon: <AlertTriangle style={{ width: 16, height: 16 }} />,
-      action: () => onNavigate?.('invoices'),
-    },
-    {
-      type: 'pending_contract',
-      count: attention.pendingContracts,
-      label: 'Pending Contracts',
-      icon: <FileText style={{ width: 16, height: 16 }} />,
-      action: () => onNavigate?.('contracts'),
-    },
-    {
-      type: 'unread_message',
-      count: attention.unreadMessages,
-      label: 'Unread Messages',
-      icon: <Mail style={{ width: 16, height: 16 }} />,
-      action: () => onNavigate?.('messaging'),
-    },
-  ];
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
-  const snapshotMetrics: SnapshotMetric[] = [
-    {
-      label: 'Active Projects',
-      value: snapshot.activeProjects,
-      icon: <Briefcase style={{ width: 16, height: 16 }} />,
-    },
-    {
-      label: 'Total Clients',
-      value: snapshot.totalClients,
-      icon: <Users style={{ width: 16, height: 16 }} />,
-    },
-    {
-      label: 'Revenue MTD',
-      value: formatCurrency(snapshot.revenueMTD),
-      icon: <DollarSign style={{ width: 16, height: 16 }} />,
-    },
-    {
-      label: 'Conversion Rate',
-      value: `${snapshot.conversionRate}%`,
-      icon: <TrendingUp style={{ width: 16, height: 16 }} />,
-    },
+  const attentionItems = [
+    { type: 'overdue_invoice', count: attention.overdueInvoices, label: 'Overdue Invoices', icon: <AlertTriangle />, action: () => onNavigate?.('invoices') },
+    { type: 'pending_contract', count: attention.pendingContracts, label: 'Pending Contracts', icon: <FileText />, action: () => onNavigate?.('contracts') },
+    { type: 'unread_message', count: attention.unreadMessages, label: 'Unread Messages', icon: <Mail />, action: () => onNavigate?.('messaging') },
+  ].filter(item => item.count > 0);
+
+  const snapshotMetrics = [
+    { label: 'Active Projects', value: snapshot.activeProjects, icon: <Briefcase /> },
+    { label: 'Total Clients', value: snapshot.totalClients, icon: <Users /> },
+    { label: 'Revenue MTD', value: formatCurrency(snapshot.revenueMTD), icon: <DollarSign /> },
+    { label: 'Conversion Rate', value: `${snapshot.conversionRate}%`, icon: <TrendingUp /> },
   ];
 
   if (isLoading) {
-    return <DashboardSkeleton />;
+    return <div className="loading-state"><div className="loading-spinner" /></div>;
   }
 
   if (error) {
     return (
-      <div style={{ ...panelStyle, textAlign: 'center', padding: 'var(--space-12)' }}>
-        <p style={{ color: 'var(--portal-text-secondary)', marginBottom: '1rem', fontFamily: 'var(--font-mono)' }}>
-          {error}
-        </p>
-        <button
-          onClick={loadDashboardData}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--portal-text-light)',
-            color: 'var(--portal-text-light)',
-            padding: 'var(--space-2) var(--space-4)',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 'var(--font-size-xs)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-          }}
-        >
-          <RefreshCw style={{ width: 14, height: 14 }} />
-          Retry
+      <div className="overview-panel ovdash-error-panel">
+        <p className="field-label ovdash-error-message">{error}</p>
+        <button onClick={loadDashboardData} className="btn btn-outline">
+          <RefreshCw className="btn-icon" /> Retry
         </button>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Attention Items */}
-      <section>
-        <h2 style={sectionTitleStyle}>Needs Attention</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-          {attentionItems.filter(item => item.count > 0).map((item) => (
-            <button
-              key={item.type}
-              onClick={item.action}
-              style={{
-                ...panelHoverStyle,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                textAlign: 'left',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--portal-text-muted)'}
-              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--portal-border-color)'}
-            >
-              <div style={{ color: 'var(--portal-text-muted)' }}>{item.icon}</div>
-              <div>
-                <div style={statValueStyle}>{item.count}</div>
-                <div style={statLabelStyle}>{item.label}</div>
-              </div>
-            </button>
-          ))}
-          {attentionItems.filter(item => item.count > 0).length === 0 && (
-            <div style={{ ...panelStyle, gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--space-8)' }}>
-              <CheckCircle style={{ width: 24, height: 24, margin: '0 auto 8px', opacity: 0.5, color: 'var(--portal-text-light)' }} />
-              <p style={{ color: 'var(--portal-text-muted)', fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)' }}>
-                All caught up! Nothing needs your attention.
-              </p>
+    <div className="overview-linear">
+      {/* Stats Strip */}
+      <div className="overview-stats-strip">
+        {snapshotMetrics.map((metric) => (
+          <div key={metric.label} className="overview-stat-card overview-panel">
+            <div className="stat-card-top">
+              <span className="field-label">{metric.label}</span>
+              {metric.icon}
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* Snapshot Metrics */}
-      <section>
-        <h2 style={sectionTitleStyle}>Snapshot</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-          {snapshotMetrics.map((metric) => (
-            <div key={metric.label} style={panelStyle}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
-                <span style={{ color: 'var(--portal-text-muted)' }}>{metric.icon}</span>
-                <span style={{ fontSize: 'var(--font-size-2xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  {metric.label}
-                </span>
-              </div>
-              <div style={statValueStyle}>{metric.value}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        {/* Active Projects */}
-        <section>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>Active Projects</h2>
-            <button
-              onClick={() => onNavigate?.('projects')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--portal-text-muted)',
-                fontSize: 'var(--font-size-2xs)',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-mono)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-1)',
-              }}
-            >
-              View All <ArrowRight style={{ width: 12, height: 12 }} />
-            </button>
+            <div className="stat-card-value">{metric.value}</div>
           </div>
-          <div style={panelStyle}>
-            {activeProjects.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
-                No active projects
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {activeProjects.slice(0, 5).map((project, index) => (
-                  <div
-                    key={project.id}
-                    onClick={() => onNavigate?.('projects', project.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: 'var(--space-3) 0',
-                      borderTop: index > 0 ? '1px solid var(--portal-border-subtle)' : 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
-                        {project.name}
-                      </div>
-                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-0-5)' }}>
-                        {project.client}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                      <div style={{ width: '80px', height: '4px', background: 'var(--portal-border-subtle)' }}>
-                        <div style={{ width: `${project.progress}%`, height: '100%', background: 'var(--portal-text-light)' }} />
-                      </div>
-                      <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', minWidth: '32px' }}>
-                        {project.progress}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Recent Activity */}
-        <section>
-          <h2 style={sectionTitleStyle}>Recent Activity</h2>
-          <div style={panelStyle}>
-            {recentActivity.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
-                No recent activity
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {recentActivity.slice(0, 8).map((activity, index) => (
-                  <div
-                    key={activity.id}
-                    style={{
-                      padding: 'var(--space-2-5) 0',
-                      borderTop: index > 0 ? '1px solid var(--portal-border-subtle)' : 'none',
-                    }}
-                  >
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
-                      {activity.description}
-                    </div>
-                    <div style={{ fontSize: 'var(--font-size-2xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-1)' }}>
-                      {formatRelativeTime(activity.timestamp)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+        ))}
       </div>
 
-      {/* Upcoming Tasks */}
-      <section>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>Upcoming Tasks</h2>
-          <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
-            <button
-              onClick={() => setTasksView('list')}
-              style={{
-                background: 'transparent',
-                border: '1px solid',
-                borderColor: tasksView === 'list' ? 'var(--portal-text-light)' : 'var(--portal-border-color)',
-                color: tasksView === 'list' ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
-                padding: 'var(--space-1-5)',
-                cursor: 'pointer',
-              }}
-              title="List view"
-            >
-              <List style={{ width: 14, height: 14 }} />
+      {/* Attention Items */}
+      {attentionItems.length > 0 && (
+        <div className="overview-stats-strip" style={{ gridTemplateColumns: `repeat(${attentionItems.length}, 1fr)` }}>
+          {attentionItems.map((item) => (
+            <button key={item.type} onClick={item.action} className="overview-stat-card overview-panel">
+              <div className="stat-card-top">
+                <span className="field-label">{item.label}</span>
+                {item.icon}
+              </div>
+              <div className="stat-card-value stat-value-alert">{item.count}</div>
             </button>
-            <button
-              onClick={() => setTasksView('kanban')}
-              style={{
-                background: 'transparent',
-                border: '1px solid',
-                borderColor: tasksView === 'kanban' ? 'var(--portal-text-light)' : 'var(--portal-border-color)',
-                color: tasksView === 'kanban' ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
-                padding: 'var(--space-1-5)',
-                cursor: 'pointer',
-              }}
-              title="Kanban view"
-            >
-              <LayoutGrid style={{ width: 14, height: 14 }} />
-            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Two Column Grid */}
+      <div className="overview-grid">
+        {/* Main Column */}
+        <div className="overview-col-main">
+          {/* Active Projects */}
+          <div className="overview-panel">
+            <div className="overview-panel-header">
+              <h3 className="overview-panel-title">
+                <Briefcase className="panel-icon" />
+                Active Projects
+              </h3>
+              <button onClick={() => onNavigate?.('projects')} className="overview-panel-action">
+                View All <ArrowRight className="panel-icon" />
+              </button>
+            </div>
+            <div className="overview-panel-body">
+              {activeProjects.length === 0 ? (
+                <div className="empty-state">No active projects</div>
+              ) : (
+                <ul className="activity-feed">
+                  {activeProjects.slice(0, 5).map((project) => (
+                    <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('projects', project.id)}>
+                      <div className="activity-body ovdash-flex-1">
+                        <span className="activity-text">{project.name}</span>
+                        <span className="activity-time">{project.client}</span>
+                      </div>
+                      <div className="progress-cell">
+                        <div className="progress-bar ovdash-progress-width">
+                          <div className="progress-fill" style={{ width: `${project.progress}%` }} />
+                        </div>
+                        <span className="progress-pct">{project.progress}%</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {/* Upcoming Tasks */}
+          <div className="overview-panel">
+            <div className="overview-panel-header">
+              <h3 className="overview-panel-title">
+                <Clock className="panel-icon" />
+                Upcoming Tasks
+              </h3>
+              <div className="view-toggle">
+                <button onClick={() => setTasksView('list')} className={cn('icon-btn icon-btn-outline', tasksView === 'list' && 'active')} title="List view">
+                  <List className="btn-icon" />
+                </button>
+                <button onClick={() => setTasksView('kanban')} className={cn('icon-btn icon-btn-outline', tasksView === 'kanban' && 'active')} title="Kanban view">
+                  <LayoutGrid className="btn-icon" />
+                </button>
+              </div>
+            </div>
+            <div className="overview-panel-body">
+              {upcomingTasks.length === 0 ? (
+                <div className="empty-state">No upcoming tasks</div>
+              ) : tasksView === 'list' ? (
+                <ul className="activity-feed">
+                  {upcomingTasks.slice(0, 5).map((task) => (
+                    <li key={task.id} className="activity-feed-item">
+                      <span className="activity-dot" style={{ background: getPriorityColor(task.priority) }} />
+                      <div className="activity-body ovdash-flex-1">
+                        <span className="activity-text">{task.title}</span>
+                        <span className="activity-time">{task.projectName}</span>
+                      </div>
+                      {task.dueDate && <span className="due-cell">{formatDate(task.dueDate)}</span>}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <TasksKanban tasks={upcomingTasks} />
+              )}
+            </div>
           </div>
         </div>
 
-        {tasksView === 'list' ? (
-          <div style={panelStyle}>
-            {upcomingTasks.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
-                No upcoming tasks
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {upcomingTasks.map((task, index) => (
-                  <div
-                    key={task.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--space-3)',
-                      padding: 'var(--space-3) 0',
-                      borderTop: index > 0 ? '1px solid var(--portal-border-subtle)' : 'none',
-                    }}
-                  >
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      background: getPriorityColor(task.priority),
-                      flexShrink: 0,
-                    }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
-                        {task.title}
+        {/* Aside Column */}
+        <div className="overview-col-aside">
+          {/* Recent Activity */}
+          <div className="overview-panel">
+            <div className="overview-panel-header">
+              <h3 className="overview-panel-title">Recent Activity</h3>
+            </div>
+            <div className="overview-panel-body--compact">
+              {recentActivity.length === 0 ? (
+                <div className="empty-state">No recent activity</div>
+              ) : (
+                <ul className="activity-feed">
+                  {recentActivity.slice(0, 8).map((activity) => (
+                    <li key={activity.id} className="activity-feed-item">
+                      <span className="activity-dot dot-blue" />
+                      <div className="activity-body">
+                        <span className="activity-text">{activity.description}</span>
+                        <span className="activity-time">{formatTimeAgo(activity.timestamp)}</span>
                       </div>
-                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-0-5)' }}>
-                        {task.projectName}
-                      </div>
-                    </div>
-                    {task.dueDate && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)', fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)' }}>
-                        <Clock style={{ width: 12, height: 12 }} />
-                        {formatDate(task.dueDate)}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        ) : (
-          <TasksKanban tasks={upcomingTasks} />
-        )}
-      </section>
+
+          {/* Quick Actions */}
+          <div className="overview-panel">
+            <div className="overview-panel-header">
+              <h3 className="overview-panel-title">Quick Actions</h3>
+            </div>
+            <div className="overview-panel-body ovdash-quick-actions">
+              <button onClick={() => onNavigate?.('projects')} className="btn btn-outline btn-sm">
+                <Plus className="btn-icon" /> New Project
+              </button>
+              <button onClick={() => onNavigate?.('clients')} className="btn btn-outline btn-sm">
+                <Users className="btn-icon" /> Add Client
+              </button>
+              <button onClick={() => onNavigate?.('invoices')} className="btn btn-outline btn-sm">
+                <FileUp className="btn-icon" /> Create Invoice
+              </button>
+              <button onClick={() => onNavigate?.('messaging')} className="btn btn-outline btn-sm">
+                <Send className="btn-icon" /> Send Message
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
+function TasksKanban({ tasks }: { tasks: any[] }) {
   const columns = [
     { id: 'pending', label: 'TO DO' },
     { id: 'in_progress', label: 'IN PROGRESS' },
@@ -493,49 +278,22 @@ function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+    <div className="kanban-grid">
       {columns.map((column) => (
-        <div key={column.id} style={panelStyle}>
-          <h3 style={{ ...sectionTitleStyle, marginBottom: 'var(--space-3)' }}>{column.label}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            {tasks
-              .filter((task) => task.status === column.id)
-              .map((task) => (
-                <div
-                  key={task.id}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid var(--portal-border-color)',
-                    padding: 'var(--space-3)',
-                    cursor: 'pointer',
-                    transition: 'border-color 0.15s',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--portal-border-color)'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--portal-border-color)'}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      background: getPriorityColor(task.priority),
-                      flexShrink: 0,
-                      marginTop: 'var(--space-1-5)',
-                    }} />
-                    <div>
-                      <div style={{ fontSize: 'var(--font-size-xs)', fontWeight: 500, color: 'var(--portal-text-light)', fontFamily: 'var(--font-mono)' }}>
-                        {task.title}
-                      </div>
-                      <div style={{ fontSize: 'var(--font-size-2xs)', color: 'var(--portal-text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-1)' }}>
-                        {task.projectName}
-                      </div>
-                    </div>
-                  </div>
+        <div key={column.id} className="kanban-column">
+          <h4 className="field-label">{column.label}</h4>
+          <div className="kanban-items">
+            {tasks.filter((task) => task.status === column.id).map((task) => (
+              <div key={task.id} className="kanban-card">
+                <span className="activity-dot" style={{ background: getPriorityColor(task.priority) }} />
+                <div>
+                  <div className="activity-text">{task.title}</div>
+                  <div className="activity-time">{task.projectName}</div>
                 </div>
-              ))}
-            {tasks.filter((task) => task.status === column.id).length === 0 && (
-              <div style={{ textAlign: 'center', fontSize: 'var(--font-size-xs)', color: 'var(--portal-text-muted)', padding: 'var(--space-6)', fontFamily: 'var(--font-mono)' }}>
-                No tasks
               </div>
+            ))}
+            {tasks.filter((task) => task.status === column.id).length === 0 && (
+              <div className="empty-state-small">No tasks</div>
             )}
           </div>
         </div>
@@ -544,63 +302,8 @@ function TasksKanban({ tasks }: { tasks: UpcomingTask[] }) {
   );
 }
 
-function DashboardSkeleton() {
-  const skeletonStyle: React.CSSProperties = {
-    background: 'var(--portal-bg-hover)',
-    border: '1px solid var(--portal-border-subtle)',
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-        {[1, 2, 3].map((i) => (
-          <div key={i} style={{ ...skeletonStyle, height: '80px' }} />
-        ))}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} style={{ ...skeletonStyle, height: '72px' }} />
-        ))}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        <div style={{ ...skeletonStyle, height: '240px' }} />
-        <div style={{ ...skeletonStyle, height: '240px' }} />
-      </div>
-      <div style={{ ...skeletonStyle, height: '200px' }} />
-    </div>
-  );
-}
-
-// Utility functions
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function formatRelativeTime(timestamp: string): string {
-  const now = new Date();
-  const date = new Date(timestamp);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return formatDate(timestamp);
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function getPriorityColor(priority: string): string {
@@ -608,7 +311,6 @@ function getPriorityColor(priority: string): string {
     case 'urgent': return 'var(--status-cancelled)';
     case 'high': return 'var(--status-pending)';
     case 'medium': return 'var(--portal-text-light)';
-    case 'low': return 'var(--portal-text-muted)';
     default: return 'var(--portal-text-muted)';
   }
 }

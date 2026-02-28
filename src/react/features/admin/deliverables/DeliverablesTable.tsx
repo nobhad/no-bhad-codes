@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   Package,
@@ -11,11 +11,14 @@ import {
   Trash2,
   Download,
   ExternalLink,
+  ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -38,14 +41,18 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useSelection } from '@react/hooks/useSelection';
+import { DELIVERABLES_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 
 interface Deliverable {
-  id: string;
+  id: number;
   title: string;
   description?: string;
-  projectId: string;
+  projectId: number;
   projectName: string;
-  clientId: string;
+  clientId: number;
   clientName: string;
   status: 'pending' | 'in-progress' | 'review' | 'approved' | 'delivered';
   dueDate?: string;
@@ -67,21 +74,77 @@ interface DeliverableStats {
 
 interface DeliverablesTableProps {
   projectId?: string;
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'review', label: 'In Review' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'delivered', label: 'Delivered' },
-];
+const DELIVERABLE_STATUS_CONFIG: Record<string, { label: string }> = {
+  pending: { label: 'Pending' },
+  'in-progress': { label: 'In Progress' },
+  review: { label: 'In Review' },
+  approved: { label: 'Approved' },
+  delivered: { label: 'Delivered' },
+};
 
-export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTableProps) {
+// Filter function
+function filterDeliverable(
+  deliverable: Deliverable,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const searchLower = search.toLowerCase();
+    const matchesSearch =
+      deliverable.title.toLowerCase().includes(searchLower) ||
+      deliverable.projectName.toLowerCase().includes(searchLower) ||
+      deliverable.clientName.toLowerCase().includes(searchLower);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (deliverable.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+// Sort function
+function sortDeliverables(a: Deliverable, b: Deliverable, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'project':
+      return multiplier * a.projectName.localeCompare(b.projectName);
+    case 'dueDate':
+      return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
+    case 'updatedAt':
+      return multiplier * (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+    default:
+      return 0;
+  }
+}
+
+export function DeliverablesTable({ projectId, getAuthToken, showNotification, onNavigate }: DeliverablesTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
   const [error, setError] = useState<string | null>(null);
   const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
   const [stats, setStats] = useState<DeliverableStats>({
@@ -92,85 +155,166 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
     delivered: 0,
     overdue: 0,
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
 
-  useEffect(() => {
-    loadDeliverables();
-  }, [projectId]);
+  // Filtering and sorting
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Deliverable>({
+    storageKey: 'admin_deliverables',
+    filters: DELIVERABLES_FILTER_CONFIG,
+    filterFn: filterDeliverable,
+    sortFn: sortDeliverables,
+    defaultSort: { column: 'updatedAt', direction: 'desc' }
+  });
 
-  async function loadDeliverables() {
+  // Apply filters
+  const filteredDeliverables = useMemo(() => applyFilters(deliverables), [applyFilters, deliverables]);
+
+  // Pagination
+  const pagination = usePagination({
+    storageKey: 'admin_deliverables_pagination',
+    totalItems: filteredDeliverables.length,
+    defaultPageSize: 25
+  });
+
+  const paginatedDeliverables = useMemo(
+    () => pagination.paginate(filteredDeliverables),
+    [pagination, filteredDeliverables]
+  );
+
+  // Selection for bulk actions
+  const selection = useSelection({
+    getId: (d: Deliverable) => d.id,
+    items: paginatedDeliverables
+  });
+
+  const loadDeliverables = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
       if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`/api/admin/deliverables?${params}`);
+      const response = await fetch(`/api/admin/deliverables?${params}`, {
+        method: 'GET',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to load deliverables');
       const data = await response.json();
-      setDeliverables(data.deliverables || []);
-      setStats(data.stats || stats);
+      const payload = data.data || data;
+      setDeliverables(payload.deliverables || []);
+      setStats(payload.stats || {
+        total: 0,
+        pending: 0,
+        inProgress: 0,
+        review: 0,
+        delivered: 0,
+        overdue: 0,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load deliverables');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [projectId, getHeaders]);
 
-  const filteredDeliverables = useMemo(() => {
-    let result = [...deliverables];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (d) =>
-          d.title.toLowerCase().includes(query) ||
-          d.projectName.toLowerCase().includes(query) ||
-          d.clientName.toLowerCase().includes(query)
-      );
-    }
-    if (statusFilter !== 'all') {
-      result = result.filter((d) => d.status === statusFilter);
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-          case 'title': aVal = a.title; bVal = b.title; break;
-          case 'project': aVal = a.projectName; bVal = b.projectName; break;
-          case 'dueDate': aVal = a.dueDate || ''; bVal = b.dueDate || ''; break;
-          case 'updatedAt': aVal = a.updatedAt; bVal = b.updatedAt; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
+  useEffect(() => {
+    loadDeliverables();
+  }, [loadDeliverables]);
+
+  // Status change handler
+  const handleStatusChange = useCallback(async (deliverableId: number, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/admin/deliverables/${deliverableId}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
       });
-    }
-    return result;
-  }, [deliverables, searchQuery, statusFilter, sort]);
 
-  const pagination = usePagination({ totalItems: filteredDeliverables.length });
-  const paginatedDeliverables = filteredDeliverables.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize
+      if (!response.ok) throw new Error('Failed to update deliverable');
+
+      setDeliverables((prev) =>
+        prev.map((d) =>
+          d.id === deliverableId
+            ? { ...d, status: newStatus as Deliverable['status'] }
+            : d
+        )
+      );
+      showNotification?.('Deliverable status updated', 'success');
+    } catch (err) {
+      console.error('Failed to update deliverable status:', err);
+      showNotification?.('Failed to update deliverable status', 'error');
+    }
+  }, [getHeaders, showNotification]);
+
+  // Bulk delete handler
+  const handleBulkDelete = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
+
+    const ids = selection.selectedItems.map((d) => d.id);
+    try {
+      const response = await fetch('/api/admin/deliverables/bulk-delete', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete deliverables');
+
+      setDeliverables((prev) => prev.filter((d) => !ids.includes(d.id)));
+      selection.clearSelection();
+      showNotification?.(`Deleted ${ids.length} deliverable${ids.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to delete deliverables:', err);
+      showNotification?.('Failed to delete deliverables', 'error');
+    }
+  }, [selection, getHeaders, showNotification]);
+
+  // Status options for bulk actions
+  const bulkStatusOptions = useMemo(
+    () =>
+      Object.entries(DELIVERABLE_STATUS_CONFIG).map(([value, config]) => ({
+        value,
+        label: config.label,
+        color: `var(--status-${value})`
+      })),
+    []
   );
 
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
+  // Handle bulk status change
+  const handleBulkStatusChange = useCallback(
+    async (newStatus: string) => {
+      if (selection.selectedCount === 0) return;
+
+      for (const d of selection.selectedItems) {
+        await handleStatusChange(d.id, newStatus);
       }
-      return { column, direction: 'asc' };
-    });
-  }
+      selection.clearSelection();
+    },
+    [selection, handleStatusChange]
+  );
+
+  // Handle filter change
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => {
+      setFilter(key, value);
+    },
+    [setFilter]
+  );
 
   function isOverdue(dueDate?: string, status?: string): boolean {
     if (!dueDate || status === 'delivered' || status === 'approved') return false;
     return new Date(dueDate) < new Date();
   }
-
-  const hasActiveFilters = searchQuery || statusFilter !== 'all';
 
   return (
     <TableLayout
@@ -192,19 +336,34 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search deliverables..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
-            ]}
-            values={{ status: statusFilter }}
-            onChange={(key, value) => setStatusFilter(value)}
+            sections={DELIVERABLES_FILTER_CONFIG}
+            values={filterValues}
+            onChange={handleFilterChange}
+          />
+          <IconButton
+            action="download"
+            disabled={filteredDeliverables.length === 0}
+            title="Export to CSV"
           />
           <IconButton action="add" title="New Deliverable" />
         </>
+      }
+      bulkActions={
+        <BulkActionsToolbar
+          selectedCount={selection.selectedCount}
+          totalCount={filteredDeliverables.length}
+          onClearSelection={selection.clearSelection}
+          onSelectAll={() => selection.selectMany(filteredDeliverables)}
+          allSelected={selection.allSelected && selection.selectedCount === filteredDeliverables.length}
+          statusOptions={bulkStatusOptions}
+          onStatusChange={handleBulkStatusChange}
+          onDelete={handleBulkDelete}
+        />
       }
       error={
         error ? (
@@ -238,7 +397,15 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
+            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={selection.allSelected}
+                onCheckedChange={selection.toggleSelectAll}
+                aria-label="Select all"
+              />
+            </AdminTableHead>
             <AdminTableHead
+              className="name-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
@@ -246,15 +413,16 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
               Deliverable
             </AdminTableHead>
             <AdminTableHead
+              className="project-col"
               sortable
               sortDirection={sort?.column === 'project' ? sort.direction : null}
               onClick={() => toggleSort('project')}
             >
               Project
             </AdminTableHead>
-            <AdminTableHead>Status</AdminTableHead>
-            <AdminTableHead>Ver</AdminTableHead>
-            <AdminTableHead>Files</AdminTableHead>
+            <AdminTableHead className="status-col">Status</AdminTableHead>
+            <AdminTableHead className="version-col">Ver</AdminTableHead>
+            <AdminTableHead className="files-col">Files</AdminTableHead>
             <AdminTableHead
               className="date-col"
               sortable
@@ -269,16 +437,27 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
 
         <AdminTableBody animate={!isLoading}>
           {isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <AdminTableLoading colSpan={8} rows={5} />
           ) : paginatedDeliverables.length === 0 ? (
             <AdminTableEmpty
-              colSpan={7}
+              colSpan={8}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No deliverables match your filters' : 'No deliverables yet'}
             />
           ) : (
             paginatedDeliverables.map((deliverable) => (
-              <AdminTableRow key={deliverable.id} clickable>
+              <AdminTableRow
+                key={deliverable.id}
+                clickable
+                selected={selection.isSelected(deliverable)}
+              >
+                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selection.isSelected(deliverable)}
+                    onCheckedChange={() => selection.toggleSelection(deliverable)}
+                    aria-label={`Select ${deliverable.title}`}
+                  />
+                </AdminTableCell>
                 <AdminTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <Package className="cell-icon" />
@@ -292,17 +471,36 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onNavigate?.('projects', deliverable.projectId);
+                      onNavigate?.('projects', String(deliverable.projectId));
                     }}
                     className="table-link"
                   >
                     {deliverable.projectName}
                   </button>
                 </AdminTableCell>
-                <AdminTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(deliverable.status)} size="sm">
-                    {deliverable.status.replace('-', ' ')}
-                  </StatusBadge>
+                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalDropdown>
+                    <PortalDropdownTrigger asChild>
+                      <button className="status-dropdown-trigger">
+                        <StatusBadge status={getStatusVariant(deliverable.status)} size="sm">
+                          {DELIVERABLE_STATUS_CONFIG[deliverable.status]?.label || deliverable.status.replace('-', ' ')}
+                        </StatusBadge>
+                        <ChevronDown className="status-dropdown-caret" />
+                      </button>
+                    </PortalDropdownTrigger>
+                    <PortalDropdownContent sideOffset={0} align="start">
+                      {Object.entries(DELIVERABLE_STATUS_CONFIG).map(([status, config]) => (
+                        <PortalDropdownItem
+                          key={status}
+                          onClick={() => handleStatusChange(deliverable.id, status)}
+                        >
+                          <StatusBadge status={getStatusVariant(status)} size="sm">
+                            {config.label}
+                          </StatusBadge>
+                        </PortalDropdownItem>
+                      ))}
+                    </PortalDropdownContent>
+                  </PortalDropdown>
                 </AdminTableCell>
                 <AdminTableCell>v{deliverable.version}</AdminTableCell>
                 <AdminTableCell>{deliverable.files}</AdminTableCell>
@@ -325,21 +523,15 @@ export function DeliverablesTable({ projectId, onNavigate }: DeliverablesTablePr
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
+                    <IconButton action="view" title="View" />
+                    <IconButton action="edit" title="Edit" />
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="icon-btn">
-                          <MoreHorizontal size={18} />
+                          <MoreHorizontal />
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>
-                        <PortalDropdownItem>
-                          <Eye className="dropdown-icon" />
-                          View
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <Edit className="dropdown-icon" />
-                          Edit
-                        </PortalDropdownItem>
                         {deliverable.files > 0 && (
                           <PortalDropdownItem>
                             <Download className="dropdown-icon" />

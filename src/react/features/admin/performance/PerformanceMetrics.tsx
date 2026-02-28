@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   RefreshCw,
   TrendingUp,
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
 
 interface PerformanceKPI {
   id: string;
@@ -39,7 +40,7 @@ interface TeamMember {
 }
 
 interface ProjectPerformance {
-  id: string;
+  id: number;
   name: string;
   clientName: string;
   budget: number;
@@ -58,6 +59,8 @@ interface PerformanceData {
 
 interface PerformanceMetricsProps {
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 const KPI_ICONS: Record<string, React.ReactNode> = {
@@ -69,7 +72,7 @@ const KPI_ICONS: Record<string, React.ReactNode> = {
   target: <Target className="tw-h-5 tw-w-5" />,
 };
 
-export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
+export function PerformanceMetrics({ onNavigate, getAuthToken, showNotification }: PerformanceMetricsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,15 +84,26 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
   });
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
 
-  useEffect(() => {
-    loadPerformance();
-  }, [period]);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadPerformance() {
+  const loadPerformance = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/performance?period=${period}`);
+      const response = await fetch(`/api/admin/performance?period=${period}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load performance data');
       const result = await response.json();
       setData(result);
@@ -98,13 +112,11 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [period, getHeaders]);
 
-  function formatCurrency(amount: number): string {
-    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
-    if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}K`;
-    return `$${amount}`;
-  }
+  useEffect(() => {
+    loadPerformance();
+  }, [loadPerformance]);
 
   function formatPercentage(value: number): string {
     return `${value.toFixed(1)}%`;
@@ -120,23 +132,22 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        <h2 className="tw-heading" style={{ fontSize: '16px' }}>Performance Dashboard</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div className="tw-tab-list" style={{ borderBottom: 'none' }}>
+      <div className="perf-header">
+        <h2 className="tw-heading perf-heading">Performance Dashboard</h2>
+        <div className="perf-controls">
+          <div className="tw-tab-list perf-tab-list">
             {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={period === p ? 'tw-tab-active' : 'tw-tab'}
-                style={{ textTransform: 'capitalize' }}
+                className={cn(period === p ? 'tw-tab-active' : 'tw-tab', 'perf-tab-capitalize')}
               >
                 {p}
               </button>
             ))}
           </div>
           <button className="tw-btn-secondary" onClick={loadPerformance} disabled={isLoading}>
-            <RefreshCw style={{ width: '1rem', height: '1rem', animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+            <RefreshCw className={cn('status-panel-refresh-icon', isLoading && 'status-panel-refresh-icon-spin')} />
             Refresh
           </button>
         </div>
@@ -146,33 +157,33 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
       {error && (
         <div className="tw-error">
           {error}
-          <button className="tw-btn-secondary" onClick={loadPerformance} style={{ marginLeft: '1rem' }}>
+          <button className="tw-btn-secondary status-retry-btn" onClick={loadPerformance}>
             Retry
           </button>
         </div>
       )}
 
       {/* KPIs */}
-      <div className="tw-grid-stats" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
+      <div className="tw-grid-stats tw-grid-6-cols">
         {isLoading
-          ? <div className="tw-loading" style={{ gridColumn: 'span 6' }}>Loading performance data...</div>
+          ? <div className="tw-loading tw-col-span-full">Loading performance data...</div>
           : data.kpis.map((kpi) => (
               <div key={kpi.id} className="tw-stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div className="perf-kpi-header">
                   <span className="tw-stat-label">{kpi.name}</span>
                   <span className="tw-text-muted">
-                    {KPI_ICONS[kpi.icon] || <BarChart3 style={{ width: '1.25rem', height: '1.25rem' }} />}
+                    {KPI_ICONS[kpi.icon] || <BarChart3 className="perf-kpi-icon" />}
                   </span>
                 </div>
-                <div className="tw-stat-value" style={{ marginBottom: '0.25rem' }}>
+                <div className="tw-stat-value perf-kpi-value">
                   {kpi.unit === '$' ? formatCurrency(kpi.value) : `${kpi.value}${kpi.unit}`}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <div className="perf-kpi-trend-row">
+                  <div className="perf-kpi-trend">
                     {kpi.trend === 'up' ? (
-                      <TrendingUp style={{ width: '0.75rem', height: '0.75rem' }} />
+                      <TrendingUp className="perf-trend-icon" />
                     ) : kpi.trend === 'down' ? (
-                      <TrendingDown style={{ width: '0.75rem', height: '0.75rem' }} />
+                      <TrendingDown className="perf-trend-icon" />
                     ) : null}
                     <span className="tw-text-muted">
                       {formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100)}
@@ -182,7 +193,7 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
                     Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
                   </span>
                 </div>
-                <div className="tw-progress-track" style={{ marginTop: '0.5rem' }}>
+                <div className="tw-progress-track perf-progress-mt">
                   <div
                     className="tw-progress-bar"
                     style={{
@@ -195,12 +206,12 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
             ))}
       </div>
 
-      <div className="tw-grid-cards" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+      <div className="tw-grid-cards tw-grid-2-cols">
         {/* Team Performance */}
-        <div className="tw-card" style={{ padding: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div className="tw-card perf-card">
+          <div className="perf-card-header">
             <h3 className="tw-section-title">Team Performance</h3>
-            <Award style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+            <Award className="perf-card-icon" />
           </div>
           {isLoading ? (
             <div className="tw-loading">Loading team data...</div>
@@ -208,18 +219,18 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
             <div>
               {data.teamMembers.map((member, index) => (
                 <div key={member.id} className="tw-list-item">
-                  <span className="tw-text-muted" style={{ width: '1.5rem', textAlign: 'center', fontSize: '12px', fontWeight: 700 }}>
+                  <span className="tw-text-muted perf-rank">
                     {index + 1}
                   </span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: '14px' }}>{member.name}</div>
-                    <div className="tw-text-muted" style={{ fontSize: '11px' }}>{member.role}</div>
+                  <div className="perf-member-info">
+                    <div className="perf-member-name">{member.name}</div>
+                    <div className="tw-text-muted perf-member-role">{member.role}</div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 700, fontSize: '14px' }}>
+                  <div className="perf-member-stats">
+                    <div className="perf-member-revenue">
                       {formatCurrency(member.revenueGenerated)}
                     </div>
-                    <div className="tw-text-muted" style={{ fontSize: '11px' }}>
+                    <div className="tw-text-muted perf-member-projects">
                       {member.projectsCompleted} projects
                     </div>
                   </div>
@@ -230,36 +241,36 @@ export function PerformanceMetrics({ onNavigate }: PerformanceMetricsProps) {
         </div>
 
         {/* Project Performance */}
-        <div className="tw-card" style={{ padding: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div className="tw-card perf-card">
+          <div className="perf-card-header">
             <h3 className="tw-section-title">Project Status</h3>
-            <Briefcase style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+            <Briefcase className="perf-card-icon" />
           </div>
           {isLoading ? (
             <div className="tw-loading">Loading project data...</div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="perf-projects-list">
               {data.projectPerformance.map((project) => (
                 <div
                   key={project.id}
                   className="tw-card-hover"
-                  onClick={() => onNavigate?.('projects', project.id)}
+                  onClick={() => onNavigate?.('projects', String(project.id))}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <div className="perf-project-header">
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '14px' }}>{project.name}</div>
-                      <div className="tw-text-muted" style={{ fontSize: '11px' }}>{project.clientName}</div>
+                      <div className="perf-project-name">{project.name}</div>
+                      <div className="tw-text-muted perf-project-client">{project.clientName}</div>
                     </div>
                     <span className="tw-badge">
                       {project.onTrack ? 'On Track' : 'At Risk'}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '11px' }} className="tw-text-muted">
+                  <div className="tw-text-muted perf-project-meta">
                     <span>Budget: {formatCurrency(project.budget)}</span>
                     <span>Spent: {formatCurrency(project.spent)}</span>
-                    <span style={{ marginLeft: 'auto' }}>{project.progress}%</span>
+                    <span className="perf-ml-auto">{project.progress}%</span>
                   </div>
-                  <div className="tw-progress-track" style={{ marginTop: '0.5rem' }}>
+                  <div className="tw-progress-track perf-progress-mt">
                     <div
                       className="tw-progress-bar"
                       style={{

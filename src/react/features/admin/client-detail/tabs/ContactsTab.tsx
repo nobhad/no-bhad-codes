@@ -190,7 +190,7 @@ export function ContactsTab({
   const renderForm = () => (
     <div className="tw-panel tw-mb-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-4">
-        <h3 className="tw-heading" style={{ fontSize: '14px' }}>
+        <h3 className="tw-heading proj-text-base">
           {editingId ? 'Edit Contact' : 'Add Contact'}
         </h3>
         <button
@@ -256,10 +256,9 @@ export function ContactsTab({
               type="checkbox"
               checked={formData.is_primary}
               onChange={(e) => handleFieldChange('is_primary', e.target.checked)}
-              className="tw-w-4 tw-h-4"
-              style={{ borderRadius: 0 }}
+              className="tw-w-4 tw-h-4 contacts-checkbox"
             />
-            <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+            <span className="tw-text-muted proj-text-base">
               Primary Contact
             </span>
           </label>
@@ -294,7 +293,7 @@ export function ContactsTab({
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading" style={{ fontSize: '18px' }}>
+        <h2 className="tw-heading proj-text-lg">
           Contacts ({contacts.length})
         </h2>
         {!isAdding && !editingId && (
@@ -313,7 +312,7 @@ export function ContactsTab({
         <div className="tw-empty-state">
           <User className="tw-h-12 tw-w-12 tw-mb-3" />
           <p>No contacts yet</p>
-          <p style={{ fontSize: '14px' }}>
+          <p className="proj-text-base">
             Add contacts to keep track of key people
           </p>
         </div>
@@ -330,12 +329,12 @@ export function ContactsTab({
               {/* Contact Header */}
               <div className="tw-flex tw-items-start tw-justify-between tw-mb-3">
                 <div className="tw-flex tw-items-center tw-gap-2">
-                  <div className="tw-w-10 tw-h-10 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center" style={{ borderRadius: 0 }}>
+                  <div className="tw-w-10 tw-h-10 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center contacts-avatar">
                     <User className="tw-h-5 tw-w-5 tw-text-muted" />
                   </div>
                   <div>
                     <div className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-heading" style={{ fontSize: '14px' }}>
+                      <span className="tw-heading proj-text-base">
                         {contact.name}
                       </span>
                       {contact.is_primary && (
@@ -343,7 +342,7 @@ export function ContactsTab({
                       )}
                     </div>
                     {contact.title && (
-                      <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+                      <span className="tw-text-muted proj-text-sm">
                         {contact.title}
                       </span>
                     )}
@@ -383,8 +382,7 @@ export function ContactsTab({
                   <Mail className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
                   <a
                     href={`mailto:${contact.email}`}
-                    className="tw-text-primary"
-                    style={{ fontSize: '12px' }}
+                    className="tw-text-primary proj-text-sm"
                   >
                     {contact.email}
                   </a>
@@ -395,8 +393,7 @@ export function ContactsTab({
                     <Phone className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
                     <a
                       href={`tel:${contact.phone}`}
-                      className="tw-text-muted"
-                      style={{ fontSize: '12px' }}
+                      className="tw-text-muted proj-text-sm"
                     >
                       {contact.phone}
                     </a>
@@ -406,7 +403,7 @@ export function ContactsTab({
                 {contact.role && (
                   <div className="tw-flex tw-items-center tw-gap-2">
                     <Briefcase className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
-                    <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+                    <span className="tw-text-muted proj-text-sm">
                       {CONTACT_ROLE_LABELS[contact.role] || contact.role}
                     </span>
                   </div>
@@ -415,7 +412,7 @@ export function ContactsTab({
 
               {/* Notes */}
               {contact.notes && (
-                <p className="tw-text-muted tw-mt-3 tw-pt-3" style={{ fontSize: '12px', borderTop: '1px solid var(--portal-border-subtle)' }}>
+                <p className="tw-text-muted tw-mt-3 tw-pt-3 contacts-notes">
                   {contact.notes}
                 </p>
               )}

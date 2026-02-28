@@ -1,12 +1,12 @@
 /**
  * NotificationsForm
  * Notification preferences form for client portal settings
- * Brutalist design: transparent backgrounds, no border-radius, monospace font
+ * Uses inline-toggle pattern: toggle to save immediately
  */
 
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import { Bell, FileText, FolderKanban, MessageSquare, Megaphone, Save, Loader2 } from 'lucide-react';
+import { Bell, FileText, FolderKanban, MessageSquare, Megaphone, Loader2 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import type { NotificationPreferences } from './PortalSettings';
 
@@ -57,117 +57,87 @@ interface ToggleSwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
+  loading?: boolean;
 }
 
-function ToggleSwitch({ checked, onChange, disabled }: ToggleSwitchProps) {
+function ToggleSwitch({ checked, onChange, disabled, loading }: ToggleSwitchProps) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
-      disabled={disabled}
+      disabled={disabled || loading}
       onClick={() => onChange(!checked)}
-      className={cn(
-        'tw-relative tw-inline-flex tw-h-5 tw-w-9 tw-shrink-0 tw-cursor-pointer tw-border tw-border-white tw-transition-colors',
-        'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white focus:tw-ring-offset-2 focus:tw-ring-offset-black',
-        'disabled:tw-cursor-not-allowed disabled:tw-opacity-50',
-        checked ? 'tw-bg-white' : 'tw-bg-transparent'
-      )}
+      className={cn('notification-toggle', checked && 'is-checked')}
     >
-      <span
-        className={cn(
-          'tw-pointer-events-none tw-inline-block tw-h-4 tw-w-4 tw-shadow tw-ring-0 tw-transition-transform',
-          checked ? 'tw-translate-x-4 tw-bg-black' : 'tw-translate-x-0 tw-bg-white'
-        )}
-      />
+      {loading ? (
+        <span className="toggle-loading">
+          <Loader2 />
+        </span>
+      ) : (
+        <span className="toggle-thumb" />
+      )}
     </button>
   );
 }
 
 /**
  * NotificationsForm Component
+ * Toggles save immediately on change
  */
 export function NotificationsForm({ preferences, onUpdate }: NotificationsFormProps) {
-  // Form state
-  const [localPreferences, setLocalPreferences] = useState<NotificationPreferences>(preferences);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
+  // Track which toggle is currently saving
+  const [savingKey, setSavingKey] = useState<keyof NotificationPreferences | null>(null);
 
-  // Handle toggle change
-  const handleToggle = useCallback((key: keyof NotificationPreferences, value: boolean) => {
-    setLocalPreferences(prev => ({
-      ...prev,
+  // Handle toggle change - saves immediately
+  const handleToggle = useCallback(async (key: keyof NotificationPreferences, value: boolean) => {
+    setSavingKey(key);
+
+    const updatedPreferences: NotificationPreferences = {
+      ...preferences,
       [key]: value
-    }));
-    setIsDirty(true);
-  }, []);
+    };
 
-  // Handle submit
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+    await onUpdate(updatedPreferences);
 
-    setIsSaving(true);
-
-    const success = await onUpdate(localPreferences);
-
-    setIsSaving(false);
-
-    if (success) {
-      setIsDirty(false);
-    }
-  }, [localPreferences, onUpdate]);
-
-  // Check if form has unsaved changes
-  const hasChanges = isDirty && (
-    localPreferences.email_invoices !== preferences.email_invoices ||
-    localPreferences.email_project_updates !== preferences.email_project_updates ||
-    localPreferences.email_messages !== preferences.email_messages ||
-    localPreferences.email_marketing !== preferences.email_marketing
-  );
+    setSavingKey(null);
+  }, [preferences, onUpdate]);
 
   return (
-    <form onSubmit={handleSubmit} className="tw-section">
+    <div className="settings-form-section">
       {/* Notification Preferences Section */}
-      <div className="tw-panel">
-        <div className="tw-flex tw-items-center tw-gap-2 tw-mb-4">
-          <Bell className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)]" />
-          <h3 className="tw-section-title tw-m-0">
+      <div className="portal-section">
+        <div className="section-header">
+          <Bell className="section-icon"  />
+          <h3 className="section-title">
             Email Notifications
           </h3>
         </div>
 
-        <p className="tw-text-muted tw-text-[14px] tw-mb-4">
+        <p className="section-description">
           Choose which email notifications you would like to receive.
         </p>
 
-        <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="notification-options">
           {NOTIFICATION_OPTIONS.map((option) => {
             const Icon = option.icon;
-            const isChecked = localPreferences[option.key];
+            const isChecked = preferences[option.key];
+            const isLoading = savingKey === option.key;
 
             return (
               <div
                 key={option.key}
-                className={cn(
-                  'tw-flex tw-items-start tw-justify-between tw-gap-4 tw-p-3',
-                  'tw-bg-transparent tw-border tw-border-[var(--portal-border-subtle)]',
-                  'tw-transition-colors',
-                  isChecked && 'tw-border-white'
-                )}
+                className={cn('notification-option', isChecked && 'is-active')}
               >
-                <div className="tw-flex tw-items-start tw-gap-3">
-                  <div className={cn(
-                    'tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8',
-                    'tw-border tw-border-[var(--portal-border-color)]',
-                    isChecked ? 'tw-bg-white tw-text-black' : 'tw-bg-transparent'
-                  )}>
-                    <Icon className="tw-h-4 tw-w-4" />
+                <div className="notification-option-content">
+                  <div className={cn('notification-option-icon', isChecked && 'is-active')}>
+                    <Icon  />
                   </div>
-                  <div className="tw-flex tw-flex-col tw-gap-0.5">
-                    <span className="tw-text-[14px] tw-font-mono tw-text-white">
+                  <div className="notification-option-text">
+                    <span className="notification-option-label">
                       {option.label}
                     </span>
-                    <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
+                    <span className="notification-option-description">
                       {option.description}
                     </span>
                   </div>
@@ -175,6 +145,8 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
                 <ToggleSwitch
                   checked={isChecked}
                   onChange={(value) => handleToggle(option.key, value)}
+                  loading={isLoading}
+                  disabled={savingKey !== null && savingKey !== option.key}
                 />
               </div>
             );
@@ -183,28 +155,12 @@ export function NotificationsForm({ preferences, onUpdate }: NotificationsFormPr
       </div>
 
       {/* Info Note */}
-      <div className="tw-card">
-        <p className="tw-text-[14px] tw-text-[var(--portal-text-muted)] tw-m-0 tw-font-mono">
-          <strong className="tw-text-white">Note:</strong> Some critical notifications
+      <div className="notification-note">
+        <p>
+          <strong>Note:</strong> Some critical notifications
           (such as security alerts and payment confirmations) cannot be disabled and will always be sent.
         </p>
       </div>
-
-      {/* Save Button */}
-      <div className="tw-flex tw-justify-end">
-        <button
-          type="submit"
-          className="tw-btn-primary"
-          disabled={!hasChanges || isSaving}
-        >
-          {isSaving ? (
-            <Loader2 className="tw-h-4 tw-w-4 tw-animate-spin" />
-          ) : (
-            <Save className="tw-h-4 tw-w-4" />
-          )}
-          Save Preferences
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }

@@ -199,10 +199,10 @@ export function PortalApprovals({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header with filter */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="approvals-header">
+        <div className="approvals-filter">
           <Filter className="tw-h-4 tw-w-4 tw-text-muted" />
-          <div className="tw-tab-list" style={{ borderBottom: 'none' }}>
+          <div className="tw-tab-list approvals-tabs">
             {ENTITY_FILTER_OPTIONS.map((option) => {
               const count = option.value === 'all' ? approvals.length : countByType[option.value] || 0;
               const isActive = entityFilter === option.value;
@@ -211,11 +211,10 @@ export function PortalApprovals({
                 <button
                   key={option.value}
                   onClick={() => setEntityFilter(option.value)}
-                  className={isActive ? 'tw-tab-active' : 'tw-tab'}
-                  style={{ padding: '0.25rem 0.5rem', fontSize: '12px', borderBottom: 'none' }}
+                  className={cn(isActive ? 'tw-tab-active' : 'tw-tab', 'approvals-tab')}
                 >
                   {option.label}
-                  {count > 0 && <span style={{ marginLeft: '0.25rem', opacity: 0.6 }}>{count}</span>}
+                  {count > 0 && <span className="approvals-count">{count}</span>}
                 </button>
               );
             })}
@@ -252,8 +251,8 @@ export function PortalApprovals({
 
       {/* Summary footer */}
       {approvals.length > 0 && (
-        <div className="tw-divider" style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-          <span className="tw-text-muted" style={{ fontSize: '11px' }}>
+        <div className="tw-divider approvals-summary">
+          <span className="tw-text-muted proj-text-xs">
             {filteredApprovals.length} of {approvals.length} pending approval{approvals.length !== 1 ? 's' : ''}
           </span>
         </div>

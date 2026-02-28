@@ -30,6 +30,8 @@ import { INVOICES_EXPORT_CONFIG } from '../../../../utils/table-export';
 import type { Invoice, InvoiceStatus, SortConfig } from '../types';
 import { INVOICE_STATUS_CONFIG } from '../types';
 import { formatDate } from '@react/utils/formatDate';
+import { formatCurrency } from '../../../../utils/format-utils';
+import { INVOICES_FILTER_CONFIG, INVOICE_STATUS_OPTIONS } from '../shared/filterConfigs';
 
 interface InvoicesTableProps {
   /** Auth token getter for API calls */
@@ -39,32 +41,6 @@ interface InvoicesTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
-
-// Filter configuration for useTableFilters
-const FILTER_CONFIG = [
-  {
-    key: 'status',
-    label: 'Status',
-    options: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'draft', label: 'Draft' },
-      { value: 'sent', label: 'Sent' },
-      { value: 'pending', label: 'Pending' },
-      { value: 'paid', label: 'Paid' },
-      { value: 'overdue', label: 'Overdue' }
-    ]
-  }
-];
-
-// Filter dropdown sections for FilterDropdown component
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'overdue', label: 'Overdue' }
-];
 
 /**
  * Check if an invoice is overdue
@@ -145,19 +121,6 @@ function sortInvoices(a: Invoice, b: Invoice, sort: SortConfig): number {
   }
 }
 
-// Format currency
-function formatCurrency(amount: number | string | undefined): string {
-  if (amount === undefined || amount === null) return '-';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(num)) return '-';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num);
-}
-
 /**
  * InvoicesTable
  * React implementation of the admin invoices table
@@ -203,7 +166,7 @@ export function InvoicesTable({
     hasActiveFilters
   } = useTableFilters<Invoice>({
     storageKey: 'admin_invoices',
-    filters: FILTER_CONFIG,
+    filters: INVOICES_FILTER_CONFIG,
     filterFn: filterInvoice,
     sortFn: sortInvoices,
     defaultSort: { column: 'due_date', direction: 'desc' }
@@ -422,9 +385,7 @@ export function InvoicesTable({
               placeholder="Search invoices..."
             />
             <FilterDropdown
-              sections={[
-                { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }
-              ]}
+              sections={INVOICES_FILTER_CONFIG}
               values={{ status: filterValues.status || 'all' }}
               onChange={(key, value) => setFilter(key, value)}
             />

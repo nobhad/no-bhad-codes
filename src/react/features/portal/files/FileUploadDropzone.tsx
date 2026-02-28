@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, X, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -103,6 +103,16 @@ export function FileUploadDropzone({
   const [error, setError] = useState<UploadError | null>(null);
   const [successCount, setSuccessCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Update state when uploading prop changes
   React.useEffect(() => {
@@ -136,8 +146,11 @@ export function FileUploadDropzone({
         setSuccessCount(valid.length);
         setState('success');
 
-        // Reset to idle after success message
-        setTimeout(() => {
+        // Reset to idle after success message (with cleanup ref to prevent memory leaks)
+        if (successTimeoutRef.current) {
+          clearTimeout(successTimeoutRef.current);
+        }
+        successTimeoutRef.current = setTimeout(() => {
           setState('idle');
           setSuccessCount(0);
         }, 3000);
@@ -232,14 +245,13 @@ export function FileUploadDropzone({
   if (state === 'error' && error) {
     return (
       <div
-        className={cn('tw-error', className)}
+        className={cn('tw-dropzone is-error', className)}
         role="alert"
-        style={{ borderStyle: 'dashed', borderWidth: '2px' }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="tw-dropzone-content">
           <AlertCircle className="tw-h-6 tw-w-6" />
-          <p style={{ fontSize: '12px', textAlign: 'center' }}>{error.message}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <p className="tw-dropzone-text">{error.message}</p>
+          <div className="tw-dropzone-actions">
             {error.files && error.files.length > 0 && (
               <button className="tw-btn-secondary" onClick={handleRetry}>Try Again</button>
             )}
@@ -253,14 +265,11 @@ export function FileUploadDropzone({
   // Render uploading state
   if (state === 'uploading') {
     return (
-      <div
-        className={cn('tw-panel', className)}
-        style={{ borderStyle: 'dashed', borderWidth: '2px' }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+      <div className={cn('tw-dropzone', className)}>
+        <div className="tw-dropzone-content">
           <RefreshCw className="tw-h-6 tw-w-6 tw-animate-spin" />
-          <p className="tw-text-muted" style={{ fontSize: '12px' }}>Uploading files...</p>
-          <div className="tw-progress-track" style={{ width: '100%', maxWidth: '16rem' }}>
+          <p className="tw-dropzone-text tw-text-muted">Uploading files...</p>
+          <div className="tw-progress-track">
             <div className="tw-progress-bar" style={{ width: `${uploadProgress}%` }} />
           </div>
         </div>
@@ -271,13 +280,10 @@ export function FileUploadDropzone({
   // Render success state
   if (state === 'success') {
     return (
-      <div
-        className={cn('tw-panel', className)}
-        style={{ borderStyle: 'dashed', borderWidth: '2px', borderColor: 'var(--portal-text-light)' }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+      <div className={cn('tw-dropzone is-success', className)}>
+        <div className="tw-dropzone-content">
           <CheckCircle className="tw-h-6 tw-w-6" />
-          <p style={{ fontSize: '12px' }}>{successCount} file(s) uploaded successfully</p>
+          <p className="tw-dropzone-text">{successCount} file(s) uploaded successfully</p>
         </div>
       </div>
     );
@@ -286,15 +292,13 @@ export function FileUploadDropzone({
   // Render idle/drag-active state
   return (
     <div
-      className={cn('tw-panel', className)}
-      style={{
-        borderStyle: 'dashed',
-        borderWidth: '2px',
-        borderColor: state === 'drag-active' ? 'var(--portal-text-light)' : 'var(--portal-border-color)',
-        background: state === 'drag-active' ? 'var(--portal-bg-hover)' : 'transparent',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1
-      }}
+      className={cn(
+        'tw-dropzone',
+        state === 'drag-active' && 'is-drag-active',
+        disabled && 'tw-cursor-not-allowed',
+        className
+      )}
+      style={disabled ? { opacity: 0.5 } : undefined}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -305,13 +309,11 @@ export function FileUploadDropzone({
       aria-label="File upload dropzone - press Enter or Space to browse files, or drag and drop files here"
       aria-disabled={disabled}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="tw-dropzone-content">
         <Upload className={cn('tw-h-6 tw-w-6', state === 'drag-active' ? 'tw-text-primary' : 'tw-text-muted')} />
-        <div style={{ textAlign: 'center' }}>
-          <p className="tw-text-primary" style={{ fontSize: '12px' }}>
-            Drag and drop files here or
-          </p>
-        </div>
+        <p className="tw-dropzone-text tw-text-primary">
+          Drag and drop files here or
+        </p>
         <button
           className="tw-btn-secondary"
           onClick={(e) => {
@@ -322,7 +324,7 @@ export function FileUploadDropzone({
         >
           Browse Files
         </button>
-        <p className="tw-text-muted" style={{ fontSize: '11px' }}>
+        <p className="tw-dropzone-hint">
           Max 5 files, 10MB each. Images, PDF, Word, ZIP accepted.
         </p>
       </div>

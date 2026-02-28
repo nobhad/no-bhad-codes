@@ -84,15 +84,15 @@ function AttachmentPreview({ attachment }: AttachmentPreviewProps) {
   };
 
   return (
-    <div className="tw-panel" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
+    <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2">
       {isImage ? (
-        <img src={attachment.download_url} alt={attachment.filename} style={{ width: '32px', height: '32px', objectFit: 'cover' }} />
+        <img src={attachment.download_url} alt={attachment.filename} className="attachment-thumbnail" />
       ) : (
         <File className="tw-h-4 tw-w-4 tw-text-muted" />
       )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="tw-text-primary" style={{ fontSize: '12px' }}>{attachment.filename}</div>
-        <div className="tw-text-muted" style={{ fontSize: '11px' }}>{formatFileSize(attachment.file_size)}</div>
+      <div className="tw-flex-1 card-content-truncate">
+        <div className="tw-text-primary tw-text-sm">{attachment.filename}</div>
+        <div className="tw-text-muted tw-text-xs">{formatFileSize(attachment.file_size)}</div>
       </div>
       <button className="tw-btn-icon" onClick={handleDownload} title="Download">
         <Download className="tw-h-4 tw-w-4" />
@@ -374,19 +374,18 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
   }, [content]);
 
   return (
-    <div className="tw-section" style={{ gap: '0.5rem' }}>
+    <div className="tw-section tw-gap-2">
       {/* Attachment previews */}
       {attachments.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', padding: '0 0.5rem' }}>
+        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-px-2">
           {attachments.map((file, index) => (
             <div
               key={`${file.name}-${index}`}
-              className="tw-panel"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.25rem 0.5rem', fontSize: '12px' }}
+              className="tw-panel tw-flex tw-items-center tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm"
             >
               <File className="tw-h-3 tw-w-3" />
-              <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
-              <button type="button" onClick={() => handleRemoveAttachment(index)} className="tw-btn-icon" style={{ padding: '0.125rem' }}>
+              <span className="attachment-filename">{file.name}</span>
+              <button type="button" onClick={() => handleRemoveAttachment(index)} className="tw-btn-icon tw-p-0.5">
                 <X className="tw-h-3 tw-w-3" />
               </button>
             </div>
@@ -395,14 +394,14 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
       )}
 
       {/* Input row */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+      <div className="tw-flex tw-items-end tw-gap-2">
         <input ref={fileInputRef} type="file" multiple accept={ALLOWED_FILE_TYPES.join(',')} onChange={handleFileChange} className="tw-hidden" />
 
         <button className="tw-btn-icon" onClick={handleAddAttachment} disabled={disabled || isSending} title="Attach file">
           <Paperclip className="tw-h-4 tw-w-4" />
         </button>
 
-        <div style={{ flex: 1 }}>
+        <div className="tw-flex-1">
           <textarea
             ref={textareaRef}
             value={content}
@@ -411,17 +410,15 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
             placeholder="Type a message..."
             disabled={disabled || isSending}
             rows={1}
-            className="tw-textarea"
-            style={{ minHeight: 'auto', resize: 'none', overflow: 'hidden' }}
+            className="tw-textarea composer-textarea"
           />
         </div>
 
         <button
-          className="tw-btn-primary"
+          className="tw-btn-primary tw-p-2"
           onClick={handleSend}
           disabled={disabled || isSending || (!content.trim() && attachments.length === 0)}
           title="Send message"
-          style={{ padding: '0.5rem' }}
         >
           <Send className="tw-h-4 tw-w-4" />
         </button>
@@ -477,17 +474,17 @@ export function MessageThread({
   }, [messages]);
 
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div ref={containerRef} className="tw-flex tw-flex-col tw-h-full">
       {/* Header */}
-      <div className="tw-divider" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem' }}>
+      <div className="tw-divider tw-flex tw-items-center tw-gap-3 tw-px-3 tw-py-2">
         <button className="tw-btn-icon" onClick={onBack} title="Back to threads">
           <ArrowLeft className="tw-h-4 tw-w-4" />
         </button>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 className="tw-text-primary" style={{ fontSize: '14px' }}>{thread.subject}</h3>
+        <div className="tw-flex-1 card-content-truncate">
+          <h3 className="tw-text-primary tw-text-sm">{thread.subject}</h3>
           {thread.project_name && (
-            <span className="tw-text-muted" style={{ fontSize: '12px' }}>{thread.project_name}</span>
+            <span className="tw-text-muted tw-text-sm">{thread.project_name}</span>
           )}
         </div>
 
@@ -497,19 +494,19 @@ export function MessageThread({
       </div>
 
       {/* Messages area */}
-      <div className="tw-scroll-container" style={{ flex: 1, padding: '1rem 0.75rem' }}>
+      <div className="tw-scroll-container tw-flex-1 tw-p-3">
         {loading && messages.length === 0 ? (
-          <div className="tw-loading" style={{ height: '100%' }}>
+          <div className="tw-loading tw-h-full">
             <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
             <span>Loading messages...</span>
           </div>
         ) : error ? (
-          <div className="tw-error" style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="tw-error tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center">
             <div className="tw-text-center tw-mb-4">{error}</div>
             <button className="tw-btn-secondary" onClick={onRefresh}>Retry</button>
           </div>
         ) : messages.length === 0 ? (
-          <div className="tw-empty-state" style={{ height: '100%' }}>
+          <div className="tw-empty-state tw-h-full">
             <span>No messages yet. Start the conversation!</span>
           </div>
         ) : (
@@ -530,7 +527,7 @@ export function MessageThread({
       </div>
 
       {/* Composer */}
-      <div className="tw-divider" style={{ padding: '0.75rem' }}>
+      <div className="tw-divider tw-p-3">
         <MessageComposer
           onSend={onSendMessage}
           disabled={loading || !!error}

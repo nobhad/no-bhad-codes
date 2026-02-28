@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search,
   Send,
@@ -16,24 +16,25 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { formatTimeAgo } from '../../../../utils/time-utils';
 
 interface Message {
-  id: string;
+  id: number;
   content: string;
-  senderId: string;
+  senderId: number;
   senderName: string;
   senderType: 'admin' | 'client';
   timestamp: string;
   status: 'sent' | 'delivered' | 'read';
-  attachments?: { id: string; name: string; url: string }[];
+  attachments?: { id: number; name: string; url: string }[];
 }
 
 interface Conversation {
-  id: string;
-  clientId: string;
+  id: number;
+  clientId: number;
   clientName: string;
   clientEmail: string;
-  projectId?: string;
+  projectId?: number;
   projectName?: string;
   lastMessage?: string;
   lastMessageAt?: string;
@@ -43,12 +44,29 @@ interface Conversation {
 }
 
 interface MessagingPanelProps {
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
+export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: MessagingPanelProps) {
   const containerRef = useFadeIn();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback((contentType = true) => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {};
+    if (contentType) {
+      headers['Content-Type'] = 'application/json';
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,63 +81,66 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
 
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  useEffect(() => {
-    if (selectedConversation) {
-      loadMessages(selectedConversation.id);
-    }
-  }, [selectedConversation?.id]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  async function loadConversations() {
+  const loadConversations = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/messages/conversations');
+      const response = await fetch('/api/admin/messages/conversations', {
+        method: 'GET',
+        headers: getHeaders(false),
+        credentials: 'include',
+        signal,
+      });
       if (!response.ok) throw new Error('Failed to load conversations');
 
       const data = await response.json();
-      setConversations(data.conversations || []);
+      const payload = data.data || data;
+      setConversations(payload.conversations || []);
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setError(err instanceof Error ? err.message : 'Failed to load conversations');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  async function loadMessages(conversationId: string) {
+  const loadMessages = useCallback(async (conversationId: number, signal?: AbortSignal) => {
     setMessagesLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/messages/conversations/${conversationId}`);
+      const response = await fetch(`/api/admin/messages/conversations/${conversationId}`, {
+        method: 'GET',
+        headers: getHeaders(false),
+        credentials: 'include',
+        signal,
+      });
       if (!response.ok) throw new Error('Failed to load messages');
 
       const data = await response.json();
-      setMessages(data.messages || []);
+      const payload = data.data || data;
+      setMessages(payload.messages || []);
 
       // Mark as read
       await fetch(`/api/admin/messages/conversations/${conversationId}/read`, {
         method: 'POST',
+        headers: getHeaders(false),
+        credentials: 'include',
+        signal,
       });
 
       setConversations((prev) =>
         prev.map((c) => (c.id === conversationId ? { ...c, unreadCount: 0 } : c))
       );
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('Failed to load messages:', err);
     } finally {
       setMessagesLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  async function sendMessage() {
+  const sendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     setSending(true);
@@ -131,7 +152,8 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
         `/api/admin/messages/conversations/${selectedConversation.id}/messages`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getHeaders(),
+          credentials: 'include',
           body: JSON.stringify({ content: messageContent }),
         }
       );
@@ -139,7 +161,8 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
       if (!response.ok) throw new Error('Failed to send message');
 
       const data = await response.json();
-      setMessages((prev) => [...prev, data.message]);
+      const payload = data.data || data;
+      setMessages((prev) => [...prev, payload.message]);
 
       // Update conversation list
       setConversations((prev) =>
@@ -149,22 +172,26 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
             : c
         )
       );
+      showNotification?.('Message sent', 'success');
     } catch (err) {
       console.error('Failed to send message:', err);
       setNewMessage(messageContent); // Restore message on error
+      showNotification?.('Failed to send message', 'error');
     } finally {
       setSending(false);
     }
-  }
+  }, [newMessage, selectedConversation, getHeaders, showNotification]);
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
 
-  async function toggleStar(conversationId: string, isStarred: boolean) {
+  const toggleStar = useCallback(async (conversationId: number, isStarred: boolean) => {
     try {
       await fetch(`/api/admin/messages/conversations/${conversationId}/star`, {
         method: isStarred ? 'DELETE' : 'POST',
+        headers: getHeaders(false),
+        credentials: 'include'
       });
 
       setConversations((prev) =>
@@ -173,7 +200,25 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
     } catch (err) {
       console.error('Failed to toggle star:', err);
     }
-  }
+  }, [getHeaders]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadConversations(controller.signal);
+    return () => controller.abort();
+  }, [loadConversations]);
+
+  useEffect(() => {
+    if (selectedConversation) {
+      const controller = new AbortController();
+      loadMessages(selectedConversation.id, controller.signal);
+      return () => controller.abort();
+    }
+  }, [selectedConversation?.id, loadMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   // Filter conversations
   const filteredConversations = conversations.filter((conv) => {
@@ -206,37 +251,35 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
   return (
     <div
       ref={containerRef as React.RefObject<HTMLDivElement>}
-      className="tw-panel"
-      style={{ display: 'flex', height: 'calc(100vh - 200px)', minHeight: '500px', overflow: 'hidden' }}
+      className="tw-panel messaging-panel-container"
     >
       {/* Conversation List */}
-      <div style={{ width: '320px', flexShrink: 0, borderRight: '1px solid var(--portal-border-color)', display: 'flex', flexDirection: 'column' }}>
+      <div className="messaging-sidebar">
         {/* Header */}
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--portal-border-color)' }}>
-          <h2 className="tw-heading" style={{ fontSize: 'var(--font-size-base)', marginBottom: '0.75rem' }}>
+        <div className="messaging-section-header">
+          <h2 className="tw-heading messaging-heading-with-badge">
             Messages
             {totalUnread > 0 && (
-              <span className="tw-badge" style={{ marginLeft: '0.5rem' }}>
+              <span className="tw-badge tw-ml-2">
                 {totalUnread}
               </span>
             )}
           </h2>
 
           {/* Search */}
-          <div style={{ position: 'relative' }}>
-            <Search style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+          <div className="messaging-search-container">
+            <Search className="messaging-search-icon" />
             <input
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="tw-input"
-              style={{ paddingLeft: '2.5rem' }}
+              className="tw-input messaging-search-input"
             />
           </div>
 
           {/* Filter Tabs */}
-          <div className="tw-tab-list" style={{ marginTop: '0.75rem', borderBottom: 'none', gap: '0.25rem' }}>
+          <div className="tw-tab-list messaging-filter-tabs">
             {[
               { id: 'all', label: 'All', icon: Inbox },
               { id: 'unread', label: 'Unread', icon: Clock },
@@ -246,10 +289,12 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id as typeof filter)}
-                className={filter === tab.id ? 'tw-tab-active' : 'tw-tab'}
-                style={{ padding: '0.25rem 0.5rem', fontSize: 'var(--font-size-2xs)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                className={cn(
+                  filter === tab.id ? 'tw-tab-active' : 'tw-tab',
+                  'messaging-filter-tab'
+                )}
               >
-                <tab.icon style={{ width: '0.75rem', height: '0.75rem' }} />
+                <tab.icon className="messaging-filter-tab-icon" />
                 {tab.label}
               </button>
             ))}
@@ -257,12 +302,12 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
         </div>
 
         {/* Conversation List */}
-        <div className="tw-scroll-container" style={{ flex: 1 }}>
+        <div className="tw-scroll-container tw-flex-1">
           {isLoading ? (
             <div className="tw-loading">Loading conversations...</div>
           ) : filteredConversations.length === 0 ? (
             <div className="tw-empty-state">
-              <Inbox style={{ width: '2rem', height: '2rem', opacity: 0.5 }} />
+              <Inbox className="messaging-icon-lg" />
               <p>No conversations</p>
             </div>
           ) : (
@@ -275,29 +320,26 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                   selectedConversation?.id === conv.id && 'tw-table-row-selected'
                 )}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', width: '100%' }}>
-                  <div style={{ width: '2.5rem', height: '2.5rem', border: '1px solid var(--portal-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'var(--portal-text-muted)' }} />
+                <div className="messaging-conv-item-content">
+                  <div className="messaging-avatar">
+                    <User className="messaging-avatar-icon" />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: conv.unreadCount > 0 ? 700 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div className="messaging-conv-item-details">
+                    <div className="messaging-conv-item-header">
+                      <span className={cn('messaging-conv-name', conv.unreadCount > 0 && 'messaging-conv-name-unread')}>
                         {conv.clientName}
                       </span>
-                      <span className="tw-text-muted" style={{ fontSize: 'var(--font-size-2xs)', flexShrink: 0 }}>
+                      <span className="tw-text-muted messaging-conv-time">
                         {conv.lastMessageAt ? formatRelativeTime(conv.lastMessageAt) : ''}
                       </span>
                     </div>
                     {conv.projectName && (
-                      <span className="tw-text-muted" style={{ fontSize: 'var(--font-size-2xs)', display: 'block' }}>
+                      <span className="tw-text-muted messaging-conv-project">
                         {conv.projectName}
                       </span>
                     )}
                     {conv.lastMessage && (
-                      <p
-                        className={conv.unreadCount > 0 ? 'tw-text-primary' : 'tw-text-muted'}
-                        style={{ fontSize: 'var(--font-size-xs)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '0.25rem' }}
-                      >
+                      <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'tw-text-primary' : 'tw-text-muted')}>
                         {conv.lastMessage}
                       </p>
                     )}
@@ -313,91 +355,85 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
       </div>
 
       {/* Message Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="messaging-main-area">
         {selectedConversation ? (
           <>
             {/* Conversation Header */}
-            <div style={{ padding: '1rem', borderBottom: '1px solid var(--portal-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className="messaging-conv-header">
               <div>
-                <h3 className="tw-heading" style={{ fontSize: 'var(--font-size-sm)' }}>
+                <h3 className="tw-heading messaging-conv-heading">
                   {selectedConversation.clientName}
                 </h3>
                 {selectedConversation.projectName && (
                   <button
-                    onClick={() => onNavigate?.('projects', selectedConversation.projectId)}
-                    className="tw-btn-ghost"
-                    style={{ padding: 0, fontSize: 'var(--font-size-xs)' }}
+                    onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
+                    className="tw-btn-ghost messaging-conv-project-link"
                   >
                     {selectedConversation.projectName}
                   </button>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="messaging-conv-actions">
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                  className="tw-btn-icon"
-                  style={{ color: selectedConversation.isStarred ? 'var(--portal-text-light)' : 'var(--portal-text-muted)' }}
+                  className={cn('tw-btn-icon', selectedConversation.isStarred ? 'tw-text-primary' : 'tw-text-muted')}
                 >
                   <Star
-                    style={{ width: '1rem', height: '1rem', fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
+                    className="messaging-star-icon"
+                    style={{ fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
                   />
                 </button>
                 <button className="tw-btn-icon">
-                  <MoreHorizontal style={{ width: '1rem', height: '1rem' }} />
+                  <MoreHorizontal className="messaging-more-icon" />
                 </button>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="tw-scroll-container" style={{ flex: 1, padding: '1rem' }}>
+            <div className="tw-scroll-container messaging-messages-container">
               {messagesLoading ? (
                 <div className="tw-loading">Loading messages...</div>
               ) : messages.length === 0 ? (
-                <div className="tw-empty-state" style={{ height: '100%' }}>
+                <div className="tw-empty-state tw-h-full">
                   <p>No messages yet. Start the conversation!</p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="messaging-messages-list">
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      style={{ display: 'flex', gap: '0.75rem', justifyContent: message.senderType === 'admin' ? 'flex-end' : 'flex-start' }}
+                      className={cn(
+                        'messaging-message-row',
+                        message.senderType === 'admin' ? 'messaging-message-row-admin' : 'messaging-message-row-client'
+                      )}
                     >
                       {message.senderType === 'client' && (
-                        <div style={{ width: '2rem', height: '2rem', border: '1px solid var(--portal-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <User style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+                        <div className="messaging-avatar messaging-avatar-sm">
+                          <User className="messaging-avatar-icon-sm tw-text-muted" />
                         </div>
                       )}
                       <div
-                        style={{
-                          maxWidth: '70%',
-                          padding: '0.5rem 1rem',
-                          border: '1px solid var(--portal-border-color)',
-                          background: message.senderType === 'admin' ? 'var(--portal-text-light)' : 'transparent',
-                          color: message.senderType === 'admin' ? 'var(--portal-bg-dark)' : 'var(--portal-text-light)',
-                        }}
+                        className={cn(
+                          'messaging-message-bubble',
+                          message.senderType === 'admin' ? 'messaging-message-bubble-admin' : 'messaging-message-bubble-client'
+                        )}
                       >
-                        <p style={{ fontSize: 'var(--font-size-sm)', whiteSpace: 'pre-wrap' }}>{message.content}</p>
+                        <p className="messaging-message-content">{message.content}</p>
                         <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            gap: '0.25rem',
-                            marginTop: '0.25rem',
-                            fontSize: 'var(--font-size-2xs)',
-                            color: message.senderType === 'admin' ? 'var(--portal-text-dark)' : 'var(--portal-text-muted)',
-                          }}
+                          className={cn(
+                            'messaging-message-meta',
+                            message.senderType === 'admin' ? 'messaging-message-meta-admin' : 'messaging-message-meta-client'
+                          )}
                         >
                           <span>{formatTime(message.timestamp)}</span>
                           {message.senderType === 'admin' && (
                             <span>
                               {message.status === 'read' ? (
-                                <CheckCheck style={{ width: '0.75rem', height: '0.75rem' }} />
+                                <CheckCheck className="messaging-status-icon" />
                               ) : message.status === 'delivered' ? (
-                                <CheckCheck style={{ width: '0.75rem', height: '0.75rem' }} />
+                                <CheckCheck className="messaging-status-icon" />
                               ) : (
-                                <Check style={{ width: '0.75rem', height: '0.75rem' }} />
+                                <Check className="messaging-status-icon" />
                               )}
                             </span>
                           )}
@@ -411,12 +447,12 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
             </div>
 
             {/* Message Input */}
-            <div style={{ padding: '1rem', borderTop: '1px solid var(--portal-border-color)' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+            <div className="messaging-compose">
+              <div className="messaging-compose-row">
                 <button className="tw-btn-icon">
-                  <Paperclip style={{ width: '1.25rem', height: '1.25rem' }} />
+                  <Paperclip className="messaging-attachment-icon" />
                 </button>
-                <div style={{ flex: 1 }}>
+                <div className="messaging-compose-input-container">
                   <textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
@@ -428,25 +464,23 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
                     }}
                     placeholder="Type a message..."
                     rows={1}
-                    className="tw-textarea"
-                    style={{ minHeight: '40px', maxHeight: '120px' }}
+                    className="tw-textarea messaging-compose-textarea"
                   />
                 </div>
                 <button
-                  className="tw-btn-primary"
+                  className="tw-btn-primary messaging-compose-send-btn"
                   onClick={sendMessage}
                   disabled={!newMessage.trim() || sending}
-                  style={{ padding: '0.5rem' }}
                 >
-                  <Send style={{ width: '1rem', height: '1rem' }} />
+                  <Send className="messaging-send-icon" />
                 </button>
               </div>
             </div>
           </>
         ) : (
-          <div className="tw-empty-state" style={{ flex: 1 }}>
-            <Users style={{ width: '3rem', height: '3rem', opacity: 0.5 }} />
-            <p style={{ fontSize: 'var(--font-size-base)' }}>Select a conversation</p>
+          <div className="tw-empty-state messaging-empty-state-full">
+            <Users className="messaging-icon-xl" />
+            <p className="messaging-empty-state-message">Select a conversation</p>
             <p className="tw-text-muted">Choose a conversation from the list to view messages</p>
           </div>
         )}
@@ -456,18 +490,7 @@ export function MessagingPanel({ onNavigate }: MessagingPanelProps) {
 }
 
 function formatRelativeTime(timestamp: string): string {
-  const now = new Date();
-  const date = new Date(timestamp);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'now';
-  if (diffMins < 60) return `${diffMins}m`;
-  if (diffHours < 24) return `${diffHours}h`;
-  if (diffDays < 7) return `${diffDays}d`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return formatTimeAgo(timestamp);
 }
 
 function formatTime(timestamp: string): string {

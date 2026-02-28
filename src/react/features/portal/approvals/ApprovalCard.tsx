@@ -18,6 +18,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { formatDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -53,48 +54,6 @@ const ENTITY_LABELS: Record<ApprovalEntityType, string> = {
   deliverable: 'Deliverable',
   project: 'Project'
 };
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-/**
- * Check if approval is overdue
- */
-function isOverdue(dueDate: string | undefined): boolean {
-  if (!dueDate) return false;
-  return new Date(dueDate) < new Date();
-}
-
-/**
- * Get days until due or days overdue
- */
-function getDueDaysText(dueDate: string | undefined): string | null {
-  if (!dueDate) return null;
-
-  const now = new Date();
-  const due = new Date(dueDate);
-  const diffTime = due.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) {
-    return `${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''} overdue`;
-  } else if (diffDays === 0) {
-    return 'Due today';
-  } else if (diffDays === 1) {
-    return 'Due tomorrow';
-  } else {
-    return `Due in ${diffDays} days`;
-  }
-}
 
 /**
  * ApprovalCard Component
@@ -151,16 +110,16 @@ export function ApprovalCard({
         onClick={onNavigate ? handleCardClick : undefined}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-mb-2">
+          <div className="tw-flex tw-items-center tw-gap-2">
             {/* Entity type icon */}
             <div className="tw-text-muted">{entityIcon}</div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
-              <span className="tw-text-primary" style={{ fontSize: '14px' }}>
+            <div className="tw-flex tw-flex-col tw-gap-0.5">
+              <span className="tw-text-primary tw-text-sm">
                 {approval.entity_name || `${entityLabel} #${approval.entity_id}`}
               </span>
-              <span className="tw-label" style={{ fontSize: '11px' }}>{entityLabel}</span>
+              <span className="tw-label tw-text-xs">{entityLabel}</span>
             </div>
           </div>
 
@@ -170,31 +129,31 @@ export function ApprovalCard({
 
         {/* Description */}
         {approval.description && (
-          <p className="tw-text-muted" style={{ fontSize: '12px', marginBottom: '0.5rem' }}>
+          <p className="tw-text-muted tw-text-sm tw-mb-2">
             {approval.description}
           </p>
         )}
 
         {/* Meta info row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <div className="tw-flex tw-items-center tw-gap-3 tw-mb-3">
           {/* Requested date */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="tw-text-muted">
+          <div className="tw-flex tw-items-center tw-gap-1 tw-text-muted">
             <Clock className="tw-h-3 tw-w-3" />
-            <span style={{ fontSize: '11px' }}>Requested {formatDate(approval.requested_at)}</span>
+            <span className="tw-text-xs">Requested {formatDate(approval.requested_at)}</span>
           </div>
 
           {/* Due date indicator */}
           {dueDaysText && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className={overdue ? 'tw-text-primary' : 'tw-text-muted'}>
+            <div className={cn('tw-flex tw-items-center tw-gap-1', overdue ? 'tw-text-primary' : 'tw-text-muted')}>
               {overdue && <AlertCircle className="tw-h-3 tw-w-3" />}
-              <span style={{ fontSize: '11px' }}>{dueDaysText}</span>
+              <span className="tw-text-xs">{dueDaysText}</span>
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="tw-flex tw-items-center tw-gap-2">
             <button className="tw-btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
               <Check className="tw-h-4 tw-w-4" />
               Approve
@@ -207,7 +166,7 @@ export function ApprovalCard({
 
           {/* View detail link */}
           {onNavigate && (
-            <button className="tw-btn-ghost" onClick={handleCardClick} style={{ fontSize: '12px' }}>
+            <button className="tw-btn-ghost tw-text-sm" onClick={handleCardClick}>
               View Details
               <ChevronRight className="tw-h-3 tw-w-3" />
             </button>

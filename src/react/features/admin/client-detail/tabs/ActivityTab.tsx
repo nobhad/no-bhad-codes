@@ -12,6 +12,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { formatTimeAgo } from '../../../../../utils/time-utils';
 import type { ClientActivity } from '../../types';
 
 interface ActivityTabProps {
@@ -57,26 +58,10 @@ function getActivityColor(type: string): string {
 }
 
 /**
- * Format relative time
+ * Format relative time using shared utility
  */
 function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-  });
+  return formatTimeAgo(dateString);
 }
 
 /**
@@ -147,7 +132,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
       <div className="tw-empty-state">
         <Clock className="tw-h-12 tw-w-12 tw-mb-3" />
         <p>No activity yet</p>
-        <p style={{ fontSize: '14px' }}>
+        <p className="proj-text-base">
           Activity will appear here as you interact with this client
         </p>
       </div>
@@ -158,10 +143,10 @@ export function ActivityTab({ activities }: ActivityTabProps) {
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading" style={{ fontSize: '18px' }}>
+        <h2 className="tw-heading proj-text-lg">
           Activity Log
         </h2>
-        <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+        <span className="tw-text-muted proj-text-base">
           {activities.length} {activities.length === 1 ? 'event' : 'events'}
         </span>
       </div>
@@ -172,16 +157,16 @@ export function ActivityTab({ activities }: ActivityTabProps) {
           <div key={group.date}>
             {/* Date Header */}
             <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-              <span className="tw-heading" style={{ fontSize: '14px' }}>
+              <span className="tw-heading proj-text-base">
                 {group.label}
               </span>
-              <div className="tw-flex-1 tw-h-px" style={{ backgroundColor: 'var(--portal-border-color)' }} />
+              <div className="tw-flex-1 tw-h-px activity-divider-line" />
             </div>
 
             {/* Activities for this date */}
             <div className="tw-relative tw-pl-8">
               {/* Timeline line */}
-              <div className="tw-absolute tw-left-3 tw-top-0 tw-bottom-0 tw-w-px" style={{ backgroundColor: 'var(--portal-border-color)' }} />
+              <div className="tw-absolute tw-left-3 tw-top-0 tw-bottom-0 tw-w-px activity-timeline-line" />
 
               <div className="tw-flex tw-flex-col tw-gap-4">
                 {group.items.map((activity, index) => {
@@ -193,8 +178,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                     <div key={activity.id} className="tw-relative tw-flex tw-gap-4">
                       {/* Timeline dot */}
                       <div
-                        className="tw-absolute tw--left-5 tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-border tw-border-[var(--portal-border-color)]"
-                        style={{ backgroundColor: 'transparent', borderRadius: 0 }}
+                        className="tw-absolute tw--left-5 tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-border tw-border-[var(--portal-border-color)] activity-timeline-dot"
                       >
                         <Icon className={cn('tw-h-3.5 tw-w-3.5', iconColor)} />
                       </div>
@@ -208,19 +192,18 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                       >
                         <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
                           <div className="tw-flex-1">
-                            <h4 className="tw-heading" style={{ fontSize: '14px' }}>
+                            <h4 className="tw-heading proj-text-base">
                               {activity.title}
                             </h4>
                             {activity.description && (
-                              <p className="tw-text-muted tw-mt-1" style={{ fontSize: '12px' }}>
+                              <p className="tw-text-muted tw-mt-1 proj-text-sm">
                                 {activity.description}
                               </p>
                             )}
                           </div>
 
                           <span
-                            className="tw-text-muted tw-whitespace-nowrap"
-                            style={{ fontSize: '12px' }}
+                            className="tw-text-muted tw-whitespace-nowrap proj-text-sm"
                             title={formatFullDate(activity.created_at)}
                           >
                             {formatRelativeTime(activity.created_at)}
@@ -229,9 +212,9 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
                         {/* Activity metadata */}
                         {(activity.created_by || activity.metadata) && (
-                          <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2" style={{ borderTop: '1px solid var(--portal-border-subtle)' }}>
+                          <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2 activity-border-top">
                             {activity.created_by && (
-                              <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+                              <span className="tw-text-muted proj-text-sm">
                                 by {activity.created_by}
                               </span>
                             )}
@@ -239,8 +222,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                               Object.entries(activity.metadata).map(([key, value]) => (
                                 <span
                                   key={key}
-                                  className="tw-text-muted"
-                                  style={{ fontSize: '12px' }}
+                                  className="tw-text-muted proj-text-sm"
                                 >
                                   {key}: {String(value)}
                                 </span>

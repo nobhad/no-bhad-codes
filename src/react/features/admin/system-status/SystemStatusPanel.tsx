@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   RefreshCw,
   Server,
@@ -58,6 +58,8 @@ interface SystemStatusData {
 
 interface SystemStatusPanelProps {
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
@@ -71,7 +73,7 @@ const SERVICE_ICONS: Record<string, React.ReactNode> = {
   auth: <Shield className="tw-h-5 tw-w-5" />,
 };
 
-export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
+export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }: SystemStatusPanelProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +86,36 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
   });
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
+
+  const loadStatus = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/admin/system-status', {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to load system status');
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load system status');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getHeaders]);
+
   useEffect(() => {
     loadStatus();
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -93,22 +125,7 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [autoRefresh]);
-
-  async function loadStatus() {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/admin/system-status');
-      if (!response.ok) throw new Error('Failed to load system status');
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load system status');
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  }, [autoRefresh, loadStatus]);
 
   function getStatusColor(status: string): string {
     switch (status) {
@@ -166,22 +183,22 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div className="tw-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+      <div className="status-panel-header">
+        <div className="status-panel-header-left">
+          <div className="tw-badge status-panel-badge">
             <span style={{ color: getStatusColor(data.overallStatus) }}>
               {getStatusIcon(data.overallStatus)}
             </span>
-            <span style={{ textTransform: 'capitalize' }}>
+            <span className="status-text-capitalize">
               {data.overallStatus === 'operational' ? 'All Systems Operational' : `System ${data.overallStatus}`}
             </span>
           </div>
-          <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+          <span className="tw-text-muted status-panel-last-update">
             Last updated: {formatDate(data.lastUpdated)}
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '12px' }} className="tw-text-muted">
+        <div className="status-panel-header-right">
+          <label className="tw-text-muted status-panel-auto-refresh">
             <input
               type="checkbox"
               checked={autoRefresh}
@@ -191,7 +208,7 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
             Auto-refresh
           </label>
           <button className="tw-btn-secondary" onClick={loadStatus} disabled={isLoading}>
-            <RefreshCw style={{ width: '1rem', height: '1rem', animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+            <RefreshCw className={cn('status-panel-refresh-icon', isLoading && 'status-panel-refresh-icon-spin')} />
             Refresh
           </button>
         </div>
@@ -201,7 +218,7 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
       {error && (
         <div className="tw-error">
           {error}
-          <button className="tw-btn-secondary" onClick={loadStatus} style={{ marginLeft: '1rem' }}>
+          <button className="tw-btn-secondary status-retry-btn" onClick={loadStatus}>
             Retry
           </button>
         </div>
@@ -209,35 +226,35 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
 
       {/* Services Grid */}
       <div>
-        <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>Services</h3>
-        <div className="tw-grid-stats" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <h3 className="tw-section-title status-section-title">Services</h3>
+        <div className="tw-grid-stats tw-grid-4-cols">
           {data.services.map((service) => (
             <div key={service.id} className="tw-stat-card">
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="status-service-header">
+                <div className="status-service-title-row">
                   <span className="tw-text-muted">
-                    {SERVICE_ICONS[service.icon] || <Server style={{ width: '1.25rem', height: '1.25rem' }} />}
+                    {SERVICE_ICONS[service.icon] || <Server className="status-service-icon" />}
                   </span>
-                  <span style={{ fontWeight: 700, fontSize: '14px' }}>{service.name}</span>
+                  <span className="status-service-name">{service.name}</span>
                 </div>
                 <span style={{ color: getStatusColor(service.status) }}>
                   {getStatusIcon(service.status)}
                 </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="status-service-details">
+                <div className="status-service-row">
                   <span className="tw-text-muted">Status</span>
-                  <span style={{ textTransform: 'capitalize', color: getStatusColor(service.status) }}>
+                  <span className="status-text-capitalize" style={{ color: getStatusColor(service.status) }}>
                     {service.status}
                   </span>
                 </div>
                 {service.latency !== undefined && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div className="status-service-row">
                     <span className="tw-text-muted">Latency</span>
                     <span>{service.latency}ms</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="status-service-row">
                   <span className="tw-text-muted">Uptime</span>
                   <span>{service.uptime}%</span>
                 </div>
@@ -249,17 +266,17 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
 
       {/* Metrics */}
       <div>
-        <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>System Metrics</h3>
-        <div className="tw-grid-stats" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <h3 className="tw-section-title status-section-title">System Metrics</h3>
+        <div className="tw-grid-stats tw-grid-4-cols">
           {data.metrics.map((metric) => (
             <div key={metric.id} className="tw-stat-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <div className="status-metric-header">
                 <span className="tw-stat-label">{metric.name}</span>
                 <span style={{ color: getStatusColor(metric.status) }}>
                   {getStatusIcon(metric.status)}
                 </span>
               </div>
-              <div className="tw-stat-value" style={{ marginBottom: '0.5rem' }}>
+              <div className="tw-stat-value status-metric-value">
                 {metric.value}{metric.unit}
               </div>
               <div className="tw-progress-track">
@@ -271,7 +288,7 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
                   }}
                 />
               </div>
-              <div className="tw-text-muted" style={{ fontSize: '11px', marginTop: '0.25rem' }}>
+              <div className="tw-text-muted status-metric-threshold">
                 Threshold: {metric.threshold}{metric.unit}
               </div>
             </div>
@@ -282,21 +299,21 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
       {/* Incidents */}
       {data.incidents.length > 0 && (
         <div>
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>Recent Incidents</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <h3 className="tw-section-title status-section-title">Recent Incidents</h3>
+          <div className="status-incidents-list">
             {data.incidents.map((incident) => (
               <div key={incident.id} className="tw-card">
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                      <span className="tw-badge" style={{ textTransform: 'uppercase' }}>
+                <div className="status-incident-row">
+                  <div className="status-incident-content">
+                    <div className="status-incident-title-row">
+                      <span className="tw-badge status-incident-severity">
                         {incident.severity}
                       </span>
-                      <span style={{ fontWeight: 700, fontSize: '14px' }}>
+                      <span className="status-incident-title">
                         {incident.title}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '12px' }} className="tw-text-muted">
+                    <div className="tw-text-muted status-incident-meta">
                       <span>Started: {formatDate(incident.startedAt)}</span>
                       {incident.resolvedAt && (
                         <span>Resolved: {formatDate(incident.resolvedAt)}</span>
@@ -304,11 +321,11 @@ export function SystemStatusPanel({ onNavigate }: SystemStatusPanelProps) {
                       <span>Affected: {incident.affectedServices.join(', ')}</span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="status-incident-status">
                     <span style={{ color: getStatusColor(incident.status) }}>
                       {getStatusIcon(incident.status)}
                     </span>
-                    <span style={{ fontSize: '12px', textTransform: 'capitalize', color: getStatusColor(incident.status) }}>
+                    <span className="status-incident-status-text" style={{ color: getStatusColor(incident.status) }}>
                       {incident.status}
                     </span>
                   </div>

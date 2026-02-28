@@ -23,6 +23,7 @@ import {
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Invoice, InvoiceStatus } from '../../types';
 import { INVOICE_STATUS_CONFIG } from '../../types';
+import { formatCurrency } from '../../../../../utils/format-utils';
 
 interface InvoicesTabProps {
   invoices: Invoice[];
@@ -57,21 +58,6 @@ function isOverdue(invoice: Invoice): boolean {
 function getDisplayStatus(invoice: Invoice): InvoiceStatus {
   if (isOverdue(invoice)) return 'overdue';
   return invoice.status;
-}
-
-/**
- * Format currency
- */
-function formatCurrency(amount: number | string | undefined): string {
-  if (amount === undefined || amount === null) return '-';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(num)) return '-';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num);
 }
 
 /**
@@ -206,23 +192,23 @@ export function InvoicesTab({
     <div className="tw-section">
       {/* Header with stats and actions */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-6" style={{ fontSize: '14px' }}>
+        <div className="tw-flex tw-items-center tw-gap-6 invtab-stats">
           <div>
             <span className="tw-text-muted">Outstanding: </span>
             <span
               className={cn(
                 totalOutstanding > 0
                   ? 'tw-text-primary'
-                  : 'tw-text-muted'
+                  : 'tw-text-muted',
+                'invtab-amount-bold'
               )}
-              style={{ fontWeight: 600 }}
             >
               {formatCurrency(totalOutstanding)}
             </span>
           </div>
           <div>
             <span className="tw-text-muted">Paid: </span>
-            <span className="tw-text-primary" style={{ fontWeight: 600 }}>
+            <span className="tw-text-primary invtab-amount-bold">
               {formatCurrency(totalPaid)}
             </span>
           </div>
@@ -233,8 +219,7 @@ export function InvoicesTab({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="tw-input"
-            style={{ height: '36px', width: 'auto' }}
+            className="tw-input invtab-filter"
           >
             <option value="all">All Invoices</option>
             <option value="draft">Draft</option>
@@ -263,10 +248,10 @@ export function InvoicesTab({
           </span>
         </div>
       ) : (
-        <div className="tw-panel" style={{ padding: 0 }}>
+        <div className="tw-panel invtab-panel">
           <table className="tw-w-full">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--portal-border-color)' }}>
+              <tr className="invtab-header-row">
                 <th className="tw-label tw-text-left tw-px-4 tw-py-3">
                   Invoice #
                 </th>
@@ -295,17 +280,16 @@ export function InvoicesTab({
                 return (
                   <tr
                     key={invoice.id}
-                    className="tw-list-item tw-cursor-pointer"
-                    style={{ display: 'table-row' }}
+                    className="tw-list-item tw-cursor-pointer invtab-row"
                     onClick={() => onViewInvoice?.(invoice.id)}
                   >
                     <td className="tw-px-4 tw-py-3">
-                      <span className="tw-text-primary" style={{ fontSize: '14px', fontWeight: 500 }}>
+                      <span className="tw-text-primary invtab-cell-bold">
                         {invoice.invoice_number || '-'}
                       </span>
                     </td>
                     <td className="tw-px-4 tw-py-3">
-                      <span className="tw-text-primary" style={{ fontSize: '14px', fontWeight: 500 }}>
+                      <span className="tw-text-primary invtab-cell-bold">
                         {formatCurrency(invoice.amount_total)}
                       </span>
                     </td>
@@ -319,9 +303,9 @@ export function InvoicesTab({
                         className={cn(
                           isOverdue(invoice)
                             ? 'tw-text-primary'
-                            : 'tw-text-muted'
+                            : 'tw-text-muted',
+                          'proj-text-base'
                         )}
-                        style={{ fontSize: '14px' }}
                       >
                         {formatDate(invoice.due_date)}
                       </span>

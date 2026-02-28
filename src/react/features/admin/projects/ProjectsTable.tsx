@@ -35,6 +35,8 @@ import { useExport, PROJECTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import type { Project, ProjectStatus, SortConfig } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
+import { formatCurrency } from '../../../../utils/format-utils';
+import { PROJECT_STATUS_OPTIONS, PROJECT_TYPE_OPTIONS } from '../shared/filterConfigs';
 
 interface ProjectsTableProps {
   /** Auth token getter for API calls */
@@ -50,28 +52,12 @@ const FILTER_CONFIG = [
   {
     key: 'status',
     label: 'Status',
-    options: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'pending', label: 'Pending' },
-      { value: 'active', label: 'Active' },
-      { value: 'in-progress', label: 'In Progress' },
-      { value: 'on-hold', label: 'On Hold' },
-      { value: 'completed', label: 'Completed' },
-      { value: 'cancelled', label: 'Cancelled' },
-    ],
+    options: PROJECT_STATUS_OPTIONS,
   },
   {
     key: 'type',
     label: 'Type',
-    options: [
-      { value: 'all', label: 'All Types' },
-      { value: 'simple-site', label: 'Simple Site' },
-      { value: 'business-site', label: 'Business Site' },
-      { value: 'portfolio', label: 'Portfolio' },
-      { value: 'e-commerce', label: 'E-Commerce' },
-      { value: 'web-app', label: 'Web App' },
-      { value: 'browser-extension', label: 'Browser Extension' },
-    ],
+    options: PROJECT_TYPE_OPTIONS,
   },
 ];
 
@@ -80,28 +66,12 @@ const FILTER_SECTIONS = [
   {
     key: 'status',
     label: 'STATUS',
-    options: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'pending', label: 'Pending' },
-      { value: 'active', label: 'Active' },
-      { value: 'in-progress', label: 'In Progress' },
-      { value: 'on-hold', label: 'On Hold' },
-      { value: 'completed', label: 'Completed' },
-      { value: 'cancelled', label: 'Cancelled' },
-    ],
+    options: PROJECT_STATUS_OPTIONS,
   },
   {
     key: 'type',
     label: 'TYPE',
-    options: [
-      { value: 'all', label: 'All Types' },
-      { value: 'simple-site', label: 'Simple Site' },
-      { value: 'business-site', label: 'Business Site' },
-      { value: 'portfolio', label: 'Portfolio' },
-      { value: 'e-commerce', label: 'E-Commerce' },
-      { value: 'web-app', label: 'Web App' },
-      { value: 'browser-extension', label: 'Browser Extension' },
-    ],
+    options: PROJECT_TYPE_OPTIONS,
   },
 ];
 
@@ -427,7 +397,7 @@ export function ProjectsTable({
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
-              <AdminTableHead className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
@@ -505,7 +475,7 @@ export function ProjectsTable({
                   onClick={() => handleRowClick(project)}
                 >
                   {/* Checkbox */}
-                  <AdminTableCell className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+                  <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(project)}
                       onCheckedChange={() => selection.toggleSelection(project)}
@@ -526,7 +496,7 @@ export function ProjectsTable({
                         {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type}
                       </span>
                       {project.budget && (
-                        <span className="budget-stacked">${project.budget.toLocaleString()}</span>
+                        <span className="budget-stacked">{formatCurrency(project.budget)}</span>
                       )}
                       {project.end_date && (
                         <span className="target-stacked">Target: {formatDate(project.end_date)}</span>
@@ -567,7 +537,7 @@ export function ProjectsTable({
 
                   {/* Budget */}
                   <AdminTableCell className="amount-col">
-                    {project.budget ? `$${project.budget.toLocaleString()}` : '-'}
+                    {formatCurrency(project.budget)}
                   </AdminTableCell>
 
                   {/* Timeline */}

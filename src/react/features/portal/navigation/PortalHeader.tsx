@@ -1,7 +1,7 @@
 /**
  * PortalHeader Component
  * Header with user info and logout for the portal sidebar
- * Brutalist design: transparent backgrounds, no border-radius, monospace font
+ * Portal design: transparent backgrounds, no border-radius, monospace font
  */
 
 import * as React from 'react';
@@ -58,7 +58,7 @@ export function PortalHeader({
           isCollapsed && 'tw-flex-col'
         )}
       >
-        {/* Avatar - brutalist square with border */}
+        {/* Avatar - square with border */}
         <div
           className={cn(
             'tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center',

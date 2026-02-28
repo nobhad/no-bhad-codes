@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Upload,
   Folder,
@@ -31,14 +31,14 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 
 interface FileItem {
-  id: string;
+  id: number;
   name: string;
   type: 'file' | 'folder';
   mimeType?: string;
   size?: number;
-  projectId?: string;
+  projectId?: number;
   projectName?: string;
-  clientId?: string;
+  clientId?: number;
   clientName?: string;
   uploadedBy?: string;
   createdAt: string;
@@ -74,9 +74,11 @@ interface FilesManagerProps {
   projectId?: string;
   clientId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerProps) {
+export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, showNotification }: FilesManagerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,11 +103,19 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
     direction: 'asc',
   });
 
-  useEffect(() => {
-    loadFiles();
-  }, [projectId, clientId]);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadFiles() {
+  const loadFiles = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -114,12 +124,16 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
       if (projectId) params.set('projectId', projectId);
       if (clientId) params.set('clientId', clientId);
 
-      const response = await fetch(`/api/admin/files?${params}`);
+      const response = await fetch(`/api/admin/files?${params}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load files');
 
       const data = await response.json();
-      setFiles(data.files || []);
-      setStats(data.stats || {
+      const payload = data.data || data;
+      setFiles(payload.files || []);
+      setStats(payload.stats || {
         totalFiles: 0,
         totalFolders: 0,
         totalSize: 0,
@@ -129,7 +143,11 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [projectId, clientId, getHeaders]);
+
+  useEffect(() => {
+    loadFiles();
+  }, [loadFiles]);
 
   // Filter and sort files
   const filteredFiles = useMemo(() => {
@@ -226,19 +244,23 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
     return FILE_ICONS.default;
   }
 
-  async function handleDelete(fileId: string) {
+  async function handleDelete(fileId: number) {
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
       const response = await fetch(`/api/admin/files/${fileId}`, {
         method: 'DELETE',
+        headers: getHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) throw new Error('Failed to delete file');
 
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      showNotification?.('File deleted successfully', 'success');
     } catch (err) {
       console.error('Failed to delete file:', err);
+      showNotification?.('Failed to delete file', 'error');
     }
   }
 
@@ -377,7 +399,7 @@ export function FilesManager({ projectId, clientId, onNavigate }: FilesManagerPr
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onNavigate?.('projects', file.projectId);
+                          onNavigate?.('projects', file.projectId != null ? String(file.projectId) : undefined);
                         }}
                         className="link-btn"
                       >
@@ -430,7 +452,7 @@ function FilesGrid({
   files: FileItem[];
   isLoading: boolean;
   getFileIcon: (file: FileItem) => React.ReactNode;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   hasActiveFilters: boolean;
 }) {
   if (isLoading) {
