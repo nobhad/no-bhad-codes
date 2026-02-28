@@ -86,3 +86,36 @@ export {
 
 // Table Pagination
 export { TablePagination, paginationToProps, type TablePaginationProps } from './TablePagination';
+
+// File Upload
+export {
+  FileUpload,
+  FileUploadProgress,
+  useFileUpload,
+  type FileUploadProps,
+  type FileUploadProgressProps,
+  type FileUploadFile,
+  type UseFileUploadOptions,
+  type UseFileUploadReturn
+} from './FileUpload';
+
+// Modal Dropdown
+export {
+  ModalDropdown,
+  useModalDropdown,
+  type ModalDropdownOption,
+  type ModalDropdownProps
+} from './ModalDropdown';
+
+// Empty State (re-exports from factories)
+export {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Skeleton,
+  EmptyStateNoResults,
+  EmptyStateNoFiles,
+  EmptyStateNoData,
+  EmptyStateError,
+  type EmptyStateProps
+} from './EmptyState';

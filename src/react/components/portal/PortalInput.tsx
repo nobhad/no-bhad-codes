@@ -13,7 +13,7 @@ export interface PortalInputProps
 
 /**
  * PortalInput
- * Styled input for portal forms - brutalist design
+ * Styled input for portal forms
  */
 export const PortalInput = React.forwardRef<HTMLInputElement, PortalInputProps>(
   ({ className, label, error, helperText, id, required, ...props }, ref) => {

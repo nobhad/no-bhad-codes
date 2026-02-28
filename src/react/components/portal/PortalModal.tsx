@@ -5,7 +5,7 @@ import { cn } from '@react/lib/utils';
 import { useScaleIn } from '@react/hooks/useGsap';
 
 /**
- * Modal size variants - brutalist design
+ * Modal size variants - portal design system
  */
 const modalSizes = {
   sm: 'tw-max-w-sm',
