@@ -437,17 +437,17 @@ body[data-page="client-intake"] .terminal-window {
   margin: 0 auto;
 }
 
-/* Client Portal context: fill available tab content height */
+/* Portal context: fill available tab content height */
 /* Only apply flex layout when tab is active to not break tab hiding */
-[data-page="client-portal"] #tab-new-project.active {
+.portal #tab-new-project.active {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 6rem); /* Subtract header and padding */
 }
 
-/* Client Portal: Reset min-width: 100% from base terminal styles */
-[data-page="client-portal"] .portal-intake,
-[data-page="client-portal"] .terminal-intake-container {
+/* Portal: Reset min-width: 100% from base terminal styles */
+.portal .portal-intake,
+.portal .terminal-intake-container {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -456,7 +456,7 @@ body[data-page="client-intake"] .terminal-window {
   width: 100%;
 }
 
-[data-page="client-portal"] .portal-intake .terminal-intake {
+.portal .portal-intake .terminal-intake {
   flex: 1;
   min-height: 0;
   height: auto;
@@ -465,7 +465,7 @@ body[data-page="client-intake"] .terminal-window {
   max-width: 900px;
 }
 
-[data-page="client-portal"] .portal-intake .terminal-intake .terminal-window {
+.portal .portal-intake .terminal-intake .terminal-window {
   flex: 1;
   min-height: 0;
   max-height: none;
@@ -566,18 +566,13 @@ body[data-page="client-intake"] .terminal-window {
 .terminal-window .message-content,
 .chat-message .message-content,
 /* High specificity override for portal context */
-[data-page="client-portal"] .terminal .message-content,
-[data-page="client-portal"] .terminal-intake .message-content,
-[data-page="client-portal"] .terminal-chat .message-content,
-[data-page="client-portal"] .portal-intake .message-content,
-[data-page="client-portal"] .portal-intake .chat-message .message-content,
-[data-page="client-portal"] .portal-intake .terminal-chat .message-content,
-[data-page="client-portal"] .chat-message .message-content,
-/* Admin portal context */
-[data-page="admin"] .terminal .message-content,
-[data-page="admin"] .terminal-intake .message-content,
-[data-page="admin"] .terminal-chat .message-content,
-[data-page="admin"] .chat-message .message-content {
+.portal .terminal .message-content,
+.portal .terminal-intake .message-content,
+.portal .terminal-chat .message-content,
+.portal .portal-intake .message-content,
+.portal .portal-intake .chat-message .message-content,
+.portal .portal-intake .terminal-chat .message-content,
+.portal .chat-message .message-content {
   background: transparent;
   background-color: transparent;
   border: none;

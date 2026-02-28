@@ -9,6 +9,7 @@
 
 /* Import all token files in order */
 @import "./colors.css";
+@import "./portal-theme.css"; /* Portal-specific overrides - MUST come after colors.css */
 @import "./typography.css";
 @import "./spacing.css";
 @import "./shadows.css";

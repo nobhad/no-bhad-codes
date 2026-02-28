@@ -1,87 +1,263 @@
-/* PORTAL MESSAGES - Minimal layout */
+/* PORTAL MESSAGES - Layout only, inherits all other styles from portal base */
 
+/* ===========================================
+   MAIN WRAPPER - fills available space
+   =========================================== */
 .portal .messages-layout {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 200px);
+  flex: 1;
+  min-height: 0;
   border: var(--portal-border);
 }
 
-/* Admin messages: extend to edges of dashboard-content padding */
-[data-page="admin"] .messages-layout {
-  margin: 0 calc(-1 * clamp(0.75rem, 2vw, 1.5rem)) calc(-1 * clamp(0.75rem, 2vw, 1.5rem)) calc(-1 * clamp(0.75rem, 2vw, 1.5rem));
-}
-
+/* ===========================================
+   SEARCH BAR - full width across top
+   =========================================== */
 .portal .messages-global-search {
+  flex-shrink: 0;
+  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
 }
 
+/* ===========================================
+   TWO COLUMNS - left: clients, right: messages
+   =========================================== */
 .portal .messages-columns {
   display: grid;
   grid-template-columns: 280px 1fr;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
+/* ===========================================
+   LEFT COLUMN - Clients list
+   =========================================== */
 .portal .messages-clients-column {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   border-right: var(--portal-border);
-  overflow-y: auto;
 }
 
 .portal .thread-list-header {
-  padding: var(--portal-section-heading-padding);
+  flex-shrink: 0;
+  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
 }
 
-/* Heading inside thread-list-header inherits portal h3 styles from portal-cards.css */
+.portal .thread-list-header h3 {
+  margin: 0;
+}
 
 .portal .thread-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
 .portal .thread-item {
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
+.portal .thread-item:hover {
+  background: var(--portal-bg-hover);
+}
+
+.portal .thread-item.active {
+  background: var(--portal-bg-light);
+}
+
+/* Thread item content - consistent text color and font */
+.portal .thread-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.portal .thread-item-title,
+.portal .thread-item-contact,
+.portal .thread-item-time {
+  color: inherit;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+}
+
+.portal .thread-item-title {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portal .thread-item-contact {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-0-5);
+}
+
+.portal .thread-item-time {
+  font-size: var(--font-size-2xs);
+  flex-shrink: 0;
+}
+
+.portal .thread-item.unread .thread-item-title {
+  font-weight: 700;
+}
+
+.portal .thread-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-1);
+  background: var(--color-primary);
+  color: var(--portal-bg-dark);
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+}
+
+/* ===========================================
+   RIGHT COLUMN - Message thread + compose
+   =========================================== */
 .portal .messages-thread-column {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   overflow: hidden;
 }
 
+/* Thread area - scrollable messages */
 .portal .messages-thread {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  border-bottom: var(--portal-border);
+  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
 }
 
+/* Individual messages */
 .portal .message {
   display: flex;
   align-items: flex-end;
+  margin-bottom: var(--space-2);
+}
+
+.portal .message:last-child {
+  margin-bottom: 0;
 }
 
 .portal .message-content {
   border: var(--portal-border);
+  padding: var(--space-1) var(--space-2);
   max-width: 80%;
 }
 
+/* Compose area - fixed at bottom */
 .portal .message-compose {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-top: var(--portal-border);
 }
 
 .portal .message-compose textarea {
   width: 100%;
+  min-height: 80px;
+  padding: var(--space-2);
   border: var(--portal-border);
-  min-height: 100px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  resize: vertical;
+}
+
+.portal .message-compose textarea::placeholder {
+  color: var(--portal-text-muted);
+  opacity: 0.5;
+}
+
+.portal .message-compose-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
 }
 
 .portal .attachment-input {
   display: none;
 }
 
+/* ===========================================
+   CLIENT PORTAL - Contact & Tips cards
+   =========================================== */
+.portal .messages-contact-card,
+.portal .messages-tips-card {
+  padding: 0;
+}
+
+.portal .messages-contact-info,
+.portal .messages-tips-list {
+  padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
+}
+
+.portal .messages-contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.portal .messages-contact-icon {
+  display: flex;
+  align-items: center;
+}
+
+.portal .messages-contact-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portal .messages-contact-note {
+  margin: 0;
+  opacity: 0.7;
+  font-size: var(--font-size-sm);
+}
+
+.portal .messages-tips-list {
+  margin: 0;
+  padding-left: var(--space-4);
+  list-style: disc;
+}
+
+.portal .messages-tips-list li {
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.portal .messages-tips-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Thread header for client portal */
+.portal .messages-thread-header {
+  flex-shrink: 0;
+  border-bottom: var(--portal-border);
+}
+
+.portal .messages-thread-header .thread-title {
+  font-weight: 500;
+}
+
+/* ===========================================
+   RESPONSIVE - tablet and mobile
+   =========================================== */
 @media (--tablet-landscape) {
   .portal .messages-columns {
     grid-template-columns: 200px 1fr;
@@ -95,4 +271,347 @@
   .portal .messages-clients-column {
     display: none;
   }
+}
+
+/* =====================================================
+   MESSAGE THREAD REACT COMPONENT CLASSES
+   Used by MessageThread.tsx
+   ===================================================== */
+
+/* Attachment thumbnail in messages */
+.attachment-thumbnail {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Attachment filename with truncation */
+.attachment-filename {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Composer textarea - auto-resize support */
+.composer-textarea {
+  min-height: auto;
+  resize: none;
+  overflow: hidden;
+}
+
+/* =====================================================
+   MESSAGING PANEL COMPONENT CLASSES
+   Used by MessagingPanel.tsx (admin)
+   ===================================================== */
+
+/* Main container */
+.messaging-panel-container {
+  display: flex;
+  height: calc(100vh - 200px);
+  min-height: 500px;
+  overflow: hidden;
+}
+
+/* Conversation list sidebar */
+.messaging-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--portal-border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Section header with border */
+.messaging-section-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--portal-border-color);
+}
+
+/* Heading with badge */
+.messaging-heading-with-badge {
+  font-size: var(--font-size-base);
+  margin-bottom: 0.75rem;
+}
+
+/* Search input container with icon */
+.messaging-search-container {
+  position: relative;
+}
+
+.messaging-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--portal-text-muted);
+}
+
+.messaging-search-input {
+  padding-left: 2.5rem;
+}
+
+/* Filter tabs */
+.messaging-filter-tabs {
+  margin-top: 0.75rem;
+  border-bottom: none;
+  gap: 0.25rem;
+}
+
+.messaging-filter-tab {
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-size-2xs);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.messaging-filter-tab-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Avatar box */
+.messaging-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--portal-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.messaging-avatar-sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.messaging-avatar-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--portal-text-muted);
+}
+
+.messaging-avatar-icon-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Conversation item content */
+.messaging-conv-item-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.messaging-conv-item-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.messaging-conv-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.messaging-conv-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messaging-conv-name-unread {
+  font-weight: 700;
+}
+
+.messaging-conv-time {
+  font-size: var(--font-size-2xs);
+  flex-shrink: 0;
+}
+
+.messaging-conv-project {
+  font-size: var(--font-size-2xs);
+  display: block;
+}
+
+.messaging-conv-preview {
+  font-size: var(--font-size-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.25rem;
+}
+
+/* Message area */
+.messaging-main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Conversation header */
+.messaging-conv-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--portal-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.messaging-conv-heading {
+  font-size: var(--font-size-sm);
+}
+
+.messaging-conv-project-link {
+  padding: 0;
+  font-size: var(--font-size-xs);
+}
+
+.messaging-conv-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Messages container */
+.messaging-messages-container {
+  flex: 1;
+  padding: 1rem;
+}
+
+.messaging-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Message bubble */
+.messaging-message-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.messaging-message-row-admin {
+  justify-content: flex-end;
+}
+
+.messaging-message-row-client {
+  justify-content: flex-start;
+}
+
+.messaging-message-bubble {
+  max-width: 70%;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--portal-border-color);
+}
+
+.messaging-message-bubble-admin {
+  background: var(--portal-text-light);
+  color: var(--portal-bg-dark);
+}
+
+.messaging-message-bubble-client {
+  background: transparent;
+  color: var(--portal-text-light);
+}
+
+.messaging-message-content {
+  font-size: var(--font-size-sm);
+  white-space: pre-wrap;
+}
+
+.messaging-message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  font-size: var(--font-size-2xs);
+}
+
+.messaging-message-meta-admin {
+  color: var(--portal-text-dark);
+}
+
+.messaging-message-meta-client {
+  color: var(--portal-text-muted);
+}
+
+.messaging-status-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Compose area */
+.messaging-compose {
+  padding: 1rem;
+  border-top: 1px solid var(--portal-border-color);
+}
+
+.messaging-compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.messaging-compose-input-container {
+  flex: 1;
+}
+
+.messaging-compose-textarea {
+  min-height: 40px;
+  max-height: 120px;
+}
+
+.messaging-compose-send-btn {
+  padding: 0.5rem;
+}
+
+.messaging-attachment-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.messaging-send-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Icon sizes */
+.messaging-icon-lg {
+  width: 2rem;
+  height: 2rem;
+  opacity: 0.5;
+}
+
+.messaging-icon-xl {
+  width: 3rem;
+  height: 3rem;
+  opacity: 0.5;
+}
+
+.messaging-star-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.messaging-more-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Empty state variations */
+.messaging-empty-state-full {
+  flex: 1;
+}
+
+.messaging-empty-state-message {
+  font-size: var(--font-size-base);
 }

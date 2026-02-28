@@ -58,7 +58,7 @@
     top: -100%;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 9999;
+    z-index: var(--z-index-portal-confirm, 9900);
     padding: 12px 24px;
     background-color: var(--portal-bg-darker, #0a0a0a);
     color: var(--portal-text-primary, #ffffff);
@@ -80,11 +80,28 @@
  * These MUST be unlayered to override layer rules
  * ============================================ */
 
+/* Portal background - shared between admin and client */
+body[data-page="admin"],
+body[data-page="client-portal"] {
+  background-color: var(--portal-bg-pitch);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+html:has(body[data-page="admin"]),
+html:has(body[data-page="client-portal"]) {
+  background-color: var(--portal-bg-pitch);
+  height: 100%;
+}
+
+/* Portal light mode overrides - see portal-theme.css */
+
 /* Ensure dashboard-container.hidden is truly hidden on login page */
 /* Must override sidebar.css [data-page] .sidebar rules */
-body[data-page="client-portal"] .dashboard-container.hidden,
-body[data-page="client-portal"] .dashboard-container.hidden .sidebar,
-body[data-page="client-portal"] .dashboard-container.hidden .dashboard-content {
+.portal .dashboard-container.hidden,
+.portal .dashboard-container.hidden .sidebar,
+.portal .dashboard-container.hidden .dashboard-content {
   display: none !important;
   visibility: hidden !important;
 }

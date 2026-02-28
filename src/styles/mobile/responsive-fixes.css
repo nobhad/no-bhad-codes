@@ -24,8 +24,7 @@
 /* Base hover states - active only on hover-capable devices */
 @media (hover: hover) {
   /* Portal buttons hover - uses token variables */
-  :is([data-page="admin"], [data-page="client-portal"])
-    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):hover {
+  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):hover {
     background: var(--btn-portal-hover-bg);
     color: var(--btn-portal-hover-color);
     box-shadow: var(--btn-portal-shadow-hover);
@@ -34,8 +33,8 @@
   /* .icon-btn hover: portal-buttons.css */
 
   /* Sidebar button hover */
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover,
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar-buttons .btn:hover .btn-icon {
+  .portal .sidebar-buttons .btn:hover,
+  .portal .sidebar-buttons .btn:hover .btn-icon {
     color: var(--color-primary);
   }
 
@@ -51,7 +50,7 @@
   }
 
   /* Table row hover */
-  :is([data-page="admin"], [data-page="client-portal"]) .data-table tbody tr:hover {
+  .portal .data-table tbody tr:hover {
     background: var(--portal-bg-hover);
   }
 
@@ -109,8 +108,7 @@
 /* Touch device fallback - active states instead of hover */
 @media (hover: none) {
   /* Buttons show feedback on active/press - uses token variables */
-  :is([data-page="admin"], [data-page="client-portal"])
-    :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):active {
+  .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):active {
     background: var(--btn-portal-hover-bg);
     color: var(--btn-portal-hover-color);
     transform: scale(0.98);
@@ -119,12 +117,12 @@
   /* .icon-btn:active - moved to portal-buttons.css */
 
   /* Table row - no hover background on touch */
-  :is([data-page="admin"], [data-page="client-portal"]) .data-table tbody tr:hover {
+  .portal .data-table tbody tr:hover {
     background: transparent;
   }
 
   /* Show active state instead */
-  :is([data-page="admin"], [data-page="client-portal"]) .data-table tbody tr:active {
+  .portal .data-table tbody tr:active {
     background: var(--portal-bg-hover);
   }
 }
@@ -188,17 +186,14 @@
   }
 
   /* Sidebar collapsed buttons */
-  :is([data-page="admin"], [data-page="client-portal"]) .sidebar.collapsed .sidebar-buttons .btn {
+  .portal .sidebar.collapsed .sidebar-buttons .btn {
     width: 44px;
     height: 44px;
     min-width: 44px;
     min-height: 44px;
   }
 
-  :is([data-page="admin"], [data-page="client-portal"])
-    .sidebar.collapsed
-    .sidebar-footer
-    .sidebar-btn {
+  .portal .sidebar.collapsed .sidebar-footer .sidebar-btn {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -288,8 +283,8 @@
   max-width: min(900px, calc(100vw - 2 * var(--space-4, 16px)));
 }
 
-/* Client portal specific modals */
-[data-page="client-portal"] .modal-content {
+/* Portal modals - shared styling */
+.portal .modal-content {
   max-width: min(var(--modal-width-md, 560px), calc(100vw - 2 * var(--space-3, 12px)));
 }
 
@@ -459,27 +454,20 @@
   min-height: 100dvh;
 }
 
-/* Sidebar */
-:is([data-page="admin"], [data-page="client-portal"]) .sidebar {
+/* Sidebar - shared portal styling */
+.portal .sidebar {
   height: 100vh;
   height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
 }
 
-/* Admin dashboard */
-[data-page="admin"] .dashboard-container {
+/* Portal dashboard container */
+.portal .dashboard-container {
   min-height: 100vh;
   min-height: 100dvh;
   height: 100vh;
   height: 100dvh;
-}
-
-[data-page="admin"] .sidebar {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
 }
 
 /* Modal overlay - use dvh for proper sizing */
@@ -527,8 +515,7 @@
 
 /* Reset min-height - use dvh for proper mobile sizing */
 @media (--mobile) {
-  body[data-page="admin"] main,
-  body[data-page="client-portal"] main {
+  .portal main {
     min-height: 100vh;
     min-height: 100dvh;
   }

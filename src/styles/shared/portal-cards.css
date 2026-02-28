@@ -102,6 +102,11 @@
   letter-spacing: var(--label-letter-spacing);
 }
 
+/* LIGHT MODE - ALL labels black */
+html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) {
+  color: var(--color-light-text, #000000);
+}
+
 /* Legacy aliases - inherit same styling via :is() */
 .portal :is(
   /* Form labels */
@@ -147,6 +152,41 @@
   color: var(--portal-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--label-letter-spacing);
+}
+
+/* LIGHT MODE - ALL legacy labels black */
+html[data-theme="light"] .portal :is(
+  .form-label,
+  .filter-label,
+  .filter-section-label,
+  .custom-field-label,
+  .documents-upload-label,
+  .client-selector-label,
+  .prompt-dialog-label,
+  .meta-label,
+  .kpi-card-label,
+  .kpi-card-change-label,
+  .summary-label,
+  .portal-stat-label,
+  .pd-stat-label,
+  .client-stat-label,
+  .cd-stat-label,
+  .cd-account-label,
+  .billing-label,
+  .health-label,
+  .health-factor-label,
+  .attention-label,
+  .section-title,
+  .sidebar-section-label,
+  .milestone-title,
+  .bar-chart-label,
+  .pie-chart-legend-label,
+  .funnel-stage-label,
+  .summary-card h4,
+  .payment-plans-section h4,
+  .project-notes h4
+) {
+  color: var(--color-light-text, #000000);
 }
 
 /* =====================================================
@@ -768,8 +808,8 @@
   margin-bottom: var(--space-3);
 }
 
-/* Summary Card - client-portal specific overrides */
-[data-page="client-portal"] .summary-card {
+/* Summary Card - shared portal styling */
+.portal .summary-card {
   text-align: center;
 }
 

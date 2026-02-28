@@ -85,8 +85,7 @@
   width: 320px;
   max-height: 420px;
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-medium);
-  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--portal-border-color);
   z-index: var(--z-index-portal-dropdown, 9700);
   overflow: hidden;
   display: flex;

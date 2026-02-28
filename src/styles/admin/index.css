@@ -26,8 +26,7 @@
 @import "../shared/portal-tabs.css";
 @import "../shared/rich-text-editor.css";
 
-/* Portal layout and sidebar (shared with client portal) */
-@import "../client-portal/layout.css";
+/* Portal layout and sidebar (shared) */
 @import "../shared/portal-sidebar.css";
 
 /* Secondary sidebar (vertical tab nav for detail pages) */

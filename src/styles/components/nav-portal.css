@@ -423,7 +423,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   width: 100vw;
   height: 100vh;
   background: var(--color-overlay-medium);
-  z-index: 20000;
+  z-index: var(--z-index-portal-overlay, 9500);
   pointer-events: auto;
   /* Backdrop blur for depth */
   -webkit-backdrop-filter: blur(8px);
@@ -446,7 +446,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   max-width: 900px;
   height: 90vh;
   max-height: 85vh;
-  z-index: 20001;
+  z-index: var(--z-index-portal-modal, 9600);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: var(--shadow-dropdown-xl);

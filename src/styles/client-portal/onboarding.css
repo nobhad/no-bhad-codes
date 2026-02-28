@@ -10,52 +10,35 @@
 
 /* ============================================================================
    CSS CUSTOM PROPERTIES - ONBOARDING SPECIFIC
+   Uses shared portal tokens - minimal custom properties
    ============================================================================ */
-
-:root {
-  /* Onboarding colors */
-  --onboarding-bg: var(--portal-bg-dark);
-  --onboarding-card-bg: var(--portal-bg-medium);
-  --onboarding-card-border: var(--portal-border-medium);
-  --onboarding-text: var(--portal-text-light);
-  --onboarding-text-muted: var(--portal-text-muted);
-  --onboarding-accent: var(--color-primary);
-  --onboarding-success: var(--color-success);
-
-  /* Spacing - use global tokens */
-  --onboarding-spacing-sm: var(--space-1);
-  --onboarding-spacing-md: var(--space-2);
-  --onboarding-spacing-lg: var(--space-3);
-  --onboarding-spacing-xl: var(--space-4);
-}
 
 /* ============================================================================
    MAIN CONTAINER
    ============================================================================ */
 
 .onboarding-wizard {
-  background: var(--onboarding-bg);
-  color: var(--onboarding-text);
-  padding: var(--onboarding-spacing-xl);
+  color: var(--portal-text-light);
+  padding: var(--space-4);
   max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px)));
   margin: 0 auto;
 }
 
 .onboarding-header {
   text-align: center;
-  margin-bottom: var(--onboarding-spacing-xl);
+  margin-bottom: var(--space-4);
 }
 
 .onboarding-title {
   font-size: 1.75rem;
   font-weight: 600;
-  margin: 0 0 var(--onboarding-spacing-sm);
-  color: var(--onboarding-text);
+  margin: 0 0 var(--space-1);
+  color: var(--portal-text-light);
 }
 
 .onboarding-subtitle {
   font-size: 1rem;
-  color: var(--onboarding-text-muted);
+  color: var(--portal-text-muted);
   margin: 0;
 }
 
@@ -67,22 +50,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--onboarding-spacing-sm);
-  margin-bottom: var(--onboarding-spacing-xl);
-  padding: var(--onboarding-spacing-md);
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  padding: var(--space-2);
   flex-wrap: wrap;
 }
 
 .onboarding-step-indicator {
   display: flex;
   align-items: center;
-  gap: var(--onboarding-spacing-sm);
-  padding: var(--onboarding-spacing-sm) var(--onboarding-spacing-md);
-  background: var(--portal-bg-medium);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--portal-border-color);
   opacity: 0.5;
   transition:
     opacity var(--transition-medium),
-    background-color var(--transition-medium);
+    border-color var(--transition-medium);
   cursor: default;
 }
 
@@ -92,12 +75,12 @@
 
 .onboarding-step-indicator.step--active {
   opacity: 1;
-  background: var(--onboarding-accent);
+  border-color: var(--color-primary);
 }
 
 .onboarding-step-indicator.step--completed {
   opacity: 0.8;
-  background: var(--onboarding-success);
+  border-color: var(--color-success);
   cursor: pointer;
 }
 
@@ -105,7 +88,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--portal-bg-light);
+  border: 1px solid var(--portal-border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,7 +104,7 @@
 .onboarding-step-divider {
   width: 40px;
   height: 2px;
-  background: var(--portal-border-medium);
+  background: var(--portal-border-color);
 }
 
 @media (--mobile) {
@@ -140,20 +123,20 @@
 
 .onboarding-content {
   min-height: 350px;
-  padding: var(--onboarding-spacing-md) 0;
+  padding: var(--space-2) 0;
 }
 
 .onboarding-step-title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin: 0 0 var(--onboarding-spacing-sm);
-  color: var(--onboarding-text);
+  margin: 0 0 var(--space-1);
+  color: var(--portal-text-light);
 }
 
 .onboarding-step-description {
   font-size: 0.9375rem;
-  color: var(--onboarding-text-muted);
-  margin: 0 0 var(--onboarding-spacing-lg);
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-3);
 }
 
 /* ============================================================================
@@ -163,13 +146,13 @@
 .onboarding-form {
   display: flex;
   flex-direction: column;
-  gap: var(--onboarding-spacing-lg);
+  gap: var(--space-3);
 }
 
 .onboarding-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--onboarding-spacing-md);
+  gap: var(--space-2);
 }
 
 @media (--compact-mobile) {
@@ -187,7 +170,7 @@
 .onboarding-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--onboarding-text);
+  color: var(--portal-text-light);
 }
 
 .onboarding-label .required {
@@ -199,10 +182,10 @@
 .onboarding-select,
 .onboarding-textarea {
   width: 100%;
-  padding: var(--onboarding-spacing-md);
-  border: 1px solid var(--onboarding-card-border);
-  background: var(--portal-bg-darker);
-  color: var(--onboarding-text);
+  padding: var(--space-2);
+  border: 1px solid var(--portal-border-color);
+  background: transparent;
+  color: var(--portal-text-light);
   font-size: 0.9375rem;
   font-family: inherit;
   transition: border-color var(--transition-fast);
@@ -210,14 +193,14 @@
 
 .onboarding-input::placeholder,
 .onboarding-textarea::placeholder {
-  color: var(--onboarding-text-muted);
+  color: var(--portal-text-muted);
 }
 
 .onboarding-input:focus,
 .onboarding-select:focus,
 .onboarding-textarea:focus {
   outline: none;
-  border-color: var(--onboarding-accent);
+  border-color: var(--color-primary);
 }
 
 .onboarding-textarea {
@@ -241,47 +224,43 @@
 .onboarding-checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: var(--onboarding-spacing-sm);
+  gap: var(--space-1);
 }
 
 .onboarding-checkbox-label {
   display: flex;
   align-items: center;
-  gap: var(--onboarding-spacing-sm);
-  padding: var(--onboarding-spacing-md);
-  background: var(--onboarding-card-bg);
-  border: 1px solid var(--onboarding-card-border);
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--portal-border-color);
   cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 .onboarding-checkbox-label:hover {
-  border-color: var(--onboarding-accent);
+  border-color: var(--color-primary);
 }
 
 .onboarding-checkbox-label.is-checked {
-  border-color: var(--onboarding-accent);
-  background: var(--color-state-selected);
+  border-color: var(--color-primary);
 }
 
 .onboarding-checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   margin: 0;
-  accent-color: var(--onboarding-accent);
+  accent-color: var(--color-primary);
 }
 
 .onboarding-checkbox-text {
   font-size: 0.9375rem;
-  color: var(--onboarding-text);
+  color: var(--portal-text-light);
 }
 
 .onboarding-checkbox-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--onboarding-spacing-sm);
+  gap: var(--space-1);
 }
 
 /* ============================================================================
@@ -291,13 +270,12 @@
 .onboarding-assets-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--onboarding-spacing-md);
+  gap: var(--space-2);
 }
 
 .onboarding-asset-card {
-  background: var(--onboarding-card-bg);
-  border: 2px solid var(--onboarding-card-border);
-  padding: var(--onboarding-spacing-lg);
+  border: 2px solid var(--portal-border-color);
+  padding: var(--space-3);
   text-align: center;
   cursor: pointer;
   transition:
@@ -306,40 +284,39 @@
 }
 
 .onboarding-asset-card:hover {
-  border-color: var(--onboarding-accent);
+  border-color: var(--color-primary);
   transform: translateY(-2px);
 }
 
 .onboarding-asset-card.is-selected {
-  border-color: var(--onboarding-success);
-  background: var(--color-success-light);
+  border-color: var(--color-success);
 }
 
 .onboarding-asset-icon {
   width: 48px;
   height: 48px;
-  margin: 0 auto var(--onboarding-spacing-md);
-  color: var(--onboarding-text-muted);
+  margin: 0 auto var(--space-2);
+  color: var(--portal-text-muted);
 }
 
 .onboarding-asset-card.is-selected .onboarding-asset-icon {
-  color: var(--onboarding-success);
+  color: var(--color-success);
 }
 
 .onboarding-asset-title {
   font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--onboarding-text);
+  color: var(--portal-text-light);
   margin: 0 0 var(--space-0-5);
 }
 
 .onboarding-asset-status {
   font-size: 0.8125rem;
-  color: var(--onboarding-text-muted);
+  color: var(--portal-text-muted);
 }
 
 .onboarding-asset-card.is-selected .onboarding-asset-status {
-  color: var(--onboarding-success);
+  color: var(--color-success);
 }
 
 /* ============================================================================
@@ -349,13 +326,12 @@
 .onboarding-review {
   display: flex;
   flex-direction: column;
-  gap: var(--onboarding-spacing-lg);
+  gap: var(--space-3);
 }
 
 .onboarding-review-section {
-  background: var(--onboarding-card-bg);
-  border: 1px solid var(--onboarding-card-border);
-  padding: var(--onboarding-spacing-lg);
+  border: 1px solid var(--portal-border-color);
+  padding: var(--space-3);
 }
 
 .onboarding-review-section-title {
@@ -363,22 +339,22 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--onboarding-text-muted);
-  margin: 0 0 var(--onboarding-spacing-md);
+  color: var(--portal-text-muted);
+  margin: 0 0 var(--space-2);
 }
 
 .onboarding-review-list {
   display: flex;
   flex-direction: column;
-  gap: var(--onboarding-spacing-sm);
+  gap: var(--space-1);
 }
 
 .onboarding-review-item {
   display: flex;
   justify-content: space-between;
-  gap: var(--onboarding-spacing-md);
-  padding: var(--onboarding-spacing-sm) 0;
-  border-bottom: 1px solid var(--onboarding-card-border);
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--portal-border-color);
 }
 
 .onboarding-review-item:last-child {
@@ -387,19 +363,19 @@
 
 .onboarding-review-label {
   font-size: 0.875rem;
-  color: var(--onboarding-text-muted);
+  color: var(--portal-text-muted);
 }
 
 .onboarding-review-value {
   font-size: 0.9375rem;
-  color: var(--onboarding-text);
+  color: var(--portal-text-light);
   font-weight: 500;
   text-align: right;
 }
 
 .onboarding-review-value--empty {
   font-style: italic;
-  color: var(--onboarding-text-muted);
+  color: var(--portal-text-muted);
   font-weight: 400;
 }
 
@@ -411,8 +387,8 @@
 }
 
 .onboarding-review-tag {
-  background: var(--color-state-selected);
-  color: var(--onboarding-accent);
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
   padding: var(--space-0-5) var(--space-2);
   font-size: 0.75rem;
   font-weight: 500;
@@ -422,33 +398,32 @@
 .onboarding-confirm {
   display: flex;
   align-items: flex-start;
-  gap: var(--onboarding-spacing-md);
-  padding: var(--onboarding-spacing-lg);
-  background: var(--portal-bg-darker);
-  border: 2px solid var(--onboarding-card-border);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 2px solid var(--portal-border-color);
   cursor: pointer;
   transition: border-color var(--transition-fast);
 }
 
 .onboarding-confirm:hover {
-  border-color: var(--onboarding-accent);
+  border-color: var(--color-primary);
 }
 
 .onboarding-confirm.is-checked {
-  border-color: var(--onboarding-success);
+  border-color: var(--color-success);
 }
 
 .onboarding-confirm input[type="checkbox"] {
   width: 20px;
   height: 20px;
   margin: 0;
-  accent-color: var(--onboarding-success);
+  accent-color: var(--color-success);
   flex-shrink: 0;
 }
 
 .onboarding-confirm-text {
   font-size: 0.9375rem;
-  color: var(--onboarding-text);
+  color: var(--portal-text-light);
   line-height: 1.5;
 }
 
@@ -460,19 +435,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--onboarding-spacing-md);
-  padding: var(--onboarding-spacing-lg) 0 0;
-  border-top: 1px solid var(--onboarding-card-border);
-  margin-top: var(--onboarding-spacing-lg);
+  gap: var(--space-2);
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--portal-border-color);
+  margin-top: var(--space-3);
 }
 
 .onboarding-actions-left {
   display: flex;
-  gap: var(--onboarding-spacing-md);
+  gap: var(--space-2);
 }
 
 .onboarding-btn {
-  padding: var(--onboarding-spacing-md) var(--onboarding-spacing-xl);
+  padding: var(--space-2) var(--space-4);
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
@@ -491,18 +466,18 @@
 
 .onboarding-btn-secondary {
   background: transparent;
-  border: 2px solid var(--onboarding-card-border);
-  color: var(--onboarding-text);
+  border: 2px solid var(--portal-border-color);
+  color: var(--portal-text-light);
 }
 
 .onboarding-btn-secondary:hover {
-  border-color: var(--onboarding-text);
+  border-color: var(--portal-text-light);
 }
 
 .onboarding-btn-primary {
-  background: var(--onboarding-accent);
-  border: 2px solid var(--onboarding-accent);
-  color: var(--onboarding-text);
+  background: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  color: var(--portal-text-light);
 }
 
 .onboarding-btn-primary:hover {
@@ -510,9 +485,9 @@
 }
 
 .onboarding-btn-success {
-  background: var(--onboarding-success);
-  border: 2px solid var(--onboarding-success);
-  color: var(--onboarding-text);
+  background: var(--color-success);
+  border: 2px solid var(--color-success);
+  color: var(--portal-text-light);
 }
 
 .onboarding-btn-success:hover {
@@ -522,12 +497,12 @@
 .onboarding-btn-ghost {
   background: transparent;
   border: none;
-  color: var(--onboarding-text-muted);
-  padding: var(--onboarding-spacing-md);
+  color: var(--portal-text-muted);
+  padding: var(--space-2);
 }
 
 .onboarding-btn-ghost:hover {
-  color: var(--onboarding-text);
+  color: var(--portal-text-light);
 }
 
 /* ============================================================================
@@ -544,8 +519,8 @@
 .onboarding-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--onboarding-card-border);
-  border-top-color: var(--onboarding-accent);
+  border: 3px solid var(--portal-border-color);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -558,7 +533,7 @@
 
 @media (--compact-mobile) {
   .onboarding-wizard {
-    padding: var(--onboarding-spacing-lg) var(--onboarding-spacing-md);
+    padding: var(--space-3) var(--space-2);
   }
 
   .onboarding-title {
@@ -567,7 +542,7 @@
 
   .onboarding-actions {
     flex-direction: column-reverse;
-    gap: var(--onboarding-spacing-md);
+    gap: var(--space-2);
   }
 
   .onboarding-actions-left {
@@ -602,7 +577,6 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-index-portal-modal, 9600);
-  background: var(--portal-bg-dark);
   display: flex;
   align-items: center;
   justify-content: center;

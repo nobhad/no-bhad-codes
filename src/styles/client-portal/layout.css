@@ -3,10 +3,9 @@
    Dashboard structure, containers, page framework
    ===================================================== */
 
-/* Page background - match main content area */
-body[data-page="client-portal"] {
-  background: var(--portal-bg-medium);
-  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+/* Prevent horizontal scroll on mobile */
+.portal {
+  overflow-x: hidden;
 }
 
 /* Footer is hidden via footer.css [data-page="client-portal"] selector */
@@ -34,13 +33,12 @@ body[data-page="client-portal"] {
   height: 100dvh;
 }
 
-/* Client Dashboard Base */
+/* Client Dashboard Base - no background, inherits from body */
 .client-dashboard {
   min-height: 100vh;
   min-height: 100dvh;
   height: 100vh;
   height: 100dvh;
-  background: var(--portal-bg-medium);
   margin: 0;
   padding: 0;
 }
@@ -93,6 +91,11 @@ body[data-page="client-portal"] {
     padding-left: 0;
     padding-right: 0;
   }
+}
+
+/* Messages layout - no gap between search bar and columns (all screen sizes) */
+.portal .messages-layout {
+  gap: 0;
 }
 
 /* Messages page: remove ALL outer padding on mobile so content fills width */
@@ -159,14 +162,13 @@ body[data-page="client-portal"] {
 
 /* Show mobile menu toggle ONLY on mobile when sidebar is collapsed */
 @media (--compact-mobile) {
-  [data-page="client-portal"] .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
+  .portal .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
     display: flex !important;
   }
 }
 
-/* Client Portal Dashboard - Dark theme to match admin */
-[data-page="client-portal"] .dashboard-content {
-  background: var(--portal-bg-medium);
+/* Portal Dashboard - uses shared portal styles */
+.portal .dashboard-content {
   color: var(--portal-text-light);
 }
 
@@ -176,18 +178,12 @@ body[data-page="client-portal"] {
    PORTAL TYPOGRAPHY - DISCOTHÈQUE THEME
    Overrides global Acme headings with serif for portals
    ================================================ */
-[data-page="client-portal"] h1,
-[data-page="client-portal"] h2,
-[data-page="client-portal"] h3,
-[data-page="client-portal"] h4,
-[data-page="client-portal"] h5,
-[data-page="client-portal"] h6,
-[data-page="admin"] h1,
-[data-page="admin"] h2,
-[data-page="admin"] h3,
-[data-page="admin"] h4,
-[data-page="admin"] h5,
-[data-page="admin"] h6 {
+.portal h1,
+.portal h2,
+.portal h3,
+.portal h4,
+.portal h5,
+.portal h6 {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
   letter-spacing: var(--letter-spacing-tightest, -0.09em);
   text-shadow: none;
@@ -195,10 +191,8 @@ body[data-page="client-portal"] {
 }
 
 /* Portal page header specific */
-[data-page="client-portal"] .page-header h2,
-[data-page="client-portal"] .client-name,
-[data-page="admin"] .page-header h2,
-[data-page="admin"] .client-name {
+.portal .page-header h2,
+.portal .client-name {
   text-shadow: none;
 }
 
@@ -206,60 +200,47 @@ body[data-page="client-portal"] {
    PORTAL BRUTALIST DESIGN - SHARP CORNERS
    Only applies to portal pages, not main site
    ================================================ */
-[data-page="client-portal"] *,
-[data-page="client-portal"] *::before,
-[data-page="client-portal"] *::after,
-[data-page="admin"] *,
-[data-page="admin"] *::before,
-[data-page="admin"] *::after {
+.portal *,
+.portal *::before,
+.portal *::after {
   border-radius: 0;
 }
 
 /* Portal HR styling - sharp corners */
-[data-page="client-portal"] hr,
-[data-page="admin"] hr {
+.portal hr {
   height: 2px;
   border-radius: 0;
   background-color: var(--portal-text-light, #ffffff);
 }
 
 /* ================================================
-   CLIENT PORTAL - CARD SHADOWS
+   PORTAL - CARD SHADOWS
    Base shadows in shared/portal-cards.css & shared/portal-files.css
-   Client-specific sections below (not in shared)
    ================================================ */
-[data-page="client-portal"] .file-section,
-[data-page="client-portal"] .content-section {
-  box-shadow: var(--shadow-panel);
+.portal .file-section,
+.portal .content-section {
+  /* No shadows - flat design */
 }
 
-/* No shadows on child divs - client-specific sections */
-[data-page="client-portal"] .content-section > div {
+/* No shadows on child divs */
+.portal .content-section > div {
   box-shadow: none;
 }
 
 /* ================================================
-   CLIENT PORTAL - GLOBAL BUTTON STYLES
+   PORTAL - GLOBAL BUTTON STYLES
    Base styles in shared/portal-buttons.css
    ================================================ */
 
 /* Remove card backgrounds */
-[data-page="client-portal"] .card,
-[data-page="client-portal"] .cp-card,
-[data-page="client-portal"] .cp-stat,
-[data-page="client-portal"] .content-section,
-[data-page="client-portal"] .timeline-content,
-[data-page="client-portal"] .update-item,
-[data-page="client-portal"] .content-item,
-[data-page="client-portal"] .settings-form,
-[data-page="admin"] .card,
-[data-page="admin"] .cp-card,
-[data-page="admin"] .cp-stat,
-[data-page="admin"] .content-section,
-[data-page="admin"] .timeline-content,
-[data-page="admin"] .update-item,
-[data-page="admin"] .content-item,
-[data-page="admin"] .settings-form {
+.portal .card,
+.portal .cp-card,
+.portal .cp-stat,
+.portal .content-section,
+.portal .timeline-content,
+.portal .update-item,
+.portal .content-item,
+.portal .settings-form {
   background: transparent;
   border: none;
 }
@@ -280,17 +261,18 @@ body[data-page="client-portal"] {
 /* ============================================
    Portal View Content Container
    Base structure for all dynamic views
-   Ensures consistent spacing between sections
+   NOTE: Gap applied at .dashboard-content level (base)
    ============================================ */
-[data-page="client-portal"] .portal-view-content,
-[data-page="client-portal"] #portal-view-content {
+.portal .portal-view-content,
+.portal #portal-view-content {
   display: flex;
   flex-direction: column;
+  /* Gap inherited from .dashboard-content base level */
 }
 
 /* All direct children of view content get consistent card structure */
-[data-page="client-portal"] .portal-view-content > *,
-[data-page="client-portal"] #portal-view-content > * {
+.portal .portal-view-content > *,
+.portal #portal-view-content > * {
   /* Reset any inherited margins - gap handles spacing */
   margin-top: 0;
   margin-bottom: 0;
@@ -306,8 +288,8 @@ body[data-page="client-portal"] {
    Page header element removed - styles deprecated
    ============================================ */
 
-/* Page title in unified global header - client portal uses Sans-serif */
-[data-page="client-portal"] .portal-global-header .header-page-title {
+/* Page title in unified global header */
+.portal .portal-global-header .header-page-title {
   font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: clamp(1rem, 3vw, 1.25rem);
   color: var(--portal-text-light);
@@ -318,7 +300,7 @@ body[data-page="client-portal"] {
 }
 
 /* Client name span styling - inline with greeting, "!" follows name */
-[data-page="client-portal"] .portal-global-header .header-page-title #client-name {
+.portal .portal-global-header .header-page-title #client-name {
   color: var(--color-primary);
   white-space: nowrap;
 }
@@ -396,9 +378,8 @@ body[data-page="client-portal"] {
 
 /* Hide individual .page-title divs inside tabs when using unified header */
 /* The portal-page-header now contains the dynamic page title */
-[data-page="admin"] .tab-content > .page-title,
-[data-page="admin"] .tab-content > .page-header > .page-title,
-[data-page="client-portal"] .tab-content > .page-title {
+.portal .tab-content > .page-title,
+.portal .tab-content > .page-header > .page-title {
   display: none;
 }
 
@@ -440,27 +421,8 @@ body[data-page="client-portal"] {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-/* Generic Card - Dark theme to match admin */
-/* Scoped to client-portal to prevent conflicts with main site */
-[data-page="client-portal"] .card {
-  background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-medium);
-  padding: var(--space-3);
-  transition: all var(--transition-fast);
-}
-
-/* Cards are not clickable - no hover effect needed */
-
-/* h3 styling from unified rule in portal-cards.css - only layout here */
-[data-page="client-portal"] .card h3 {
-  margin: 0 0 var(--space-1-5) 0;
-}
-
-[data-page="client-portal"] .card p {
-  color: var(--portal-text-secondary);
-  margin: 0 0 var(--space-2) 0;
-  line-height: 1.5;
-}
+/* Generic Card - uses shared portal styles from portal-cards.css */
+/* No overrides here - all card styling comes from shared styles */
 
 /* Portal Header - transparent */
 .portal-header {

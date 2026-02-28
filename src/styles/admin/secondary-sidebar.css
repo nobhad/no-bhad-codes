@@ -11,7 +11,7 @@
 #secondary-sidebar {
   display: none;
   flex-shrink: 0;
-  z-index: 50;
+  z-index: var(--z-index-50);
 }
 
 .dashboard-container.has-secondary-sidebar #secondary-sidebar {
@@ -35,7 +35,7 @@
     max-width var(--transition-fast);
   overflow: hidden;
   position: relative;
-  z-index: 55;
+  z-index: calc(var(--z-index-50) + 5);
   box-shadow: var(--shadow-sidebar);
 }
 
@@ -303,7 +303,7 @@
   transition:
     opacity var(--transition-fast),
     visibility var(--transition-fast);
-  z-index: 100;
+  z-index: var(--z-index-dropdown);
   box-shadow: var(--shadow-md);
 }
 

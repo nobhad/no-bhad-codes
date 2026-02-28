@@ -127,6 +127,24 @@
 
   /* Section heading padding - uniform above and below */
   --portal-section-heading-padding: var(--space-1-5) var(--space-2); /* 12px 16px */
+
+  /* ============================================
+   * DASHBOARD SPACING - Admin Overview
+   * ============================================
+   * Consistent spacing for dashboard layouts.
+   */
+
+  /* Dashboard section gap (between major sections) */
+  --dashboard-section-gap: var(--space-6); /* 48px */
+
+  /* Dashboard grid gap (between cards in a grid) */
+  --dashboard-grid-gap: var(--space-3); /* 24px */
+
+  /* Dashboard card gap (between items within a card) */
+  --dashboard-card-gap: var(--space-2); /* 16px */
+
+  /* Dashboard panel gap (between content areas) */
+  --dashboard-panel-gap: var(--space-3-5); /* 28px */
 }
 
 /* ============================================

@@ -1,0 +1,299 @@
+/**
+ * ===============================================
+ * PORTAL THEME - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/design-system/tokens/portal-theme.css
+ *
+ * ALL portal-specific CSS variables consolidated here.
+ * This file is the ONLY place portal theme values should be defined.
+ *
+ * Includes:
+ * - Portal text colors
+ * - Portal background colors
+ * - Portal border system
+ * - Dark mode (default)
+ * - Light mode overrides
+ */
+
+/* ============================================
+ * PORTAL DARK MODE (DEFAULT) - DISCOTHÈQUE THEME
+ * Black background, white text
+ * ============================================ */
+[data-page="admin"],
+[data-page="client-portal"] {
+  /* ----------------------------------------
+   * TEXT COLORS
+   * ---------------------------------------- */
+  --portal-text-light: #ffffff;
+  --portal-text-primary: #ffffff;
+  --portal-text-secondary: #ffffff;
+  --portal-text-muted: #999999;
+  --portal-text-dark: #000000;
+
+  /* ----------------------------------------
+   * BACKGROUND COLORS
+   * ---------------------------------------- */
+  --portal-bg-pitch: #000000;
+  --portal-bg-darkest: #000000;
+  --portal-bg-darker: #0a0a0a;
+  --portal-bg-dark: #1a1a1a;
+  --portal-bg-medium: #2a2a2a;
+  --portal-bg-light: #3a3a3a;
+  --portal-bg-lighter: #4a4a4a;
+  --portal-bg-hover: #1a1a1a;
+  --portal-bg-readonly: #0a0a0a;
+
+  /* ----------------------------------------
+   * BORDER SYSTEM
+   * ---------------------------------------- */
+  --portal-border-color: #ffffff;
+  --portal-border-width: 1px;
+  --portal-border: var(--portal-border-width) solid var(--portal-border-color);
+  --portal-border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* Border aliases for backwards compatibility */
+  --portal-border-dark: var(--portal-border-color);
+  --portal-border-medium: var(--portal-border-color);
+  --portal-border-light: var(--portal-border-color);
+  --table-border-color: var(--portal-border-color);
+
+  /* ----------------------------------------
+   * ALPHA COLORS
+   * ---------------------------------------- */
+  --portal-alpha-white-02: rgba(255, 255, 255, 0.02);
+  --portal-alpha-white-04: rgba(255, 255, 255, 0.04);
+  --portal-alpha-white-05: rgba(255, 255, 255, 0.05);
+  --portal-alpha-white-08: rgba(255, 255, 255, 0.08);
+  --portal-alpha-white-10: rgba(255, 255, 255, 0.1);
+  --portal-alpha-white-15: rgba(255, 255, 255, 0.15);
+  --portal-alpha-white-20: rgba(255, 255, 255, 0.2);
+  --portal-alpha-white-25: rgba(255, 255, 255, 0.25);
+  --portal-alpha-white-30: rgba(255, 255, 255, 0.3);
+  --portal-alpha-white-50: rgba(255, 255, 255, 0.5);
+  --portal-alpha-black-04: rgba(0, 0, 0, 0.04);
+  --portal-alpha-black-05: rgba(0, 0, 0, 0.05);
+  --portal-alpha-black-10: rgba(0, 0, 0, 0.1);
+  --portal-alpha-black-15: rgba(0, 0, 0, 0.15);
+  --portal-alpha-black-20: rgba(0, 0, 0, 0.2);
+  --portal-alpha-black-30: rgba(0, 0, 0, 0.3);
+  --portal-alpha-black-40: rgba(0, 0, 0, 0.4);
+  --portal-alpha-black-50: rgba(0, 0, 0, 0.5);
+  --portal-alpha-black-60: rgba(0, 0, 0, 0.6);
+  --portal-alpha-black-70: rgba(0, 0, 0, 0.7);
+  --portal-alpha-black-80: rgba(0, 0, 0, 0.8);
+
+  /* ----------------------------------------
+   * BORDER RADIUS - BRUTALIST (sharp corners)
+   * ---------------------------------------- */
+  --border-radius-card: 0;
+  --portal-radius-xs: 0;
+  --portal-radius-sm: 0;
+  --portal-radius-md: 0;
+  --portal-radius-lg: 0;
+  --portal-radius-xl: 0;
+  --portal-radius-pill: 0;
+  --portal-radius-full: 50%; /* Exception for circular avatars/indicators */
+
+  /* ----------------------------------------
+   * BUTTON COLORS (Dark Mode)
+   * ---------------------------------------- */
+  --btn-portal-primary-bg: transparent;
+  --btn-portal-primary-color: #ffffff;
+  --btn-portal-primary-border: #ffffff;
+  --btn-portal-primary-hover-bg: #ffffff;
+  --btn-portal-primary-hover-color: #000000;
+  --btn-portal-primary-hover-border: #ffffff;
+
+  --btn-portal-secondary-bg: transparent;
+  --btn-portal-secondary-color: #ffffff;
+  --btn-portal-secondary-border: #ffffff;
+  --btn-portal-secondary-hover-bg: transparent;
+  --btn-portal-secondary-hover-color: #ffffff;
+  --btn-portal-secondary-hover-border: #ffffff;
+
+  --btn-portal-border-color: #ffffff;
+  --btn-portal-color: #ffffff;
+  --btn-portal-hover-bg: #ffffff;
+  --btn-portal-hover-color: #000000;
+  --btn-portal-hover-border: #ffffff;
+
+  /* ----------------------------------------
+   * CARD & PANEL TOKENS
+   * ---------------------------------------- */
+  --portal-card-padding: 13px 14px;
+  --portal-panel-padding-x: 14px;
+  --portal-list-item-padding: var(--space-1) var(--portal-panel-padding-x);
+
+  /* ----------------------------------------
+   * LAYOUT TOKENS
+   * ---------------------------------------- */
+  --portal-section-gap: var(--space-2, 16px);
+  --portal-section-heading-padding: var(--space-1-5) var(--space-2);
+
+  /* ----------------------------------------
+   * FIELD/LABEL SPACING
+   * ---------------------------------------- */
+  --field-label-value-gap: 0.125rem;
+  --field-group-gap: 0.75rem;
+
+  /* ----------------------------------------
+   * LABEL STYLING
+   * ---------------------------------------- */
+  --label-font-size: 0.75rem;
+  --label-color: var(--portal-text-secondary);
+  --label-font-weight: 500;
+  --label-text-transform: uppercase;
+  --label-letter-spacing: 0.05em;
+
+  /* ----------------------------------------
+   * DASHBOARD LAYOUT TOKENS
+   * ---------------------------------------- */
+  --dashboard-section-gap: 48px;
+  --dashboard-grid-gap: 24px;
+  --dashboard-panel-gap: 24px;
+  --dashboard-panel-padding: var(--space-4);
+  --dashboard-title-margin: var(--space-3);
+
+  /* ----------------------------------------
+   * OVERRIDE SEMANTIC COLOR TOKENS
+   * Portal uses inverted color scheme
+   * ---------------------------------------- */
+  --color-neutral-100: #1a1a1a;
+  --color-neutral-200: #0a0a0a;
+  --color-neutral-300: #000000;
+  --color-neutral-400: #787878;
+  --color-neutral-500: #a0a0a0;
+  --color-neutral-600: #c0c0c0;
+  --color-neutral-700: #e0e0e0;
+  --color-neutral-800: #f4f4f4;
+  --color-neutral-900: #ffffff;
+  --color-dark: #ffffff;
+  --color-light: #000000;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #ffffff;
+  --color-text-tertiary: #ffffff;
+  --color-border: #ffffff;
+  --color-border-light: #787878;
+  --color-nav-text: #ffffff;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* App-level aliases for portal */
+  --app-color-primary: #ffffff;
+  --app-color-primary-hover: #000000;
+
+  /* Form variables */
+  --form-input-border: #ffffff;
+  --form-input-placeholder: #787878;
+  --form-btn-bg: #ffffff;
+  --form-btn-fg: #000000;
+  --form-btn-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+ * PORTAL LIGHT MODE - INVERTED DISCOTHÈQUE
+ * White background, black text
+ * ============================================
+ * IMPORTANT: Use consistent selector pattern
+ */
+html[data-theme="light"] body[data-page="admin"],
+html[data-theme="light"] body[data-page="client-portal"] {
+  /* ----------------------------------------
+   * TEXT COLORS - ALL BLACK
+   * ---------------------------------------- */
+  --portal-text-light: #000000;
+  --portal-text-primary: #000000;
+  --portal-text-secondary: #000000;
+  --portal-text-muted: #000000;
+  --portal-text-dark: #ffffff;
+
+  /* ----------------------------------------
+   * BACKGROUND COLORS - WHITE BASE
+   * ---------------------------------------- */
+  --portal-bg-pitch: #ffffff;
+  --portal-bg-darkest: #ffffff;
+  --portal-bg-darker: #f5f5f5;
+  --portal-bg-dark: #e5e5e5;
+  --portal-bg-medium: #d5d5d5;
+  --portal-bg-light: #c5c5c5;
+  --portal-bg-lighter: #b5b5b5;
+  --portal-bg-hover: #e5e5e5;
+  --portal-bg-readonly: #f5f5f5;
+
+  /* ----------------------------------------
+   * BORDER SYSTEM - BLACK BORDERS
+   * ---------------------------------------- */
+  --portal-border-color: #000000;
+  --portal-border-subtle: rgba(0, 0, 0, 0.08);
+
+  /* ----------------------------------------
+   * BUTTON COLORS (Light Mode)
+   * ---------------------------------------- */
+  --btn-portal-primary-bg: transparent;
+  --btn-portal-primary-color: #000000;
+  --btn-portal-primary-border: #000000;
+  --btn-portal-primary-hover-bg: #000000;
+  --btn-portal-primary-hover-color: #ffffff;
+  --btn-portal-primary-hover-border: #000000;
+
+  --btn-portal-secondary-bg: transparent;
+  --btn-portal-secondary-color: #000000;
+  --btn-portal-secondary-border: #000000;
+  --btn-portal-secondary-hover-bg: #000000;
+  --btn-portal-secondary-hover-color: #ffffff;
+  --btn-portal-secondary-hover-border: #000000;
+
+  --btn-portal-border-color: #000000;
+  --btn-portal-color: #000000;
+  --btn-portal-hover-bg: #000000;
+  --btn-portal-hover-color: #ffffff;
+  --btn-portal-hover-border: #000000;
+
+  /* ----------------------------------------
+   * OVERRIDE SEMANTIC COLOR TOKENS - INVERTED
+   * ---------------------------------------- */
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #ffffff;
+  --color-neutral-300: #ffffff;
+  --color-neutral-400: #000000;
+  --color-neutral-500: #000000;
+  --color-neutral-600: #000000;
+  --color-neutral-700: #000000;
+  --color-neutral-800: #000000;
+  --color-neutral-900: #000000;
+  --color-dark: #000000;
+  --color-light: #ffffff;
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+  --color-text-tertiary: #000000;
+  --color-border: #000000;
+  --color-border-light: #787878;
+  --color-nav-text: #000000;
+  --color-white: #000000; /* Inverted for text that uses var(--color-white) */
+  --color-black: #ffffff;
+
+  /* Gray scale - ALL BLACK for text in light mode */
+  --color-gray-100: #000000;
+  --color-gray-200: #000000;
+  --color-gray-300: #000000;
+  --color-gray-400: #000000;
+  --color-gray-500: #000000;
+  --color-gray-600: #cccccc; /* Chart grid lines - light gray on white */
+
+  /* App-level aliases for portal light mode */
+  --app-color-primary: #000000;
+  --app-color-primary-hover: #ffffff;
+
+  /* Form variables for portal light mode */
+  --form-input-border: #000000;
+  --form-input-placeholder: #787878;
+  --form-btn-bg: #000000;
+  --form-btn-fg: #ffffff;
+  --form-btn-shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* Apply to html element as well for full coverage */
+html[data-theme="light"]:has(body[data-page="admin"]),
+html[data-theme="light"]:has(body[data-page="client-portal"]) {
+  background-color: #ffffff;
+}

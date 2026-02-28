@@ -48,7 +48,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10000; /* Above overlay (9999) so header is always visible */
+  z-index: var(--z-index-fixed, 300); /* Fixed header uses standard fixed layer */
   /* Base visibility - always visible by default */
   opacity: 1;
   visibility: visible;

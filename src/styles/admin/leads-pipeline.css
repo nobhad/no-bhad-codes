@@ -288,9 +288,42 @@
    Scoring Rules. Lives on Analytics > Business tab.
    ============================================ */
 
-/* When leads-analytics-section is wrapped in portal-project-card, no extra margin needed */
+/* Leads Analytics Section - keep outer border, remove inner card borders
+   to avoid double-border effect */
 .leads-analytics-section {
-  /* margin handled by parent card */
+  /* Inherits border from .analytics-section */
+}
+
+/* Override portal-cards.css padding on direct children */
+.portal .leads-analytics-section > .analytics-columns-2col,
+.portal .leads-analytics-section > .analytics-column-full {
+  padding: 0;
+}
+
+/* Remove borders from inner columns - outer section has the border */
+.leads-analytics-section .analytics-column,
+.leads-analytics-section .analytics-column-full {
+  border: none;
+}
+
+/* Inner column content padding */
+.leads-analytics-section .analytics-column {
+  padding: var(--space-2);
+}
+
+/* 2-column grid: no gap, border between columns */
+.leads-analytics-section .analytics-columns-2col {
+  gap: 0;
+}
+
+.leads-analytics-section .analytics-columns-2col .analytics-column:first-child {
+  border-right: 1px solid var(--table-border-color);
+}
+
+/* Scoring rules: border-top separator, padding for content */
+.leads-analytics-section > .analytics-column-full {
+  padding: var(--space-2);
+  border-top: 1px solid var(--table-border-color);
 }
 
 /* 3-column grid (legacy) */

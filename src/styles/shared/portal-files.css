@@ -13,7 +13,7 @@
   border: none;
   padding: var(--space-4);
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
 }
@@ -35,7 +35,7 @@
   border: none;
   padding: var(--space-3);
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 .portal .files-upload-section h3 {
@@ -99,7 +99,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 .portal .files-list-section h3 {
@@ -450,7 +450,7 @@
    CARD SHADOWS
    ===================================================== */
 .portal :is(.files-upload-section, .files-list-section) {
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 /* No shadows on child divs */
@@ -519,7 +519,7 @@
   background: transparent;
   border: none;
   overflow: hidden;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
 }
 
 .file-section-header {
@@ -547,13 +547,102 @@
   border-bottom: none;
 }
 
-/* File items - consistent with admin styling */
-[data-page="client-portal"] .files-list-section .file-item {
+/* File items - shared portal styling */
+.portal .files-list-section .file-item {
   margin-bottom: var(--space-0-5);
   cursor: default;
 }
 
-[data-page="client-portal"] .files-list-section .file-item:hover {
+.portal .files-list-section .file-item:hover {
   border-color: var(--color-primary);
   border: 1px solid var(--color-primary);
+}
+
+/* =====================================================
+   TW-DROPZONE - File Upload Dropzone
+   Used by React FileUploadDropzone component
+   ===================================================== */
+
+.tw-dropzone {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: var(--portal-border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1, 0.5rem);
+  padding: var(--space-2, 1rem);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.tw-dropzone:hover,
+.tw-dropzone.is-drag-active {
+  border-color: var(--portal-text-light);
+}
+
+.tw-dropzone.is-error {
+  border-color: var(--color-error, #ef4444);
+}
+
+.tw-dropzone.is-success {
+  border-color: var(--portal-text-light);
+}
+
+.tw-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1, 0.5rem);
+}
+
+.tw-dropzone-text {
+  font-size: var(--font-size-xs, 12px);
+  text-align: center;
+}
+
+.tw-dropzone-hint {
+  font-size: var(--font-size-2xs, 11px);
+  color: var(--portal-text-muted);
+}
+
+.tw-dropzone-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 0.5rem);
+}
+
+/* Progress bar max width */
+.tw-dropzone .tw-progress-track {
+  width: 100%;
+  max-width: 16rem;
+}
+
+/* =====================================================
+   FILES MANAGER COMPONENT CLASSES
+   Used by PortalFilesManager.tsx
+   ===================================================== */
+
+/* Folder sidebar */
+.files-folder-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .files-folder-sidebar {
+    display: block;
+  }
+}
+
+/* Folder list item without bottom border */
+.folder-item {
+  border-bottom: none;
+}
+
+/* Nested folder items */
+.folder-item-nested {
+  padding-left: 1.5rem;
 }

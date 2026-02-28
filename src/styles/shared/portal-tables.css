@@ -19,7 +19,7 @@
   --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
   --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
   --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
-  --table-actions-gap: var(--space-1);
+  --table-actions-gap: var(--space-0-5);
 
   /* Table typography - derived from design system */
   --table-header-font-size: var(--font-size-xs);
@@ -67,12 +67,11 @@
 .data-table {
   width: 100%;
   min-width: 800px;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
   background: var(--table-bg);
   table-layout: auto;
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-lg, 8px);
+  border: none;
   font-family: inherit;
   font-size: var(--table-cell-font-size);
   color: var(--table-cell-color);
@@ -164,8 +163,7 @@
   .data-table .table-actions,
   td .table-actions,
   .actions-cell .table-actions,
-  [data-page="admin"] .table-actions,
-  [data-page="client-portal"] .table-actions {
+  .portal .table-actions {
     display: inline-flex;
     align-items: center;
     gap: var(--table-actions-gap);
@@ -177,10 +175,8 @@
   td.actions-cell,
   .data-table .actions-cell,
   .data-table td.actions-cell,
-  [data-page="admin"] .actions-cell,
-  [data-page="admin"] td.actions-cell,
-  [data-page="client-portal"] .actions-cell,
-  [data-page="client-portal"] td.actions-cell {
+  .portal .actions-cell,
+  .portal td.actions-cell {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -209,6 +205,26 @@
   gap: var(--table-actions-gap);
 }
 
+/* Table action icon buttons - match text size (14px) */
+.data-table .table-actions .icon-btn,
+.data-table .actions-cell .icon-btn,
+.table-actions .icon-btn {
+  width: var(--space-3, 24px);
+  height: var(--space-3, 24px);
+  min-width: var(--space-3, 24px);
+  min-height: var(--space-3, 24px);
+  max-width: var(--space-3, 24px);
+  max-height: var(--space-3, 24px);
+  padding: 0;
+}
+
+.data-table .table-actions .icon-btn svg,
+.data-table .actions-cell .icon-btn svg,
+.table-actions .icon-btn svg {
+  width: var(--font-size-sm, 14px);
+  height: var(--font-size-sm, 14px);
+}
+
 /* ==============================================
    TABLE CONTAINERS
    ============================================== */
@@ -216,7 +232,6 @@
 .data-table-card {
   background: transparent;
   border: var(--portal-border);
-  border-radius: var(--portal-radius-sm, 8px);
   overflow: visible;
   min-width: 0;
 }
@@ -230,54 +245,26 @@
   min-width: 0;
 }
 
+/* Scroll wrapper - no border if inside card (card has the border) */
 .admin-table-scroll-wrapper,
 .table-scroll-wrapper,
 .data-table-scroll-wrapper {
   width: 100%;
   overflow: visible;
   background: var(--table-bg);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-lg, 8px);
+  border: none;
 }
 
-.admin-table-card .admin-table-scroll-wrapper,
-.admin-table-card .data-table-scroll-wrapper,
-.data-table-card .data-table-scroll-wrapper {
-  border: none;
-  border-radius: 0;
+/* Standalone scroll wrapper (not in card) gets the border */
+.admin-table-scroll-wrapper:not(.data-table-card *),
+.table-scroll-wrapper:not(.data-table-card *),
+.data-table-scroll-wrapper:not(.data-table-card *) {
+  border: var(--portal-border);
 }
 
 /* ==============================================
-   TABLE BORDER RADIUS
+   TABLE CORNERS - Brutalist: no border radius
    ============================================== */
-
-.data-table thead tr:first-child th:first-child {
-  border-top-left-radius: var(--portal-radius-lg, 8px);
-}
-
-.data-table thead tr:first-child th:last-child {
-  border-top-right-radius: var(--portal-radius-lg, 8px);
-}
-
-.data-table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: var(--portal-radius-lg, 8px);
-}
-
-.data-table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: var(--portal-radius-lg, 8px);
-}
-
-:has(+ .table-pagination) tbody tr:last-child td:first-child,
-:has(~ .table-pagination) tbody tr:last-child td:first-child,
-.has-pagination tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 0;
-}
-
-:has(+ .table-pagination) tbody tr:last-child td:last-child,
-:has(~ .table-pagination) tbody tr:last-child td:last-child,
-.has-pagination tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 0;
-}
 
 /* ==============================================
    TABLE PAGINATION
@@ -500,10 +487,13 @@
   flex-shrink: 0;
 }
 
-/* Project stacked */
+/* Project stacked - appears FIRST in cell when shown */
 .data-table .project-stacked {
-  color: var(--portal-text-muted);
+  order: -1;
+  color: inherit;
   font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 /* Count stacked (projects count) */
@@ -668,8 +658,11 @@
   text-align: center;
 }
 
-.data-table :is(.amount-col, .amount-cell) {
+.data-table :is(.amount-col, .amount-cell),
+.data-table th.amount-col,
+.data-table th[class*="amount"] {
   text-align: right;
+  padding-right: var(--table-outer-padding);
 }
 
 .data-table :is(.actions-col, .actions-cell) {
@@ -930,56 +923,46 @@
   }
 }
 
-/* 1000px: Hide date, timeline, and assigned columns */
+/* 1000px: Hide date, timeline, assigned, company, project, type columns */
 @media (max-width: 1000px) {
   .data-table :is(.date-col, .date-cell, .created-col, .created-cell, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
     display: none;
   }
 
-  /* Show date stacked in primary cell */
-  .data-table .cell-content .date-stacked {
+  .data-table :is(.company-col, .company-cell, .project-col, .project-cell, .type-col, .type-cell, .projects-col, .projects-cell, .count-col, .count-cell):not(.primary-cell) {
+    display: none;
+  }
+
+  /* Project stacked - shows FIRST above title */
+  .data-table .cell-content .project-stacked {
     display: block;
-    color: var(--portal-text-muted);
+    order: -1;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+  }
+
+  /* Show stacked info in primary cell - same text color */
+  .data-table .cell-content .company-stacked,
+  .data-table .cell-content .type-stacked,
+  .data-table .cell-content .date-stacked,
+  .data-table .cell-content .assigned-stacked,
+  .data-table .cell-content .count-stacked,
+  .data-table .cell-content .target-stacked,
+  .data-table .cell-content .project-stacked,
+  .data-table .identity-cell .identity-company {
+    display: block;
+    color: inherit;
     font-size: var(--font-size-xs);
   }
 }
 
-/* 900px: Hide company and project columns, show stacked */
-@media (max-width: 900px) {
-  .data-table :is(.company-col, .company-cell, .project-col, .project-cell):not(.primary-cell) {
-    display: none;
-  }
-
-  /* Show stacked company/project info in primary cell */
-  .data-table .cell-content .company-stacked,
-  .data-table .cell-content .project-stacked,
-  .data-table .identity-cell .identity-company {
-    display: block;
-  }
-
-  /* Hide projects count column */
-  .data-table :is(.projects-col, .projects-cell, .count-col, .count-cell) {
-    display: none;
-  }
-
-  /* Show count stacked */
-  .data-table .cell-content .count-stacked {
-    display: block;
-  }
-
-  /* Show target stacked */
-  .data-table .cell-content .target-stacked {
-    display: block;
-  }
-}
-
-/* 800px: Hide type, budget, priority, invoice, amount columns */
+/* 800px: Hide budget, priority, invoice, amount columns */
 @media (max-width: 800px) {
-  .data-table :is(.type-col, .type-cell, .project-type-col, .project-type-cell, .budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
+  .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
     display: none;
   }
 
-  .data-table .type-stacked,
   .data-table .budget-stacked,
   .data-table .invoice-stacked,
   .data-table .amount-stacked {

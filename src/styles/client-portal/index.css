@@ -1,51 +1,51 @@
-/* =====================================================
-   CLIENT PORTAL - CSS ORCHESTRATOR
-   Import order matters: base components first, then views
-   ===================================================== */
+/**
+ * ===============================================
+ * CLIENT PORTAL STYLES - INDEX
+ * ===============================================
+ * @file src/styles/client-portal/index.css
+ *
+ * Import file for all client portal styles.
+ * Uses same shared styles as admin portal.
+ */
 
-/* Shared Portal Styles (admin + client) */
+/* Shared portal styles (same as admin) */
 @import "../shared/portal-auth.css";
 @import "../shared/portal-layout.css";
 @import "../shared/portal-buttons.css";
 @import "../shared/portal-messages.css";
 @import "../shared/portal-cards.css";
+@import "../shared/portal-stat-cards.css";
+@import "../shared/portal-dashboard-widgets.css";
 @import "../shared/portal-tables.css";
+@import "../shared/details-card.css";
 @import "../shared/portal-forms.css";
 @import "../shared/portal-files.css";
 @import "../shared/portal-dropdown.css";
 @import "../shared/portal-badges.css";
-@import "../shared/portal-tabs.css";
 @import "../shared/portal-components.css";
+@import "../shared/portal-tabs.css";
 @import "../shared/confirm-dialog.css";
 
-/* Base Components (cp- prefixed reusable classes) */
-@import "./components.css";
+/* Inline editing component */
+@import "../components/inline-edit.css";
 
-/* Layout & Structure */
-@import "./layout.css";
+/* Portal sidebar (shared with admin) */
 @import "../shared/portal-sidebar.css";
 
 /* Authentication */
 @import "./login.css";
 
-/* Dashboard Views */
+/* Client-specific views */
 @import "./dashboard.css";
-@import "./settings.css";
-
-/* Project Navigation & Details */
 @import "./projects.css";
-
-/* Help (Knowledge Base) */
-@import "./help.css";
-
-/* Document Requests */
-@import "./documents.css";
-
-/* Ad Hoc Requests */
-@import "./requests.css";
-
-/* Onboarding Wizard */
+@import "./settings.css";
 @import "./onboarding.css";
-
-/* Questionnaires */
 @import "./questionnaires.css";
+@import "./help.css";
+@import "./requests.css";
+@import "./documents.css";
+@import "./notification-bell.css";
+@import "./components.css";
+
+/* Unified modal system */
+@import "../shared/modal-system.css";

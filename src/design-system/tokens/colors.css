@@ -3,10 +3,12 @@
  * COLOR DESIGN TOKENS
  * ===============================================
  * @file src/design-system/tokens/colors.css
- * 
+ *
  * Core color palette and semantic color tokens.
  * Uses CSS custom properties for runtime theming.
  */
+
+/* Portal light mode overrides: see portal-theme.css */
 
 :root {
   /* ============================================
@@ -132,79 +134,11 @@
 }
 
 /* ============================================
- * PORTAL THEME - DISCOTHÈQUE (Dark)
+ * PORTAL THEME
  * ============================================
- * High contrast black/white for admin and client portals
- * This section ONLY applies to portal pages
+ * Portal-specific colors are defined in portal-theme.css
+ * This includes dark mode (DISCOTHÈQUE) and light mode overrides.
  */
-
-[data-page="admin"],
-[data-page="client-portal"] {
-  /* Brand Colors - White on black */
-  --color-brand-primary: #ffffff;
-  --color-brand-primary-rgb: 255, 255, 255;
-  --color-brand-secondary: #ffffff;
-  --color-brand-secondary-rgb: 255, 255, 255;
-  --color-brand-accent: #ffffff;
-  --color-brand-accent-rgb: 255, 255, 255;
-
-  /* Background Colors - Pure black base */
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #0a0a0a;
-  --color-bg-tertiary: #1a1a1a;
-  --color-bg-inverse: #ffffff;
-  --color-bg-overlay: rgba(0, 0, 0, 0.85);
-
-  /* Surface Colors - Dark surfaces */
-  --color-surface-primary: #000000;
-  --color-surface-secondary: #0a0a0a;
-  --color-surface-tertiary: #1a1a1a;
-  --color-surface-elevated: #1a1a1a;
-
-  /* Form Field Background */
-  --color-form-input-bg: #000000;
-
-  /* Text Colors - White on black */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #ffffff;
-  --color-text-tertiary: #ffffff;
-  --color-text-disabled: #787878;
-  --color-text-inverse: #000000;
-  --color-text-brand: #ffffff;
-
-  /* Header/Navigation Specific Text Color */
-  --color-nav-text: #ffffff;
-
-  /* Border Colors - White borders for contrast */
-  --color-border-primary: #ffffff;
-  --color-border-secondary: #787878;
-  --color-border-tertiary: #24221b;
-  --color-border-focus: #ffffff;
-
-  /* Interactive Colors - Inverted on hover */
-  --color-interactive-primary: #ffffff;
-  --color-interactive-primary-hover: #000000;
-  --color-interactive-primary-active: #1a1a1a;
-  --color-interactive-secondary: #787878;
-  --color-interactive-secondary-hover: #ffffff;
-  --color-interactive-secondary-active: #f4f4f4;
-
-  /* State Colors */
-  --color-state-hover: rgba(255, 255, 255, 0.1);
-  --color-state-active: rgba(255, 255, 255, 0.15);
-  --color-state-selected: rgba(255, 255, 255, 0.2);
-  --color-state-disabled: #787878;
-
-  /* Shadow Colors - Darker for dark theme */
-  --color-shadow-sm: rgba(0, 0, 0, 0.3);
-  --color-shadow-md: rgba(0, 0, 0, 0.5);
-  --color-shadow-lg: rgba(0, 0, 0, 0.7);
-  --color-shadow-xl: rgba(0, 0, 0, 0.9);
-
-  /* Chart Colors for portals */
-  --color-chart-text: var(--color-gray-100);
-  --color-chart-grid: var(--color-gray-600);
-}
 
 /* ============================================
  * DARK THEME OVERRIDES - MAIN SITE
@@ -514,35 +448,4 @@ html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client-portal"]
   --color-card-bg-gradient-end: var(--color-gray-300);
 }
 
-/* Portal legacy aliases - DISCOTHÈQUE theme */
-[data-page="admin"],
-[data-page="client-portal"] {
-  /* Legacy neutral colors → DISCOTHÈQUE dark scale */
-  --color-neutral-100: #1a1a1a;
-  --color-neutral-200: #0a0a0a;
-  --color-neutral-300: #000000;
-  --color-neutral-400: #787878;
-  --color-neutral-500: #a0a0a0;
-  --color-neutral-600: #c0c0c0;
-  --color-neutral-700: #e0e0e0;
-  --color-neutral-800: #f4f4f4;
-  --color-neutral-900: #ffffff;
-
-  /* Legacy semantic colors - DISCOTHÈQUE white-on-black */
-  --color-dark: #ffffff;
-  --color-light: #000000;
-  --color-border: #ffffff;
-  --color-border-light: #787878;
-  --color-shadow: rgba(0, 0, 0, 0.5);
-
-  /* App-level aliases for portal */
-  --app-color-primary: #ffffff;
-  --app-color-primary-hover: #000000;
-
-  /* Form variables for portal */
-  --form-input-border: #ffffff;
-  --form-input-placeholder: #787878;
-  --form-btn-bg: #ffffff;
-  --form-btn-fg: #000000;
-  --form-btn-shadow: rgba(0, 0, 0, 0.3);
-}
+/* Portal legacy aliases - see portal-theme.css for portal-specific color overrides */

@@ -23,7 +23,7 @@
   padding: var(--space-3) var(--space-4);
   background: var(--portal-bg-darker);
   border: 1px solid var(--portal-border-dark);
-  box-shadow: var(--shadow-modal);
+  box-shadow: none;
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   line-height: 1.5;

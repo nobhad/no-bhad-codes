@@ -47,7 +47,7 @@
 
 .confirm-dialog {
   background: var(--portal-bg-darker);
-  box-shadow: var(--shadow-modal);
+  box-shadow: none;
   width: 100%;
   max-width: var(--modal-width-sm, 400px);
   padding: var(--space-6);
@@ -145,7 +145,7 @@
   border: none;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: var(--btn-portal-shadow, var(--shadow-panel));
+  box-shadow: none;
   min-width: 100px;
 }
 
@@ -158,7 +158,7 @@
 .confirm-dialog-cancel:hover {
   background: var(--color-primary);
   color: var(--portal-bg-dark);
-  box-shadow: var(--btn-portal-shadow-hover, var(--shadow-panel));
+  box-shadow: none;
 }
 
 /* Confirm button - transparent bg, red text */
@@ -170,7 +170,7 @@
 .confirm-dialog-confirm:hover {
   background: var(--color-primary);
   color: var(--portal-bg-dark);
-  box-shadow: var(--btn-portal-shadow-hover, var(--shadow-panel));
+  box-shadow: none;
 }
 
 /* Danger variant - red background always */
@@ -181,21 +181,19 @@
 
 .confirm-dialog-confirm.danger:hover {
   background: var(--color-danger-hover);
-  box-shadow: var(--btn-portal-shadow-hover, var(--shadow-panel));
+  box-shadow: none;
 }
 
-/* Focus styles - match portal button focus */
+/* Focus styles - keep focus ring for accessibility */
 .confirm-dialog-btn:focus,
 .confirm-dialog-btn:focus-visible {
   outline: none;
-  box-shadow: var(--btn-portal-shadow-focus);
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 .confirm-dialog-confirm.danger:focus,
 .confirm-dialog-confirm.danger:focus-visible {
-  box-shadow:
-    var(--shadow-panel),
-    0 0 0 3px var(--color-danger);
+  box-shadow: 0 0 0 2px var(--color-danger);
 }
 
 /* Active state for selection buttons (e.g., who cancelled) */

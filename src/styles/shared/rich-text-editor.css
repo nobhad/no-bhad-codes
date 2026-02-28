@@ -231,7 +231,7 @@
   background: var(--portal-bg-dark);
   border: 1px solid var(--portal-border);
   color: var(--portal-text-light);
-  box-shadow: var(--shadow-lg);
+  box-shadow: none;
 }
 
 .ql-snow .ql-tooltip input[type="text"] {

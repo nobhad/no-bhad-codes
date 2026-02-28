@@ -225,7 +225,7 @@
 
 /* Child element - no border per shadow hierarchy */
 .cp-question-item {
-  background: var(--portal-bg-medium);
+  border: 1px solid var(--portal-border-color);
   padding: var(--space-4);
 }
 
@@ -258,7 +258,7 @@
 .cp-questionnaire-form .form-input,
 .cp-questionnaire-form .form-textarea,
 .cp-questionnaire-form .form-select {
-  background: var(--portal-bg-darker);
+  background: transparent;
 }
 
 .cp-questionnaire-form .form-textarea {
@@ -277,12 +277,9 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-medium);
+  border: 1px solid var(--portal-border-color);
   cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 .cp-checkbox-label:hover {

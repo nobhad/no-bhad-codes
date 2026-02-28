@@ -258,8 +258,7 @@ summary::-webkit-details-marker {
  * ============================================ */
 
 /* Navigation items, dropdown items, logout buttons - all icon+text patterns */
-:is([data-page="admin"], [data-page="client-portal"])
-  :is(
+.portal :is(
     .sidebar-nav-item,
     .sidebar-signout,
     .dropdown-item,
