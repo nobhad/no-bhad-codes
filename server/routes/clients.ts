@@ -22,6 +22,7 @@ import { notificationPreferencesService } from '../services/notification-prefere
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { clientService } from '../services/client-service.js';
 import { validateRequest } from '../middleware/validation.js';
+import { rateLimit } from '../middleware/security.js';
 
 const router = express.Router();
 
@@ -138,6 +139,13 @@ router.put(
 router.put(
   '/me/password',
   authenticateToken,
+  // Rate limit: 5 password change attempts per hour per user to prevent abuse
+  rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 5,
+    message: 'Too many password change attempts. Please try again later.',
+    keyGenerator: (req) => `password-change:${(req as AuthenticatedRequest).user?.id || req.ip}`,
+  }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
@@ -311,6 +319,11 @@ router.get(
   '/me/dashboard',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    // Ensure only clients can access their dashboard
+    if (req.user!.type !== 'client') {
+      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+    }
+
     const db = getDatabase();
     const clientId = req.user!.id;
 

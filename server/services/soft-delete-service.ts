@@ -114,21 +114,22 @@ class SoftDeleteService {
 
       if (projects.length > 0) {
         const projectIds = projects.map((p) => p.id);
+        const placeholders = projectIds.map(() => '?').join(',');
 
         // Batch soft delete proposals for all projects in one query
         const proposalResult = await db.run(
           `UPDATE proposal_requests
            SET deleted_at = ?, deleted_by = ?
-           WHERE project_id IN (${projectIds.join(',')}) AND deleted_at IS NULL`,
-          [now, deletedBy]
+           WHERE project_id IN (${placeholders}) AND deleted_at IS NULL`,
+          [now, deletedBy, ...projectIds]
         );
         affectedItems.proposals += proposalResult.changes || 0;
 
         // Batch soft delete all projects in one query
         await db.run(
           `UPDATE projects SET deleted_at = ?, deleted_by = ?
-           WHERE id IN (${projectIds.join(',')})`,
-          [now, deletedBy]
+           WHERE id IN (${placeholders})`,
+          [now, deletedBy, ...projectIds]
         );
         affectedItems.projects = projectIds.length;
       }

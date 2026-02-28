@@ -1143,6 +1143,20 @@ router.get(
 // =====================================================
 
 /**
+ * GET /api/admin/leads/duplicates - Get all pending duplicates
+ * NOTE: This route MUST come before /leads/:id/duplicates to avoid matching 'duplicates' as :id
+ */
+router.get(
+  '/leads/duplicates',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
+    const duplicates = await leadService.getAllPendingDuplicates();
+    sendSuccess(res, { duplicates });
+  })
+);
+
+/**
  * GET /api/admin/leads/:id/duplicates - Find duplicates for a lead
  */
 router.get(
@@ -1152,19 +1166,6 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id);
     const duplicates = await leadService.findDuplicates(projectId);
-    sendSuccess(res, { duplicates });
-  })
-);
-
-/**
- * GET /api/admin/leads/duplicates - Get all pending duplicates
- */
-router.get(
-  '/leads/duplicates',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
-    const duplicates = await leadService.getAllPendingDuplicates();
     sendSuccess(res, { duplicates });
   })
 );
@@ -1267,6 +1268,48 @@ router.post(
 
     const count = await leadService.bulkMoveToStage(projectIds, stageId);
     sendSuccess(res, { count }, `Moved ${count} leads`);
+  })
+);
+
+/**
+ * POST /api/admin/leads/bulk/delete - Bulk soft delete leads
+ */
+router.post(
+  '/leads/bulk/delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { leadIds } = req.body;
+
+    if (!leadIds || !Array.isArray(leadIds) || leadIds.length === 0) {
+      return errorResponse(
+        res,
+        'leadIds array is required and must not be empty',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
+    }
+
+    const db = getDatabase();
+    const deletedBy = req.user?.email || 'admin';
+    const now = new Date().toISOString();
+    let deleted = 0;
+
+    // Soft delete each lead (leads are stored in projects table)
+    for (const leadId of leadIds) {
+      const id = typeof leadId === 'string' ? parseInt(leadId, 10) : leadId;
+      if (isNaN(id)) continue;
+
+      const result = await db.run(
+        `UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL`,
+        [now, deletedBy, id]
+      );
+      if (result.changes && result.changes > 0) {
+        deleted++;
+      }
+    }
+
+    sendSuccess(res, { deleted }, `Deleted ${deleted} leads`);
   })
 );
 

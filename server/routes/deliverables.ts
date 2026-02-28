@@ -580,6 +580,12 @@ router.patch(
         return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
       }
 
+      // Verify comment belongs to this deliverable
+      const existingComment = await deliverableService.getCommentById(parsedCommentId);
+      if (!existingComment || existingComment.deliverable_id !== parsedDeliverableId) {
+        return errorResponse(res, 'Comment not found', 404, 'RESOURCE_NOT_FOUND');
+      }
+
       const comment = await deliverableService.resolveComment(parsedCommentId);
       sendSuccess(res, { comment });
     } catch (error: unknown) {
@@ -618,6 +624,12 @@ router.delete(
       // Check authorization
       if (!(await canAccessDeliverable(req, parsedDeliverableId))) {
         return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      }
+
+      // Verify comment belongs to this deliverable
+      const existingComment = await deliverableService.getCommentById(parsedCommentId);
+      if (!existingComment || existingComment.deliverable_id !== parsedDeliverableId) {
+        return errorResponse(res, 'Comment not found', 404, 'RESOURCE_NOT_FOUND');
       }
 
       await deliverableService.deleteComment(parsedCommentId);
@@ -722,6 +734,12 @@ router.patch(
       // Check authorization
       if (!(await canAccessDeliverable(req, parsedDeliverableId))) {
         return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      }
+
+      // Verify element belongs to this deliverable
+      const existingElement = await deliverableService.getDesignElementById(parsedElementId);
+      if (!existingElement || existingElement.deliverable_id !== parsedDeliverableId) {
+        return errorResponse(res, 'Design element not found', 404, 'RESOURCE_NOT_FOUND');
       }
 
       const { status } = req.body;

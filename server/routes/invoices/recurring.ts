@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseRecurringInvoice } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
 
@@ -77,11 +77,7 @@ router.post(
         endDate,
       });
 
-      res.status(201).json({
-        success: true,
-        message: 'Recurring invoice pattern created',
-        recurring_invoice: toSnakeCaseRecurringInvoice(recurring),
-      });
+      sendCreated(res, { recurring_invoice: toSnakeCaseRecurringInvoice(recurring) }, 'Recurring invoice pattern created');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create recurring invoice', 500, 'CREATION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -105,8 +101,7 @@ router.get(
     try {
       const recurring = await getInvoiceService().getRecurringInvoices();
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
         count: recurring.length,
       });
@@ -145,8 +140,7 @@ router.get(
     try {
       const recurring = await getInvoiceService().getRecurringInvoices(projectId);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
         count: recurring.length,
       });
@@ -186,11 +180,7 @@ router.put(
     try {
       const recurring = await getInvoiceService().updateRecurringInvoice(recurringId, req.body);
 
-      res.json({
-        success: true,
-        message: 'Recurring invoice updated',
-        recurring_invoice: toSnakeCaseRecurringInvoice(recurring),
-      });
+      sendSuccess(res, { recurring_invoice: toSnakeCaseRecurringInvoice(recurring) }, 'Recurring invoice updated');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to update recurring invoice', 500, 'UPDATE_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -221,10 +211,7 @@ router.post(
     try {
       await getInvoiceService().pauseRecurringInvoice(recurringId);
 
-      res.json({
-        success: true,
-        message: 'Recurring invoice paused',
-      });
+      messageResponse(res, 'Recurring invoice paused');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to pause recurring invoice', 500, 'PAUSE_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -255,10 +242,7 @@ router.post(
     try {
       await getInvoiceService().resumeRecurringInvoice(recurringId);
 
-      res.json({
-        success: true,
-        message: 'Recurring invoice resumed',
-      });
+      messageResponse(res, 'Recurring invoice resumed');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to resume recurring invoice', 500, 'RESUME_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -289,10 +273,7 @@ router.delete(
     try {
       await getInvoiceService().deleteRecurringInvoice(recurringId);
 
-      res.json({
-        success: true,
-        message: 'Recurring invoice deleted',
-      });
+      messageResponse(res, 'Recurring invoice deleted');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to delete recurring invoice', 500, 'DELETION_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error',

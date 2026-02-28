@@ -441,7 +441,30 @@ router.get(
       [threadId, threadId]
     );
 
-    // Parse attachments JSON and fetch reactions for each message
+    // Batch fetch all reactions for all messages in this thread (fixes N+1 query)
+    const messageIds = messages.map((m) => m.id as number);
+    let reactionsMap: Map<number, Array<Record<string, unknown>>> = new Map();
+
+    if (messageIds.length > 0) {
+      const placeholders = messageIds.map(() => '?').join(',');
+      const allReactions = await db.all(
+        `SELECT id, message_id, reaction, user_email, created_at
+         FROM message_reactions
+         WHERE message_id IN (${placeholders})`,
+        messageIds
+      );
+
+      // Group reactions by message_id
+      for (const reaction of allReactions) {
+        const msgId = reaction.message_id as number;
+        if (!reactionsMap.has(msgId)) {
+          reactionsMap.set(msgId, []);
+        }
+        reactionsMap.get(msgId)!.push(reaction);
+      }
+    }
+
+    // Parse attachments JSON and assign reactions for each message
     for (const msg of messages) {
       const attachmentsStr = getString(msg, 'attachments');
       if (attachmentsStr) {
@@ -454,14 +477,8 @@ router.get(
         msg.attachments = [];
       }
 
-      // Fetch reactions for this message
-      const reactions = await db.all(
-        `SELECT id, reaction, user_email, created_at
-         FROM message_reactions
-         WHERE message_id = ?`,
-        [msg.id as number]
-      );
-      msg.reactions = reactions || [];
+      // Assign reactions from batch fetch
+      msg.reactions = reactionsMap.get(msg.id as number) || [];
     }
 
     sendSuccess(res, { thread, messages });
@@ -1273,17 +1290,25 @@ router.get(
 
     const db = getDatabase();
 
+    // Escape special characters in filename for LIKE pattern to prevent SQL injection
+    // LIKE special chars: % (wildcard), _ (single char), \ (escape), " (JSON delimiter)
+    const escapedFilename = filename
+      .replace(/\\/g, '\\\\')  // Escape backslashes first
+      .replace(/%/g, '\\%')    // Escape percent
+      .replace(/_/g, '\\_')    // Escape underscore
+      .replace(/"/g, '\\"');   // Escape quotes for JSON matching
+
     // First, find the message containing this attachment and verify access
     // Use exact JSON match to prevent substring attacks
     const messageQuery = req.user!.type === 'admin'
-      ? `SELECT m.id, m.attachments, m.thread_id FROM messages m WHERE m.attachments LIKE ?`
+      ? `SELECT m.id, m.attachments, m.thread_id FROM messages m WHERE m.attachments LIKE ? ESCAPE '\\'`
       : `SELECT m.id, m.attachments, m.thread_id FROM messages m
          JOIN message_threads mt ON m.thread_id = mt.id
-         WHERE m.attachments LIKE ? AND mt.client_id = ?`;
+         WHERE m.attachments LIKE ? ESCAPE '\\' AND mt.client_id = ?`;
 
     const params = req.user!.type === 'admin'
-      ? [`%"filename":"${filename}"%`]
-      : [`%"filename":"${filename}"%`, req.user!.id];
+      ? [`%"filename":"${escapedFilename}"%`]
+      : [`%"filename":"${escapedFilename}"%`, req.user!.id];
 
     const message = await db.get(messageQuery, params);
 

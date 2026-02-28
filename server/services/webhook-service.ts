@@ -7,6 +7,7 @@ import * as crypto from 'crypto';
 import { getDatabase } from '../database/init.js';
 import { WebhookConfig, WebhookDelivery, WebhookPayload } from '../models/webhook.js';
 import type { Database } from '../database/init.js';
+import { logger } from './logger.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -96,7 +97,7 @@ export class WebhookService {
       ? `SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE is_active = 1 ORDER BY created_at DESC`
       : `SELECT ${WEBHOOK_COLUMNS} FROM webhooks ORDER BY created_at DESC`;
     const rows = await this.db.all(query);
-    return rows.map((row: any) => this.formatWebhook(row));
+    return rows.map((row: Record<string, unknown>) => this.formatWebhook(row));
   }
 
   /**
@@ -307,32 +308,53 @@ export class WebhookService {
     );
 
     for (const row of deliveries) {
-      const webhookData = {
-        id: row.webhook_id as number,
-        name: row.name as string,
-        url: row.url as string,
-        method: row.method as 'POST' | 'PUT' | 'PATCH',
-        headers: JSON.parse((row.headers as string) || '{}'),
-        payload_template: row.payload_template as string,
-        events: (row.events as string).split(',').map((e: string) => e.trim()),
-        is_active: Boolean(row.is_active),
-        secret_key: row.secret_key as string,
-        retry_enabled: Boolean(row.retry_enabled),
-        retry_max_attempts: row.retry_max_attempts as number,
-        retry_backoff_seconds: row.retry_backoff_seconds as number,
-        created_at: row.created_at as string,
-        updated_at: row.updated_at as string,
-      };
+      try {
+        let headers = {};
+        try {
+          headers = JSON.parse((row.headers as string) || '{}');
+        } catch {
+          logger.warn(`[WebhookService] Invalid headers JSON for delivery ${row.id}, using empty object`);
+        }
 
-      const payload = JSON.parse(row.event_data as string);
-      const signature = row.signature as string;
+        const webhookData = {
+          id: row.webhook_id as number,
+          name: row.name as string,
+          url: row.url as string,
+          method: row.method as 'POST' | 'PUT' | 'PATCH',
+          headers,
+          payload_template: row.payload_template as string,
+          events: (row.events as string).split(',').map((e: string) => e.trim()),
+          is_active: Boolean(row.is_active),
+          secret_key: row.secret_key as string,
+          retry_enabled: Boolean(row.retry_enabled),
+          retry_max_attempts: row.retry_max_attempts as number,
+          retry_backoff_seconds: row.retry_backoff_seconds as number,
+          created_at: row.created_at as string,
+          updated_at: row.updated_at as string,
+        };
 
-      await this.deliverWebhookAttempt(
-        webhookData as WebhookConfig,
-        row.id as number,
-        payload,
-        signature
-      );
+        let payload: WebhookPayload;
+        try {
+          payload = JSON.parse(row.event_data as string) as WebhookPayload;
+        } catch {
+          logger.error(`[WebhookService] Invalid event_data JSON for delivery ${row.id}, skipping`);
+          continue;
+        }
+
+        const signature = row.signature as string;
+
+        await this.deliverWebhookAttempt(
+          webhookData as WebhookConfig,
+          row.id as number,
+          payload,
+          signature
+        );
+      } catch (error) {
+        logger.error(`[WebhookService] Failed to process retry for delivery ${row.id}:`, {
+          error: error instanceof Error ? error : undefined,
+          metadata: { errorMessage: error instanceof Error ? error.message : String(error) },
+        });
+      }
     }
   }
 
@@ -358,7 +380,7 @@ export class WebhookService {
     }
   ): Promise<{ deliveries: WebhookDelivery[]; total: number }> {
     let query = `SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE webhook_id = ?`;
-    const params: any[] = [webhookId];
+    const params: (string | number)[] = [webhookId];
 
     if (options?.status) {
       query += ' AND status = ?';
@@ -387,7 +409,7 @@ export class WebhookService {
 
     const rows = await this.db.all(query, params);
     return {
-      deliveries: rows.map((row: any) => this.formatDelivery(row)),
+      deliveries: rows.map((row: Record<string, unknown>) => this.formatDelivery(row)),
       total: Number(countResult?.count) || 0,
     };
   }
@@ -466,8 +488,13 @@ export class WebhookService {
   /**
    * Get nested object value by dot notation (e.g., "invoice.total")
    */
-  private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, part) => current?.[part], obj);
+  private getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+    return path.split('.').reduce((current, part) => {
+      if (current && typeof current === 'object' && part in (current as Record<string, unknown>)) {
+        return (current as Record<string, unknown>)[part];
+      }
+      return undefined;
+    }, obj as unknown);
   }
 
   /**
@@ -497,44 +524,46 @@ export class WebhookService {
   /**
    * Format webhook row from database
    */
-  private formatWebhook(row: any): WebhookConfig {
+  private formatWebhook(row: Record<string, unknown>): WebhookConfig {
+    const eventsStr = String(row.events || '');
+    const headersStr = String(row.headers || '{}');
     return {
-      id: row.id,
-      name: row.name,
-      url: row.url,
-      method: row.method || 'POST',
-      headers: JSON.parse(row.headers || '{}'),
-      payload_template: row.payload_template,
-      events: row.events.split(',').map((e: string) => e.trim()),
+      id: Number(row.id),
+      name: String(row.name),
+      url: String(row.url),
+      method: (row.method as 'POST' | 'PUT' | 'PATCH') || 'POST',
+      headers: JSON.parse(headersStr) as Record<string, string>,
+      payload_template: String(row.payload_template),
+      events: eventsStr.split(',').map((e: string) => e.trim()),
       is_active: Boolean(row.is_active),
-      secret_key: row.secret_key,
+      secret_key: String(row.secret_key),
       retry_enabled: Boolean(row.retry_enabled),
-      retry_max_attempts: row.retry_max_attempts,
-      retry_backoff_seconds: row.retry_backoff_seconds,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
+      retry_max_attempts: Number(row.retry_max_attempts),
+      retry_backoff_seconds: Number(row.retry_backoff_seconds),
+      created_at: String(row.created_at),
+      updated_at: String(row.updated_at),
     };
   }
 
   /**
    * Format delivery row from database
    */
-  private formatDelivery(row: any): WebhookDelivery {
+  private formatDelivery(row: Record<string, unknown>): WebhookDelivery {
     return {
-      id: row.id,
-      webhook_id: row.webhook_id,
-      event_type: row.event_type,
-      event_data: row.event_data,
-      status: row.status,
-      attempt_number: row.attempt_number,
-      response_status: row.response_status,
-      response_body: row.response_body,
-      error_message: row.error_message,
-      signature: row.signature,
-      delivered_at: row.delivered_at,
-      next_retry_at: row.next_retry_at,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
+      id: Number(row.id),
+      webhook_id: Number(row.webhook_id),
+      event_type: String(row.event_type),
+      event_data: String(row.event_data),
+      status: row.status as 'pending' | 'success' | 'failed' | 'retrying',
+      attempt_number: Number(row.attempt_number),
+      response_status: row.response_status != null ? Number(row.response_status) : null,
+      response_body: row.response_body != null ? String(row.response_body) : null,
+      error_message: row.error_message != null ? String(row.error_message) : null,
+      signature: String(row.signature),
+      delivered_at: row.delivered_at != null ? String(row.delivered_at) : null,
+      next_retry_at: row.next_retry_at != null ? String(row.next_retry_at) : null,
+      created_at: String(row.created_at),
+      updated_at: String(row.updated_at),
     };
   }
 }
@@ -557,16 +586,27 @@ export const webhookService = {
     url: string,
     events: string[],
     payloadTemplate: string,
-    options?: any
+    options?: {
+      method?: 'POST' | 'PUT' | 'PATCH';
+      headers?: Record<string, string>;
+      retryEnabled?: boolean;
+      retryMaxAttempts?: number;
+      retryBackoffSeconds?: number;
+    }
   ) => getWebhookService().createWebhook(name, url, events, payloadTemplate, options),
-  updateWebhook: async (id: number, updates: any) => getWebhookService().updateWebhook(id, updates),
+  updateWebhook: async (id: number, updates: Partial<Omit<WebhookConfig, 'id' | 'secret_key' | 'created_at'>>) => getWebhookService().updateWebhook(id, updates),
   deleteWebhook: async (id: number) => getWebhookService().deleteWebhook(id),
   toggleWebhook: async (id: number, active: boolean) =>
     getWebhookService().toggleWebhook(id, active),
-  triggerEvent: async (eventType: string, eventData: any) =>
+  triggerEvent: async (eventType: string, eventData: WebhookPayload) =>
     getWebhookService().triggerEvent(eventType, eventData),
   getDeliveryById: async (id: number) => getWebhookService().getDeliveryById(id),
-  getWebhookDeliveries: async (webhookId: number, options?: any) =>
+  getWebhookDeliveries: async (webhookId: number, options?: {
+    status?: 'pending' | 'success' | 'failed';
+    eventType?: string;
+    limit?: number;
+    offset?: number;
+  }) =>
     getWebhookService().getWebhookDeliveries(webhookId, options),
   getDeliveryStats: async (webhookId: number) => getWebhookService().getDeliveryStats(webhookId),
   processPendingRetries: async () => getWebhookService().processPendingRetries(),

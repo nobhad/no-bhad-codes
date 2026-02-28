@@ -4,7 +4,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -48,7 +48,7 @@ router.get(
       user_name: entry.userName || 'Admin',
     }));
 
-    res.json({ entries: transformedEntries });
+    sendSuccess(res, { entries: transformedEntries });
   })
 );
 
@@ -108,7 +108,7 @@ router.post(
     };
 
     const entry = await projectService.logTime(projectId, normalizedData);
-    res.status(201).json({ message: 'Time logged successfully', entry });
+    sendCreated(res, { entry }, 'Time logged successfully');
   })
 );
 
@@ -150,7 +150,7 @@ router.put(
     else if (taskId !== undefined) normalizedData.taskId = taskId;
 
     const entry = await projectService.updateTimeEntry(entryId, normalizedData);
-    res.json({ message: 'Time entry updated successfully', entry });
+    sendSuccess(res, { entry }, 'Time entry updated successfully');
   })
 );
 
@@ -162,7 +162,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const entryId = parseInt(req.params.entryId);
     await projectService.deleteTimeEntry(entryId);
-    res.json({ message: 'Time entry deleted successfully' });
+    messageResponse(res, 'Time entry deleted successfully');
   })
 );
 
@@ -173,7 +173,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const stats = await projectService.getProjectTimeStats(projectId);
-    res.json({ stats });
+    sendSuccess(res, { stats });
   })
 );
 
@@ -190,7 +190,7 @@ router.get(
     }
 
     const report = await projectService.getTeamTimeReport(startDate as string, endDate as string);
-    res.json({ report });
+    sendSuccess(res, { report });
   })
 );
 

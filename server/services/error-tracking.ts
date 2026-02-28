@@ -89,10 +89,11 @@ export class ErrorTrackingService {
       try {
         const { nodeProfilingIntegration } = require('@sentry/profiling-node');
         integrations.push(nodeProfilingIntegration());
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.warn(
           '⚠️ Sentry profiling integration not available:',
-          error?.message || 'Unknown error'
+          errorMessage
         );
       }
     }

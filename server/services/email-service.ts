@@ -628,7 +628,7 @@ export const emailService = {
     return sendEmail(emailContent);
   },
 
-  async sendAdminNotification(title: string | any, data?: any): Promise<EmailResult> {
+  async sendAdminNotification(title: string | Record<string, unknown>, data?: Record<string, unknown>): Promise<EmailResult> {
     if (typeof title === 'string') {
       logger.info(`Sending admin notification: ${title}`, { metadata: data });
     } else {
@@ -637,17 +637,17 @@ export const emailService = {
     return { success: true, message: 'Admin notification logged for development' };
   },
 
-  async sendMessageNotification(email: string, data: any): Promise<EmailResult> {
-    logger.info(`[EMAIL] Sending message notification to: ${sanitizeEmailForLog(email)}`);
+  async sendMessageNotification(email: string, data?: Record<string, unknown>): Promise<EmailResult> {
+    logger.info(`[EMAIL] Sending message notification to: ${sanitizeEmailForLog(email)}`, { metadata: data });
     return { success: true, message: 'Message notification logged for development' };
   },
 
-  async sendProjectUpdateEmail(email: string, data: any): Promise<EmailResult> {
-    logger.info(`[EMAIL] Sending project update email to: ${sanitizeEmailForLog(email)}`);
+  async sendProjectUpdateEmail(email: string, data?: Record<string, unknown>): Promise<EmailResult> {
+    logger.info(`[EMAIL] Sending project update email to: ${sanitizeEmailForLog(email)}`, { metadata: data });
     return { success: true, message: 'Project update email logged for development' };
   },
 
-  async sendIntakeConfirmation(data: any): Promise<EmailResult> {
+  async sendIntakeConfirmation(data: Record<string, unknown>): Promise<EmailResult> {
     logger.info('Sending intake confirmation', { metadata: data });
     return { success: true, message: 'Intake confirmation logged for development' };
   },

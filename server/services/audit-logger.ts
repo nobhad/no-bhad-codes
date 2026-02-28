@@ -23,6 +23,7 @@
 import { getDatabase } from '../database/init.js';
 import type { Request } from 'express';
 import { logger } from './logger.js';
+import { safeJsonParseOrNull } from '../utils/safe-json.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -633,13 +634,13 @@ export const auditLogger = {
       [...params, limit, offset]
     );
 
-    // Parse JSON fields
+    // Parse JSON fields safely
     return logs.map((log: any) => ({
       ...log,
-      old_value: log.old_value ? JSON.parse(log.old_value) : null,
-      new_value: log.new_value ? JSON.parse(log.new_value) : null,
-      changes: log.changes ? JSON.parse(log.changes) : null,
-      metadata: log.metadata ? JSON.parse(log.metadata) : null
+      old_value: safeJsonParseOrNull(log.old_value, 'audit log old_value'),
+      new_value: safeJsonParseOrNull(log.new_value, 'audit log new_value'),
+      changes: safeJsonParseOrNull(log.changes, 'audit log changes'),
+      metadata: safeJsonParseOrNull(log.metadata, 'audit log metadata'),
     }));
   }
 };

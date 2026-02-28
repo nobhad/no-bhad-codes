@@ -53,6 +53,35 @@ router.get(
   })
 );
 
+// Bulk delete contracts
+router.post(
+  '/bulk-delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { contractIds } = req.body;
+
+    if (!contractIds || !Array.isArray(contractIds) || contractIds.length === 0) {
+      return errorResponse(res, 'contractIds array is required', 400, 'VALIDATION_ERROR');
+    }
+
+    let deleted = 0;
+    for (const contractId of contractIds) {
+      const id = typeof contractId === 'string' ? parseInt(contractId, 10) : contractId;
+      if (isNaN(id)) continue;
+
+      try {
+        await contractService.updateContract(id, { status: 'cancelled' });
+        deleted++;
+      } catch {
+        // Skip contracts that don't exist or can't be updated
+      }
+    }
+
+    sendSuccess(res, { deleted }, `${deleted} contract(s) cancelled`);
+  })
+);
+
 // Create contract from template
 router.post(
   '/from-template',
@@ -200,6 +229,110 @@ router.put(
 
     const contract = await contractService.updateContract(contractId, req.body);
     sendSuccess(res, { contract }, 'Contract updated successfully');
+  })
+);
+
+// Send contract for signature
+router.post(
+  '/:contractId/send',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const contractId = parseInt(req.params.contractId);
+    const db = getDatabase();
+
+    const contract = await contractService.getContract(contractId);
+
+    // Get project and client info
+    const project = await db.get(
+      `SELECT p.id, p.project_name, p.contract_signature_token, p.contract_signature_expires_at,
+              c.contact_name, c.email
+       FROM projects p
+       LEFT JOIN clients c ON p.client_id = c.id
+       WHERE p.id = ?`,
+      [contract.projectId]
+    );
+
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+    }
+
+    const p = project as Record<string, unknown>;
+    const clientEmail = getString(p, 'email');
+    const clientName = getString(p, 'contact_name') || 'there';
+    const projectName = getString(p, 'project_name');
+
+    // Validate email exists and has valid format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!clientEmail || !emailRegex.test(clientEmail)) {
+      return errorResponse(res, 'No valid client email on file', 400, 'VALIDATION_ERROR');
+    }
+
+    // Generate signature token if not exists
+    let signatureToken = p.contract_signature_token as string | null;
+    if (!signatureToken) {
+      const crypto = await import('crypto');
+      signatureToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 day expiry
+
+      await db.run(
+        `UPDATE projects SET contract_signature_token = ?, contract_signature_expires_at = ? WHERE id = ?`,
+        [signatureToken, expiresAt.toISOString(), contract.projectId]
+      );
+    }
+
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
+    const contractPreviewUrl = `${baseUrl}/api/projects/${contract.projectId}/contract/pdf`;
+
+    const { emailService } = await import('../services/email-service.js');
+    await emailService.sendEmail({
+      to: clientEmail,
+      subject: `Contract Ready for Signature - ${projectName}`,
+      text: `Hi ${clientName},\n\nYour contract for "${projectName}" is ready for review and signature.\n\nSign the contract here:\n${signatureUrl}\n\nPreview the contract here:\n${contractPreviewUrl}\n\nThanks,\n${BUSINESS_INFO.name}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .content { background: #f9f9f9; padding: 24px; border-radius: 8px; }
+    .btn { display: inline-block; padding: 12px 24px; background: #00aff0; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <p>Hi ${clientName},</p>
+      <p>Your contract for <strong>"${projectName}"</strong> is ready for review and signature.</p>
+      <p style="text-align: center; margin: 20px 0;">
+        <a href="${signatureUrl}" class="btn">Sign Contract</a>
+      </p>
+      <p>Preview the contract here: <a href="${contractPreviewUrl}">${contractPreviewUrl}</a></p>
+      <p>Thanks,<br>${BUSINESS_INFO.name}</p>
+    </div>
+  </div>
+</body>
+</html>
+      `.trim(),
+    });
+
+    // Log the send action
+    await db.run(
+      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
+       VALUES (?, ?, 'sent', ?, ?)`,
+      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
+    );
+
+    // Update contract status to sent if it's a draft
+    let updatedContract = contract;
+    if (contract.status === 'draft') {
+      updatedContract = await contractService.updateContract(contractId, { status: 'sent' });
+    }
+
+    sendSuccess(res, { contract: updatedContract }, 'Contract sent for signature');
   })
 );
 

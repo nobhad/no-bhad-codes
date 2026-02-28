@@ -4,7 +4,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
 import { getString } from '../../database/row-helpers.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -12,6 +12,24 @@ const MILESTONE_COLUMNS = `
   id, project_id, title, description, due_date, completed_date,
   is_completed, deliverables, created_at, updated_at
 `.replace(/\s+/g, ' ').trim();
+
+/** Milestone row from database query with task counts */
+interface MilestoneRow {
+  [key: string]: unknown;  // Index signature for DatabaseRow compatibility
+  id: number;
+  project_id: number;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  completed_date: string | null;
+  is_completed: number;
+  deliverables: string | string[];
+  created_at: string;
+  updated_at: string;
+  task_count?: number;
+  completed_task_count?: number;
+  progress_percentage?: number;
+}
 
 const router = express.Router();
 
@@ -56,7 +74,7 @@ router.get(
     );
 
     // Parse deliverables JSON and calculate progress
-    milestones.forEach((milestone: any) => {
+    (milestones as MilestoneRow[]).forEach((milestone) => {
       const deliverablesStr = getString(milestone, 'deliverables');
       if (deliverablesStr) {
         try {
@@ -75,7 +93,7 @@ router.get(
         taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
     });
 
-    res.json({ milestones });
+    sendSuccess(res, { milestones });
   })
 );
 
@@ -138,10 +156,7 @@ router.post(
       newMilestone.deliverables = [];
     }
 
-    res.status(201).json({
-      message: 'Milestone created successfully',
-      milestone: newMilestone,
-    });
+    sendCreated(res, { milestone: newMilestone }, 'Milestone created successfully');
   })
 );
 
@@ -254,10 +269,7 @@ router.put(
       updatedMilestone.deliverables = [];
     }
 
-    res.json({
-      message: 'Milestone updated successfully',
-      milestone: updatedMilestone,
-    });
+    sendSuccess(res, { milestone: updatedMilestone }, 'Milestone updated successfully');
   })
 );
 
@@ -283,9 +295,7 @@ router.delete(
 
     await db.run('DELETE FROM milestones WHERE id = ?', [milestoneId]);
 
-    res.json({
-      message: 'Milestone deleted successfully',
-    });
+    messageResponse(res, 'Milestone deleted successfully');
   })
 );
 

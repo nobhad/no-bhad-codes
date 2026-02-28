@@ -14,6 +14,7 @@ import { getDatabase } from '../database/init.js';
 import { emailService } from './email-service.js';
 import { userService } from './user-service.js';
 import { logger } from './logger.js';
+import { parseIfString } from '../utils/safe-json.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -146,10 +147,11 @@ class WorkflowTriggerService {
       try {
         // Check conditions
         if (trigger.conditions) {
-          const conditions =
-            typeof trigger.conditions === 'string'
-              ? JSON.parse(trigger.conditions)
-              : trigger.conditions;
+          const conditions = parseIfString<Record<string, unknown>>(
+            trigger.conditions,
+            {},
+            'trigger conditions'
+          );
 
           if (!this.evaluateConditions(conditions, context)) {
             await this.logTriggerExecution(
@@ -477,30 +479,46 @@ class WorkflowTriggerService {
    * Execute a trigger action
    */
   private async executeAction(trigger: WorkflowTrigger, context: EventContext): Promise<void> {
-    const config =
-      typeof trigger.action_config === 'string'
-        ? JSON.parse(trigger.action_config)
-        : trigger.action_config;
+    const config = parseIfString<Record<string, unknown>>(
+      trigger.action_config,
+      {},
+      'trigger action_config'
+    );
 
     switch (trigger.action_type) {
       case 'send_email':
-        await this.executeSendEmail(config, context);
+        await this.executeSendEmail(
+          config as { template: string; to: string; subject?: string },
+          context
+        );
         break;
 
       case 'create_task':
-        await this.executeCreateTask(config, context);
+        await this.executeCreateTask(
+          config as { title: string; description?: string; assignee?: string; due_days?: number },
+          context
+        );
         break;
 
       case 'update_status':
-        await this.executeUpdateStatus(config, context);
+        await this.executeUpdateStatus(
+          config as { entity: string; status: string; field?: string },
+          context
+        );
         break;
 
       case 'webhook':
-        await this.executeWebhook(config, context);
+        await this.executeWebhook(
+          config as { url: string; method?: string; headers?: Record<string, string> },
+          context
+        );
         break;
 
       case 'notify':
-        await this.executeNotify(config, context);
+        await this.executeNotify(
+          config as { channel: string; message: string },
+          context
+        );
         break;
 
       default:

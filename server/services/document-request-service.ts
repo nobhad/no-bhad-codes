@@ -250,6 +250,65 @@ class DocumentRequestService {
   }
 
   /**
+   * Get all document requests (admin view)
+   */
+  async getAllRequests(status?: RequestStatus): Promise<DocumentRequest[]> {
+    const db = await getDatabase();
+
+    let query = `SELECT dr.*,
+            COALESCE(c.company_name, c.contact_name) as client_name,
+            p.project_name as project_name,
+            f.original_filename as file_name
+     FROM document_requests dr
+     LEFT JOIN clients c ON dr.client_id = c.id
+     LEFT JOIN projects p ON dr.project_id = p.id
+     LEFT JOIN files f ON dr.file_id = f.id`;
+
+    const params: (string | number)[] = [];
+
+    if (status) {
+      query += ` WHERE dr.status = ?`;
+      params.push(status);
+    }
+
+    query += ` ORDER BY dr.created_at DESC`;
+
+    const requests = await db.all(query, params);
+    return requests as unknown as DocumentRequest[];
+  }
+
+  /**
+   * Get admin-level stats for all document requests
+   */
+  async getAdminStats(): Promise<{
+    total: number;
+    pending: number;
+    uploaded: number;
+    approved: number;
+    overdue: number;
+  }> {
+    const db = await getDatabase();
+
+    const stats = await db.get(
+      `SELECT
+         COUNT(*) as total,
+         SUM(CASE WHEN status IN ('requested', 'viewed') THEN 1 ELSE 0 END) as pending,
+         SUM(CASE WHEN status IN ('uploaded', 'under_review') THEN 1 ELSE 0 END) as uploaded,
+         SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+         SUM(CASE WHEN due_date < DATE('now') AND status NOT IN ('approved', 'rejected') THEN 1 ELSE 0 END) as overdue
+       FROM document_requests`
+    );
+
+    return {
+      total: stats?.total || 0,
+      pending: stats?.pending || 0,
+      uploaded: stats?.uploaded || 0,
+      approved: stats?.approved || 0,
+      overdue: stats?.overdue || 0,
+    };
+  }
+
+  /**
    * Get all pending requests (admin view)
    */
   async getPendingRequests(): Promise<DocumentRequest[]> {

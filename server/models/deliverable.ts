@@ -68,7 +68,7 @@ export interface DeliverableReview {
   reviewer_id: number;
   decision: 'approved' | 'revision_needed' | 'rejected';
   feedback: string;
-  design_elements_reviewed: string; // JSON array of element IDs
+  design_elements_reviewed: string[]; // Array of element IDs
   review_duration_minutes: number;
   created_at: string;
 }

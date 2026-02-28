@@ -3,7 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessFile, canAccessFileComment } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.get(
 
     const includeInternal = req.user!.type === 'admin';
     const comments = await fileService.getComments(fileId, includeInternal);
-    res.json({ comments });
+    sendSuccess(res, { comments });
   })
 );
 
@@ -57,7 +57,7 @@ router.post(
       parent_comment_id
     );
 
-    res.status(201).json({ comment });
+    sendCreated(res, { comment });
   })
 );
 
@@ -76,7 +76,7 @@ router.delete(
     }
 
     await fileService.deleteComment(commentId);
-    res.json({ message: 'Comment deleted' });
+    messageResponse(res, 'Comment deleted');
   })
 );
 

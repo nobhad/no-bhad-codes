@@ -300,10 +300,22 @@ router.get(
         limit: limit ? Math.min(parseInt(String(limit), 10) || 100, 500) : 100,
       });
 
+      // Calculate stats for the GlobalTasksTable
+      const today = new Date().toISOString().split('T')[0];
+      const stats = {
+        total: tasks.length,
+        pending: tasks.filter((t: { status: string }) => t.status === 'pending').length,
+        inProgress: tasks.filter((t: { status: string }) => t.status === 'in_progress').length,
+        completed: tasks.filter((t: { status: string }) => t.status === 'completed').length,
+        overdue: tasks.filter((t: { status: string; dueDate?: string }) =>
+          t.dueDate && t.dueDate < today && t.status !== 'completed'
+        ).length,
+      };
+
       res.json({
         success: true,
         tasks,
-        count: tasks.length,
+        stats,
       });
     } catch (error) {
       logger.error('Error fetching global tasks:', {

@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseCredit } from './helpers.js';
 
 const router = express.Router();
@@ -50,11 +50,7 @@ router.post(
         req.user?.email
       );
 
-      res.json({
-        success: true,
-        message: 'Credit applied successfully',
-        credit: toSnakeCaseCredit(credit),
-      });
+      sendSuccess(res, { credit: toSnakeCaseCredit(credit) }, 'Credit applied successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('Insufficient') || message.includes('Invalid')) {
@@ -87,8 +83,7 @@ router.get(
       const credits = await getInvoiceService().getInvoiceCredits(invoiceId);
       const totalCredits = await getInvoiceService().getTotalCredits(invoiceId);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         credits: credits.map(toSnakeCaseCredit),
         total_credits: totalCredits,
       });

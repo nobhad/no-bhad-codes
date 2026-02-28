@@ -34,7 +34,7 @@ export function sanitizeString(input: string): string {
 /**
  * Recursively sanitize all string values in an object or array
  */
-export function sanitizeObject(obj: any): any {
+export function sanitizeObject(obj: unknown): unknown {
   if (obj === null || obj === undefined) {
     return obj;
   }
@@ -48,7 +48,7 @@ export function sanitizeObject(obj: any): any {
   }
 
   if (typeof obj === 'object') {
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       // Don't sanitize certain fields that might need special handling
       // (e.g., password hashes, tokens that shouldn't be modified)
@@ -141,7 +141,7 @@ export function sanitizeInputs(
 /**
  * Sanitize a single value (can be used directly in route handlers)
  */
-export function sanitize(value: any): any {
+export function sanitize(value: unknown): unknown {
   return sanitizeObject(value);
 }
 

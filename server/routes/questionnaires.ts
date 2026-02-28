@@ -323,6 +323,38 @@ router.delete(
   })
 );
 
+/**
+ * Bulk delete questionnaires (admin)
+ */
+router.post(
+  '/bulk-delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { questionnaireIds } = req.body;
+
+    if (!questionnaireIds || !Array.isArray(questionnaireIds) || questionnaireIds.length === 0) {
+      return errorResponse(res, 'questionnaireIds array is required', 400);
+    }
+
+    let deleted = 0;
+
+    for (const questionnaireId of questionnaireIds) {
+      const id = typeof questionnaireId === 'string' ? parseInt(questionnaireId, 10) : questionnaireId;
+      if (isNaN(id)) continue;
+
+      try {
+        await questionnaireService.deleteQuestionnaire(id);
+        deleted++;
+      } catch {
+        // Skip questionnaires that don't exist or can't be deleted
+      }
+    }
+
+    sendSuccess(res, { deleted }, `${deleted} questionnaire(s) deleted`);
+  })
+);
+
 // =====================================================
 // ADMIN ENDPOINTS - RESPONSES
 // =====================================================

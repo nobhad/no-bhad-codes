@@ -76,8 +76,9 @@ async function testEmailService(): Promise<void> {
 
     console.log('\n🎉 Email service test completed successfully!');
     console.log('\n💡 To test actual email sending, configure SMTP settings in .env file');
-  } catch (error: any) {
-    console.error('❌ Email service test failed:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Email service test failed:', errorMessage);
     process.exit(1);
   }
 }

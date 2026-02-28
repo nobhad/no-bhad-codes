@@ -12,9 +12,10 @@ import { logger } from '../services/logger.js';
  * - Google Calendar sync
  */
 
-import { Router, Request, Response } from 'express';
-import express from 'express';
-import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { Router } from 'express';
+import express, { Request, Response } from 'express';
+import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth';
+import { asyncHandler } from '../middleware/errorHandler.js';
 import {
   // Zapier
   formatZapierPayload,
@@ -66,15 +67,6 @@ const INVOICE_COLUMNS = `
 
 const router = Router();
 
-// Helper for async route handlers
-const asyncHandler =
-  (fn: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response) => {
-    Promise.resolve(fn(req, res)).catch((error) => {
-      logger.error('Integration route error:', { error, category: 'INTEGRATION' });
-      errorResponse(res, error.message || 'Internal server error', 500, 'INTERNAL_ERROR');
-    });
-  };
-
 // ===================================
 // INTEGRATION STATUS
 // ===================================
@@ -87,7 +79,7 @@ router.get(
   '/status',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const db = getDatabase();
     const statuses = await db.all(
       `SELECT ${INTEGRATION_STATUS_COLUMNS} FROM integration_status ORDER BY integration_type LIMIT 100`
@@ -131,7 +123,7 @@ router.get(
   '/zapier/events',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     const eventTypes = getZapierEventTypes();
     sendSuccess(res, { events: eventTypes });
   })
@@ -145,7 +137,7 @@ router.get(
   '/zapier/samples',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     const samples = getZapierTriggerSamples();
     sendSuccess(res, { samples });
   })
@@ -159,7 +151,7 @@ router.post(
   '/zapier/webhook',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { name, url, events } = req.body;
 
     if (!name || !url || !events?.length) {
@@ -189,7 +181,7 @@ router.post(
   '/zapier/format',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { eventType, data, entityId } = req.body;
 
     if (!eventType || !data) {
@@ -214,7 +206,7 @@ router.get(
   '/notifications',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     const configs = await getNotificationConfigs();
     sendSuccess(res, { notifications: configs });
   })
@@ -228,7 +220,7 @@ router.post(
   '/notifications',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id, name, platform, webhook_url, channel, events, is_active } = req.body;
 
     if (!name || !platform || !webhook_url || !events?.length) {
@@ -273,7 +265,7 @@ router.delete(
   '/notifications/:id',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     await deleteNotificationConfig(parseInt(id, 10));
     sendSuccess(res, undefined, 'Notification configuration deleted');
@@ -288,7 +280,7 @@ router.post(
   '/notifications/:id/test',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const configs = await getNotificationConfigs();
     const config = configs.find((c) => c.id === parseInt(id, 10));
@@ -311,7 +303,7 @@ router.post(
   '/notifications/preview',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { platform, eventType, data } = req.body;
 
     if (!platform || !eventType) {
@@ -350,7 +342,7 @@ router.get(
   '/stripe/status',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
     const status = getStripeStatus();
     sendSuccess(res, status);
   })
@@ -364,7 +356,7 @@ router.post(
   '/stripe/payment-link',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     if (!isStripeConfigured()) {
       errorResponse(
         res,
@@ -411,7 +403,7 @@ router.get(
   '/stripe/payment-link/:invoiceId',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { invoiceId } = req.params;
     const link = await getPaymentLink(parseInt(invoiceId, 10));
 
@@ -432,7 +424,7 @@ router.delete(
   '/stripe/payment-link/:invoiceId',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { invoiceId } = req.params;
     await expirePaymentLink(parseInt(invoiceId, 10));
     sendSuccess(res, undefined, 'Payment link expired');
@@ -449,7 +441,7 @@ router.delete(
 router.post(
   '/stripe/webhook',
   express.raw({ type: 'application/json' }),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const signature = req.headers['stripe-signature'] as string;
 
     if (!signature) {
@@ -486,7 +478,7 @@ router.get(
   '/calendar/status',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const configured = isGoogleCalendarConfigured();
     const userId = (req as any).user?.id;
 
@@ -518,7 +510,7 @@ router.get(
   '/calendar/auth-url',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     if (!isGoogleCalendarConfigured()) {
       errorResponse(
         res,
@@ -543,7 +535,7 @@ router.post(
   '/calendar/callback',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { code } = req.body;
     const userId = (req as any).user?.id;
 
@@ -579,7 +571,7 @@ router.put(
   '/calendar/settings',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = (req as any).user?.id;
     const { syncMilestones, syncTasks, syncInvoiceDueDates, isActive } = req.body;
 
@@ -608,7 +600,7 @@ router.put(
 router.get(
   '/calendar/export/project/:projectId',
   authenticateToken,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { projectId } = req.params;
     const ical = await exportProjectToICal(parseInt(projectId, 10));
 
@@ -625,7 +617,7 @@ router.get(
 router.get(
   '/calendar/export/upcoming',
   authenticateToken,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const daysParam = parseInt(req.query.days as string, 10);
     const days = isNaN(daysParam) || daysParam < 1 || daysParam > 365 ? 30 : daysParam;
     const ical = await exportUpcomingToICal(days);

@@ -22,6 +22,7 @@ import type {
 } from '../../types/invoice-types.js';
 import { logger } from '../logger.js';
 import type { Database } from '../../database/init.js';
+import { safeJsonParseArray } from '../../utils/safe-json.js';
 
 type SqlValue = string | number | boolean | null;
 
@@ -130,7 +131,7 @@ export class InvoiceRecurringService {
         const invoice = await this.createInvoice({
           projectId: scheduled.project_id,
           clientId: scheduled.client_id,
-          lineItems: JSON.parse(scheduled.line_items),
+          lineItems: safeJsonParseArray<InvoiceLineItem>(scheduled.line_items, 'scheduled invoice line_items'),
           notes: scheduled.notes,
           terms: scheduled.terms,
         });
@@ -317,7 +318,7 @@ export class InvoiceRecurringService {
         await this.createInvoice({
           projectId: recurring.project_id,
           clientId: recurring.client_id,
-          lineItems: JSON.parse(recurring.line_items),
+          lineItems: safeJsonParseArray<InvoiceLineItem>(recurring.line_items, 'recurring invoice line_items'),
           notes: recurring.notes,
           terms: recurring.terms,
         });
@@ -342,18 +343,16 @@ export class InvoiceRecurringService {
     // Batch update all successful recurring invoices in a single transaction
     if (successfulRecurring.length > 0) {
       await this.db.transaction(async (ctx: any) => {
-        // Build CASE WHEN statement for batch update
-        const ids = successfulRecurring.map((r) => r.id);
-        const caseWhen = successfulRecurring
-          .map((r) => `WHEN id = ${r.id} THEN '${r.nextDate}'`)
-          .join(' ');
-
-        await ctx.run(
-          `UPDATE recurring_invoices
-           SET last_generated_at = CURRENT_TIMESTAMP,
-               next_generation_date = CASE ${caseWhen} END
-           WHERE id IN (${ids.join(',')})`
-        );
+        // Update each recurring invoice individually with parameterized queries
+        for (const r of successfulRecurring) {
+          await ctx.run(
+            `UPDATE recurring_invoices
+             SET last_generated_at = CURRENT_TIMESTAMP,
+                 next_generation_date = ?
+             WHERE id = ?`,
+            [r.nextDate, r.id]
+          );
+        }
       });
     }
 
@@ -512,7 +511,7 @@ export class InvoiceRecurringService {
       scheduledDate: row.scheduled_date,
       triggerType: row.trigger_type as ScheduledInvoice['triggerType'],
       triggerMilestoneId: row.trigger_milestone_id,
-      lineItems: JSON.parse(row.line_items),
+      lineItems: safeJsonParseArray<InvoiceLineItem>(row.line_items, 'scheduled invoice line_items'),
       notes: row.notes,
       terms: row.terms,
       status: row.status as ScheduledInvoice['status'],
@@ -589,7 +588,7 @@ export class InvoiceRecurringService {
       frequency: row.frequency as RecurringInvoice['frequency'],
       dayOfMonth: row.day_of_month,
       dayOfWeek: row.day_of_week,
-      lineItems: JSON.parse(row.line_items),
+      lineItems: safeJsonParseArray<InvoiceLineItem>(row.line_items, 'recurring invoice line_items'),
       notes: row.notes,
       terms: row.terms,
       startDate: row.start_date,

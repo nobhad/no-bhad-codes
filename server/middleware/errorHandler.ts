@@ -43,6 +43,25 @@ function sanitizeRequestData(data: any): any {
     'x-api-key',
     'x-auth-token',
     'x-access-token',
+    // Payment-related fields
+    'stripeToken',
+    'stripe_token',
+    'paymentToken',
+    'payment_token',
+    'webhookSecret',
+    'webhook_secret',
+    'clientSecret',
+    'client_secret',
+    // OAuth fields
+    'refreshToken',
+    'refresh_token',
+    'accessToken',
+    'access_token',
+    // Additional auth fields
+    'privateKey',
+    'private_key',
+    'sessionId',
+    'session_id',
   ];
 
   const sanitized = { ...data };

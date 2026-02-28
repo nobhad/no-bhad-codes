@@ -4,7 +4,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessFile } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.get(
     }
 
     const versions = await fileService.getVersions(fileId);
-    res.json({ versions });
+    sendSuccess(res, { versions });
   })
 );
 
@@ -59,7 +59,7 @@ router.post(
       comment,
     });
 
-    res.status(201).json({ version });
+    sendCreated(res, { version });
   })
 );
 
@@ -72,7 +72,7 @@ router.post(
     const fileId = parseInt(req.params.fileId);
     const versionId = parseInt(req.params.versionId);
     const version = await fileService.restoreVersion(fileId, versionId);
-    res.json({ message: 'Version restored', version });
+    sendSuccess(res, { version }, 'Version restored');
   })
 );
 

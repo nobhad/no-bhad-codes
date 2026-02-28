@@ -305,6 +305,8 @@ app.use(
       if (req.path.includes('/auth/')) return true;
       // Skip CSRF for public proposal signature endpoints
       if (req.path.match(/\/proposals\/\d+\/sign/) || req.path.match(/\/proposals\/sign\//)) return true;
+      // Skip CSRF for analytics tracking (public endpoint, uses rate limiting)
+      if (req.path.includes('/analytics/track')) return true;
       return false;
     },
   })
@@ -351,6 +353,10 @@ apiRouters.forEach(({ path, router }) => {
   app.use(`/api${path}`, router);
   app.use(`/api/v1${path}`, router);
 });
+
+// Portal route aliases - for frontend consistency
+app.use('/api/portal/projects', projectsRouter);
+app.use('/api/v1/portal/projects', projectsRouter);
 
 // General API routes (contact, etc.) - also dual mount
 app.use('/api', apiRouter);

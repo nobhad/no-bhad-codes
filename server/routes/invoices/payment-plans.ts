@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice, toSnakeCasePaymentPlan } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
 
@@ -63,8 +63,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const templates = await getInvoiceService().getPaymentPlanTemplates();
-      res.json({
-        success: true,
+      sendSuccess(res, {
         templates: templates.map(toSnakeCasePaymentPlan),
         count: templates.length,
       });
@@ -107,11 +106,7 @@ router.post(
         isDefault: isDefault || false,
       });
 
-      res.status(201).json({
-        success: true,
-        message: 'Payment plan template created',
-        template: toSnakeCasePaymentPlan(template),
-      });
+      sendCreated(res, { template: toSnakeCasePaymentPlan(template) }, 'Payment plan template created');
     } catch (error: unknown) {
       errorResponseWithPayload(
         res,
@@ -147,10 +142,7 @@ router.delete(
 
     try {
       await getInvoiceService().deletePaymentPlanTemplate(templateId);
-      res.json({
-        success: true,
-        message: 'Payment plan template deleted',
-      });
+      messageResponse(res, 'Payment plan template deleted');
     } catch (error: unknown) {
       errorResponseWithPayload(
         res,
@@ -194,12 +186,10 @@ router.post(
         totalAmount
       );
 
-      res.status(201).json({
-        success: true,
-        message: `Generated ${invoices.length} invoices from payment plan`,
+      sendCreated(res, {
         invoices: invoices.map(toSnakeCaseInvoice),
         count: invoices.length,
-      });
+      }, `Generated ${invoices.length} invoices from payment plan`);
     } catch (error: unknown) {
       errorResponseWithPayload(
         res,

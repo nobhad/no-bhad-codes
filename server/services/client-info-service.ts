@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { parseIfString } from '../utils/safe-json.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -590,10 +591,11 @@ class ClientInfoService {
       client_id: row.client_id as number,
       project_id: row.project_id as number | undefined,
       current_step: row.current_step as number,
-      step_data:
-        typeof row.step_data === 'string'
-          ? JSON.parse(row.step_data)
-          : (row.step_data as Record<string, unknown>),
+      step_data: parseIfString<Record<string, unknown>>(
+        row.step_data as string | Record<string, unknown>,
+        {},
+        'onboarding step_data'
+      ),
       status: row.status as OnboardingStatus,
       completed_at: row.completed_at as string | undefined,
       created_at: row.created_at as string,

@@ -8,6 +8,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { safeJsonParseOrNull } from '../utils/safe-json.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -401,7 +402,7 @@ class NotificationPreferencesService {
 
     return logs.map((log: any) => ({
       ...log,
-      metadata: log.metadata ? JSON.parse(log.metadata) : null,
+      metadata: safeJsonParseOrNull(log.metadata, 'notification log metadata'),
     })) as NotificationLog[];
   }
 

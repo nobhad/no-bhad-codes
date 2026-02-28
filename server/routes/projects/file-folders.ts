@@ -7,7 +7,7 @@ import {
   canAccessFile,
 } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -27,7 +27,7 @@ router.get(
     }
 
     const folders = await fileService.getFolders(projectId, parentId);
-    res.json({ folders });
+    sendSuccess(res, { folders });
   })
 );
 
@@ -60,7 +60,7 @@ router.post(
       created_by: req.user!.email,
     });
 
-    res.status(201).json({ folder });
+    sendCreated(res, { folder });
   })
 );
 
@@ -86,7 +86,7 @@ router.put(
       icon,
       sort_order,
     });
-    res.json({ folder });
+    sendSuccess(res, { folder });
   })
 );
 
@@ -101,7 +101,7 @@ router.delete(
       ? parseInt(req.query.move_files_to as string)
       : undefined;
     await fileService.deleteFolder(folderId, moveFilesTo);
-    res.json({ message: 'Folder deleted' });
+    messageResponse(res, 'Folder deleted');
   })
 );
 
@@ -121,7 +121,7 @@ router.post(
     }
 
     await fileService.moveFile(fileId, folder_id || null);
-    res.json({ message: 'File moved' });
+    messageResponse(res, 'File moved');
   })
 );
 
@@ -141,7 +141,7 @@ router.post(
     }
 
     await fileService.moveFolder(folderId, parent_folder_id || null);
-    res.json({ message: 'Folder moved' });
+    messageResponse(res, 'Folder moved');
   })
 );
 
