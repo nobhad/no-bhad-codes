@@ -203,7 +203,7 @@ export function ErrorState({
   return (
     <div className={cn('error-state', `error-state--${type}`, className)} role="alert">
       <div className="error-state-icon" aria-hidden="true">
-        <Icon size={24} />
+        <Icon />
       </div>
       <p className="error-state-message">{message}</p>
       {(onRetry || onSecondary) && (
