@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Client Portal - No Bhad Codes</title>
     <style>
-      /* Inline fallbacks before main CSS loads - uses design system variables */
+      /* Inline fallbacks before main CSS loads - portal defaults to dark */
       :root {
-        --page-bg: var(--color-neutral-300, #e0e0e0);
-        --page-fg: var(--color-dark, #333333);
+        --page-bg: var(--portal-bg-pitch, #000000);
+        --page-fg: var(--portal-text-light, #ffffff);
       }
-      [data-theme='dark'] {
-        --page-bg: var(--portal-bg-darkest, #1a1a1a);
-        --page-fg: var(--portal-text-light, #f5f5f5);
+      [data-theme='light'] {
+        --page-bg: var(--portal-bg-pitch, #ffffff);
+        --page-fg: var(--portal-text-light, #000000);
       }
       html,
       body {
@@ -26,9 +26,9 @@
       (function () {
         try {
           const savedTheme = localStorage.getItem('theme');
-          document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+          document.documentElement.setAttribute('data-theme', savedTheme || 'dark');
         } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.setAttribute('data-theme', 'dark');
         }
       })();
       (function () {
@@ -411,7 +411,6 @@
       <header class="portal-global-header">
         <div class="portal-global-header-left">
           <a href="/" class="header-logo" aria-label="Go to homepage">NO BHAD CODES</a>
-          <span class="header-separator"></span>
           <nav class="breadcrumb-nav header-breadcrumb-nav" aria-label="Breadcrumb">
             <ul id="breadcrumb-list" class="breadcrumb-list"></ul>
           </nav>
