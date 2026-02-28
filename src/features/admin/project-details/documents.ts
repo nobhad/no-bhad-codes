@@ -12,6 +12,7 @@ import { showToast } from '../../../utils/toast-notifications';
 import { alertError, alertSuccess, confirmDialog } from '../../../utils/confirm-dialog';
 import { ICONS } from '../../../constants/icons';
 import { createLogger } from '../../../utils/logger';
+import { URL_REVOKE_DELAY } from '../../../utils/time-utils';
 
 const logger = createLogger('Documents');
 
@@ -71,7 +72,7 @@ export async function previewProjectReport(projectId: number): Promise<void> {
     window.open(url, '_blank');
 
     // Clean up URL after a delay
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    setTimeout(() => URL.revokeObjectURL(url), URL_REVOKE_DELAY);
   } catch (error) {
     logger.error(' Error previewing project report:', error);
     alertError('Failed to preview project report');
@@ -174,7 +175,7 @@ export async function previewSow(projectId: number): Promise<void> {
     window.open(url, '_blank');
 
     // Clean up URL after a delay
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    setTimeout(() => URL.revokeObjectURL(url), URL_REVOKE_DELAY);
   } catch (error) {
     logger.error(' Error previewing SOW:', error);
     alertError('Failed to preview Statement of Work');

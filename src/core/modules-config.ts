@@ -261,6 +261,39 @@ export function registerModules(debug: boolean = false): void {
           name: 'AdminDashboardModule'
         };
       }
+    },
+    {
+      name: 'PortalShellModule',
+      type: 'dom',
+      factory: async () => {
+        // Load portal shell on both admin and client pages
+        const currentPath = window.location.pathname;
+        const isPortalPage = currentPath.includes('/admin') || currentPath.includes('/client');
+
+        if (isPortalPage) {
+          const { getPortalShell, destroyPortalShell } = await import('../features/portal');
+          const shell = getPortalShell();
+
+          return {
+            init: async () => {
+              await shell.init();
+            },
+            destroy: () => {
+              destroyPortalShell();
+            },
+            isInitialized: true,
+            name: 'PortalShellModule'
+          };
+        }
+
+        // Return a dummy module for other pages
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'PortalShellModule'
+        };
+      }
     }
   ];
 
@@ -319,4 +352,12 @@ export function getClientIntakeModules(): string[] {
  */
 export function getAdminModules(): string[] {
   return ['ThemeModule', 'NavigationModule', 'AdminDashboardModule'];
+}
+
+/**
+ * Get module list for portal pages (unified shell)
+ * Used for both admin and client portals when using the new architecture
+ */
+export function getPortalModules(): string[] {
+  return ['ThemeModule', 'NavigationModule', 'PortalShellModule'];
 }

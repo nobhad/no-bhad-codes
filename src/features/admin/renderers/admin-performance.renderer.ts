@@ -9,7 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 import { renderEmptyState } from '../../../components/empty-state';
 
 const logger = createLogger('AdminPerformanceRenderer');

@@ -14,10 +14,13 @@ import { domCache } from './dom-cache';
 import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { createPortalModal } from '../../../components/portal-modal';
-import { showToast } from '../../../utils/toast-notifications';
 import { ICONS } from '../../../constants/icons';
 import { initTableKeyboardNav } from '../../../components/table-keyboard-nav';
 import { createLogger } from '../../../utils/logger';
+import {
+  downloadInvoicePdf,
+  downloadReceiptPdf
+} from '../../../utils/file-download';
 
 const logger = createLogger('ProjectInvoices');
 
@@ -320,9 +323,9 @@ function setupInvoiceTableHandlers(container: HTMLElement): void {
     } else if (button.classList.contains('btn-mark-paid')) {
       window.adminDashboard?.markInvoicePaid(id);
     } else if (button.classList.contains('btn-download-invoice')) {
-      await downloadInvoicePdf(id, button.dataset.invoiceNumber || `invoice-${id}`);
+      await downloadInvoicePdf(id, button.dataset.invoiceNumber || `INV-${id}`);
     } else if (button.classList.contains('btn-download-receipt')) {
-      await downloadReceiptPdf(id, button.dataset.invoiceNumber || `invoice-${id}`);
+      await handleReceiptDownload(id, button.dataset.invoiceNumber || `INV-${id}`);
     }
   };
 
@@ -331,40 +334,15 @@ function setupInvoiceTableHandlers(container: HTMLElement): void {
 }
 
 /**
- * Download invoice PDF
+ * Handle receipt download - fetches the latest receipt for an invoice and downloads it
  */
-async function downloadInvoicePdf(invoiceId: number, invoiceNumber: string): Promise<void> {
-  try {
-    const response = await apiFetch(`/api/invoices/${invoiceId}/pdf`);
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${invoiceNumber}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } else {
-      logger.error(' Failed to download PDF');
-      showToast('Failed to download invoice PDF', 'error');
-    }
-  } catch (error) {
-    logger.error(' Download error:', error);
-    showToast('Failed to download invoice PDF', 'error');
-  }
-}
-
-/**
- * Download receipt PDF for a paid invoice
- */
-async function downloadReceiptPdf(invoiceId: number, invoiceNumber: string): Promise<void> {
+async function handleReceiptDownload(invoiceId: number, invoiceNumber: string): Promise<void> {
   try {
     // First, get receipts for this invoice
     const receiptsResponse = await apiFetch(`/api/receipts/invoice/${invoiceId}`);
 
     if (!receiptsResponse.ok) {
+      const { showToast } = await import('../../../utils/toast-notifications');
       showToast('Failed to fetch receipts', 'error');
       return;
     }
@@ -373,32 +351,17 @@ async function downloadReceiptPdf(invoiceId: number, invoiceNumber: string): Pro
     const receipts = receiptsData.receipts || [];
 
     if (receipts.length === 0) {
+      const { showToast } = await import('../../../utils/toast-notifications');
       showToast('No receipt found for this invoice', 'warning');
       return;
     }
 
     // Download the most recent receipt
     const latestReceipt = receipts[0];
-    const pdfResponse = await apiFetch(`/api/receipts/${latestReceipt.id}/pdf`);
-
-    if (!pdfResponse.ok) {
-      showToast('Failed to download receipt PDF', 'error');
-      return;
-    }
-
-    const blob = await pdfResponse.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `receipt-${latestReceipt.receipt_number || invoiceNumber}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showToast('Receipt downloaded successfully', 'success');
+    await downloadReceiptPdf(latestReceipt.id, latestReceipt.receipt_number || invoiceNumber);
   } catch (error) {
     logger.error(' Receipt download error:', error);
+    const { showToast } = await import('../../../utils/toast-notifications');
     showToast('Failed to download receipt', 'error');
   }
 }
@@ -617,11 +580,11 @@ async function showViewInvoiceModal(invoiceId: number): Promise<void> {
   });
 
   modal.footer.querySelector('#view-invoice-pdf-btn')?.addEventListener('click', async () => {
-    await downloadInvoicePdf(invoice!.id, invoice!.invoice_number || `invoice-${invoice!.id}`);
+    await downloadInvoicePdf(invoice!.id, invoice!.invoice_number || `INV-${invoice!.id}`);
   });
 
   modal.footer.querySelector('#view-invoice-receipt-btn')?.addEventListener('click', async () => {
-    await downloadReceiptPdf(invoice!.id, invoice!.invoice_number || `invoice-${invoice!.id}`);
+    await handleReceiptDownload(invoice!.id, invoice!.invoice_number || `INV-${invoice!.id}`);
   });
 
   modal.footer.querySelector('#view-invoice-send-btn')?.addEventListener('click', async () => {

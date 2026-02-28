@@ -9,7 +9,11 @@
  */
 
 import { getContactEmail } from '../../config/branding';
+import { apiFetch } from '../../utils/api-client';
 import { BaseModule } from '../../modules/core/base';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('TerminalIntake');
 import type {
   IntakeQuestion,
   IntakeData,
@@ -1687,7 +1691,7 @@ export class TerminalIntakeModule extends BaseModule {
 
       this.log('Submitting data:', submitData);
 
-      const response = await fetch('/api/intake', {
+      const response = await apiFetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submitData)
@@ -2008,7 +2012,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (intakeContainer) {
     const module = new TerminalIntakeModule(intakeContainer);
     module.init().catch((error) => {
-      console.error('[TerminalIntake] Failed to initialize:', error);
+      logger.error('Failed to initialize:', error);
     });
   }
 });

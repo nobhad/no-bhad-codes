@@ -10,6 +10,7 @@
 
 import { ICONS } from '../constants/icons';
 import { getPortalCheckboxHTML } from '../components/portal-checkbox';
+import { getCsrfToken, CSRF_HEADER_NAME } from './api-client';
 
 // ===============================================
 // TYPES
@@ -490,9 +491,13 @@ export function createArchiveAction(apiEndpoint: string, onSuccess?: () => void)
     variant: 'warning',
     confirmMessage: 'Archive {count} selected items? They can be restored later.',
     handler: async (selectedIds) => {
+      const csrfToken = getCsrfToken();
       const response = await fetch(apiEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({ ids: selectedIds })
       });
@@ -517,9 +522,13 @@ export function createDeleteAction(apiEndpoint: string, onSuccess?: () => void):
     variant: 'danger',
     confirmMessage: 'Permanently delete {count} selected items? This cannot be undone.',
     handler: async (selectedIds) => {
+      const csrfToken = getCsrfToken();
       const response = await fetch(apiEndpoint, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({ ids: selectedIds })
       });
@@ -547,9 +556,13 @@ export function createStatusUpdateAction(
     label,
     variant: 'default',
     handler: async (selectedIds) => {
+      const csrfToken = getCsrfToken();
       const response = await fetch(apiEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({ ids: selectedIds, status })
       });

@@ -22,6 +22,9 @@ import type {
 } from './proposal-builder-types';
 import { getTierConfiguration, calculatePriceBreakdown } from './proposal-builder-data';
 import { showToast } from '../../utils/toast-notifications';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('ProposalBuilder');
 import {
   renderProposalBuilderHTML,
   renderTierCards,
@@ -632,7 +635,7 @@ export class ProposalBuilderModule {
         expirationDate: draft.selection.expirationDate || null
       };
     } catch (error) {
-      console.error('[ProposalBuilder] Failed to load draft:', error);
+      logger.error('Failed to load draft:', error);
     }
   }
 
@@ -703,7 +706,7 @@ export class ProposalBuilderModule {
   private showError(message: string): void {
     this.state.error = message;
     // Could implement a toast notification here
-    console.error('[ProposalBuilder]', message);
+    logger.error(message);
   }
 
   /**

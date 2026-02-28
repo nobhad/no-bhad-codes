@@ -41,6 +41,9 @@
  */
 
 import { APP_CONSTANTS } from '../config/constants';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('VisitorTracking');
 
 /**
  * Visitor session data structure
@@ -649,10 +652,8 @@ export class VisitorTrackingService {
     const events = [...this.eventQueue];
     this.eventQueue = [];
 
-    // Log events to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[VisitorTracking] Flushing events:', events);
-    }
+    // Log events in development
+    logger.log('Flushing events:', events);
 
     // Send to analytics endpoint if configured
     if (this.config.endpoint) {
@@ -681,7 +682,7 @@ export class VisitorTrackingService {
         })
       });
     } catch (error) {
-      console.warn('[VisitorTracking] Failed to send events:', error);
+      logger.warn('Failed to send events:', error);
       // Re-queue events for retry
       this.eventQueue.unshift(...events);
     }
@@ -702,7 +703,7 @@ export class VisitorTrackingService {
 
       localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.TRACKING_EVENTS, JSON.stringify(trimmed));
     } catch (error) {
-      console.warn('[VisitorTracking] Failed to store events locally:', error);
+      logger.warn('Failed to store events locally:', error);
     }
   }
 

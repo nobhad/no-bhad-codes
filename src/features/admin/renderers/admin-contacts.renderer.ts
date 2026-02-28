@@ -10,7 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 import { createTableDropdown } from '../../../utils/table-dropdown';
 import { getStatusDotHTML } from '../../../components/status-badge';
 import { adminDataService, type Contact, type ContactStats } from '../services/admin-data.service';

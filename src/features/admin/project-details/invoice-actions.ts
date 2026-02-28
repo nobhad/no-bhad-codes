@@ -318,12 +318,11 @@ export async function deleteInvoice(invoiceId: number, onSuccess: () => void): P
   if (!confirmed) return;
 
   try {
-    const response = await fetch(`/api/invoices/${invoiceId}`, {
+    const response = await apiFetch(`/api/invoices/${invoiceId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
-      },
-      credentials: 'include'
+      }
     });
 
     if (response.ok) {

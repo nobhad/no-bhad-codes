@@ -7,6 +7,10 @@
  * Entry point for the admin dashboard.
  */
 
+// CRITICAL: Register React components BEFORE app initialization
+// This must be the FIRST import to prevent race conditions
+import './react/admin-entry';
+
 // Import admin CSS bundle
 import './styles/bundles/admin.css';
 

@@ -8,7 +8,7 @@
  * Provides reusable export utilities with proper formatting.
  */
 
-import { createLogger } from './logging';
+import { createLogger } from './logger';
 
 const logger = createLogger('TableExport');
 

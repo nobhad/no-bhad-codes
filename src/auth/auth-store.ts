@@ -30,6 +30,7 @@ import {
 } from './auth-types';
 
 import { authEndpoints, adminAuthEndpoints } from '../config/api';
+import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/api-client';
 
 // ============================================
 // Auth Store Implementation
@@ -223,11 +224,16 @@ function createAuthStore(): AuthStore {
   // ============================================
 
   async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise<T> {
+    const method = options.method?.toUpperCase() || 'GET';
+    const needsCsrf = !['GET', 'HEAD', 'OPTIONS'].includes(method);
+    const csrfToken = needsCsrf ? getCsrfToken() : null;
+
     const response = await fetch(url, {
       ...options,
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...(csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {}),
         ...options.headers
       }
     });
