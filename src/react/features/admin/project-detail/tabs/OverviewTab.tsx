@@ -20,6 +20,7 @@ import { InlineEdit, formatCurrencyDisplay, parseCurrencyInput } from '@react/co
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Project, ProjectMilestone } from '../../types';
 import { PROJECT_TYPE_LABELS } from '../../types';
+import { formatCurrency } from '../../../../../utils/format-utils';
 
 interface OverviewTabProps {
   project: Project;
@@ -45,19 +46,6 @@ function formatDate(date: string | undefined): string {
   const day = String(d.getDate()).padStart(2, '0');
   const year = d.getFullYear();
   return `${month}/${day}/${year}`;
-}
-
-/**
- * Format currency for display
- */
-function formatCurrency(amount: number | undefined): string {
-  if (amount === undefined || amount === null) return '-';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
 }
 
 /**
@@ -158,7 +146,7 @@ export function OverviewTab({
       <div className="lg:tw-col-span-2 tw-flex tw-flex-col tw-gap-6">
         {/* Project Details Card */}
         <div className="tw-panel">
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+          <h3 className="tw-section-title overview-section-title">
             Project Details
           </h3>
 
@@ -166,7 +154,7 @@ export function OverviewTab({
             {/* Project Type */}
             <div className="tw-flex tw-flex-col tw-gap-1">
               <span className="tw-label">Type</span>
-              <span className="tw-text-primary" style={{ fontSize: '14px' }}>
+              <span className="tw-text-primary overview-text-base">
                 {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type || '-'}
               </span>
             </div>
@@ -174,7 +162,7 @@ export function OverviewTab({
             {/* Timeline */}
             <div className="tw-flex tw-flex-col tw-gap-1">
               <span className="tw-label">Timeline</span>
-              <span className="tw-text-primary" style={{ fontSize: '14px' }}>
+              <span className="tw-text-primary overview-text-base">
                 {project.timeline || '-'}
               </span>
             </div>
@@ -182,7 +170,7 @@ export function OverviewTab({
             {/* Start Date */}
             <div className="tw-flex tw-flex-col tw-gap-1">
               <span className="tw-label">Start Date</span>
-              <span className="tw-text-primary tw-flex tw-items-center tw-gap-1" style={{ fontSize: '14px' }}>
+              <span className="tw-text-primary tw-flex tw-items-center tw-gap-1 overview-text-base">
                 <Calendar className="tw-h-3 tw-w-3" />
                 {formatDate(project.start_date)}
               </span>
@@ -191,7 +179,7 @@ export function OverviewTab({
             {/* End Date */}
             <div className="tw-flex tw-flex-col tw-gap-1">
               <span className="tw-label">Target End Date</span>
-              <span className="tw-text-primary tw-flex tw-items-center tw-gap-1" style={{ fontSize: '14px' }}>
+              <span className="tw-text-primary tw-flex tw-items-center tw-gap-1 overview-text-base">
                 <Calendar className="tw-h-3 tw-w-3" />
                 {formatDate(project.end_date)}
               </span>
@@ -232,11 +220,11 @@ export function OverviewTab({
 
           {/* Description */}
           {project.description && (
-            <div className="tw-divider" style={{ marginTop: '1rem' }}>
-              <span className="tw-label" style={{ display: 'block', marginBottom: '0.5rem' }}>
+            <div className="tw-divider overview-divider-top">
+              <span className="tw-label overview-label-block">
                 Description
               </span>
-              <p className="tw-text-muted" style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>
+              <p className="tw-text-muted overview-description">
                 {project.description}
               </p>
             </div>
@@ -246,7 +234,7 @@ export function OverviewTab({
         {/* URLs Card */}
         {(project.preview_url || project.repo_url || project.production_url) && (
           <div className="tw-panel">
-            <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+            <h3 className="tw-section-title overview-section-title">
               Links
             </h3>
 
@@ -256,8 +244,7 @@ export function OverviewTab({
                   href={project.preview_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-list-item"
-                  style={{ padding: '0.5rem 0', borderBottom: 'none' }}
+                  className="tw-list-item overview-link-item"
                 >
                   <LinkIcon className="tw-h-4 tw-w-4" />
                   Preview URL
@@ -269,8 +256,7 @@ export function OverviewTab({
                   href={project.repo_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-list-item"
-                  style={{ padding: '0.5rem 0', borderBottom: 'none' }}
+                  className="tw-list-item overview-link-item"
                 >
                   <LinkIcon className="tw-h-4 tw-w-4" />
                   Repository
@@ -282,8 +268,7 @@ export function OverviewTab({
                   href={project.production_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-list-item"
-                  style={{ padding: '0.5rem 0', borderBottom: 'none' }}
+                  className="tw-list-item overview-link-item"
                 >
                   <LinkIcon className="tw-h-4 tw-w-4" />
                   Production URL
@@ -313,7 +298,7 @@ export function OverviewTab({
           <div className="tw-mb-4">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
               <span className="tw-label">Progress</span>
-              <span className="tw-text-primary" style={{ fontSize: '12px' }}>{progress}%</span>
+              <span className="tw-text-primary overview-text-sm">{progress}%</span>
             </div>
             <div className="tw-progress-track">
               <div
@@ -339,8 +324,7 @@ export function OverviewTab({
                   }
                 }}
                 autoFocus
-                className="tw-input tw-flex-1"
-                style={{ height: '32px' }}
+                className="tw-input tw-flex-1 overview-input-sm"
               />
               <button className="tw-btn-primary" onClick={handleAddMilestone}>
                 Add
@@ -359,7 +343,7 @@ export function OverviewTab({
 
           {/* Milestones List */}
           {milestones.length === 0 ? (
-            <div className="tw-empty-state" style={{ padding: '2rem 0' }}>
+            <div className="tw-empty-state overview-empty-state">
               No milestones yet
             </div>
           ) : (
@@ -379,12 +363,11 @@ export function OverviewTab({
                         handleToggleMilestone(milestone.id);
                       }}
                       className={cn(
-                        'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors',
+                        'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors overview-checkbox',
                         milestone.is_completed
                           ? 'tw-bg-white tw-border-white'
                           : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
                       )}
-                      style={{ borderRadius: 0 }}
                     >
                       {milestone.is_completed && (
                         <Check className="tw-h-3 tw-w-3 tw-text-black" />
@@ -393,18 +376,17 @@ export function OverviewTab({
 
                     <span
                       className={cn(
-                        'tw-flex-1',
+                        'tw-flex-1 overview-text-base',
                         milestone.is_completed
                           ? 'tw-text-muted tw-line-through'
                           : 'tw-text-primary'
                       )}
-                      style={{ fontSize: '14px' }}
                     >
                       {milestone.title}
                     </span>
 
                     {milestone.due_date && (
-                      <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+                      <span className="tw-text-muted overview-text-sm">
                         {formatDate(milestone.due_date)}
                       </span>
                     )}
@@ -418,9 +400,9 @@ export function OverviewTab({
 
                   {/* Expanded Content */}
                   {expandedMilestones.has(milestone.id) && (
-                    <div className="tw-px-3 tw-pb-3 tw-pt-0 tw-ml-8" style={{ borderTop: '1px solid var(--portal-border-subtle)' }}>
+                    <div className="tw-px-3 tw-pb-3 tw-pt-0 tw-ml-8 overview-expanded-content">
                       {milestone.description && (
-                        <p className="tw-text-muted tw-mt-2" style={{ fontSize: '12px' }}>
+                        <p className="tw-text-muted tw-mt-2 overview-text-sm">
                           {milestone.description}
                         </p>
                       )}
@@ -430,8 +412,7 @@ export function OverviewTab({
                           {milestone.deliverables.map((deliverable, idx) => (
                             <li
                               key={idx}
-                              className="tw-text-muted tw-flex tw-items-start tw-gap-1"
-                              style={{ fontSize: '12px' }}
+                              className="tw-text-muted tw-flex tw-items-start tw-gap-1 overview-text-sm"
                             >
                               <span>•</span>
                               {deliverable}
@@ -466,7 +447,7 @@ export function OverviewTab({
       <div className="tw-flex tw-flex-col tw-gap-6">
         {/* Client Info Card */}
         <div className="tw-panel">
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+          <h3 className="tw-section-title overview-section-title">
             Client
           </h3>
 
@@ -474,7 +455,7 @@ export function OverviewTab({
             {project.contact_name && (
               <div className="tw-flex tw-items-center tw-gap-2">
                 <User className="tw-h-4 tw-w-4 tw-text-muted" />
-                <span className="tw-text-primary" style={{ fontSize: '14px' }}>
+                <span className="tw-text-primary overview-text-base">
                   {project.contact_name}
                 </span>
               </div>
@@ -483,7 +464,7 @@ export function OverviewTab({
             {project.company_name && (
               <div className="tw-flex tw-items-center tw-gap-2">
                 <Building className="tw-h-4 tw-w-4 tw-text-muted" />
-                <span className="tw-text-primary" style={{ fontSize: '14px' }}>
+                <span className="tw-text-primary overview-text-base">
                   {project.company_name}
                 </span>
               </div>
@@ -494,8 +475,7 @@ export function OverviewTab({
                 <Mail className="tw-h-4 tw-w-4 tw-text-muted" />
                 <a
                   href={`mailto:${project.email}`}
-                  className="tw-text-primary"
-                  style={{ fontSize: '14px' }}
+                  className="tw-text-primary overview-text-base"
                 >
                   {project.email}
                 </a>
@@ -506,12 +486,12 @@ export function OverviewTab({
 
         {/* Financial Summary Card */}
         <div className="tw-panel">
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+          <h3 className="tw-section-title overview-section-title">
             Financials
           </h3>
 
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-stat-card" style={{ border: 'none', padding: 0 }}>
+            <div className="tw-stat-card overview-stat-inline">
               <span className="tw-stat-label">
                 Outstanding Balance
               </span>
@@ -520,7 +500,7 @@ export function OverviewTab({
               </span>
             </div>
 
-            <div className="tw-stat-card" style={{ border: 'none', padding: 0 }}>
+            <div className="tw-stat-card overview-stat-inline">
               <span className="tw-stat-label">
                 Total Paid
               </span>
@@ -530,7 +510,7 @@ export function OverviewTab({
             </div>
 
             {project.deposit_amount !== undefined && project.deposit_amount > 0 && (
-              <div className="tw-stat-card" style={{ border: 'none', padding: 0 }}>
+              <div className="tw-stat-card overview-stat-inline">
                 <span className="tw-stat-label">
                   Deposit Amount
                 </span>
@@ -544,11 +524,11 @@ export function OverviewTab({
 
         {/* Quick Stats */}
         <div className="tw-panel">
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+          <h3 className="tw-section-title overview-section-title">
             Quick Stats
           </h3>
 
-          <div className="tw-grid-stats" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="tw-grid-stats overview-grid-2">
             <div className="tw-stat-card">
               <span className="tw-stat-label">Files</span>
               <span className="tw-stat-value">
@@ -561,7 +541,7 @@ export function OverviewTab({
               <span className="tw-stat-value">
                 {project.message_count ?? 0}
                 {(project.unread_count ?? 0) > 0 && (
-                  <span className="tw-ml-1" style={{ fontSize: '12px' }}>
+                  <span className="tw-ml-1 overview-text-sm">
                     ({project.unread_count} new)
                   </span>
                 )}
@@ -577,7 +557,7 @@ export function OverviewTab({
 
             <div className="tw-stat-card">
               <span className="tw-stat-label">Created</span>
-              <span className="tw-text-primary" style={{ fontSize: '14px' }}>
+              <span className="tw-text-primary overview-text-base">
                 {formatDate(project.created_at)}
               </span>
             </div>

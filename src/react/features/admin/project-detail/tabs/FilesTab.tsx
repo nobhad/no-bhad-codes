@@ -192,12 +192,11 @@ export function FilesTab({
       {/* Upload Section */}
       <div
         className={cn(
-          'tw-panel tw-border-2 tw-border-dashed tw-cursor-pointer tw-transition-colors',
+          'tw-panel tw-border-2 tw-border-dashed tw-cursor-pointer tw-transition-colors files-upload-area',
           isDragging
             ? 'tw-border-white tw-bg-[var(--portal-bg-hover)]'
             : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
         )}
-        style={{ borderRadius: 0, padding: '1.5rem' }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -219,22 +218,21 @@ export function FilesTab({
             )}
           />
           <div className="tw-text-center">
-            <p className="tw-text-primary" style={{ fontSize: '14px' }}>
+            <p className="tw-text-primary overview-text-base">
               {isDragging ? 'Drop files here' : 'Drag and drop files here, or click to select'}
             </p>
-            <p className="tw-text-muted tw-mt-1" style={{ fontSize: '12px' }}>
+            <p className="tw-text-muted tw-mt-1 overview-text-sm">
               Supports images, PDFs, documents, and archives
             </p>
           </div>
 
           {/* Category Selector */}
           <div className="tw-flex tw-items-center tw-gap-2 tw-mt-2" onClick={(e) => e.stopPropagation()}>
-            <span className="tw-text-muted" style={{ fontSize: '12px' }}>Category:</span>
+            <span className="tw-text-muted overview-text-sm">Category:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="tw-input"
-              style={{ height: '32px', width: 'auto' }}
+              className="tw-input files-category-select"
             >
               <option value="">None</option>
               {FILE_CATEGORY_OPTIONS.map((opt) => (
@@ -246,8 +244,8 @@ export function FilesTab({
           </div>
 
           {isUploading && (
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-primary" style={{ fontSize: '14px' }}>
-              <div className="tw-animate-spin tw-h-4 tw-w-4 tw-border-2 tw-border-current tw-border-t-transparent" style={{ borderRadius: '50%' }} />
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-primary overview-text-base">
+              <div className="tw-animate-spin tw-h-4 tw-w-4 tw-border-2 tw-border-current tw-border-t-transparent files-spinner" />
               Uploading...
             </div>
           )}
@@ -261,10 +259,10 @@ export function FilesTab({
           <span>No files uploaded yet</span>
         </div>
       ) : (
-        <div className="tw-panel" style={{ padding: 0 }}>
+        <div className="tw-panel contract-panel-no-padding">
           <table className="tw-w-full">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--portal-border-color)' }}>
+              <tr className="files-table-header">
                 <th className="tw-label tw-text-left tw-px-4 tw-py-3">
                   File
                 </th>
@@ -286,28 +284,27 @@ export function FilesTab({
               {files.map((file) => (
                 <tr
                   key={file.id}
-                  className="tw-list-item"
-                  style={{ display: 'table-row' }}
+                  className="tw-list-item files-table-row"
                 >
                   <td className="tw-px-4 tw-py-3">
                     <div className="tw-flex tw-items-center tw-gap-3">
                       {getFileIcon(file.file_type)}
                       <div className="tw-flex tw-flex-col">
-                        <span className="tw-text-primary tw-truncate tw-max-w-[300px]" style={{ fontSize: '14px' }}>
+                        <span className="tw-text-primary tw-truncate tw-max-w-[300px] overview-text-base">
                           {file.original_name}
                         </span>
                         {file.category && (
-                          <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+                          <span className="tw-text-muted overview-text-sm">
                             {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category}
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="tw-px-4 tw-py-3 tw-text-muted" style={{ fontSize: '14px' }}>
+                  <td className="tw-px-4 tw-py-3 tw-text-muted overview-text-base">
                     {formatFileSize(file.file_size)}
                   </td>
-                  <td className="tw-px-4 tw-py-3 tw-text-muted" style={{ fontSize: '14px' }}>
+                  <td className="tw-px-4 tw-py-3 tw-text-muted overview-text-base">
                     {formatDate(file.created_at)}
                   </td>
                   <td className="tw-px-4 tw-py-3">

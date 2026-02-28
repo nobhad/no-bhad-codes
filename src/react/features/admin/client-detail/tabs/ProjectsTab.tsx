@@ -56,7 +56,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
       <div className="tw-empty-state">
         <FolderKanban className="tw-h-12 tw-w-12 tw-mb-3" />
         <p>No projects yet</p>
-        <p style={{ fontSize: '14px' }}>
+        <p className="proj-text-base">
           Projects associated with this client will appear here
         </p>
       </div>
@@ -75,15 +75,15 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
           <div className="tw-flex-1 tw-min-w-0">
             <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-              <h4 className="tw-heading tw-truncate" style={{ fontSize: '14px' }}>
+              <h4 className="tw-heading tw-truncate proj-text-base">
                 {project.project_name}
               </h4>
-              <span className="tw-badge" style={{ fontSize: '11px' }}>
+              <span className="tw-badge proj-text-xs">
                 {statusConfig?.label || project.status}
               </span>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted" style={{ fontSize: '12px' }}>
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted proj-text-sm">
               <Clock className="tw-h-3 tw-w-3" />
               <span>Created {formatDate(project.created_at)}</span>
             </div>
@@ -103,7 +103,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
           <div className="tw-mt-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
               <span className="tw-label">Progress</span>
-              <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+              <span className="tw-text-muted proj-text-sm">
                 {progress}%
               </span>
             </div>
@@ -128,11 +128,11 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
     return (
       <div>
-        <h3 className="tw-section-title" style={{ marginBottom: '0.75rem' }}>
+        <h3 className="tw-section-title proj-section-title">
           {title} ({projectList.length})
         </h3>
         {projectList.length === 0 ? (
-          <p className="tw-text-muted" style={{ fontSize: '14px', fontStyle: 'italic' }}>
+          <p className="tw-text-muted proj-text-base proj-empty-italic">
             {emptyMessage}
           </p>
         ) : (
@@ -148,23 +148,23 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading" style={{ fontSize: '18px' }}>
+        <h2 className="tw-heading proj-text-lg">
           Projects ({projects.length})
         </h2>
 
         {/* Summary stats */}
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-center">
-            <span className="tw-stat-value" style={{ fontSize: '18px' }}>
+            <span className="tw-stat-value proj-text-lg">
               {activeProjects.length}
             </span>
-            <span className="tw-text-muted tw-ml-1" style={{ fontSize: '12px' }}>Active</span>
+            <span className="tw-text-muted tw-ml-1 proj-text-sm">Active</span>
           </div>
           <div className="tw-text-center">
-            <span className="tw-stat-value" style={{ fontSize: '18px' }}>
+            <span className="tw-stat-value proj-text-lg">
               {completedProjects.length}
             </span>
-            <span className="tw-text-muted tw-ml-1" style={{ fontSize: '12px' }}>
+            <span className="tw-text-muted tw-ml-1 proj-text-sm">
               Completed
             </span>
           </div>

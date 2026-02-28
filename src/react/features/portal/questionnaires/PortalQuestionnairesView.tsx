@@ -183,20 +183,20 @@ export function PortalQuestionnairesView({
       <div className="tw-grid-stats">
         <div className="tw-stat-card">
           <span className="tw-stat-label">Completed</span>
-          <span className="tw-stat-value" style={{ color: 'var(--status-completed)' }}>{completedCount}</span>
+          <span className="tw-stat-value qview-status-completed">{completedCount}</span>
         </div>
         <div className="tw-stat-card">
           <span className="tw-stat-label">Pending</span>
-          <span className="tw-stat-value" style={{ color: 'var(--status-active)' }}>{pendingCount}</span>
+          <span className="tw-stat-value qview-status-active">{pendingCount}</span>
         </div>
         <div className="tw-stat-card">
           <span className="tw-stat-label">Needs Revision</span>
-          <span className="tw-stat-value" style={{ color: 'var(--status-cancelled)' }}>{needsRevisionCount}</span>
+          <span className="tw-stat-value qview-status-cancelled">{needsRevisionCount}</span>
         </div>
       </div>
 
       {/* Questionnaire Cards */}
-      <div ref={cardsRef} className="tw-section" style={{ gap: 0 }}>
+      <div ref={cardsRef} className="tw-section qview-no-gap">
         {responses.map((response) => {
           const config = QUESTIONNAIRE_STATUS_CONFIG[response.status];
           const isActionable = response.status !== 'submitted' && response.status !== 'approved';
@@ -205,20 +205,19 @@ export function PortalQuestionnairesView({
             <div
               key={response.id}
               onClick={() => handleOpenQuestionnaire(response)}
-              className="tw-card-hover"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}
+              className="tw-card-hover qview-card"
             >
               {/* Left side: Icon and info */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
-                <div style={{ flexShrink: 0 }}>
+              <div className="qview-left">
+                <div className="qview-icon">
                   {getStatusIcon(response.status)}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem', minWidth: 0 }}>
-                  <span className="tw-text-primary" style={{ fontSize: '12px', fontWeight: 500 }}>
+                <div className="qview-info">
+                  <span className="tw-text-primary qview-title">
                     {response.questionnaire.title}
                   </span>
                   {response.questionnaire.description && (
-                    <span className="tw-text-muted" style={{ fontSize: '10px' }}>
+                    <span className="tw-text-muted qview-text-xs">
                       {response.questionnaire.description}
                     </span>
                   )}
@@ -227,24 +226,24 @@ export function PortalQuestionnairesView({
 
               {/* Middle: Progress bar (if in progress) */}
               {response.status === 'in_progress' && response.progress > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-                  <div className="tw-progress-track" style={{ width: '64px' }}>
+                <div className="qview-progress-section">
+                  <div className="tw-progress-track qview-progress-track">
                     <div
                       className="tw-progress-bar"
                       style={{ width: `${response.progress}%` }}
                     />
                   </div>
-                  <span className="tw-text-muted" style={{ fontSize: '10px' }}>
+                  <span className="tw-text-muted qview-text-xs">
                     {response.progress}%
                   </span>
                 </div>
               )}
 
               {/* Right side: Status and action */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+              <div className="qview-right">
+                <div className="qview-status-col">
                   <span className="tw-badge">{config.label}</span>
-                  <span className="tw-text-muted" style={{ fontSize: '10px' }}>
+                  <span className="tw-text-muted qview-text-xs">
                     {response.submitted_at
                       ? `Submitted ${formatDate(response.submitted_at)}`
                       : `Updated ${formatDate(response.updated_at || response.created_at)}`

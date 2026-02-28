@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   Palette,
@@ -36,12 +36,12 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 
 interface DesignReview {
-  id: string;
+  id: number;
   title: string;
   description?: string;
-  projectId: string;
+  projectId: number;
   projectName: string;
-  clientId: string;
+  clientId: number;
   clientName: string;
   status: 'pending' | 'in-review' | 'approved' | 'revision-requested' | 'rejected';
   version: number;
@@ -66,6 +66,8 @@ interface DesignReviewStats {
 interface DesignReviewPanelProps {
   projectId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 const STATUS_FILTER_OPTIONS = [
@@ -77,7 +79,7 @@ const STATUS_FILTER_OPTIONS = [
   { value: 'rejected', label: 'Rejected' },
 ];
 
-export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelProps) {
+export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNotification }: DesignReviewPanelProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,27 +96,43 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
 
-  useEffect(() => {
-    loadReviews();
-  }, [projectId]);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadReviews() {
+  const loadReviews = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
       if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`/api/admin/design-reviews?${params}`);
+      const response = await fetch(`/api/admin/design-reviews?${params}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load design reviews');
       const data = await response.json();
-      setReviews(data.reviews || []);
-      setStats(data.stats || stats);
+      const payload = data.data || data;
+      setReviews(payload.reviews || []);
+      setStats(payload.stats || stats);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load design reviews');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [projectId, getHeaders, stats]);
+
+  useEffect(() => {
+    loadReviews();
+  }, [loadReviews]);
 
   const filteredReviews = useMemo(() => {
     let result = [...reviews];
@@ -285,7 +303,7 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onNavigate?.('projects', review.projectId);
+                      onNavigate?.('projects', String(review.projectId));
                     }}
                     className="link-btn"
                   >
@@ -318,7 +336,9 @@ export function DesignReviewPanel({ projectId, onNavigate }: DesignReviewPanelPr
                     )}
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <IconButton action="more-horizontal" />
+                        <button className="icon-btn">
+                          <MoreHorizontal />
+                        </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>
                         <PortalDropdownItem>

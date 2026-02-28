@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   CheckCircle,
@@ -15,9 +15,11 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDateShort } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -40,14 +42,18 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useSelection } from '@react/hooks/useSelection';
+import { GLOBAL_TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 
 interface Task {
-  id: string;
+  id: number;
   title: string;
   description?: string;
   status: 'pending' | 'in_progress' | 'completed' | 'blocked' | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  projectId?: string;
+  projectId?: number;
   projectName?: string;
   assignedTo?: string;
   assignedToName?: string;
@@ -79,30 +85,76 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
   low: { label: 'Low', color: 'var(--portal-text-muted)' },
 };
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'pending', label: 'To Do' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Done' },
-  { value: 'blocked', label: 'Blocked' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
-
-const PRIORITY_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Priority' },
-  { value: 'urgent', label: 'Urgent' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
-];
-
 interface GlobalTasksTableProps {
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
+// Filter function
+function filterTask(
+  task: Task,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const searchLower = search.toLowerCase();
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchLower) ||
+      task.description?.toLowerCase().includes(searchLower) ||
+      task.projectName?.toLowerCase().includes(searchLower);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (task.status !== filters.status) return false;
+  }
+
+  if (filters.priority && filters.priority !== 'all') {
+    if (task.priority !== filters.priority) return false;
+  }
+
+  return true;
+}
+
+// Sort function
+function sortTasks(a: Task, b: Task, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'priority': {
+      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+      return multiplier * ((priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4));
+    }
+    case 'dueDate':
+      return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    default:
+      return 0;
+  }
+}
+
+export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }: GlobalTasksTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
   const [error, setError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<TaskStats>({
@@ -112,31 +164,63 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
     completed: 0,
     overdue: 0,
   });
-
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
-  // Sorting
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+  // Filtering and sorting
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Task>({
+    storageKey: 'admin_global_tasks',
+    filters: GLOBAL_TASKS_FILTER_CONFIG,
+    filterFn: filterTask,
+    sortFn: sortTasks,
+    defaultSort: { column: 'dueDate', direction: 'asc' }
+  });
 
-  useEffect(() => {
-    loadTasks();
-  }, []);
+  // Apply filters
+  const filteredTasks = useMemo(() => applyFilters(tasks), [applyFilters, tasks]);
 
-  async function loadTasks() {
+  // Pagination
+  const pagination = usePagination({
+    storageKey: 'admin_global_tasks_pagination',
+    totalItems: filteredTasks.length,
+    defaultPageSize: 25
+  });
+
+  const paginatedTasks = useMemo(
+    () => pagination.paginate(filteredTasks),
+    [pagination, filteredTasks]
+  );
+
+  // Selection for bulk actions
+  const selection = useSelection({
+    getId: (task: Task) => task.id,
+    items: paginatedTasks
+  });
+
+  const loadTasks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/tasks');
+      const response = await fetch('/api/admin/tasks', {
+        method: 'GET',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to load tasks');
 
       const data = await response.json();
-      setTasks(data.tasks || []);
-      setStats(data.stats || {
+      const payload = data.data || data;
+      setTasks(payload.tasks || []);
+      setStats(payload.stats || {
         total: 0,
         pending: 0,
         inProgress: 0,
@@ -148,90 +232,19 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  // Filter and sort tasks
-  const filteredTasks = useMemo(() => {
-    let result = [...tasks];
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (task) =>
-          task.title.toLowerCase().includes(query) ||
-          task.description?.toLowerCase().includes(query) ||
-          task.projectName?.toLowerCase().includes(query)
-      );
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      result = result.filter((task) => task.status === statusFilter);
-    }
-
-    // Priority filter
-    if (priorityFilter !== 'all') {
-      result = result.filter((task) => task.priority === priorityFilter);
-    }
-
-    // Sort
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-
-        switch (sort.column) {
-          case 'title':
-            aVal = a.title;
-            bVal = b.title;
-            break;
-          case 'priority':
-            const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-            aVal = priorityOrder[a.priority] ?? 4;
-            bVal = priorityOrder[b.priority] ?? 4;
-            break;
-          case 'dueDate':
-            aVal = a.dueDate || '';
-            bVal = b.dueDate || '';
-            break;
-          case 'status':
-            aVal = a.status;
-            bVal = b.status;
-            break;
-        }
-
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return result;
-  }, [tasks, searchQuery, statusFilter, priorityFilter, sort]);
-
-  const pagination = usePagination({ totalItems: filteredTasks.length });
-  const paginatedTasks = filteredTasks.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize
-  );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc'
-          ? { column, direction: 'desc' }
-          : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  async function handleStatusChange(taskId: string, newStatus: string) {
+  // Status change handler
+  const handleStatusChange = useCallback(async (taskId: number, newStatus: string) => {
     try {
       const response = await fetch(`/api/admin/tasks/${taskId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -242,20 +255,68 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
           task.id === taskId ? { ...task, status: newStatus as Task['status'] } : task
         )
       );
+      showNotification?.('Task status updated', 'success');
     } catch (err) {
       console.error('Failed to update task status:', err);
+      showNotification?.('Failed to update task status', 'error');
     }
-  }
+  }, [getHeaders, showNotification]);
 
-  function handleFilterChange(key: string, value: string) {
-    if (key === 'status') {
-      setStatusFilter(value);
-    } else if (key === 'priority') {
-      setPriorityFilter(value);
+  // Bulk delete handler
+  const handleBulkDelete = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
+
+    const ids = selection.selectedItems.map((t) => t.id);
+    try {
+      const response = await fetch('/api/admin/tasks/bulk-delete', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete tasks');
+
+      setTasks((prev) => prev.filter((t) => !ids.includes(t.id)));
+      selection.clearSelection();
+      showNotification?.(`Deleted ${ids.length} task${ids.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to delete tasks:', err);
+      showNotification?.('Failed to delete tasks', 'error');
     }
-  }
+  }, [selection, getHeaders, showNotification]);
 
-  const hasActiveFilters = searchQuery || statusFilter !== 'all' || priorityFilter !== 'all';
+  // Status options for bulk actions
+  const bulkStatusOptions = useMemo(
+    () =>
+      Object.entries(TASK_STATUS_CONFIG).map(([value, config]) => ({
+        value,
+        label: config.label,
+        color: `var(--status-${value})`
+      })),
+    []
+  );
+
+  // Handle bulk status change
+  const handleBulkStatusChange = useCallback(
+    async (newStatus: string) => {
+      if (selection.selectedCount === 0) return;
+
+      for (const task of selection.selectedItems) {
+        await handleStatusChange(task.id, newStatus);
+      }
+      selection.clearSelection();
+    },
+    [selection, handleStatusChange]
+  );
+
+  // Handle filter change
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => {
+      setFilter(key, value);
+    },
+    [setFilter]
+  );
 
   return (
     <TableLayout
@@ -275,16 +336,13 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search tasks..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
-              { key: 'priority', label: 'PRIORITY', options: PRIORITY_FILTER_OPTIONS },
-            ]}
-            values={{ status: statusFilter, priority: priorityFilter }}
+            sections={GLOBAL_TASKS_FILTER_CONFIG}
+            values={filterValues}
             onChange={handleFilterChange}
           />
           <div className="view-toggle">
@@ -303,8 +361,25 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
               <LayoutGrid className="icon-sm" />
             </button>
           </div>
+          <IconButton
+            action="download"
+            disabled={filteredTasks.length === 0}
+            title="Export to CSV"
+          />
           <IconButton action="add" title="Add Task" />
         </>
+      }
+      bulkActions={
+        <BulkActionsToolbar
+          selectedCount={selection.selectedCount}
+          totalCount={filteredTasks.length}
+          onClearSelection={selection.clearSelection}
+          onSelectAll={() => selection.selectMany(filteredTasks)}
+          allSelected={selection.allSelected && selection.selectedCount === filteredTasks.length}
+          statusOptions={bulkStatusOptions}
+          onStatusChange={handleBulkStatusChange}
+          onDelete={handleBulkDelete}
+        />
       }
       error={
         error ? (
@@ -338,6 +413,13 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
+              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </AdminTableHead>
               <AdminTableHead
                 className="name-col"
                 sortable
@@ -378,25 +460,35 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
 
           <AdminTableBody animate={!isLoading}>
             {isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <AdminTableLoading colSpan={8} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <AdminTableEmpty
-                colSpan={7}
+                colSpan={8}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
             ) : (
               paginatedTasks.map((task) => (
-                <AdminTableRow key={task.id} clickable>
+                <AdminTableRow
+                  key={task.id}
+                  clickable
+                  selected={selection.isSelected(task)}
+                >
+                  <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selection.isSelected(task)}
+                      onCheckedChange={() => selection.toggleSelection(task)}
+                      aria-label={`Select ${task.title}`}
+                    />
+                  </AdminTableCell>
                   <AdminTableCell className="primary-cell name-cell">
                     <div className="cell-content">
+                      {task.projectName && (
+                        <span className="project-stacked">{task.projectName}</span>
+                      )}
                       <span className="cell-title">{task.title}</span>
                       {task.description && (
                         <span className="cell-subtitle">{task.description}</span>
-                      )}
-                      {/* Stacked content for responsive - hidden on desktop */}
-                      {task.projectName && (
-                        <span className="project-stacked">{task.projectName}</span>
                       )}
                       <span className="priority-stacked">
                         <span
@@ -408,12 +500,15 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                       {task.dueDate && (
                         <span className="date-stacked">{formatDateShort(task.dueDate)}</span>
                       )}
+                      {task.assignedToName && (
+                        <span className="assigned-stacked">{task.assignedToName}</span>
+                      )}
                     </div>
                   </AdminTableCell>
                   <AdminTableCell className="project-cell">
                     {task.projectName ? (
                       <span
-                        onClick={() => onNavigate?.('projects', task.projectId)}
+                        onClick={() => onNavigate?.('projects', task.projectId != null ? String(task.projectId) : undefined)}
                         className="table-link"
                       >
                         {task.projectName}
@@ -478,7 +573,8 @@ export function GlobalTasksTable({ onNavigate }: GlobalTasksTableProps) {
                   </AdminTableCell>
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
-                      <IconButton action="more-horizontal" />
+                      <IconButton action="view" title="View" />
+                      <IconButton action="edit" title="Edit" />
                     </div>
                   </AdminTableCell>
                 </AdminTableRow>
@@ -503,7 +599,7 @@ function TasksKanbanView({
   isLoading,
 }: {
   tasks: Task[];
-  onStatusChange: (taskId: string, status: string) => void;
+  onStatusChange: (taskId: number, status: string) => void;
   isLoading: boolean;
 }) {
   const columns = [

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   Play,
@@ -11,6 +11,7 @@ import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDateShort } from '@react/utils/formatDate';
+import { formatCurrency } from '../../../../utils/format-utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   AdminTable,
@@ -26,13 +27,13 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 
 interface TimeEntry {
-  id: string;
+  id: number;
   description: string;
-  projectId?: string;
+  projectId?: number;
   projectName?: string;
-  taskId?: string;
+  taskId?: number;
   taskName?: string;
-  userId: string;
+  userId: number;
   userName: string;
   date: string;
   startTime: string;
@@ -54,6 +55,8 @@ interface TimeStats {
 interface TimeTrackingPanelProps {
   projectId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 const DATE_RANGE_OPTIONS = [
@@ -69,7 +72,7 @@ const BILLABLE_FILTER_OPTIONS = [
   { value: 'non-billable', label: 'Non-Billable' },
 ];
 
-export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelProps) {
+export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingPanelProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,9 +105,17 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
     direction: 'desc',
   });
 
-  useEffect(() => {
-    loadTimeEntries();
-  }, [projectId, dateRange]);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -122,7 +133,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
     return () => clearInterval(interval);
   }, [activeTimer]);
 
-  async function loadTimeEntries() {
+  const loadTimeEntries = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -131,12 +142,16 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
       if (projectId) params.set('projectId', projectId);
       params.set('range', dateRange);
 
-      const response = await fetch(`/api/admin/time-entries?${params}`);
+      const response = await fetch(`/api/admin/time-entries?${params}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load time entries');
 
       const data = await response.json();
-      setEntries(data.entries || []);
-      setStats(data.stats || {
+      const payload = data.data || data;
+      setEntries(payload.entries || []);
+      setStats(payload.stats || {
         totalHours: 0,
         billableHours: 0,
         billedHours: 0,
@@ -148,27 +163,34 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [projectId, dateRange, getHeaders]);
+
+  useEffect(() => {
+    loadTimeEntries();
+  }, [loadTimeEntries]);
 
   async function startTimer() {
     try {
       const response = await fetch('/api/admin/time-entries/start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ projectId }),
       });
 
       if (!response.ok) throw new Error('Failed to start timer');
 
       const data = await response.json();
+      const payload = data.data || data;
       setActiveTimer({
-        entryId: data.entryId,
+        entryId: payload.entryId,
         startedAt: new Date(),
         description: '',
-        projectName: data.projectName,
+        projectName: payload.projectName,
       });
     } catch (err) {
       console.error('Failed to start timer:', err);
+      showNotification?.('Failed to start timer', 'error');
     }
   }
 
@@ -178,6 +200,8 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
     try {
       const response = await fetch(`/api/admin/time-entries/${activeTimer.entryId}/stop`, {
         method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) throw new Error('Failed to stop timer');
@@ -185,8 +209,10 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
       setActiveTimer(null);
       setTimerDisplay('00:00:00');
       loadTimeEntries();
+      showNotification?.('Timer stopped', 'success');
     } catch (err) {
       console.error('Failed to stop timer:', err);
+      showNotification?.('Failed to stop timer', 'error');
     }
   }
 
@@ -398,7 +424,7 @@ export function TimeTrackingPanel({ projectId, onNavigate }: TimeTrackingPanelPr
                 <AdminTableCell>
                   {entry.projectName ? (
                     <button
-                      onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId); }}
+                      onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId != null ? String(entry.projectId) : undefined); }}
                       className="link-btn"
                     >
                       {entry.projectName}
@@ -434,10 +460,6 @@ function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return `${hours}h ${mins}m`;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount);
 }
 
 export default TimeTrackingPanel;

@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Eye,
   Download,
@@ -51,6 +51,26 @@ interface PortalFile {
   uploadedBy?: string;
   projectId?: number;
   projectName?: string;
+}
+
+/**
+ * Transform API response to PortalFile interface
+ * Maps snake_case API fields to camelCase component fields
+ */
+function transformFile(apiFile: Record<string, unknown>): PortalFile {
+  return {
+    id: apiFile.id as number,
+    filename: (apiFile.filename || apiFile.original_filename || '') as string,
+    originalName: (apiFile.original_filename || apiFile.originalName) as string | undefined,
+    size: (apiFile.file_size || apiFile.size || 0) as number,
+    mimetype: (apiFile.mime_type || apiFile.mimetype || '') as string,
+    fileType: (apiFile.file_type || apiFile.fileType) as string | undefined,
+    category: apiFile.category as string | undefined,
+    uploadedAt: (apiFile.uploaded_at || apiFile.uploadedAt || apiFile.created_at || '') as string,
+    uploadedBy: (apiFile.uploaded_by || apiFile.uploadedBy) as string | undefined,
+    projectId: (apiFile.project_id || apiFile.projectId) as number | undefined,
+    projectName: (apiFile.project_name || apiFile.projectName) as string | undefined,
+  };
 }
 
 interface Project {
@@ -197,17 +217,16 @@ interface FolderTreeProps {
 
 function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) {
   return (
-    <div className="tw-section" style={{ gap: '0.25rem' }}>
+    <div className="tw-section tw-gap-1">
       {/* All Files */}
       <button
         type="button"
-        className={selectedFolder === 'all' ? 'tw-list-item tw-table-row-selected' : 'tw-list-item'}
+        className={cn('tw-list-item folder-item', selectedFolder === 'all' && 'tw-table-row-selected')}
         onClick={() => onSelectFolder('all')}
-        style={{ borderBottom: 'none' }}
       >
         <Folder className="tw-h-4 tw-w-4" />
-        <span style={{ flex: 1 }}>All Files</span>
-        <span className="tw-text-muted" style={{ fontSize: '11px' }}>{totalCount}</span>
+        <span className="tw-flex-1">All Files</span>
+        <span className="tw-text-muted tw-text-xs">{totalCount}</span>
       </button>
 
       {/* Folder categories */}
@@ -215,13 +234,12 @@ function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: Fol
         <button
           key={folder.id}
           type="button"
-          className={selectedFolder === folder.id ? 'tw-list-item tw-table-row-selected' : 'tw-list-item'}
+          className={cn('tw-list-item folder-item folder-item-nested', selectedFolder === folder.id && 'tw-table-row-selected')}
           onClick={() => onSelectFolder(folder.id)}
-          style={{ borderBottom: 'none', paddingLeft: '1.5rem' }}
         >
           <Folder className="tw-h-4 tw-w-4" />
-          <span style={{ flex: 1 }}>{folder.name}</span>
-          <span className="tw-text-muted" style={{ fontSize: '11px' }}>{folder.count}</span>
+          <span className="tw-flex-1">{folder.name}</span>
+          <span className="tw-text-muted tw-text-xs">{folder.count}</span>
         </button>
       ))}
     </div>
@@ -248,15 +266,14 @@ function FiltersBar({
   hasActiveFilters,
 }: FiltersBarProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+    <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
       <Filter className="tw-h-4 tw-w-4 tw-text-muted" />
 
       {/* Project filter */}
       <select
-        className="tw-select"
+        className="tw-select tw-text-sm"
         value={selectedProject}
         onChange={(e) => onProjectChange(e.target.value)}
-        style={{ fontSize: '12px' }}
       >
         <option value="all">All Projects</option>
         {projects.map((project) => (
@@ -268,10 +285,9 @@ function FiltersBar({
 
       {/* File type filter */}
       <select
-        className="tw-select"
+        className="tw-select tw-text-sm"
         value={selectedFileType}
         onChange={(e) => onFileTypeChange(e.target.value)}
-        style={{ fontSize: '12px' }}
       >
         <option value="all">All Types</option>
         <option value="image">Images</option>
@@ -320,6 +336,16 @@ export function PortalFilesManager({
   // Delete confirmation
   const deleteDialog = useConfirmDialog();
   const [fileToDelete, setFileToDelete] = useState<PortalFile | null>(null);
+
+  // AbortController ref for cleanup on unmount
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   // Compute folder categories
   const folderCategories = useMemo(() => countFilesByFolder(files), [files]);
@@ -373,6 +399,10 @@ export function PortalFilesManager({
 
   // Fetch files
   const fetchFiles = useCallback(async () => {
+    // Abort any in-flight request
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+
     setIsLoading(true);
     setError(null);
 
@@ -389,6 +419,7 @@ export function PortalFilesManager({
       const response = await fetch(`${FILES_API_BASE}/client`, {
         headers,
         credentials: 'include',
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -396,9 +427,15 @@ export function PortalFilesManager({
       }
 
       const data = await response.json();
-      setFiles(data.files || []);
+      // Transform API response to match component interface (snake_case to camelCase)
+      const transformedFiles = (data.files || []).map(transformFile);
+      setFiles(transformedFiles);
       setProjects(data.projects || []);
     } catch (err) {
+      // Don't set error state if request was aborted (component unmounted)
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       console.error('[PortalFilesManager] Error fetching files:', err);
       setError(err instanceof Error ? err.message : 'Failed to load files');
     } finally {
@@ -544,9 +581,9 @@ export function PortalFilesManager({
       />
 
       {/* Main Content */}
-      <div style={{ display: 'flex', gap: '1rem' }}>
+      <div className="tw-flex tw-gap-4">
         {/* Folder Tree Sidebar */}
-        <div className="tw-panel" style={{ width: '200px', flexShrink: 0, display: 'none' }} id="folder-sidebar">
+        <div className="tw-panel files-folder-sidebar" id="folder-sidebar">
           <FolderTree
             folders={folderCategories}
             selectedFolder={selectedFolder}
@@ -557,14 +594,13 @@ export function PortalFilesManager({
         <style>{`@media (min-width: 768px) { #folder-sidebar { display: block !important; } }`}</style>
 
         {/* Files List */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="tw-flex-1 card-content-truncate">
           {/* Mobile folder selector */}
-          <div style={{ marginBottom: '0.75rem' }} className="md:tw-hidden">
+          <div className="tw-mb-3 md:tw-hidden">
             <select
-              className="tw-select"
+              className="tw-select tw-w-full"
               value={selectedFolder}
               onChange={(e) => setSelectedFolder(e.target.value)}
-              style={{ width: '100%' }}
             >
               <option value="all">All Files ({files.length})</option>
               {folderCategories.map((folder) => (
@@ -576,16 +612,16 @@ export function PortalFilesManager({
           </div>
 
           {/* Breadcrumb Path */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.75rem' }} className="tw-text-muted">
-            <span style={{ fontSize: '12px' }}>Files</span>
+          <div className="tw-flex tw-items-center tw-gap-1 tw-mb-3 tw-text-muted">
+            <span className="tw-text-sm">Files</span>
             <ChevronRight className="tw-h-3 tw-w-3" />
-            <span className="tw-text-primary" style={{ fontSize: '12px' }}>
+            <span className="tw-text-primary tw-text-sm">
               {FOLDER_NAMES[selectedFolder] || selectedFolder}
             </span>
           </div>
 
           {/* Filters */}
-          <div style={{ marginBottom: '0.75rem' }}>
+          <div className="tw-mb-3">
             <FiltersBar
               projects={projects}
               selectedProject={selectedProject}
@@ -691,9 +727,9 @@ export function PortalFilesManager({
 
           {/* Pagination */}
           {filteredFiles.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', fontSize: '12px' }}>
+            <div className="tw-flex tw-items-center tw-justify-between tw-mt-3 tw-text-sm">
               <span className="tw-text-muted">{pagination.pageInfo}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <div className="tw-flex tw-items-center tw-gap-1">
                 <button
                   className="tw-btn-ghost"
                   onClick={pagination.prevPage}
@@ -701,7 +737,7 @@ export function PortalFilesManager({
                 >
                   Previous
                 </button>
-                <span className="tw-text-muted" style={{ padding: '0 0.5rem' }}>
+                <span className="tw-text-muted tw-px-2">
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
                 <button

@@ -87,19 +87,19 @@ export function MessagesTab({
   );
 
   return (
-    <div className="tw-flex tw-flex-col" style={{ height: '500px' }}>
+    <div className="tw-flex tw-flex-col msgtab-container">
       {/* Messages List */}
-      <div className="tw-flex-1 tw-overflow-y-auto tw-scroll-container tw-panel" style={{ borderRadius: 0 }}>
+      <div className="tw-flex-1 tw-overflow-y-auto tw-scroll-container tw-panel msgtab-panel">
         {isLoading ? (
           <div className="tw-loading">
-            <div className="tw-animate-spin tw-h-6 tw-w-6 tw-border-2 tw-border-current tw-border-t-transparent" style={{ borderRadius: '50%' }} />
+            <div className="tw-animate-spin tw-h-6 tw-w-6 tw-border-2 tw-border-current tw-border-t-transparent msgtab-spinner" />
             Loading messages...
           </div>
         ) : messages.length === 0 ? (
           <div className="tw-empty-state">
             <MessageSquare className="tw-h-8 tw-w-8 tw-mb-2" />
             <span>No messages yet</span>
-            <span style={{ fontSize: '12px' }}>Start a conversation with your client</span>
+            <span className="proj-text-sm">Start a conversation with your client</span>
           </div>
         ) : (
           <div className="tw-flex tw-flex-col tw-gap-4">
@@ -117,12 +117,11 @@ export function MessagesTab({
                   {/* Avatar */}
                   <div
                     className={cn(
-                      'tw-w-8 tw-h-8 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
+                      'tw-w-8 tw-h-8 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 msgtab-avatar',
                       isAdmin
                         ? 'tw-bg-white'
                         : 'tw-bg-transparent tw-border tw-border-[var(--portal-border-color)]'
                     )}
-                    style={{ borderRadius: 0 }}
                   >
                     <User className={cn('tw-h-4 tw-w-4', isAdmin ? 'tw-text-black' : 'tw-text-white')} />
                   </div>
@@ -135,7 +134,7 @@ export function MessagesTab({
                     )}
                   >
                     {/* Sender and Time */}
-                    <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted" style={{ fontSize: '12px' }}>
+                    <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted proj-text-sm">
                       <span>{message.sender_name || (isAdmin ? 'You' : 'Client')}</span>
                       <Clock className="tw-h-3 tw-w-3" />
                       <span>{formatMessageTime(message.created_at)}</span>
@@ -144,14 +143,13 @@ export function MessagesTab({
                     {/* Message Bubble */}
                     <div
                       className={cn(
-                        'tw-px-4 tw-py-2',
+                        'tw-px-4 tw-py-2 msgtab-bubble',
                         isAdmin
                           ? 'tw-bg-white tw-text-black'
                           : 'tw-border tw-border-[var(--portal-border-color)] tw-text-white'
                       )}
-                      style={{ borderRadius: 0 }}
                     >
-                      <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>{message.content}</p>
+                      <p className="msgtab-content">{message.content}</p>
                     </div>
                   </div>
                 </div>
@@ -163,7 +161,7 @@ export function MessagesTab({
       </div>
 
       {/* Message Input */}
-      <div className="tw-panel" style={{ borderTop: '1px solid var(--portal-border-color)', borderRadius: 0 }}>
+      <div className="tw-panel msgtab-input-panel">
         <div className="tw-flex tw-gap-3">
           <textarea
             ref={textareaRef}
@@ -172,8 +170,7 @@ export function MessagesTab({
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={2}
-            className="tw-textarea tw-flex-1"
-            style={{ minHeight: '60px' }}
+            className="tw-textarea tw-flex-1 msgtab-textarea"
           />
           <button
             className="tw-btn-primary tw-self-end"
@@ -184,8 +181,8 @@ export function MessagesTab({
             {isSending ? 'Sending...' : 'Send'}
           </button>
         </div>
-        <div className="tw-text-muted tw-mt-2" style={{ fontSize: '12px' }}>
-          Press <kbd className="tw-badge" style={{ fontSize: '11px', padding: '2px 6px' }}>Cmd+Enter</kbd> to send
+        <div className="tw-text-muted tw-mt-2 proj-text-sm">
+          Press <kbd className="tw-badge msgtab-kbd">Cmd+Enter</kbd> to send
         </div>
       </div>
     </div>

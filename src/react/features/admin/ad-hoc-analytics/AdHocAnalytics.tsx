@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Play,
   Save,
@@ -13,7 +13,7 @@ import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 
 interface SavedQuery {
-  id: string;
+  id: number;
   name: string;
   description?: string;
   query: string;
@@ -30,9 +30,11 @@ interface QueryResult {
 
 interface AdHocAnalyticsProps {
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
+export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: AdHocAnalyticsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,20 +45,36 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'custom'>('30d');
 
-  useEffect(() => {
-    loadSavedQueries();
-  }, []);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadSavedQueries() {
+  const loadSavedQueries = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/ad-hoc-analytics/queries');
+      const response = await fetch('/api/admin/ad-hoc-analytics/queries', {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load saved queries');
       const data = await response.json();
-      setSavedQueries(data.queries || []);
+      const payload = data.data || data;
+      setSavedQueries(payload.queries || []);
     } catch (err) {
       console.error('Failed to load saved queries:', err);
     }
-  }
+  }, [getHeaders]);
+
+  useEffect(() => {
+    loadSavedQueries();
+  }, [loadSavedQueries]);
 
   async function runQuery() {
     if (!query.trim()) return;
@@ -67,7 +85,8 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
     try {
       const response = await fetch('/api/admin/ad-hoc-analytics/run', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ query, dateRange }),
       });
 
@@ -77,7 +96,8 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
       }
 
       const data = await response.json();
-      setResult(data.result);
+      const payload = data.data || data;
+      setResult(payload.result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to execute query');
     } finally {
@@ -91,7 +111,8 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
     try {
       const response = await fetch('/api/admin/ad-hoc-analytics/queries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ name: queryName, query }),
       });
 
@@ -99,24 +120,30 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
 
       loadSavedQueries();
       setQueryName('');
+      showNotification?.('Query saved', 'success');
     } catch (err) {
       console.error('Failed to save query:', err);
+      showNotification?.('Failed to save query', 'error');
     }
   }
 
-  async function deleteQuery(queryId: string) {
+  async function deleteQuery(queryId: number) {
     if (!confirm('Are you sure you want to delete this saved query?')) return;
 
     try {
       const response = await fetch(`/api/admin/ad-hoc-analytics/queries/${queryId}`, {
         method: 'DELETE',
+        headers: getHeaders(),
+        credentials: 'include',
       });
 
       if (!response.ok) throw new Error('Failed to delete query');
 
       setSavedQueries((prev) => prev.filter((q) => q.id !== queryId));
+      showNotification?.('Query deleted', 'success');
     } catch (err) {
       console.error('Failed to delete query:', err);
+      showNotification?.('Failed to delete query', 'error');
     }
   }
 
@@ -153,9 +180,9 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        <h2 className="tw-heading" style={{ fontSize: '16px' }}>Custom Analytics</h2>
-        <div className="tw-tab-list" style={{ borderBottom: 'none' }}>
+      <div className="perf-header">
+        <h2 className="tw-heading perf-heading">Custom Analytics</h2>
+        <div className="tw-tab-list perf-tab-list">
           {(['7d', '30d', '90d', 'custom'] as const).map((range) => (
             <button
               key={range}
@@ -168,27 +195,26 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1.5rem' }}>
+      <div className="analytics-grid">
         {/* Saved Queries Sidebar */}
         <div>
           <div className="tw-panel">
-            <h3 className="tw-section-title" style={{ marginBottom: '0.75rem' }}>Saved Queries</h3>
+            <h3 className="tw-section-title analytics-section-title">Saved Queries</h3>
             {savedQueries.length === 0 ? (
-              <p className="tw-text-muted" style={{ fontSize: '12px' }}>No saved queries yet</p>
+              <p className="tw-text-muted analytics-empty-text">No saved queries yet</p>
             ) : (
               <div>
                 {savedQueries.map((sq) => (
                   <div
                     key={sq.id}
-                    className="tw-card-hover"
-                    style={{ marginBottom: '0.5rem' }}
+                    className="tw-card-hover analytics-query-card"
                     onClick={() => loadQuery(sq)}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                      <div style={{ flex: 1 }}>
-                        <span style={{ fontSize: '14px', fontWeight: 700 }}>{sq.name}</span>
+                    <div className="analytics-query-header">
+                      <div className="analytics-query-content">
+                        <span className="analytics-query-name">{sq.name}</span>
                         {sq.lastRun && (
-                          <span className="tw-text-muted" style={{ display: 'block', fontSize: '11px' }}>
+                          <span className="tw-text-muted analytics-query-date">
                             Last run: {formatDate(sq.lastRun)}
                           </span>
                         )}
@@ -200,7 +226,7 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
                         }}
                         className="tw-btn-icon"
                       >
-                        <Trash2 style={{ width: '0.75rem', height: '0.75rem' }} />
+                        <Trash2 className="analytics-trash-icon" />
                       </button>
                     </div>
                   </div>
@@ -211,25 +237,24 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
         </div>
 
         {/* Main Content */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="analytics-main">
           {/* Query Editor */}
           <div className="tw-panel">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Code style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+            <div className="analytics-editor-header">
+              <div className="analytics-editor-title">
+                <Code className="analytics-editor-icon" />
                 <span className="tw-section-title">Query</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="analytics-editor-actions">
                 <input
                   type="text"
                   placeholder="Query name..."
                   value={queryName}
                   onChange={(e) => setQueryName(e.target.value)}
-                  className="tw-input"
-                  style={{ width: '200px', padding: '0.25rem 0.5rem', fontSize: '12px' }}
+                  className="tw-input analytics-name-input"
                 />
                 <button className="tw-btn-secondary" onClick={saveQuery} disabled={!query || !queryName}>
-                  <Save style={{ width: '1rem', height: '1rem' }} />
+                  <Save className="analytics-action-icon" />
                   Save
                 </button>
               </div>
@@ -241,12 +266,12 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
               rows={6}
               className="tw-textarea"
             />
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem' }}>
-              <span className="tw-text-muted" style={{ fontSize: '11px' }}>
+            <div className="analytics-editor-footer">
+              <span className="tw-text-muted analytics-hint">
                 Use SQL-like syntax to query your data
               </span>
               <button className="tw-btn-primary" onClick={runQuery} disabled={isLoading || !query}>
-                <Play style={{ width: '1rem', height: '1rem', animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+                <Play className={cn('analytics-action-icon', isLoading && 'status-panel-refresh-icon-spin')} />
                 {isLoading ? 'Running...' : 'Run Query'}
               </button>
             </div>
@@ -260,37 +285,35 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
           {/* Results */}
           {result && (
             <div className="tw-panel">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '14px' }}>
+              <div className="analytics-results-header">
+                <div className="analytics-results-stats">
                   <span>{result.rowCount} rows</span>
                   <span className="tw-text-muted">Executed in {result.executionTime}ms</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div className="tw-tab-list" style={{ borderBottom: 'none' }}>
+                <div className="analytics-results-actions">
+                  <div className="tw-tab-list perf-tab-list">
                     <button
                       onClick={() => setViewMode('table')}
-                      className={viewMode === 'table' ? 'tw-tab-active' : 'tw-tab'}
-                      style={{ padding: '0.25rem 0.5rem' }}
+                      className={cn(viewMode === 'table' ? 'tw-tab-active' : 'tw-tab', 'analytics-view-toggle')}
                     >
-                      <Table style={{ width: '1rem', height: '1rem' }} />
+                      <Table className="analytics-action-icon" />
                     </button>
                     <button
                       onClick={() => setViewMode('chart')}
-                      className={viewMode === 'chart' ? 'tw-tab-active' : 'tw-tab'}
-                      style={{ padding: '0.25rem 0.5rem' }}
+                      className={cn(viewMode === 'chart' ? 'tw-tab-active' : 'tw-tab', 'analytics-view-toggle')}
                     >
-                      <BarChart3 style={{ width: '1rem', height: '1rem' }} />
+                      <BarChart3 className="analytics-action-icon" />
                     </button>
                   </div>
                   <button className="tw-btn-secondary" onClick={exportResults}>
-                    <Download style={{ width: '1rem', height: '1rem' }} />
+                    <Download className="analytics-action-icon" />
                     Export
                   </button>
                 </div>
               </div>
 
               {viewMode === 'table' ? (
-                <div style={{ overflowX: 'auto' }}>
+                <div className="analytics-table-container">
                   <table className="tw-table">
                     <thead>
                       <tr>
@@ -310,16 +333,16 @@ export function AdHocAnalytics({ onNavigate }: AdHocAnalyticsProps) {
                     </tbody>
                   </table>
                   {result.rowCount > 100 && (
-                    <p className="tw-text-muted" style={{ fontSize: '11px', marginTop: '0.5rem', textAlign: 'center' }}>
+                    <p className="tw-text-muted analytics-pagination">
                       Showing first 100 of {result.rowCount} rows
                     </p>
                   )}
                 </div>
               ) : (
-                <div className="tw-empty-state" style={{ height: '16rem' }}>
-                  <BarChart3 style={{ width: '3rem', height: '3rem', opacity: 0.3 }} />
+                <div className="tw-empty-state analytics-chart-empty">
+                  <BarChart3 className="analytics-chart-icon" />
                   <p>Chart visualization</p>
-                  <p className="tw-text-muted" style={{ fontSize: '11px' }}>Select numeric columns to visualize</p>
+                  <p className="tw-text-muted analytics-chart-hint">Select numeric columns to visualize</p>
                 </div>
               )}
             </div>

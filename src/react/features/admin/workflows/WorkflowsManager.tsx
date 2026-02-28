@@ -1,19 +1,24 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   GitBranch,
   Settings,
-  MoreHorizontal,
   Inbox,
   Copy,
   Trash2,
   Zap,
+  ChevronDown,
+  MoreHorizontal,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
@@ -35,14 +40,25 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useSelection } from '@react/hooks/useSelection';
+import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
+import { EmailTemplatesManager } from '../email-templates/EmailTemplatesManager';
+
+// ============================================
+// TYPES
+// ============================================
+
+type WorkflowsSubtab = 'approvals' | 'triggers' | 'email-templates';
 
 interface Workflow {
-  id: string;
+  id: number;
   name: string;
-  description?: string;
+  description?: string | null;
   trigger: string;
-  status: 'active' | 'inactive' | 'draft';
-  lastRun?: string;
+  status: 'active' | 'inactive';
+  lastRun?: string | null;
   runCount: number;
   successRate: number;
   steps: number;
@@ -59,18 +75,87 @@ interface WorkflowStats {
 }
 
 interface WorkflowsManagerProps {
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'draft', label: 'Draft' },
+const WORKFLOWS_FILTER_CONFIG = [
+  { key: 'status', label: 'STATUS', options: WORKFLOW_STATUS_OPTIONS },
 ];
 
-export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
+const WORKFLOW_STATUS_CONFIG: Record<string, { label: string }> = {
+  active: { label: 'Active' },
+  inactive: { label: 'Inactive' },
+};
+
+const BULK_STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
+// Filter function
+function filterWorkflow(
+  workflow: Workflow,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    const matchesSearch =
+      workflow.name.toLowerCase().includes(query) ||
+      workflow.description?.toLowerCase().includes(query) ||
+      workflow.trigger.toLowerCase().includes(query);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (workflow.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+// Sort function
+function sortWorkflows(a: Workflow, b: Workflow, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+    case 'name':
+      return a.name.localeCompare(b.name) * multiplier;
+    case 'runCount':
+      return (a.runCount - b.runCount) * multiplier;
+    case 'successRate':
+      return (a.successRate - b.successRate) * multiplier;
+    case 'updatedAt':
+      return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
+    default:
+      return 0;
+  }
+}
+
+export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }: WorkflowsManagerProps) {
   const containerRef = useFadeIn();
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
+
+  // Subtab state - listen for header subtab changes
+  const [currentSubtab, setCurrentSubtab] = useState<WorkflowsSubtab>('approvals');
+
+  // Data states
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -81,100 +166,202 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
     totalRuns: 0,
     avgSuccessRate: 0,
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
+  // Listen for subtab change events from header
   useEffect(() => {
-    loadWorkflows();
+    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
+      const subtab = e.detail.subtab as WorkflowsSubtab;
+      if (subtab === 'approvals' || subtab === 'triggers' || subtab === 'email-templates') {
+        setCurrentSubtab(subtab);
+      }
+    }
+
+    document.addEventListener('workflowsSubtabChange', handleSubtabChange as EventListener);
+    return () => {
+      document.removeEventListener('workflowsSubtabChange', handleSubtabChange as EventListener);
+    };
   }, []);
 
-  async function loadWorkflows() {
+  // Use centralized table filters hook
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters,
+  } = useTableFilters<Workflow>({
+    storageKey: 'admin_workflows',
+    filters: WORKFLOWS_FILTER_CONFIG,
+    filterFn: filterWorkflow,
+    sortFn: sortWorkflows,
+    defaultSort: { column: 'updatedAt', direction: 'desc' },
+  });
+
+  // Apply filters and sorting
+  const filteredWorkflows = useMemo(() => applyFilters(workflows), [applyFilters, workflows]);
+
+  // Pagination
+  const pagination = usePagination({
+    storageKey: 'admin_workflows_pagination',
+    totalItems: filteredWorkflows.length,
+    defaultPageSize: 25,
+  });
+
+  const paginatedWorkflows = useMemo(
+    () => pagination.paginate(filteredWorkflows),
+    [pagination, filteredWorkflows]
+  );
+
+  // Selection for bulk actions
+  const selection = useSelection({
+    getId: (workflow: Workflow) => workflow.id,
+    items: paginatedWorkflows,
+  });
+
+  // Filter change handler
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => setFilter(key, value),
+    [setFilter]
+  );
+
+  const loadWorkflows = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/workflows');
+      const response = await fetch('/api/admin/workflows', {
+        method: 'GET',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to load workflows');
       const data = await response.json();
-      setWorkflows(data.workflows || []);
-      setStats(data.stats || stats);
+      const payload = data.data || data;
+      setWorkflows(payload.workflows || []);
+      setStats(payload.stats || {
+        total: 0,
+        active: 0,
+        inactive: 0,
+        totalRuns: 0,
+        avgSuccessRate: 0,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load workflows');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  const filteredWorkflows = useMemo(() => {
-    let result = [...workflows];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (w) =>
-          w.name.toLowerCase().includes(query) ||
-          w.description?.toLowerCase().includes(query) ||
-          w.trigger.toLowerCase().includes(query)
-      );
-    }
-    if (statusFilter !== 'all') {
-      result = result.filter((w) => w.status === statusFilter);
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-          case 'name': aVal = a.name; bVal = b.name; break;
-          case 'runCount': aVal = a.runCount; bVal = b.runCount; break;
-          case 'successRate': aVal = a.successRate; bVal = b.successRate; break;
-          case 'updatedAt': aVal = a.updatedAt; bVal = b.updatedAt; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [workflows, searchQuery, statusFilter, sort]);
+  useEffect(() => {
+    loadWorkflows();
+  }, [loadWorkflows]);
 
-  const pagination = usePagination({ totalItems: filteredWorkflows.length });
-  const paginatedWorkflows = filteredWorkflows.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize
-  );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  async function toggleWorkflowStatus(workflowId: string, currentStatus: string) {
+  // Update single workflow status (uses bulk endpoint with single ID)
+  const updateWorkflowStatus = useCallback(async (workflowId: number, newStatus: string) => {
     try {
-      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      const response = await fetch(`/api/admin/workflows/${workflowId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+      const response = await fetch('/api/admin/workflows/bulk-status', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ workflowIds: [workflowId], status: newStatus }),
       });
       if (!response.ok) throw new Error('Failed to update workflow status');
       setWorkflows((prev) =>
-        prev.map((w) => (w.id === workflowId ? { ...w, status: newStatus as Workflow['status'] } : w))
+        prev.map((w) =>
+          w.id === workflowId ? { ...w, status: newStatus as Workflow['status'] } : w
+        )
       );
+      showNotification?.('Workflow status updated', 'success');
     } catch (err) {
-      console.error('Failed to toggle workflow status:', err);
+      console.error('Failed to update workflow status:', err);
+      showNotification?.('Failed to update workflow status', 'error');
     }
+  }, [getHeaders, showNotification]);
+
+  // Bulk status change
+  const handleBulkStatusChange = useCallback(async (newStatus: string) => {
+    if (selection.selectedCount === 0) return;
+
+    setBulkLoading(true);
+    try {
+      const workflowIds = Array.from(selection.selectedIds);
+      const response = await fetch('/api/admin/workflows/bulk-status', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ workflowIds, status: newStatus }),
+      });
+      if (!response.ok) throw new Error('Failed to update workflow statuses');
+      setWorkflows((prev) =>
+        prev.map((w) =>
+          selection.selectedIds.has(w.id)
+            ? { ...w, status: newStatus as Workflow['status'] }
+            : w
+        )
+      );
+      selection.clearSelection();
+      showNotification?.(`Updated ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to bulk update status:', err);
+      showNotification?.('Failed to update workflows', 'error');
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [selection, getHeaders, showNotification]);
+
+  // Bulk delete
+  const handleBulkDelete = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
+
+    if (
+      !confirm(`Are you sure you want to delete ${selection.selectedCount} workflow(s)?`)
+    ) {
+      return;
+    }
+
+    setBulkLoading(true);
+    try {
+      const workflowIds = Array.from(selection.selectedIds);
+      const response = await fetch('/api/admin/workflows/bulk-delete', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ workflowIds }),
+      });
+      if (!response.ok) throw new Error('Failed to delete workflows');
+      setWorkflows((prev) => prev.filter((w) => !selection.selectedIds.has(w.id)));
+      selection.clearSelection();
+      showNotification?.(`Deleted ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to bulk delete:', err);
+      showNotification?.('Failed to delete workflows', 'error');
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [selection, getHeaders, showNotification]);
+
+  // Build filter dropdown sections from config
+  const filterSections = WORKFLOWS_FILTER_CONFIG.map((config) => ({
+    key: config.key,
+    label: config.label,
+    options: config.options,
+  }));
+
+  // If email-templates subtab is selected, render EmailTemplatesManager
+  if (currentSubtab === 'email-templates') {
+    return <EmailTemplatesManager onNavigate={onNavigate} />;
   }
 
-  const hasActiveFilters = searchQuery || statusFilter !== 'all';
+  // Determine title based on subtab
+  const subtabTitle = currentSubtab === 'approvals' ? 'APPROVAL WORKFLOWS' : 'TRIGGERS';
 
   return (
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
-      title="WORKFLOWS"
+      title={subtabTitle}
       stats={
         <TableStats
           items={[
@@ -188,19 +375,26 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search workflows..."
+            value={search}
+            onChange={setSearch}
+            placeholder={`Search ${currentSubtab}...`}
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
-            ]}
-            values={{ status: statusFilter }}
-            onChange={(key, value) => setStatusFilter(value)}
+            sections={filterSections}
+            values={filterValues}
+            onChange={handleFilterChange}
           />
-          <IconButton action="export" />
-          <IconButton action="add" title="New Workflow" />
+          <IconButton
+            action="download"
+            disabled={filteredWorkflows.length === 0}
+            title="Export to CSV"
+          />
+          <IconButton
+            action="refresh"
+            onClick={loadWorkflows}
+            disabled={isLoading}
+            title="Refresh"
+          />
         </>
       }
       error={
@@ -212,6 +406,19 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
             </PortalButton>
           </div>
         ) : undefined
+      }
+      bulkActions={
+        <BulkActionsToolbar
+          selectedCount={selection.selectedCount}
+          totalCount={filteredWorkflows.length}
+          onClearSelection={selection.clearSelection}
+          onSelectAll={() => selection.selectMany(filteredWorkflows)}
+          allSelected={selection.allSelected && selection.selectedCount === filteredWorkflows.length}
+          statusOptions={BULK_STATUS_OPTIONS}
+          onStatusChange={handleBulkStatusChange}
+          onDelete={handleBulkDelete}
+          deleteLoading={bulkLoading}
+        />
       }
       pagination={
         !isLoading && filteredWorkflows.length > 0 ? (
@@ -232,130 +439,175 @@ export function WorkflowsManager({ onNavigate }: WorkflowsManagerProps) {
       }
     >
       {!error && (
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
-              sortable
-              sortDirection={sort?.column === 'name' ? sort.direction : null}
-              onClick={() => toggleSort('name')}
-            >
-              Workflow
-            </AdminTableHead>
-            <AdminTableHead>Trigger</AdminTableHead>
-            <AdminTableHead>Steps</AdminTableHead>
-            <AdminTableHead>Status</AdminTableHead>
-            <AdminTableHead
-              className="text-right"
-              sortable
-              sortDirection={sort?.column === 'runCount' ? sort.direction : null}
-              onClick={() => toggleSort('runCount')}
-            >
-              Runs
-            </AdminTableHead>
-            <AdminTableHead
-              className="text-right"
-              sortable
-              sortDirection={sort?.column === 'successRate' ? sort.direction : null}
-              onClick={() => toggleSort('successRate')}
-            >
-              Success
-            </AdminTableHead>
-            <AdminTableHead
-              className="date-col"
-              sortable
-              sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
-              onClick={() => toggleSort('updatedAt')}
-            >
-              Updated
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+        <AdminTable>
+          <AdminTableHeader>
+            <AdminTableRow>
+              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                  onCheckedChange={selection.toggleSelectAll}
+                  aria-label="Select all"
+                />
+              </AdminTableHead>
+              <AdminTableHead
+                className="name-col"
+                sortable
+                sortDirection={sort?.column === 'name' ? sort.direction : null}
+                onClick={() => toggleSort('name')}
+              >
+                Workflow
+              </AdminTableHead>
+              <AdminTableHead className="type-col">Trigger</AdminTableHead>
+              <AdminTableHead className="count-col">Steps</AdminTableHead>
+              <AdminTableHead className="status-col">Status</AdminTableHead>
+              <AdminTableHead
+                className="count-col"
+                sortable
+                sortDirection={sort?.column === 'runCount' ? sort.direction : null}
+                onClick={() => toggleSort('runCount')}
+              >
+                Runs
+              </AdminTableHead>
+              <AdminTableHead
+                className="count-col"
+                sortable
+                sortDirection={sort?.column === 'successRate' ? sort.direction : null}
+                onClick={() => toggleSort('successRate')}
+              >
+                Success
+              </AdminTableHead>
+              <AdminTableHead
+                className="date-col"
+                sortable
+                sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
+                onClick={() => toggleSort('updatedAt')}
+              >
+                Updated
+              </AdminTableHead>
+              <AdminTableHead className="actions-col">Actions</AdminTableHead>
+            </AdminTableRow>
+          </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
-            <AdminTableLoading colSpan={8} rows={5} />
-          ) : paginatedWorkflows.length === 0 ? (
-            <AdminTableEmpty
-              colSpan={8}
-              icon={<Inbox />}
-              message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
-            />
-          ) : (
-            paginatedWorkflows.map((workflow) => (
-              <AdminTableRow key={workflow.id} clickable>
-                <AdminTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <GitBranch className="cell-icon" />
-                    <div className="cell-content">
-                      <span className="cell-title">{workflow.name}</span>
-                      {workflow.description && (
-                        <span className="cell-subtitle">{workflow.description}</span>
-                      )}
-                    </div>
-                  </div>
-                </AdminTableCell>
-                <AdminTableCell>
-                  <div className="cell-with-icon">
-                    <Zap className="cell-icon-sm status-pending" />
-                    <span>{workflow.trigger}</span>
-                  </div>
-                </AdminTableCell>
-                <AdminTableCell>{workflow.steps} steps</AdminTableCell>
-                <AdminTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
-                    {workflow.status}
-                  </StatusBadge>
-                </AdminTableCell>
-                <AdminTableCell className="text-right">{workflow.runCount}</AdminTableCell>
-                <AdminTableCell className="text-right">
-                  <span
-                    className={
-                      workflow.successRate >= 90
-                        ? 'text-success'
-                        : workflow.successRate >= 70
-                        ? 'text-warning'
-                        : 'text-danger'
-                    }
+          <AdminTableBody animate={!isLoading}>
+            {isLoading ? (
+              <AdminTableLoading colSpan={9} rows={5} />
+            ) : paginatedWorkflows.length === 0 ? (
+              <AdminTableEmpty
+                colSpan={9}
+                icon={<Inbox />}
+                message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
+              />
+            ) : (
+              paginatedWorkflows.map((workflow) => (
+                <AdminTableRow
+                  key={workflow.id}
+                  clickable
+                  selected={selection.isSelected(workflow)}
+                >
+                  <AdminTableCell
+                    className="bulk-select-cell"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {workflow.successRate}%
-                  </span>
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(workflow.updatedAt)}</AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
-                  <div className="table-actions">
-                    <IconButton
-                      action={workflow.status === 'active' ? 'disable' : 'activate'}
-                      title={workflow.status === 'active' ? 'Pause' : 'Activate'}
-                      onClick={() => toggleWorkflowStatus(workflow.id, workflow.status)}
+                    <Checkbox
+                      checked={selection.isSelected(workflow)}
+                      onCheckedChange={() => selection.toggleSelection(workflow)}
+                      aria-label={`Select ${workflow.name}`}
                     />
+                  </AdminTableCell>
+                  <AdminTableCell className="primary-cell">
+                    <div className="cell-with-icon">
+                      <GitBranch className="cell-icon" />
+                      <div className="cell-content">
+                        <span className="cell-title">{workflow.name}</span>
+                        {workflow.description && (
+                          <span className="cell-subtitle">{workflow.description}</span>
+                        )}
+                      </div>
+                    </div>
+                  </AdminTableCell>
+                  <AdminTableCell className="type-cell">
+                    <div className="cell-with-icon">
+                      <Zap className="cell-icon-sm status-pending" />
+                      <span>{workflow.trigger}</span>
+                    </div>
+                  </AdminTableCell>
+                  <AdminTableCell className="count-cell">{workflow.steps} steps</AdminTableCell>
+                  <AdminTableCell
+                    className="status-cell"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <IconButton action="more-horizontal" />
+                        <button type="button" className="status-dropdown-trigger">
+                          <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
+                            {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
+                          </StatusBadge>
+                          <ChevronDown className="status-dropdown-caret" />
+                        </button>
                       </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        <PortalDropdownItem>
-                          <Settings className="dropdown-icon" />
-                          Configure
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <Copy className="dropdown-icon" />
-                          Duplicate
-                        </PortalDropdownItem>
-                        <PortalDropdownItem className="text-danger">
-                          <Trash2 className="dropdown-icon" />
-                          Delete
-                        </PortalDropdownItem>
+                      <PortalDropdownContent sideOffset={0} align="start">
+                        {Object.entries(WORKFLOW_STATUS_CONFIG).map(([value, config]) => (
+                          <PortalDropdownItem
+                            key={value}
+                            onClick={() => updateWorkflowStatus(workflow.id, value)}
+                            className={workflow.status === value ? 'active' : ''}
+                          >
+                            <StatusBadge status={getStatusVariant(value)} size="sm">
+                              {config.label}
+                            </StatusBadge>
+                          </PortalDropdownItem>
+                        ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
-                  </div>
-                </AdminTableCell>
-              </AdminTableRow>
-            ))
-          )}
-        </AdminTableBody>
-      </AdminTable>
+                  </AdminTableCell>
+                  <AdminTableCell className="count-cell">{workflow.runCount}</AdminTableCell>
+                  <AdminTableCell className="count-cell">
+                    <span
+                      className={
+                        workflow.successRate >= 90
+                          ? 'text-success'
+                          : workflow.successRate >= 70
+                            ? 'text-warning'
+                            : 'text-danger'
+                      }
+                    >
+                      {workflow.successRate}%
+                    </span>
+                  </AdminTableCell>
+                  <AdminTableCell className="date-cell">
+                    {formatDate(workflow.updatedAt)}
+                  </AdminTableCell>
+                  <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                    <div className="table-actions">
+                      <IconButton
+                        action="edit"
+                        title="Configure"
+                        onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
+                      />
+                      <PortalDropdown>
+                        <PortalDropdownTrigger asChild>
+                          <button className="icon-btn">
+                            <MoreHorizontal />
+                          </button>
+                        </PortalDropdownTrigger>
+                        <PortalDropdownContent>
+                          <PortalDropdownItem>
+                            <Copy className="dropdown-icon" />
+                            Duplicate
+                          </PortalDropdownItem>
+                          <PortalDropdownItem className="text-danger">
+                            <Trash2 className="dropdown-icon" />
+                            Delete
+                          </PortalDropdownItem>
+                        </PortalDropdownContent>
+                      </PortalDropdown>
+                    </div>
+                  </AdminTableCell>
+                </AdminTableRow>
+              ))
+            )}
+          </AdminTableBody>
+        </AdminTable>
       )}
     </TableLayout>
   );

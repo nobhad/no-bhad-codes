@@ -66,8 +66,7 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
     <button
       type="button"
       onClick={onClick}
-      className={cn('tw-list-item', isSelected && 'tw-table-row-selected')}
-      style={{ borderBottom: '1px solid var(--portal-border-subtle)' }}
+      className={cn('tw-list-item msg-thread-item', isSelected && 'tw-table-row-selected')}
     >
       {/* Icon */}
       <div className={hasUnread ? 'tw-text-primary' : 'tw-text-muted'}>
@@ -75,25 +74,25 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-          <span className="tw-text-primary" style={{ fontSize: '14px' }}>{thread.subject}</span>
-          <span className="tw-text-muted" style={{ fontSize: '11px', flexShrink: 0 }}>
+      <div className="msg-thread-content">
+        <div className="msg-thread-row">
+          <span className="tw-text-primary proj-text-base">{thread.subject}</span>
+          <span className="tw-text-muted proj-text-xs msg-time-noshrink">
             {formatThreadTime(thread.last_message_at)}
           </span>
         </div>
 
         {thread.project_name && (
-          <span className="tw-text-muted" style={{ fontSize: '11px' }}>{thread.project_name}</span>
+          <span className="tw-text-muted proj-text-xs">{thread.project_name}</span>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginTop: '0.125rem' }}>
-          <span className={hasUnread ? 'tw-text-primary' : 'tw-text-muted'} style={{ fontSize: '12px' }}>
+        <div className="msg-thread-preview-row">
+          <span className={cn(hasUnread ? 'tw-text-primary' : 'tw-text-muted', 'proj-text-sm')}>
             {truncatePreview(thread.last_message_preview)}
           </span>
 
           {hasUnread && (
-            <span className="tw-badge" style={{ fontSize: '11px' }}>
+            <span className="tw-badge proj-text-xs">
               {thread.unread_count > UNREAD_BADGE_MAX ? `${UNREAD_BADGE_MAX}+` : thread.unread_count}
             </span>
           )}
@@ -151,7 +150,7 @@ function ThreadList({
       <div ref={containerRef} className="tw-empty-state">
         <Inbox className="tw-h-6 tw-w-6" />
         <p>No messages yet</p>
-        <p style={{ fontSize: '12px' }}>New conversations will appear here</p>
+        <p className="proj-text-sm">New conversations will appear here</p>
       </div>
     );
   }
@@ -159,7 +158,7 @@ function ThreadList({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header with refresh */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="tw-divider">
+      <div className="tw-divider msg-header-flex">
         <h3 className="tw-section-title">Messages</h3>
         <button className="tw-btn-icon" onClick={onRefresh} title="Refresh">
           <RefreshCw className={cn('tw-h-4 tw-w-4', loading && 'tw-animate-spin')} />
@@ -167,7 +166,7 @@ function ThreadList({
       </div>
 
       {/* Thread list */}
-      <div ref={listRef} className="tw-section" style={{ gap: 0 }}>
+      <div ref={listRef} className="tw-section msg-thread-list">
         {threads.map((thread) => (
           <ThreadListItem
             key={thread.id}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
 
 interface KPI {
   id: string;
@@ -52,9 +53,11 @@ interface AnalyticsData {
 
 interface AnalyticsDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
+export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification }: AnalyticsDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,16 +69,27 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
     'overview'
   );
 
-  useEffect(() => {
-    loadAnalytics();
-  }, [dateRange]);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadAnalytics() {
+  const loadAnalytics = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/analytics?range=${dateRange}`);
+      const response = await fetch(`/api/admin/analytics?range=${dateRange}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load analytics');
 
       const analyticsData = await response.json();
@@ -85,7 +99,11 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [dateRange, getHeaders]);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
 
   const kpis: KPI[] = data
     ? [
@@ -163,7 +181,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="perf-header">
         {/* Subtabs */}
         <div className="tw-tab-list">
           {subtabs.map((tab) => (
@@ -178,7 +196,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="perf-controls">
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value as typeof dateRange)}
@@ -192,12 +210,12 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
           </select>
 
           <button className="tw-btn-secondary" onClick={loadAnalytics} disabled={isLoading}>
-            <RefreshCw style={{ width: '1rem', height: '1rem', animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+            <RefreshCw className={cn('status-panel-refresh-icon', isLoading && 'status-panel-refresh-icon-spin')} />
             Refresh
           </button>
 
           <button className="tw-btn-secondary">
-            <Download style={{ width: '1rem', height: '1rem' }} />
+            <Download className="analytics-action-icon" />
             Export
           </button>
         </div>
@@ -207,7 +225,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
       {error && (
         <div className="tw-error">
           {error}
-          <button className="tw-btn-secondary" onClick={loadAnalytics} style={{ marginLeft: '1rem' }}>
+          <button className="tw-btn-secondary status-retry-btn" onClick={loadAnalytics}>
             Retry
           </button>
         </div>
@@ -219,20 +237,20 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
       ) : (
         <>
           {/* KPIs Grid */}
-          <div className="tw-grid-stats" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
+          <div className="tw-grid-stats tw-grid-6-cols">
             {kpis.map((kpi) => (
               <div key={kpi.id} className="tw-stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="perf-kpi-header">
                   <span style={{ color: kpi.color }}>{kpi.icon}</span>
                   <span className="tw-stat-label">{kpi.label}</span>
                 </div>
                 <div className="tw-stat-value">{kpi.value}</div>
                 {kpi.change !== undefined && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', fontSize: '11px' }}>
+                  <div className="perf-kpi-trend">
                     {kpi.change >= 0 ? (
-                      <TrendingUp style={{ width: '0.75rem', height: '0.75rem' }} />
+                      <TrendingUp className="perf-trend-icon" />
                     ) : (
-                      <TrendingDown style={{ width: '0.75rem', height: '0.75rem' }} />
+                      <TrendingDown className="perf-trend-icon" />
                     )}
                     <span className="tw-text-muted">
                       {kpi.change >= 0 ? '+' : ''}
@@ -245,49 +263,49 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
           </div>
 
           {/* Charts */}
-          <div className="tw-grid-cards" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="tw-grid-cards tw-grid-2-cols">
             {/* Revenue Chart */}
-            <div className="tw-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div className="tw-card perf-card">
+              <div className="perf-card-header">
                 <h3 className="tw-section-title">Revenue Over Time</h3>
-                <LineChart style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+                <LineChart className="perf-card-icon" />
               </div>
-              <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="analytics-chart-empty tw-flex tw-items-center tw-justify-center">
                 <ChartPlaceholder data={data?.revenueChart} type="line" />
               </div>
             </div>
 
             {/* Projects Chart */}
-            <div className="tw-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div className="tw-card perf-card">
+              <div className="perf-card-header">
                 <h3 className="tw-section-title">Projects by Status</h3>
-                <PieChart style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+                <PieChart className="perf-card-icon" />
               </div>
-              <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="analytics-chart-empty tw-flex tw-items-center tw-justify-center">
                 <ChartPlaceholder data={data?.projectsChart} type="pie" />
               </div>
             </div>
 
             {/* Leads Chart */}
-            <div className="tw-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div className="tw-card perf-card">
+              <div className="perf-card-header">
                 <h3 className="tw-section-title">Lead Funnel</h3>
-                <BarChart3 style={{ width: '1rem', height: '1rem', color: 'var(--portal-text-muted)' }} />
+                <BarChart3 className="perf-card-icon" />
               </div>
-              <div style={{ height: '16rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="analytics-chart-empty tw-flex tw-items-center tw-justify-center">
                 <ChartPlaceholder data={data?.leadsChart} type="bar" />
               </div>
             </div>
 
             {/* Source Breakdown */}
-            <div className="tw-card" style={{ padding: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div className="tw-card perf-card">
+              <div className="perf-card-header">
                 <h3 className="tw-section-title">Lead Sources</h3>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="perf-projects-list">
                 {data?.sourceBreakdown?.map((source, index) => (
                   <div key={source.source}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '14px', marginBottom: '0.25rem' }}>
+                    <div className="perf-kpi-trend-row">
                       <span>{source.source}</span>
                       <span className="tw-text-muted">
                         {source.count} ({source.percentage}%)
@@ -301,7 +319,7 @@ export function AnalyticsDashboard({ onNavigate }: AnalyticsDashboardProps) {
                     </div>
                   </div>
                 )) || (
-                  <div className="tw-empty-state" style={{ padding: '2rem 0' }}>
+                  <div className="tw-empty-state tw-py-8">
                     No data available
                   </div>
                 )}
@@ -324,10 +342,10 @@ function ChartPlaceholder({
   // Placeholder for chart visualization
   // In production, you would use Chart.js or similar
   return (
-    <div className="tw-empty-state" style={{ padding: 0 }}>
-      <BarChart3 style={{ width: '3rem', height: '3rem', opacity: 0.3 }} />
+    <div className="tw-empty-state tw-p-0">
+      <BarChart3 className="analytics-chart-icon" />
       <p>Chart visualization</p>
-      <p className="tw-text-muted" style={{ fontSize: '11px' }}>
+      <p className="tw-text-muted analytics-chart-hint">
         {data?.labels?.length || 0} data points
       </p>
     </div>
@@ -336,25 +354,12 @@ function ChartPlaceholder({
 
 function AnalyticsSkeleton() {
   return (
-    <div className="tw-loading" style={{ flexDirection: 'column', padding: '4rem 0' }}>
-      <div style={{ opacity: 0.3 }}>Loading analytics data...</div>
+    <div className="tw-loading tw-flex-col tw-py-16">
+      <div className="tw-opacity-30">Loading analytics data...</div>
     </div>
   );
 }
 
-function formatCurrency(amount: number): string {
-  if (amount >= 1000000) {
-    return `$${(amount / 1000000).toFixed(1)}M`;
-  }
-  if (amount >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}K`;
-  }
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(amount);
-}
 
 function getSourceColor(index: number): string {
   const colors = [

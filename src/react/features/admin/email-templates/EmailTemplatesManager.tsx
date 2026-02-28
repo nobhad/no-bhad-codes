@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   Mail,
@@ -18,7 +18,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDate } from '@react/utils/formatDate';
 import { PortalButton } from '@react/components/portal/PortalButton';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { StatusBadge } from '@react/components/portal/StatusBadge';
 import {
   AdminTable,
   AdminTableHeader,
@@ -37,40 +37,47 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
+
+interface TemplateVariable {
+  name: string;
+  description: string;
+}
 
 interface EmailTemplate {
-  id: string;
+  id: number;
   name: string;
-  subject: string;
+  description?: string | null;
   category: string;
-  status: 'active' | 'draft' | 'archived';
-  usageCount: number;
-  lastUsed?: string;
-  variables: string[];
-  createdAt: string;
-  updatedAt: string;
+  subject: string;
+  body_html: string;
+  body_text?: string | null;
+  variables: TemplateVariable[];
+  is_active: boolean;
+  is_system: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CategoryOption {
+  value: string;
+  label: string;
 }
 
 interface EmailTemplateStats {
   total: number;
   active: number;
-  draft: number;
-  totalSent: number;
-  categories: string[];
+  categories: CategoryOption[];
 }
 
 interface EmailTemplatesManagerProps {
   onNavigate?: (tab: string, entityId?: string) => void;
+  getAuthToken?: () => string | null;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'active', label: 'Active' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'archived', label: 'Archived' },
-];
 
-export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps) {
+export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotification }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,8 +85,6 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
   const [stats, setStats] = useState<EmailTemplateStats>({
     total: 0,
     active: 0,
-    draft: 0,
-    totalSent: 0,
     categories: [],
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,31 +92,47 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
 
-  useEffect(() => {
-    loadTemplates();
-  }, []);
+  // Auth headers helper
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
 
-  async function loadTemplates() {
+  const loadTemplates = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/email-templates');
+      const response = await fetch('/api/admin/email-templates', {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to load templates');
       const data = await response.json();
-      setTemplates(data.templates || []);
-      setStats(data.stats || stats);
+      const payload = data.data || data;
+      setTemplates(payload.templates || []);
+      setStats(payload.stats || stats);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load templates');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders, stats]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   // Build category filter options dynamically from stats
   const categoryFilterOptions = useMemo(() => {
     return [
       { value: 'all', label: 'All Categories' },
-      ...stats.categories.map(cat => ({ value: cat, label: cat })),
+      ...stats.categories.map(cat => ({ value: cat.value, label: cat.label })),
     ];
   }, [stats.categories]);
 
@@ -129,7 +150,8 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
       result = result.filter((t) => t.category === categoryFilter);
     }
     if (statusFilter !== 'all') {
-      result = result.filter((t) => t.status === statusFilter);
+      const isActive = statusFilter === 'active';
+      result = result.filter((t) => t.is_active === isActive);
     }
     if (sort) {
       result.sort((a, b) => {
@@ -137,8 +159,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
         let bVal: string | number = '';
         switch (sort.column) {
           case 'name': aVal = a.name; bVal = b.name; break;
-          case 'usageCount': aVal = a.usageCount; bVal = b.usageCount; break;
-          case 'updatedAt': aVal = a.updatedAt; bVal = b.updatedAt; break;
+          case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
         }
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
@@ -182,10 +203,9 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
           items={[
             { value: stats.total, label: 'total' },
             { value: stats.active, label: 'active', variant: 'completed', hideIfZero: true },
-            { value: stats.draft, label: 'draft', variant: 'pending', hideIfZero: true },
-            { value: stats.totalSent, label: 'sent' },
+            { value: stats.total - stats.active, label: 'inactive', variant: 'pending', hideIfZero: true },
           ]}
-          tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.draft} Draft • ${stats.totalSent} Emails Sent`}
+          tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.total - stats.active} Inactive`}
         />
       }
       actions={
@@ -198,7 +218,7 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
           <FilterDropdown
             sections={[
               { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
+              { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS },
             ]}
             values={{ category: categoryFilter, status: statusFilter }}
             onChange={handleFilterChange}
@@ -250,18 +270,10 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
             <AdminTableHead>Category</AdminTableHead>
             <AdminTableHead>Status</AdminTableHead>
             <AdminTableHead
-              className="text-right"
-              sortable
-              sortDirection={sort?.column === 'usageCount' ? sort.direction : null}
-              onClick={() => toggleSort('usageCount')}
-            >
-              Used
-            </AdminTableHead>
-            <AdminTableHead
               className="date-col"
               sortable
-              sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
-              onClick={() => toggleSort('updatedAt')}
+              sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
+              onClick={() => toggleSort('updated_at')}
             >
               Updated
             </AdminTableHead>
@@ -271,10 +283,10 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
 
         <AdminTableBody animate={!isLoading}>
           {isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <AdminTableLoading colSpan={6} rows={5} />
           ) : paginatedTemplates.length === 0 ? (
             <AdminTableEmpty
-              colSpan={7}
+              colSpan={6}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No templates match your filters' : 'No templates yet'}
             />
@@ -304,17 +316,18 @@ export function EmailTemplatesManager({ onNavigate }: EmailTemplatesManagerProps
                   </div>
                 </AdminTableCell>
                 <AdminTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(template.status)} size="sm">
-                    {template.status}
+                  <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
+                    {template.is_active ? 'Active' : 'Inactive'}
                   </StatusBadge>
                 </AdminTableCell>
-                <AdminTableCell className="text-right">{template.usageCount}</AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(template.updatedAt)}</AdminTableCell>
+                <AdminTableCell className="date-cell">{formatDate(template.updated_at)}</AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <IconButton action="more-horizontal" />
+                        <button className="icon-btn">
+                          <MoreHorizontal />
+                        </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent>
                         <PortalDropdownItem>

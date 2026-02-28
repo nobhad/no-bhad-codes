@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   FileText,
@@ -10,11 +10,14 @@ import {
   Download,
   Eye,
   Send,
+  ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
@@ -28,22 +31,36 @@ import {
   AdminTableEmpty,
   AdminTableLoading,
 } from '@react/components/portal/AdminTable';
+import {
+  PortalDropdown,
+  PortalDropdownTrigger,
+  PortalDropdownContent,
+  PortalDropdownItem,
+} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useSelection } from '@react/hooks/useSelection';
+import { CONTRACTS_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 
 interface Contract {
-  id: string;
-  title: string;
-  clientId: string;
-  clientName: string;
-  projectId?: string;
+  id: number;
+  templateId?: number | null;
+  templateName?: string;
+  templateType?: string | null;
+  projectId: number;
   projectName?: string;
+  clientId: number;
+  clientName?: string;
+  clientEmail?: string;
   status: 'draft' | 'sent' | 'viewed' | 'signed' | 'expired' | 'cancelled';
-  amount?: number;
+  content?: string;
+  sentAt?: string | null;
+  signedAt?: string | null;
+  expiresAt?: string | null;
   createdAt: string;
-  sentAt?: string;
-  signedAt?: string;
-  expiresAt?: string;
+  updatedAt: string;
 }
 
 interface ContractStats {
@@ -63,22 +80,68 @@ const CONTRACT_STATUS_CONFIG: Record<string, { label: string; icon: React.ReactN
   cancelled: { label: 'Cancelled', icon: <XCircle /> },
 };
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'viewed', label: 'Viewed' },
-  { value: 'signed', label: 'Signed' },
-  { value: 'expired', label: 'Expired' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
-
 interface ContractsTableProps {
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-export function ContractsTable({ onNavigate }: ContractsTableProps) {
+// Filter function
+function filterContract(
+  contract: Contract,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const searchLower = search.toLowerCase();
+    const matchesSearch =
+      (contract.templateName?.toLowerCase().includes(searchLower) || false) ||
+      (contract.clientName?.toLowerCase().includes(searchLower) || false) ||
+      (contract.clientEmail?.toLowerCase().includes(searchLower) || false) ||
+      (contract.projectName?.toLowerCase().includes(searchLower) || false);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (contract.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+// Sort function
+function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+    case 'title':
+      return multiplier * (a.templateName || '').localeCompare(b.templateName || '');
+    case 'client':
+      return multiplier * (a.clientName || '').localeCompare(b.clientName || '');
+    case 'createdAt':
+      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    default:
+      return 0;
+  }
+}
+
+export function ContractsTable({ getAuthToken, showNotification, onNavigate }: ContractsTableProps) {
   const containerRef = useFadeIn();
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -90,28 +153,61 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
     expired: 0,
   });
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  // Filtering and sorting
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Contract>({
+    storageKey: 'admin_contracts',
+    filters: CONTRACTS_FILTER_CONFIG,
+    filterFn: filterContract,
+    sortFn: sortContracts,
+    defaultSort: { column: 'createdAt', direction: 'desc' }
+  });
 
-  // Sorting
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+  // Apply filters
+  const filteredContracts = useMemo(() => applyFilters(contracts), [applyFilters, contracts]);
 
-  useEffect(() => {
-    loadContracts();
-  }, []);
+  // Pagination
+  const pagination = usePagination({
+    storageKey: 'admin_contracts_pagination',
+    totalItems: filteredContracts.length,
+    defaultPageSize: 25
+  });
 
-  async function loadContracts() {
+  const paginatedContracts = useMemo(
+    () => pagination.paginate(filteredContracts),
+    [pagination, filteredContracts]
+  );
+
+  // Selection for bulk actions
+  const selection = useSelection({
+    getId: (contract: Contract) => contract.id,
+    items: paginatedContracts
+  });
+
+  const loadContracts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/contracts');
+      const response = await fetch('/api/contracts', {
+        method: 'GET',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to load contracts');
 
       const data = await response.json();
-      setContracts(data.contracts || []);
-      setStats(data.stats || {
+      const payload = data.data || data;
+      setContracts(payload.contracts || []);
+      setStats(payload.stats || {
         total: 0,
         draft: 0,
         pending: 0,
@@ -123,81 +219,44 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [getHeaders]);
 
-  // Filter and sort contracts
-  const filteredContracts = useMemo(() => {
-    let result = [...contracts];
+  useEffect(() => {
+    loadContracts();
+  }, [loadContracts]);
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (contract) =>
-          contract.title.toLowerCase().includes(query) ||
-          contract.clientName.toLowerCase().includes(query) ||
-          contract.projectName?.toLowerCase().includes(query)
-      );
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      result = result.filter((contract) => contract.status === statusFilter);
-    }
-
-    // Sort
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-
-        switch (sort.column) {
-          case 'title':
-            aVal = a.title;
-            bVal = b.title;
-            break;
-          case 'client':
-            aVal = a.clientName;
-            bVal = b.clientName;
-            break;
-          case 'amount':
-            aVal = a.amount || 0;
-            bVal = b.amount || 0;
-            break;
-          case 'createdAt':
-            aVal = a.createdAt;
-            bVal = b.createdAt;
-            break;
-        }
-
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return result;
-  }, [contracts, searchQuery, statusFilter, sort]);
-
-  const pagination = usePagination({ totalItems: filteredContracts.length });
-  const paginatedContracts = filteredContracts.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize
-  );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  async function handleSendContract(contractId: string) {
+  // Status change handler
+  const handleStatusChange = useCallback(async (contractId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/admin/contracts/${contractId}/send`, {
+      const response = await fetch(`/api/contracts/${contractId}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update contract');
+
+      setContracts((prev) =>
+        prev.map((contract) =>
+          contract.id === contractId
+            ? { ...contract, status: newStatus as Contract['status'] }
+            : contract
+        )
+      );
+      showNotification?.('Contract status updated', 'success');
+    } catch (err) {
+      console.error('Failed to update contract status:', err);
+      showNotification?.('Failed to update contract status', 'error');
+    }
+  }, [getHeaders, showNotification]);
+
+  const handleSendContract = useCallback(async (contractId: number) => {
+    try {
+      const response = await fetch(`/api/contracts/${contractId}/send`, {
         method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to send contract');
@@ -209,12 +268,68 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
             : contract
         )
       );
+      showNotification?.('Contract sent', 'success');
     } catch (err) {
       console.error('Failed to send contract:', err);
+      showNotification?.('Failed to send contract', 'error');
     }
-  }
+  }, [getHeaders, showNotification]);
 
-  const hasActiveFilters = searchQuery || statusFilter !== 'all';
+  // Bulk delete handler
+  const handleBulkDelete = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
+
+    const ids = selection.selectedItems.map((c) => c.id);
+    try {
+      const response = await fetch('/api/contracts/bulk-delete', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete contracts');
+
+      setContracts((prev) => prev.filter((c) => !ids.includes(c.id)));
+      selection.clearSelection();
+      showNotification?.(`Deleted ${ids.length} contract${ids.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to delete contracts:', err);
+      showNotification?.('Failed to delete contracts', 'error');
+    }
+  }, [selection, getHeaders, showNotification]);
+
+  // Status options for bulk actions
+  const bulkStatusOptions = useMemo(
+    () =>
+      Object.entries(CONTRACT_STATUS_CONFIG).map(([value, config]) => ({
+        value,
+        label: config.label,
+        color: `var(--status-${value})`
+      })),
+    []
+  );
+
+  // Handle bulk status change
+  const handleBulkStatusChange = useCallback(
+    async (newStatus: string) => {
+      if (selection.selectedCount === 0) return;
+
+      for (const contract of selection.selectedItems) {
+        await handleStatusChange(contract.id, newStatus);
+      }
+      selection.clearSelection();
+    },
+    [selection, handleStatusChange]
+  );
+
+  // Handle filter change
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => {
+      setFilter(key, value);
+    },
+    [setFilter]
+  );
 
   return (
     <TableLayout
@@ -235,20 +350,34 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search contracts..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
-            ]}
-            values={{ status: statusFilter }}
-            onChange={(key, value) => setStatusFilter(value)}
+            sections={CONTRACTS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={handleFilterChange}
           />
-          <IconButton action="download" title="Export" />
+          <IconButton
+            action="download"
+            disabled={filteredContracts.length === 0}
+            title="Export to CSV"
+          />
           <IconButton action="add" title="New Contract" />
         </>
+      }
+      bulkActions={
+        <BulkActionsToolbar
+          selectedCount={selection.selectedCount}
+          totalCount={filteredContracts.length}
+          onClearSelection={selection.clearSelection}
+          onSelectAll={() => selection.selectMany(filteredContracts)}
+          allSelected={selection.allSelected && selection.selectedCount === filteredContracts.length}
+          statusOptions={bulkStatusOptions}
+          onStatusChange={handleBulkStatusChange}
+          onDelete={handleBulkDelete}
+        />
       }
       error={
         error ? (
@@ -282,7 +411,15 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
+            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={selection.allSelected}
+                onCheckedChange={selection.toggleSelectAll}
+                aria-label="Select all"
+              />
+            </AdminTableHead>
             <AdminTableHead
+              className="contract-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
@@ -290,22 +427,18 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
               Contract
             </AdminTableHead>
             <AdminTableHead
+              className="client-col"
               sortable
               sortDirection={sort?.column === 'client' ? sort.direction : null}
               onClick={() => toggleSort('client')}
             >
               Client
             </AdminTableHead>
-            <AdminTableHead>Project</AdminTableHead>
-            <AdminTableHead
-              className="text-right"
-              sortable
-              sortDirection={sort?.column === 'amount' ? sort.direction : null}
-              onClick={() => toggleSort('amount')}
-            >
-              Amount
+            <AdminTableHead className="project-col">Project</AdminTableHead>
+            <AdminTableHead className="email-col">
+              Email
             </AdminTableHead>
-            <AdminTableHead>Status</AdminTableHead>
+            <AdminTableHead className="status-col">Status</AdminTableHead>
             <AdminTableHead
               className="date-col"
               sortable
@@ -320,41 +453,55 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
 
         <AdminTableBody animate={!isLoading}>
           {isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <AdminTableLoading colSpan={8} rows={5} />
           ) : paginatedContracts.length === 0 ? (
             <AdminTableEmpty
-              colSpan={7}
+              colSpan={8}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No contracts match your filters' : 'No contracts yet'}
             />
           ) : (
             paginatedContracts.map((contract) => (
-              <AdminTableRow key={contract.id} clickable>
-                <AdminTableCell className="primary-cell">
+              <AdminTableRow
+                key={contract.id}
+                clickable
+                selected={selection.isSelected(contract)}
+              >
+                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selection.isSelected(contract)}
+                    onCheckedChange={() => selection.toggleSelection(contract)}
+                    aria-label={`Select ${contract.templateName || 'Contract ' + contract.id}`}
+                  />
+                </AdminTableCell>
+                <AdminTableCell className="contract-cell">
                   <div className="cell-with-icon">
                     <FileText className="cell-icon" />
                     <div className="cell-content">
-                      <span className="cell-title">{contract.title}</span>
+                      <span className="cell-title">{contract.templateName || `Contract #${contract.id}`}</span>
+                      {contract.templateType && (
+                        <span className="cell-subtitle">{contract.templateType}</span>
+                      )}
                     </div>
                   </div>
                 </AdminTableCell>
-                <AdminTableCell>
+                <AdminTableCell className="client-cell">
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
-                      onNavigate?.('clients', contract.clientId);
+                      onNavigate?.('clients', String(contract.clientId));
                     }}
                     className="table-link"
                   >
                     {contract.clientName}
                   </span>
                 </AdminTableCell>
-                <AdminTableCell>
+                <AdminTableCell className="project-cell">
                   {contract.projectName ? (
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
-                        onNavigate?.('projects', contract.projectId);
+                        onNavigate?.('projects', String(contract.projectId));
                       }}
                       className="table-link"
                     >
@@ -364,13 +511,32 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
                     <span className="text-muted">-</span>
                   )}
                 </AdminTableCell>
-                <AdminTableCell className="text-right">
-                  {contract.amount ? formatCurrency(contract.amount) : '-'}
+                <AdminTableCell className="email-cell">
+                  {contract.clientEmail || '-'}
                 </AdminTableCell>
-                <AdminTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(contract.status)} size="sm">
-                    {CONTRACT_STATUS_CONFIG[contract.status]?.label || contract.status}
-                  </StatusBadge>
+                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalDropdown>
+                    <PortalDropdownTrigger asChild>
+                      <button className="status-dropdown-trigger">
+                        <StatusBadge status={getStatusVariant(contract.status)} size="sm">
+                          {CONTRACT_STATUS_CONFIG[contract.status]?.label || contract.status}
+                        </StatusBadge>
+                        <ChevronDown className="status-dropdown-caret" />
+                      </button>
+                    </PortalDropdownTrigger>
+                    <PortalDropdownContent sideOffset={0} align="start">
+                      {Object.entries(CONTRACT_STATUS_CONFIG).map(([status, config]) => (
+                        <PortalDropdownItem
+                          key={status}
+                          onClick={() => handleStatusChange(contract.id, status)}
+                        >
+                          <StatusBadge status={getStatusVariant(status)} size="sm">
+                            {config.label}
+                          </StatusBadge>
+                        </PortalDropdownItem>
+                      ))}
+                    </PortalDropdownContent>
+                  </PortalDropdown>
                 </AdminTableCell>
                 <AdminTableCell className="date-cell">{formatDate(contract.createdAt)}</AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
@@ -394,14 +560,6 @@ export function ContractsTable({ onNavigate }: ContractsTableProps) {
       )}
     </TableLayout>
   );
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(amount);
 }
 
 export default ContractsTable;

@@ -260,17 +260,16 @@ export function PortalAdHocRequests({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+      <div className="adhoc-header">
         <div>
           <h2 className="tw-heading">Ad-Hoc Requests</h2>
-          <p className="tw-text-muted" style={{ fontSize: '11px', marginTop: '0.125rem' }}>
+          <p className="tw-text-muted adhoc-desc">
             Submit requests for additional work outside your current project scope
           </p>
         </div>
         <button
-          className="tw-btn-primary"
+          className="tw-btn-primary adhoc-btn"
           onClick={() => setIsModalOpen(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
         >
           <Plus className="tw-h-3.5 tw-w-3.5" />
           New Request
@@ -282,7 +281,7 @@ export function PortalAdHocRequests({
         <div className="tw-empty-state">
           <Inbox className="tw-h-6 tw-w-6" />
           <p>No requests yet</p>
-          <p style={{ fontSize: '12px' }}>Click "New Request" to submit your first ad-hoc request</p>
+          <p className="proj-text-sm">Click "New Request" to submit your first ad-hoc request</p>
         </div>
       ) : (
         <div ref={listRef} className="tw-section">
@@ -300,24 +299,16 @@ export function PortalAdHocRequests({
       {/* New Request Modal */}
       {isModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 50,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'var(--portal-bg-overlay)'
-          }}
+          className="adhoc-modal-backdrop"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsModalOpen(false);
           }}
         >
-          <div className="tw-panel" style={{ width: '100%', maxWidth: '480px', maxHeight: '90vh', overflow: 'auto' }}>
-            <div className="tw-divider" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="tw-panel adhoc-modal-content">
+            <div className="tw-divider adhoc-modal-header">
               <div>
                 <h3 className="tw-heading">New Ad-Hoc Request</h3>
-                <p className="tw-text-muted" style={{ fontSize: '11px', marginTop: '0.125rem' }}>
+                <p className="tw-text-muted adhoc-desc">
                   Describe what you need and we'll provide a quote
                 </p>
               </div>

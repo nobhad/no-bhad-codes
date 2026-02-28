@@ -12,6 +12,26 @@ import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import type { PortalProject, PortalProjectStatus } from '../types';
 
+/**
+ * Transform API response to PortalProject interface
+ * Maps project_name to name for compatibility
+ */
+function transformProject(apiProject: Record<string, unknown>): PortalProject {
+  return {
+    id: apiProject.id as number,
+    name: (apiProject.name || apiProject.project_name || 'Untitled Project') as string,
+    description: apiProject.description as string | undefined,
+    status: (apiProject.status || 'pending') as PortalProjectStatus,
+    progress: (apiProject.progress || 0) as number,
+    start_date: apiProject.start_date as string | undefined,
+    end_date: (apiProject.end_date || apiProject.estimated_end_date) as string | undefined,
+    preview_url: apiProject.preview_url as string | undefined,
+    client_id: apiProject.client_id as number | undefined,
+    created_at: apiProject.created_at as string | undefined,
+    updated_at: apiProject.updated_at as string | undefined,
+  };
+}
+
 interface PortalProjectsListProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
@@ -48,8 +68,22 @@ export function PortalProjectsList({
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
+  // AbortController ref for cleanup on unmount
+  const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
   // Fetch projects from API
   const fetchProjects = React.useCallback(async () => {
+    // Abort any in-flight request
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+
     setIsLoading(true);
     setError(null);
 
@@ -67,6 +101,7 @@ export function PortalProjectsList({
         method: 'GET',
         headers,
         credentials: 'include',
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -75,18 +110,27 @@ export function PortalProjectsList({
 
       const data = await response.json();
 
-      // Handle various response formats
+      // Handle various response formats and transform to PortalProject interface
+      let rawProjects: Record<string, unknown>[] = [];
+
       if (data.projects && Array.isArray(data.projects)) {
-        setProjects(data.projects);
+        rawProjects = data.projects;
       } else if (data.success && data.data) {
-        const projectsArray = Array.isArray(data.data) ? data.data : (data.data.projects || []);
-        setProjects(projectsArray);
+        rawProjects = Array.isArray(data.data) ? data.data : (data.data.projects || []);
       } else if (Array.isArray(data)) {
-        setProjects(data);
+        rawProjects = data;
       } else {
         throw new Error(data.error || 'Failed to load projects');
       }
+
+      // Transform API response to match PortalProject interface (maps project_name to name)
+      const transformedProjects = rawProjects.map(transformProject);
+      setProjects(transformedProjects);
     } catch (err) {
+      // Don't set error state if request was aborted (component unmounted)
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
       console.error('[PortalProjectsList] Error:', message);
@@ -198,14 +242,14 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
   return (
     <div onClick={onClick} className="tw-card-hover">
       {/* Header: Name and Status */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
+      <div className="projlist-header">
+        <div className="projlist-name-wrap">
           <FolderOpen className="tw-h-4 tw-w-4 tw-text-muted" />
-          <span className="tw-text-primary" style={{ fontSize: '14px', fontWeight: 400 }}>
+          <span className="tw-text-primary projlist-name">
             {project.name}
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+        <div className="projlist-status-wrap">
           <span className="tw-badge">{statusLabel}</span>
           <ChevronRight className="tw-h-4 tw-w-4 tw-text-muted" />
         </div>
@@ -213,16 +257,16 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
 
       {/* Description */}
       {project.description && (
-        <p className="tw-text-muted" style={{ fontSize: '12px', marginBottom: '0.5rem' }}>
+        <p className="tw-text-muted projlist-desc">
           {project.description}
         </p>
       )}
 
       {/* Progress Bar */}
-      <div style={{ marginBottom: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+      <div className="projlist-progress">
+        <div className="projlist-progress-header">
           <span className="tw-label">Progress</span>
-          <span className="tw-text-primary" style={{ fontSize: '12px' }}>{project.progress}%</span>
+          <span className="tw-text-primary proj-text-sm">{project.progress}%</span>
         </div>
         <div className="tw-progress-track">
           <div
@@ -233,8 +277,8 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
       </div>
 
       {/* Footer: Date and Preview */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span className="tw-text-muted" style={{ fontSize: '11px' }}>
+      <div className="projlist-footer">
+        <span className="tw-text-muted proj-text-xs">
           {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
         </span>
         {project.preview_url && (

@@ -1,14 +1,17 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   ClipboardList,
   Inbox,
+  ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
@@ -21,11 +24,22 @@ import {
   AdminTableEmpty,
   AdminTableLoading,
 } from '@react/components/portal/AdminTable';
+import {
+  PortalDropdown,
+  PortalDropdownTrigger,
+  PortalDropdownContent,
+  PortalDropdownItem,
+} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useSelection } from '@react/hooks/useSelection';
+import { formatDate } from '@react/utils/formatDate';
+import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 
 interface Questionnaire {
-  id: string;
+  id: number;
   title: string;
   description: string;
   client_name: string;
@@ -43,36 +57,124 @@ interface Questionnaire {
 interface QuestionnairesTableProps {
   clientId?: string;
   projectId?: string;
+  /** Auth token getter for API calls */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-type SortField = 'title' | 'client_name' | 'status' | 'due_date' | 'completion_rate' | 'created_at';
-type SortDirection = 'asc' | 'desc';
+const QUESTIONNAIRE_STATUS_CONFIG: Record<string, { label: string }> = {
+  draft: { label: 'Draft' },
+  sent: { label: 'Sent' },
+  in_progress: { label: 'In Progress' },
+  completed: { label: 'Completed' },
+  expired: { label: 'Expired' },
+};
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'expired', label: 'Expired' },
-];
+// Filter function
+function filterQuestionnaire(
+  questionnaire: Questionnaire,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const searchLower = search.toLowerCase();
+    const matchesSearch =
+      questionnaire.title.toLowerCase().includes(searchLower) ||
+      questionnaire.client_name.toLowerCase().includes(searchLower) ||
+      (questionnaire.project_name && questionnaire.project_name.toLowerCase().includes(searchLower));
+    if (!matchesSearch) return false;
+  }
 
-export function QuestionnairesTable({ clientId, projectId, onNavigate }: QuestionnairesTableProps) {
+  if (filters.status && filters.status !== 'all') {
+    if (questionnaire.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+// Sort function
+function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+    case 'title':
+      return multiplier * a.title.localeCompare(b.title);
+    case 'client_name':
+      return multiplier * a.client_name.localeCompare(b.client_name);
+    case 'status':
+      return multiplier * a.status.localeCompare(b.status);
+    case 'due_date':
+      return multiplier * ((a.due_date || '').localeCompare(b.due_date || ''));
+    case 'completion_rate':
+      return multiplier * (a.completion_rate - b.completion_rate);
+    case 'created_at':
+      return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    default:
+      return 0;
+  }
+}
+
+export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification, onNavigate }: QuestionnairesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
+
+  // Build headers helper with auth token
+  const getHeaders = useCallback(() => {
+    const token = getAuthToken?.();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortField, setSortField] = useState<SortField>('created_at');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  useEffect(() => {
-    fetchQuestionnaires();
-  }, [clientId, projectId]);
+  // Filtering and sorting
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Questionnaire>({
+    storageKey: 'admin_questionnaires',
+    filters: QUESTIONNAIRES_FILTER_CONFIG,
+    filterFn: filterQuestionnaire,
+    sortFn: sortQuestionnaires,
+    defaultSort: { column: 'created_at', direction: 'desc' }
+  });
 
-  async function fetchQuestionnaires() {
+  // Apply filters
+  const filteredQuestionnaires = useMemo(() => applyFilters(questionnaires), [applyFilters, questionnaires]);
+
+  // Pagination
+  const pagination = usePagination({
+    storageKey: 'admin_questionnaires_pagination',
+    totalItems: filteredQuestionnaires.length,
+    defaultPageSize: 25
+  });
+
+  const paginatedQuestionnaires = useMemo(
+    () => pagination.paginate(filteredQuestionnaires),
+    [pagination, filteredQuestionnaires]
+  );
+
+  // Selection for bulk actions
+  const selection = useSelection({
+    getId: (q: Questionnaire) => q.id,
+    items: paginatedQuestionnaires
+  });
+
+  const fetchQuestionnaires = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -81,108 +183,124 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
       if (clientId) params.append('client_id', clientId);
       if (projectId) params.append('project_id', projectId);
 
-      const response = await fetch(`/api/admin/questionnaires?${params}`);
+      const response = await fetch(`/api/questionnaires?${params}`, {
+        method: 'GET',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch questionnaires');
 
       const data = await response.json();
-      setQuestionnaires(data.questionnaires || []);
+      const payload = data.data || data;
+      setQuestionnaires(payload.questionnaires || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [clientId, projectId, getHeaders]);
 
-  const filteredQuestionnaires = useMemo(() => {
-    let filtered = [...questionnaires];
+  useEffect(() => {
+    fetchQuestionnaires();
+  }, [fetchQuestionnaires]);
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (q) =>
-          q.title.toLowerCase().includes(query) ||
-          q.client_name.toLowerCase().includes(query) ||
-          (q.project_name && q.project_name.toLowerCase().includes(query))
+  // Status change handler
+  const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/questionnaires/${questionnaireId}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update questionnaire');
+
+      setQuestionnaires((prev) =>
+        prev.map((q) =>
+          q.id === questionnaireId
+            ? { ...q, status: newStatus as Questionnaire['status'] }
+            : q
+        )
       );
+      showNotification?.('Questionnaire status updated', 'success');
+    } catch (err) {
+      console.error('Failed to update questionnaire status:', err);
+      showNotification?.('Failed to update questionnaire status', 'error');
     }
+  }, [getHeaders, showNotification]);
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((q) => q.status === statusFilter);
+  const handleSendQuestionnaire = useCallback(async (id: number) => {
+    try {
+      const response = await fetch(`/api/questionnaires/${id}/send`, {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to send questionnaire');
+      fetchQuestionnaires();
+      showNotification?.('Questionnaire sent', 'success');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send questionnaire');
+      showNotification?.('Failed to send questionnaire', 'error');
     }
+  }, [getHeaders, showNotification, fetchQuestionnaires]);
 
-    filtered.sort((a, b) => {
-      let aVal: string | number = '';
-      let bVal: string | number = '';
+  // Bulk delete handler
+  const handleBulkDelete = useCallback(async () => {
+    if (selection.selectedCount === 0) return;
 
-      switch (sortField) {
-        case 'title':
-          aVal = a.title.toLowerCase();
-          bVal = b.title.toLowerCase();
-          break;
-        case 'client_name':
-          aVal = a.client_name.toLowerCase();
-          bVal = b.client_name.toLowerCase();
-          break;
-        case 'status':
-          aVal = a.status;
-          bVal = b.status;
-          break;
-        case 'due_date':
-          aVal = a.due_date || '';
-          bVal = b.due_date || '';
-          break;
-        case 'completion_rate':
-          aVal = a.completion_rate;
-          bVal = b.completion_rate;
-          break;
-        case 'created_at':
-          aVal = a.created_at;
-          bVal = b.created_at;
-          break;
-      }
+    const ids = selection.selectedItems.map((q) => q.id);
+    try {
+      const response = await fetch('/api/questionnaires/bulk-delete', {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      });
 
-      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
+      if (!response.ok) throw new Error('Failed to delete questionnaires');
 
-    return filtered;
-  }, [questionnaires, searchQuery, statusFilter, sortField, sortDirection]);
+      setQuestionnaires((prev) => prev.filter((q) => !ids.includes(q.id)));
+      selection.clearSelection();
+      showNotification?.(`Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      console.error('Failed to delete questionnaires:', err);
+      showNotification?.('Failed to delete questionnaires', 'error');
+    }
+  }, [selection, getHeaders, showNotification]);
 
-  const pagination = usePagination({ totalItems: filteredQuestionnaires.length });
-  const paginatedQuestionnaires = filteredQuestionnaires.slice(
-    (pagination.page - 1) * pagination.pageSize,
-    pagination.page * pagination.pageSize
+  // Status options for bulk actions
+  const bulkStatusOptions = useMemo(
+    () =>
+      Object.entries(QUESTIONNAIRE_STATUS_CONFIG).map(([value, config]) => ({
+        value,
+        label: config.label,
+        color: `var(--status-${value})`
+      })),
+    []
   );
 
-  function handleSort(field: SortField) {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  }
+  // Handle bulk status change
+  const handleBulkStatusChange = useCallback(
+    async (newStatus: string) => {
+      if (selection.selectedCount === 0) return;
 
-  function getStatusLabel(status: Questionnaire['status']): string {
-    const labels: Record<Questionnaire['status'], string> = {
-      draft: 'Draft',
-      sent: 'Sent',
-      in_progress: 'In Progress',
-      completed: 'Completed',
-      expired: 'Expired',
-    };
-    return labels[status];
-  }
+      for (const q of selection.selectedItems) {
+        await handleStatusChange(q.id, newStatus);
+      }
+      selection.clearSelection();
+    },
+    [selection, handleStatusChange]
+  );
 
-  function formatDate(dateString: string | null): string {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }
+  // Handle filter change
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => {
+      setFilter(key, value);
+    },
+    [setFilter]
+  );
 
   function isOverdue(questionnaire: Questionnaire): boolean {
     if (!questionnaire.due_date || questionnaire.status === 'completed') return false;
@@ -201,20 +319,6 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
 
     return { total, draft, sent, inProgress, completed, avgCompletion };
   }, [questionnaires]);
-
-  async function handleSendQuestionnaire(id: string) {
-    try {
-      const response = await fetch(`/api/admin/questionnaires/${id}/send`, {
-        method: 'POST',
-      });
-      if (!response.ok) throw new Error('Failed to send questionnaire');
-      fetchQuestionnaires();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send questionnaire');
-    }
-  }
-
-  const hasActiveFilters = searchQuery || statusFilter !== 'all';
 
   return (
     <TableLayout
@@ -235,19 +339,34 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search questionnaires..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
-            ]}
-            values={{ status: statusFilter }}
-            onChange={(key, value) => setStatusFilter(value)}
+            sections={QUESTIONNAIRES_FILTER_CONFIG}
+            values={filterValues}
+            onChange={handleFilterChange}
+          />
+          <IconButton
+            action="download"
+            disabled={filteredQuestionnaires.length === 0}
+            title="Export to CSV"
           />
           <IconButton action="add" title="Create Questionnaire" onClick={() => onNavigate?.('questionnaire-create')} />
         </>
+      }
+      bulkActions={
+        <BulkActionsToolbar
+          selectedCount={selection.selectedCount}
+          totalCount={filteredQuestionnaires.length}
+          onClearSelection={selection.clearSelection}
+          onSelectAll={() => selection.selectMany(filteredQuestionnaires)}
+          allSelected={selection.allSelected && selection.selectedCount === filteredQuestionnaires.length}
+          statusOptions={bulkStatusOptions}
+          onStatusChange={handleBulkStatusChange}
+          onDelete={handleBulkDelete}
+        />
       }
       error={
         error ? (
@@ -281,33 +400,43 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
+            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={selection.allSelected}
+                onCheckedChange={selection.toggleSelectAll}
+                aria-label="Select all"
+              />
+            </AdminTableHead>
             <AdminTableHead
+              className="name-col"
               sortable
-              sortDirection={sortField === 'title' ? sortDirection : null}
-              onClick={() => handleSort('title')}
+              sortDirection={sort?.column === 'title' ? sort.direction : null}
+              onClick={() => toggleSort('title')}
             >
               Questionnaire
             </AdminTableHead>
             <AdminTableHead
+              className="client-col"
               sortable
-              sortDirection={sortField === 'client_name' ? sortDirection : null}
-              onClick={() => handleSort('client_name')}
+              sortDirection={sort?.column === 'client_name' ? sort.direction : null}
+              onClick={() => toggleSort('client_name')}
             >
               Client / Project
             </AdminTableHead>
             <AdminTableHead
+              className="status-col"
               sortable
-              sortDirection={sortField === 'status' ? sortDirection : null}
-              onClick={() => handleSort('status')}
+              sortDirection={sort?.column === 'status' ? sort.direction : null}
+              onClick={() => toggleSort('status')}
             >
               Status
             </AdminTableHead>
-            <AdminTableHead>Progress</AdminTableHead>
+            <AdminTableHead className="progress-col">Progress</AdminTableHead>
             <AdminTableHead
               className="date-col"
               sortable
-              sortDirection={sortField === 'due_date' ? sortDirection : null}
-              onClick={() => handleSort('due_date')}
+              sortDirection={sort?.column === 'due_date' ? sort.direction : null}
+              onClick={() => toggleSort('due_date')}
             >
               Due Date
             </AdminTableHead>
@@ -317,16 +446,27 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
 
         <AdminTableBody animate={!isLoading}>
           {isLoading ? (
-            <AdminTableLoading colSpan={6} rows={5} />
+            <AdminTableLoading colSpan={7} rows={5} />
           ) : paginatedQuestionnaires.length === 0 ? (
             <AdminTableEmpty
-              colSpan={6}
+              colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No questionnaires match your filters' : 'No questionnaires yet'}
             />
           ) : (
             paginatedQuestionnaires.map((questionnaire) => (
-              <AdminTableRow key={questionnaire.id} clickable>
+              <AdminTableRow
+                key={questionnaire.id}
+                clickable
+                selected={selection.isSelected(questionnaire)}
+              >
+                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selection.isSelected(questionnaire)}
+                    onCheckedChange={() => selection.toggleSelection(questionnaire)}
+                    aria-label={`Select ${questionnaire.title}`}
+                  />
+                </AdminTableCell>
                 <AdminTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <ClipboardList className="cell-icon" />
@@ -346,10 +486,29 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
                     )}
                   </div>
                 </AdminTableCell>
-                <AdminTableCell className="status-cell">
-                  <StatusBadge status={getStatusVariant(questionnaire.status)} size="sm">
-                    {getStatusLabel(questionnaire.status)}
-                  </StatusBadge>
+                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalDropdown>
+                    <PortalDropdownTrigger asChild>
+                      <button className="status-dropdown-trigger">
+                        <StatusBadge status={getStatusVariant(questionnaire.status)} size="sm">
+                          {QUESTIONNAIRE_STATUS_CONFIG[questionnaire.status]?.label || questionnaire.status}
+                        </StatusBadge>
+                        <ChevronDown className="status-dropdown-caret" />
+                      </button>
+                    </PortalDropdownTrigger>
+                    <PortalDropdownContent sideOffset={0} align="start">
+                      {Object.entries(QUESTIONNAIRE_STATUS_CONFIG).map(([status, config]) => (
+                        <PortalDropdownItem
+                          key={status}
+                          onClick={() => handleStatusChange(questionnaire.id, status)}
+                        >
+                          <StatusBadge status={getStatusVariant(status)} size="sm">
+                            {config.label}
+                          </StatusBadge>
+                        </PortalDropdownItem>
+                      ))}
+                    </PortalDropdownContent>
+                  </PortalDropdown>
                 </AdminTableCell>
                 <AdminTableCell>
                   <div className="cell-content">
@@ -379,7 +538,7 @@ export function QuestionnairesTable({ clientId, projectId, onNavigate }: Questio
                   <div className="table-actions">
                     <IconButton
                       action="view"
-                      onClick={() => onNavigate?.('questionnaire-detail', questionnaire.id)}
+                      onClick={() => onNavigate?.('questionnaire-detail', String(questionnaire.id))}
                     />
                     {questionnaire.status === 'draft' && (
                       <IconButton

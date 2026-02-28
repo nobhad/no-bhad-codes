@@ -1,13 +1,13 @@
 /**
  * BillingForm
  * Billing address form for client portal settings
- * Brutalist design: transparent backgrounds, no border-radius, monospace font
+ * Uses inline-edit pattern: click to edit, Enter/blur to save
  */
 
 import * as React from 'react';
-import { useState, useCallback } from 'react';
-import { MapPin, Save, Loader2 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
+import { useCallback } from 'react';
+import { MapPin, Building, Globe } from 'lucide-react';
+import { InlineEditField, InlineEditSelect } from '@react/components/portal/InlineEditField';
 import type { BillingAddress } from './PortalSettings';
 
 interface BillingFormProps {
@@ -29,6 +29,7 @@ const COUNTRIES = [
 
 // US State options
 const US_STATES = [
+  { value: '', label: 'Select state' },
   { value: 'AL', label: 'Alabama' },
   { value: 'AK', label: 'Alaska' },
   { value: 'AZ', label: 'Arizona' },
@@ -83,7 +84,7 @@ const US_STATES = [
 ];
 
 // Validation helpers
-function validatePostalCode(postalCode: string, country: string): string | null {
+function validatePostalCode(postalCode: string, country?: string): string | null {
   if (!postalCode) return null; // Optional
 
   if (country === 'US') {
@@ -103,203 +104,106 @@ function validatePostalCode(postalCode: string, country: string): string | null 
 
 /**
  * BillingForm Component
+ * Inline-editable billing address fields
  */
 export function BillingForm({ billing, onUpdate }: BillingFormProps) {
-  // Form state
-  const [streetAddress, setStreetAddress] = useState(billing.street_address || '');
-  const [city, setCity] = useState(billing.city || '');
-  const [state, setState] = useState(billing.state || '');
-  const [postalCode, setPostalCode] = useState(billing.postal_code || '');
-  const [country, setCountry] = useState(billing.country || 'US');
+  // Save handlers - each field updates the full billing object
+  const handleSaveStreet = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, street_address: value || undefined });
+  }, [billing, onUpdate]);
 
-  // Validation state
-  const [errors, setErrors] = useState<Record<string, string | null>>({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
+  const handleSaveCity = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, city: value || undefined });
+  }, [billing, onUpdate]);
 
-  // Track changes
-  const handleFieldChange = useCallback((
-    setter: React.Dispatch<React.SetStateAction<string>>,
-    value: string,
-    field: string
-  ) => {
-    setter(value);
-    setIsDirty(true);
-    // Clear error on change
-    setErrors(prev => ({ ...prev, [field]: null }));
-  }, []);
+  const handleSaveState = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, state: value || undefined });
+  }, [billing, onUpdate]);
 
-  // Validate all fields
-  const validateForm = useCallback(() => {
-    const newErrors: Record<string, string | null> = {
-      postal_code: validatePostalCode(postalCode, country)
-    };
+  const handleSavePostalCode = useCallback(async (value: string) => {
+    return await onUpdate({ ...billing, postal_code: value || undefined });
+  }, [billing, onUpdate]);
 
-    setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error !== null);
-  }, [postalCode, country]);
-
-  // Handle submit
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
+  const handleSaveCountry = useCallback(async (value: string) => {
+    // Clear state when changing away from US
+    const updates: BillingAddress = { ...billing, country: value || undefined };
+    if (value !== 'US') {
+      updates.state = undefined;
     }
+    return await onUpdate(updates);
+  }, [billing, onUpdate]);
 
-    setIsSaving(true);
-
-    const updates: BillingAddress = {
-      street_address: streetAddress.trim() || undefined,
-      city: city.trim() || undefined,
-      state: state.trim() || undefined,
-      postal_code: postalCode.trim() || undefined,
-      country: country || undefined
-    };
-
-    const success = await onUpdate(updates);
-
-    setIsSaving(false);
-
-    if (success) {
-      setIsDirty(false);
-    }
-  }, [streetAddress, city, state, postalCode, country, validateForm, onUpdate]);
-
-  // Check if form has unsaved changes
-  const hasChanges = isDirty && (
-    streetAddress !== (billing.street_address || '') ||
-    city !== (billing.city || '') ||
-    state !== (billing.state || '') ||
-    postalCode !== (billing.postal_code || '') ||
-    country !== (billing.country || 'US')
-  );
+  // Determine if we're in the US for state dropdown
+  const isUS = billing.country === 'US';
 
   return (
-    <form onSubmit={handleSubmit} className="tw-section">
+    <div className="settings-form-section">
       {/* Billing Address Section */}
-      <div className="tw-panel">
-        <div className="tw-flex tw-items-center tw-gap-2 tw-mb-4">
-          <MapPin className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)]" />
-          <h3 className="tw-section-title tw-m-0">
+      <div className="portal-section">
+        <div className="section-header">
+          <MapPin className="section-icon"  />
+          <h3 className="section-title">
             Billing Address
           </h3>
         </div>
 
-        <p className="tw-text-muted tw-text-[14px] tw-mb-4">
+        <p className="section-description">
           This address will appear on your invoices and receipts.
         </p>
 
-        <div className="tw-flex tw-flex-col tw-gap-4">
-          {/* Street Address */}
-          <div className="tw-flex tw-flex-col tw-gap-1">
-            <label className="tw-field-label">Street Address</label>
-            <input
-              type="text"
-              value={streetAddress}
-              onChange={(e) => handleFieldChange(setStreetAddress, e.target.value, 'street_address')}
-              placeholder="123 Main Street, Suite 100"
-              className="tw-input"
+        <div className="settings-fields">
+          <InlineEditField
+            label="Street Address"
+            value={billing.street_address || ''}
+            onSave={handleSaveStreet}
+            placeholder="Enter street address"
+            icon={<Building  />}
+          />
+
+          <InlineEditField
+            label="City"
+            value={billing.city || ''}
+            onSave={handleSaveCity}
+            placeholder="Enter city"
+            icon={<MapPin  />}
+          />
+
+          {isUS ? (
+            <InlineEditSelect
+              label="State"
+              value={billing.state || ''}
+              options={US_STATES}
+              onSave={handleSaveState}
+              icon={<MapPin  />}
             />
-          </div>
+          ) : (
+            <InlineEditField
+              label="State / Province"
+              value={billing.state || ''}
+              onSave={handleSaveState}
+              placeholder="Enter state or province"
+              icon={<MapPin  />}
+            />
+          )}
 
-          {/* City and State Row */}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-4">
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <label className="tw-field-label">City</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => handleFieldChange(setCity, e.target.value, 'city')}
-                placeholder="City"
-                className="tw-input"
-              />
-            </div>
+          <InlineEditField
+            label={isUS ? 'ZIP Code' : 'Postal Code'}
+            value={billing.postal_code || ''}
+            onSave={handleSavePostalCode}
+            placeholder={isUS ? '12345' : 'Postal code'}
+            validate={(value) => validatePostalCode(value, billing.country)}
+            icon={<MapPin  />}
+          />
 
-            {/* State/Province - Show select for US, text input for others */}
-            {country === 'US' ? (
-              <div className="tw-flex tw-flex-col tw-gap-1">
-                <label className="tw-field-label">State</label>
-                <select
-                  value={state}
-                  onChange={(e) => handleFieldChange(setState, e.target.value, 'state')}
-                  className="tw-select tw-w-full"
-                >
-                  <option value="">Select state</option>
-                  {US_STATES.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div className="tw-flex tw-flex-col tw-gap-1">
-                <label className="tw-field-label">State / Province</label>
-                <input
-                  type="text"
-                  value={state}
-                  onChange={(e) => handleFieldChange(setState, e.target.value, 'state')}
-                  placeholder="State or Province"
-                  className="tw-input"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Postal Code and Country Row */}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-4">
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <label className="tw-field-label">
-                {country === 'US' ? 'ZIP Code' : 'Postal Code'}
-              </label>
-              <input
-                type="text"
-                value={postalCode}
-                onChange={(e) => handleFieldChange(setPostalCode, e.target.value, 'postal_code')}
-                placeholder={country === 'US' ? '12345' : 'Postal code'}
-                className={cn('tw-input', errors.postal_code && 'tw-border-white')}
-              />
-              {errors.postal_code && (
-                <span className="tw-text-[12px] tw-text-white">{errors.postal_code}</span>
-              )}
-            </div>
-
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <label className="tw-field-label">Country</label>
-              <select
-                value={country}
-                onChange={(e) => {
-                  handleFieldChange(setCountry, e.target.value, 'country');
-                  // Clear state when country changes
-                  if (e.target.value !== 'US') {
-                    setState('');
-                  }
-                }}
-                className="tw-select tw-w-full"
-              >
-                {COUNTRIES.map(c => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <InlineEditSelect
+            label="Country"
+            value={billing.country || 'US'}
+            options={COUNTRIES}
+            onSave={handleSaveCountry}
+            icon={<Globe  />}
+          />
         </div>
       </div>
-
-      {/* Save Button */}
-      <div className="tw-flex tw-justify-end">
-        <button
-          type="submit"
-          className="tw-btn-primary"
-          disabled={!hasChanges || isSaving}
-        >
-          {isSaving ? (
-            <Loader2 className="tw-h-4 tw-w-4 tw-animate-spin" />
-          ) : (
-            <Save className="tw-h-4 tw-w-4" />
-          )}
-          Save Changes
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }

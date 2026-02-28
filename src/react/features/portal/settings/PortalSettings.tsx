@@ -1,13 +1,12 @@
 /**
  * PortalSettings
  * Main settings view with tab-based navigation
- * Brutalist design: transparent backgrounds, no border-radius, monospace font
+ * Uses inline-edit pattern for fields
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { User, CreditCard, Bell, RefreshCw } from 'lucide-react';
-import { cn } from '@react/lib/utils';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { User, CreditCard, Bell } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ProfileForm } from './ProfileForm';
 import { BillingForm } from './BillingForm';
@@ -77,17 +76,26 @@ export function PortalSettings({
     email_marketing: false
   });
 
+  // Use refs for callback props to avoid dependency issues
+  const getAuthTokenRef = useRef(getAuthToken);
+  const showNotificationRef = useRef(showNotification);
+
+  useEffect(() => {
+    getAuthTokenRef.current = getAuthToken;
+    showNotificationRef.current = showNotification;
+  }, [getAuthToken, showNotification]);
+
   // Build headers with auth token
   const buildHeaders = useCallback(() => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     };
-    const token = getAuthToken?.();
+    const token = getAuthTokenRef.current?.();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
     return headers;
-  }, [getAuthToken]);
+  }, []);
 
   // Fetch profile data
   const fetchProfile = useCallback(async () => {
@@ -127,10 +135,11 @@ export function PortalSettings({
     }
   }, [buildHeaders]);
 
-  // Initial fetch
+  // Initial fetch - run only once on mount
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Update profile
   const handleProfileUpdate = useCallback(async (updates: Partial<ClientProfile>) => {
@@ -146,16 +155,15 @@ export function PortalSettings({
         throw new Error('Failed to update profile');
       }
 
-      const data = await response.json();
       setProfile(prev => prev ? { ...prev, ...updates } : null);
-      showNotification?.('Profile updated successfully', 'success');
+      showNotificationRef.current?.('Profile updated', 'success');
       return true;
     } catch (err) {
       console.error('Error updating profile:', err);
-      showNotification?.('Failed to update profile', 'error');
+      showNotificationRef.current?.('Failed to update profile', 'error');
       return false;
     }
-  }, [buildHeaders, showNotification]);
+  }, [buildHeaders]);
 
   // Update billing
   const handleBillingUpdate = useCallback(async (updates: BillingAddress) => {
@@ -172,14 +180,14 @@ export function PortalSettings({
       }
 
       setBilling(updates);
-      showNotification?.('Billing address updated successfully', 'success');
+      showNotificationRef.current?.('Billing address updated', 'success');
       return true;
     } catch (err) {
       console.error('Error updating billing:', err);
-      showNotification?.('Failed to update billing address', 'error');
+      showNotificationRef.current?.('Failed to update billing address', 'error');
       return false;
     }
-  }, [buildHeaders, showNotification]);
+  }, [buildHeaders]);
 
   // Update notifications
   const handleNotificationsUpdate = useCallback(async (updates: NotificationPreferences) => {
@@ -196,20 +204,20 @@ export function PortalSettings({
       }
 
       setNotifications(updates);
-      showNotification?.('Notification preferences updated successfully', 'success');
+      showNotificationRef.current?.('Notification preferences updated', 'success');
       return true;
     } catch (err) {
       console.error('Error updating notifications:', err);
-      showNotification?.('Failed to update notification preferences', 'error');
+      showNotificationRef.current?.('Failed to update notification preferences', 'error');
       return false;
     }
-  }, [buildHeaders, showNotification]);
+  }, [buildHeaders]);
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
+      <div className="loading-state">
+        <span className="loading-spinner"></span>
         <span>Loading settings...</span>
       </div>
     );
@@ -218,9 +226,9 @@ export function PortalSettings({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <p>{error}</p>
-        <button className="tw-btn-secondary tw-mt-4" onClick={fetchProfile}>
+        <button className="btn-secondary" onClick={fetchProfile}>
           Retry
         </button>
       </div>
@@ -228,23 +236,9 @@ export function PortalSettings({
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Header */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <h1 className="tw-heading tw-text-xl tw-m-0">
-          Settings
-        </h1>
-        <button
-          className="tw-btn-ghost"
-          onClick={fetchProfile}
-          title="Refresh"
-        >
-          <RefreshCw className="tw-h-4 tw-w-4" />
-        </button>
-      </div>
-
+    <div ref={containerRef} className="settings-section">
       {/* Tabs */}
-      <div className="tw-tab-list">
+      <div className="portal-tabs">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -253,9 +247,9 @@ export function PortalSettings({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={isActive ? 'tw-tab-active' : 'tw-tab'}
+              className={isActive ? 'active' : ''}
             >
-              <Icon className="tw-h-4 tw-w-4" />
+              <Icon />
               {tab.label}
             </button>
           );
@@ -263,7 +257,7 @@ export function PortalSettings({
       </div>
 
       {/* Tab Content */}
-      <div className="tw-section tw-min-h-[300px]">
+      <div className="portal-tab-panel active">
         {activeTab === 'profile' && profile && (
           <ProfileForm
             profile={profile}

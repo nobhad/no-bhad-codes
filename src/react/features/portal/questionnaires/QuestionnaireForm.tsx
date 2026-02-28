@@ -152,8 +152,7 @@ function TextareaInput({ question, value, onChange, disabled }: QuestionInputPro
       placeholder={question.placeholder}
       disabled={disabled}
       rows={4}
-      className="tw-textarea"
-      style={{ minHeight: '80px', resize: 'vertical' }}
+      className="tw-textarea form-textarea-resizable"
     />
   );
 }
@@ -179,35 +178,24 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
   const selectedOption = question.options?.find(opt => opt.value === value);
 
   return (
-    <div ref={selectRef} style={{ position: 'relative' }}>
+    <div ref={selectRef} className="qform-select-container">
       <button
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className="tw-select"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', textAlign: 'left' }}
+        className="tw-select qform-select-btn"
       >
         <span className={!selectedOption ? 'tw-text-muted' : 'tw-text-primary'}>
           {selectedOption?.label || question.placeholder || 'Select an option'}
         </span>
         <ChevronDown className={cn(
-          'tw-h-3.5 tw-w-3.5 tw-text-muted',
+          'tw-h-3.5 tw-w-3.5 tw-text-muted qform-chevron-icon',
           isOpen && 'tw-rotate-180'
-        )} style={{ transition: 'transform 0.2s ease' }} />
+        )} />
       </button>
 
       {isOpen && (
-        <div
-          className="tw-panel"
-          style={{
-            position: 'absolute',
-            zIndex: 50,
-            width: '100%',
-            marginTop: '0.25rem',
-            maxHeight: '192px',
-            overflow: 'auto'
-          }}
-        >
+        <div className="tw-panel qform-select-dropdown">
           {question.options?.map((option) => (
             <button
               key={option.value}
@@ -216,8 +204,7 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
                 onChange(option.value);
                 setIsOpen(false);
               }}
-              className={cn('tw-list-item', option.value === value && 'tw-table-row-selected')}
-              style={{ width: '100%', textAlign: 'left', padding: '0.5rem 0.75rem' }}
+              className={cn('tw-list-item qform-select-option', option.value === value && 'tw-table-row-selected')}
             >
               {option.label}
             </button>
@@ -245,7 +232,7 @@ function MultiselectInput({ question, value, onChange, disabled }: QuestionInput
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+    <div className="qform-multiselect-container">
       {question.options?.map((option) => {
         const isSelected = selectedValues.includes(option.value);
 
@@ -255,8 +242,7 @@ function MultiselectInput({ question, value, onChange, disabled }: QuestionInput
             type="button"
             onClick={() => handleToggle(option.value)}
             disabled={disabled}
-            className={isSelected ? 'tw-btn-primary' : 'tw-btn-secondary'}
-            style={{ fontSize: '11px', padding: '0.375rem 0.75rem' }}
+            className={cn(isSelected ? 'tw-btn-primary' : 'tw-btn-secondary', 'qform-multiselect-btn')}
           >
             {option.label}
           </button>
@@ -295,7 +281,14 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
   const [dragActive, setDragActive] = useState(false);
 
   // Parse file metadata if available
-  const fileMetadata = value && typeof value === 'string' ? JSON.parse(value) : null;
+  const fileMetadata = useMemo(() => {
+    if (!value || typeof value !== 'string') return null;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  }, [value]);
   const maxSize = question.maxFileSize || MAX_FILE_SIZE_BYTES;
 
   const handleFileSelect = (file: File) => {
@@ -342,18 +335,15 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <div className="qform-file-upload">
       {fileMetadata ? (
-        <div
-          className="tw-card"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-            <Check className="tw-h-3.5 tw-w-3.5" style={{ color: 'var(--status-completed)', flexShrink: 0 }} />
-            <span className="tw-text-primary" style={{ fontSize: '12px' }}>
+        <div className="tw-card qform-file-selected">
+          <div className="qform-file-info">
+            <Check className="tw-h-3.5 tw-w-3.5 qform-check-success" />
+            <span className="tw-text-primary qform-file-name">
               {fileMetadata.filename}
             </span>
-            <span className="tw-text-muted" style={{ fontSize: '10px', flexShrink: 0 }}>
+            <span className="tw-text-muted qform-file-size">
               ({formatFileSize(fileMetadata.fileSize)})
             </span>
           </div>
@@ -373,25 +363,18 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
           onClick={() => !disabled && fileInputRef.current?.click()}
-          className={cn('tw-card', dragActive && 'tw-table-row-selected')}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            padding: '1.5rem',
-            border: '2px dashed var(--portal-border-color)',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            opacity: disabled ? 0.5 : 1
-          }}
+          className={cn(
+            'tw-card qform-dropzone',
+            dragActive && 'tw-table-row-selected',
+            disabled && 'qform-dropzone-disabled'
+          )}
         >
           <Upload className="tw-h-5 tw-w-5 tw-text-muted" />
-          <div style={{ textAlign: 'center' }}>
-            <span className="tw-text-primary" style={{ fontSize: '12px' }}>
+          <div className="qform-dropzone-text">
+            <span className="tw-text-primary qform-dropzone-label">
               Drop file here or click to upload
             </span>
-            <div className="tw-text-muted" style={{ fontSize: '10px', marginTop: '0.25rem' }}>
+            <div className="tw-text-muted qform-dropzone-hint">
               {question.acceptedFileTypes && `Accepted: ${question.acceptedFileTypes}`}
               {question.acceptedFileTypes && ' | '}
               Max size: {formatFileSize(maxSize)}
@@ -406,7 +389,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         accept={question.acceptedFileTypes}
         onChange={handleInputChange}
         disabled={disabled}
-        style={{ display: 'none' }}
+        className="tw-hidden"
       />
     </div>
   );
@@ -614,8 +597,8 @@ export function QuestionnaireForm({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="qform-header">
+        <div className="qform-header-left">
           <button
             className="tw-btn-icon"
             onClick={onBack}
@@ -624,11 +607,11 @@ export function QuestionnaireForm({
             <ArrowLeft className="tw-h-4 tw-w-4" />
           </button>
           <div>
-            <h2 className="tw-heading" style={{ fontSize: '14px' }}>
+            <h2 className="tw-heading qform-heading">
               {questionnaire.title}
             </h2>
             {questionnaire.description && (
-              <p className="tw-text-muted" style={{ fontSize: '11px' }}>
+              <p className="tw-text-muted qform-description">
                 {questionnaire.description}
               </p>
             )}
@@ -636,21 +619,21 @@ export function QuestionnaireForm({
         </div>
 
         {/* Save status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="qform-status">
           {isSaving && (
-            <div className="tw-text-muted" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '10px' }}>
+            <div className="tw-text-muted qform-status-item">
               <RefreshCw className="tw-h-3 tw-w-3 tw-animate-spin" />
               Saving...
             </div>
           )}
           {!isSaving && lastSaved && (
-            <div className="tw-text-muted" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '10px' }}>
-              <Check className="tw-h-3 tw-w-3" style={{ color: 'var(--status-completed)' }} />
+            <div className="tw-text-muted qform-status-item">
+              <Check className="tw-h-3 tw-w-3 qform-check-success" />
               Saved
             </div>
           )}
           {!isSaving && hasUnsavedChanges && (
-            <div style={{ fontSize: '10px', color: 'var(--status-pending)' }}>
+            <div className="qform-unsaved">
               Unsaved changes
             </div>
           )}
@@ -659,14 +642,14 @@ export function QuestionnaireForm({
 
       {/* Progress bar */}
       {!isReadOnly && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div className="tw-progress-track" style={{ flex: 1 }}>
+        <div className="qform-progress-row">
+          <div className="tw-progress-track tw-flex-1">
             <div
               className="tw-progress-bar"
-              style={{ width: `${progress}%`, transition: 'width 0.3s ease' }}
+              style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="tw-text-muted" style={{ fontSize: '11px', fontVariantNumeric: 'tabular-nums' }}>
+          <span className="tw-text-muted qform-progress-text">
             {progress}%
           </span>
         </div>
@@ -684,19 +667,19 @@ export function QuestionnaireForm({
               className="tw-card"
             >
               {/* Question label */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <span className="tw-text-muted" style={{ fontSize: '10px', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+              <div className="qform-question-label-row">
+                <span className="tw-text-muted qform-question-number">
                   {index + 1}.
                 </span>
-                <div style={{ flex: 1 }}>
+                <div className="qform-question-label-container">
                   <label className="tw-label">
                     {question.text}
                     {question.required && (
-                      <span style={{ color: 'var(--status-cancelled)', marginLeft: '0.125rem' }}>*</span>
+                      <span className="form-required">*</span>
                     )}
                   </label>
                   {question.helpText && (
-                    <p className="tw-text-muted" style={{ fontSize: '10px', marginTop: '0.125rem' }}>
+                    <p className="tw-text-muted qform-question-help">
                       {question.helpText}
                     </p>
                   )}
@@ -704,7 +687,7 @@ export function QuestionnaireForm({
               </div>
 
               {/* Question input */}
-              <div style={{ paddingLeft: '1.25rem' }}>
+              <div className="qform-question-input">
                 <InputComponent
                   question={question}
                   value={value}
@@ -719,22 +702,20 @@ export function QuestionnaireForm({
 
       {/* Actions */}
       {!isReadOnly && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', paddingTop: '0.5rem' }}>
+        <div className="qform-actions">
           <button
-            className="tw-btn-secondary"
+            className="tw-btn-secondary qform-btn-with-icon"
             onClick={saveAnswers}
             disabled={isSaving || !hasUnsavedChanges}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
           >
             <Save className="tw-h-3.5 tw-w-3.5" />
             Save Draft
           </button>
 
           <button
-            className="tw-btn-primary"
+            className="tw-btn-primary qform-btn-with-icon"
             onClick={handleSubmit}
             disabled={progress < 100 || isSubmitting}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
           >
             {isSubmitting ? (
               <RefreshCw className="tw-h-3.5 tw-w-3.5 tw-animate-spin" />
@@ -748,7 +729,7 @@ export function QuestionnaireForm({
 
       {/* Read-only notice */}
       {isReadOnly && (
-        <div className="tw-text-muted" style={{ textAlign: 'center', padding: '0.75rem 0', fontSize: '11px' }}>
+        <div className="tw-text-muted qform-readonly-notice">
           This questionnaire has been submitted and cannot be edited.
         </div>
       )}

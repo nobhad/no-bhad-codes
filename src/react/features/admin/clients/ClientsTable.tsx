@@ -36,6 +36,7 @@ import { CLIENTS_EXPORT_CONFIG } from '../../../../utils/table-export';
 import type { Client, ClientStatus, SortConfig } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
+import { CLIENTS_FILTER_CONFIG } from '../shared/filterConfigs';
 
 interface ClientsTableProps {
   /** Auth token getter for API calls */
@@ -45,29 +46,6 @@ interface ClientsTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
-
-// Filter configuration
-const FILTER_CONFIG = [
-  {
-    key: 'status',
-    label: 'STATUS',
-    options: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'active', label: 'Active' },
-      { value: 'inactive', label: 'Inactive' },
-      { value: 'pending', label: 'Pending' }
-    ]
-  },
-  {
-    key: 'type',
-    label: 'TYPE',
-    options: [
-      { value: 'all', label: 'All Types' },
-      { value: 'personal', label: 'Personal' },
-      { value: 'business', label: 'Business' }
-    ]
-  }
-];
 
 // Filter function
 function filterClient(
@@ -183,7 +161,7 @@ export function ClientsTable({
     hasActiveFilters
   } = useTableFilters<Client>({
     storageKey: 'admin_clients',
-    filters: FILTER_CONFIG,
+    filters: CLIENTS_FILTER_CONFIG,
     filterFn: filterClient,
     sortFn: sortClients,
     defaultSort: { column: 'name', direction: 'asc' }
@@ -414,7 +392,7 @@ export function ClientsTable({
             placeholder="Search clients..."
           />
           <FilterDropdown
-            sections={FILTER_CONFIG}
+            sections={CLIENTS_FILTER_CONFIG}
             values={filterValues}
             onChange={handleFilterChange}
           />

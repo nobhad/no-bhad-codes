@@ -70,17 +70,17 @@ export function NotesTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-2">
           <StickyNote className="tw-h-5 tw-w-5 tw-text-muted" />
-          <h3 className="tw-heading" style={{ fontSize: '14px' }}>
+          <h3 className="tw-heading proj-text-base">
             Internal Notes
           </h3>
-          <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+          <span className="tw-text-muted proj-text-sm">
             (Only visible to admins)
           </span>
         </div>
 
         <div className="tw-flex tw-items-center tw-gap-2">
           {hasChanges && (
-            <span className="tw-text-muted" style={{ fontSize: '12px' }}>Unsaved changes</span>
+            <span className="tw-text-muted proj-text-sm">Unsaved changes</span>
           )}
           <button
             className="tw-btn-primary"
@@ -94,22 +94,21 @@ export function NotesTab({
       </div>
 
       {/* Notes Editor */}
-      <div className="tw-panel" style={{ padding: '0.25rem' }}>
+      <div className="tw-panel notes-panel">
         <textarea
           value={notes}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Add internal notes about this project..."
           rows={15}
-          className="tw-textarea"
-          style={{ border: 'none', minHeight: '300px' }}
+          className="tw-textarea notes-textarea"
         />
       </div>
 
       {/* Keyboard shortcut hint */}
-      <div className="tw-text-muted" style={{ fontSize: '12px', textAlign: 'right' }}>
-        Press <kbd className="tw-badge" style={{ fontSize: '11px', padding: '2px 6px' }}>Cmd+S</kbd> or{' '}
-        <kbd className="tw-badge" style={{ fontSize: '11px', padding: '2px 6px' }}>Ctrl+S</kbd> to save
+      <div className="tw-text-muted notes-hint">
+        Press <kbd className="tw-badge msgtab-kbd">Cmd+S</kbd> or{' '}
+        <kbd className="tw-badge msgtab-kbd">Ctrl+S</kbd> to save
       </div>
     </div>
   );

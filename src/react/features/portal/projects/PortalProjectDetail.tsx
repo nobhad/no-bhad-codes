@@ -230,7 +230,7 @@ export function PortalProjectDetail({
     return (
       <div className="tw-error">
         <div className="tw-text-center tw-mb-4">{error || 'Project not found'}</div>
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+        <div className="pdetail-error-actions">
           {onBack && (
             <button className="tw-btn-secondary" onClick={onBack}>
               Go Back
@@ -254,19 +254,19 @@ export function PortalProjectDetail({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+      <div className="pdetail-header">
         {onBack && (
           <button className="tw-btn-icon" onClick={onBack} title="Back to projects">
             <ArrowLeft className="tw-h-4 tw-w-4" />
           </button>
         )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <h2 className="tw-heading" style={{ fontSize: '16px' }}>{project.name}</h2>
+        <div className="pdetail-flex-content">
+          <div className="pdetail-title-row">
+            <h2 className="tw-heading pdetail-heading">{project.name}</h2>
             <span className="tw-badge">{statusLabel}</span>
           </div>
           {project.description && (
-            <p className="tw-text-muted" style={{ fontSize: '12px', marginTop: '0.25rem' }}>
+            <p className="tw-text-muted pdetail-description">
               {project.description}
             </p>
           )}
@@ -281,22 +281,22 @@ export function PortalProjectDetail({
 
       {/* Progress Section */}
       <div className="tw-panel">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+        <div className="pdetail-progress-header">
           <span className="tw-label">Overall Progress</span>
-          <span className="tw-text-primary" style={{ fontSize: '14px' }}>{progress}%</span>
+          <span className="tw-text-primary pdetail-text-base">{progress}%</span>
         </div>
-        <div className="tw-progress-track" style={{ height: '6px' }}>
+        <div className="tw-progress-track pdetail-progress-track">
           <div
             className="tw-progress-bar"
             style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
           />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-          <span className="tw-text-muted" style={{ fontSize: '11px' }}>
+        <div className="pdetail-progress-footer">
+          <span className="tw-text-muted pdetail-text-xs">
             {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
           </span>
           {milestones.length > 0 && (
-            <span className="tw-text-muted" style={{ fontSize: '11px' }}>
+            <span className="tw-text-muted pdetail-text-xs">
               {completedMilestones}/{milestones.length} milestones
             </span>
           )}
@@ -354,42 +354,41 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
     <div ref={containerRef} className="tw-section">
       {milestones.map((milestone) => (
         <div key={milestone.id} className="tw-card">
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+          <div className="pdetail-milestone-row">
             {/* Status Icon */}
-            <div style={{ flexShrink: 0, marginTop: '2px' }}>
+            <div className="pdetail-milestone-icon">
               {milestone.is_completed ? (
-                <CheckCircle2 className="tw-h-4 tw-w-4" style={{ color: 'var(--portal-text-light)' }} />
+                <CheckCircle2 className="tw-h-4 tw-w-4 pdetail-milestone-completed" />
               ) : (
                 <Circle className="tw-h-4 tw-w-4 tw-text-muted" />
               )}
             </div>
 
             {/* Content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+            <div className="pdetail-flex-content">
+              <div className="pdetail-milestone-header">
                 <span
-                  className={milestone.is_completed ? 'tw-text-muted' : 'tw-text-primary'}
-                  style={{
-                    fontSize: '14px',
-                    textDecoration: milestone.is_completed ? 'line-through' : 'none'
-                  }}
+                  className={cn(
+                    milestone.is_completed ? 'tw-text-muted tw-line-through' : 'tw-text-primary',
+                    'pdetail-text-base'
+                  )}
                 >
                   {milestone.title}
                 </span>
                 {milestone.due_date && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} className="tw-text-muted">
+                  <div className="pdetail-date-row tw-text-muted">
                     <Clock className="tw-h-3 tw-w-3" />
-                    <span style={{ fontSize: '11px' }}>{formatDate(milestone.due_date)}</span>
+                    <span className="pdetail-text-xs">{formatDate(milestone.due_date)}</span>
                   </div>
                 )}
               </div>
               {milestone.description && (
-                <p className="tw-text-muted" style={{ fontSize: '12px', marginTop: '0.25rem' }}>
+                <p className="tw-text-muted pdetail-description">
                   {milestone.description}
                 </p>
               )}
               {milestone.is_completed && milestone.completed_date && (
-                <span style={{ fontSize: '11px', marginTop: '0.25rem', display: 'block', color: 'var(--portal-text-light)' }}>
+                <span className="pdetail-completed-date">
                   Completed {formatDate(milestone.completed_date)}
                 </span>
               )}
@@ -417,45 +416,28 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
   }
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} className="pdetail-timeline">
       {/* Timeline line */}
-      <div style={{
-        position: 'absolute',
-        left: '11px',
-        top: '1rem',
-        bottom: '1rem',
-        width: '1px',
-        background: 'var(--portal-border-color)'
-      }} />
+      <div className="pdetail-timeline-line" />
 
       {/* Updates */}
       <div className="tw-section">
         {updates.map((update) => (
-          <div key={update.id} style={{ display: 'flex', gap: '0.75rem', position: 'relative' }}>
+          <div key={update.id} className="pdetail-update-row">
             {/* Timeline dot */}
-            <div style={{
-              flexShrink: 0,
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'transparent',
-              border: '1px solid var(--portal-border-color)',
-              zIndex: 10
-            }}>
+            <div className="pdetail-timeline-dot">
               <span className="tw-text-muted">{getUpdateIcon(update.update_type)}</span>
             </div>
 
             {/* Content */}
-            <div className="tw-card" style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                <span className="tw-text-primary" style={{ fontSize: '14px' }}>{update.title}</span>
-                <span className="tw-text-muted" style={{ fontSize: '11px' }}>{formatRelativeTime(update.created_at)}</span>
+            <div className="tw-card pdetail-update-card">
+              <div className="pdetail-update-header">
+                <span className="tw-text-primary pdetail-text-base">{update.title}</span>
+                <span className="tw-text-muted pdetail-text-xs">{formatRelativeTime(update.created_at)}</span>
               </div>
-              <p className="tw-text-muted" style={{ fontSize: '12px' }}>{update.content}</p>
+              <p className="tw-text-muted pdetail-text-sm">{update.content}</p>
               {update.created_by && (
-                <span className="tw-text-muted" style={{ fontSize: '11px', marginTop: '0.5rem', display: 'block' }}>
+                <span className="tw-text-muted pdetail-created-by">
                   by {update.created_by}
                 </span>
               )}

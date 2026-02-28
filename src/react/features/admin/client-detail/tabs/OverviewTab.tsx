@@ -23,6 +23,7 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import type { Client, ClientHealth, ClientDetailStats, ClientTag } from '../../types';
+import { formatCurrency as formatCurrencyUtil } from '../../../../../utils/format-utils';
 
 interface OverviewTabProps {
   client: Client;
@@ -37,16 +38,10 @@ interface OverviewTabProps {
 }
 
 /**
- * Format currency
+ * Format currency with $0 fallback for client stats
  */
 function formatCurrency(amount: number | undefined): string {
-  if (amount === undefined || amount === null) return '$0';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
+  return formatCurrencyUtil(amount, { fallback: '$0' });
 }
 
 /**
@@ -139,11 +134,11 @@ export function OverviewTab({
       <div className="tw-col-span-2 tw-flex tw-flex-col tw-gap-6">
         {/* Health Score Card */}
         {health && (
-          <div className="tw-panel" style={{ padding: '1.5rem' }}>
+          <div className="tw-panel cdetail-panel-lg">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-4">
               <div className="tw-flex tw-items-center tw-gap-2">
                 <Heart className="tw-h-5 tw-w-5 tw-text-muted" />
-                <h3 className="tw-heading" style={{ fontSize: '14px' }}>
+                <h3 className="tw-heading overview-text-base">
                   Health Score
                 </h3>
               </div>
@@ -151,7 +146,7 @@ export function OverviewTab({
                 <span className="tw-stat-value">
                   {health.score}
                 </span>
-                <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+                <span className="tw-text-muted overview-text-base">
                   {getHealthStatusLabel(health.score)}
                 </span>
               </div>
@@ -162,7 +157,7 @@ export function OverviewTab({
             <div className="tw-grid tw-grid-cols-2 tw-gap-4">
               {Object.entries(health.factors).map(([key, value]) => (
                 <div key={key} className="tw-flex tw-flex-col tw-gap-1">
-                  <div className="tw-flex tw-items-center tw-justify-between" style={{ fontSize: '12px' }}>
+                  <div className="tw-flex tw-items-center tw-justify-between overview-text-sm">
                     <span className="tw-text-muted tw-capitalize">
                       {key.replace('_', ' ')}
                     </span>
@@ -183,7 +178,7 @@ export function OverviewTab({
 
         {/* Stats Grid */}
         {stats && (
-          <div className="tw-grid-stats" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <div className="tw-grid-stats cdetail-grid-3">
             {/* Projects */}
             <div className="tw-stat-card">
               <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
@@ -193,7 +188,7 @@ export function OverviewTab({
               <div className="tw-stat-value">
                 {stats.totalProjects || 0}
               </div>
-              <div className="tw-text-muted tw-mt-1" style={{ fontSize: '12px' }}>
+              <div className="tw-text-muted tw-mt-1 overview-text-sm">
                 {stats.activeProjects || 0} active, {stats.completedProjects || 0} completed
               </div>
             </div>
@@ -207,7 +202,7 @@ export function OverviewTab({
               <div className="tw-stat-value">
                 {formatCurrency(stats.totalPaid)}
               </div>
-              <div className="tw-text-muted tw-mt-1" style={{ fontSize: '12px' }}>
+              <div className="tw-text-muted tw-mt-1 overview-text-sm">
                 {formatCurrency(stats.totalInvoiced)} invoiced
               </div>
             </div>
@@ -230,7 +225,7 @@ export function OverviewTab({
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
             <div className="tw-flex tw-items-center tw-gap-2">
               <Tag className="tw-h-4 tw-w-4 tw-text-muted" />
-              <span className="tw-heading" style={{ fontSize: '14px' }}>
+              <span className="tw-heading overview-text-base">
                 Tags
               </span>
             </div>
@@ -247,8 +242,8 @@ export function OverviewTab({
                   {unassignedTags.map((tag) => (
                     <PortalDropdownItem key={tag.id} onClick={() => handleAddTag(tag.id)}>
                       <span
-                        className="tw-w-3 tw-h-3 tw-mr-2"
-                        style={{ backgroundColor: tag.color, borderRadius: 0 }}
+                        className="tw-w-3 tw-h-3 tw-mr-2 cdetail-tag-dot"
+                        style={{ backgroundColor: tag.color }}
                       />
                       {tag.name}
                     </PortalDropdownItem>
@@ -260,7 +255,7 @@ export function OverviewTab({
 
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             {tags.length === 0 ? (
-              <span className="tw-text-muted" style={{ fontSize: '14px', fontStyle: 'italic' }}>
+              <span className="tw-text-muted cdetail-empty-italic">
                 No tags assigned
               </span>
             ) : (
@@ -288,7 +283,7 @@ export function OverviewTab({
       <div className="tw-flex tw-flex-col tw-gap-6">
         {/* Contact Info */}
         <div className="tw-panel">
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+          <h3 className="tw-section-title overview-section-title">
             Contact Information
           </h3>
 
@@ -296,7 +291,7 @@ export function OverviewTab({
             {client.contact_name && (
               <div className="tw-flex tw-items-center tw-gap-3">
                 <User className="tw-h-4 tw-w-4 tw-text-muted" />
-                <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+                <span className="tw-text-muted overview-text-base">
                   {client.contact_name}
                 </span>
               </div>
@@ -305,7 +300,7 @@ export function OverviewTab({
             {client.company_name && (
               <div className="tw-flex tw-items-center tw-gap-3">
                 <Building2 className="tw-h-4 tw-w-4 tw-text-muted" />
-                <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+                <span className="tw-text-muted overview-text-base">
                   {client.company_name}
                 </span>
               </div>
@@ -316,8 +311,7 @@ export function OverviewTab({
                 <Mail className="tw-h-4 tw-w-4 tw-text-muted" />
                 <a
                   href={`mailto:${client.email}`}
-                  className="tw-text-primary"
-                  style={{ fontSize: '14px' }}
+                  className="tw-text-primary overview-text-base"
                 >
                   {client.email}
                 </a>
@@ -329,8 +323,7 @@ export function OverviewTab({
                 <Phone className="tw-h-4 tw-w-4 tw-text-muted" />
                 <a
                   href={`tel:${client.phone}`}
-                  className="tw-text-muted"
-                  style={{ fontSize: '14px' }}
+                  className="tw-text-muted overview-text-base"
                 >
                   {client.phone}
                 </a>
@@ -341,14 +334,14 @@ export function OverviewTab({
 
         {/* Account Details */}
         <div className="tw-panel">
-          <h3 className="tw-section-title" style={{ marginBottom: '1rem' }}>
+          <h3 className="tw-section-title overview-section-title">
             Account Details
           </h3>
 
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between">
               <span className="tw-label">Created</span>
-              <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+              <span className="tw-text-muted overview-text-base">
                 {formatDate(client.created_at)}
               </span>
             </div>
@@ -356,7 +349,7 @@ export function OverviewTab({
             {client.invitation_sent_at && (
               <div className="tw-flex tw-items-center tw-justify-between">
                 <span className="tw-label">Invited</span>
-                <span className="tw-text-muted" style={{ fontSize: '14px' }}>
+                <span className="tw-text-muted overview-text-base">
                   {formatDate(client.invitation_sent_at)}
                 </span>
               </div>
@@ -368,9 +361,9 @@ export function OverviewTab({
                 className={cn(
                   client.status === 'active'
                     ? 'tw-text-primary'
-                    : 'tw-text-muted'
+                    : 'tw-text-muted',
+                  'overview-text-base'
                 )}
-                style={{ fontSize: '14px' }}
               >
                 {client.status === 'active' ? 'Active' : 'Inactive'}
               </span>
