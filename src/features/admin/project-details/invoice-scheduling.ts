@@ -309,9 +309,8 @@ export async function cancelScheduledInvoice(
   if (!confirmed) return;
 
   try {
-    const response = await fetch(`/api/invoices/scheduled/${scheduleId}`, {
-      method: 'DELETE',
-      credentials: 'include'
+    const response = await apiFetch(`/api/invoices/scheduled/${scheduleId}`, {
+      method: 'DELETE'
     });
 
     if (response.ok) {

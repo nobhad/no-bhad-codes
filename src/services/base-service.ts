@@ -8,14 +8,18 @@
  * Services are different from DOM modules - they don't manage UI.
  */
 
+import { createLogger } from '../utils/logger';
+
 export abstract class BaseService {
   protected name: string;
   protected isInitialized = false;
   protected debug: boolean;
+  private logger: ReturnType<typeof createLogger>;
 
   constructor(name: string, debug = false) {
     this.name = name;
     this.debug = debug;
+    this.logger = createLogger(name);
   }
 
   /**
@@ -42,16 +46,16 @@ export abstract class BaseService {
    */
   protected log(...args: unknown[]): void {
     if (this.debug) {
-      console.log(`[${this.name}]`, ...args);
+      this.logger.log(...args);
     }
   }
 
   protected warn(...args: unknown[]): void {
-    console.warn(`[${this.name}]`, ...args);
+    this.logger.warn(...args);
   }
 
   protected error(...args: unknown[]): void {
-    console.error(`[${this.name}]`, ...args);
+    this.logger.error(...args);
   }
 
   /**

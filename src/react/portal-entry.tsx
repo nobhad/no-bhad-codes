@@ -6,8 +6,7 @@
 
 // Import pre-generated Tailwind CSS for React components
 import './styles/tailwind-generated.css';
-// Import brutalist component styles
-import './styles/brutalist.css';
+// Note: Button styles (tw-btn-*) are now in portal-buttons.css (base portal styles)
 
 import { registerReactComponent } from './registry';
 

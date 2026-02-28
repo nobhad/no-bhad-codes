@@ -10,7 +10,7 @@
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDate, formatDateTime } from '../../../utils/format-utils';
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 import { type MessageThread, type Message } from '../services/admin-data.service';
 import { renderEmptyState } from '../../../components/empty-state';
 

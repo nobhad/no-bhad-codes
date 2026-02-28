@@ -44,6 +44,7 @@ import { closeAllModalOverlays } from '../../utils/modal-utils';
 import { initAdminCommandPalette, destroyAdminCommandPalette } from './admin-command-palette';
 import { initKeyboardHelp } from '../../components/keyboard-help';
 import { showTableEmpty } from '../../utils/loading-utils';
+import { initPortalHeader, type PortalHeader } from '../shared/portal-header';
 
 // DOM element keys for caching
 type DashboardDOMKeys = Record<string, string>;
@@ -70,7 +71,8 @@ import {
   loadAdHocRequestsModule,
   loadGlobalTasksModule,
   loadWorkflowsModule,
-  loadQuestionnairesModule
+  loadQuestionnairesModule,
+  loadEmailTemplatesModule
 } from './modules';
 
 // Deliverables manager module
@@ -637,13 +639,15 @@ class AdminDashboard {
     greetingEl.style.display = '';
   }
 
+  /** Reference to shared portal header instance */
+  private portalHeader: PortalHeader | null = null;
+
   private async initializeModules(): Promise<void> {
     // Initialize deliverables manager module
     initializeDeliverablesModule();
 
-    // Admin dashboard doesn't use theme toggle or main site navigation
-    // Theme is handled via CSS and sessionStorage directly
-    // No additional modules needed for admin portal
+    // Initialize shared portal header (notification bell, theme toggle)
+    this.portalHeader = await initPortalHeader({ role: 'admin' });
   }
 
   private setupEventListeners(): void {
@@ -1953,6 +1957,10 @@ class AdminDashboard {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Workflows', href: false });
       break;
+    case 'email-templates':
+      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
+      items.push({ label: 'Email Templates', href: false });
+      break;
     default:
       items.push({ label: 'Dashboard', href: false });
     }
@@ -2378,9 +2386,49 @@ class AdminDashboard {
         await wfModule.loadWorkflowsData(this.moduleContext);
         break;
       }
+      case 'email-templates': {
+        // Dynamically render email-templates tab, then load data
+        const tabContainer = document.getElementById('tab-email-templates');
+        const emailTemplatesModule = await loadEmailTemplatesModule();
+
+        // Render the tab structure dynamically
+        if (tabContainer) {
+          emailTemplatesModule.renderEmailTemplatesTab(tabContainer);
+        }
+
+        // Load email templates data
+        await emailTemplatesModule.loadEmailTemplatesData(this.moduleContext);
+        break;
+      }
       }
     } catch (error) {
-      logger.error(`Error loading ${tabName} data:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      logger.error(`Error loading ${tabName} data:`, {
+        tab: tabName,
+        message: errorMessage,
+        stack: errorStack,
+        error
+      });
+
+      // Show user-friendly error in the tab container
+      const tabContainer = document.getElementById(`tab-${tabName}`);
+      if (tabContainer) {
+        tabContainer.innerHTML = `
+          <div class="module-error-state" style="padding: 2rem; text-align: center;">
+            <p style="color: var(--app-color-danger); margin-bottom: 1rem;">
+              Failed to load ${tabName.replace(/-/g, ' ')} module
+            </p>
+            <p style="color: var(--app-color-text-muted); font-size: 0.875rem;">
+              ${errorMessage}
+            </p>
+            <button class="btn-secondary" onclick="window.adminDashboard?.loadTabData('${tabName}')" style="margin-top: 1rem;">
+              Retry
+            </button>
+          </div>
+        `;
+      }
     } finally {
       this.showLoading(false);
     }
@@ -3005,6 +3053,28 @@ class AdminDashboard {
   /** Toggle recurring invoice - delegated to projectDetails */
   public toggleRecurringInvoice(recurringId: number, isActive: boolean): Promise<void> {
     return this.projectDetails.toggleRecurringInvoice(recurringId, isActive);
+  }
+
+  /** Stop auto refresh interval */
+  private stopAutoRefresh(): void {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = null;
+    }
+  }
+
+  /** Clean up resources when dashboard is destroyed */
+  public destroy(): void {
+    this.stopAutoRefresh();
+
+    // Destroy all charts
+    this.charts.forEach((chart) => chart.destroy());
+    this.charts.clear();
+
+    // Destroy command palette
+    destroyAdminCommandPalette();
+
+    logger.log('AdminDashboard destroyed');
   }
 }
 

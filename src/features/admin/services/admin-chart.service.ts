@@ -9,7 +9,7 @@
  */
 
 import { getChartColor, getChartColorWithAlpha } from '../../../config/constants';
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminChartService');
 

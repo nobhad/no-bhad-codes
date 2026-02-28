@@ -43,9 +43,13 @@ import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
 import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
 import { initCopyEmailDelegation } from '../../utils/copy-email';
-import { installGlobalAuthInterceptor } from '../../utils/api-client';
+import { installGlobalAuthInterceptor, apiFetch } from '../../utils/api-client';
 import { getStatusBadgeHTML, createStatusBadge } from '../../components/status-badge';
 import { renderEmptyState } from '../../components/empty-state';
+import { initPortalHeader, type PortalHeader } from '../shared/portal-header';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('ClientPortal');
 
 // DOM element keys for caching
 type PortalDOMKeys = Record<string, string>;
@@ -142,7 +146,7 @@ export class ClientPortalModule extends BaseModule {
         type: 'success' | 'error' | 'info' | 'warning' = 'success'
       ) => {
         if (type === 'error') {
-          console.error('[ClientPortal]', message);
+          logger.error(message);
           showToast(message, 'error', { duration: 5000 });
         } else {
           showToast(message, type);
@@ -391,7 +395,7 @@ export class ClientPortalModule extends BaseModule {
         if (errorEl) {
           errorEl.textContent = 'Failed to send magic link. Please try again.';
         }
-        console.error('Magic link error:', error);
+        logger.error('Magic link error:', error);
       } finally {
         submitBtn.disabled = false;
         if (btnText) (btnText as HTMLElement).style.display = 'inline';
@@ -673,11 +677,7 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // Setup file upload handlers (drag & drop) and filter listeners - uses module
-    loadFilesModule().then((filesModule) => {
-      filesModule.setupFileUploadHandlers(this.moduleContext);
-      filesModule.setupFileFilterListeners(this.moduleContext);
-    });
+    // Note: File upload handlers now handled by React component
 
     // Setup settings form handlers
     this.setupSettingsFormHandlers();
@@ -766,12 +766,11 @@ export class ClientPortalModule extends BaseModule {
     }
 
     try {
-      const response = await fetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
+      const response = await apiFetch(`${ClientPortalModule.PROJECTS_API_BASE}/request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify({
           name,
           projectType,
@@ -801,7 +800,7 @@ export class ClientPortalModule extends BaseModule {
       // Switch to dashboard tab
       this.switchTab('dashboard');
     } catch (error) {
-      console.error('Error submitting project request:', error);
+      logger.error('Error submitting project request:', error);
       showToast('Failed to submit project request. Please try again.', 'error');
     }
   }
@@ -829,12 +828,11 @@ export class ClientPortalModule extends BaseModule {
 
     try {
       // Update profile info
-      const profileResponse = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me`, {
+      const profileResponse = await apiFetch(`${ClientPortalModule.CLIENTS_API_BASE}/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify({
           contact_name: contactName,
           company_name: companyName,
@@ -859,12 +857,11 @@ export class ClientPortalModule extends BaseModule {
           return;
         }
 
-        const passwordResponse = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
+        const passwordResponse = await apiFetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
           },
-          credentials: 'include', // Include HttpOnly cookies
           body: JSON.stringify({
             currentPassword,
             newPassword
@@ -890,7 +887,7 @@ export class ClientPortalModule extends BaseModule {
       // Refresh displayed profile data
       await this.loadUserSettings();
     } catch (error) {
-      console.error('Error saving profile:', error);
+      logger.error('Error saving profile:', error);
       showToast('Failed to save profile. Please try again.', 'error');
     }
   }
@@ -966,12 +963,11 @@ export class ClientPortalModule extends BaseModule {
     }
 
     try {
-      const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
+      const response = await apiFetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include',
         body: JSON.stringify({
           currentPassword,
           newPassword
@@ -993,7 +989,7 @@ export class ClientPortalModule extends BaseModule {
 
       showToast('Password updated successfully!', 'success');
     } catch (error) {
-      console.error('Error updating password:', error);
+      logger.error('Error updating password:', error);
       showToast('Failed to update password. Please try again.', 'error');
     }
   }
@@ -1021,12 +1017,11 @@ export class ClientPortalModule extends BaseModule {
     };
 
     try {
-      const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/notifications`, {
+      const response = await apiFetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/notifications`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify(settings)
       });
 
@@ -1037,7 +1032,7 @@ export class ClientPortalModule extends BaseModule {
 
       showToast('Notification preferences saved!', 'success');
     } catch (error) {
-      console.error('Error saving notifications:', error);
+      logger.error('Error saving notifications:', error);
       showToast('Failed to save preferences. Please try again.', 'error');
     }
   }
@@ -1064,12 +1059,11 @@ export class ClientPortalModule extends BaseModule {
     };
 
     try {
-      const response = await fetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/billing`, {
+      const response = await apiFetch(`${ClientPortalModule.CLIENTS_API_BASE}/me/billing`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include', // Include HttpOnly cookies
         body: JSON.stringify(billing)
       });
 
@@ -1080,7 +1074,7 @@ export class ClientPortalModule extends BaseModule {
 
       showToast('Billing information saved!', 'success');
     } catch (error) {
-      console.error('Error saving billing:', error);
+      logger.error('Error saving billing:', error);
       showToast('Failed to save billing info. Please try again.', 'error');
     }
   }
@@ -1102,12 +1096,10 @@ export class ClientPortalModule extends BaseModule {
 
     try {
       // Fetch projects from API
-      const projectsResponse = await fetch('/api/projects', {
-        credentials: 'include'
-      });
+      const projectsResponse = await apiFetch('/api/projects');
 
       if (!projectsResponse.ok) {
-        console.error('[ClientPortal] Failed to fetch projects:', projectsResponse.status);
+        logger.error('Failed to fetch projects:', projectsResponse.status);
         // Show error state with client name
         const errorClientName = user.name || user.email || 'Client';
         loadNavigationModule().then((nav) => nav.setClientName(errorClientName));
@@ -1140,9 +1132,7 @@ export class ClientPortalModule extends BaseModule {
           // Fetch milestones for this project
           let milestones: ProjectMilestoneResponse[] = [];
           try {
-            const milestonesResponse = await fetch(`/api/projects/${apiProject.id}/milestones`, {
-              credentials: 'include'
-            });
+            const milestonesResponse = await apiFetch(`/api/projects/${apiProject.id}/milestones`);
             if (milestonesResponse.ok) {
               const milestonesData = (await milestonesResponse.json()) as {
                 milestones?: ProjectMilestoneResponse[];
@@ -1150,14 +1140,14 @@ export class ClientPortalModule extends BaseModule {
               milestones = milestonesData.milestones || [];
             } else {
               milestoneFetchFailures++;
-              console.warn(
-                `[ClientPortal] Failed to fetch milestones for project ${apiProject.id}: ${milestonesResponse.status}`
+              logger.warn(
+                `Failed to fetch milestones for project ${apiProject.id}: ${milestonesResponse.status}`
               );
             }
           } catch (milestoneError) {
             milestoneFetchFailures++;
-            console.warn(
-              `[ClientPortal] Failed to fetch milestones for project ${apiProject.id}:`,
+            logger.warn(
+              `Failed to fetch milestones for project ${apiProject.id}:`,
               milestoneError
             );
           }
@@ -1220,7 +1210,7 @@ export class ClientPortalModule extends BaseModule {
       this.populateProjectsList(clientProjects);
       this.renderDashboardMilestones(clientProjects);
     } catch (error) {
-      console.error('[ClientPortal] Failed to load projects:', error);
+      logger.error('Failed to load projects:', error);
       // Show error state with client name
       const clientName = user.name || user.email || 'Client';
       loadNavigationModule().then((nav) => nav.setClientName(clientName));
@@ -1237,12 +1227,10 @@ export class ClientPortalModule extends BaseModule {
    */
   private async loadDashboardStats(): Promise<void> {
     try {
-      const response = await fetch('/api/clients/me/dashboard', {
-        credentials: 'include'
-      });
+      const response = await apiFetch('/api/clients/me/dashboard');
 
       if (!response.ok) {
-        console.warn('[ClientPortal] Failed to load dashboard stats:', response.status);
+        logger.warn('Failed to load dashboard stats:', response.status);
         // Clear "Loading..." state on API error
         const activityList = document.querySelector('.activity-list');
         if (activityList) {
@@ -1255,9 +1243,23 @@ export class ClientPortalModule extends BaseModule {
       const stats = response_data.data?.stats;
       const recentActivity = response_data.data?.recentActivity;
 
-      // Defensive check - if stats is missing, log and return
+      // Defensive check - if stats is missing, show empty state and return
       if (!stats) {
-        console.warn('[ClientPortal] Dashboard response missing stats:', response_data);
+        logger.warn('Dashboard response missing stats:', response_data);
+        // Clear loading states to prevent infinite loading
+        const activityList = document.querySelector('.activity-list');
+        if (activityList) {
+          activityList.innerHTML = '<li class="activity-item empty">No activity data available</li>';
+        }
+        const milestonesList = document.getElementById('milestones-list');
+        if (milestonesList) {
+          milestonesList.innerHTML = '';
+          const empty = document.getElementById('milestones-empty');
+          if (empty) {
+            empty.textContent = 'No milestone data available';
+            empty.style.display = 'block';
+          }
+        }
         return;
       }
 
@@ -1329,12 +1331,12 @@ export class ClientPortalModule extends BaseModule {
         const approvalsModule = await loadApprovalsModule();
         await approvalsModule.initClientApprovals();
       } catch (approvalError) {
-        console.warn('[ClientPortal] Error loading approvals:', approvalError);
+        logger.warn('Error loading approvals:', approvalError);
       }
 
       this.log('[ClientPortal] Dashboard stats loaded');
     } catch (error) {
-      console.error('[ClientPortal] Error loading dashboard stats:', error);
+      logger.error('Error loading dashboard stats:', error);
       // Clear "Loading..." state on error
       const activityList = document.querySelector('.activity-list');
       if (activityList) {
@@ -1592,12 +1594,10 @@ export class ClientPortalModule extends BaseModule {
 
     try {
       // Fetch project details from API
-      const response = await fetch(`/api/projects/${projectId}`, {
-        credentials: 'include'
-      });
+      const response = await apiFetch(`/api/projects/${projectId}`);
 
       if (!response.ok) {
-        console.warn('[ClientPortal] Failed to fetch project details:', response.status);
+        logger.warn('Failed to fetch project details:', response.status);
         return;
       }
 
@@ -1635,7 +1635,7 @@ export class ClientPortalModule extends BaseModule {
         }));
       }
     } catch (error) {
-      console.warn('[ClientPortal] Error fetching project details:', error);
+      logger.warn('Error fetching project details:', error);
     }
   }
 
@@ -1929,26 +1929,55 @@ export class ClientPortalModule extends BaseModule {
     // Show admin features if user is admin
     this.setupAdminFeatures();
 
-    // Initialize notification bell
-    this.initNotificationBell();
+    // Initialize shared portal header (notification bell, theme toggle)
+    this.initPortalHeader();
   }
 
-  /** Reference to notification bell instance */
-  private notificationBellInstance: unknown = null;
+  /** Reference to shared portal header instance */
+  private portalHeader: PortalHeader | null = null;
 
   /**
-   * Initialize the notification bell component
+   * Initialize the shared portal header (notification bell, theme toggle)
    */
-  private async initNotificationBell(): Promise<void> {
-    const container = document.getElementById('notification-bell-container');
-    if (!container || this.notificationBellInstance) return;
+  private async initPortalHeader(): Promise<void> {
+    if (this.portalHeader) return;
 
     try {
-      const { initNotificationBell } = await import('../../components/notification-bell');
-      this.notificationBellInstance = await initNotificationBell(container);
+      // Check if logged-in user is admin to use correct notification endpoints
+      const isAdmin = this.checkIfUserIsAdmin();
+      this.portalHeader = await initPortalHeader({ role: isAdmin ? 'admin' : 'client' });
     } catch (error) {
-      console.warn('[ClientPortal] Failed to initialize notification bell:', error);
+      logger.warn('Failed to initialize portal header:', error);
     }
+  }
+
+  /**
+   * Check if the current user is an admin
+   * Used for determining which API endpoints to use
+   */
+  private checkIfUserIsAdmin(): boolean {
+    try {
+      // Check sessionStorage for admin flag
+      const authData = sessionStorage.getItem('clientAuth');
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        if (parsed.isAdmin) {
+          return true;
+        }
+      }
+
+      // Also check JWT token for admin flag
+      const token = sessionStorage.getItem('client_auth_token');
+      if (token) {
+        const payload = decodeJwtPayload(token);
+        if (payload && isAdminPayload(payload)) {
+          return true;
+        }
+      }
+    } catch (error) {
+      logger.warn('Error checking admin status:', error);
+    }
+    return false;
   }
 
   /** Flag to track if hash router has been initialized */
@@ -2006,7 +2035,7 @@ export class ClientPortalModule extends BaseModule {
         }
       }
     } catch (error) {
-      console.error('[ClientPortal] Error checking admin status:', error);
+      logger.error('Error checking admin status:', error);
     }
   }
 
@@ -2105,17 +2134,20 @@ export class ClientPortalModule extends BaseModule {
 
   private async showBillingView(): Promise<void> {
     const navModule = await loadNavigationModule();
-    navModule.showBillingView(() => this.loadBillingSettings());
+    // React component handles data loading
+    navModule.showBillingView(() => {});
   }
 
   private async showContactView(): Promise<void> {
     const navModule = await loadNavigationModule();
-    navModule.showContactView(() => this.loadContactSettings());
+    // React component handles data loading
+    navModule.showContactView(() => {});
   }
 
   private async showNotificationsView(): Promise<void> {
     const navModule = await loadNavigationModule();
-    navModule.showNotificationsView(() => this.loadNotificationSettings());
+    // React component handles data loading
+    navModule.showNotificationsView(() => {});
   }
 
   private async showUpdatesView(): Promise<void> {
@@ -2283,31 +2315,8 @@ export class ClientPortalModule extends BaseModule {
     this.setupPasswordForm();
   }
 
-  /**
-   * Load billing settings - delegates to settings module
-   */
-  private async loadBillingSettings(): Promise<void> {
-    const settingsModule = await loadSettingsModule();
-    settingsModule.loadBillingSettings();
-  }
-
-  /**
-   * Load contact settings - delegates to settings module
-   */
-  private async loadContactSettings(): Promise<void> {
-    const settingsModule = await loadSettingsModule();
-    settingsModule.loadContactSettings(this.currentUser);
-  }
-
-  /**
-   * Load notification settings - delegates to settings module
-   */
-  private async loadNotificationSettings(): Promise<void> {
-    const settingsModule = await loadSettingsModule();
-    settingsModule.loadNotificationSettings();
-  }
-
   // NOTE: Settings save methods moved to portal-settings module
+  // Load methods removed - React component handles data loading
   // The setupViewFormHandlers method now delegates to the module
 
   private showSuccessMessage(message: string): void {

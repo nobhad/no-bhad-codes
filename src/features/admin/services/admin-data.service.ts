@@ -9,7 +9,7 @@
  */
 
 import { apiFetch, apiPost, apiPut, parseApiResponse } from '../../../utils/api-client';
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminDataService');
 

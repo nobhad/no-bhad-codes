@@ -8,7 +8,7 @@
  * Handles analytics, visitors, and performance exports.
  */
 
-import { createLogger } from '../../../utils/logging';
+import { createLogger } from '../../../utils/logger';
 import type { PerformanceMetrics, PerformanceAlert } from '../../../services/performance-service';
 
 const logger = createLogger('AdminExportService');

@@ -7,6 +7,10 @@
  * Entry point for the client portal.
  */
 
+// CRITICAL: Register React components BEFORE app initialization
+// This must be the FIRST import to prevent race conditions
+import './react/portal-entry';
+
 // Import client portal CSS bundle
 import './styles/bundles/portal.css';
 

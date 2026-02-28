@@ -22,36 +22,39 @@ export const UI_CONTEXTS = {
 
 /**
  * Standard icon sizes (in pixels).
- * Matches design system specifications.
+ * NOTE: For React components, prefer CSS variables (--btn-portal-icon-inner-size).
+ * These values are used by server-side rendering factories only.
  */
 export const ICON_SIZES = {
   xs: 12,
   sm: 14,
   md: 16,
-  lg: 18, // Table standard (desktop)
+  lg: 18,
   xl: 20,
-  '2xl': 24, // Modal standard
+  '2xl': 24,
   '3xl': 32
 } as const;
 
 /**
  * Standard button sizes (in pixels).
- * Defines touch target dimensions.
+ * NOTE: For React components, prefer CSS variables (--btn-portal-icon-size-*).
+ * These values are used by server-side rendering factories only.
  */
 export const BUTTON_SIZES = {
   xs: 24,
   sm: 28,
   md: 32,
-  lg: 36, // Desktop standard
+  lg: 36,
   xl: 40
 } as const;
 
 /**
  * Default configurations per UI context.
- * Each context has optimal icon/button sizes and spacing.
+ * NOTE: Gap values used by server-side rendering only.
+ * React components use CSS variables for spacing.
  */
 export const CONTEXT_DEFAULTS = {
-  table: { iconSize: 'lg' as const, buttonSize: 'lg' as const, gap: 8 },
+  table: { iconSize: 'sm' as const, buttonSize: 'sm' as const, gap: 4 },
   modal: { iconSize: '2xl' as const, buttonSize: 'xl' as const, gap: 12 },
   toolbar: { iconSize: 'lg' as const, buttonSize: 'lg' as const, gap: 8 },
   card: { iconSize: 'md' as const, buttonSize: 'md' as const, gap: 4 },

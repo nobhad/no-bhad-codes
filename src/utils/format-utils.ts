@@ -22,25 +22,38 @@ export function formatFileSize(bytes: number): string {
 
 /**
  * Format number as USD currency
- * @param amount - Number to format (handles null/undefined)
- * @param showCents - Whether to show decimal places (default: true)
- * @returns Formatted currency string (e.g., "$1,234.56" or "$1,234")
+ * @param amount - Number or string to format (handles null/undefined/NaN)
+ * @param options - Formatting options
+ * @param options.showCents - Whether to show decimal places (default: false)
+ * @param options.fallback - Value to return for invalid input (default: '-')
+ * @returns Formatted currency string (e.g., "$1,234" or "-" for invalid)
  */
 export function formatCurrency(
-  amount: number | null | undefined,
-  showCents: boolean = true
+  amount: number | string | null | undefined,
+  options: { showCents?: boolean; fallback?: string } = {}
 ): string {
-  const options: Intl.NumberFormatOptions = {
+  const { showCents = false, fallback = '-' } = options;
+
+  // Handle null/undefined
+  if (amount === null || amount === undefined) return fallback;
+
+  // Parse string to number if needed
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  // Handle NaN
+  if (isNaN(num)) return fallback;
+
+  const formatOptions: Intl.NumberFormatOptions = {
     style: 'currency',
     currency: 'USD'
   };
 
   if (!showCents) {
-    options.minimumFractionDigits = 0;
-    options.maximumFractionDigits = 0;
+    formatOptions.minimumFractionDigits = 0;
+    formatOptions.maximumFractionDigits = 0;
   }
 
-  return new Intl.NumberFormat('en-US', options).format(amount || 0);
+  return new Intl.NumberFormat('en-US', formatOptions).format(num);
 }
 
 /**

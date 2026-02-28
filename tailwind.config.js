@@ -149,7 +149,7 @@ export default {
         },
       },
 
-      // Border radius - minimal/brutalist (squared edges)
+      // Border radius - minimal/portal design (squared edges)
       borderRadius: {
         none: '0',
         xs: '0',
@@ -165,7 +165,7 @@ export default {
       // DO NOT override - the default scale is:
       // 1 = 0.25rem (4px), 2 = 0.5rem (8px), 4 = 1rem (16px), etc.
 
-      // Font family - monospace for brutalist aesthetic
+      // Font family - monospace for portal aesthetic
       fontFamily: {
         mono: [
           'Inconsolata',
@@ -188,7 +188,7 @@ export default {
         '3xl': ['32px', { lineHeight: '1.2' }],
       },
 
-      // Box shadows - minimal/brutalist (mostly none)
+      // Box shadows - minimal/flat design (mostly none)
       boxShadow: {
         none: 'none',
         card: 'none',

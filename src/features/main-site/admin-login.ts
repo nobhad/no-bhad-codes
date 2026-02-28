@@ -10,6 +10,9 @@
 
 import { apiPost } from '../../utils/api-client';
 import { initPasswordToggle } from '../../components/password-toggle';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('AdminLogin');
 
 export class AdminLoginOnMainSite {
   private loginForm: HTMLFormElement | null = null;
@@ -28,7 +31,7 @@ export class AdminLoginOnMainSite {
     this.authError = document.getElementById('auth-error');
 
     if (!this.loginForm || !this.passwordInput) {
-      console.warn('[AdminLogin] Login form or password input not found');
+      logger.warn('Login form or password input not found');
       return;
     }
 
@@ -75,7 +78,7 @@ export class AdminLoginOnMainSite {
           }
         }
       } catch (error) {
-        console.error('[AdminLogin] Login error:', error);
+        logger.error('Login error:', error);
         if (this.authError) {
           this.authError.textContent = 'Connection error. Please try again.';
         }

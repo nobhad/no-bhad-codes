@@ -151,7 +151,7 @@ export class PerformanceService {
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
         this.observers.push(lcpObserver);
       } catch (_e) {
-        console.warn('[PerformanceService] LCP monitoring not supported');
+        logger.warn('LCP monitoring not supported');
       }
 
       // First Input Delay
@@ -169,7 +169,7 @@ export class PerformanceService {
         fidObserver.observe({ entryTypes: ['first-input'] });
         this.observers.push(fidObserver);
       } catch (_e) {
-        console.warn('[PerformanceService] FID monitoring not supported');
+        logger.warn('FID monitoring not supported');
       }
 
       // Cumulative Layout Shift
@@ -191,7 +191,7 @@ export class PerformanceService {
         clsObserver.observe({ entryTypes: ['layout-shift'] });
         this.observers.push(clsObserver);
       } catch (_e) {
-        console.warn('[PerformanceService] CLS monitoring not supported');
+        logger.warn('CLS monitoring not supported');
       }
     }
   }
@@ -226,7 +226,7 @@ export class PerformanceService {
         paintObserver.observe({ entryTypes: ['paint'] });
         this.observers.push(paintObserver);
       } catch (_e) {
-        console.warn('[PerformanceService] Paint timing not supported');
+        logger.warn('Paint timing not supported');
       }
     }
   }
@@ -387,13 +387,13 @@ export class PerformanceService {
     this.alerts.push(alert);
 
     if (alert.type === 'error') {
-      console.error(`[Performance ${alert.type.toUpperCase()}]`, alert.message, {
+      logger.error(`${alert.type.toUpperCase()}: ${alert.message}`, {
         value: alert.value,
         threshold: alert.threshold,
         suggestions: alert.suggestions
       });
     } else {
-      console.warn(`[Performance ${alert.type.toUpperCase()}]`, alert.message, {
+      logger.warn(`${alert.type.toUpperCase()}: ${alert.message}`, {
         value: alert.value,
         threshold: alert.threshold,
         suggestions: alert.suggestions
@@ -435,7 +435,7 @@ export class PerformanceService {
         this.recordCustomMetric(name, duration);
         return duration;
       } catch (e) {
-        console.warn('[PerformanceService] Failed to measure:', e);
+        logger.warn('Failed to measure:', e);
         return null;
       }
     }

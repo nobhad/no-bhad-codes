@@ -270,7 +270,6 @@ export class RouterService extends BaseService {
       await this.performNavigation(path, options);
       this.log('Navigation complete');
     } catch (error) {
-      console.error('[RouterService] Navigation failed:', error);
       this.error('Navigation failed:', error);
     } finally {
       this.isNavigating = false;

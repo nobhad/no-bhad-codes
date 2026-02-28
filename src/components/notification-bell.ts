@@ -30,6 +30,7 @@ interface NotificationBellOptions {
   container: HTMLElement;
   onNotificationClick?: (notification: Notification) => void;
   pollInterval?: number; // ms, default 60000
+  isAdmin?: boolean; // Use admin API endpoints
 }
 
 // ============================================
@@ -55,11 +56,16 @@ export class NotificationBell {
   private pollTimer: number | null = null;
   private pollInterval: number;
   private onNotificationClick?: (notification: Notification) => void;
+  private isAdmin: boolean;
+  private apiBasePath: string;
 
   constructor(options: NotificationBellOptions) {
     this.container = options.container;
     this.onNotificationClick = options.onNotificationClick;
     this.pollInterval = options.pollInterval ?? DEFAULT_POLL_INTERVAL;
+    this.isAdmin = options.isAdmin ?? false;
+    // Use role-appropriate API path
+    this.apiBasePath = this.isAdmin ? '/api/admin/notifications' : '/api/clients/me/notifications';
   }
 
   /**
@@ -197,7 +203,7 @@ export class NotificationBell {
   private async fetchNotifications(): Promise<void> {
     try {
       const response = await fetch(
-        `/api/clients/me/notifications/history?limit=${NOTIFICATION_LIMIT}`,
+        `${this.apiBasePath}/history?limit=${NOTIFICATION_LIMIT}`,
         {
           credentials: 'include'
         }
@@ -265,7 +271,7 @@ export class NotificationBell {
    */
   private async markAsRead(notificationId: number): Promise<void> {
     try {
-      const response = await fetch(`/api/clients/me/notifications/${notificationId}/read`, {
+      const response = await fetch(`${this.apiBasePath}/${notificationId}/read`, {
         method: 'PUT',
         credentials: 'include'
       });
@@ -289,7 +295,7 @@ export class NotificationBell {
    */
   private async markAllAsRead(): Promise<void> {
     try {
-      const response = await fetch('/api/clients/me/notifications/mark-all-read', {
+      const response = await fetch(`${this.apiBasePath}/mark-all-read`, {
         method: 'PUT',
         credentials: 'include'
       });
