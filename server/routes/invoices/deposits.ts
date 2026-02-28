@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseDeposit, toSnakeCaseInvoice } from './helpers.js';
 import { logger } from '../../services/logger.js';
 
@@ -53,11 +53,7 @@ router.post(
         description
       );
 
-      res.status(201).json({
-        success: true,
-        message: 'Deposit invoice created successfully',
-        invoice: toSnakeCaseInvoice(invoice),
-      });
+      sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Deposit invoice created successfully');
     } catch (error: unknown) {
       logger.error('[Invoices] Error creating deposit invoice:', {
         error: error instanceof Error ? error : undefined,
@@ -90,8 +86,7 @@ router.get(
 
     try {
       const deposits = await getInvoiceService().getAvailableDeposits(projectId);
-      res.json({
-        success: true,
+      sendSuccess(res, {
         deposits: deposits.map(toSnakeCaseDeposit),
         count: deposits.length,
       });

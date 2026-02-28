@@ -14,6 +14,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { safeJsonParseArray, safeJsonParseObject, parseIfString } from '../utils/safe-json.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -527,10 +528,7 @@ class QuestionnaireService {
       name: row.name as string,
       description: row.description as string | undefined,
       project_type: row.project_type as string | undefined,
-      questions:
-        typeof row.questions === 'string'
-          ? JSON.parse(row.questions)
-          : (row.questions as Question[]),
+      questions: parseIfString<Question[]>(row.questions as string | Question[], [], 'questionnaire questions'),
       is_active: Boolean(row.is_active),
       auto_send_on_project_create: Boolean(row.auto_send_on_project_create),
       display_order: row.display_order as number,
@@ -549,10 +547,11 @@ class QuestionnaireService {
       questionnaire_id: row.questionnaire_id as number,
       client_id: row.client_id as number,
       project_id: row.project_id as number | undefined,
-      answers:
-        typeof row.answers === 'string'
-          ? JSON.parse(row.answers)
-          : (row.answers as Record<string, unknown>),
+      answers: parseIfString<Record<string, unknown>>(
+        row.answers as string | Record<string, unknown>,
+        {},
+        'questionnaire answers'
+      ),
       status: row.status as ResponseStatus,
       started_at: row.started_at as string | undefined,
       completed_at: row.completed_at as string | undefined,

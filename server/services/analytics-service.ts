@@ -8,6 +8,7 @@
 import { getDatabase } from '../database/init.js';
 import { logger } from '../services/logger.js';
 import { userService } from './user-service.js';
+import { safeJsonParse, safeJsonParseArray, safeJsonParseObject } from '../utils/safe-json.js';
 
 // ============================================
 // Types
@@ -226,8 +227,8 @@ class AnalyticsService {
 
     return reports.map((r: any) => ({
       ...r,
-      filters: r.filters ? JSON.parse(r.filters) : {},
-      columns: r.columns ? JSON.parse(r.columns) : null,
+      filters: safeJsonParseObject(r.filters, 'report filters'),
+      columns: r.columns ? safeJsonParseArray<string>(r.columns, 'report columns') : null,
     }));
   }
 
@@ -244,8 +245,8 @@ class AnalyticsService {
 
     return {
       ...(report as unknown as SavedReport),
-      filters: typeof report.filters === 'string' ? JSON.parse(report.filters) : {},
-      columns: typeof report.columns === 'string' ? JSON.parse(report.columns) : null,
+      filters: safeJsonParseObject(report.filters as string, 'report filters'),
+      columns: report.columns ? safeJsonParseArray<string>(report.columns as string, 'report columns') : null,
     };
   }
 
@@ -412,7 +413,7 @@ class AnalyticsService {
 
     return schedules.map((s: any) => ({
       ...s,
-      recipients: s.recipients ? JSON.parse(s.recipients) : [],
+      recipients: safeJsonParseArray(s.recipients, 'schedule recipients'),
     }));
   }
 
@@ -429,7 +430,7 @@ class AnalyticsService {
 
     return {
       ...(schedule as unknown as ReportSchedule),
-      recipients: typeof schedule.recipients === 'string' ? JSON.parse(schedule.recipients) : [],
+      recipients: safeJsonParseArray(schedule.recipients as string, 'schedule recipients'),
     };
   }
 
@@ -526,7 +527,7 @@ class AnalyticsService {
 
     return schedules.map((s: any) => ({
       ...s,
-      recipients: s.recipients ? JSON.parse(s.recipients) : [],
+      recipients: safeJsonParseArray(s.recipients, 'schedule recipients'),
     }));
   }
 
@@ -628,7 +629,7 @@ class AnalyticsService {
 
     return widgets.map((w: any) => ({
       ...w,
-      config: w.config ? JSON.parse(w.config) : {},
+      config: safeJsonParseObject(w.config, 'widget config'),
     }));
   }
 
@@ -684,7 +685,7 @@ class AnalyticsService {
 
     return {
       ...(widget as unknown as DashboardWidget),
-      config: typeof widget.config === 'string' ? JSON.parse(widget.config) : {},
+      config: safeJsonParseObject(widget.config as string, 'widget config'),
     };
   }
 
@@ -793,7 +794,17 @@ class AnalyticsService {
     await db.run('DELETE FROM dashboard_widgets WHERE user_email = ?', [userEmail]);
 
     // Create widgets from preset
-    const widgetConfigs = JSON.parse(typeof preset.widgets === 'string' ? preset.widgets : '[]');
+    interface PresetWidgetConfig {
+      type: WidgetType;
+      title: string;
+      data_source: DataSource;
+      config?: Record<string, unknown>;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    }
+    const widgetConfigs = safeJsonParseArray<PresetWidgetConfig>(preset.widgets as string, 'preset widgets');
     const widgets: DashboardWidget[] = [];
 
     for (const config of widgetConfigs) {
@@ -1003,7 +1014,7 @@ class AnalyticsService {
 
     return snapshots.map((s: any) => ({
       ...s,
-      metadata: s.metadata ? JSON.parse(s.metadata) : null,
+      metadata: safeJsonParseObject(s.metadata, 'snapshot metadata'),
     }));
   }
 
@@ -1026,7 +1037,7 @@ class AnalyticsService {
 
     return snapshots.map((s: any) => ({
       ...s,
-      metadata: s.metadata ? JSON.parse(s.metadata) : null,
+      metadata: safeJsonParseObject(s.metadata, 'snapshot metadata'),
     }));
   }
 
@@ -1072,7 +1083,7 @@ class AnalyticsService {
 
     return alerts.map((a: any) => ({
       ...a,
-      notification_emails: a.notification_emails ? JSON.parse(a.notification_emails) : [],
+      notification_emails: safeJsonParseArray<string>(a.notification_emails, 'alert emails'),
     }));
   }
 
@@ -1089,8 +1100,7 @@ class AnalyticsService {
 
     return {
       ...(alert as unknown as MetricAlert),
-      notification_emails:
-        typeof alert.notification_emails === 'string' ? JSON.parse(alert.notification_emails) : [],
+      notification_emails: safeJsonParseArray<string>(alert.notification_emails as string, 'alert emails'),
     };
   }
 

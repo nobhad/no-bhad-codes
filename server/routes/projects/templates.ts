@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ router.get(
   asyncHandler(async (req: express.Request, res: Response) => {
     const { projectType } = req.query;
     const templates = await projectService.getTemplates(projectType as string | undefined);
-    res.json({ templates });
+    sendSuccess(res, { templates });
   })
 );
 
@@ -35,7 +35,7 @@ router.get(
       return errorResponse(res, 'Template not found', 404, 'TEMPLATE_NOT_FOUND');
     }
 
-    res.json({ template });
+    sendSuccess(res, { template });
   })
 );
 
@@ -52,7 +52,7 @@ router.post(
     }
 
     const template = await projectService.createTemplate(req.body);
-    res.status(201).json({ message: 'Template created successfully', template });
+    sendCreated(res, { template }, 'Template created successfully');
   })
 );
 
@@ -80,12 +80,11 @@ router.post(
       startDate
     );
 
-    res.status(201).json({
-      message: 'Project created from template successfully',
+    sendCreated(res, {
       projectId: result.projectId,
       milestoneIds: result.milestoneIds,
       taskIds: result.taskIds,
-    });
+    }, 'Project created from template successfully');
   })
 );
 

@@ -144,8 +144,9 @@ router.put('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => 
     const webhook = await webhookService.updateWebhook(webhookId, req.body);
     const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
-  } catch (error: any) {
-    if (error.message.includes('not found')) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes('not found')) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
     }
     logger.error('[Webhooks] Failed to update webhook', {
@@ -199,8 +200,9 @@ router.patch('/webhooks/:id/toggle', async (req: AuthenticatedRequest, res: Resp
     const webhook = await webhookService.toggleWebhook(webhookId, active);
     const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
-  } catch (error: any) {
-    if (error.message.includes('not found')) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes('not found')) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
     }
     logger.error('[Webhooks] Failed to toggle webhook', {
@@ -267,8 +269,13 @@ router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Re
       return errorResponse(res, 'Invalid pagination parameters', 400, 'VALIDATION_ERROR');
     }
 
+    const validStatuses = ['pending', 'success', 'failed'] as const;
+    const statusFilter = status && validStatuses.includes(status as typeof validStatuses[number])
+      ? status as 'pending' | 'success' | 'failed'
+      : undefined;
+
     const result = await webhookService.getWebhookDeliveries(webhookId, {
-      status: status as string | undefined,
+      status: statusFilter,
       eventType: eventType as string | undefined,
       limit: parsedLimit,
       offset: parsedOffset,

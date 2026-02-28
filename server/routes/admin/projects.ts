@@ -8,8 +8,9 @@ import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../../config/upl
 import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -294,5 +295,64 @@ async function saveAdminProjectAsFile(
 
   logger.info(`[AdminProjects] Saved project file: ${relativePath}`);
 }
+
+// =====================================================
+// BULK OPERATIONS
+// =====================================================
+
+/**
+ * POST /api/admin/projects/bulk/delete - Bulk soft delete projects
+ */
+router.post(
+  '/projects/bulk/delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { projectIds } = req.body;
+
+    if (!projectIds || !Array.isArray(projectIds) || projectIds.length === 0) {
+      return errorResponse(
+        res,
+        'projectIds array is required and must not be empty',
+        400,
+        'MISSING_REQUIRED_FIELDS'
+      );
+    }
+
+    const deletedBy = req.user?.email || 'admin';
+    let deleted = 0;
+    const errors: string[] = [];
+
+    // Soft delete each project using the soft delete service
+    for (const projectId of projectIds) {
+      const id = typeof projectId === 'string' ? parseInt(projectId, 10) : projectId;
+      if (isNaN(id)) {
+        errors.push(`Invalid project ID: ${projectId}`);
+        continue;
+      }
+
+      try {
+        const result = await softDeleteService.softDeleteProject(id, deletedBy);
+        if (result.success) {
+          deleted++;
+        } else {
+          errors.push(`Project ${id}: ${result.message}`);
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        errors.push(`Project ${id}: ${errorMsg}`);
+      }
+    }
+
+    // Log the bulk action
+    errorTracker.captureMessage('Admin bulk deleted projects', 'info', {
+      tags: { component: 'admin-projects' },
+      user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
+      extra: { projectIds, deleted, errors },
+    });
+
+    sendSuccess(res, { deleted, errors: errors.length > 0 ? errors : undefined }, `Deleted ${deleted} projects`);
+  })
+);
 
 export default router;

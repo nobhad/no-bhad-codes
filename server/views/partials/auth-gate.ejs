@@ -8,7 +8,7 @@
     </div>
     <% if (portalType === 'admin') { %>
       <!-- Admin Login Form -->
-      <form class="auth-gate-form" id="admin-login-form" autocomplete="off" novalidate onsubmit="return false;">
+      <form class="auth-gate-form" id="admin-login-form" autocomplete="off" novalidate>
         <!-- Hidden username field for accessibility and password managers -->
         <input
           type="email"
@@ -63,7 +63,7 @@
       </script>
     <% } else { %>
       <!-- Client Portal Login Form -->
-      <form class="auth-gate-form" id="portal-login-form" novalidate onsubmit="return false;">
+      <form class="auth-gate-form" id="portal-login-form" novalidate>
         <div class="form-group">
           <label for="portal-email" class="sr-only">Email Address</label>
           <input
@@ -105,7 +105,7 @@
         </button>
       </form>
       <!-- Magic Link Form (hidden by default) -->
-      <form class="auth-gate-form" id="magic-link-form" novalidate onsubmit="return false;" style="display: none;">
+      <form class="auth-gate-form" id="magic-link-form" novalidate style="display: none;">
         <div class="form-group">
           <label for="magic-link-email" class="sr-only">Email Address</label>
           <input

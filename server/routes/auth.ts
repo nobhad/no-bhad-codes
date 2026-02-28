@@ -708,6 +708,13 @@ router.post(
  */
 router.post(
   '/reset-password',
+  // Rate limit: 10 reset attempts per 15 minutes per IP to prevent token brute-forcing
+  rateLimit({
+    windowMs: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.WINDOW_MS,
+    maxRequests: 10,
+    message: 'Too many password reset attempts. Please try again later.',
+    keyGenerator: (req) => `reset-password:${req.ip}`,
+  }),
   // Validate and sanitize input
   validateRequest(AuthValidationSchemas.resetPassword),
   asyncHandler(async (req: express.Request, res: express.Response) => {
@@ -1313,6 +1320,13 @@ router.post(
  */
 router.post(
   '/set-password',
+  // Rate limit: 10 set-password attempts per 15 minutes per IP to prevent token brute-forcing
+  rateLimit({
+    windowMs: RATE_LIMIT_CONFIG.FORGOT_PASSWORD.WINDOW_MS,
+    maxRequests: 10,
+    message: 'Too many password set attempts. Please try again later.',
+    keyGenerator: (req) => `set-password:${req.ip}`,
+  }),
   // Validate and sanitize input
   validateRequest(AuthValidationSchemas.setPassword),
   asyncHandler(async (req: express.Request, res: express.Response) => {

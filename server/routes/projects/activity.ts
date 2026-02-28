@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessProject, isUserAdmin } from '../../middleware/access-control.js';
 import { getNumber } from '../../database/row-helpers.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -69,10 +69,7 @@ router.post(
       [result.lastID]
     );
 
-    res.status(201).json({
-      message: 'Project update added successfully',
-      update: newUpdate,
-    });
+    sendCreated(res, { update: newUpdate }, 'Project update added successfully');
   })
 );
 
@@ -176,7 +173,7 @@ router.get(
         ? Math.round((completedMilestones / totalMilestones) * 100)
         : projectProgress || 0;
 
-    res.json({
+    sendSuccess(res, {
       project,
       stats,
       progressPercentage,

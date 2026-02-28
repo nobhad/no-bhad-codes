@@ -38,10 +38,9 @@ export type ValidationRule = {
   min?: number;
   max?: number;
   pattern?: RegExp;
-  // Using any for customValidator to allow strongly-typed validators from calling code
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Validators handle their own type narrowing
   customValidator?: (value: any) => boolean | string;
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Sanitizers handle their own type narrowing
   customSanitizer?: (value: any) => unknown;
   allowedValues?: unknown[];
   description?: string;

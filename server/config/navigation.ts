@@ -1,9 +1,29 @@
 /**
- * Portal Navigation Configuration
+ * ===============================================
+ * PORTAL NAVIGATION CONFIGURATION
+ * ===============================================
+ * @file server/config/navigation.ts
  *
- * Single source of truth for both admin and client portal navigation.
- * Changes here automatically reflect in both portals via EJS templates.
+ * EJS template adapter for unified portal navigation.
+ * Combines unified config (source of truth) with SVG icons
+ * for server-side rendering in EJS templates.
+ *
+ * NOTE: The actual navigation data lives in unified-navigation.ts.
+ * This file provides backward compatibility with EJS templates.
  */
+
+import {
+  getNavigationForRole,
+  getSubtabGroupsForRole,
+  getFeaturesForRole,
+  type UserRole,
+  type UnifiedNavItem,
+  type UnifiedSubtabGroup,
+} from './unified-navigation.js';
+
+// ============================================
+// TYPES (for EJS template compatibility)
+// ============================================
 
 export interface NavItem {
   id: string;
@@ -44,6 +64,7 @@ export interface PortalConfig {
     subtabs: boolean;
     notificationBell: boolean;
     mobileMenuToggle: boolean;
+    themeToggle?: boolean;
   };
 }
 
@@ -51,7 +72,7 @@ export interface PortalConfig {
 // ICON DEFINITIONS (Lucide SVG)
 // ============================================
 
-const ICONS = {
+export const ICONS: Record<string, string> = {
   // Sidebar toggle
   panelLeft:
     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M15 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg>',
@@ -98,194 +119,130 @@ const ICONS = {
     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>',
 };
 
-/**
- * Admin Portal Configuration
- */
-const ADMIN_CONFIG: PortalConfig = {
-  type: 'admin',
-  title: 'Admin Dashboard - No Bhad Codes',
-  pageTitle: 'Dashboard',
-  authTitle: 'Admin Access',
-  authDescription: 'Enter your admin password to continue',
-  dashboardId: 'admin-dashboard',
-  pageTitleId: 'admin-page-title',
-  navigation: [
-    { id: 'overview', label: 'Overview', icon: ICONS.gauge, shortcut: '1', active: true },
-    { id: 'work', label: 'Projects', icon: ICONS.folder, shortcut: '2', dataTab: 'work' },
-    { id: 'workflows', label: 'Workflows', icon: ICONS.lineChart, shortcut: '3' },
-    { id: 'crm', label: 'CRM', icon: ICONS.users, shortcut: '4', ariaLabel: 'Clients & Leads' },
-    { id: 'documents', label: 'Documents', icon: ICONS.fileText, shortcut: '5' },
-    { id: 'analytics', label: 'Analytics', icon: ICONS.barChart, shortcut: '6' },
-    {
-      id: 'support',
-      label: 'Knowledge',
-      icon: ICONS.bookOpen,
-      shortcut: '7',
-      ariaLabel: 'Knowledge Base',
-    },
-    {
-      id: 'system',
-      label: 'Settings',
-      icon: ICONS.settings,
-      shortcut: '8',
-      ariaLabel: 'System Status',
-    },
-  ],
-  subtabGroups: [
-    {
-      forTab: 'work',
-      mode: 'primary',
-      subtabs: [
-        { id: 'projects', label: 'Projects', active: true },
-        { id: 'tasks', label: 'Tasks' },
-        { id: 'ad-hoc-requests', label: 'Requests' },
-      ],
-    },
-    {
-      forTab: 'crm',
-      mode: 'primary',
-      subtabs: [
-        { id: 'leads', label: 'Leads', active: true },
-        { id: 'contacts', label: 'Contacts' },
-        { id: 'messages', label: 'Messages' },
-        { id: 'clients', label: 'Clients' },
-      ],
-    },
-    {
-      forTab: 'documents',
-      mode: 'primary',
-      subtabs: [
-        { id: 'invoices', label: 'Invoices', active: true },
-        { id: 'contracts', label: 'Contracts' },
-        { id: 'document-requests', label: 'Document Requests' },
-        { id: 'questionnaires', label: 'Questionnaires' },
-      ],
-    },
-    {
-      forTab: 'analytics',
-      subtabs: [
-        { id: 'overview', label: 'Overview', active: true },
-        { id: 'business', label: 'Business' },
-        { id: 'visitors', label: 'Visitors' },
-        { id: 'reports', label: 'Reports & Alerts' },
-      ],
-    },
-    {
-      forTab: 'workflows',
-      id: 'workflows-subtabs',
-      subtabs: [
-        { id: 'approvals', label: 'Approvals', active: true },
-        { id: 'triggers', label: 'Triggers' },
-        { id: 'email-templates', label: 'Email Templates' },
-      ],
-    },
-    {
-      forTab: 'support',
-      id: 'knowledge-base-subtabs',
-      mode: 'primary',
-      subtabs: [
-        { id: 'categories', label: 'Categories', active: true },
-        { id: 'articles', label: 'Articles' },
-      ],
-    },
-    {
-      forTab: 'project-detail',
-      id: 'project-detail-header-tabs',
-      subtabs: [
-        { id: 'overview', label: 'Overview', active: true, dataAttr: 'pd-tab' },
-        { id: 'files', label: 'Files', dataAttr: 'pd-tab' },
-        { id: 'deliverables', label: 'Deliverables', dataAttr: 'pd-tab' },
-        { id: 'messages', label: 'Messages', dataAttr: 'pd-tab' },
-        { id: 'invoices', label: 'Invoices', dataAttr: 'pd-tab' },
-        { id: 'tasks', label: 'Tasks', dataAttr: 'pd-tab' },
-        { id: 'time', label: 'Time', dataAttr: 'pd-tab' },
-        { id: 'contract', label: 'Contract', dataAttr: 'pd-tab' },
-        { id: 'notes', label: 'Notes', dataAttr: 'pd-tab' },
-      ],
-    },
-    {
-      forTab: 'client-detail',
-      id: 'client-detail-header-tabs',
-      subtabs: [
-        { id: 'overview', label: 'Overview', active: true, dataAttr: 'cd-tab' },
-        { id: 'contacts', label: 'Contacts', dataAttr: 'cd-tab' },
-        { id: 'activity', label: 'Activity', dataAttr: 'cd-tab' },
-        { id: 'projects', label: 'Projects', dataAttr: 'cd-tab' },
-        { id: 'invoices', label: 'Invoices', dataAttr: 'cd-tab' },
-        { id: 'notes', label: 'Notes', dataAttr: 'cd-tab' },
-      ],
-    },
-  ],
-  features: {
-    secondarySidebar: true,
-    subtabs: true,
-    notificationBell: false,
-    mobileMenuToggle: false,
+// ============================================
+// PORTAL CONFIG METADATA
+// ============================================
+
+const PORTAL_METADATA: Record<
+  UserRole,
+  {
+    title: string;
+    pageTitle: string;
+    authTitle: string;
+    authDescription: string;
+    dashboardId: string;
+    pageTitleId: string;
+  }
+> = {
+  admin: {
+    title: 'Admin Dashboard - No Bhad Codes',
+    pageTitle: 'Dashboard',
+    authTitle: 'Admin Access',
+    authDescription: 'Enter your admin password to continue',
+    dashboardId: 'admin-dashboard',
+    pageTitleId: 'admin-page-title',
+  },
+  client: {
+    title: 'Client Portal - No Bhad Codes',
+    pageTitle: 'Welcome Back',
+    authTitle: 'Client Portal',
+    authDescription: 'Sign in to access your projects and documents',
+    dashboardId: 'client-dashboard',
+    pageTitleId: 'portal-page-title',
   },
 };
 
-/**
- * Client Portal Configuration
- */
-const CLIENT_CONFIG: PortalConfig = {
-  type: 'client',
-  title: 'Client Portal - No Bhad Codes',
-  pageTitle: 'Welcome Back',
-  authTitle: 'Client Portal',
-  authDescription: 'Sign in to access your projects and documents',
-  dashboardId: 'client-dashboard',
-  pageTitleId: 'portal-page-title',
-  navigation: [
-    { id: 'dashboard', label: 'Dashboard', icon: ICONS.gauge, active: true },
-    { id: 'projects', label: 'Projects', icon: ICONS.briefcase, badge: 'badge-projects' },
-    { id: 'messages', label: 'Messages', icon: ICONS.messageSquare, badge: 'badge-messages' },
-    { id: 'requests', label: 'Requests', icon: ICONS.messageCircle, badge: 'badge-requests' },
-    {
-      id: 'questionnaires',
-      label: 'Questionnaires',
-      icon: ICONS.clipboardList,
-      badge: 'badge-questionnaires',
-    },
-    { id: 'approvals', label: 'Approvals', icon: ICONS.checkCircle, badge: 'badge-approvals' },
-    { id: 'invoices', label: 'Invoices', icon: ICONS.receipt, badge: 'badge-invoices' },
-    {
-      id: 'documents',
-      label: 'Files',
-      icon: ICONS.fileText,
-      badge: 'badge-documents',
-      dataTab: 'files',
-    },
-    { id: 'review', label: 'Review', icon: ICONS.eye, dataTab: 'preview' },
-    { id: 'help', label: 'Help', icon: ICONS.helpCircle },
-    { id: 'settings', label: 'Settings', icon: ICONS.settingsClient },
-  ],
-  features: {
-    secondarySidebar: false,
-    subtabs: false,
-    notificationBell: true,
-    mobileMenuToggle: true,
-  },
-};
+// ============================================
+// CONVERSION FUNCTIONS
+// ============================================
 
 /**
- * Get portal configuration by type
+ * Convert unified nav item to EJS-compatible nav item
+ * Resolves icon key to actual SVG markup
  */
-export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
-  return portalType === 'admin' ? ADMIN_CONFIG : CLIENT_CONFIG;
+function toNavItem(item: UnifiedNavItem): NavItem {
+  return {
+    id: item.id,
+    label: item.label,
+    icon: ICONS[item.icon] || ICONS.gauge, // Fallback to gauge icon
+    shortcut: item.shortcut,
+    badge: item.badge,
+    dataTab: item.dataTab,
+    active: item.activeForRole !== undefined,
+    ariaLabel: item.ariaLabel,
+  };
 }
 
 /**
- * Export both configs for direct access
+ * Convert unified subtab group to EJS-compatible subtab group
  */
-export const PORTAL_CONFIGS = {
-  admin: ADMIN_CONFIG,
-  client: CLIENT_CONFIG,
-} as const;
+function toSubtabGroup(group: UnifiedSubtabGroup): SubtabGroup {
+  return {
+    forTab: group.forTab,
+    mode: group.mode,
+    id: group.id,
+    subtabs: group.subtabs.map((subtab) => ({
+      id: subtab.id,
+      label: subtab.label,
+      active: subtab.active,
+      dataAttr: subtab.dataAttr,
+    })),
+  };
+}
 
 /**
- * Export icons for use in templates
+ * Get portal configuration by type
+ * This is the main function used by EJS templates
+ *
+ * IMPORTANT: This now uses unified-navigation.ts as the source of truth
  */
-export { ICONS };
+export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
+  const role: UserRole = portalType;
+  const metadata = PORTAL_METADATA[role];
+  const features = getFeaturesForRole(role);
+  const navItems = getNavigationForRole(role);
+  const subtabGroups = getSubtabGroupsForRole(role);
+
+  // Filter to only show top-level nav items (not grouped tabs for admin)
+  // Admin shows: overview, work, workflows, crm, documents, analytics, support, system
+  // Client shows: all their items since they don't have groups
+  const topLevelNavItems =
+    role === 'admin'
+      ? navItems.filter(
+          (item) =>
+            !item.group ||
+            ['work', 'crm', 'documents', 'workflows', 'analytics', 'support', 'system'].includes(
+              item.id
+            )
+        )
+      : navItems;
+
+  return {
+    type: portalType,
+    ...metadata,
+    navigation: topLevelNavItems.map(toNavItem),
+    subtabGroups: subtabGroups.map(toSubtabGroup),
+    features: {
+      secondarySidebar: features.secondarySidebar,
+      subtabs: features.subtabs,
+      notificationBell: features.notificationBell,
+      mobileMenuToggle: features.mobileMenuToggle,
+      themeToggle: features.themeToggle,
+    },
+  };
+}
+
+/**
+ * Export both configs for direct access (backward compatibility)
+ */
+export const PORTAL_CONFIGS = {
+  get admin() {
+    return getPortalConfig('admin');
+  },
+  get client() {
+    return getPortalConfig('client');
+  },
+} as const;
 
 /**
  * Tab content IDs that need to be rendered (admin only)
@@ -306,4 +263,27 @@ export const ADMIN_TAB_IDS = [
   'system',
   'project-detail',
   'workflows',
+  'questionnaires',
+  'invoices',
+  'contracts',
+  'document-requests',
+  'email-templates',
 ];
+
+// Re-export from unified-navigation for TypeScript usage
+export {
+  getNavigationForRole,
+  getSubtabGroupsForRole,
+  getFeaturesForRole,
+  getCapabilitiesForRole,
+  resolveTab,
+  getTabTitle,
+  canAccessTab,
+  getDefaultTabForRole,
+  UNIFIED_NAVIGATION,
+  UNIFIED_SUBTAB_GROUPS,
+  UNIFIED_TAB_TITLES,
+  UNIFIED_TAB_GROUPS,
+} from './unified-navigation.js';
+
+export type { UserRole, UnifiedNavItem, UnifiedSubtabGroup } from './unified-navigation.js';

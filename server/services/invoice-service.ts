@@ -11,6 +11,7 @@ import { getDatabase, Database } from '../database/init.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
+import { safeJsonParseArray } from '../utils/safe-json.js';
 import { InvoicePaymentService } from './invoice/payment-service.js';
 import { InvoiceRecurringService } from './invoice/recurring-service.js';
 import { InvoiceReportingService } from './invoice/reporting-service.js';
@@ -1102,7 +1103,7 @@ export class InvoiceService {
       id: row.id,
       name: row.name,
       description: row.description,
-      payments: JSON.parse(row.payments),
+      payments: safeJsonParseArray(row.payments, 'payment plan payments'),
       isDefault: Boolean(row.is_default),
       createdAt: row.created_at,
     }));
@@ -1123,7 +1124,7 @@ export class InvoiceService {
       id: row.id,
       name: row.name,
       description: row.description,
-      payments: JSON.parse(row.payments),
+      payments: safeJsonParseArray(row.payments, 'payment plan payments'),
       isDefault: Boolean(row.is_default),
       createdAt: row.created_at,
     };

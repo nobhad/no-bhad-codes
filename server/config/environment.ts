@@ -338,8 +338,9 @@ function validateConfigValue(key: string, schema: ConfigSchemaItem): void {
     }
 
     (config as any)[key] = value;
-  } catch (error: any) {
-    validationErrors.push(`Invalid ${key}: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    validationErrors.push(`Invalid ${key}: ${errorMessage}`);
   }
 }
 
@@ -425,8 +426,9 @@ function generateDerivedConfig(): void {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-    } catch (error: any) {
-      console.warn(`⚠️  Could not create directory ${dir}: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`⚠️  Could not create directory ${dir}: ${errorMessage}`);
     }
   });
 }

@@ -12,6 +12,7 @@ import {
   DesignElement,
   DeliverableReview,
 } from '../models/deliverable.js';
+import { safeJsonParseArray } from '../utils/safe-json.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -558,9 +559,10 @@ export class DeliverableService {
       reviewer_id: row.reviewer_id,
       decision: row.decision,
       feedback: row.feedback,
-      design_elements_reviewed: row.design_elements_reviewed
-        ? JSON.parse(row.design_elements_reviewed)
-        : [],
+      design_elements_reviewed: safeJsonParseArray(
+        row.design_elements_reviewed,
+        'design elements reviewed'
+      ),
       review_duration_minutes: row.review_duration_minutes,
       created_at: row.created_at,
     };

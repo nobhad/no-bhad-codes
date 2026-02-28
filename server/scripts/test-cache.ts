@@ -150,10 +150,12 @@ async function testCacheService(): Promise<void> {
 
     console.log('\n🎉 All cache tests passed successfully!');
     console.log('\n💡 Redis caching is ready for production use!');
-  } catch (error: any) {
-    console.error('❌ Cache service test failed:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+    console.error('❌ Cache service test failed:', errorMessage);
 
-    if (error.code === 'ECONNREFUSED') {
+    if (errorCode === 'ECONNREFUSED') {
       console.log('\n💡 Tips to fix connection issues:');
       console.log(
         '   1. Install Redis: brew install redis (macOS) or apt-get install redis (Ubuntu)'

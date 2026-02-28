@@ -9,6 +9,7 @@
  */
 
 import { getDatabase, type SqlParam } from '../database/init.js';
+import { safeJsonParseArray, safeJsonParseOrNull } from '../utils/safe-json.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -614,7 +615,7 @@ class EmailTemplateService {
       const l = log as Record<string, unknown>;
       return {
         ...l,
-        metadata: l.metadata ? JSON.parse(l.metadata as string) : null,
+        metadata: safeJsonParseOrNull(l.metadata as string, 'email send log metadata'),
       } as EmailSendLog;
     });
   }
@@ -635,7 +636,7 @@ class EmailTemplateService {
       subject: row.subject as string,
       body_html: row.body_html as string,
       body_text: row.body_text as string | null,
-      variables: row.variables ? JSON.parse(row.variables as string) : [],
+      variables: safeJsonParseArray<TemplateVariable>(row.variables as string, 'email template variables'),
       is_active: Boolean(row.is_active),
       is_system: Boolean(row.is_system),
       created_at: row.created_at as string,

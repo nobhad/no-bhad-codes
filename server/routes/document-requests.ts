@@ -115,6 +115,23 @@ router.get(
 // =====================================================
 
 /**
+ * Get all document requests (admin)
+ * Supports filtering by status and pagination
+ */
+router.get(
+  '/',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const status = req.query.status as RequestStatus | undefined;
+    const requests = await documentRequestService.getAllRequests(status);
+    const stats = await documentRequestService.getAdminStats();
+
+    sendSuccess(res, { requests, stats });
+  })
+);
+
+/**
  * Get all pending document requests (admin)
  */
 router.get(
@@ -426,6 +443,38 @@ router.delete(
 
     await documentRequestService.deleteRequest(id);
     sendSuccess(res, undefined, 'Document request deleted');
+  })
+);
+
+/**
+ * Bulk delete requests (admin)
+ */
+router.post(
+  '/bulk-delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { requestIds } = req.body;
+
+    if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
+      return errorResponse(res, 'requestIds array is required', 400);
+    }
+
+    let deleted = 0;
+
+    for (const requestId of requestIds) {
+      const id = typeof requestId === 'string' ? parseInt(requestId, 10) : requestId;
+      if (isNaN(id)) continue;
+
+      try {
+        await documentRequestService.deleteRequest(id);
+        deleted++;
+      } catch {
+        // Skip requests that don't exist or can't be deleted
+      }
+    }
+
+    sendSuccess(res, { deleted }, `${deleted} document request(s) deleted`);
   })
 );
 

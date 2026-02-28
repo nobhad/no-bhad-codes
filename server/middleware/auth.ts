@@ -13,6 +13,16 @@ import { errorResponse } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import type { JWTAuthRequest } from '../types/request.js';
 
+/** JWT payload structure for user authentication tokens */
+interface JWTPayload {
+  id?: number;
+  clientId?: number;
+  email: string;
+  type: 'admin' | 'client';
+  iat?: number;
+  exp?: number;
+}
+
 export const authenticateToken = (req: JWTAuthRequest, res: Response, next: NextFunction) => {
   // Try Authorization header first (for API consumers), then HttpOnly cookie
   const authHeader = req.headers['authorization'];
@@ -32,9 +42,13 @@ export const authenticateToken = (req: JWTAuthRequest, res: Response, next: Next
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as any;
+    const decoded = jwt.verify(token, secret) as JWTPayload;
+    const userId = decoded.id ?? decoded.clientId;
+    if (userId === undefined) {
+      return errorResponse(res, 'Invalid token: missing user ID', 403, 'TOKEN_INVALID');
+    }
     req.user = {
-      id: decoded.id || decoded.clientId, // Support both id and clientId from tokens
+      id: userId,
       email: decoded.email,
       type: decoded.type
     };

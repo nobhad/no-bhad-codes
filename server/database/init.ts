@@ -368,7 +368,7 @@ export async function initializeDatabase(): Promise<void> {
     // Log connection stats
     const stats = dbPool.getConnectionStats();
     logger.info(`Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to initialize database:', {
       error: error instanceof Error ? error : undefined,
     });

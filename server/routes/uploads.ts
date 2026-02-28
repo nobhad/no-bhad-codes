@@ -31,6 +31,32 @@ import {
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
 
+/** Database row type for file records */
+interface FileRow {
+  id: number;
+  project_id: number;
+  project_name?: string;
+  filename: string;
+  original_filename: string;
+  mime_type: string;
+  file_size: number;
+  file_path: string;
+  uploaded_by: string;
+  created_at: string;
+  description?: string;
+  file_type?: string;
+  category?: string;
+  shared_with_client?: number | boolean;
+  shared_at?: string;
+  shared_by?: string;
+}
+
+/** Database row type for project records */
+interface ProjectRow {
+  id: number;
+  project_name: string;
+}
+
 const router = express.Router();
 
 // Upload validation schemas for additional request body validation
@@ -230,7 +256,7 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
 };
 
 // File filter for security
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Define allowed file types
   // SECURITY: JS/TS/HTML/CSS removed to prevent stored XSS if files are served
   // JSON/XML allowed as they're served with safe content-type via authenticated endpoint
@@ -606,7 +632,7 @@ router.get(
       );
 
       sendSuccess(res, {
-        files: files.map((file: any) => ({
+        files: (files as FileRow[]).map((file) => ({
           id: file.id,
           projectId: file.project_id,
           filename: file.filename,
@@ -714,7 +740,7 @@ router.get(
       );
 
       sendSuccess(res, {
-        files: files.map((file: any) => ({
+        files: (files as FileRow[]).map((file) => ({
           id: file.id,
           projectId: file.project_id,
           projectName: file.project_name,
@@ -730,7 +756,7 @@ router.get(
           sharedWithClient: file.shared_with_client,
           sharedAt: file.shared_at,
         })),
-        projects: projects.map((p: any) => ({
+        projects: (projects as ProjectRow[]).map((p) => ({
           id: p.id,
           name: p.project_name,
         })),

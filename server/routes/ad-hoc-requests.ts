@@ -993,6 +993,37 @@ router.post(
   })
 );
 
+// Bulk delete ad hoc requests
+router.post(
+  '/bulk-delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { requestIds } = req.body;
+
+    if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
+      return errorResponse(res, 'requestIds array is required', 400, 'VALIDATION_ERROR');
+    }
+
+    const deletedBy = req.user?.email || String(req.user?.id || 'system');
+    let deleted = 0;
+
+    for (const requestId of requestIds) {
+      const id = typeof requestId === 'string' ? parseInt(requestId, 10) : requestId;
+      if (isNaN(id)) continue;
+
+      try {
+        await adHocRequestService.softDeleteRequest(id, deletedBy);
+        deleted++;
+      } catch {
+        // Skip requests that don't exist or can't be deleted
+      }
+    }
+
+    sendSuccess(res, { deleted }, `${deleted} request(s) deleted`);
+  })
+);
+
 // Soft delete ad hoc request
 router.delete(
   '/:requestId',
