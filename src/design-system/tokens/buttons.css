@@ -33,47 +33,47 @@
   /* Button borders - DISCOTHÈQUE: no radius, 2px white border */
   --btn-portal-border-width: 2px;
   --btn-portal-border-radius: 0;
-  --btn-portal-border-color: rgb(255, 255, 255);
+  --btn-portal-border-color: var(--portal-text-light);
 
   /* Button colors - base (transparent bg, white text/border) */
   --btn-portal-bg: transparent;
-  --btn-portal-color: rgb(255, 255, 255);
-  --btn-portal-border: rgb(255, 255, 255);
+  --btn-portal-color: var(--portal-text-light);
+  --btn-portal-border: var(--portal-text-light);
 
   /* Button colors - hover (inverted to white bg) */
-  --btn-portal-hover-bg: rgb(255, 255, 255);
-  --btn-portal-hover-color: rgb(0, 0, 0);
-  --btn-portal-hover-border: rgb(255, 255, 255);
+  --btn-portal-hover-bg: var(--portal-text-light);
+  --btn-portal-hover-color: var(--portal-background);
+  --btn-portal-hover-border: var(--portal-text-light);
 
   /* Button colors - secondary (same as base) */
   --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: rgb(255, 255, 255);
-  --btn-portal-secondary-border: rgb(255, 255, 255);
+  --btn-portal-secondary-color: var(--portal-text-light);
+  --btn-portal-secondary-border: var(--portal-text-light);
 
   /* Button colors - secondary hover */
-  --btn-portal-secondary-hover-bg: rgb(255, 255, 255);
-  --btn-portal-secondary-hover-color: rgb(0, 0, 0);
-  --btn-portal-secondary-hover-border: rgb(255, 255, 255);
+  --btn-portal-secondary-hover-bg: var(--portal-text-light);
+  --btn-portal-secondary-hover-color: var(--portal-background);
+  --btn-portal-secondary-hover-border: var(--portal-text-light);
 
   /* Button colors - primary (same as base) */
   --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: rgb(255, 255, 255);
-  --btn-portal-primary-border: rgb(255, 255, 255);
+  --btn-portal-primary-color: var(--portal-text-light);
+  --btn-portal-primary-border: var(--portal-text-light);
 
   /* Button colors - primary hover */
-  --btn-portal-primary-hover-bg: rgb(255, 255, 255);
-  --btn-portal-primary-hover-color: rgb(0, 0, 0);
-  --btn-portal-primary-hover-border: rgb(255, 255, 255);
+  --btn-portal-primary-hover-bg: var(--portal-text-light);
+  --btn-portal-primary-hover-color: var(--portal-background);
+  --btn-portal-primary-hover-border: var(--portal-text-light);
 
   /* Button colors - danger (transparent bg, red text/border) */
   --btn-portal-danger-bg: transparent;
-  --btn-portal-danger-color: var(--color-error-500, #ef4444);
-  --btn-portal-danger-border: var(--color-error-500, #ef4444);
+  --btn-portal-danger-color: var(--color-error-500);
+  --btn-portal-danger-border: var(--color-error-500);
 
   /* Button colors - danger hover */
-  --btn-portal-danger-hover-bg: var(--color-error-500, #ef4444);
-  --btn-portal-danger-hover-color: rgb(255, 255, 255);
-  --btn-portal-danger-hover-border: var(--color-error-500, #ef4444);
+  --btn-portal-danger-hover-bg: var(--color-error-500);
+  --btn-portal-danger-hover-color: var(--portal-text-light);
+  --btn-portal-danger-hover-border: var(--color-error-500);
 
   /* Button effects - BRUTALIST: no shadows */
   --btn-portal-transition: all var(--transition-fast, 150ms);
@@ -108,37 +108,37 @@ html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] [data-page="client-portal"],
 html[data-theme="light"] [data-page="admin"] {
   /* Button borders - black in light mode */
-  --btn-portal-border-color: rgb(0, 0, 0);
+  --btn-portal-border-color: var(--portal-text-primary);
 
   /* Button colors - base (transparent bg, black text/border) */
   --btn-portal-bg: transparent;
-  --btn-portal-color: rgb(0, 0, 0);
-  --btn-portal-border: rgb(0, 0, 0);
+  --btn-portal-color: var(--portal-text-primary);
+  --btn-portal-border: var(--portal-text-primary);
 
   /* Button colors - hover (black bg, white text) */
-  --btn-portal-hover-bg: rgb(0, 0, 0);
-  --btn-portal-hover-color: rgb(255, 255, 255);
-  --btn-portal-hover-border: rgb(0, 0, 0);
+  --btn-portal-hover-bg: var(--portal-text-primary);
+  --btn-portal-hover-color: var(--portal-background);
+  --btn-portal-hover-border: var(--portal-text-primary);
 
   /* Button colors - secondary (same as base) */
   --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: rgb(0, 0, 0);
-  --btn-portal-secondary-border: rgb(0, 0, 0);
+  --btn-portal-secondary-color: var(--portal-text-primary);
+  --btn-portal-secondary-border: var(--portal-text-primary);
 
   /* Button colors - secondary hover */
-  --btn-portal-secondary-hover-bg: rgb(0, 0, 0);
-  --btn-portal-secondary-hover-color: rgb(255, 255, 255);
-  --btn-portal-secondary-hover-border: rgb(0, 0, 0);
+  --btn-portal-secondary-hover-bg: var(--portal-text-primary);
+  --btn-portal-secondary-hover-color: var(--portal-background);
+  --btn-portal-secondary-hover-border: var(--portal-text-primary);
 
   /* Button colors - primary (same as base) */
   --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: rgb(0, 0, 0);
-  --btn-portal-primary-border: rgb(0, 0, 0);
+  --btn-portal-primary-color: var(--portal-text-primary);
+  --btn-portal-primary-border: var(--portal-text-primary);
 
   /* Button colors - primary hover */
-  --btn-portal-primary-hover-bg: rgb(0, 0, 0);
-  --btn-portal-primary-hover-color: rgb(255, 255, 255);
-  --btn-portal-primary-hover-border: rgb(0, 0, 0);
+  --btn-portal-primary-hover-bg: var(--portal-text-primary);
+  --btn-portal-primary-hover-color: var(--portal-background);
+  --btn-portal-primary-hover-border: var(--portal-text-primary);
 
   /* Button colors - danger (transparent bg, red text/border) */
   --btn-portal-danger-bg: transparent;

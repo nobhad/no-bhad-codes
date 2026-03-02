@@ -7,7 +7,7 @@ import * as React from 'react';
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Clock, CheckCircle, AlertCircle, FileText, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { formatDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
+import { formatCardDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 
@@ -262,7 +262,7 @@ export function DocumentRequestCard({
         <div className="tw-flex tw-items-center tw-gap-1 tw-mb-2">
           <Clock className="tw-h-4 tw-w-4 tw-text-muted" />
           <span className={cn('tw-text-sm', overdue ? 'tw-text-primary' : 'tw-text-muted')}>
-            Due {formatDate(request.due_date)}
+            Due {formatCardDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
           </span>

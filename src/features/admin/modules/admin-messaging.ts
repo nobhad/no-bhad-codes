@@ -20,7 +20,7 @@ import { ICONS } from '../../../constants/icons';
 import { showToast } from '../../../utils/toast-notifications';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { createLogger } from '../../../utils/logger';
-import { formatFileSize } from '../../../utils/file-validation';
+import { formatFileSize } from '../../../utils/format-utils';
 import { createMessagingAttachmentManager, AttachmentManager } from '../../../utils/attachment-manager';
 import { getCachedElement, clearDOMCache } from '../../../utils/dom-helpers';
 import {

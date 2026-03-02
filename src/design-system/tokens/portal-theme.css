@@ -95,27 +95,9 @@
   --portal-radius-full: 50%; /* Exception for circular avatars/indicators */
 
   /* ----------------------------------------
-   * BUTTON COLORS (Dark Mode)
+   * BUTTON COLORS
+   * See: src/design-system/tokens/buttons.css
    * ---------------------------------------- */
-  --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: #ffffff;
-  --btn-portal-primary-border: #ffffff;
-  --btn-portal-primary-hover-bg: #ffffff;
-  --btn-portal-primary-hover-color: #000000;
-  --btn-portal-primary-hover-border: #ffffff;
-
-  --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: #ffffff;
-  --btn-portal-secondary-border: #ffffff;
-  --btn-portal-secondary-hover-bg: transparent;
-  --btn-portal-secondary-hover-color: #ffffff;
-  --btn-portal-secondary-hover-border: #ffffff;
-
-  --btn-portal-border-color: #ffffff;
-  --btn-portal-color: #ffffff;
-  --btn-portal-hover-bg: #ffffff;
-  --btn-portal-hover-color: #000000;
-  --btn-portal-hover-border: #ffffff;
 
   /* ----------------------------------------
    * CARD & PANEL TOKENS
@@ -126,9 +108,8 @@
 
   /* ----------------------------------------
    * LAYOUT TOKENS
+   * See: src/design-system/tokens/spacing.css
    * ---------------------------------------- */
-  --portal-section-gap: var(--space-2, 16px);
-  --portal-section-heading-padding: var(--space-1-5) var(--space-2);
 
   /* ----------------------------------------
    * FIELD/LABEL SPACING
@@ -147,10 +128,8 @@
 
   /* ----------------------------------------
    * DASHBOARD LAYOUT TOKENS
+   * See: src/design-system/tokens/spacing.css
    * ---------------------------------------- */
-  --dashboard-section-gap: 48px;
-  --dashboard-grid-gap: 24px;
-  --dashboard-panel-gap: 24px;
   --dashboard-panel-padding: var(--space-4);
   --dashboard-title-margin: var(--space-3);
 

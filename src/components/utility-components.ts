@@ -8,7 +8,3 @@ export type {
   ComponentTemplate,
   ComponentHooks
 } from './base-component';
-export { ButtonComponent } from './button-component';
-export type { ButtonProps, ButtonState } from './button-component';
-export { ModalComponent } from './modal-component';
-export type { ModalProps, ModalState } from './modal-component';
