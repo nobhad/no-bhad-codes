@@ -50,7 +50,7 @@ export class Application {
   private isInitialized = false;
   private debug = isDev();
 
-  private log(...args: any[]): void {
+  private log(...args: unknown[]): void {
     if (this.debug) {
       console.log('[Application]', ...args);
     }
@@ -260,7 +260,7 @@ export class Application {
         this.log(`${serviceName} initialized`);
 
         if (serviceName === 'RouterService') {
-          this.registerHomePageRoutes(service as any);
+          this.registerHomePageRoutes(service as { addRoute: (route: { path: string; section: string; title: string }) => void });
         }
       } catch (error) {
         console.error(`[Application] Failed to initialize ${serviceName}:`, error);

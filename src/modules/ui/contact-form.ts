@@ -503,7 +503,7 @@ export class ContactFormModule extends BaseModule {
   }
 
   // Email service integrations
-  async submitToNetlify(data: any) {
+  async submitToNetlify(data: Partial<ContactFormData>) {
     // For Netlify Forms, we need to submit as form-encoded data
     const params = new URLSearchParams();
     params.append('form-name', 'contact-form');
@@ -524,7 +524,7 @@ export class ContactFormModule extends BaseModule {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  async submitToFormspree(data: any) {
+  async submitToFormspree(data: Partial<ContactFormData>) {
     // Get Formspree form ID from environment variable
     const formId = import.meta.env.VITE_FORMSPREE_FORM_ID;
 
@@ -545,7 +545,7 @@ export class ContactFormModule extends BaseModule {
     throw new Error(errorData.message || 'Formspree submission failed');
   }
 
-  async submitToEmailJS(_data: any) {
+  async submitToEmailJS(_data: Partial<ContactFormData>) {
     // EmailJS integration would go here
     // This requires EmailJS SDK and proper configuration
     return { success: false, error: 'EmailJS not configured' };
