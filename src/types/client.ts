@@ -212,9 +212,5 @@ export function getPriorityIcon(priority: ProjectPriority): string {
   return icons[priority] || '⚪';
 }
 
-export function formatFileSize(bytes: number): string {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  if (bytes === 0) return '0 Bytes';
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${Math.round((bytes / Math.pow(1024, i)) * 100) / 100} ${sizes[i]}`;
-}
+// Re-export formatFileSize from canonical source
+export { formatFileSize } from '../utils/format-utils';

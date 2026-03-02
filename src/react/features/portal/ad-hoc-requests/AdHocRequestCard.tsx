@@ -18,7 +18,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { formatDate, formatCurrency, formatFileSize } from '@react/utils/cardFormatters';
+import { formatCardDate, formatCurrency, formatFileSize } from '@react/utils/cardFormatters';
 import type { AdHocRequest } from './types';
 import { AD_HOC_REQUEST_STATUS_CONFIG, AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
 
@@ -101,7 +101,7 @@ export function AdHocRequestCard({
                 {AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.label || request.priority}
               </span>
               <span className="tw-text-muted tw-text-xs">
-                {formatDate(request.created_at)}
+                {formatCardDate(request.created_at)}
               </span>
             </div>
           </div>
@@ -243,7 +243,7 @@ export function AdHocRequestCard({
                   {/* Expiry */}
                   {request.quote!.expires_at && (
                     <div className="tw-text-muted tw-text-xs">
-                      Quote valid until: {formatDate(request.quote!.expires_at)}
+                      Quote valid until: {formatCardDate(request.quote!.expires_at)}
                     </div>
                   )}
                 </div>

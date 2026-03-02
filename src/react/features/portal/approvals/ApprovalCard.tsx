@@ -18,7 +18,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { formatDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
+import { formatCardDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -139,7 +139,7 @@ export function ApprovalCard({
           {/* Requested date */}
           <div className="tw-flex tw-items-center tw-gap-1 tw-text-muted">
             <Clock className="tw-h-3 tw-w-3" />
-            <span className="tw-text-xs">Requested {formatDate(approval.requested_at)}</span>
+            <span className="tw-text-xs">Requested {formatCardDate(approval.requested_at)}</span>
           </div>
 
           {/* Due date indicator */}

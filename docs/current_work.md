@@ -14,6 +14,37 @@ This file tracks active development work and TODOs. Completed items are archived
 
 Resolved all conflicts identified in deep dive audit across CSS, components, API endpoints, and utilities.
 
+**Additional Fixes (Deep Dive Audit Phase 2):**
+
+- [x] **formatFileSize Consolidation**
+  - Removed duplicate implementation from `src/utils/file-validation.ts`
+  - Removed duplicate implementation from `src/types/client.ts`
+  - Both files now re-export from canonical `src/utils/format-utils.ts`
+  - Updated `src/features/admin/modules/admin-messaging.ts` to import from format-utils
+
+- [x] **formatDate Name Collision Fix**
+  - Renamed `formatDate` to `formatCardDate` in `src/react/utils/cardFormatters.ts`
+  - Updated imports in 3 component files:
+    - `ApprovalCard.tsx`, `DocumentRequestCard.tsx`, `AdHocRequestCard.tsx`
+
+- [x] **Button CSS Variable Migration**
+  - Replaced 30+ hardcoded RGB values in `src/design-system/tokens/buttons.css` with CSS variables
+  - Now uses `var(--portal-text-light)`, `var(--portal-text-primary)`, etc.
+
+- [x] **Orphaned Vanilla Components Deleted**
+  - Deleted 5 unused vanilla TypeScript components:
+    - `src/components/button-component.ts`
+    - `src/components/modal-component.ts`
+    - `src/components/analytics-dashboard.ts`
+    - `src/components/performance-dashboard.ts`
+    - `src/components/table-action-buttons.ts` (deprecated wrapper)
+  - Updated barrel files `utility-components.ts` and `dashboard-components.ts`
+
+- [x] **CSS Variable Consolidation**
+  - Removed redundant button variables from `portal-theme.css` (now in `buttons.css`)
+  - Removed redundant spacing variables (defined in `spacing.css`)
+  - Removed redundant dashboard variables (defined in `spacing.css`)
+
 **Phase 1: CSS Variable Fixes**
 
 - [x] Added missing color variables to `src/design-system/tokens/colors.css`:
