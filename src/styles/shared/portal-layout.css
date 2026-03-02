@@ -1399,39 +1399,39 @@ html[data-theme="light"] .portal .funnel-value {
 
 .tw-panel {
   background: transparent;
-  border: 1px solid var(--portal-border-color, rgba(255, 255, 255, 0.2));
-  padding: var(--space-4, 1rem);
+  border: 1px solid var(--portal-border-color);
+  padding: var(--space-4);
 }
 
 .tw-card {
   background: transparent;
-  border: 1px solid var(--portal-border-color, rgba(255, 255, 255, 0.3));
-  padding: var(--space-4, 1rem);
+  border: 1px solid var(--portal-border-color);
+  padding: var(--space-4);
 }
 
 .tw-card-hover {
   background: transparent;
-  border: 1px solid var(--portal-border-color, rgba(255, 255, 255, 0.3));
-  padding: var(--space-4, 1rem);
+  border: 1px solid var(--portal-border-color);
+  padding: var(--space-4);
   transition: border-color var(--transition-fast);
   cursor: pointer;
 }
 
 .tw-card-hover:hover {
-  border-color: var(--portal-text-light, rgba(255, 255, 255, 0.6));
+  border-color: var(--portal-text-light);
 }
 
 /* Dividers */
 .tw-divider {
   height: 1px;
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
-  margin: var(--space-4, 1rem) 0;
+  background: var(--portal-alpha-white-20);
+  margin: var(--space-4) 0;
 }
 
 .tw-divider-vertical {
   width: 1px;
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
-  margin: 0 var(--space-2, 0.5rem);
+  background: var(--portal-alpha-white-20);
+  margin: 0 var(--space-2);
   align-self: stretch;
 }
 
@@ -1481,11 +1481,11 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .tw-scroll-container::-webkit-scrollbar-thumb {
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  background: var(--portal-alpha-white-20);
 }
 
 .tw-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: var(--portal-alpha-white-30, rgba(255, 255, 255, 0.4));
+  background: var(--portal-alpha-white-30);
 }
 
 /* =====================================================
@@ -1756,18 +1756,18 @@ html[data-theme="light"] .portal .funnel-value {
 /* =====================================================
    TW-* BORDER CLASSES
    ===================================================== */
-.tw-border { border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-border { border: 1px solid var(--portal-alpha-white-30); }
 .tw-border-2 { border-width: 2px; }
-.tw-border-b { border-bottom: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
-.tw-border-t { border-top: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
-.tw-border-r { border-right: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-border-b { border-bottom: 1px solid var(--portal-alpha-white-30); }
+.tw-border-t { border-top: 1px solid var(--portal-alpha-white-30); }
+.tw-border-r { border-right: 1px solid var(--portal-alpha-white-30); }
 .tw-border-l-2 { border-left: 2px solid; }
 .tw-border-l-white { border-left-color: var(--portal-border-color); }
 .tw-border-none { border: none; }
 .tw-border-dashed { border-style: dashed; }
 .tw-border-current { border-color: currentColor; }
 .tw-border-white { border-color: var(--portal-border-color); }
-.tw-border-black { border-color: var(--portal-bg-pitch, #000000); }
+.tw-border-black { border-color: var(--portal-bg-pitch); }
 .tw-border-t-transparent { border-top-color: transparent; }
 
 /* Border radius - brutalist style is 0 */
@@ -1776,7 +1776,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Ring (focus outline) */
 .tw-ring-0 { box-shadow: none; }
-.tw-ring-1 { box-shadow: 0 0 0 1px var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3)); }
+.tw-ring-1 { box-shadow: 0 0 0 1px var(--portal-alpha-white-30); }
 .tw-ring-2 { box-shadow: 0 0 0 2px var(--ring); }
 .tw-ring-white { --ring: var(--portal-border-color); }
 
