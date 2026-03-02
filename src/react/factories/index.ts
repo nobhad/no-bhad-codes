@@ -92,19 +92,25 @@ export type {
 } from './useDataFetch';
 
 // ============================================
-// STATUS BADGE
+// STATUS BADGE - Re-exported from components/portal
+// See src/react/components/portal/StatusBadge.tsx
 // ============================================
 
 export {
   StatusBadge,
-  StatusDot,
-  getStatusVariant,
+  getStatusVariant
+} from '../components/portal/StatusBadge';
+
+export type { StatusVariant } from '../components/portal/StatusBadge';
+
+// Badge factory utilities
+export {
   BADGE_VARIANTS,
   normalizeStatus,
   formatStatusLabel,
   getStatusClass,
   getDefaultLabel
-} from './StatusBadge';
+} from '../../factories/components/badge-factory';
 
 // ============================================
 // STATE DISPLAY

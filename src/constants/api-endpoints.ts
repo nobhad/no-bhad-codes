@@ -43,7 +43,16 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS: '/api/notifications',
 
   // Auth
-  AUTH: '/api/auth'
+  AUTH: '/api/auth',
+
+  // Admin-specific endpoints (bulk operations, admin routes)
+  ADMIN: {
+    LEADS: '/api/admin/leads',
+    LEADS_BULK_STATUS: '/api/admin/leads/bulk/status',
+    LEADS_BULK_DELETE: '/api/admin/leads/bulk/delete',
+    PROJECTS_BULK_DELETE: '/api/admin/projects/bulk/delete',
+    CONTACTS: '/api/admin/contacts'
+  }
 } as const;
 
 export type ApiEndpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

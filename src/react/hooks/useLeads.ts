@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Lead, LeadStatus, LeadStats, ApiResponse } from '@react/features/admin/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
 
 interface UseLeadsOptions {
   /** Auth token getter for API calls */
@@ -90,7 +91,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/admin/leads', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.LEADS, {
         method: 'GET',
         headers,
         credentials: 'include'
@@ -139,8 +140,8 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         // Use status endpoint if only updating status
         const endpoint =
           Object.keys(updates).length === 1 && 'status' in updates
-            ? `/api/admin/leads/${id}/status`
-            : `/api/admin/leads/${id}`;
+            ? `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`
+            : `${API_ENDPOINTS.ADMIN.LEADS}/${id}`;
 
         const response = await fetch(endpoint, {
           method: 'PUT',
@@ -183,7 +184,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch('/api/admin/leads/bulk/status', {
+        const response = await fetch(API_ENDPOINTS.ADMIN.LEADS_BULK_STATUS, {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -230,7 +231,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         }
 
         // Try bulk endpoint first
-        const response = await fetch('/api/admin/leads/bulk/delete', {
+        const response = await fetch(API_ENDPOINTS.ADMIN.LEADS_BULK_DELETE, {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -247,7 +248,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         } else {
           // Fallback to individual deletes
           for (const id of ids) {
-            const deleteResponse = await fetch(`/api/admin/leads/${id}`, {
+            const deleteResponse = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/${id}`, {
               method: 'DELETE',
               headers,
               credentials: 'include'

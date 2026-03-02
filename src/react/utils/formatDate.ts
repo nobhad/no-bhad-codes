@@ -2,20 +2,18 @@
  * Unified date formatting utilities
  * Use these functions across all React components for consistent date display
  * Standard format: MM/DD/YYYY
+ *
+ * Re-exports from canonical source for consistency.
+ * Additional React-specific formatters maintained here.
  */
 
-/**
- * Format date as "MM/DD/YYYY"
- */
-export function formatDate(date: string | Date | undefined | null): string {
-  if (!date) return '-';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '-';
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${month}/${day}/${year}`;
-}
+// Re-export core formatters from canonical source
+export {
+  formatDate,
+  formatDateTime,
+  formatDateForInput,
+  formatRelativeTime
+} from '../../utils/format-utils';
 
 /**
  * Format date as "MM/DD" - for compact displays

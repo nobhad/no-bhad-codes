@@ -280,6 +280,11 @@ html[data-theme="light"] {
   /* Role/semantic (contact role badges, etc.) */
   --color-role-technical: #ea580c;
 
+  /* Legacy color aliases for components */
+  --color-purple: #c084fc;
+  --color-pink: #f472b6;
+  --color-cyan: #22d3ee;
+
   /* ================================================
      STATUS COLORS - SINGLE SOURCE OF TRUTH
      See docs/design/STATUS_SYSTEM.md for full documentation

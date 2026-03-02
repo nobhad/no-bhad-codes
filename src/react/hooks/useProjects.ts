@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project, ProjectStats, ApiResponse } from '@react/features/admin/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
 
 interface UseProjectsOptions {
   /** Auto-fetch on mount */
@@ -59,7 +60,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/projects', {
+      const response = await fetch(API_ENDPOINTS.PROJECTS, {
         method: 'GET',
         headers,
         credentials: 'include'
@@ -108,7 +109,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`/api/projects/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${id}`, {
           method: 'PUT',
           headers,
           credentials: 'include',
@@ -153,7 +154,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         }
 
         // Try bulk endpoint first
-        const response = await fetch('/api/admin/projects/bulk/delete', {
+        const response = await fetch(API_ENDPOINTS.ADMIN.PROJECTS_BULK_DELETE, {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -170,7 +171,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         } else {
           // Fallback to individual deletes
           for (const id of ids) {
-            const deleteResponse = await fetch(`/api/admin/projects/${id}`, {
+            const deleteResponse = await fetch(`${API_ENDPOINTS.PROJECTS}/${id}`, {
               method: 'DELETE',
               headers,
               credentials: 'include'
