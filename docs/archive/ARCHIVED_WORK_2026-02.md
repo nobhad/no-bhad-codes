@@ -4856,3 +4856,361 @@ Unified Documents tab to use single container with internal card switching.
 4. Event listener calls `applyDocumentsSection()` to show/hide appropriate card
 
 **Files Created:** `src/features/admin/modules/admin-documents.ts`
+
+---
+
+## Completed - February 27-28, 2026
+
+### Portal Audit Security Fixes - COMPLETE
+
+**Completed:** February 28, 2026
+
+Comprehensive audit of portal codebase identified and fixed critical security and stability issues.
+
+**Completed Fixes:**
+
+1. **JSON.parse Safety (Task #1) - COMPLETE**
+   - Created `server/utils/safe-json.ts` utility with `safeJsonParse`, `safeJsonParseArray`, `safeJsonParseObject`, `safeJsonParseOrNull`, `parseIfString` functions
+   - Updated 12+ service files to use safe JSON parsing
+
+2. **Authorization Bypass Fix (Task #3) - COMPLETE**
+   - Fixed IDOR vulnerability in `server/routes/deliverables.ts`
+   - Added validation that `commentId` and `elementId` belong to specified `deliverableId`
+
+3. **Rate Limiting (Task #2) - COMPLETE**
+   - Added rate limiting to `/me/password` endpoint (5 attempts/hour per user)
+   - Added rate limiting to `/reset-password` and `/set-password` endpoints (10 attempts/15 min per IP)
+
+---
+
+### React Subtab Support for Knowledge Base & Workflows - COMPLETE
+
+**Completed:** February 28, 2026
+
+Updated React components to support subtab navigation (matching vanilla implementation behavior).
+
+**Files Modified:**
+
+- `src/react/features/admin/knowledge-base/KnowledgeBase.tsx`
+- `src/react/features/admin/workflows/WorkflowsManager.tsx`
+- `src/features/admin/modules/admin-knowledge-base.ts`
+- `src/features/admin/modules/admin-workflows.ts`
+
+---
+
+### React Component Race Condition Fix - COMPLETE
+
+**Completed:** February 28, 2026
+
+Fixed critical race condition where pages failed to load on first visit but worked on subsequent loads.
+
+**Fix:** Added explicit imports of React entry files at the TOP of both entry points, before `app` is imported.
+
+**Files Modified:**
+
+- `src/admin.ts` - Added `import './react/admin-entry'` as first import
+- `src/portal.ts` - Added `import './react/portal-entry'` as first import
+
+---
+
+### Additional Bulk API Endpoints - COMPLETE
+
+**Completed:** February 28, 2026
+
+Added 13 missing bulk/action API endpoints that frontend React components were calling but didn't exist on backend.
+
+**Files Modified:**
+
+- `server/routes/admin/misc.ts`
+- `server/routes/admin/workflows.ts`
+- `server/routes/contracts.ts`
+- `server/routes/ad-hoc-requests.ts`
+- `server/routes/document-requests.ts`
+- `server/routes/questionnaires.ts`
+- `server/services/document-request-service.ts`
+
+---
+
+### Portal Architecture Consolidation - PHASE 3 COMPLETE
+
+**Completed:** February 27, 2026
+
+Consolidated two separate portals (admin + client) into a single shell with dynamically rendered navigation, features, and capabilities based on user role.
+
+**Files Created:**
+
+- `server/config/unified-navigation.ts`
+- `src/features/shared/types.ts`
+- `src/features/shared/PortalFeatureModule.ts`
+- `src/features/shared/PortalMessaging.ts`
+- `src/features/shared/PortalFiles.ts`
+- `src/features/shared/PortalInvoices.ts`
+- `src/features/shared/PortalProjects.ts`
+- `src/features/shared/PortalRequests.ts`
+- `src/features/shared/PortalDashboard.ts`
+- `src/features/shared/PortalSettings.ts`
+- `src/features/shared/PortalQuestionnaires.ts`
+- `src/features/portal/PortalShell.ts`
+- `src/features/portal/PortalModuleLoader.ts`
+
+---
+
+### CSS Separation: Main Site vs Portal - COMPLETE
+
+**Completed:** February 27, 2026
+
+Fixed critical CSS bleed where DISCOTHÈQUE portal theme was incorrectly applied to the main site.
+
+**Files Modified:**
+
+- `src/design-system/tokens/colors.css`
+- `src/styles/variables.css`
+
+---
+
+### Button SVG Icon Color Fix - COMPLETE
+
+**Completed:** February 27, 2026
+
+Fixed SVG icons in buttons appearing grey while button text was white.
+
+**Files Modified:**
+
+- `src/styles/base/reset.css`
+- `src/styles/components/form-buttons.css`
+
+---
+
+### Portal Spacing Uniformity - COMPLETE
+
+**Completed:** February 27, 2026
+
+Fixed inconsistent spacing throughout the admin/client portal.
+
+**Files Modified:**
+
+- `src/design-system/tokens/spacing.css`
+- `src/styles/components/loading.css`
+- `src/styles/components/inline-edit.css`
+- `src/styles/shared/portal-buttons.css`
+- `src/styles/shared/portal-cards.css`
+- `src/styles/variables.css`
+
+---
+
+### Client Portal Login Route Fix - COMPLETE
+
+**Completed:** February 27, 2026
+
+Fixed POST /client/login 404 error caused by ClientPortalModule not loading on auth pages.
+
+**Files Modified:**
+
+- `src/core/modules-config.ts`
+
+---
+
+### Messages Styling Uniformity - COMPLETE
+
+**Completed:** February 27, 2026
+
+Stripped `src/styles/shared/portal-messages.css` down to minimal layout-only CSS. Reduced file from ~855 lines to ~95 lines.
+
+---
+
+### Subtab Spacing Uniformity - COMPLETE
+
+**Completed:** February 27, 2026
+
+Made `.content-wrapper` a flex container with gap for consistent spacing.
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css`
+
+---
+
+### Messages Layout Consistency - COMPLETE
+
+**Completed:** February 27, 2026
+
+Fixed inconsistent spacing and borders in the messages layout.
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css`
+- `src/styles/shared/portal-messages.css`
+- `src/styles/client-portal/layout.css`
+- `src/styles/components/loading.css`
+- `src/features/client/modules/portal-views.ts`
+
+---
+
+### Client Portal Settings Inline Edit - COMPLETE
+
+**Completed:** February 27, 2026
+
+Converted client portal settings from traditional form inputs to inline-edit pattern.
+
+**Files Created:**
+
+- `src/react/components/portal/InlineEditField.tsx`
+
+**Files Modified:**
+
+- `src/react/features/portal/settings/ProfileForm.tsx`
+- `src/react/features/portal/settings/BillingForm.tsx`
+- `src/react/features/portal/settings/NotificationsForm.tsx`
+- `src/react/features/portal/settings/PortalSettings.tsx`
+- `src/styles/components/inline-edit.css`
+
+---
+
+### Portal Code Audit - COMPLETE
+
+**Completed:** February 27, 2026
+
+Full audit of portal CSS, TypeScript, and React code.
+
+**Files Modified:**
+
+- `src/features/client/modules/portal-navigation.ts`
+- `src/react/features/portal/navigation/mount.tsx`
+- `src/react/features/portal/files/mount.tsx`
+- `src/react/components/portal/ErrorBoundary.tsx`
+- `src/styles/shared/portal-components.css`
+- `src/utils/format-utils.ts`
+
+---
+
+### Backend Documentation Audit - COMPLETE
+
+**Completed:** February 27, 2026
+
+Full audit of backend documentation for accuracy.
+
+**Files Modified:**
+
+- `docs/architecture/DATABASE_SCHEMA.md`
+- `docs/architecture/BACKEND_PATTERNS.md`
+- `docs/THE_BACKEND.md`
+- `docs/API_DOCUMENTATION.md`
+
+---
+
+### Admin API Bulk Delete Endpoints - COMPLETE
+
+**Completed:** February 28, 2026
+
+Added missing bulk delete endpoints for leads and projects.
+
+**Files Modified:**
+
+- `server/routes/admin/leads.ts`
+- `server/routes/admin/projects.ts`
+
+---
+
+### Comprehensive Codebase Audit Fixes - COMPLETE
+
+**Completed:** February 28, 2026
+
+Full audit across admin API routes, client portal routes, CSS, navigation, TypeScript, and database layer. Fixed SQL injection vulnerabilities, missing API endpoints, and CSS z-index issues.
+
+**Files Modified:**
+
+- `server/services/soft-delete-service.ts`
+- `server/services/invoice/recurring-service.ts`
+- `server/routes/admin/misc.ts`
+- `server/routes/admin/leads.ts`
+- `server/app.ts`
+- 12 CSS files
+
+---
+
+### Console Statements → Logger Refactoring - COMPLETE
+
+**Completed:** February 28, 2026
+
+Refactored frontend services to use the centralized logger utility.
+
+**Files Modified:**
+
+- `src/services/performance-service.ts`
+- `src/services/visitor-tracking.ts`
+- `src/services/base-service.ts`
+- `src/services/router-service.ts`
+
+---
+
+### Knowledge Base & Workflows Subtabs Fix - COMPLETE
+
+**Completed:** February 28, 2026
+
+Fixed subtab buttons not displaying when clicking on Knowledge Base or Workflows tabs.
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css`
+
+---
+
+### React Component Auth Headers Audit - COMPLETE
+
+**Completed:** February 28, 2026
+
+Comprehensive audit ensuring all React components properly use authentication headers for API calls.
+
+**Files Modified:**
+
+- `src/react/factories/createTableMount.tsx`
+- `src/react/features/admin/tasks/TasksManager.tsx`
+- `src/react/features/portal/invoices/PortalInvoicesTable.tsx`
+
+---
+
+### React Table Vanilla CSS Conversion - COMPLETE
+
+**Completed:** February 24-27, 2026
+
+Converted React tables to use vanilla CSS classes. Added all required tw-* utility classes directly to brutalist.css.
+
+**Files Modified:**
+
+- `src/react/styles/brutalist.css` - Added ~150 utility class definitions
+
+---
+
+### CSS Consolidation - COMPLETE
+
+**Completed:** February 28, 2026
+
+Consolidated all tw-* component classes from brutalist.css and globals.css into the main portal-*.css stylesheets.
+
+**Files Modified:**
+
+- `src/styles/shared/portal-buttons.css`
+- `src/styles/shared/portal-forms.css`
+- `src/styles/shared/portal-tabs.css`
+- `src/styles/shared/portal-components.css`
+- `src/styles/shared/portal-stat-cards.css`
+- `src/styles/shared/portal-files.css`
+- `src/styles/shared/portal-layout.css`
+- `src/react/styles/globals.css`
+- `src/react/styles/brutalist.css` - DELETED
+
+---
+
+### Brutalist Design System - COMPLETE
+
+**Completed:** February 25-28, 2026
+
+Implemented a brutalist/minimalist design system for React components inspired by discothequefragrances.com.
+
+**Design Principles:**
+
+- Transparent backgrounds
+- No border-radius (squared edges)
+- Monospace font (Inconsolata)
+- High contrast white on black
+- Minimal borders
