@@ -167,7 +167,7 @@ export function NotesTab({
   const renderForm = () => (
     <div className="tw-panel tw-mb-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
-        <h3 className="tw-heading" style={{ fontSize: '14px' }}>
+        <h3 className="tw-heading tw-text-sm">
           {editingId ? 'Edit Note' : 'New Note'}
         </h3>
         <button
@@ -218,7 +218,7 @@ export function NotesTab({
           {note.is_pinned && (
             <Pin className="tw-h-3 tw-w-3 tw-text-white tw-fill-current" />
           )}
-          <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+          <span className="tw-text-muted tw-text-xs">
             {formatDate(note.created_at)}
             {note.updated_at !== note.created_at && ' (edited)'}
           </span>
@@ -253,14 +253,14 @@ export function NotesTab({
       </div>
 
       {/* Note content */}
-      <p className="tw-text-muted" style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>
+      <p className="tw-text-muted tw-text-sm tw-whitespace-pre-wrap">
         {note.content}
       </p>
 
       {/* Note footer */}
       {note.created_by && (
-        <div className="tw-mt-2 tw-pt-2" style={{ borderTop: '1px solid var(--portal-border-subtle)' }}>
-          <span className="tw-text-muted" style={{ fontSize: '12px' }}>
+        <div className="tw-mt-2 tw-pt-2 tw-border-t">
+          <span className="tw-text-muted tw-text-xs">
             by {note.created_by}
           </span>
         </div>
@@ -272,7 +272,7 @@ export function NotesTab({
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading" style={{ fontSize: '18px' }}>
+        <h2 className="tw-heading tw-text-lg">
           Notes ({notes.length})
         </h2>
         {!isAdding && !editingId && (
@@ -291,7 +291,7 @@ export function NotesTab({
         <div className="tw-empty-state">
           <StickyNote className="tw-h-12 tw-w-12 tw-mb-3" />
           <p>No notes yet</p>
-          <p style={{ fontSize: '14px' }}>
+          <p className="tw-text-sm">
             Add internal notes about this client
           </p>
         </div>

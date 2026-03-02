@@ -193,9 +193,9 @@ export function PortalInvoicesTable({
               <th className="tw-table-header">Invoice</th>
               <th className="tw-table-header">Project</th>
               <th className="tw-table-header">Date</th>
-              <th className="tw-table-header" style={{ textAlign: 'right' }}>Amount</th>
+              <th className="tw-table-header tw-text-right">Amount</th>
               <th className="tw-table-header">Status</th>
-              <th className="tw-table-header" style={{ textAlign: 'right' }}>Actions</th>
+              <th className="tw-table-header tw-text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -207,7 +207,7 @@ export function PortalInvoicesTable({
                   <td className="tw-table-cell">{invoice.invoice_number}</td>
                   <td className="tw-table-cell tw-text-muted">{invoice.project_name || 'Project'}</td>
                   <td className="tw-table-cell tw-text-muted">{formatDate(invoice.created_at)}</td>
-                  <td className="tw-table-cell" style={{ textAlign: 'right' }}>
+                  <td className="tw-table-cell tw-text-right">
                     {formatCurrency(invoice.amount_total)}
                   </td>
                   <td className="tw-table-cell">
@@ -215,8 +215,8 @@ export function PortalInvoicesTable({
                       {PORTAL_INVOICE_STATUS_CONFIG[invoice.status]?.label || invoice.status}
                     </span>
                   </td>
-                  <td className="tw-table-cell">
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                  <td className="tw-table-cell tw-text-right">
+                    <div className="tw-flex tw-justify-end tw-gap-1">
                       <button
                         className="tw-btn-icon"
                         onClick={() => handlePreview(invoice)}

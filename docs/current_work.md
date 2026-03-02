@@ -8,19 +8,24 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
-### Inline Style Refactoring to CSS Classes - IN PROGRESS
+### Inline Style Refactoring to CSS Classes - COMPLETE
 
-**Started:** February 28, 2026
+**Completed:** March 2, 2026
 
-Refactoring inline `style={{}}` attributes in React components to CSS classes for better maintainability and consistency.
+Refactored inline `style={{}}` attributes in React components to CSS classes.
 
 **Progress:**
 
 - Starting count: 733 inline styles
-- Current count: 74 inline styles
-- Removed: 659 (90% reduction)
+- Final count: 47 inline styles
+- Removed: 686 (94% reduction)
 
-**Remaining:** ~74 inline styles (mostly dynamic styles for progress bars, conditional colors, grid column counts)
+**Remaining 47 are dynamic values that MUST stay inline:**
+
+- Progress bar widths (`width: ${progress}%`)
+- Config-based colors (priority, status, tag colors from objects)
+- Dynamic grid columns (`gridTemplateColumns: repeat(${count}, 1fr)`)
+- Conditional opacity for loading states
 
 ---
 

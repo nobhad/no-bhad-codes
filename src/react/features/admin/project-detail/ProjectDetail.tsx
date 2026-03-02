@@ -235,7 +235,7 @@ export function ProjectDetail({
           {/* Project Info */}
           <div className="tw-flex tw-flex-col tw-gap-0.5">
             <div className="tw-flex tw-items-center tw-gap-2">
-              <h1 className="tw-heading" style={{ fontSize: '18px', margin: 0 }}>
+              <h1 className="tw-heading tw-text-lg tw-m-0">
                 {project.project_name || 'Untitled Project'}
               </h1>
               <PortalDropdown>
@@ -259,7 +259,7 @@ export function ProjectDetail({
               </PortalDropdown>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-3 tw-text-muted" style={{ fontSize: '12px' }}>
+            <div className="tw-flex tw-items-center tw-gap-3 tw-text-muted tw-text-xs">
               {project.client_name && (
                 <span>
                   Client: <span className="tw-text-primary">{project.client_name}</span>
@@ -348,7 +348,7 @@ export function ProjectDetail({
       </div>
 
       {/* Tab Content */}
-      <div className="tw-section" style={{ minHeight: '400px' }}>
+      <div className="tw-section tw-min-h-400">
         {activeTab === 'overview' && (
           <OverviewTab
             project={project}
