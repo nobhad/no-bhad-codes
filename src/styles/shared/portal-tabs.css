@@ -218,12 +218,12 @@
 
 .portal-tabs-wrapper::before {
   left: 0;
-  background: linear-gradient(to right, var(--portal-bg-medium, #2a2a2a) 0%, transparent 100%);
+  background: linear-gradient(to right, var(--portal-bg-medium) 0%, transparent 100%);
 }
 
 .portal-tabs-wrapper::after {
   right: 0;
-  background: linear-gradient(to left, var(--portal-bg-medium, #2a2a2a) 0%, transparent 100%);
+  background: linear-gradient(to left, var(--portal-bg-medium) 0%, transparent 100%);
 }
 
 /* Show indicators when scrollable - controlled via JS data attributes */

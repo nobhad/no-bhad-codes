@@ -4,8 +4,12 @@
  * Provides consistent formatting for dates, currency, file sizes, and due date calculations
  */
 
+// Re-export shared utilities from canonical source
+export { formatCurrency, formatFileSize } from '../../utils/format-utils';
+
 /**
  * Format ISO date string to readable format (e.g., "Feb 27, 2026")
+ * Note: This uses a different format than the standard MM/DD/YYYY for card displays
  * @param dateString - ISO date string to format
  * @returns Formatted date string
  */
@@ -16,29 +20,6 @@ export function formatDate(dateString: string): string {
     day: 'numeric',
     year: 'numeric'
   });
-}
-
-/**
- * Format number as US currency (e.g., "$1,234.56")
- * @param amount - Number to format as currency
- * @returns Formatted currency string
- */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount);
-}
-
-/**
- * Format bytes to human readable file size (e.g., "1.5 MB")
- * @param bytes - File size in bytes
- * @returns Formatted file size string
- */
-export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Client, ClientStats, ApiResponse } from '@react/features/admin/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
 
 interface UseClientsOptions {
   /** Auth token getter for API calls */
@@ -85,7 +86,7 @@ export function useClients({
     setError(null);
 
     try {
-      const response = await fetch('/api/clients', {
+      const response = await fetch(API_ENDPOINTS.CLIENTS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -115,7 +116,7 @@ export function useClients({
   const updateClient = useCallback(
     async (id: number, updates: Partial<Client>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -173,7 +174,7 @@ export function useClients({
 
       try {
         for (const id of ids) {
-          const response = await fetch(`/api/clients/${id}`, {
+          const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}`, {
             method: 'DELETE',
             headers: getHeaders(),
             credentials: 'include'
@@ -204,7 +205,7 @@ export function useClients({
   const sendInvite = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${id}/send-invite`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}/send-invite`, {
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include'

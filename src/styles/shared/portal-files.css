@@ -583,7 +583,7 @@
 }
 
 .tw-dropzone.is-error {
-  border-color: var(--color-error, #ef4444);
+  border-color: var(--color-error);
 }
 
 .tw-dropzone.is-success {

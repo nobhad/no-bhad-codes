@@ -48,8 +48,8 @@
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--portal-bg-darker, #1a1a1a);
-  border: 1px solid var(--portal-border, #333);
+  background: var(--portal-bg-darker);
+  border: 1px solid var(--portal-border);
   border-radius: var(--border-radius-lg, 8px);
   box-shadow:
     0 16px 70px var(--portal-alpha-black-50),
@@ -77,14 +77,14 @@
   align-items: center;
   gap: var(--space-1-5, 12px);
   padding: var(--space-2, 16px);
-  border-bottom: 1px solid var(--portal-border, #333);
+  border-bottom: 1px solid var(--portal-border);
 }
 
 .command-palette-icon {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
-  color: var(--portal-text-muted, #888);
+  color: var(--portal-text-muted);
 }
 
 .command-palette-icon svg {
@@ -98,7 +98,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   font-size: var(--font-size-md, 15px);
   font-weight: 400;
   line-height: 1.5;
@@ -106,16 +106,16 @@
 }
 
 .command-palette-input::placeholder {
-  color: var(--portal-text-muted, #888);
+  color: var(--portal-text-muted);
 }
 
 .command-palette-kbd {
   flex-shrink: 0;
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--portal-bg-dark, #252525);
-  border: 1px solid var(--portal-border, #333);
-  color: var(--portal-text-muted, #888);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  color: var(--portal-text-muted);
   font-size: 11px;
   font-family: inherit;
   font-weight: 500;
@@ -140,12 +140,12 @@
 }
 
 .command-palette-results::-webkit-scrollbar-thumb {
-  background: var(--portal-border, #333);
+  background: var(--portal-border);
   border-radius: 3px;
 }
 
 .command-palette-results::-webkit-scrollbar-thumb:hover {
-  background: var(--portal-text-muted, #555);
+  background: var(--portal-text-muted);
 }
 
 /* -----------------------------------------------------
@@ -161,7 +161,7 @@
 
 .command-palette-section-label {
   padding: var(--space-0-5, 4px) var(--space-1, 8px);
-  color: var(--portal-text-muted, #888);
+  color: var(--portal-text-muted);
   font-size: var(--font-size-xs, 11px);
   font-weight: 600;
   text-transform: uppercase;
@@ -186,7 +186,7 @@
   border: none;
   border-radius: var(--border-radius-sm, 6px);
   background: transparent;
-  color: var(--portal-text-light, #fff);
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm, 14px);
   font-weight: 400;
   text-align: left;
@@ -196,7 +196,7 @@
 
 .command-palette-item:hover,
 .command-palette-item.selected {
-  background: var(--portal-bg-medium, #2a2a2a);
+  background: var(--portal-bg-medium);
 }
 
 .command-palette-item.selected {
@@ -207,7 +207,7 @@
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: var(--portal-text-secondary, #aaa);
+  color: var(--portal-text-secondary);
 }
 
 .command-palette-item-icon svg {
@@ -230,9 +230,9 @@
   flex-shrink: 0;
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--portal-bg-dark, #252525);
-  border: 1px solid var(--portal-border, #333);
-  color: var(--portal-text-muted, #888);
+  background: var(--portal-bg-dark);
+  border: 1px solid var(--portal-border);
+  color: var(--portal-text-muted);
   font-size: 11px;
   font-weight: 500;
 }

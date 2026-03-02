@@ -359,7 +359,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 /* Logout button hover - red color for destructive action */
 .portal .sidebar-btn.btn-logout:hover,
 .portal .sidebar-btn.btn-logout:hover .btn-icon {
-  color: var(--color-error-400, #f87171);
+  color: var(--color-error-400);
 }
 
 /* =====================================================
@@ -709,7 +709,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-muted, #555);
+  color: var(--portal-text-muted);
   font-family: inherit;
   font-size: 0.625rem;
   font-weight: 400;

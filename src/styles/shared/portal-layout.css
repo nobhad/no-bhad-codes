@@ -849,7 +849,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: var(--portal-bg-darker, #2a2a2a);
+  background: var(--portal-bg-darker);
   color: var(--portal-text-light);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--portal-radius-sm);
@@ -1207,7 +1207,7 @@ td {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
   letter-spacing: var(--letter-spacing-tightest, -0.09em);
   text-shadow: none;
-  color: var(--portal-text-light, #ffffff);
+  color: var(--portal-text-light);
 }
 
 .portal .page-header h2,
@@ -1266,7 +1266,7 @@ html[data-theme="light"] .portal .funnel-value {
 .portal hr {
   height: 2px;
   border-radius: 0;
-  background-color: var(--portal-text-light, #ffffff);
+  background-color: var(--portal-text-light);
 }
 
 /* =====================================================

@@ -1,6 +1,6 @@
 # UI Factory System
 
-**Last Updated:** 2026-02-26
+**Last Updated:** 2026-03-02
 
 ## Overview
 
@@ -28,11 +28,13 @@ src/factories/
     └── state-factory.ts        # Empty/loading/error states
 
 src/react/factories/
-├── index.ts                    # React factory exports
+├── index.ts                    # React factory exports (re-exports StatusBadge from components/portal)
 ├── IconButton.tsx              # React icon button component
 ├── useFactory.ts               # React hooks
-├── StatusBadge.tsx             # React badge components
 └── StateDisplay.tsx            # React state components
+
+src/react/components/portal/
+└── StatusBadge.tsx             # Canonical StatusBadge component (exported via factories/index.ts)
 ```
 
 ## Core Concepts

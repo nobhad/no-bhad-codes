@@ -13,46 +13,24 @@ export * from './api';
 // Database entity types
 export * from './database';
 
-// Authentication types (exclude duplicates from api.ts)
+// Authentication types from centralized auth module
+export { type UserRole, AUTH_STORAGE_KEYS, AUTH_ERROR_CODES } from '../auth/auth-constants';
 export {
-  type UserRole,
-  type Permission,
-  ROLE_PERMISSIONS,
   type AuthUser,
-  type AuthAdminUser,
-  type AuthClientUser,
-  type AnyAuthUser,
-  type JWTPayload,
-  type AdminJWTPayload,
-  type ClientJWTPayload,
-  type TokenPair,
-  type DecodedToken,
-  type SessionData,
-  type AdminSessionData,
-  type ClientSessionData,
-  type SessionValidationResult,
+  type AdminUser,
+  type ClientUser,
+  type AnyUser,
+  type AuthState,
   type LoginCredentials,
   type AdminLoginCredentials,
-  type MagicLinkVerification,
-  type PasswordResetRequest,
-  type PasswordResetConfirmation,
   type AuthResult,
   type LoginResult,
-  type TokenRefreshResult,
-  type AuthErrorCode,
-  type AuthState,
-  type AuthContextValue,
-  type AuthStorageKeys,
-  AUTH_STORAGE_KEYS,
+  type SessionData,
   isAdminUser,
   isClientUser,
-  hasPermission,
-  isTokenExpired,
-  shouldRefreshToken,
-  type UserId,
-  type AuthenticatedRequest,
-  type OptionalAuthRequest
-} from './auth';
+  isSessionExpired,
+  shouldRefreshSession
+} from '../auth/auth-types';
 
 // Client/Project types (existing)
 export * from './client';

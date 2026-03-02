@@ -21,13 +21,13 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--portal-bg-darker, #0a0a0a);
+  background: var(--portal-bg-darker);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: var(--z-index-portal-overlay, 90);
+  z-index: var(--z-index-portal-overlay);
   transition: background-color var(--transition-fast);
 }
 
@@ -48,8 +48,8 @@
    ===================================================== */
 
 .auth-gate-container {
-  background: var(--portal-bg-darkest, #000000);
-  border: 2px solid var(--portal-border-color, #ffffff);
+  background: var(--portal-bg-darkest);
+  border: 2px solid var(--portal-border-color);
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
   max-width: min(500px, 90vw);
@@ -79,12 +79,12 @@
   font-family: "Inconsolata", "JetBrains Mono", monospace;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
-  color: var(--portal-text-light, #ffffff);
+  color: var(--portal-text-light);
   margin: 0 0 0.5rem 0;
 }
 
 .auth-gate-header p {
-  color: var(--portal-text-secondary, #ffffff);
+  color: var(--portal-text-secondary);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   margin: 0;
 }
@@ -113,7 +113,7 @@
   position: static;
   display: block;
   margin-bottom: var(--space-1);
-  color: var(--portal-text-light, #ffffff);
+  color: var(--portal-text-light);
   font-weight: var(--font-weight-medium, 500);
   font-size: var(--font-size-sm, 0.875rem);
 }
@@ -126,10 +126,10 @@
 .auth-gate .form-input {
   width: 100%;
   padding: var(--space-2) var(--space-3);
-  border: 2px solid var(--portal-border-color, #ffffff);
+  border: 2px solid var(--portal-border-color);
   font-size: var(--font-size-base, 1rem);
-  background-color: var(--portal-bg-darkest, #000000);
-  color: var(--portal-text-light, #ffffff);
+  background-color: var(--portal-bg-darkest);
+  color: var(--portal-text-light);
   font-family: inherit;
   box-sizing: border-box;
   transition: all var(--transition-fast);
@@ -139,12 +139,12 @@
 .auth-gate-form .form-input:focus,
 .auth-gate .form-input:focus {
   outline: none;
-  border-color: var(--color-primary, #ffffff);
+  border-color: var(--color-primary);
 }
 
 .auth-gate-form .form-input::placeholder,
 .auth-gate .form-input::placeholder {
-  color: var(--portal-text-muted, #a0a0a0);
+  color: var(--portal-text-muted);
   opacity: 0.7;
 }
 
@@ -173,12 +173,12 @@
   cursor: pointer;
   padding: var(--space-0-5);
   transition: color var(--transition-fast);
-  color: var(--portal-text-secondary, #ffffff);
+  color: var(--portal-text-secondary);
 }
 
 .auth-gate .password-toggle:hover,
 .auth-gate .portal-password-toggle:hover {
-  color: var(--color-primary, #ffffff);
+  color: var(--color-primary);
 }
 
 /* =====================================================
@@ -187,12 +187,12 @@
 
 .auth-gate .auth-error {
   display: none;
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger);
   font-size: 0.875rem;
   margin-bottom: 1rem;
   padding: 0.75rem;
   background-color: transparent;
-  border: 1px solid var(--color-danger, #ef4444);
+  border: 1px solid var(--color-danger);
   font-weight: 500;
   text-align: center;
 }
@@ -202,12 +202,12 @@
 }
 
 .auth-gate-form .form-input.error {
-  border-color: var(--color-danger, #ef4444);
+  border-color: var(--color-danger);
 }
 
 .auth-gate-form .error-message {
   display: none;
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger);
   font-size: 0.875rem;
   margin-top: 0.25rem;
   font-weight: 500;
@@ -226,7 +226,7 @@
 .auth-gate-form .auth-submit {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
-  border: 2px solid var(--portal-border-color, #ffffff);
+  border: 2px solid var(--portal-border-color);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -235,15 +235,15 @@
   transition: all var(--transition-fast);
   text-transform: uppercase;
   background-color: transparent;
-  color: var(--portal-text-light, #ffffff);
+  color: var(--portal-text-light);
   margin-top: var(--space-2);
 }
 
 .auth-gate .auth-submit:hover,
 .auth-gate .auth-submit.active {
-  background-color: var(--color-primary, #ffffff);
-  color: var(--portal-bg-dark, #000000);
-  border-color: var(--color-primary, #ffffff);
+  background-color: var(--color-primary);
+  color: var(--portal-bg-dark);
+  border-color: var(--color-primary);
 }
 
 .auth-gate .auth-submit:disabled {
@@ -277,32 +277,32 @@
 }
 
 .auth-link {
-  color: var(--portal-text-secondary, #ffffff);
+  color: var(--portal-text-secondary);
   text-decoration: none;
   font-size: 0.875rem;
   transition: color var(--transition-fast);
 }
 
 .auth-link:hover {
-  color: var(--color-primary, #ffffff);
+  color: var(--color-primary);
 }
 
 .auth-divider {
-  color: var(--portal-text-muted, #a0a0a0);
+  color: var(--portal-text-muted);
 }
 
 .back-link {
   display: block;
   text-align: center;
   margin-top: 1.5rem;
-  color: var(--portal-text-secondary, #ffffff);
+  color: var(--portal-text-secondary);
   text-decoration: none;
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   transition: color var(--transition-fast);
 }
 
 .back-link:hover {
-  color: var(--color-primary, #ffffff);
+  color: var(--color-primary);
 }
 
 /* =====================================================
@@ -313,10 +313,10 @@
 .auth-gate .form-input:-webkit-autofill:hover,
 .auth-gate .form-input:-webkit-autofill:focus,
 .auth-gate .form-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px var(--portal-bg-darkest, #000000) inset !important;
-  -webkit-text-fill-color: var(--portal-text-light, #ffffff) !important;
-  background-color: var(--portal-bg-darkest, #000000) !important;
-  caret-color: var(--portal-text-light, #ffffff) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--portal-bg-darkest) inset !important;
+  -webkit-text-fill-color: var(--portal-text-light) !important;
+  background-color: var(--portal-bg-darkest) !important;
+  caret-color: var(--portal-text-light) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
