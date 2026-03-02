@@ -447,7 +447,7 @@
 
 #view-project-invoice-modal .invoice-line-items td {
   padding: var(--space-1);
-  border-bottom: 1px solid var(--portal-border-color-light);
+  border-bottom: 1px solid var(--portal-alpha-white-20);
   color: var(--portal-text-light);
 }
 

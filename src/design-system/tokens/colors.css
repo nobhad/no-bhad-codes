@@ -245,6 +245,13 @@ html[data-theme="light"] {
   --app-color-primary: var(--color-brand-primary);
   --app-color-primary-hover: #b91c1c;
 
+  /* Light mode semantic colors - used by portal light mode fallbacks */
+  --color-light-bg: #ffffff;
+  --color-light-text: #171717;
+  --color-light-text-secondary: #525252;
+  --color-light-text-muted: #737373;
+  --color-light-border: #d4d4d4;
+
   /* Legacy base colors */
   --color-black: #000000;
   --color-white: #ffffff;
