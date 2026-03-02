@@ -8,6 +8,7 @@
  * for better decoupling and testability.
  */
 
+
 export type ServiceFactory<T = unknown> = (...args: any[]) => T | Promise<T>;
 export type ServiceInstance<T = unknown> = T;
 

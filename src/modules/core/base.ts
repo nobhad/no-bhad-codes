@@ -30,7 +30,7 @@ export class BaseModule {
   protected debug: boolean;
   protected reducedMotion: boolean;
   protected eventListeners: Map<string, EventHandler>;
-  protected timelines: Set<any>; // GSAP timeline type would go here
+  protected timelines: Set<gsap.core.Timeline | gsap.core.Tween>;
   protected elements: Map<string, Element | null>;
   protected lastActivity: Date | null;
   protected errors: string[];
@@ -190,7 +190,7 @@ export class BaseModule {
    * Add a GSAP timeline to be managed by the module (killed on destroy)
    * @param {gsap.core.Timeline|gsap.core.Tween} timeline
    */
-  protected addTimeline(timeline: any): void {
+  protected addTimeline(timeline: gsap.core.Timeline | gsap.core.Tween): void {
     if (timeline) {
       this.timelines.add(timeline);
     }
@@ -200,7 +200,7 @@ export class BaseModule {
    * Remove a GSAP timeline from being managed
    * @param {gsap.core.Timeline|gsap.core.Tween} timeline
    */
-  protected removeTimeline(timeline: any): void {
+  protected removeTimeline(timeline: gsap.core.Timeline | gsap.core.Tween): void {
     if (timeline) {
       this.timelines.delete(timeline);
     }
@@ -318,17 +318,17 @@ export class BaseModule {
   /**
    * Logging methods with module context
    */
-  protected log(...args: any[]): void {
+  protected log(...args: unknown[]): void {
     if (this.debug) {
       console.log(`[${this.name}]`, ...args);
     }
   }
 
-  protected warn(...args: any[]): void {
+  protected warn(...args: unknown[]): void {
     console.warn(`[${this.name}]`, ...args);
   }
 
-  protected error(...args: any[]): void {
+  protected error(...args: unknown[]): void {
     console.error(`[${this.name}]`, ...args);
   }
 
@@ -360,7 +360,7 @@ export class BaseModule {
   /**
    * Emit custom event (alias for dispatchEvent)
    */
-  emit(eventName: string, detail?: any): void {
+  emit(eventName: string, detail?: Record<string, unknown>): void {
     this.dispatchEvent(eventName, detail);
   }
 

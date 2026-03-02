@@ -25,6 +25,21 @@ export interface NavigationModuleOptions extends ModuleOptions {
   dataService?: DataService;
 }
 
+interface NavigationItem {
+  id: string;
+  text?: string;
+  title?: string;
+  href?: string;
+  path?: string;
+  eyebrow?: string;
+  disabled?: boolean;
+  comingSoon?: boolean;
+}
+
+interface WindowNavigationData {
+  menuItems?: NavigationItem[];
+}
+
 export class NavigationModule extends BaseModule {
   // Navigation elements
   private nav: HTMLElement | null = null;
@@ -474,7 +489,7 @@ export class NavigationModule extends BaseModule {
 
       // Fallback: try to get from window global if available (from EJS template)
       if (navigationItems.length === 0 && typeof window !== 'undefined') {
-        const windowData = (window as any).NAVIGATION_DATA;
+        const windowData = (window as unknown as { NAVIGATION_DATA?: WindowNavigationData }).NAVIGATION_DATA;
         if (windowData?.menuItems) {
           navigationItems = windowData.menuItems;
         }
@@ -526,7 +541,7 @@ export class NavigationModule extends BaseModule {
   /**
    * Update navigation DOM with data
    */
-  private updateNavigationDOM(navigationItems: any[]): void {
+  private updateNavigationDOM(navigationItems: NavigationItem[]): void {
     if (!this.menuLinks) return;
 
     navigationItems.forEach((item, index) => {

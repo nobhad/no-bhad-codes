@@ -104,7 +104,7 @@ export interface ColumnDef<T> {
   sortable?: boolean;
   width?: string;
   align?: 'left' | 'center' | 'right';
-  render?: (value: any, item: T) => string;
+  render?: (value: T[keyof T] | string | number, item: T) => string;
 }
 
 /**
@@ -137,5 +137,6 @@ export interface ModuleRegistration {
   id: string;
   name: string;
   roles: UserRole[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loader: () => Promise<{ default: any }>;
 }

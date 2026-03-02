@@ -32,6 +32,28 @@ interface OverviewDashboardProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
+interface ActivityItem {
+  id: number;
+  description: string;
+  timestamp: string;
+}
+
+interface ProjectItem {
+  id: number;
+  name: string;
+  client: string;
+  progress: number;
+}
+
+interface TaskItem {
+  id: number;
+  title: string;
+  projectName: string;
+  priority: string;
+  status: string;
+  dueDate?: string;
+}
+
 export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }: OverviewDashboardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +61,9 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
 
   const [attention, setAttention] = useState({ overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
   const [snapshot, setSnapshot] = useState({ activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [activeProjects, setActiveProjects] = useState<any[]>([]);
-  const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
+  const [activeProjects, setActiveProjects] = useState<ProjectItem[]>([]);
+  const [upcomingTasks, setUpcomingTasks] = useState<TaskItem[]>([]);
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
@@ -161,7 +183,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
               ) : (
                 <ul className="activity-feed">
                   {activeProjects.slice(0, 5).map((project) => (
-                    <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('projects', project.id)}>
+                    <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('projects', String(project.id))}>
                       <div className="activity-body ovdash-flex-1">
                         <span className="activity-text">{project.name}</span>
                         <span className="activity-time">{project.client}</span>
@@ -270,7 +292,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
   );
 }
 
-function TasksKanban({ tasks }: { tasks: any[] }) {
+function TasksKanban({ tasks }: { tasks: TaskItem[] }) {
   const columns = [
     { id: 'pending', label: 'TO DO' },
     { id: 'in_progress', label: 'IN PROGRESS' },
