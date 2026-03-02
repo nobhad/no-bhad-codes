@@ -132,3 +132,30 @@ Resolved all conflicts identified in deep dive audit across CSS, components, API
 - TypeScript compilation passed
 - ESLint passed
 - Production build completed successfully
+
+---
+
+### Inline Style Refactoring to CSS Classes - COMPLETE
+
+**Completed:** March 2, 2026
+
+Refactored inline `style={{}}` attributes in React components to CSS utility classes.
+
+**Progress:**
+
+- Starting count: 733 inline styles
+- Final count: 47 inline styles
+- Removed: 686 (94% reduction)
+
+**Changes:**
+
+- Added `tw-min-h-400` utility class to portal-layout.css
+- Converted `fontSize`, `textAlign`, `margin`, `marginBottom` inline styles to tw-* classes
+- Updated files: PortalInvoicesTable.tsx, PortalDocumentRequests.tsx, ProjectDetail.tsx, ClientDetail.tsx, NotesTab.tsx
+
+**Remaining 47 are dynamic values that MUST stay inline:**
+
+- Progress bar widths (`width: ${progress}%`)
+- Config-based colors (priority, status, tag colors from objects)
+- Dynamic grid columns (`gridTemplateColumns: repeat(${count}, 1fr)`)
+- Conditional opacity for loading states

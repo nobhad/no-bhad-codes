@@ -8,45 +8,19 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
-### Inline Style Refactoring to CSS Classes - COMPLETE
-
-**Completed:** March 2, 2026
-
-Refactored inline `style={{}}` attributes in React components to CSS classes.
-
-**Progress:**
-
-- Starting count: 733 inline styles
-- Final count: 47 inline styles
-- Removed: 686 (94% reduction)
-
-**Remaining 47 are dynamic values that MUST stay inline:**
-
-- Progress bar widths (`width: ${progress}%`)
-- Config-based colors (priority, status, tag colors from objects)
-- Dynamic grid columns (`gridTemplateColumns: repeat(${count}, 1fr)`)
-- Conditional opacity for loading states
-
----
-
 ### Portal Architecture Consolidation - Phase 4 Cleanup
 
-**Started:** February 27, 2026
+**Status:** BLOCKED - Awaiting User Testing
 
 Phase 4 cleanup tasks remaining:
 
-- [ ] Delete deprecated modules (requires user confirmation)
-- [ ] Remove old navigation configs (backward compatible - can be done later)
+- [ ] Test new PortalShell architecture in browser
+- [ ] Delete deprecated modules (after testing confirms PortalShell works)
+- [ ] Remove old navigation configs
 - [ ] Update tests
 - [ ] Update documentation
 
-**Note on Deprecated Modules:**
-
-The new portal architecture is ready but runs alongside the existing system. The following modules can be deprecated once the new system is fully tested:
-
-- `src/features/admin/admin-dashboard.ts` - Replaced by PortalShell
-- `src/features/client/client-portal.ts` - Replaced by PortalShell
-- Individual module files in `admin/modules/` and `client/modules/` that duplicate shared modules
+**Note:** The deprecated modules (`admin-dashboard.ts`, `client-portal.ts`) are still actively imported in `modules-config.ts`. They cannot be deleted until the new PortalShell system is fully tested and confirmed working.
 
 ---
 
