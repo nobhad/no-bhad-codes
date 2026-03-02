@@ -1399,7 +1399,7 @@ a.text-danger:hover {
 /* Progress bars */
 .tw-progress-track {
   height: 4px;
-  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  background: var(--portal-alpha-white-20);
   overflow: hidden;
 }
 
@@ -1416,13 +1416,13 @@ a.text-danger:hover {
   gap: 0.75rem;
   padding: 0.75rem;
   background: transparent;
-  border-bottom: 1px solid var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  border-bottom: 1px solid var(--portal-alpha-white-10);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
 .tw-list-item:hover {
-  background: var(--portal-alpha-white-05, rgba(255, 255, 255, 0.05));
+  background: var(--portal-alpha-white-05);
 }
 
 .tw-list-item:last-child {
@@ -1433,7 +1433,7 @@ a.text-danger:hover {
 .tw-modal-overlay {
   position: fixed;
   inset: 0;
-  background: var(--portal-alpha-black-80, rgba(0, 0, 0, 0.8));
+  background: var(--portal-alpha-black-80);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -1442,8 +1442,8 @@ a.text-danger:hover {
 }
 
 .tw-modal {
-  background: var(--portal-bg-pitch, #000000);
-  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
+  background: var(--portal-bg-pitch);
+  border: 1px solid var(--portal-alpha-white-30);
   padding: 1.5rem;
   max-width: 32rem;
   width: 100%;
@@ -1466,8 +1466,8 @@ a.text-danger:hover {
 
 /* Dropdown menus */
 .tw-dropdown {
-  background: var(--portal-bg-pitch, #000000);
-  border: 1px solid var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
+  background: var(--portal-bg-pitch);
+  border: 1px solid var(--portal-alpha-white-30);
   padding: 0.25rem 0;
 }
 
@@ -1481,12 +1481,12 @@ a.text-danger:hover {
 }
 
 .tw-dropdown-item:hover {
-  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  background: var(--portal-alpha-white-10);
   color: var(--portal-text-light);
 }
 
 .tw-dropdown-item-active {
-  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  background: var(--portal-alpha-white-10);
   color: var(--portal-text-light);
 }
 
@@ -1514,7 +1514,7 @@ a.text-danger:hover {
 
 /* Table row selected state */
 .tw-table-row-selected {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--portal-alpha-white-10);
 }
 
 /* =====================================================

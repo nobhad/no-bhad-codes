@@ -244,7 +244,7 @@
 
 .tw-stat-card {
   background: transparent;
-  border: 1px solid var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  border: 1px solid var(--portal-alpha-white-20);
   padding: var(--space-2, 1rem);
   display: flex;
   flex-direction: column;

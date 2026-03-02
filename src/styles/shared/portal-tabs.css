@@ -382,7 +382,7 @@
 .tw-tab-list {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  border-bottom: 1px solid var(--portal-alpha-white-20);
 }
 
 .tw-tab {
