@@ -1784,6 +1784,12 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-shadow { box-shadow: none; }
 
 /* =====================================================
+   TW-* SIZING UTILITY CLASSES
+   ===================================================== */
+.tw-min-h-96 { min-height: 24rem; } /* 384px */
+.tw-min-h-400 { min-height: 400px; }
+
+/* =====================================================
    TW-* MISC UTILITY CLASSES
    ===================================================== */
 .tw-fill-current { fill: currentColor; }

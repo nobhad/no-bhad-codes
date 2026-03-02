@@ -175,14 +175,14 @@ export function PortalDocumentRequests({
         <div className="tw-empty-state">
           <FileText className="tw-h-8 tw-w-8" />
           <p>No document requests yet.</p>
-          <p style={{ fontSize: '12px' }}>Requests will appear here when your project team needs documents from you.</p>
+          <p className="tw-text-xs">Requests will appear here when your project team needs documents from you.</p>
         </div>
       )}
 
       {/* Action Needed Section */}
       {actionNeeded.length > 0 && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
             <h2 className="tw-section-title">Action Needed</h2>
             <span className="tw-badge">{actionNeeded.length}</span>
           </div>
@@ -203,7 +203,7 @@ export function PortalDocumentRequests({
       {/* In Review Section */}
       {inReview.length > 0 && (
         <div>
-          <h2 className="tw-section-title" style={{ marginBottom: '0.5rem' }}>In Review</h2>
+          <h2 className="tw-section-title tw-mb-2">In Review</h2>
           <div className="tw-section">
             {inReview.map(request => (
               <DocumentRequestCard
@@ -221,7 +221,7 @@ export function PortalDocumentRequests({
       {/* Completed Section */}
       {completed.length > 0 && (
         <div>
-          <h2 className="tw-section-title" style={{ marginBottom: '0.5rem' }}>Completed</h2>
+          <h2 className="tw-section-title tw-mb-2">Completed</h2>
           <div className="tw-section">
             {completed.map(request => (
               <DocumentRequestCard
