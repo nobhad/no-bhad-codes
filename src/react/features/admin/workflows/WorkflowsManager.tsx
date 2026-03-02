@@ -352,7 +352,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
 
   // If email-templates subtab is selected, render EmailTemplatesManager
   if (currentSubtab === 'email-templates') {
-    return <EmailTemplatesManager onNavigate={onNavigate} />;
+    return <EmailTemplatesManager onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />;
   }
 
   // Determine title based on subtab
