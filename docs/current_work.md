@@ -132,11 +132,11 @@ Comprehensive audit of portal codebase identified and fixed critical security an
 
 **Remaining Tasks:**
 
-- Task #4: Create CSS z-index scale design tokens
-- Task #5: Standardize API response formats
-- Task #6: Move hardcoded colors to design tokens
-- Task #7: Fix React component issues (accessibility, error handling)
-- Task #8: Fix service type safety and logging
+- Task #4: Create CSS z-index scale design tokens - ✅ ALREADY EXISTS (`src/design-system/tokens/z-index.css`)
+- Task #5: Standardize API response formats - ✅ ALREADY EXISTS (`server/utils/api-response.ts`, 42 files use `sendSuccess`/`sendError`)
+- Task #6: Move hardcoded colors to design tokens - ✅ MOSTLY COMPLETE (buttons.css fixed March 2, 2026)
+- Task #7: Fix React component issues (accessibility, error handling) - Deferred (low priority)
+- Task #8: Fix service type safety and logging - Deferred (low priority)
 
 ---
 

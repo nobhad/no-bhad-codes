@@ -55,6 +55,48 @@ Applied via `[data-page="admin"]` and `[data-page="client-portal"]` selectors:
 --portal-section-heading-padding: 16px 0 8px 0;
 ```
 
+### Button Tokens
+
+**Location:** `src/design-system/tokens/buttons.css`
+
+Portal button tokens use CSS variables for theming. Never hardcode RGB values.
+
+```css
+/* Dark mode (default) */
+--btn-portal-color: var(--portal-text-light);
+--btn-portal-border: var(--portal-text-light);
+--btn-portal-hover-bg: var(--portal-text-light);
+--btn-portal-hover-color: var(--portal-background);
+
+/* Light mode - automatically inverted */
+--btn-portal-color: var(--portal-text-primary);
+--btn-portal-border: var(--portal-text-primary);
+```
+
+### Z-Index Tokens
+
+**Location:** `src/design-system/tokens/z-index.css`
+
+Use z-index tokens instead of hardcoded values:
+
+```css
+/* Semantic layers */
+--z-index-dropdown: 100;
+--z-index-sticky: 200;
+--z-index-fixed: 300;
+--z-index-modal-backdrop: 400;
+--z-index-modal: 500;
+--z-index-toast: 800;
+
+/* Portal-specific layers */
+--z-index-portal-header: 9100;
+--z-index-portal-sidebar: 9200;
+--z-index-portal-modal: 9600;
+--z-index-portal-dropdown: 9700;
+--z-index-portal-toast: 9800;
+--z-index-portal-confirm: 9900;
+```
+
 ---
 
 ## File Organization
@@ -64,7 +106,11 @@ src/
 ├── design-system/
 │   └── tokens/
 │       ├── colors.css      # Color variables
-│       └── spacing.css     # Spacing variables
+│       ├── spacing.css     # Spacing variables
+│       ├── buttons.css     # Button tokens (portal)
+│       ├── borders.css     # Border radius tokens
+│       ├── z-index.css     # Z-index scale tokens
+│       └── portal-theme.css # Portal theme overrides
 ├── styles/
 │   ├── base/
 │   │   ├── reset.css       # CSS reset

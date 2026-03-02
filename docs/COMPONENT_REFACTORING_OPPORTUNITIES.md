@@ -1,21 +1,21 @@
 # Component Refactoring Opportunities
 
-**Last Updated:** February 15, 2026
+**Last Updated:** March 2, 2026
 
 ---
 
 ## Button/Modal Standardization — COMPLETE
 
-All manual button and modal usages have been refactored to use standardized ButtonComponent and ModalComponent patterns. CSS classes and variables are now consistent, and accessibility is improved across all modules.
+All manual button and modal usages have been refactored to use standardized component patterns. CSS classes and variables are now consistent, and accessibility is improved across all modules.
 
 ### Refactor Summary
 
-- All button creation now uses ButtonComponent/button.ts/icon-button.ts
-- All modal implementations use ModalComponent or createPortalModal
+- All button creation now uses `button.ts`, `icon-button.ts`, or `@factories` system
+- All modal implementations use `createPortalModal` or React modal components
 - CSS updated for shared classes and variables
 - ARIA, keyboard, and focus management standardized
 
-See src/components/button-component.ts, button.ts, icon-button.ts, modal-component.ts, portal-modal.ts for implementation details.
+**Note:** Legacy `ButtonComponent` and `ModalComponent` class files were deleted March 2, 2026 as they had zero usage. See `src/components/button.ts`, `icon-button.ts`, `portal-modal.ts`, and `src/factories/` for current implementations.
 
 ---
 
