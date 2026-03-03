@@ -122,13 +122,13 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
       const data = await response.json();
       const payload = data.data || data;
       setReviews(payload.reviews || []);
-      setStats(payload.stats || stats);
+      setStats(payload.stats || { total: 0, pending: 0, approved: 0, inRevision: 0 });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load design reviews');
     } finally {
       setIsLoading(false);
     }
-  }, [projectId, getHeaders, stats]);
+  }, [projectId, getHeaders]);
 
   useEffect(() => {
     loadReviews();

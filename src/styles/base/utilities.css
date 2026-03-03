@@ -602,7 +602,7 @@ html[data-wireframe="true"] {
 }
 
 html[data-wireframe="true"] *:focus-visible {
-  outline-color: var(--color-gray-700, #404040);
+  outline-color: var(--color-gray-700);
 }
 
 /* ============================================
@@ -617,8 +617,8 @@ html[data-wireframe="true"] *:focus-visible {
   transform: translateX(-50%);
   z-index: var(--z-index-portal-confirm, 9900);
   padding: 12px 24px;
-  background-color: var(--color-dark, #333333);
-  color: var(--color-light, #ffffff);
+  background-color: var(--color-dark);
+  color: var(--color-light);
   text-decoration: none;
   font-weight: 600;
   border-radius: 4px;

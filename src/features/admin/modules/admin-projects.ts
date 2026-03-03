@@ -9,6 +9,7 @@
  */
 
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
+import { TIMING } from '../../../constants/timing';
 import {
   formatFileSize,
   formatDisplayValue,
@@ -3007,7 +3008,7 @@ async function showCreateInvoicePrompt(): Promise<void> {
 
   const closeModal = (): void => {
     overlay.classList.add('closing');
-    setTimeout(() => overlay.remove(), 150);
+    setTimeout(() => overlay.remove(), TIMING.OVERLAY_FADE);
   };
 
   const submitInvoice = async (): Promise<void> => {

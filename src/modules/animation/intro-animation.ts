@@ -778,8 +778,8 @@ export class IntroAnimationModule extends BaseModule {
     }
 
     // Update app state if available
-    if (typeof window !== 'undefined' && (window as any).NBW_STATE) {
-      (window as any).NBW_STATE.setState({ introAnimating: false });
+    if (typeof window !== 'undefined' && window.NBW_STATE) {
+      window.NBW_STATE.setState({ introAnimating: false });
     }
 
     // Dispatch completion event for PageTransitionModule

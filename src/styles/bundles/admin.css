@@ -66,8 +66,8 @@
     transform: translateX(-50%);
     z-index: var(--z-index-portal-confirm, 9900);
     padding: 12px 24px;
-    background-color: var(--portal-bg-darker, #0a0a0a);
-    color: var(--portal-text-primary, #ffffff);
+    background-color: var(--portal-bg-darker);
+    color: var(--portal-text-primary);
     text-decoration: none;
     font-weight: 600;
     border-radius: 0; /* DISCOTHÈQUE: sharp corners */
@@ -99,7 +99,7 @@ body.admin-logged-in[data-page="admin"] {
 
 /* html background needs fallback since portal variables are scoped to body */
 html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-pitch, #000000);
+  background-color: var(--portal-bg-pitch);
   /* Fixed height to constrain body */
   height: 100%;
 }
@@ -110,21 +110,21 @@ html:has(body.admin-logged-in[data-page="admin"]) {
  * Uses proper gray scale for visual hierarchy
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"] {
-  background-color: var(--color-light-bg, #ffffff);
-  color: var(--color-light-text, #171717);
+  background-color: var(--color-light-bg);
+  color: var(--color-light-text);
 
   /* Portal text colors - proper hierarchy */
-  --portal-text-light: var(--color-light-text, #171717);
-  --portal-text-primary: var(--color-light-text, #171717);
-  --portal-text-secondary: var(--color-light-text-secondary, #525252);
-  --portal-text-muted: var(--color-light-text-muted, #737373);
+  --portal-text-light: var(--color-light-text);
+  --portal-text-primary: var(--color-light-text);
+  --portal-text-secondary: var(--color-light-text-secondary);
+  --portal-text-muted: var(--color-light-text-muted);
 
   /* Generic text colors - proper hierarchy */
-  --color-dark: var(--color-light-text, #171717);
-  --color-white: var(--color-light-bg, #ffffff);
-  --color-text-primary: var(--color-light-text, #171717);
-  --color-text-secondary: var(--color-light-text-secondary, #525252);
-  --color-text-tertiary: var(--color-light-text-muted, #737373);
+  --color-dark: var(--color-light-text);
+  --color-white: var(--color-light-bg);
+  --color-text-primary: var(--color-light-text);
+  --color-text-secondary: var(--color-light-text-secondary);
+  --color-text-tertiary: var(--color-light-text-muted);
 
   /* Gray scale - proper light mode values */
   --color-gray-100: #f5f5f5;
@@ -140,8 +140,8 @@ html[data-theme="light"] body[data-page="admin"] {
   --color-neutral-900: #171717;
 
   /* Portal backgrounds - light mode */
-  --portal-bg-pitch: var(--color-light-bg, #ffffff);
-  --portal-bg-darkest: var(--color-light-bg, #ffffff);
+  --portal-bg-pitch: var(--color-light-bg);
+  --portal-bg-darkest: var(--color-light-bg);
   --portal-bg-darker: #f5f5f5;
   --portal-bg-dark: #e5e5e5;
   --portal-bg-medium: #d5d5d5;
@@ -150,11 +150,11 @@ html[data-theme="light"] body[data-page="admin"] {
   --portal-bg-readonly: #f5f5f5;
 
   /* Portal borders - visible but not harsh */
-  --portal-border-color: var(--color-light-border, #d4d4d4);
+  --portal-border-color: var(--color-light-border);
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--color-light-bg, #ffffff);
+  background-color: var(--color-light-bg);
 }
 
 /* Scrollbar styling */
@@ -163,14 +163,14 @@ html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-neutral-200, #f1f3f4);
+  background: var(--color-neutral-200);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-400, #9aa0a6);
+  background: var(--color-neutral-400);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-500, #5f6368);
+  background: var(--color-neutral-500);
 }

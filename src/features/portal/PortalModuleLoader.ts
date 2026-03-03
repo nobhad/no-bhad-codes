@@ -40,7 +40,7 @@ const MODULE_LOADERS: Record<string, ModuleLoader> = {
   // ========== SHARED MODULES (role-adaptive) ==========
   // These modules adapt their behavior based on user role
   dashboard: () => import('../shared/PortalDashboard').then((m) => ({ default: m.default })),
-  messages: () => import('../shared/PortalMessaging').then((m) => ({ default: m.default })),
+  messages: () => import('../shared/PortalMessages').then((m) => ({ default: m.default })),
   files: () => import('../shared/PortalFiles').then((m) => ({ default: m.default })),
   invoices: () => import('../shared/PortalInvoices').then((m) => ({ default: m.default })),
   projects: () => import('../shared/PortalProjects').then((m) => ({ default: m.default })),

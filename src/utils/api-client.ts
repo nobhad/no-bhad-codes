@@ -14,6 +14,7 @@
  */
 
 import { AUTH_EVENTS } from '../auth/auth-constants';
+import { ROUTES } from '../constants/api-endpoints';
 
 // ============================================
 // CSRF TOKEN MANAGEMENT
@@ -117,7 +118,7 @@ function handleSessionExpired(): void {
   window.dispatchEvent(new CustomEvent(AUTH_EVENTS.SESSION_EXPIRED));
 
   // Check if we're in admin or client portal
-  const isAdminPage = window.location.pathname.includes('/admin');
+  const isAdminPage = window.location.pathname.includes(ROUTES.ADMIN.LOGIN);
 
   // Clear all auth data
   sessionStorage.clear();
@@ -139,9 +140,9 @@ function handleSessionExpired(): void {
     // Default: redirect to login page after a brief delay
     setTimeout(() => {
       if (isAdminPage) {
-        window.location.href = '/admin';
+        window.location.href = ROUTES.ADMIN.LOGIN;
       } else {
-        window.location.href = '/client/login.html';
+        window.location.href = ROUTES.CLIENT.LOGIN;
       }
     }, 1500);
   }

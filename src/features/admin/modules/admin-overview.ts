@@ -27,7 +27,7 @@ import { createLogger } from '../../../utils/logger';
 const logger = createLogger('AdminOverview');
 
 // React mount functions - lazy loaded
-let mountOverviewDashboard: ((element: HTMLElement, options: any) => () => void) | null = null;
+let mountOverviewDashboard: ((element: HTMLElement, options: Record<string, unknown>) => () => void) | null = null;
 let unmountOverviewDashboard: (() => void) | null = null;
 let reactCleanup: (() => void) | null = null;
 

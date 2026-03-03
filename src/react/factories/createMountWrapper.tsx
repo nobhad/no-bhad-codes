@@ -207,15 +207,20 @@ export function createMountWrapper<P extends BaseMountOptions>(
       console.error(`[React/${displayName}] Mount failed:`, error);
       onMountError?.(error, displayName);
 
-      // Show error state
+      // Show error state (avoid inline onclick for CSP compliance)
       element.innerHTML = `
         <div class="mount-error-container">
           <p class="mount-error-message">Failed to load ${displayName}</p>
-          <button class="mount-error-button" onclick="window.location.reload()">
+          <button class="mount-error-button" data-action="reload">
             Refresh Page
           </button>
         </div>
       `;
+      // Add event listener for reload button
+      const reloadBtn = element.querySelector('[data-action="reload"]');
+      if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => window.location.reload());
+      }
       root = null;
     }
 

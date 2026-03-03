@@ -38,9 +38,9 @@ export type ValidationRule = {
   min?: number;
   max?: number;
   pattern?: RegExp;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Validators handle their own type narrowing
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Validators accept any input type for flexibility
   customValidator?: (value: any) => boolean | string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Sanitizers handle their own type narrowing
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Sanitizers accept any input type for flexibility
   customSanitizer?: (value: any) => unknown;
   allowedValues?: unknown[];
   description?: string;
@@ -847,5 +847,137 @@ export const ValidationSchemas = {
     },
     additionalInfo: { type: 'string' as const, maxLength: 5000 },
     proposalSelection: { type: 'object' as const },
+  },
+
+  // Project request (client submission)
+  projectRequest: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 2, maxLength: 200 },
+    ],
+    projectType: [
+      { type: 'required' as const },
+      {
+        type: 'string' as const,
+        allowedValues: [
+          'simple-site',
+          'business-site',
+          'portfolio',
+          'e-commerce',
+          'ecommerce',
+          'web-app',
+          'browser-extension',
+          'other',
+        ],
+      },
+    ],
+    description: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 10, maxLength: 5000 },
+    ],
+    budget: { type: 'string' as const, maxLength: 50 },
+    timeline: { type: 'string' as const, maxLength: 50 },
+  },
+
+  // Project creation (admin)
+  projectCreate: {
+    client_id: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 },
+    ],
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 2, maxLength: 200 },
+    ],
+    description: { type: 'string' as const, maxLength: 10000 },
+    priority: {
+      type: 'string' as const,
+      allowedValues: ['low', 'medium', 'high', 'urgent'],
+    },
+    status: {
+      type: 'string' as const,
+      allowedValues: ['lead', 'pending', 'active', 'on-hold', 'completed', 'cancelled'],
+    },
+    project_type: { type: 'string' as const, maxLength: 50 },
+    budget_range: { type: 'string' as const, maxLength: 50 },
+    budget_min: { type: 'number' as const, min: 0 },
+    budget_max: { type: 'number' as const, min: 0 },
+    start_date: { type: 'string' as const, maxLength: 20 },
+    due_date: { type: 'string' as const, maxLength: 20 },
+  },
+
+  // Project update
+  projectUpdate: {
+    name: { type: 'string' as const, minLength: 2, maxLength: 200 },
+    description: { type: 'string' as const, maxLength: 10000 },
+    priority: {
+      type: 'string' as const,
+      allowedValues: ['low', 'medium', 'high', 'urgent'],
+    },
+    status: {
+      type: 'string' as const,
+      allowedValues: ['lead', 'pending', 'active', 'on-hold', 'completed', 'cancelled'],
+    },
+    progress: { type: 'number' as const, min: 0, max: 100 },
+  },
+
+  // Message thread creation
+  messageThread: {
+    subject: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 200 },
+    ],
+    thread_type: {
+      type: 'string' as const,
+      allowedValues: ['general', 'support', 'project', 'billing', 'feedback'],
+    },
+    priority: {
+      type: 'string' as const,
+      allowedValues: ['low', 'normal', 'high', 'urgent'],
+    },
+    project_id: { type: 'number' as const, min: 1 },
+    client_id: { type: 'number' as const, min: 1 },
+  },
+
+  // Message send
+  message: {
+    message: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 10000 },
+    ],
+    priority: {
+      type: 'string' as const,
+      allowedValues: ['low', 'normal', 'high', 'urgent'],
+    },
+    reply_to: { type: 'number' as const, min: 1 },
+  },
+
+  // Bulk delete operations
+  bulkDelete: {
+    ids: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: 100 },
+    ],
+  },
+
+  // Task creation/update
+  task: {
+    title: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 200 },
+    ],
+    description: { type: 'string' as const, maxLength: 5000 },
+    status: {
+      type: 'string' as const,
+      allowedValues: ['pending', 'in-progress', 'review', 'completed', 'blocked'],
+    },
+    priority: {
+      type: 'string' as const,
+      allowedValues: ['low', 'medium', 'high', 'urgent'],
+    },
+    due_date: { type: 'string' as const, maxLength: 20 },
+    assigned_to: { type: 'number' as const, min: 1 },
+    project_id: { type: 'number' as const, min: 1 },
+    milestone_id: { type: 'number' as const, min: 1 },
   },
 };

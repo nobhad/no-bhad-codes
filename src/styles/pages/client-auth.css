@@ -235,7 +235,7 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 
 .magic-link-success p {
   margin: 0;
-  color: var(--color-success, #10b981);
+  color: var(--color-success);
   font-weight: var(--font-weight-medium, 500);
 }
 

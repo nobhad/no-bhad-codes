@@ -1367,7 +1367,7 @@ body.modal-open .dashboard-content {
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--portal-bg-darker, #2a2a2a);
+  border-top-color: var(--portal-bg-darker);
   z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
   opacity: 0;

@@ -253,9 +253,15 @@ async function loadRevenueChart(): Promise<void> {
     chartContainer.appendChild(skeleton);
   }
 
-  // Destroy existing chart
+  // Destroy existing chart - check both our Map and Chart.js internal registry
   if (charts.has('revenue')) {
     charts.get('revenue')?.destroy();
+    charts.delete('revenue');
+  }
+  // Also check for orphaned chart instance on canvas
+  const existingChart = Chart.getChart(canvas);
+  if (existingChart) {
+    existingChart.destroy();
   }
 
   let labels: string[] = [];
@@ -360,9 +366,15 @@ async function loadProjectStatusChart(): Promise<void> {
     chartContainer.appendChild(skeleton);
   }
 
-  // Destroy existing chart
+  // Destroy existing chart - check both our Map and Chart.js internal registry
   if (charts.has('projectStatus')) {
     charts.get('projectStatus')?.destroy();
+    charts.delete('projectStatus');
+  }
+  // Also check for orphaned chart instance on canvas
+  const existingChart = Chart.getChart(canvas);
+  if (existingChart) {
+    existingChart.destroy();
   }
 
   let labels: string[] = ['Active', 'Completed', 'On Hold', 'Pending'];
@@ -1994,9 +2006,15 @@ async function loadVisitorsChart(): Promise<void> {
     chartContainer.appendChild(skeleton);
   }
 
-  // Destroy existing chart
+  // Destroy existing chart - check both our Map and Chart.js internal registry
   if (charts.has('visitors')) {
     charts.get('visitors')?.destroy();
+    charts.delete('visitors');
+  }
+  // Also check for orphaned chart instance on canvas
+  const existingVisitorsChart = Chart.getChart(canvas);
+  if (existingVisitorsChart) {
+    existingVisitorsChart.destroy();
   }
 
   // Try to fetch real data from API
@@ -2086,8 +2104,15 @@ async function loadSourcesChart(): Promise<void> {
     chartContainer.appendChild(skeleton);
   }
 
+  // Destroy existing chart - check both our Map and Chart.js internal registry
   if (charts.has('sources')) {
     charts.get('sources')?.destroy();
+    charts.delete('sources');
+  }
+  // Also check for orphaned chart instance on canvas
+  const existingSourcesChart = Chart.getChart(canvas);
+  if (existingSourcesChart) {
+    existingSourcesChart.destroy();
   }
 
   // Try to fetch real data from API
@@ -2182,6 +2207,18 @@ async function loadSourcesChart(): Promise<void> {
 export function destroyCharts(): void {
   charts.forEach((chart) => chart.destroy());
   charts.clear();
+
+  // Also clean up any orphaned chart instances on known canvas elements
+  const canvasIds = ['revenue-chart', 'project-status-chart', 'visitors-chart', 'sources-chart'];
+  canvasIds.forEach((id) => {
+    const canvas = document.getElementById(id) as HTMLCanvasElement | null;
+    if (canvas) {
+      const existingChart = Chart.getChart(canvas);
+      if (existingChart) {
+        existingChart.destroy();
+      }
+    }
+  });
 }
 
 // Data export functions

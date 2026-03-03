@@ -116,13 +116,13 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
       const data = await response.json();
       const payload = data.data || data;
       setTemplates(payload.templates || []);
-      setStats(payload.stats || stats);
+      setStats(payload.stats || { total: 0, active: 0, categories: [] });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load templates');
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders, stats]);
+  }, [getHeaders]);
 
   useEffect(() => {
     loadTemplates();

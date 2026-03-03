@@ -65,4 +65,19 @@ export const API_ENDPOINTS = {
   CLIENT_CONTACTS: '/api/clients/contacts'
 } as const;
 
+/**
+ * Application routes for redirects and navigation
+ * Use these instead of hardcoded paths
+ */
+export const ROUTES = {
+  ADMIN: {
+    LOGIN: '/admin',
+    DASHBOARD: '/admin/login'
+  },
+  CLIENT: {
+    LOGIN: '/client/login.html',
+    PORTAL: '/client/portal.html'
+  }
+} as const;
+
 export type ApiEndpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

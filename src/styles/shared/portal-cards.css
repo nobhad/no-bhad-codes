@@ -104,7 +104,7 @@
 
 /* LIGHT MODE - ALL labels black */
 html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) {
-  color: var(--color-light-text, #000000);
+  color: var(--color-light-text);
 }
 
 /* Legacy aliases - inherit same styling via :is() */
@@ -186,7 +186,7 @@ html[data-theme="light"] .portal :is(
   .payment-plans-section h4,
   .project-notes h4
 ) {
-  color: var(--color-light-text, #000000);
+  color: var(--color-light-text);
 }
 
 /* =====================================================

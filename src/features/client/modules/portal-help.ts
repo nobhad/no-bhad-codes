@@ -15,6 +15,7 @@ import { ICONS } from '../../../constants/icons';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { apiFetch } from '../../../utils/api-client';
 import { getCachedElement, clearDOMCache } from '../../../utils/dom-helpers';
+import { TIMING } from '../../../constants/timing';
 
 // ---------------------------------------------------------------------------
 // Types (match API responses)
@@ -671,7 +672,7 @@ function setupListeners(ctx: ClientPortalContext): void {
 
     // Hide suggestions on blur (with delay for click handling)
     searchInput.addEventListener('blur', () => {
-      setTimeout(hideSuggestions, 200);
+      setTimeout(hideSuggestions, TIMING.SUGGESTION_HIDE_DELAY);
     });
 
     // Show suggestions on focus if has value

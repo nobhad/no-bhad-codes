@@ -141,7 +141,7 @@ const PINNED_MESSAGE_COLUMNS = `
 
 const MESSAGE_COLUMNS = `
   id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
-  subject, message, message_type, priority, is_read, read_at, attachments,
+  subject, message, message_type, priority, read_at, attachments,
   parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
   reaction_count, reply_count, created_at, updated_at
 `.replace(/\s+/g, ' ').trim();

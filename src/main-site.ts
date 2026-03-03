@@ -42,5 +42,5 @@ export { app };
 
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
-  (window as any).NBW_APP = app;
+  window.NBW_APP = app;
 }

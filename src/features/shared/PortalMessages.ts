@@ -1,10 +1,10 @@
 /**
  * ===============================================
- * PORTAL MESSAGING MODULE
+ * PORTAL MESSAGES MODULE
  * ===============================================
- * @file src/features/shared/PortalMessaging.ts
+ * @file src/features/shared/PortalMessages.ts
  *
- * Role-adaptive messaging module for both admin and client portals.
+ * Role-adaptive messages module for both admin and client portals.
  * Admin can see all client threads and manage conversations.
  * Client sees only their own threads.
  *
@@ -17,7 +17,7 @@ import { formatTimeAgo } from '../../utils/time-utils';
 import type { DataItem } from './types';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('PortalMessaging');
+const logger = createLogger('PortalMessages');
 
 // ============================================
 // TYPES
@@ -58,7 +58,7 @@ interface Message extends DataItem {
  * - Admin: sees all threads, can manage, assign, close
  * - Client: sees own threads only, can send messages
  */
-export default class PortalMessaging extends PortalFeatureModule {
+export default class PortalMessages extends PortalFeatureModule {
   /** Message threads */
   private threads: MessageThread[] = [];
 
@@ -69,7 +69,7 @@ export default class PortalMessaging extends PortalFeatureModule {
   private messages: Message[] = [];
 
   constructor() {
-    super('UnifiedMessaging');
+    super('PortalMessages');
   }
 
   // ============================================

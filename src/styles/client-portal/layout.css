@@ -187,7 +187,7 @@
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
   letter-spacing: var(--letter-spacing-tightest, -0.09em);
   text-shadow: none;
-  color: var(--portal-text-light, #ffffff);
+  color: var(--portal-text-light);
 }
 
 /* Portal page header specific */
@@ -210,7 +210,7 @@
 .portal hr {
   height: 2px;
   border-radius: 0;
-  background-color: var(--portal-text-light, #ffffff);
+  background-color: var(--portal-text-light);
 }
 
 /* ================================================

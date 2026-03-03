@@ -58,7 +58,7 @@ export type ModuleType = 'dom' | 'service' | 'utility';
 export interface ModuleDefinition {
   name: string;
   type: ModuleType;
-  factory: () => Promise<any>;
+  factory: () => Promise<unknown>;
   dependencies?: string[];
   pageSpecific?: boolean;
 }

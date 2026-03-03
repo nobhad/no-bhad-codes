@@ -178,17 +178,17 @@
 
 /* Error state */
 :is(.form-input, .form-textarea, input, textarea, select).error {
-  border-color: var(--color-danger, #ef4444);
+  border-color: var(--color-danger);
 }
 .form-error-message {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger);
   font-size: var(--font-size-sm, 12px);
   margin-top: var(--space-0-5, 0.125rem);
 }
 
 /* Required field indicator */
 .form-required-indicator {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger);
   margin-left: var(--space-0-5, 0.125rem);
 }
 
@@ -530,7 +530,7 @@ input.search-bar-input {
 }
 
 .tw-input-error {
-  border-color: var(--color-error, #ef4444) !important;
+  border-color: var(--color-error) !important;
 }
 
 /* Select dropdown */
@@ -598,14 +598,14 @@ input.search-bar-input {
 
 /* Form required indicator */
 .form-required {
-  color: var(--status-cancelled, #ef4444);
+  color: var(--status-cancelled);
   margin-left: 0.125rem;
 }
 
 /* Form error text */
 .form-error-text {
   font-size: 11px;
-  color: var(--status-cancelled, #ef4444);
+  color: var(--status-cancelled);
 }
 
 /* Form textarea resizable */

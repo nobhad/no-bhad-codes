@@ -28,8 +28,8 @@ export async function loadClientsModule() {
   return import('./admin-clients');
 }
 
-export async function loadMessagingModule() {
-  return import('./admin-messaging');
+export async function loadMessagesModule() {
+  return import('./admin-messages');
 }
 
 export async function loadAnalyticsModule() {

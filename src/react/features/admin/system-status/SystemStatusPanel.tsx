@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { TIMING } from '../../../../constants/timing';
 
 interface ServiceStatus {
   id: string;
@@ -120,7 +121,7 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
     loadStatus();
     let interval: ReturnType<typeof setInterval> | null = null;
     if (autoRefresh) {
-      interval = setInterval(loadStatus, 30000);
+      interval = setInterval(loadStatus, TIMING.STATUS_REFRESH);
     }
     return () => {
       if (interval) clearInterval(interval);

@@ -833,9 +833,9 @@ function renderAttachmentPreview(): void {
 }
 
 /**
- * Setup messaging event listeners
+ * Setup message event listeners
  */
-export function setupMessagingListeners(ctx: ClientPortalContext): void {
+export function setupMessageListeners(ctx: ClientPortalContext): void {
   const sendBtn = domCache.get('sendBtn');
   if (sendBtn) {
     sendBtn.addEventListener('click', (e) => {

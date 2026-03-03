@@ -1,14 +1,11 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   FileUp,
   FileCheck,
   AlertCircle,
   MoreHorizontal,
   Inbox,
-  Send,
-  Eye,
   Trash2,
   Download,
   ChevronDown,
@@ -84,7 +81,17 @@ const DOCUMENT_REQUEST_STATUS_CONFIG: Record<string, { label: string }> = {
   approved: { label: 'Approved' },
   rejected: { label: 'Rejected' },
   expired: { label: 'Expired' },
+  viewed: { label: 'Viewed' },
 };
+
+// Capitalize status label (fallback for unknown statuses)
+function getStatusLabel(status: string | undefined | null): string {
+  if (!status) return 'Unknown';
+  if (DOCUMENT_REQUEST_STATUS_CONFIG[status]) {
+    return DOCUMENT_REQUEST_STATUS_CONFIG[status].label;
+  }
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
 
 // Filter function
 function filterDocumentRequest(
@@ -404,35 +411,27 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
             >
               Request
             </AdminTableHead>
-            <AdminTableHead
-              className="client-col"
-              sortable
-              sortDirection={sort?.column === 'client' ? sort.direction : null}
-              onClick={() => toggleSort('client')}
-            >
-              Client
-            </AdminTableHead>
-            <AdminTableHead className="project-col">Project</AdminTableHead>
+            <AdminTableHead className="client-col">Client</AdminTableHead>
             <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead className="docs-col">Docs</AdminTableHead>
             <AdminTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
               onClick={() => toggleSort('dueDate')}
             >
-              Due
+              Due Date
             </AdminTableHead>
+            <AdminTableHead className="docs-col">Docs</AdminTableHead>
             <AdminTableHead className="actions-col">Actions</AdminTableHead>
           </AdminTableRow>
         </AdminTableHeader>
 
         <AdminTableBody animate={!isLoading}>
           {isLoading ? (
-            <AdminTableLoading colSpan={8} rows={5} />
+            <AdminTableLoading colSpan={7} rows={5} />
           ) : paginatedRequests.length === 0 ? (
             <AdminTableEmpty
-              colSpan={8}
+              colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No requests match your filters' : 'No document requests yet'}
             />
@@ -473,43 +472,12 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                   </span>
                 </AdminTableCell>
                 <AdminTableCell>
-                  {request.projectName ? (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNavigate?.('projects', request.projectId != null ? String(request.projectId) : undefined);
-                      }}
-                      className="table-link"
-                    >
-                      {request.projectName}
-                    </span>
-                  ) : (
-                    <span className="text-muted">-</span>
-                  )}
+                  <StatusBadge status={getStatusVariant(request.status)}>
+                    {getStatusLabel(request.status)}
+                  </StatusBadge>
                 </AdminTableCell>
-                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
-                        <StatusBadge status={getStatusVariant(request.status)} size="sm">
-                          {DOCUMENT_REQUEST_STATUS_CONFIG[request.status]?.label || request.status}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(DOCUMENT_REQUEST_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(request.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
+                <AdminTableCell className={cn(isOverdue(request.dueDate) && 'text-danger')}>
+                  {request.dueDate ? formatDate(request.dueDate) : '-'}
                 </AdminTableCell>
                 <AdminTableCell className="text-right">
                   {request.documents > 0 ? (
@@ -519,22 +487,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                     </span>
                   ) : (
                     '-'
-                  )}
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">
-                  {request.dueDate ? (
-                    <span
-                      className={cn(
-                        isOverdue(request.dueDate) && request.status === 'pending' && 'text-danger'
-                      )}
-                    >
-                      {isOverdue(request.dueDate) && request.status === 'pending' && (
-                        <AlertCircle className="cell-icon-sm text-danger" />
-                      )}
-                      {formatDate(request.dueDate)}
-                    </span>
-                  ) : (
-                    <span className="text-muted">-</span>
                   )}
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>

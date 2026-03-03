@@ -12,6 +12,7 @@ import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
+import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -203,21 +204,13 @@ router.get(
 router.post(
   '/request',
   authenticateToken,
+  validateRequest(ValidationSchemas.projectRequest),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Only clients can submit project requests', 403, 'ACCESS_DENIED');
     }
 
     const { name, projectType, budget, timeline, description } = req.body;
-
-    if (!name || !projectType || !description) {
-      return errorResponse(
-        res,
-        'Project name, type, and description are required',
-        400,
-        'MISSING_REQUIRED_FIELDS'
-      );
-    }
 
     const db = getDatabase();
 
@@ -291,6 +284,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(ValidationSchemas.projectCreate),
   asyncHandler(async (req: express.Request, res: Response) => {
     const {
       client_id,
@@ -301,15 +295,6 @@ router.post(
       due_date,
       budget,
     } = req.body;
-
-    if (!client_id || !name) {
-      return errorResponse(
-        res,
-        'Client ID and project name are required',
-        400,
-        'MISSING_REQUIRED_FIELDS'
-      );
-    }
 
     const db = getDatabase();
 

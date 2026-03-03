@@ -107,7 +107,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
   const attentionItems = [
     { type: 'overdue_invoice', count: attention.overdueInvoices, label: 'Overdue Invoices', icon: <AlertTriangle />, action: () => onNavigate?.('invoices') },
     { type: 'pending_contract', count: attention.pendingContracts, label: 'Pending Contracts', icon: <FileText />, action: () => onNavigate?.('contracts') },
-    { type: 'unread_message', count: attention.unreadMessages, label: 'Unread Messages', icon: <Mail />, action: () => onNavigate?.('messaging') },
+    { type: 'unread_message', count: attention.unreadMessages, label: 'Unread Messages', icon: <Mail />, action: () => onNavigate?.('messages') },
   ].filter(item => item.count > 0);
 
   const snapshotMetrics = [
@@ -281,7 +281,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
               <button onClick={() => onNavigate?.('invoices')} className="btn btn-outline btn-sm">
                 <FileUp className="btn-icon" /> Create Invoice
               </button>
-              <button onClick={() => onNavigate?.('messaging')} className="btn btn-outline btn-sm">
+              <button onClick={() => onNavigate?.('messages')} className="btn btn-outline btn-sm">
                 <Send className="btn-icon" /> Send Message
               </button>
             </div>

@@ -38,14 +38,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-neutral-200, #f1f3f4);
+  background: var(--color-neutral-200);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-400, #9aa0a6);
+  background: var(--color-neutral-400);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-500, #5f6368);
+  background: var(--color-neutral-500);
 }

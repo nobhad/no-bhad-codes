@@ -55,3 +55,6 @@ export * from './modules';
 
 // Performance API types
 export * from './performance';
+
+// Global type definitions (browser API extensions)
+export type { NetworkInformation, PerformanceMemory, APIConfig } from './global';

@@ -31,7 +31,19 @@ export const TIMING = {
   INPUT_FOCUS_DELAY: 100,
 
   /** Skeleton loading minimum display time */
-  SKELETON_MIN_DISPLAY: 500
+  SKELETON_MIN_DISPLAY: 500,
+
+  /** Overlay fade out duration */
+  OVERLAY_FADE: 150,
+
+  /** Suggestion dropdown hide delay */
+  SUGGESTION_HIDE_DELAY: 200,
+
+  /** Long press detection threshold */
+  LONG_PRESS_DURATION: 500,
+
+  /** Message send debounce */
+  MESSAGE_DEBOUNCE: 300
 } as const;
 
 export type TimingKey = keyof typeof TIMING;

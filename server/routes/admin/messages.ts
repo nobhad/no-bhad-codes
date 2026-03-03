@@ -102,7 +102,7 @@ router.get(
         m.sender_type as senderType,
         m.sender_name as senderName,
         m.attachments,
-        m.is_read as isRead,
+        CASE WHEN m.read_at IS NOT NULL THEN 1 ELSE 0 END as isRead,
         m.read_at as readAt,
         m.created_at as createdAt
       FROM messages m
@@ -136,7 +136,7 @@ router.post(
     // Mark all unread messages from clients as read
     await db.run(`
       UPDATE messages
-      SET is_read = 1, read_at = CURRENT_TIMESTAMP
+      SET read_at = CURRENT_TIMESTAMP
       WHERE thread_id = ?
       AND sender_type != 'admin'
       AND read_at IS NULL
@@ -184,10 +184,9 @@ router.post(
         sender_name,
         message,
         attachments,
-        is_read,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, 'general', 'admin', ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, 'general', 'admin', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `, [
       conversationId,
       thread.client_id,

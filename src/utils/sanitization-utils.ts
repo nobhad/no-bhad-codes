@@ -351,7 +351,7 @@ export class SanitizationUtils {
   /**
    * Log security violations
    */
-  static logSecurityViolation(type: string, data: any, userAgent?: string): void {
+  static logSecurityViolation(type: string, data: unknown, userAgent?: string): void {
     const violation = {
       type,
       timestamp: new Date().toISOString(),

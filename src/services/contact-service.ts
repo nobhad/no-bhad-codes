@@ -197,7 +197,7 @@ export class ContactService extends BaseService {
     const response = await fetch('/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(form as any).toString()
+      body: new URLSearchParams(form as unknown as Record<string, string>).toString()
     });
 
     if (response.ok) {
@@ -247,7 +247,7 @@ export class ContactService extends BaseService {
    */
   private async submitToEmailJS(formData: ContactFormData): Promise<ContactSubmissionResult> {
     // EmailJS requires their SDK to be loaded
-    if (typeof window === 'undefined' || !(window as any).emailjs) {
+    if (typeof window === 'undefined' || !window.emailjs) {
       throw new Error('EmailJS SDK not loaded');
     }
 
@@ -266,7 +266,7 @@ export class ContactService extends BaseService {
       throw new Error('EmailJS service ID or template ID not configured in environment variables');
     }
 
-    const _response = await (window as any).emailjs.send(
+    await window.emailjs.send(
       serviceId,
       templateId,
       templateParams,

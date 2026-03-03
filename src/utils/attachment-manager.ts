@@ -378,9 +378,9 @@ export class AttachmentManager {
 }
 
 /**
- * Create an AttachmentManager instance with messaging defaults
+ * Create an AttachmentManager instance with message attachment defaults
  */
-export function createMessagingAttachmentManager(
+export function createMessageAttachmentManager(
   options: Omit<AttachmentManagerOptions, 'allowedExtensions'> = {}
 ): AttachmentManager {
   return new AttachmentManager({
