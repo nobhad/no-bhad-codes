@@ -8,6 +8,7 @@
  */
 
 import type { Invoice, InvoicePayment, InvoicePaymentRow } from '../../types/invoice-types.js';
+import { getFloat } from '../../database/row-helpers.js';
 import { receiptService } from '../receipt-service.js';
 import { logger } from '../logger.js';
 import type { Database } from '../../database/init.js';
@@ -231,7 +232,7 @@ export class InvoicePaymentService {
     return rows.map((row: InvoicePaymentRow) => ({
       id: row.id,
       invoiceId: row.invoice_id,
-      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount,
+      amount: getFloat(row as unknown as Record<string, unknown>, 'amount'),
       paymentMethod: row.payment_method,
       paymentReference: row.payment_reference,
       paymentDate: row.payment_date,
@@ -268,7 +269,7 @@ export class InvoicePaymentService {
     return rows.map((row: InvoicePaymentRow) => ({
       id: row.id,
       invoiceId: row.invoice_id,
-      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount,
+      amount: getFloat(row as unknown as Record<string, unknown>, 'amount'),
       paymentMethod: row.payment_method,
       paymentReference: row.payment_reference,
       paymentDate: row.payment_date,

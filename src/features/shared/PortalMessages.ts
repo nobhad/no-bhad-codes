@@ -387,7 +387,8 @@ export default class PortalMessages extends PortalFeatureModule {
   }
 
   private handleNewThread(): void {
-    // TODO: Implement new thread creation modal
+    // Feature deferred: Requires backend thread creation endpoint
+    // See docs/current_work.md for tracking
     this.notify('New thread creation coming soon', 'info');
   }
 

@@ -72,7 +72,7 @@ export interface InvoicePayment {
 export interface InvoicePaymentRow {
   id: number;
   invoice_id: number;
-  amount: string | number;
+  amount: number;
   payment_method: string;
   payment_reference?: string;
   payment_date: string;
@@ -334,8 +334,8 @@ export interface InvoiceRow {
   invoice_number: string;
   project_id: number;
   client_id: number;
-  amount_total: string | number;
-  amount_paid?: string | number;
+  amount_total: number;
+  amount_paid?: number;
   currency: string;
   status: InvoiceStatus;
   due_date?: string;
@@ -350,7 +350,7 @@ export interface InvoiceRow {
   // Deposit fields
   invoice_type?: InvoiceType;
   deposit_for_project_id?: number;
-  deposit_percentage?: string | number;
+  deposit_percentage?: number;
   // Joined fields from clients/projects tables
   company_name?: string;
   contact_name?: string;
@@ -358,16 +358,16 @@ export interface InvoiceRow {
   project_name?: string;
   project_description?: string;
   // Tax and discount
-  subtotal?: string | number;
-  tax_rate?: string | number;
-  tax_amount?: string | number;
+  subtotal?: number;
+  tax_rate?: number;
+  tax_amount?: number;
   discount_type?: string;
-  discount_value?: string | number;
-  discount_amount?: string | number;
+  discount_value?: number;
+  discount_amount?: number;
   // Late fees
-  late_fee_rate?: string | number;
+  late_fee_rate?: number;
   late_fee_type?: string;
-  late_fee_amount?: string | number;
+  late_fee_amount?: number;
   late_fee_applied_at?: string;
   // Payment terms
   payment_terms_id?: number;
@@ -395,7 +395,7 @@ export interface InvoiceCreditRow {
   id: number;
   invoice_id: number;
   deposit_invoice_id: number;
-  amount: string | number;
+  amount: number;
   applied_at: string;
   applied_by?: string;
   deposit_invoice_number?: string;

@@ -12,6 +12,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { getDatabase } from '../database/init.js';
+import { getFloat } from '../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
 import { PAGE_MARGINS } from '../utils/pdf-utils.js';
@@ -381,7 +382,7 @@ class ReceiptService {
       receiptNumber: row.receipt_number,
       invoiceId: row.invoice_id,
       paymentId: row.payment_id,
-      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount,
+      amount: getFloat(row as unknown as Record<string, unknown>, 'amount'),
       fileId: row.file_id,
       createdAt: row.created_at,
       invoiceNumber: row.invoice_number,
@@ -643,7 +644,7 @@ class ReceiptService {
       }),
       paymentMethod: String(row.payment_method || 'Unknown'),
       paymentReference: row.payment_reference ? String(row.payment_reference) : undefined,
-      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
+      amount: getFloat(row as unknown as Record<string, unknown>, 'amount'),
       clientName: String(row.client_name || 'Client'),
       clientEmail: String(row.client_email || ''),
       clientCompany: row.company_name ? String(row.company_name) : undefined,

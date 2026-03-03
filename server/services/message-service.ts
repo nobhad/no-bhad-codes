@@ -16,7 +16,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import { getString, getNumber } from '../database/row-helpers.js';
+import { getString, getNumber, getBoolean } from '../database/row-helpers.js';
 import {
   type Mention,
   type Reaction,
@@ -800,7 +800,7 @@ class MessageService {
       message: getString(row, 'message'),
       priority: getString(row, 'priority'),
       isRead: row.read_at !== null,
-      isInternal: Boolean(row.is_internal),
+      isInternal: getBoolean(row, 'is_internal'),
       editedAt: row.edited_at as string | undefined,
       deletedAt: row.deleted_at as string | undefined,
       createdAt: getString(row, 'created_at'),
@@ -829,9 +829,9 @@ class MessageService {
       projectId: getNumber(r, 'project_id'),
       userEmail: getString(r, 'user_email'),
       userType: getString(r, 'user_type'),
-      notifyAll: Boolean(r.notify_all),
-      notifyMentions: Boolean(r.notify_mentions),
-      notifyReplies: Boolean(r.notify_replies),
+      notifyAll: getBoolean(r, 'notify_all'),
+      notifyMentions: getBoolean(r, 'notify_mentions'),
+      notifyReplies: getBoolean(r, 'notify_replies'),
       mutedUntil: r.muted_until as string | undefined,
       createdAt: getString(r, 'created_at'),
       updatedAt: getString(r, 'updated_at'),

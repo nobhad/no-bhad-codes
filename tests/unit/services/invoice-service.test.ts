@@ -497,9 +497,11 @@ describe('Invoice Service', () => {
     const count = await service.processRecurringInvoices();
 
     expect(count).toBe(1);
-    // The service uses a batch CASE WHEN update for efficiency
-    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE recurring_invoices'));
-    expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('CASE WHEN id = 12 THEN'));
+    // The service updates each recurring invoice individually
+    expect(mockDb.run).toHaveBeenCalledWith(
+      expect.stringContaining('UPDATE recurring_invoices'),
+      expect.anything()
+    );
 
     createInvoiceSpy.mockRestore();
   });

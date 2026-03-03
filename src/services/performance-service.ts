@@ -59,6 +59,7 @@ export interface PerformanceAlert {
 
 import { APP_CONSTANTS } from '../config/constants';
 import { createLogger } from '../utils/logger';
+import { PERFORMANCE_THRESHOLDS } from '../constants/timing';
 import type {
   PerformanceLCPEntry,
   PerformanceFIDEntry,
@@ -78,11 +79,11 @@ export class PerformanceService {
 
   constructor(budget?: Partial<PerformanceBudget>) {
     this.budget = {
-      lcp: APP_CONSTANTS.PERFORMANCE.FCP_GOOD, // 1.8s
-      fid: 100, // 100ms
-      cls: 0.1, // 0.1
-      bundleSize: 600 * 1024, // 600KB - Increased to realistic size for TypeScript app
-      ttfb: 200, // 200ms
+      lcp: APP_CONSTANTS.PERFORMANCE.FCP_GOOD,
+      fid: PERFORMANCE_THRESHOLDS.FID,
+      cls: PERFORMANCE_THRESHOLDS.CLS,
+      bundleSize: PERFORMANCE_THRESHOLDS.BUNDLE_SIZE,
+      ttfb: PERFORMANCE_THRESHOLDS.TTFB,
       ...budget
     };
   }

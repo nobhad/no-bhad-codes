@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { getBoolean } from '../database/row-helpers.js';
 import { logger } from './logger.js';
 
 /**
@@ -193,7 +194,7 @@ export async function checkAndUpdateMilestoneCompletion(milestoneId: number): Pr
 
     // Determine if milestone should be completed
     const shouldBeCompleted = progress.total > 0 && progress.completed === progress.total;
-    const isCurrentlyCompleted = Boolean(milestone.is_completed);
+    const isCurrentlyCompleted = getBoolean(milestone as Record<string, unknown>, 'is_completed');
 
     // Update if status changed
     if (shouldBeCompleted !== isCurrentlyCompleted) {

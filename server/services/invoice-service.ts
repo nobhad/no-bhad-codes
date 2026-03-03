@@ -8,6 +8,7 @@
  */
 
 import { getDatabase, Database } from '../database/init.js';
+import { getFloat, getFloatOrNull, getBoolean } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
@@ -583,21 +584,16 @@ export class InvoiceService {
    * Note: lineItems are loaded separately via getLineItems() for full invoice data
    */
   private mapRowToInvoice(row: InvoiceRow): Invoice {
-    // Helper to parse optional numeric fields
-    const parseNum = (val: string | number | undefined): number | undefined => {
-      if (val === undefined || val === null) return undefined;
-      return typeof val === 'string' ? parseFloat(val) : val;
-    };
+    // Use row as DatabaseRow for type-safe extraction
+    const dbRow = row as unknown as Record<string, unknown>;
 
     return {
       id: row.id,
       invoiceNumber: row.invoice_number,
       projectId: row.project_id,
       clientId: row.client_id,
-      amountTotal:
-        typeof row.amount_total === 'string' ? parseFloat(row.amount_total) : row.amount_total,
-      amountPaid:
-        typeof row.amount_paid === 'string' ? parseFloat(row.amount_paid) : row.amount_paid || 0,
+      amountTotal: getFloat(dbRow, 'amount_total'),
+      amountPaid: getFloat(dbRow, 'amount_paid'),
       currency: row.currency,
       status: row.status,
       dueDate: row.due_date,
@@ -624,28 +620,24 @@ export class InvoiceService {
       // Deposit invoice fields
       invoiceType: row.invoice_type || 'standard',
       depositForProjectId: row.deposit_for_project_id,
-      depositPercentage: row.deposit_percentage
-        ? typeof row.deposit_percentage === 'string'
-          ? parseFloat(row.deposit_percentage)
-          : row.deposit_percentage
-        : undefined,
+      depositPercentage: getFloatOrNull(dbRow, 'deposit_percentage') ?? undefined,
       // Advanced features - Tax
-      subtotal: parseNum(row.subtotal),
-      taxRate: parseNum(row.tax_rate),
-      taxAmount: parseNum(row.tax_amount),
+      subtotal: getFloatOrNull(dbRow, 'subtotal') ?? undefined,
+      taxRate: getFloatOrNull(dbRow, 'tax_rate') ?? undefined,
+      taxAmount: getFloatOrNull(dbRow, 'tax_amount') ?? undefined,
       // Advanced features - Discount
       discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
-      discountValue: parseNum(row.discount_value),
-      discountAmount: parseNum(row.discount_amount),
+      discountValue: getFloatOrNull(dbRow, 'discount_value') ?? undefined,
+      discountAmount: getFloatOrNull(dbRow, 'discount_amount') ?? undefined,
       // Advanced features - Late fees
-      lateFeeRate: parseNum(row.late_fee_rate),
+      lateFeeRate: getFloatOrNull(dbRow, 'late_fee_rate') ?? undefined,
       lateFeeType: row.late_fee_type as
         | 'none'
         | 'flat'
         | 'percentage'
         | 'daily_percentage'
         | undefined,
-      lateFeeAmount: parseNum(row.late_fee_amount),
+      lateFeeAmount: getFloatOrNull(dbRow, 'late_fee_amount') ?? undefined,
       lateFeeAppliedAt: row.late_fee_applied_at,
       // Advanced features - Payment terms
       paymentTermsId: row.payment_terms_id,
@@ -672,34 +664,14 @@ export class InvoiceService {
 
     return rows.map((row: Record<string, unknown>) => ({
       description: row.description as string,
-      quantity:
-        typeof row.quantity === 'string' ? parseFloat(row.quantity) : (row.quantity as number),
-      rate:
-        typeof row.unit_price === 'string'
-          ? parseFloat(row.unit_price)
-          : (row.unit_price as number),
-      amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
-      taxRate: row.tax_rate
-        ? typeof row.tax_rate === 'string'
-          ? parseFloat(row.tax_rate)
-          : (row.tax_rate as number)
-        : undefined,
-      taxAmount: row.tax_amount
-        ? typeof row.tax_amount === 'string'
-          ? parseFloat(row.tax_amount)
-          : (row.tax_amount as number)
-        : undefined,
+      quantity: getFloat(row, 'quantity'),
+      rate: getFloat(row, 'unit_price'),
+      amount: getFloat(row, 'amount'),
+      taxRate: getFloatOrNull(row, 'tax_rate') ?? undefined,
+      taxAmount: getFloatOrNull(row, 'tax_amount') ?? undefined,
       discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
-      discountValue: row.discount_value
-        ? typeof row.discount_value === 'string'
-          ? parseFloat(row.discount_value)
-          : (row.discount_value as number)
-        : undefined,
-      discountAmount: row.discount_amount
-        ? typeof row.discount_amount === 'string'
-          ? parseFloat(row.discount_amount)
-          : (row.discount_amount as number)
-        : undefined,
+      discountValue: getFloatOrNull(row, 'discount_value') ?? undefined,
+      discountAmount: getFloatOrNull(row, 'discount_amount') ?? undefined,
     }));
   }
 
@@ -725,34 +697,14 @@ export class InvoiceService {
       const invoiceId = row.invoice_id as number;
       const lineItem: InvoiceLineItem = {
         description: row.description as string,
-        quantity:
-          typeof row.quantity === 'string' ? parseFloat(row.quantity) : (row.quantity as number),
-        rate:
-          typeof row.unit_price === 'string'
-            ? parseFloat(row.unit_price)
-            : (row.unit_price as number),
-        amount: typeof row.amount === 'string' ? parseFloat(row.amount) : (row.amount as number),
-        taxRate: row.tax_rate
-          ? typeof row.tax_rate === 'string'
-            ? parseFloat(row.tax_rate)
-            : (row.tax_rate as number)
-          : undefined,
-        taxAmount: row.tax_amount
-          ? typeof row.tax_amount === 'string'
-            ? parseFloat(row.tax_amount)
-            : (row.tax_amount as number)
-          : undefined,
+        quantity: getFloat(row, 'quantity'),
+        rate: getFloat(row, 'unit_price'),
+        amount: getFloat(row, 'amount'),
+        taxRate: getFloatOrNull(row, 'tax_rate') ?? undefined,
+        taxAmount: getFloatOrNull(row, 'tax_amount') ?? undefined,
         discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
-        discountValue: row.discount_value
-          ? typeof row.discount_value === 'string'
-            ? parseFloat(row.discount_value)
-            : (row.discount_value as number)
-          : undefined,
-        discountAmount: row.discount_amount
-          ? typeof row.discount_amount === 'string'
-            ? parseFloat(row.discount_amount)
-            : (row.discount_amount as number)
-          : undefined,
+        discountValue: getFloatOrNull(row, 'discount_value') ?? undefined,
+        discountAmount: getFloatOrNull(row, 'discount_amount') ?? undefined,
       };
 
       if (!lineItemsMap.has(invoiceId)) {

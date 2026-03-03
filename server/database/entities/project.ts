@@ -33,8 +33,8 @@ export interface TaskRow extends DatabaseRow {
   assigned_to_user_id?: number;
   assigned_to_name?: string;
   due_date?: string;
-  estimated_hours?: number | string;
-  actual_hours?: number | string;
+  estimated_hours?: number;
+  actual_hours?: number;
   sort_order: number;
   parent_task_id?: number;
   completed_at?: string;
@@ -77,10 +77,10 @@ export interface TimeEntryRow extends DatabaseRow {
   user_id: number | null;
   user_name: string | null;
   description?: string;
-  hours: number | string;
+  hours: number;
   date: string;
   billable: number;
-  hourly_rate?: number | string;
+  hourly_rate?: number;
   created_at: string;
   updated_at: string;
   task_title?: string;
@@ -94,7 +94,7 @@ export interface TemplateRow extends DatabaseRow {
   default_milestones?: string;
   default_tasks?: string;
   estimated_duration_days?: number;
-  default_hourly_rate?: number | string;
+  default_hourly_rate?: number;
   is_active: number;
   created_at: string;
   updated_at: string;

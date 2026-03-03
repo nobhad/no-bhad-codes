@@ -9,6 +9,7 @@
  */
 
 import { BaseService } from './base-service';
+import { TIMING } from '../constants/timing';
 
 export interface Route {
   path: string;
@@ -46,7 +47,7 @@ export class RouterService extends BaseService {
       defaultRoute: '/',
       smoothScrolling: true,
       scrollOffset: 80, // Header height offset
-      transitionDuration: 600,
+      transitionDuration: TIMING.PAGE_TRANSITION,
       ...config
     };
 
