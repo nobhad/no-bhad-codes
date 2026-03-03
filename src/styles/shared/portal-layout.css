@@ -1222,7 +1222,7 @@ td {
 
 /* Base text color in light mode - uses CSS variables */
 html[data-theme="light"] .portal {
-  color: var(--portal-text-primary, var(--color-light-text, #171717));
+  color: var(--portal-text-primary, var(--color-light-text));
 }
 
 /* Headings in light mode */
@@ -1232,11 +1232,11 @@ html[data-theme="light"] .portal h3,
 html[data-theme="light"] .portal h4,
 html[data-theme="light"] .portal h5,
 html[data-theme="light"] .portal h6 {
-  color: var(--portal-text-primary, var(--color-light-text, #171717));
+  color: var(--portal-text-primary, var(--color-light-text));
 }
 
 html[data-theme="light"] .portal hr {
-  background-color: var(--portal-border-color, var(--color-light-border, #d4d4d4));
+  background-color: var(--portal-border-color, var(--color-light-border));
 }
 
 /* Secondary text elements - use muted color for hierarchy */
@@ -1251,7 +1251,7 @@ html[data-theme="light"] .portal .summary-label,
 html[data-theme="light"] .portal .funnel-stage-label,
 html[data-theme="light"] .portal .funnel-stage,
 html[data-theme="light"] .portal .funnel-value {
-  color: var(--portal-text-secondary, var(--color-light-text-secondary, #525252));
+  color: var(--portal-text-secondary, var(--color-light-text-secondary));
 }
 
 /* =====================================================
@@ -1737,15 +1737,15 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-italic { font-style: italic; }
 
 /* Status colors - semantic colors for status indicators */
-.tw-text-green-400 { color: var(--status-active, #4ade80); }
-.tw-text-yellow-400 { color: var(--status-pending, #facc15); }
-.tw-text-orange-400 { color: var(--status-on-hold, #fb923c); }
-.tw-text-blue-400 { color: var(--color-primary, #60a5fa); }
-.tw-text-purple-400 { color: var(--color-purple, #c084fc); }
-.tw-text-pink-400 { color: var(--color-pink, #f472b6); }
-.tw-text-cyan-400 { color: var(--color-cyan, #22d3ee); }
+.tw-text-green-400 { color: var(--status-active); }
+.tw-text-yellow-400 { color: var(--status-pending); }
+.tw-text-orange-400 { color: var(--status-on-hold); }
+.tw-text-blue-400 { color: var(--color-primary); }
+.tw-text-purple-400 { color: var(--color-purple); }
+.tw-text-pink-400 { color: var(--color-pink); }
+.tw-text-cyan-400 { color: var(--color-cyan); }
 .tw-text-white { color: var(--portal-text-light); }
-.tw-text-black { color: var(--portal-bg-pitch, #000000); }
+.tw-text-black { color: var(--portal-bg-pitch); }
 .tw-text-secondary { color: var(--portal-text-secondary); }
 
 /* Background colors */

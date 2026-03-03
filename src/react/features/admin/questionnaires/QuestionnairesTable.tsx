@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   ClipboardList,
   Inbox,
-  ChevronDown,
+  AlertCircle,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -12,6 +11,8 @@ import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
+import { formatDate } from '@react/utils/formatDate';
+import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
@@ -24,17 +25,10 @@ import {
   AdminTableEmpty,
   AdminTableLoading,
 } from '@react/components/portal/AdminTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem,
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
-import { formatDate } from '@react/utils/formatDate';
 import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 
@@ -70,7 +64,17 @@ const QUESTIONNAIRE_STATUS_CONFIG: Record<string, { label: string }> = {
   in_progress: { label: 'In Progress' },
   completed: { label: 'Completed' },
   expired: { label: 'Expired' },
+  viewed: { label: 'Viewed' },
 };
+
+// Capitalize status label (fallback for unknown statuses)
+function getStatusLabel(status: string | undefined | null): string {
+  if (!status) return 'Unknown';
+  if (QUESTIONNAIRE_STATUS_CONFIG[status]) {
+    return QUESTIONNAIRE_STATUS_CONFIG[status].label;
+  }
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
 
 // Filter function
 function filterQuestionnaire(
@@ -415,23 +419,8 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
             >
               Questionnaire
             </AdminTableHead>
-            <AdminTableHead
-              className="client-col"
-              sortable
-              sortDirection={sort?.column === 'client_name' ? sort.direction : null}
-              onClick={() => toggleSort('client_name')}
-            >
-              Client / Project
-            </AdminTableHead>
-            <AdminTableHead
-              className="status-col"
-              sortable
-              sortDirection={sort?.column === 'status' ? sort.direction : null}
-              onClick={() => toggleSort('status')}
-            >
-              Status
-            </AdminTableHead>
-            <AdminTableHead className="progress-col">Progress</AdminTableHead>
+            <AdminTableHead className="client-col">Client</AdminTableHead>
+            <AdminTableHead className="status-col">Status</AdminTableHead>
             <AdminTableHead
               className="date-col"
               sortable
@@ -440,6 +429,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
             >
               Due Date
             </AdminTableHead>
+            <AdminTableHead className="progress-col">Progress</AdminTableHead>
             <AdminTableHead className="actions-col">Actions</AdminTableHead>
           </AdminTableRow>
         </AdminTableHeader>
@@ -479,36 +469,17 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                   </div>
                 </AdminTableCell>
                 <AdminTableCell>
-                  <div className="cell-content">
-                    <span className="cell-title">{questionnaire.client_name}</span>
-                    {questionnaire.project_name && (
-                      <span className="cell-subtitle">{questionnaire.project_name}</span>
-                    )}
-                  </div>
+                  <span className="table-link">
+                    {questionnaire.client_name}
+                  </span>
                 </AdminTableCell>
-                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
-                  <PortalDropdown>
-                    <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
-                        <StatusBadge status={getStatusVariant(questionnaire.status)} size="sm">
-                          {QUESTIONNAIRE_STATUS_CONFIG[questionnaire.status]?.label || questionnaire.status}
-                        </StatusBadge>
-                        <ChevronDown className="status-dropdown-caret" />
-                      </button>
-                    </PortalDropdownTrigger>
-                    <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(QUESTIONNAIRE_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(questionnaire.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
-                    </PortalDropdownContent>
-                  </PortalDropdown>
+                <AdminTableCell>
+                  <StatusBadge status={getStatusVariant(questionnaire.status)}>
+                    {getStatusLabel(questionnaire.status)}
+                  </StatusBadge>
+                </AdminTableCell>
+                <AdminTableCell className={cn(isOverdue(questionnaire) && 'text-danger')}>
+                  {questionnaire.due_date ? formatDate(questionnaire.due_date) : '-'}
                 </AdminTableCell>
                 <AdminTableCell>
                   <div className="cell-content">
@@ -525,14 +496,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       {questionnaire.responses_count}/{questionnaire.questions_count} questions
                     </span>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">
-                  <span className={isOverdue(questionnaire) ? 'text-danger' : ''}>
-                    {formatDate(questionnaire.due_date)}
-                    {isOverdue(questionnaire) && (
-                      <span className="overdue-label">Overdue</span>
-                    )}
-                  </span>
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">

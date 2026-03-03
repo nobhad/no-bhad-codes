@@ -29,9 +29,8 @@ interface ApiConfig {
 function getApiConfig(): ApiConfig {
   // Check if running in browser and get from window globals first
   if (typeof window !== 'undefined') {
-    const windowConfig = (window as any).API_CONFIG;
-    if (windowConfig) {
-      return windowConfig;
+    if (window.API_CONFIG) {
+      return window.API_CONFIG as unknown as ApiConfig;
     }
   }
 

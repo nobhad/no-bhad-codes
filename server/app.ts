@@ -282,8 +282,14 @@ setupSwagger(app);
 // These render the admin and client portal HTML shells
 app.use(portalRoutes);
 
-// Global rate limiting for all API routes
-// Standard rate limit: 60 requests per minute
+// Rate limiting for API routes
+// IMPORTANT: More specific routes must come BEFORE general routes in Express
+
+// Higher rate limit for admin routes (authenticated dashboard users)
+// Authenticated rate limit: 120 requests per minute
+app.use('/api/admin', rateLimiters.authenticated);
+
+// Standard rate limit for other API routes: 60 requests per minute
 app.use('/api', rateLimiters.standard);
 
 // CSRF protection for state-changing API requests

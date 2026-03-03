@@ -21,6 +21,8 @@
  * ===============================================
  */
 
+/* eslint-disable no-undef */
+
 import type { ModuleOptions, ModuleStatus, EventHandler } from '../../types/modules';
 
 export class BaseModule {
@@ -31,9 +33,11 @@ export class BaseModule {
   protected reducedMotion: boolean;
   protected eventListeners: Map<string, EventHandler>;
   protected timelines: Set<gsap.core.Timeline | gsap.core.Tween>;
-  protected elements: Map<string, Element | null>;
+  protected elements: Map<string, Element | NodeListOf<Element> | null>;
   protected lastActivity: Date | null;
   protected errors: string[];
+  protected hasError: boolean;
+  protected state: Record<string, unknown>;
 
   constructor(name: string, options: ModuleOptions = {}) {
     this.name = name;
@@ -46,6 +50,8 @@ export class BaseModule {
     this.elements = new Map(); // Map to store cached DOM elements
     this.lastActivity = null;
     this.errors = [];
+    this.hasError = false;
+    this.state = {};
 
     // Bind methods to maintain context
     this.init = this.init.bind(this);
@@ -89,7 +95,7 @@ export class BaseModule {
       this.handleInitError(error as Error);
       // Mark as initialized but with error state
       this.isInitialized = true;
-      (this as any).hasError = true;
+      this.hasError = true;
       this.dispatchEvent('init-error', { error });
     }
   }
@@ -145,17 +151,19 @@ export class BaseModule {
    * @returns {Element|null} The found element or null
    */
   protected getElement(name: string, selector: string, required = true): Element | null {
-    let element = this.elements.get(name);
-    if (!element) {
-      element = document.querySelector(selector);
-      if (element) {
-        this.elements.set(name, element);
-        this.log(`Cached element: ${name} (${selector})`);
-      } else if (required) {
-        this.error(`Required element "${name}" with selector "${selector}" not found.`);
-      }
-      // Optional elements that aren't found don't need a warning - that's expected behavior
+    const cachedElement = this.elements.get(name);
+    // Only return if it's a single Element, not a NodeList
+    if (cachedElement && !(cachedElement instanceof NodeList)) {
+      return cachedElement as Element;
     }
+    const element = document.querySelector(selector);
+    if (element) {
+      this.elements.set(name, element);
+      this.log(`Cached element: ${name} (${selector})`);
+    } else if (required) {
+      this.error(`Required element "${name}" with selector "${selector}" not found.`);
+    }
+    // Optional elements that aren't found don't need a warning - that's expected behavior
     return element;
   }
 
@@ -171,19 +179,21 @@ export class BaseModule {
     selector: string,
     required = true
   ): NodeListOf<Element> | null {
-    let elements = this.elements.get(name) as NodeListOf<Element> | null;
-    if (!elements || (elements as NodeListOf<Element>).length === 0) {
+    const cachedElements = this.elements.get(name);
+    let elements: NodeListOf<Element> | null = cachedElements instanceof NodeList
+      ? cachedElements as NodeListOf<Element>
+      : null;
+
+    if (!elements || elements.length === 0) {
       elements = document.querySelectorAll(selector);
-      if ((elements as NodeListOf<Element>).length > 0) {
-        this.elements.set(name, elements as any);
-        this.log(
-          `Cached ${(elements as NodeListOf<Element>).length} elements for: ${name} (${selector})`
-        );
+      if (elements.length > 0) {
+        this.elements.set(name, elements);
+        this.log(`Cached ${elements.length} elements for: ${name} (${selector})`);
       } else if (required) {
         this.warn(`No elements found for "${name}" with selector "${selector}".`);
       }
     }
-    return elements as NodeListOf<Element> | null;
+    return elements.length > 0 ? elements : null;
   }
 
   /**
@@ -292,7 +302,7 @@ export class BaseModule {
       this.elements.clear();
 
       // Clear state
-      (this as any).state = {};
+      this.state = {};
 
       this.isDestroyed = true;
       this.isInitialized = false;
@@ -374,7 +384,7 @@ export class BaseModule {
       // Track for cleanup
       const key = `document-${eventName}-${this.eventListeners.size}`;
       this.eventListeners.set(key, {
-        element: document as any,
+        element: document,
         event: eventName,
         handler: callback
       });
@@ -403,7 +413,7 @@ export class BaseModule {
   find(selector: string): Element | null {
     // Search in cached elements first
     for (const element of this.elements.values()) {
-      if (element && element.matches(selector)) {
+      if (element && !(element instanceof NodeList) && element.matches(selector)) {
         return element;
       }
     }
@@ -421,29 +431,22 @@ export class BaseModule {
   /**
    * Set module state (placeholder for state management)
    */
-  setState(key: string | Record<string, any>, value?: any): void {
-    if (!(this as any).state) {
-      (this as any).state = {};
-    }
-
+  setState(key: string | Record<string, unknown>, value?: unknown): void {
     if (typeof key === 'string') {
       // Single key-value pair
-      (this as any).state[key] = value;
+      this.state[key] = value;
     } else {
       // Object with multiple key-value pairs
-      (this as any).state = { ...(this as any).state, ...key };
+      this.state = { ...this.state, ...key };
     }
   }
 
   /**
    * Get module state value
    */
-  getState(key: string, defaultValue?: any): any {
-    if (!(this as any).state) {
-      return defaultValue;
-    }
-    const value = (this as any).state[key];
-    return value !== undefined ? value : defaultValue;
+  getState<T = unknown>(key: string, defaultValue?: T): T | undefined {
+    const value = this.state[key];
+    return value !== undefined ? (value as T) : defaultValue;
   }
 
   /**

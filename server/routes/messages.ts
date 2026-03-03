@@ -12,6 +12,7 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { messageService } from '../services/message-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const MESSAGE_THREAD_COLUMNS = `
@@ -22,7 +23,7 @@ const MESSAGE_THREAD_COLUMNS = `
 
 const MESSAGE_COLUMNS = `
   id, project_id, client_id, thread_id, context_type, sender_type, sender_name,
-  subject, message, message_type, priority, is_read, read_at, attachments,
+  subject, message, message_type, priority, read_at, attachments,
   parent_message_id, is_internal, edited_at, deleted_at, deleted_by,
   reaction_count, reply_count, created_at, updated_at
 `.replace(/\s+/g, ' ').trim();
@@ -207,13 +208,10 @@ router.get(
 router.post(
   '/threads',
   authenticateToken,
+  validateRequest(ValidationSchemas.messageThread),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { subject, thread_type = 'general', priority = 'normal', project_id } = req.body;
-
-    if (!subject || subject.trim().length === 0) {
-      return errorResponse(res, 'Subject is required', 400, 'MISSING_SUBJECT');
-    }
 
     const db = getDatabase();
 
@@ -258,15 +256,26 @@ router.post(
   '/threads/:threadId/messages',
   authenticateToken,
   upload.array('attachments', 5),
+  validateRequest(ValidationSchemas.message),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const threadId = parseInt(req.params.threadId);
     const { message, priority = 'normal', reply_to } = req.body;
     const attachments = req.files as Express.Multer.File[];
 
-    if (!message || message.trim().length === 0) {
-      return errorResponse(res, 'Message content is required', 400, 'MISSING_MESSAGE');
-    }
+    // Debug: log request details
+    logger.info('Send message request', {
+      category: 'messages',
+      metadata: {
+        threadId,
+        hasMessage: !!message,
+        messageLength: message?.length,
+        priority,
+        hasAttachments: attachments?.length > 0,
+        userType: req.user?.type,
+        userId: req.user?.id
+      }
+    });
 
     const db = getDatabase();
 
@@ -305,6 +314,12 @@ router.post(
     ])) as { contact_name: string | null; email: string } | undefined;
     const sender_name: string =
       senderClient?.contact_name || senderClient?.email || req.user!.email;
+
+    // Safety check for message (validation should catch this, but just in case)
+    if (!message || typeof message !== 'string') {
+      logger.error('Message validation failed', { category: 'messages', metadata: { message, type: typeof message } });
+      return errorResponse(res, 'Message content is required', 400, 'MESSAGE_REQUIRED');
+    }
 
     const result = await db.run(
       `

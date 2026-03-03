@@ -92,7 +92,7 @@ export class PerformanceService {
    */
   async init(): Promise<void> {
     // Skip performance monitoring in development to prevent flashing/reloading
-    if ((import.meta as any).env?.DEV || process.env.NODE_ENV === 'development') {
+    if (import.meta.env?.DEV || process.env.NODE_ENV === 'development') {
       logger.log('Skipping monitoring in development mode');
       return;
     }
@@ -262,8 +262,8 @@ export class PerformanceService {
    * Monitor memory usage
    */
   private monitorMemoryUsage(): void {
-    if ('memory' in performance) {
-      const { memory } = performance as any;
+    if ('memory' in performance && performance.memory) {
+      const { memory } = performance;
 
       this.metrics.memoryUsage = {
         used: memory.usedJSHeapSize,
@@ -294,7 +294,7 @@ export class PerformanceService {
    * Measure network performance
    */
   private measureNetworkPerformance(): void {
-    const { connection } = navigator as any;
+    const { connection } = navigator;
     if (connection) {
       this.metrics.connectionType = connection.effectiveType;
       this.metrics.downloadSpeed = connection.downlink;

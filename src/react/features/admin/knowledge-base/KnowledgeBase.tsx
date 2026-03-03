@@ -194,14 +194,14 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         // API wraps response in { success, data: { ...stats } }
-        setStats(statsData.data || statsData || stats);
+        setStats(statsData.data || statsData || { totalArticles: 0, totalCategories: 0, totalViews: 0, published: 0, draft: 0 });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load knowledge base');
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders, stats]);
+  }, [getHeaders]);
 
   // Refresh just articles (for article-specific actions)
   const loadArticles = useCallback(async () => {
@@ -222,12 +222,12 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
       });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
-        setStats(statsData.data || statsData || stats);
+        setStats(statsData.data || statsData || { totalArticles: 0, totalCategories: 0, totalViews: 0, published: 0, draft: 0 });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load articles');
     }
-  }, [getHeaders, stats]);
+  }, [getHeaders]);
 
   // Refresh just categories (for category-specific actions)
   const loadCategories = useCallback(async () => {

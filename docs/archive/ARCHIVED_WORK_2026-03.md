@@ -159,3 +159,96 @@ Refactored inline `style={{}}` attributes in React components to CSS utility cla
 - Config-based colors (priority, status, tag colors from objects)
 - Dynamic grid columns (`gridTemplateColumns: repeat(${count}, 1fr)`)
 - Conditional opacity for loading states
+
+---
+
+### Input Validation Middleware - COMPLETE
+
+**Completed:** March 2, 2026
+
+Added comprehensive input validation to server-side routes using centralized validation middleware.
+
+**Validation Schemas Added:**
+
+- `projectRequest` - Client project submission validation
+- `projectCreate` - Admin project creation validation
+- `projectUpdate` - Project update validation
+- `messageThread` - Thread creation validation
+- `message` - Message sending validation
+- `bulkDelete` - Bulk deletion validation
+- `task` - Task creation/update validation
+
+**Routes Updated:**
+
+- `server/routes/projects/core.ts` - Applied `projectRequest` and `projectCreate` validation
+- `server/routes/messages.ts` - Applied `messageThread` and `message` validation
+- `server/routes/admin/misc.ts` - Applied `task` validation
+
+**Verification:**
+
+- TypeScript compilation passed
+- ESLint passed
+- Production build completed successfully
+
+---
+
+### Type Safety Improvements Phase 2 - COMPLETE
+
+**Completed:** March 2, 2026
+
+Further reduced `any` type usage with proper type definitions.
+
+**Progress:**
+
+- Starting count: 45 instances
+- Final count: 6 instances (87% reduction from this phase)
+- Total reduction from audit start: 61 to 6 (90% total reduction)
+
+**Changes:**
+
+- Created `src/types/global.d.ts` with proper browser API types:
+  - `NetworkInformation` interface for Network Information API
+  - `PerformanceMemory` interface for Chrome memory API
+  - Extended `Window` interface for `NBW_APP`, `NBW_STATE`, `API_CONFIG`
+  - Extended `Navigator` interface for `connection` property
+  - Extended `Performance` interface for `memory` property
+
+- Fixed entry files (main.ts, admin.ts, portal.ts, main-site.ts):
+  - Removed `(window as any).NBW_APP` casts - now uses typed `window.NBW_APP`
+
+- Fixed `src/services/performance-service.ts`:
+  - Removed `(import.meta as any).env?.DEV` cast
+  - Removed `performance as any` cast for memory
+  - Removed `navigator as any` cast for connection
+
+- Fixed `src/modules/core/base.ts`:
+  - Added `hasError` and `state` as class properties
+  - Fixed `elements` Map typing to support `NodeListOf<Element>`
+  - Fixed `setState` and `getState` method signatures with proper generics
+
+- Fixed `src/components/base-component.ts`:
+  - Changed `ComponentProps` and `ComponentState` to use `unknown` instead of `any`
+  - Fixed `onGlobalStateChange` parameter types
+
+- Fixed `src/config/protection.config.ts`:
+  - Changed violation callback `details` parameter to `unknown`
+
+- Fixed `src/features/admin/modules/admin-overview.ts`:
+  - Changed mount function options to `Record<string, unknown>`
+
+- Fixed `src/utils/sanitization-utils.ts`:
+  - Changed `logSecurityViolation` data parameter to `unknown`
+
+**Remaining 6 `any` types are justified:**
+
+1. `state-manager.ts` - Generic selectors need flexible value types
+2. `container.ts` - ServiceFactory needs to accept varying arguments
+3. `features/shared/types.ts` - Dynamic import loader returns various component types
+4. `base-component.ts` (2) - Generic watcher callbacks for prop/state changes
+5. `react/registry.ts` - Mount function options vary by component
+
+**Verification:**
+
+- TypeScript compilation passed
+- ESLint passed
+- Production build completed successfully (19.22s)

@@ -278,8 +278,8 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background-color: var(--color-bg-primary, #fafafa);
-  color: var(--color-text-primary, #171717);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   transition:
     background-color 0.2s ease,
     color 0.2s ease;

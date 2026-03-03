@@ -60,8 +60,8 @@
     transform: translateX(-50%);
     z-index: var(--z-index-portal-confirm, 9900);
     padding: 12px 24px;
-    background-color: var(--portal-bg-darker, #0a0a0a);
-    color: var(--portal-text-primary, #ffffff);
+    background-color: var(--portal-bg-darker);
+    color: var(--portal-text-primary);
     text-decoration: none;
     font-weight: 600;
     border-radius: 0; /* DISCOTHÈQUE: sharp corners */
@@ -112,14 +112,14 @@ html:has(body[data-page="client-portal"]) {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-neutral-200, #f1f3f4);
+  background: var(--color-neutral-200);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-400, #9aa0a6);
+  background: var(--color-neutral-400);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-500, #5f6368);
+  background: var(--color-neutral-500);
 }

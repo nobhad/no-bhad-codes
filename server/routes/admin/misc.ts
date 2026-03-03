@@ -5,6 +5,7 @@ import { emailService } from '../../services/email-service.js';
 import { softDeleteService, SoftDeleteEntityType } from '../../services/soft-delete-service.js';
 import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
+import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
 const router = express.Router();
 
@@ -597,6 +598,7 @@ router.put(
   '/tasks/:taskId',
   authenticateToken,
   requireAdmin,
+  validateRequest(ValidationSchemas.task),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId);
     const { title, description, status, priority, dueDate, assignedTo } = req.body;

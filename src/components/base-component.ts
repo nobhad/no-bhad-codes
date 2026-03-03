@@ -13,11 +13,11 @@ import { appState } from '../core/state';
 import type { ModuleOptions } from '../types/modules';
 
 export interface ComponentProps {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ComponentState {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ComponentTemplate {
@@ -48,7 +48,11 @@ export abstract class BaseComponent<
   protected refs: Map<string, Element> = new Map();
 
   private stateUnsubscribe: (() => void) | null = null;
+
+
   private propWatchers: Map<keyof P, ((newVal: any, oldVal: any) => void)[]> = new Map();
+
+
   private stateWatchers: Map<keyof S, ((newVal: any, oldVal: any) => void)[]> = new Map();
 
   constructor(name: string, props: P, initialState: S, options: ModuleOptions = {}) {
@@ -191,7 +195,7 @@ export abstract class BaseComponent<
   /**
    * Override in child classes to handle global state changes
    */
-  protected onGlobalStateChange?(newState: any, prevState: any): void;
+  protected onGlobalStateChange?(newState: unknown, prevState: unknown): void;
 
   /**
    * Render the component

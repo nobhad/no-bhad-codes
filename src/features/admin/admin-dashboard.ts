@@ -59,7 +59,7 @@ import {
   loadClientsModule,
   loadInvoicesModule,
   loadContractsModule,
-  loadMessagingModule,
+  loadMessagesModule,
   loadAnalyticsModule,
   loadOverviewModule,
   loadPerformanceModule,
@@ -866,8 +866,8 @@ class AdminDashboard {
     this.loadContactSubmissions();
     this.loadSystemInfo();
 
-    // Setup messaging functionality
-    this.setupMessaging();
+    // NOTE: Message listeners are setup when the Messages tab is rendered
+    // (see switchTab 'messages' case) to ensure DOM elements exist
 
     // Refresh contacts button
     const refreshContactsBtn = this.domCache.get('refreshContactsBtn');
@@ -1395,27 +1395,17 @@ class AdminDashboard {
     }
   }
 
-  // Messaging properties
+  // Messages properties
   private selectedClientId: number | null = null;
   private selectedThreadId: number | null = null;
 
-  private async setupMessaging(): Promise<void> {
-    // Load the messaging module to handle send functionality
-    const messagingModule = await loadMessagingModule();
-
-    // Setup event listeners using the module (which tracks selectedThreadId)
-    messagingModule.setupMessagingListeners(this.moduleContext);
-
-    logger.log('Messaging listeners setup complete');
-  }
-
   private async loadClientThreads(): Promise<void> {
     // Delegate to messaging module for code splitting
-    const messagingModule = await loadMessagingModule();
-    await messagingModule.loadClientThreads(this.moduleContext);
+    const messagesModule = await loadMessagesModule();
+    await messagesModule.loadClientThreads(this.moduleContext);
   }
 
-  // NOTE: populateClientDropdown moved to admin-messaging module
+  // NOTE: populateClientDropdown moved to admin-messages module
 
   private selectThread(clientId: number, threadId: number, _clientName: string): void {
     this.selectedClientId = clientId;
@@ -2287,15 +2277,19 @@ class AdminDashboard {
         // Dynamically render messages tab, then load data
         {
           const tabContainer = document.getElementById('tab-messages');
-          const messagingModule = await loadMessagingModule();
+          const messagesModule = await loadMessagesModule();
 
           // Render the tab structure dynamically
           if (tabContainer) {
-            messagingModule.renderMessagesTab(tabContainer);
+            messagesModule.renderMessagesTab(tabContainer);
           }
 
+          // Setup messaging listeners AFTER the tab is rendered
+          // (must happen after renderMessagesTab creates the DOM elements)
+          messagesModule.setupMessageListeners(this.moduleContext);
+
           // Load messages data
-          await messagingModule.loadClientThreads(this.moduleContext);
+          await messagesModule.loadClientThreads(this.moduleContext);
         }
         break;
       case 'support': {
@@ -2412,7 +2406,7 @@ class AdminDashboard {
         error
       });
 
-      // Show user-friendly error in the tab container
+      // Show user-friendly error in the tab container (avoid inline onclick for CSP compliance)
       const tabContainer = document.getElementById(`tab-${tabName}`);
       if (tabContainer) {
         tabContainer.innerHTML = `
@@ -2423,11 +2417,21 @@ class AdminDashboard {
             <p style="color: var(--app-color-text-muted); font-size: 0.875rem;">
               ${errorMessage}
             </p>
-            <button class="btn-secondary" onclick="window.adminDashboard?.loadTabData('${tabName}')" style="margin-top: 1rem;">
+            <button class="btn-secondary" data-action="retry" data-tab="${tabName}" style="margin-top: 1rem;">
               Retry
             </button>
           </div>
         `;
+        // Add event listener for retry button
+        const retryBtn = tabContainer.querySelector('[data-action="retry"]');
+        if (retryBtn) {
+          retryBtn.addEventListener('click', () => {
+            const tab = retryBtn.getAttribute('data-tab');
+            if (tab) {
+              window.adminDashboard?.loadTabData(tab);
+            }
+          });
+        }
       }
     } finally {
       this.showLoading(false);

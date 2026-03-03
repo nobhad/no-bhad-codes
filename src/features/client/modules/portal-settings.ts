@@ -45,13 +45,18 @@ export function setupSettingsForms(ctx: ClientPortalContext): void {
   const component = getReactComponent('portalSettings');
   if (!component) {
     logger.error('React component not found');
-    // Show error state instead of leaving loading spinner
+    // Show error state instead of leaving loading spinner (avoid inline onclick for CSP compliance)
     settingsContainer.innerHTML = `
       <div class="settings-error" style="text-align: center; padding: 2rem;">
         <p style="color: var(--portal-text-muted);">Unable to load settings. Please refresh the page.</p>
-        <button class="btn btn-secondary" onclick="window.location.reload()">Refresh</button>
+        <button class="btn btn-secondary" data-action="reload">Refresh</button>
       </div>
     `;
+    // Add event listener for refresh button
+    const refreshBtn = settingsContainer.querySelector('[data-action="reload"]');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => window.location.reload());
+    }
     return;
   }
 

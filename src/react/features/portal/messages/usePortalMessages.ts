@@ -56,8 +56,14 @@ export function usePortalMessages({
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [messagesError, setMessagesError] = useState<string | null>(null);
 
-  // Refs for cleanup
+  // Refs for cleanup and stable callbacks
   const abortControllerRef = useRef<AbortController | null>(null);
+  const getAuthTokenRef = useRef(getAuthToken);
+
+  // Keep ref in sync with prop
+  useEffect(() => {
+    getAuthTokenRef.current = getAuthToken;
+  }, [getAuthToken]);
 
   /**
    * Build request headers with auth token
@@ -66,12 +72,12 @@ export function usePortalMessages({
     const headers: HeadersInit = {
       'Content-Type': 'application/json'
     };
-    const token = getAuthToken?.();
+    const token = getAuthTokenRef.current?.();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
     return headers;
-  }, [getAuthToken]);
+  }, []);
 
   /**
    * Fetch all threads

@@ -70,7 +70,7 @@ export const PROTECTION_CONFIG: CodeProtectionConfig = {
   },
 
   // Violation callback - called when protection is triggered
-  onViolation: (type: string, details: any) => {
+  onViolation: (type: string, details: unknown) => {
     console.warn(`🛡️ [Protection] ${type.toUpperCase()} violation detected:`, details);
 
     // Optional: Send violation data to your analytics

@@ -16,10 +16,13 @@ import type {
 export class StateManager<T = AppState> {
   private state: T;
   private listeners = new Map<string, StateListener<T>[]>();
+
+
   private selectors = new Map<
     string,
     { selector: StateSelector<T, any>; lastValue: any; listeners: ((value: any) => void)[] }
   >();
+
 
   private computed = new Map<string, ComputedProperty<T, any>>();
   private reducers = new Map<string, StateReducer<T>>();
@@ -553,7 +556,43 @@ export class StateManager<T = AppState> {
   }
 
   /**
-   * Destroy the state manager and clean up
+   * Remove all listeners for a specific key
+   * Useful for component cleanup when unmounting
+   *
+   * @example
+   * // In component cleanup
+   * stateManager.clearListeners('currentUser');
+   */
+  clearListeners(key: string): void {
+    this.listeners.delete(key);
+  }
+
+  /**
+   * Get the count of active listeners
+   * Useful for debugging memory leaks
+   */
+  getListenerCount(): number {
+    let count = 0;
+    this.listeners.forEach((arr) => {
+      count += arr.length;
+    });
+    return count;
+  }
+
+  /**
+   * Destroy the state manager and clean up all resources
+   *
+   * IMPORTANT: Call this method when the state manager is no longer needed
+   * to prevent memory leaks. This clears all:
+   * - Listeners (subscription callbacks)
+   * - Selectors (derived state subscriptions)
+   * - Computed properties
+   * - Reducers and middleware
+   * - History and redo stacks
+   *
+   * @example
+   * // In app cleanup or test teardown
+   * stateManager.destroy();
    */
   destroy(): void {
     this.listeners.clear();
@@ -563,7 +602,6 @@ export class StateManager<T = AppState> {
     this.middleware = [];
     this.history = [];
     this.redoStack = [];
-    // Clear state as well
     this.state = {} as T;
   }
 }

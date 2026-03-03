@@ -9,6 +9,7 @@
  */
 
 import { cx } from '../utils/dom-utils';
+import { TIMING } from '../constants/timing';
 
 // ===============================================
 // TYPES
@@ -331,7 +332,7 @@ export function createInfoRow(config: InfoRowConfig): HTMLElement {
       try {
         await navigator.clipboard.writeText(value);
         copyBtn.classList.add('copied');
-        setTimeout(() => copyBtn.classList.remove('copied'), 2000);
+        setTimeout(() => copyBtn.classList.remove('copied'), TIMING.COPY_FEEDBACK);
       } catch (err) {
         console.error('Failed to copy:', err);
       }

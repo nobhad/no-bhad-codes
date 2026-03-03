@@ -898,8 +898,8 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.skipHandler = null;
     }
 
-    if (typeof window !== 'undefined' && (window as any).NBW_STATE) {
-      (window as any).NBW_STATE.setState({ introAnimating: false });
+    if (typeof window !== 'undefined' && window.NBW_STATE) {
+      window.NBW_STATE.setState({ introAnimating: false });
     }
 
     // Dispatch complete event for PageTransitionModule

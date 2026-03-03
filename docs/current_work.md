@@ -8,6 +8,37 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ## Active TODOs
 
+### CSP Inline Event Handler Fixes - COMPLETE
+
+**Completed:** March 2, 2026
+
+Fixed all Content Security Policy violations caused by inline `onclick` handlers.
+
+**Files Modified:**
+
+- `src/react/factories/createMountWrapper.tsx` - Replaced inline onclick with data-action and addEventListener
+- `src/react/factories/createTableMount.tsx` - Replaced inline onclick with data-action and addEventListener
+- `src/features/admin/admin-dashboard.ts` - Replaced inline onclick with data-action and addEventListener
+- `src/features/client/modules/portal-files.ts` - Replaced inline onclick with data-action and addEventListener
+- `src/features/client/modules/portal-settings.ts` - Replaced inline onclick with data-action and addEventListener
+
+---
+
+### Chart.js Canvas Reuse Fix - COMPLETE
+
+**Completed:** March 2, 2026
+
+Fixed Chart.js "Canvas is already in use" errors by implementing proper chart cleanup.
+
+**Changes:**
+
+- Added `Chart.getChart(canvas)` checks before creating new charts
+- Updated `destroyCharts()` to clean up orphaned chart instances on known canvas elements
+
+**File Modified:** `src/features/admin/modules/admin-analytics.ts`
+
+---
+
 ### Portal Architecture Consolidation - Phase 4 Cleanup
 
 **Status:** BLOCKED - Awaiting User Testing
@@ -39,15 +70,15 @@ Phase 4 cleanup tasks remaining:
 
 ## Deferred Tasks (Lower Priority)
 
-### Input Validation Hardening - Remaining Phases
+### Input Validation Hardening - COMPLETE
 
-**Started:** February 27, 2026
+**Completed:** March 2, 2026
 
-Phases 1-5 complete (auth, invoices, clients, uploads). Remaining phases are lower priority:
+All phases complete:
 
-- [ ] Phase 6: Project routes (large file, many routes)
-- [ ] Phase 7: Admin routes
-- [ ] Phase 8: Message routes
+- [x] Phase 6: Project routes (applied `projectRequest`, `projectCreate` validation)
+- [x] Phase 7: Admin routes (applied `task` validation)
+- [x] Phase 8: Message routes (applied `messageThread`, `message` validation)
 
 **Note:** Pre-existing test failure in `email-service.test.ts` (nodemailer mock issue) - 9 tests failing, unrelated to validation changes.
 
@@ -80,14 +111,19 @@ Identified in March 2026 audit. Large files that should be split:
 
 ---
 
-### Remaining Type Safety Improvements - Deferred
+### Remaining Type Safety Improvements - COMPLETE
 
-45 `any` type instances remain, mostly in:
+**Completed:** March 2, 2026
 
-- Window extensions for dynamic global state
-- State management with dynamic keys
-- Third-party library integrations (GSAP)
-- Service factories with flexible arguments
+Reduced from 61 to 6 `any` type instances (90% reduction). Created `src/types/global.d.ts` with proper browser API types.
+
+Remaining 6 `any` instances are justified:
+
+- State manager generic selectors (type system limitation)
+- Service factory arguments (DI pattern requirement)
+- Dynamic import loaders (vary by component)
+- Prop/state watchers (generic callbacks)
+- Mount function options (vary by component)
 
 ---
 

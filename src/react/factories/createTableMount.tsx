@@ -136,15 +136,20 @@ export function createTableMount<P extends TableMountOptions>(
       console.log(`[React/${displayName}] Mounted successfully`);
     } catch (err) {
       console.error(`[React/${displayName}] Mount failed:`, err);
-      // Show error state in container using CSS classes
+      // Show error state in container (avoid inline onclick for CSP compliance)
       element.innerHTML = `
         <div class="mount-error-container">
           <p class="mount-error-message">Failed to load ${displayName}</p>
-          <button class="mount-error-button" onclick="window.location.reload()">
+          <button class="mount-error-button" data-action="reload">
             Refresh Page
           </button>
         </div>
       `;
+      // Add event listener for reload button
+      const reloadBtn = element.querySelector('[data-action="reload"]');
+      if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => window.location.reload());
+      }
       root = null;
     }
 

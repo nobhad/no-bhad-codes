@@ -227,7 +227,7 @@ section.contact-section .contact-hero-desktop {
   /* Star glow - white fill with glow that overflows slightly */
   .avatar-blurb-svg .star-glow,
   .avatar-blurb-svg #STAR_GLOW {
-    fill: var(--color-white, #ffffff);
+    fill: var(--color-white);
     stroke: none;
     filter: url(#star-glow);
     transform-origin: center center;
@@ -246,7 +246,7 @@ section.contact-section .contact-hero-desktop {
     font-family: var(--font-family-acme), sans-serif;
     font-size: clamp(1.4rem, 2.6vw, 1.75rem);
     line-height: 1.35;
-    color: var(--color-black, #000000); /* Always black - blurb bg is white */
+    color: var(--color-black); /* Always black - blurb bg is white */
     text-align: center;
     margin: 0;
   }
@@ -554,7 +554,7 @@ input:-webkit-autofill:active {
 
 .submit-button:focus,
 .submit-button:focus-visible {
-  outline: 3px solid var(--color-black, #000);
+  outline: 3px solid var(--color-black);
   outline-offset: 3px;
 }
 
@@ -563,7 +563,7 @@ input:-webkit-autofill:active {
 /* Submit button text - hidden by default */
 .submit-button span {
   display: none;
-  color: var(--bg, #fffbee);
+  color: var(--bg);
   font-size: 1.2rem;
   font-weight: 600;
 }
@@ -574,11 +574,11 @@ input:-webkit-autofill:active {
 }
 
 .submit-button.form-valid span {
-  color: var(--color-black, #000);
+  color: var(--color-black);
 }
 
 .submit-button.form-valid svg {
-  stroke: var(--color-black, #000);
+  stroke: var(--color-black);
 }
 
 /* Sent state - show SENT! text */
@@ -588,7 +588,7 @@ input:-webkit-autofill:active {
 
 .contact-form .submit-button.form-sent span {
   display: block;
-  color: var(--color-black, #000);
+  color: var(--color-black);
   font-family: var(--font-family-display, "Acme", sans-serif);
   font-size: 1.5rem;
   font-weight: 700;
@@ -610,7 +610,7 @@ input:-webkit-autofill:active {
   height: 64px;
   transform: rotate(0deg);
   fill: none;
-  stroke: var(--color-black, #000);
+  stroke: var(--color-black);
   transition:
     transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 3.5),
     stroke 0.4s;
@@ -647,7 +647,7 @@ html[data-theme="dark"] .input-item textarea {
 }
 
 html[data-theme="dark"] .submit-button svg {
-  stroke: var(--color-black, #000);
+  stroke: var(--color-black);
 }
 
 html[data-theme="dark"] .submit-button {
@@ -721,7 +721,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 .field-error-popup {
   position: fixed;
   background-color: var(--color-danger);
-  color: var(--color-white, #fff);
+  color: var(--color-white);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-size: 0.875rem;
