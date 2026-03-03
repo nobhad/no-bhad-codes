@@ -451,7 +451,7 @@ export function useClientDetail({
   const updateContact = useCallback(
     async (id: number, updates: Partial<ClientContact>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/contacts/${id}`, {
+        const response = await fetch(`/api/clients/contacts/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -483,7 +483,7 @@ export function useClientDetail({
   const deleteContact = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/contacts/${id}`, {
+        const response = await fetch(`/api/clients/contacts/${id}`, {
           method: 'DELETE',
           headers: getHeaders(),
           credentials: 'include'
