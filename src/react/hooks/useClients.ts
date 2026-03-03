@@ -104,8 +104,8 @@ export function useClients({
 
       if (data.success && data.data) {
         // Decode HTML entities in text fields to prevent double-encoding
-        const clients = data.data.clients || [];
-        setClients(decodeArrayFields(clients, CLIENT_TEXT_FIELDS));
+        const fetchedClients = data.data.clients || [];
+        setClients(decodeArrayFields(fetchedClients, CLIENT_TEXT_FIELDS));
       } else {
         throw new Error(data.error || 'Failed to load clients');
       }
