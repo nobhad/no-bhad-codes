@@ -18,6 +18,8 @@ import {
   getNumberOrNull,
   getBoolean,
   getBooleanOrNull,
+  getFloat,
+  getFloatOrNull,
   getDate,
 } from './row-helpers.js';
 
@@ -101,16 +103,10 @@ function extractValue(row: DatabaseRow, mapping: FieldMapping): unknown {
       value = getBooleanOrNull(row, column);
       break;
     case 'float':
-      {
-        const rawValue = row[column];
-        value = rawValue != null ? parseFloat(String(rawValue)) : 0;
-      }
+      value = getFloat(row, column);
       break;
     case 'float?':
-      {
-        const rawValue = row[column];
-        value = rawValue != null ? parseFloat(String(rawValue)) : null;
-      }
+      value = getFloatOrNull(row, column);
       break;
     case 'json':
       {

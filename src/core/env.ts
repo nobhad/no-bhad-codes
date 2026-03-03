@@ -12,6 +12,7 @@
  */
 export function isDev(): boolean {
   if (typeof window === 'undefined') return false;
+  if (!window.location?.hostname) return true; // Assume dev in test environment
 
   const { hostname } = window.location;
   return (

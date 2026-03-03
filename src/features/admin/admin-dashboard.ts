@@ -2763,8 +2763,8 @@ class AdminDashboard {
       }
 
       if (dashboardContainer) {
-        // Performance dashboard component not yet implemented
-        // TODO: Add performance dashboard component when available
+        // Feature deferred: Performance dashboard requires additional metrics collection
+        // See docs/current_work.md for tracking
         dashboardContainer.innerHTML =
           '<div class="empty-state">Performance dashboard coming soon</div>';
       }

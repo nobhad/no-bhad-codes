@@ -62,6 +62,50 @@ export function getNumberOrNull(row: DatabaseRow | undefined, key: string): numb
 }
 
 /**
+ * Safely extract a float value from a database row
+ * Handles SQLite DECIMAL fields that may return as strings
+ */
+export function getFloat(row: DatabaseRow | undefined, key: string): number {
+  if (!row || !(key in row)) {
+    return 0;
+  }
+  const value = row[key];
+  if (value === null || value === undefined) {
+    return 0;
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
+
+/**
+ * Safely extract a float value from a database row, returning null if not present
+ * Handles SQLite DECIMAL fields that may return as strings
+ */
+export function getFloatOrNull(row: DatabaseRow | undefined, key: string): number | null {
+  if (!row || !(key in row)) {
+    return null;
+  }
+  const value = row[key];
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
+  }
+  return null;
+}
+
+/**
  * Safely extract a boolean value from a database row
  * Handles SQLite's 0/1 representation of booleans
  */

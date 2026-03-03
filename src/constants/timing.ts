@@ -43,7 +43,39 @@ export const TIMING = {
   LONG_PRESS_DURATION: 500,
 
   /** Message send debounce */
-  MESSAGE_DEBOUNCE: 300
+  MESSAGE_DEBOUNCE: 300,
+
+  /** Page transition duration */
+  PAGE_TRANSITION: 600,
+
+  /** Estimated time savings threshold (ms) */
+  SAVINGS_THRESHOLD: 500
 } as const;
 
 export type TimingKey = keyof typeof TIMING;
+
+/**
+ * Performance metric thresholds
+ * Used for scoring and alerting
+ */
+export const PERFORMANCE_THRESHOLDS = {
+  /** First Input Delay threshold (ms) */
+  FID: 100,
+
+  /** Time to First Byte threshold (ms) */
+  TTFB: 200,
+
+  /** Largest Contentful Paint threshold (ms) */
+  LCP: 2500,
+
+  /** Cumulative Layout Shift threshold */
+  CLS: 0.1,
+
+  /** Maximum bundle size before warning (bytes) */
+  BUNDLE_SIZE: 600 * 1024,
+
+  /** Perfect score baseline */
+  PERFECT_SCORE: 100
+} as const;
+
+export type PerformanceThresholdKey = keyof typeof PERFORMANCE_THRESHOLDS;

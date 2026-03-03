@@ -21,9 +21,6 @@ import {
   type TableKeyboardNavConfig
 } from '../../components/table-keyboard-nav';
 import { ICONS } from '../../constants/icons';
-import { createLogger } from '../../utils/logger';
-
-const logger = createLogger('CommandPalette');
 
 // ============================================================================
 // TYPES
@@ -347,6 +344,156 @@ function buildActionItems(config: AdminCommandPaletteConfig): CommandItem[] {
 // ============================================================================
 
 /**
+ * Keyboard shortcuts configuration for help panel
+ */
+const KEYBOARD_SHORTCUTS = [
+  { keys: '⌘K', description: 'Open command palette' },
+  { keys: '1-8', description: 'Navigate sidebar sections' },
+  { keys: '⌘N', description: 'Create new client' },
+  { keys: '⌘⇧P', description: 'Create new project' },
+  { keys: '⌘⇧I', description: 'Create new invoice' },
+  { keys: '?', description: 'Show this help' },
+  { keys: 'Esc', description: 'Close dialogs' }
+] as const;
+
+/**
+ * Show keyboard shortcuts help panel
+ */
+function showKeyboardShortcutsPanel(): void {
+  // Check if panel already exists
+  if (document.getElementById('keyboard-shortcuts-panel')) {
+    hideKeyboardShortcutsPanel();
+    return;
+  }
+
+  const panel = document.createElement('div');
+  panel.id = 'keyboard-shortcuts-panel';
+  panel.className = 'keyboard-shortcuts-panel';
+  panel.innerHTML = `
+    <div class="shortcuts-backdrop"></div>
+    <div class="shortcuts-content">
+      <div class="shortcuts-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="shortcuts-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="shortcuts-list">
+        ${KEYBOARD_SHORTCUTS.map((s) => `<div class="shortcut-item"><kbd>${s.keys}</kbd><span>${s.description}</span></div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  // Add styles
+  const style = document.createElement('style');
+  style.id = 'keyboard-shortcuts-styles';
+  style.textContent = `
+    .keyboard-shortcuts-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: var(--z-index-portal-modal, 9600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shortcuts-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .shortcuts-content {
+      position: relative;
+      background: var(--portal-bg-primary, #1a1a1a);
+      border: 1px solid var(--portal-border, #333);
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 320px;
+      max-width: 400px;
+    }
+    .shortcuts-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .shortcuts-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--portal-text-primary, #fff);
+    }
+    .shortcuts-close {
+      background: none;
+      border: none;
+      color: var(--portal-text-muted, #888);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .shortcuts-close:hover {
+      color: var(--portal-text-primary, #fff);
+    }
+    .shortcuts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .shortcut-item kbd {
+      background: var(--portal-bg-secondary, #2a2a2a);
+      border: 1px solid var(--portal-border, #333);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--portal-text-primary, #fff);
+      min-width: 60px;
+      text-align: center;
+    }
+    .shortcut-item span {
+      color: var(--portal-text-secondary, #aaa);
+      font-size: 14px;
+    }
+  `;
+
+  document.head.appendChild(style);
+  document.body.appendChild(panel);
+
+  // Add event listeners
+  const closeBtn = panel.querySelector('.shortcuts-close');
+  const backdrop = panel.querySelector('.shortcuts-backdrop');
+
+  closeBtn?.addEventListener('click', hideKeyboardShortcutsPanel);
+  backdrop?.addEventListener('click', hideKeyboardShortcutsPanel);
+
+  // Close on Escape
+  const escHandler = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      hideKeyboardShortcutsPanel();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+}
+
+/**
+ * Hide keyboard shortcuts help panel
+ */
+function hideKeyboardShortcutsPanel(): void {
+  const panel = document.getElementById('keyboard-shortcuts-panel');
+  const style = document.getElementById('keyboard-shortcuts-styles');
+  panel?.remove();
+  style?.remove();
+}
+
+/**
  * Sidebar shortcut mapping (1-8 keys)
  * Matches the data-shortcut attributes in admin/index.html
  */
@@ -389,11 +536,10 @@ function createKeyboardHandler(config: AdminCommandPaletteConfig): (e: KeyboardE
       return;
     }
 
-    // Handle ? for help (future: show keyboard shortcuts panel)
+    // Handle ? for help - show keyboard shortcuts panel
     if (e.key === '?' && e.shiftKey) {
       e.preventDefault();
-      // TODO: Show keyboard shortcuts help panel
-      logger.log('Keyboard shortcuts: ⌘K (command palette), 1-8 (navigation)');
+      showKeyboardShortcutsPanel();
     }
   };
 }

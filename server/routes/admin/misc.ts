@@ -878,6 +878,7 @@ router.post(
 
 /**
  * GET /api/admin/analytics - Get analytics data
+ * Returns KPIs, charts, and source breakdown for the analytics dashboard
  */
 router.get(
   '/analytics',
@@ -887,65 +888,222 @@ router.get(
     const db = getDatabase();
     const { range = '30d' } = req.query;
 
-    // Calculate date range
+    // Calculate date ranges for current and previous periods
     let daysBack = 30;
     if (range === '7d') daysBack = 7;
     else if (range === '90d') daysBack = 90;
     else if (range === '1y') daysBack = 365;
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - daysBack);
-    const startDateStr = startDate.toISOString().split('T')[0];
+    const now = new Date();
+    const currentStart = new Date();
+    currentStart.setDate(currentStart.getDate() - daysBack);
+    const previousStart = new Date();
+    previousStart.setDate(previousStart.getDate() - (daysBack * 2));
 
-    // Get revenue data
-    const revenueData = await db.all(`
-      SELECT
-        DATE(paid_at) as date,
-        SUM(total) as revenue,
-        COUNT(*) as invoiceCount
+    const currentStartStr = currentStart.toISOString().split('T')[0];
+    const previousStartStr = previousStart.toISOString().split('T')[0];
+    const nowStr = now.toISOString().split('T')[0];
+
+    // Get current period revenue
+    const currentRevenue = await db.get(`
+      SELECT COALESCE(SUM(total), 0) as value
       FROM invoices
-      WHERE status = 'paid' AND paid_at >= ?
-      GROUP BY DATE(paid_at)
-      ORDER BY date ASC
-    `, [startDateStr]);
+      WHERE status = 'paid' AND DATE(paid_at) >= ? AND DATE(paid_at) <= ?
+    `, [currentStartStr, nowStr]);
 
-    // Get project data
-    const projectData = await db.all(`
-      SELECT
-        DATE(created_at) as date,
-        COUNT(*) as projectCount
-      FROM projects
-      WHERE created_at >= ? AND deleted_at IS NULL
-      GROUP BY DATE(created_at)
-      ORDER BY date ASC
-    `, [startDateStr]);
+    // Get previous period revenue
+    const previousRevenue = await db.get(`
+      SELECT COALESCE(SUM(total), 0) as value
+      FROM invoices
+      WHERE status = 'paid' AND DATE(paid_at) >= ? AND DATE(paid_at) < ?
+    `, [previousStartStr, currentStartStr]);
 
-    // Get client data
-    const clientData = await db.all(`
-      SELECT
-        DATE(created_at) as date,
-        COUNT(*) as clientCount
-      FROM clients
-      WHERE created_at >= ? AND deleted_at IS NULL
-      GROUP BY DATE(created_at)
-      ORDER BY date ASC
-    `, [startDateStr]);
+    // Get current period clients
+    const currentClients = await db.get(`
+      SELECT COUNT(*) as value FROM clients WHERE deleted_at IS NULL
+    `);
+    const newClientsCurrentPeriod = await db.get(`
+      SELECT COUNT(*) as value FROM clients
+      WHERE deleted_at IS NULL AND DATE(created_at) >= ?
+    `, [currentStartStr]);
+    const newClientsPreviousPeriod = await db.get(`
+      SELECT COUNT(*) as value FROM clients
+      WHERE deleted_at IS NULL AND DATE(created_at) >= ? AND DATE(created_at) < ?
+    `, [previousStartStr, currentStartStr]);
 
-    // Get summary stats
-    const summary = await db.get(`
+    // Get current period active projects
+    const activeProjects = await db.get(`
+      SELECT COUNT(*) as value FROM projects
+      WHERE status IN ('active', 'in-progress', 'in_progress') AND deleted_at IS NULL
+    `);
+    const newProjectsCurrentPeriod = await db.get(`
+      SELECT COUNT(*) as value FROM projects
+      WHERE deleted_at IS NULL AND DATE(created_at) >= ?
+    `, [currentStartStr]);
+    const newProjectsPreviousPeriod = await db.get(`
+      SELECT COUNT(*) as value FROM projects
+      WHERE deleted_at IS NULL AND DATE(created_at) >= ? AND DATE(created_at) < ?
+    `, [previousStartStr, currentStartStr]);
+
+    // Get invoices sent in current period
+    const invoicesSent = await db.get(`
+      SELECT COUNT(*) as value FROM invoices
+      WHERE DATE(created_at) >= ?
+    `, [currentStartStr]);
+    const invoicesSentPrevious = await db.get(`
+      SELECT COUNT(*) as value FROM invoices
+      WHERE DATE(created_at) >= ? AND DATE(created_at) < ?
+    `, [previousStartStr, currentStartStr]);
+
+    // Get conversion rate (leads converted to clients)
+    const leadsStats = await db.get(`
       SELECT
-        (SELECT COALESCE(SUM(total), 0) FROM invoices WHERE status = 'paid' AND paid_at >= ?) as totalRevenue,
-        (SELECT COUNT(*) FROM projects WHERE created_at >= ? AND deleted_at IS NULL) as newProjects,
-        (SELECT COUNT(*) FROM clients WHERE created_at >= ? AND deleted_at IS NULL) as newClients,
-        (SELECT COUNT(*) FROM invoices WHERE status = 'paid' AND paid_at >= ?) as paidInvoices
-    `, [startDateStr, startDateStr, startDateStr, startDateStr]);
+        COUNT(*) as total,
+        SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
+      FROM contact_submissions
+    `);
+    const leadsStatsPrevious = await db.get(`
+      SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
+      FROM contact_submissions
+      WHERE DATE(created_at) < ?
+    `, [currentStartStr]);
+
+    const currentConversionRate = leadsStats?.total > 0
+      ? Math.round((leadsStats.converted / leadsStats.total) * 100)
+      : 0;
+    const previousConversionRate = leadsStatsPrevious?.total > 0
+      ? Math.round((leadsStatsPrevious.converted / leadsStatsPrevious.total) * 100)
+      : 0;
+
+    // Get average project value
+    const avgProjectValue = await db.get(`
+      SELECT COALESCE(AVG(budget), 0) as value
+      FROM projects WHERE deleted_at IS NULL AND budget > 0
+    `);
+    const avgProjectValuePrevious = await db.get(`
+      SELECT COALESCE(AVG(budget), 0) as value
+      FROM projects WHERE deleted_at IS NULL AND budget > 0 AND DATE(created_at) < ?
+    `, [currentStartStr]);
+
+    // Calculate percentage changes
+    const calcChange = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    // Revenue chart data (by month or day depending on range)
+    const revenueChartData = await db.all(`
+      SELECT
+        strftime('%Y-%m-%d', paid_at) as date,
+        SUM(total) as revenue
+      FROM invoices
+      WHERE status = 'paid' AND DATE(paid_at) >= ?
+      GROUP BY strftime('%Y-%m-%d', paid_at)
+      ORDER BY date ASC
+    `, [currentStartStr]);
+
+    // Projects by status chart
+    const projectsByStatus = await db.all(`
+      SELECT status, COUNT(*) as count
+      FROM projects WHERE deleted_at IS NULL
+      GROUP BY status
+    `);
+
+    // Lead funnel data
+    const leadFunnelData = await db.all(`
+      SELECT status, COUNT(*) as count
+      FROM contact_submissions
+      GROUP BY status
+      ORDER BY
+        CASE status
+          WHEN 'new' THEN 1
+          WHEN 'contacted' THEN 2
+          WHEN 'qualified' THEN 3
+          WHEN 'proposal_sent' THEN 4
+          WHEN 'converted' THEN 5
+          WHEN 'lost' THEN 6
+          ELSE 7
+        END
+    `);
+
+    // Source breakdown
+    const sourceBreakdownData = await db.all(`
+      SELECT
+        COALESCE(source, 'Direct') as source,
+        COUNT(*) as count
+      FROM contact_submissions
+      GROUP BY source
+      ORDER BY count DESC
+    `);
+
+    const totalLeads = sourceBreakdownData.reduce((sum: number, s: { count: number }) => sum + s.count, 0);
+    const sourceBreakdown = sourceBreakdownData.map((s: { source: string; count: number }) => ({
+      source: s.source,
+      count: s.count,
+      percentage: totalLeads > 0 ? Math.round((s.count / totalLeads) * 100) : 0
+    }));
+
+    // Format chart data
+    const revenueChart = {
+      labels: revenueChartData.map((d: { date: string }) => d.date),
+      datasets: [{
+        label: 'Revenue',
+        data: revenueChartData.map((d: { revenue: number }) => d.revenue),
+        color: 'var(--status-completed)'
+      }]
+    };
+
+    const projectsChart = {
+      labels: projectsByStatus.map((p: { status: string }) => p.status),
+      datasets: [{
+        label: 'Projects',
+        data: projectsByStatus.map((p: { count: number }) => p.count),
+        color: 'var(--color-brand-primary)'
+      }]
+    };
+
+    const leadsChart = {
+      labels: leadFunnelData.map((l: { status: string }) => l.status),
+      datasets: [{
+        label: 'Leads',
+        data: leadFunnelData.map((l: { count: number }) => l.count),
+        color: 'var(--status-pending)'
+      }]
+    };
 
     res.json({
-      range,
-      summary,
-      revenue: revenueData,
-      projects: projectData,
-      clients: clientData,
+      kpis: {
+        revenue: {
+          value: currentRevenue?.value || 0,
+          change: calcChange(currentRevenue?.value || 0, previousRevenue?.value || 0)
+        },
+        clients: {
+          value: currentClients?.value || 0,
+          change: calcChange(newClientsCurrentPeriod?.value || 0, newClientsPreviousPeriod?.value || 0)
+        },
+        projects: {
+          value: activeProjects?.value || 0,
+          change: calcChange(newProjectsCurrentPeriod?.value || 0, newProjectsPreviousPeriod?.value || 0)
+        },
+        invoices: {
+          value: invoicesSent?.value || 0,
+          change: calcChange(invoicesSent?.value || 0, invoicesSentPrevious?.value || 0)
+        },
+        conversionRate: {
+          value: currentConversionRate,
+          change: currentConversionRate - previousConversionRate
+        },
+        avgProjectValue: {
+          value: Math.round(avgProjectValue?.value || 0),
+          change: calcChange(avgProjectValue?.value || 0, avgProjectValuePrevious?.value || 0)
+        }
+      },
+      revenueChart,
+      projectsChart,
+      leadsChart,
+      sourceBreakdown
     });
   })
 );
