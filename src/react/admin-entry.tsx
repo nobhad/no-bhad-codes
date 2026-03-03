@@ -9,6 +9,9 @@ import './styles/tailwind-generated.css';
 // Note: Button styles (tw-btn-*) are now in portal-buttons.css (base portal styles)
 
 import { registerReactComponent } from './registry';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('AdminEntry');
 
 // Detail views
 import { mountClientDetail, unmountClientDetail } from './features/admin/client-detail';
@@ -45,6 +48,11 @@ import { mountOverviewDashboard, unmountOverviewDashboard } from './features/adm
 import { mountAnalyticsDashboard, unmountAnalyticsDashboard } from './features/admin/analytics';
 import { mountAdHocAnalytics, unmountAdHocAnalytics } from './features/admin/ad-hoc-analytics';
 import { mountPerformanceMetrics, unmountPerformanceMetrics } from './features/admin/performance';
+
+// Dashboard components (parent tab groups)
+import { mountWorkDashboard, unmountWorkDashboard } from './features/admin/work';
+import { mountCRMDashboard, unmountCRMDashboard } from './features/admin/crm';
+import { mountDocumentsDashboard, unmountDocumentsDashboard } from './features/admin/documents';
 
 // Register detail views
 registerReactComponent('clientDetail', {
@@ -190,5 +198,21 @@ registerReactComponent('performanceMetrics', {
   unmount: unmountPerformanceMetrics,
 });
 
+// Register dashboard components (parent tab groups)
+registerReactComponent('workDashboard', {
+  mount: mountWorkDashboard,
+  unmount: unmountWorkDashboard,
+});
+
+registerReactComponent('crmDashboard', {
+  mount: mountCRMDashboard,
+  unmount: unmountCRMDashboard,
+});
+
+registerReactComponent('documentsDashboard', {
+  mount: mountDocumentsDashboard,
+  unmount: unmountDocumentsDashboard,
+});
+
 // Log that React components are available
-console.log('[React] Admin components registered (28 total)');
+logger.info('Admin components registered (31 total)');

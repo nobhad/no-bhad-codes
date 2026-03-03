@@ -73,7 +73,7 @@
   table-layout: auto;
   border: none;
   font-family: inherit;
-  font-size: var(--table-cell-font-size);
+  font-size: inherit;
   color: var(--table-cell-color);
 }
 
@@ -84,11 +84,11 @@
 .data-table th {
   text-align: left;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
-  color: var(--table-header-color);
-  font-size: var(--table-header-font-size);
-  font-weight: var(--table-header-font-weight);
+  color: var(--portal-text-light);
+  font-size: inherit;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: var(--table-header-letter-spacing);
+  letter-spacing: 0.05em;
   white-space: nowrap;
   border-bottom: var(--portal-border);
   vertical-align: middle;
@@ -127,13 +127,32 @@
    TABLE ROW STATES
    ============================================== */
 
-.data-table tbody tr:hover td,
-.data-table tbody tr:hover td.actions-cell {
+/* ==============================================
+   ROW HOVER - ALL CELLS MUST MATCH
+   Single rule for uniform hover background
+   ============================================== */
+
+.data-table tbody tr:hover td {
   background: var(--portal-bg-hover);
 }
 
-.data-table tbody tr:active td,
-.data-table tbody tr:active td.actions-cell {
+/* Ensure actions cell inherits row hover - no exceptions */
+.data-table tbody tr:hover td.actions-cell,
+.data-table tbody tr:hover td:last-child,
+.data-table tbody tr:hover td[class*="actions"],
+[data-page="admin"] .data-table tbody tr:hover td {
+  background: var(--portal-bg-hover);
+}
+
+/* No hover effect for empty state rows */
+.data-table tbody tr:hover td[colspan],
+.data-table tbody tr:hover td:has(.empty-state),
+.data-table tbody tr:has(td[colspan]):hover td,
+.data-table tbody tr.empty-row:hover td {
+  background: transparent;
+}
+
+.data-table tbody tr:active td {
   background: var(--portal-bg-active);
 }
 
@@ -159,6 +178,39 @@
 
 /* Table actions - use utilities layer for override priority */
 @layer utilities {
+  /* Button group - generic flex wrapper for icon buttons */
+  .button-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-0-5);
+    flex-wrap: nowrap;
+  }
+
+  /* Button group context modifiers */
+  .button-group--table {
+    gap: var(--space-0-5);
+  }
+
+  .button-group--modal {
+    gap: var(--space-1-5);
+  }
+
+  .button-group--toolbar {
+    gap: var(--space-1);
+  }
+
+  .button-group--card {
+    gap: var(--space-0-5);
+  }
+
+  .button-group--sidebar {
+    gap: var(--space-1);
+  }
+
+  .button-group--inline {
+    gap: var(--space-0-5);
+  }
+
   .table-actions,
   .data-table .table-actions,
   td .table-actions,
@@ -171,15 +223,22 @@
     justify-content: flex-end;
   }
 
+  /* Actions cell - DO NOT use display:flex on td, it breaks table-cell behavior */
   .actions-cell,
   td.actions-cell,
   .data-table .actions-cell,
   .data-table td.actions-cell,
   .portal .actions-cell,
   .portal td.actions-cell {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    /* Keep table-cell display for proper row background inheritance */
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+    /* Explicit reset - no margin, no border on desktop */
+    margin: 0;
+    border-top: none;
+    /* Ensure background is transparent so row hover shows through */
+    background: transparent;
   }
 }
 
@@ -229,6 +288,12 @@
    TABLE CONTAINERS
    ============================================== */
 
+/* Table layout wrapper - outer container from TableLayout component */
+.table-layout {
+  width: 100%;
+  min-width: 0;
+}
+
 .data-table-card {
   background: transparent;
   border: var(--portal-border);
@@ -274,7 +339,6 @@
   display: flex;
   align-items: center;
   padding: var(--space-3);
-  border-top: var(--portal-border);
   color: inherit;
   font-size: inherit;
 }
@@ -427,6 +491,55 @@
   gap: var(--space-0-5);
 }
 
+/* ==============================================
+   CELL WITH ICON - Icon aligned left of text
+   Icons appear inline with checkboxes visually
+   ============================================== */
+
+.data-table .cell-with-icon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.data-table .cell-icon {
+  flex-shrink: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  /* Inherit color from parent - no grey override */
+  color: inherit;
+}
+
+.data-table .cell-icon-sm {
+  flex-shrink: 0;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  /* Inherit color from parent - no grey override */
+  color: inherit;
+}
+
+/* Type cell with icon - inline flex */
+.data-table .type-cell .cell-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+/* Priority cell - center align dot with text */
+.data-table .priority-cell .cell-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+/* Inline variant for smaller icon + text patterns */
+.data-table .cell-with-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
 .data-table .cell-title,
 .data-table .cell-subtitle,
 .data-table .identity-name,
@@ -475,7 +588,7 @@
 .data-table .priority-stacked {
   display: none;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs);
 }
@@ -483,7 +596,7 @@
 .data-table .priority-stacked .priority-indicator {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   flex-shrink: 0;
 }
 
@@ -542,16 +655,29 @@
 /* ==============================================
    SLUG CELL - ONLY SPECIAL TEXT STYLING
    Monospace font for code/slug display
+   Same size as rest of table text
    ============================================== */
 
 .data-table .slug-cell,
-.data-table .slug-cell code {
+.data-table .slug-cell code,
+.data-table .type-cell code,
+.data-table code {
   font-family: var(--font-family-mono, "Inconsolata", monospace);
+  font-size: inherit;
 }
 
-.data-table .slug-cell code {
+.data-table .slug-cell code,
+.data-table .type-cell code,
+.data-table code {
   background: transparent;
   padding: 0;
+}
+
+/* Ensure all cell text inherits table font-size */
+.data-table td span,
+.data-table td code,
+.data-table .cell-with-icon span {
+  font-size: inherit;
 }
 
 /* ==============================================
@@ -580,10 +706,17 @@
   max-width: var(--table-cell-max-width);
 }
 
-/* Status cells need visible overflow for dropdowns */
+/* Status cells need visible overflow for dropdowns, centered content */
 .data-table td.status-cell {
   overflow: visible;
   text-overflow: clip;
+  text-align: center;
+}
+
+/* Center the dropdown within status cell */
+.data-table td.status-cell .table-dropdown {
+  display: inline-flex;
+  justify-content: center;
 }
 
 .data-table
@@ -654,15 +787,39 @@
   max-width: var(--table-compact-max-width);
 }
 
-.data-table :is(.count-col, .count-cell) {
+/* CENTER ALIGNED COLUMNS - status, articles, active, featured, views, runs, success, steps, counts, dates */
+.data-table :is(
+  .status-col, .status-cell,
+  .count-col, .count-cell,
+  .articles-col, .articles-cell,
+  .active-col, .active-cell,
+  .featured-col, .featured-cell,
+  .views-col, .views-cell,
+  .runs-col, .runs-cell,
+  .success-col, .success-cell,
+  .steps-col, .steps-cell,
+  .projects-col, .projects-cell,
+  .date-col, .date-cell,
+  .due-date-col, .due-date-cell,
+  .created-col, .created-cell,
+  .updated-col, .updated-cell,
+  .text-center
+) {
   text-align: center;
 }
 
-.data-table :is(.amount-col, .amount-cell),
+/* Ensure icons in centered cells display inline for proper centering */
+.data-table td.text-center svg,
+.data-table th.text-center svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.data-table :is(.amount-col, .amount-cell, .text-right),
 .data-table th.amount-col,
+.data-table th.text-right,
 .data-table th[class*="amount"] {
   text-align: right;
-  padding-right: var(--table-outer-padding);
 }
 
 .data-table :is(.actions-col, .actions-cell) {
@@ -760,22 +917,6 @@
   }
 }
 
-/* Table Error Banner - shown when data fails to load */
-.table-error-banner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-6) var(--space-4);
-  margin: var(--space-2) var(--space-3);
-  background-color: color-mix(in srgb, var(--app-color-danger) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--app-color-danger) 20%, transparent);
-  border-radius: var(--radius-md);
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-sm);
-}
-
 /* ==============================================
    SORTABLE TABLE HEADERS
    ============================================== */
@@ -795,7 +936,7 @@
 .sort-header-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   background: transparent;
   border: none;
   padding: 0;
@@ -1062,27 +1203,28 @@
   }
 }
 
-/* Small mobile checkbox hidden - utilities layer for override */
+/* Small mobile layout overrides - utilities layer for override */
 @layer utilities {
   @media (--small-mobile) {
     .data-table .bulk-select-cell,
     .data-table th.checkbox-col {
       display: none;
     }
-  }
 
-  .data-table tbody td.identity-cell {
-    order: -2;
-    padding-bottom: var(--space-2);
-    margin-bottom: var(--space-1);
-  }
+    /* Mobile-only: Identity cell first, actions cell last */
+    .data-table tbody td.identity-cell {
+      order: -2;
+      padding-bottom: var(--space-2);
+      margin-bottom: var(--space-1);
+    }
 
-  .data-table tbody td.actions-cell {
-    order: 10;
-    display: flex;
-    justify-content: flex-end;
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--portal-border-color);
-    margin-top: var(--space-2);
+    .data-table tbody td.actions-cell {
+      order: 10;
+      display: flex;
+      justify-content: flex-end;
+      padding-top: var(--space-2);
+      border-top: var(--border-width) solid var(--portal-border-color);
+      margin-top: var(--space-2);
+    }
   }
 }

@@ -11,6 +11,9 @@
 import { ICON_SIZES, SVG_ATTRS } from '../constants';
 import type { IconConfig, IconSizeKey } from '../types';
 import { getIconDefinition } from './icon-registry';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('IconFactory');
 
 // ============================================
 // ICON RENDERING
@@ -36,7 +39,7 @@ export function renderIcon(config: IconConfig): string {
 
   const definition = getIconDefinition(name);
   if (!definition) {
-    console.warn(`[IconFactory] Unknown icon: ${name}`);
+    logger.warn(`Unknown icon: ${name}`);
     return '';
   }
 

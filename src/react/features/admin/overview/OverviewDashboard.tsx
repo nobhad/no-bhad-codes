@@ -21,10 +21,12 @@ import {
   Plus,
   FileUp,
   Send,
+  Inbox,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatTimeAgo } from '../../../../utils/time-utils';
 import { formatCurrency } from '../../../../utils/format-utils';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface OverviewDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -81,7 +83,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/dashboard', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.DASHBOARD, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -126,7 +128,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
       <div className="overview-panel ovdash-error-panel">
         <p className="field-label ovdash-error-message">{error}</p>
         <button onClick={loadDashboardData} className="btn btn-outline">
-          <RefreshCw className="btn-icon" /> Retry
+          <RefreshCw /> Retry
         </button>
       </div>
     );
@@ -139,8 +141,8 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
         {snapshotMetrics.map((metric) => (
           <div key={metric.label} className="overview-stat-card overview-panel">
             <div className="stat-card-top">
-              <span className="field-label">{metric.label}</span>
               {metric.icon}
+              <span className="field-label">{metric.label}</span>
             </div>
             <div className="stat-card-value">{metric.value}</div>
           </div>
@@ -153,8 +155,8 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
           {attentionItems.map((item) => (
             <button key={item.type} onClick={item.action} className="overview-stat-card overview-panel">
               <div className="stat-card-top">
-                <span className="field-label">{item.label}</span>
                 {item.icon}
+                <span className="field-label">{item.label}</span>
               </div>
               <div className="stat-card-value stat-value-alert">{item.count}</div>
             </button>
@@ -169,17 +171,20 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
           {/* Active Projects */}
           <div className="overview-panel">
             <div className="overview-panel-header">
-              <h3 className="overview-panel-title">
+              <div className="overview-panel-title">
                 <Briefcase className="panel-icon" />
-                Active Projects
-              </h3>
+                <span className="field-label">Active Projects</span>
+              </div>
               <button onClick={() => onNavigate?.('projects')} className="overview-panel-action">
                 View All <ArrowRight className="panel-icon" />
               </button>
             </div>
             <div className="overview-panel-body">
               {activeProjects.length === 0 ? (
-                <div className="empty-state">No active projects</div>
+                <div className="empty-state">
+                  <Briefcase className="icon-xl" />
+                  <span>No active projects</span>
+                </div>
               ) : (
                 <ul className="activity-feed">
                   {activeProjects.slice(0, 5).map((project) => (
@@ -204,22 +209,25 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
           {/* Upcoming Tasks */}
           <div className="overview-panel">
             <div className="overview-panel-header">
-              <h3 className="overview-panel-title">
+              <div className="overview-panel-title">
                 <Clock className="panel-icon" />
-                Upcoming Tasks
-              </h3>
+                <span className="field-label">Upcoming Tasks</span>
+              </div>
               <div className="view-toggle">
                 <button onClick={() => setTasksView('list')} className={cn('icon-btn icon-btn-outline', tasksView === 'list' && 'active')} title="List view">
-                  <List className="btn-icon" />
+                  <List />
                 </button>
                 <button onClick={() => setTasksView('kanban')} className={cn('icon-btn icon-btn-outline', tasksView === 'kanban' && 'active')} title="Kanban view">
-                  <LayoutGrid className="btn-icon" />
+                  <LayoutGrid />
                 </button>
               </div>
             </div>
             <div className="overview-panel-body">
               {upcomingTasks.length === 0 ? (
-                <div className="empty-state">No upcoming tasks</div>
+                <div className="empty-state">
+                  <Clock className="icon-xl" />
+                  <span>No upcoming tasks</span>
+                </div>
               ) : tasksView === 'list' ? (
                 <ul className="activity-feed">
                   {upcomingTasks.slice(0, 5).map((task) => (
@@ -245,11 +253,16 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
           {/* Recent Activity */}
           <div className="overview-panel">
             <div className="overview-panel-header">
-              <h3 className="overview-panel-title">Recent Activity</h3>
+              <div className="overview-panel-title">
+                <span className="field-label">Recent Activity</span>
+              </div>
             </div>
             <div className="overview-panel-body--compact">
               {recentActivity.length === 0 ? (
-                <div className="empty-state">No recent activity</div>
+                <div className="empty-state">
+                  <Inbox className="icon-xl" />
+                  <span>No recent activity</span>
+                </div>
               ) : (
                 <ul className="activity-feed">
                   {recentActivity.slice(0, 8).map((activity) => (
@@ -269,20 +282,22 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
           {/* Quick Actions */}
           <div className="overview-panel">
             <div className="overview-panel-header">
-              <h3 className="overview-panel-title">Quick Actions</h3>
+              <div className="overview-panel-title">
+                <span className="field-label">Quick Actions</span>
+              </div>
             </div>
             <div className="overview-panel-body ovdash-quick-actions">
               <button onClick={() => onNavigate?.('projects')} className="btn btn-outline btn-sm">
-                <Plus className="btn-icon" /> New Project
+                <Plus /> New Project
               </button>
               <button onClick={() => onNavigate?.('clients')} className="btn btn-outline btn-sm">
-                <Users className="btn-icon" /> Add Client
+                <Users /> Add Client
               </button>
               <button onClick={() => onNavigate?.('invoices')} className="btn btn-outline btn-sm">
-                <FileUp className="btn-icon" /> Create Invoice
+                <FileUp /> Create Invoice
               </button>
               <button onClick={() => onNavigate?.('messages')} className="btn btn-outline btn-sm">
-                <Send className="btn-icon" /> Send Message
+                <Send /> Send Message
               </button>
             </div>
           </div>

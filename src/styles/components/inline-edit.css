@@ -12,7 +12,7 @@
 [data-page="admin"] .inline-editable-cell {
   position: relative;
   cursor: pointer;
-  transition: background-color 0.1s ease;
+  transition: background-color var(--transition-fast) ease;
 }
 
 /* Hover state - subtle edit hint */
@@ -48,8 +48,8 @@
 [data-page="admin"] .inline-edit-input {
   width: 100%;
   padding: 6px 8px;
-  border: 2px solid var(--color-primary);
-  border-radius: 4px;
+  border: var(--border-width) solid var(--color-primary);
+  border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
   font-size: inherit;
@@ -166,7 +166,7 @@
 
 /* Value text */
 .portal .inline-edit-value {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .portal .inline-edit-value.is-placeholder {
@@ -195,9 +195,9 @@
   padding: 0 6px;
   background: var(--portal-bg-darkest);
   color: var(--portal-text-primary);
-  border: 1px solid var(--color-brand-primary, var(--color-primary));
+  border: var(--border-width) solid var(--color-brand-primary, var(--color-primary));
   border-radius: var(--portal-radius-sm, 4px);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   outline: none;
 }
 
@@ -266,7 +266,7 @@
   width: 100%;
   min-height: 80px;
   padding: var(--space-2);
-  border: 2px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
@@ -280,7 +280,7 @@
 /* Select dropdown for type/status editing */
 .pd-header-card .inline-edit-select {
   padding: var(--space-1) var(--space-2);
-  border: 2px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
@@ -401,7 +401,7 @@
 .portal .inline-edit-row .inline-edit-input {
   width: 100%;
   padding: var(--space-1) var(--space-2);
-  border: 2px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
   font-size: var(--font-size-base, 14px);
@@ -431,7 +431,7 @@
 .portal .inline-edit-row .inline-edit-select {
   width: 100%;
   padding: var(--space-1) var(--space-2);
-  border: 2px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   background: var(--portal-bg-darker);
   color: var(--portal-text-light);
   font-size: var(--font-size-base, 14px);

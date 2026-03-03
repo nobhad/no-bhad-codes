@@ -172,21 +172,20 @@
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
+  gap: var(--icon-gap);
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
   white-space: nowrap;
 }
 
 /* Status indicator in tables - inherits from table cell styles */
-.data-table .status-indicator {
-  font: inherit;
-}
+/* Note: Base .status-indicator now uses inherit, this is redundant but kept for explicitness */
 
 .status-indicator .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+  border-radius: var(--portal-radius-full);
   flex-shrink: 0;
   background-color: var(--portal-text-muted);
 }
@@ -266,17 +265,17 @@
    ===================================================== */
 .sidebar-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  font-size: 11px;
+  top: var(--space-0-5);
+  right: var(--space-0-5);
+  min-width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-2xs);
   font-weight: 700;
-  line-height: 18px;
+  line-height: var(--icon-size-lg);
   text-align: center;
   background: transparent;
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   color: var(--color-primary);
   display: none;
   z-index: 10;
@@ -290,7 +289,7 @@
 /* Adjust badge position for expanded sidebar */
 .sidebar:not(.collapsed) .sidebar-badge {
   top: 50%;
-  right: 8px;
+  right: var(--space-1);
   transform: translateY(-50%);
 }
 
@@ -331,11 +330,11 @@
     top: 0;
     right: 0;
     transform: none;
-    min-width: 14px;
-    height: 14px;
-    font-size: 9px;
-    padding: 0 3px;
-    line-height: 14px;
+    min-width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    font-size: var(--font-size-2xs);
+    padding: 0 var(--space-0-5);
+    line-height: var(--icon-size-sm);
   }
 }
 
@@ -349,7 +348,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   background: transparent;
-  border: 1px solid;
+  border: var(--border-width) solid;
 }
 
 /* System badge variant - purple */
@@ -390,12 +389,16 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  gap: var(--icon-gap);
   position: relative;
-  /* Fixed width to match longest status (e.g., "In Progress", "Not Invited") + caret + padding */
-  width: 160px;
-  /* Left padding matches gap between dot and text (--space-1) */
-  padding: var(--space-1);
-  padding-right: var(--space-6);
+  /* Fixed width - MUST match menu width exactly */
+  width: var(--status-dropdown-width, 130px);
+  min-width: var(--status-dropdown-width, 130px);
+  max-width: var(--status-dropdown-width, 130px);
+  /* Symmetric horizontal padding - same on left/right of content */
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  /* Extra right padding for absolutely positioned caret */
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-caret-size) + var(--icon-gap));
   background: transparent;
   border: var(--portal-border);
   margin: 0;
@@ -422,14 +425,14 @@
 }
 
 /* Caret icon in status dropdown - positioned absolutely on right */
-/* Uses --space-1 to match gap between dot and text */
+/* Uses --dropdown-padding-x for consistent spacing with left padding */
 .status-dropdown-trigger > .status-dropdown-caret {
   position: absolute;
-  right: var(--space-1);
+  right: var(--dropdown-padding-x);
   top: 50%;
   transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
+  width: var(--dropdown-caret-size);
+  height: var(--dropdown-caret-size);
   color: var(--portal-text-muted);
   transition: transform var(--transition-fast);
 }
@@ -445,9 +448,9 @@
    ===================================================== */
 .status-color-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+  border-radius: var(--portal-radius-full);
   flex-shrink: 0;
   margin-right: var(--space-2);
 }

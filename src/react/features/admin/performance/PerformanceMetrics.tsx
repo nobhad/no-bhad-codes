@@ -16,6 +16,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface PerformanceKPI {
   id: string;
@@ -64,15 +65,15 @@ interface PerformanceMetricsProps {
 }
 
 const KPI_ICONS: Record<string, React.ReactNode> = {
-  revenue: <DollarSign className="tw-h-5 tw-w-5" />,
-  projects: <Briefcase className="tw-h-5 tw-w-5" />,
-  tasks: <CheckCircle className="tw-h-5 tw-w-5" />,
-  clients: <Users className="tw-h-5 tw-w-5" />,
-  time: <Clock className="tw-h-5 tw-w-5" />,
-  target: <Target className="tw-h-5 tw-w-5" />,
+  revenue: <DollarSign className="icon-lg" />,
+  projects: <Briefcase className="icon-lg" />,
+  tasks: <CheckCircle className="icon-lg" />,
+  clients: <Users className="icon-lg" />,
+  time: <Clock className="icon-lg" />,
+  target: <Target className="icon-lg" />,
 };
 
-export function PerformanceMetrics({ onNavigate, getAuthToken, showNotification }: PerformanceMetricsProps) {
+export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetricsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +85,6 @@ export function PerformanceMetrics({ onNavigate, getAuthToken, showNotification 
   });
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
 
-  // Auth headers helper
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -100,7 +100,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken, showNotification 
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/performance?period=${period}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.PERFORMANCE}?period=${period}`, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -132,107 +132,98 @@ export function PerformanceMetrics({ onNavigate, getAuthToken, showNotification 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
       {/* Header */}
-      <div className="perf-header">
-        <h2 className="tw-heading perf-heading">Performance Dashboard</h2>
-        <div className="perf-controls">
-          <div className="tw-tab-list perf-tab-list">
-            {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={cn(period === p ? 'tw-tab-active' : 'tw-tab', 'perf-tab-capitalize')}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-          <button className="tw-btn-secondary" onClick={loadPerformance} disabled={isLoading}>
-            <RefreshCw className={cn('status-panel-refresh-icon', isLoading && 'status-panel-refresh-icon-spin')} />
-            Refresh
-          </button>
+      <div className="section-header-with-actions">
+        <div className="view-toggle">
+          {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={cn('view-toggle-btn', period === p && 'active')}
+            >
+              {p}
+            </button>
+          ))}
         </div>
+        <button className="btn-secondary" onClick={loadPerformance} disabled={isLoading}>
+          <RefreshCw className={cn('icon-sm', isLoading && 'animate-spin')} />
+          Refresh
+        </button>
       </div>
 
       {/* Error State */}
       {error && (
-        <div className="tw-error">
+        <div className="error-state">
           {error}
-          <button className="tw-btn-secondary status-retry-btn" onClick={loadPerformance}>
+          <button className="btn-secondary" onClick={loadPerformance}>
             Retry
           </button>
         </div>
       )}
 
       {/* KPIs */}
-      <div className="tw-grid-stats tw-grid-6-cols">
-        {isLoading
-          ? <div className="tw-loading tw-col-span-full">Loading performance data...</div>
-          : data.kpis.map((kpi) => (
-              <div key={kpi.id} className="tw-stat-card">
-                <div className="perf-kpi-header">
-                  <span className="tw-stat-label">{kpi.name}</span>
-                  <span className="tw-text-muted">
-                    {KPI_ICONS[kpi.icon] || <BarChart3 className="perf-kpi-icon" />}
-                  </span>
-                </div>
-                <div className="tw-stat-value perf-kpi-value">
-                  {kpi.unit === '$' ? formatCurrency(kpi.value) : `${kpi.value}${kpi.unit}`}
-                </div>
-                <div className="perf-kpi-trend-row">
-                  <div className="perf-kpi-trend">
-                    {kpi.trend === 'up' ? (
-                      <TrendingUp className="perf-trend-icon" />
-                    ) : kpi.trend === 'down' ? (
-                      <TrendingDown className="perf-trend-icon" />
-                    ) : null}
-                    <span className="tw-text-muted">
-                      {formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100)}
-                    </span>
-                  </div>
-                  <span className="tw-text-muted">
-                    Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
-                  </span>
-                </div>
-                <div className="tw-progress-track perf-progress-mt">
-                  <div
-                    className="tw-progress-bar"
-                    style={{
-                      width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
-                      backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
-                    }}
-                  />
-                </div>
+      <div className="tw-grid-stats">
+        {isLoading ? (
+          <div className="loading-state">Loading performance data...</div>
+        ) : (
+          data.kpis.map((kpi) => (
+            <div key={kpi.id} className="tw-stat-card">
+              <div className="stat-card-top">
+                <span className="field-label">{kpi.name}</span>
+                <span className="tw-text-muted">
+                  {KPI_ICONS[kpi.icon] || <BarChart3 className="icon-lg" />}
+                </span>
               </div>
-            ))}
+              <div className="tw-stat-value">
+                {kpi.unit === '$' ? formatCurrency(kpi.value) : `${kpi.value}${kpi.unit}`}
+              </div>
+              <div className="stat-card-trend">
+                {kpi.trend === 'up' ? (
+                  <TrendingUp className="icon-xs" />
+                ) : kpi.trend === 'down' ? (
+                  <TrendingDown className="icon-xs" />
+                ) : null}
+                <span className="tw-text-muted">
+                  {formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100)}
+                </span>
+                <span className="tw-text-muted">
+                  Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
+                </span>
+              </div>
+              <div className="tw-progress-track">
+                <div
+                  className="tw-progress-bar"
+                  style={{
+                    width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
+                    backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
+                  }}
+                />
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
-      <div className="tw-grid-cards tw-grid-2-cols">
+      <div className="analytics-card-grid">
         {/* Team Performance */}
-        <div className="tw-card perf-card">
-          <div className="perf-card-header">
+        <div className="tw-card">
+          <div className="section-header-with-actions">
             <h3 className="tw-section-title">Team Performance</h3>
-            <Award className="perf-card-icon" />
+            <Award className="icon-md tw-text-muted" />
           </div>
           {isLoading ? (
-            <div className="tw-loading">Loading team data...</div>
+            <div className="loading-state">Loading team data...</div>
           ) : (
-            <div>
+            <div className="source-list">
               {data.teamMembers.map((member, index) => (
                 <div key={member.id} className="tw-list-item">
-                  <span className="tw-text-muted perf-rank">
-                    {index + 1}
-                  </span>
-                  <div className="perf-member-info">
-                    <div className="perf-member-name">{member.name}</div>
-                    <div className="tw-text-muted perf-member-role">{member.role}</div>
+                  <span className="tw-text-muted">{index + 1}</span>
+                  <div className="tw-flex-1">
+                    <div>{member.name}</div>
+                    <div className="tw-text-muted">{member.role}</div>
                   </div>
-                  <div className="perf-member-stats">
-                    <div className="perf-member-revenue">
-                      {formatCurrency(member.revenueGenerated)}
-                    </div>
-                    <div className="tw-text-muted perf-member-projects">
-                      {member.projectsCompleted} projects
-                    </div>
+                  <div className="tw-text-right">
+                    <div>{formatCurrency(member.revenueGenerated)}</div>
+                    <div className="tw-text-muted">{member.projectsCompleted} projects</div>
                   </div>
                 </div>
               ))}
@@ -241,36 +232,35 @@ export function PerformanceMetrics({ onNavigate, getAuthToken, showNotification 
         </div>
 
         {/* Project Performance */}
-        <div className="tw-card perf-card">
-          <div className="perf-card-header">
+        <div className="tw-card">
+          <div className="section-header-with-actions">
             <h3 className="tw-section-title">Project Status</h3>
-            <Briefcase className="perf-card-icon" />
+            <Briefcase className="icon-md tw-text-muted" />
           </div>
           {isLoading ? (
-            <div className="tw-loading">Loading project data...</div>
+            <div className="loading-state">Loading project data...</div>
           ) : (
-            <div className="perf-projects-list">
+            <div className="source-list">
               {data.projectPerformance.map((project) => (
                 <div
                   key={project.id}
-                  className="tw-card-hover"
+                  className="source-item tw-cursor-pointer"
                   onClick={() => onNavigate?.('projects', String(project.id))}
                 >
-                  <div className="perf-project-header">
+                  <div className="source-row">
                     <div>
-                      <div className="perf-project-name">{project.name}</div>
-                      <div className="tw-text-muted perf-project-client">{project.clientName}</div>
+                      <div>{project.name}</div>
+                      <div className="tw-text-muted">{project.clientName}</div>
                     </div>
                     <span className="tw-badge">
                       {project.onTrack ? 'On Track' : 'At Risk'}
                     </span>
                   </div>
-                  <div className="tw-text-muted perf-project-meta">
+                  <div className="source-row tw-text-muted">
                     <span>Budget: {formatCurrency(project.budget)}</span>
-                    <span>Spent: {formatCurrency(project.spent)}</span>
-                    <span className="perf-ml-auto">{project.progress}%</span>
+                    <span>{project.progress}%</span>
                   </div>
-                  <div className="tw-progress-track perf-progress-mt">
+                  <div className="tw-progress-track">
                     <div
                       className="tw-progress-bar"
                       style={{

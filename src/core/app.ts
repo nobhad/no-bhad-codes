@@ -24,6 +24,9 @@ import { isDev } from './env';
 import { APP_CONSTANTS } from '../config/constants';
 import { initGlobalErrorHandler } from '../portal-global-error-handler';
 import { initI18n } from '../i18n';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('Application');
 
 // Initialize global error handler immediately
 initGlobalErrorHandler();
@@ -52,7 +55,7 @@ export class Application {
 
   private log(...args: unknown[]): void {
     if (this.debug) {
-      console.log('[Application]', ...args);
+      logger.log(...args);
     }
   }
 
@@ -72,7 +75,7 @@ export class Application {
     }
 
     if (this.isInitialized) {
-      console.warn('[Application] Already initialized');
+      logger.warn('Already initialized');
       return;
     }
 
@@ -99,7 +102,7 @@ export class Application {
           )) as ServiceInstance;
           await trackingService.init?.();
         } catch (error) {
-          console.error('[Application] Failed to initialize visitor tracking:', error);
+          logger.error('Failed to initialize visitor tracking:', error);
         }
       }
 
@@ -128,7 +131,7 @@ export class Application {
         this.setupStickyFooter();
       }, APP_CONSTANTS.TIMERS.INTRO_COMPLETE_WAIT);
     } catch (error) {
-      console.error('[Application] Initialization failed:', error);
+      logger.error('Initialization failed:', error);
       throw error;
     }
   }
@@ -169,7 +172,7 @@ export class Application {
                 )) as ServiceInstance;
                 await trackingService.init?.();
               } catch (error) {
-                console.error('[Application] Failed to initialize visitor tracking:', error);
+                logger.error('Failed to initialize visitor tracking:', error);
               }
             },
             onDecline: () => {
@@ -182,7 +185,7 @@ export class Application {
         this.log('Existing consent found, will initialize tracking after services');
       }
     } catch (error) {
-      console.error('[Application] Failed to initialize consent banner:', error);
+      logger.error('Failed to initialize consent banner:', error);
     }
   }
 
@@ -263,7 +266,7 @@ export class Application {
           this.registerHomePageRoutes(service as { addRoute: (route: { path: string; section: string; title: string }) => void });
         }
       } catch (error) {
-        console.error(`[Application] Failed to initialize ${serviceName}:`, error);
+        logger.error(`Failed to initialize ${serviceName}:`, error);
       }
     }
   }
@@ -333,7 +336,7 @@ export class Application {
         this.modules.set(moduleName, moduleInstance);
         this.log(`${moduleName} initialized`);
       } catch (error) {
-        console.error(`[Application] Failed to initialize ${moduleName}:`, error);
+        logger.error(`Failed to initialize ${moduleName}:`, error);
       }
     }
   }
@@ -494,7 +497,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   } catch (error) {
-    console.error('[Application] Startup failed:', error);
+    logger.error('Startup failed:', error);
   }
 });
 

@@ -8,9 +8,14 @@ import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { User, CreditCard, Bell } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { TabList, TabPanel } from '@react/factories';
 import { ProfileForm } from './ProfileForm';
 import { BillingForm } from './BillingForm';
 import { NotificationsForm } from './NotificationsForm';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalSettings');
 
 // Types
 export interface ClientProfile {
@@ -48,11 +53,18 @@ export interface PortalSettingsProps {
 type SettingsTab = 'profile' | 'billing' | 'notifications';
 
 // Tab configuration
-const TABS: Array<{ id: SettingsTab; label: string; icon: React.ElementType }> = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
-  { id: 'notifications', label: 'Notifications', icon: Bell }
+const TABS: Array<{ id: SettingsTab; label: string }> = [
+  { id: 'profile', label: 'Profile' },
+  { id: 'billing', label: 'Billing' },
+  { id: 'notifications', label: 'Notifications' }
 ];
+
+// Tab icons mapping
+const TAB_ICONS: Record<SettingsTab, React.ElementType> = {
+  profile: User,
+  billing: CreditCard,
+  notifications: Bell
+};
 
 /**
  * PortalSettings Component
@@ -103,7 +115,7 @@ export function PortalSettings({
     setError(null);
 
     try {
-      const response = await fetch('/api/clients/me', {
+      const response = await fetch(API_ENDPOINTS.CLIENTS_ME, {
         headers: buildHeaders(),
         credentials: 'include'
       });
@@ -128,7 +140,7 @@ export function PortalSettings({
         }));
       }
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      logger.error('Error fetching profile:', err);
       setError('Failed to load profile. Please try again.');
     } finally {
       setIsLoading(false);
@@ -144,7 +156,7 @@ export function PortalSettings({
   // Update profile
   const handleProfileUpdate = useCallback(async (updates: Partial<ClientProfile>) => {
     try {
-      const response = await fetch('/api/clients/me', {
+      const response = await fetch(API_ENDPOINTS.CLIENTS_ME, {
         method: 'PUT',
         headers: buildHeaders(),
         credentials: 'include',
@@ -159,7 +171,7 @@ export function PortalSettings({
       showNotificationRef.current?.('Profile updated', 'success');
       return true;
     } catch (err) {
-      console.error('Error updating profile:', err);
+      logger.error('Error updating profile:', err);
       showNotificationRef.current?.('Failed to update profile', 'error');
       return false;
     }
@@ -168,7 +180,7 @@ export function PortalSettings({
   // Update billing
   const handleBillingUpdate = useCallback(async (updates: BillingAddress) => {
     try {
-      const response = await fetch('/api/clients/me/billing', {
+      const response = await fetch(API_ENDPOINTS.CLIENTS_ME_BILLING, {
         method: 'PUT',
         headers: buildHeaders(),
         credentials: 'include',
@@ -183,7 +195,7 @@ export function PortalSettings({
       showNotificationRef.current?.('Billing address updated', 'success');
       return true;
     } catch (err) {
-      console.error('Error updating billing:', err);
+      logger.error('Error updating billing:', err);
       showNotificationRef.current?.('Failed to update billing address', 'error');
       return false;
     }
@@ -192,7 +204,7 @@ export function PortalSettings({
   // Update notifications
   const handleNotificationsUpdate = useCallback(async (updates: NotificationPreferences) => {
     try {
-      const response = await fetch('/api/clients/me', {
+      const response = await fetch(API_ENDPOINTS.CLIENTS_ME, {
         method: 'PUT',
         headers: buildHeaders(),
         credentials: 'include',
@@ -207,7 +219,7 @@ export function PortalSettings({
       showNotificationRef.current?.('Notification preferences updated', 'success');
       return true;
     } catch (err) {
-      console.error('Error updating notifications:', err);
+      logger.error('Error updating notifications:', err);
       showNotificationRef.current?.('Failed to update notification preferences', 'error');
       return false;
     }
@@ -238,47 +250,37 @@ export function PortalSettings({
   return (
     <div ref={containerRef} className="settings-section">
       {/* Tabs */}
-      <div className="portal-tabs">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={isActive ? 'active' : ''}
-            >
-              <Icon />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <TabList
+        tabs={TABS}
+        tabIcons={TAB_ICONS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Settings tabs"
+      />
 
       {/* Tab Content */}
-      <div className="portal-tab-panel active">
-        {activeTab === 'profile' && profile && (
+      <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
+        {profile && (
           <ProfileForm
             profile={profile}
             onUpdate={handleProfileUpdate}
           />
         )}
+      </TabPanel>
 
-        {activeTab === 'billing' && (
-          <BillingForm
-            billing={billing}
-            onUpdate={handleBillingUpdate}
-          />
-        )}
+      <TabPanel tabId="billing" isActive={activeTab === 'billing'}>
+        <BillingForm
+          billing={billing}
+          onUpdate={handleBillingUpdate}
+        />
+      </TabPanel>
 
-        {activeTab === 'notifications' && (
-          <NotificationsForm
-            preferences={notifications}
-            onUpdate={handleNotificationsUpdate}
-          />
-        )}
-      </div>
+      <TabPanel tabId="notifications" isActive={activeTab === 'notifications'}>
+        <NotificationsForm
+          preferences={notifications}
+          onUpdate={handleNotificationsUpdate}
+        />
+      </TabPanel>
     </div>
   );
 }

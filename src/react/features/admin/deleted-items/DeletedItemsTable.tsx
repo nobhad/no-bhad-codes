@@ -29,6 +29,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -37,6 +38,10 @@ import { useSelection } from '@react/hooks/useSelection';
 import { formatDate } from '@react/utils/formatDate';
 import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filterConfigs';
 import type { SortConfig } from '@react/features/admin/types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('DeletedItemsTable');
 
 interface DeletedItem {
   id: string;
@@ -194,7 +199,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/deleted-items', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -224,7 +229,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
 
   const handleRestore = useCallback(async (itemId: string) => {
     try {
-      const response = await fetch(`/api/admin/deleted-items/${itemId}/restore`, {
+      const response = await fetch(buildEndpoint.adminDeletedItemRestore(itemId), {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include'
@@ -233,7 +238,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       setItems((prev) => prev.filter((item) => item.id !== itemId));
       showNotification?.('Item restored', 'success');
     } catch (err) {
-      console.error('Failed to restore item:', err);
+      logger.error('Failed to restore item:', err);
       showNotification?.('Failed to restore item', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -247,7 +252,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       return;
     }
     try {
-      const response = await fetch(`/api/admin/deleted-items/${itemId}`, {
+      const response = await fetch(buildEndpoint.adminDeletedItem(itemId), {
         method: 'DELETE',
         headers: getHeaders(),
         credentials: 'include'
@@ -256,7 +261,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       setItems((prev) => prev.filter((item) => item.id !== itemId));
       showNotification?.('Item permanently deleted', 'success');
     } catch (err) {
-      console.error('Failed to delete item:', err);
+      logger.error('Failed to delete item:', err);
       showNotification?.('Failed to delete item', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -270,7 +275,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       return;
     }
     try {
-      const response = await fetch('/api/admin/deleted-items/empty', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS_EMPTY, {
         method: 'DELETE',
         headers: getHeaders(),
         credentials: 'include'
@@ -279,7 +284,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       setItems([]);
       showNotification?.('Trash emptied', 'success');
     } catch (err) {
-      console.error('Failed to empty trash:', err);
+      logger.error('Failed to empty trash:', err);
       showNotification?.('Failed to empty trash', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -297,7 +302,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
     setBulkLoading(true);
     try {
       const ids = Array.from(selection.selectedIds);
-      const response = await fetch('/api/admin/deleted-items/bulk-restore', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_RESTORE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -308,7 +313,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       selection.clearSelection();
       showNotification?.(`Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to bulk restore:', err);
+      logger.error('Failed to bulk restore:', err);
       showNotification?.('Failed to restore items', 'error');
     } finally {
       setBulkLoading(false);
@@ -330,7 +335,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
     setBulkLoading(true);
     try {
       const ids = Array.from(selection.selectedIds);
-      const response = await fetch('/api/admin/deleted-items/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS_BULK_DELETE, {
         method: 'DELETE',
         headers: getHeaders(),
         credentials: 'include',
@@ -341,7 +346,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to bulk delete:', err);
+      logger.error('Failed to bulk delete:', err);
       showNotification?.('Failed to delete items', 'error');
     } finally {
       setBulkLoading(false);
@@ -419,16 +424,6 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
           )}
         </>
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadDeletedItems}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       bulkActions={
         selection.selectedCount > 0 ? (
           <BulkActionsToolbar
@@ -477,8 +472,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
         ) : undefined
       }
     >
-      {!error && (
-        <AdminTable>
+      <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
               <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
@@ -525,8 +519,10 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={loadDeletedItems} />
+            ) : isLoading ? (
               <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedItems.length === 0 ? (
               <AdminTableEmpty
@@ -592,7 +588,6 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
             )}
           </AdminTableBody>
         </AdminTable>
-      )}
     </TableLayout>
   );
 }

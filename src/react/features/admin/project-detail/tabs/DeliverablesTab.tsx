@@ -92,14 +92,14 @@ export function DeliverablesTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div>
-            <span className="tw-text-muted tasks-text-base">Overall Progress: </span>
-            <span className="tw-text-primary tasks-text-semibold">
+            <span className="tw-text-muted ">Overall Progress: </span>
+            <span className="tw-text-primary tw-font-semibold">
               {progress}%
             </span>
           </div>
           <div>
-            <span className="tw-text-muted tasks-text-base">Deliverables: </span>
-            <span className="tw-text-primary tasks-text-semibold">
+            <span className="tw-text-muted ">Deliverables: </span>
+            <span className="tw-text-primary tw-font-semibold">
               {completedCount}/{totalCount}
             </span>
           </div>
@@ -116,10 +116,10 @@ export function DeliverablesTab({
 
       {/* Deliverables List */}
       {totalCount === 0 ? (
-        <div className="tw-empty-state">
-          <Inbox className="tw-h-8 tw-w-8 tw-mb-2" />
+        <div className="empty-state">
+          <Inbox className="icon-xl tw-mb-2" />
           <span>No deliverables defined yet</span>
-          <span className="tasks-text-xs">Add deliverables to milestones in the Tasks tab</span>
+          <span className="tw-text-xs">Add deliverables to milestones in the Tasks tab</span>
         </div>
       ) : (
         <div className="tw-flex tw-flex-col tw-gap-4">
@@ -145,9 +145,9 @@ export function DeliverablesTab({
                         )}
                       >
                         {milestone.is_completed ? (
-                          <Check className="tw-h-4 tw-w-4 tw-text-black" />
+                          <Check className="icon-md tw-text-black" />
                         ) : (
-                          <Package className="tw-h-3 tw-w-3 tw-text-muted" />
+                          <Package className="icon-xs" />
                         )}
                       </div>
 
@@ -157,7 +157,7 @@ export function DeliverablesTab({
                             milestone.is_completed
                               ? 'tw-text-muted'
                               : 'tw-text-primary',
-                            'tasks-text-medium'
+                            ''
                           )}
                         >
                           {milestone.title}
@@ -172,8 +172,8 @@ export function DeliverablesTab({
 
                     {/* Due Date */}
                     {milestone.due_date && (
-                      <span className="tw-text-muted tw-flex tw-items-center tw-gap-1 tasks-text-xs">
-                        <Calendar className="tw-h-3 tw-w-3" />
+                      <span className="tw-text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
+                        <Calendar className="icon-xs" />
                         {formatDate(milestone.due_date)}
                       </span>
                     )}
@@ -196,9 +196,9 @@ export function DeliverablesTab({
                             )}
                           >
                             {item.isCompleted ? (
-                              <Check className="tw-h-3 tw-w-3 tw-text-black" />
+                              <Check className="icon-xs tw-text-black" />
                             ) : (
-                              <Clock className="tw-h-3 tw-w-3 tw-text-muted" />
+                              <Clock className="icon-xs" />
                             )}
                           </div>
 
@@ -207,7 +207,7 @@ export function DeliverablesTab({
                               item.isCompleted
                                 ? 'tw-text-muted tw-line-through'
                                 : 'tw-text-primary',
-                              'tasks-text-base'
+                              ''
                             )}
                           >
                             {item.text}
@@ -223,16 +223,16 @@ export function DeliverablesTab({
       )}
 
       {/* Legend */}
-      <div className="tw-flex tw-items-center tw-gap-6 tw-text-muted tasks-text-xs">
+      <div className="tw-flex tw-items-center tw-gap-6 tw-text-muted tw-text-xs">
         <div className="tw-flex tw-items-center tw-gap-2">
           <div className="tw-w-4 tw-h-4 tw-bg-white tw-flex tw-items-center tw-justify-center deliv-icon-box">
-            <Check className="tw-h-2.5 tw-w-2.5 tw-text-black" />
+            <Check className="icon-xs tw-text-black" />
           </div>
           <span>Completed</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-2">
           <div className="tw-w-4 tw-h-4 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center deliv-icon-box">
-            <Clock className="tw-h-2.5 tw-w-2.5 tw-text-muted" />
+            <Clock className="icon-xs" />
           </div>
           <span>In Progress</span>
         </div>

@@ -45,18 +45,18 @@ const variantConfig: Record<DialogVariant, {
 }> = {
   danger: {
     icon: <Trash2 className="tw-h-5 tw-w-5" />,
-    iconClass: 'tw-p-2 tw-border tw-border-white',
-    buttonClass: 'tw-btn-danger'
+    iconClass: 'tw-p-2 tw-border tw-border-primary',
+    buttonClass: 'btn-danger'
   },
   warning: {
     icon: <AlertTriangle className="tw-h-5 tw-w-5" />,
-    iconClass: 'tw-p-2 tw-border tw-border-white',
-    buttonClass: 'tw-btn-primary'
+    iconClass: 'tw-p-2 tw-border tw-border-primary',
+    buttonClass: 'btn-primary'
   },
   info: {
     icon: <Info className="tw-h-5 tw-w-5" />,
-    iconClass: 'tw-p-2 tw-border tw-border-white',
-    buttonClass: 'tw-btn-primary'
+    iconClass: 'tw-p-2 tw-border tw-border-primary',
+    buttonClass: 'btn-primary'
   }
 };
 
@@ -106,11 +106,11 @@ export function ConfirmDialog({
             </div>
           </div>
         </AlertDialogHeader>
-        <AlertDialogFooter className="tw-flex tw-justify-end tw-gap-2 tw-pt-4 tw-border-t tw-border-white/20">
+        <AlertDialogFooter className="tw-flex tw-justify-end tw-gap-2 tw-pt-4 tw-border-t tw-border-primary/20">
           <AlertDialogCancel
             onClick={handleCancel}
             disabled={loading}
-            className="tw-btn-secondary"
+            className="btn-secondary"
           >
             {cancelText}
           </AlertDialogCancel>

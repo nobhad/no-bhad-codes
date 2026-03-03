@@ -21,8 +21,44 @@ import { createLogger } from '../../../utils/logger';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { apiFetch } from '../../../utils/api-client';
 import { el } from '../../../utils/dom-helpers';
+import { getReactComponent } from '../../../react/registry';
 
 const logger = createLogger('DesignReview');
+
+// ============================================
+// REACT INTEGRATION
+// ============================================
+
+let _reactMounted = false;
+let _reactContainer: HTMLElement | null = null;
+
+function _shouldUseReactDesignReview(): boolean {
+  return true;
+}
+
+async function _mountReactDesignReview(
+  container: HTMLElement,
+  deliverableId: number
+): Promise<boolean> {
+  const component = getReactComponent('designReviewPanel');
+  if (!component) {
+    logger.warn('React design review panel not registered');
+    return false;
+  }
+
+  try {
+    component.mount(container, {
+      deliverableId,
+      getAuthToken: () => null
+    });
+    _reactMounted = true;
+    _reactContainer = container;
+    return true;
+  } catch (error) {
+    logger.error('Failed to mount React design review:', error);
+    return false;
+  }
+}
 
 interface Deliverable {
   id: number;

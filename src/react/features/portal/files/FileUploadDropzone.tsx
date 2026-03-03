@@ -253,9 +253,9 @@ export function FileUploadDropzone({
           <p className="tw-dropzone-text">{error.message}</p>
           <div className="tw-dropzone-actions">
             {error.files && error.files.length > 0 && (
-              <button className="tw-btn-secondary" onClick={handleRetry}>Try Again</button>
+              <button className="btn-secondary" onClick={handleRetry}>Try Again</button>
             )}
-            <button className="tw-btn-ghost" onClick={handleDismiss}>Dismiss</button>
+            <button className="btn-ghost" onClick={handleDismiss}>Dismiss</button>
           </div>
         </div>
       </div>
@@ -310,12 +310,12 @@ export function FileUploadDropzone({
       aria-disabled={disabled}
     >
       <div className="tw-dropzone-content">
-        <Upload className={cn('tw-h-6 tw-w-6', state === 'drag-active' ? 'tw-text-primary' : 'tw-text-muted')} />
+        <Upload className={cn('tw-h-6 tw-w-6', state === 'drag-active' && 'tw-text-primary')} />
         <p className="tw-dropzone-text tw-text-primary">
           Drag and drop files here or
         </p>
         <button
-          className="tw-btn-secondary"
+          className="btn-secondary"
           onClick={(e) => {
             e.stopPropagation();
             handleBrowseClick();

@@ -9,6 +9,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useDataFetch');
 
 // ============================================
 // TYPES
@@ -172,7 +175,7 @@ export function useDataFetch<T, P = void>(
       }
 
       const error = err instanceof Error ? err : new Error(String(err));
-      console.error('[useDataFetch] Fetch failed:', error);
+      logger.error('[useDataFetch] Fetch failed:', error);
 
       setState(prev => ({
         ...prev,
@@ -345,7 +348,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`${itemName} created successfully`, 'success');
       return result;
     } catch (err) {
-      console.error(`[useCrud] Create failed:`, err);
+      logger.error(`[useCrud] Create failed:`, err);
       showNotification?.(`Failed to create ${itemName}`, 'error');
       return null;
     }
@@ -364,7 +367,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`${itemName} updated successfully`, 'success');
       return result;
     } catch (err) {
-      console.error(`[useCrud] Update failed:`, err);
+      logger.error(`[useCrud] Update failed:`, err);
       showNotification?.(`Failed to update ${itemName}`, 'error');
       return null;
     }
@@ -381,11 +384,216 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`${itemName} deleted successfully`, 'success');
       return true;
     } catch (err) {
-      console.error(`[useCrud] Delete failed:`, err);
+      logger.error(`[useCrud] Delete failed:`, err);
       showNotification?.(`Failed to delete ${itemName}`, 'error');
       return false;
     }
   }, [endpoint, getHeaders, showNotification, itemName]);
 
   return { create, update, remove };
+}
+
+// ============================================
+// BULK OPERATIONS HOOK
+// ============================================
+
+/**
+ * Options for bulk operations hook.
+ */
+export interface UseBulkOperationsOptions {
+  /** Bulk delete endpoint (e.g., '/api/admin/clients/bulk-delete') */
+  bulkDeleteEndpoint?: string;
+  /** Bulk status update endpoint */
+  bulkStatusEndpoint?: string;
+  /** Single item endpoint for fallback (e.g., '/api/admin/clients') */
+  itemEndpoint: string;
+  /** Auth token getter */
+  getAuthToken?: () => string | null;
+  /** Show notification callback */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Item name for messages (e.g., 'client') */
+  itemName?: string;
+  /** Plural item name for messages (e.g., 'clients') */
+  itemNamePlural?: string;
+}
+
+/**
+ * Result of a bulk operation
+ */
+export interface BulkOperationResult {
+  success: number;
+  failed: number;
+}
+
+/**
+ * Hook for bulk operations on resources.
+ *
+ * @example
+ * ```typescript
+ * const { bulkDelete, bulkUpdateStatus } = useBulkOperations({
+ *   bulkDeleteEndpoint: API_ENDPOINTS.ADMIN.CLIENTS_BULK_DELETE,
+ *   bulkStatusEndpoint: API_ENDPOINTS.ADMIN.CLIENTS_BULK_STATUS,
+ *   itemEndpoint: API_ENDPOINTS.ADMIN.CLIENTS,
+ *   getAuthToken,
+ *   showNotification,
+ *   itemName: 'client',
+ *   itemNamePlural: 'clients'
+ * });
+ * ```
+ */
+export function useBulkOperations(options: UseBulkOperationsOptions) {
+  const {
+    bulkDeleteEndpoint,
+    bulkStatusEndpoint,
+    itemEndpoint,
+    getAuthToken,
+    showNotification,
+    itemName = 'item',
+    itemNamePlural = 'items'
+  } = options;
+
+  const getHeaders = useCallback((): HeadersInit => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    const token = getAuthToken?.();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [getAuthToken]);
+
+  /**
+   * Delete multiple items at once.
+   */
+  const bulkDelete = useCallback(async (ids: (number | string)[]): Promise<BulkOperationResult> => {
+    let success = 0;
+    let failed = 0;
+
+    try {
+      // Try bulk endpoint first
+      if (bulkDeleteEndpoint) {
+        const response = await fetch(bulkDeleteEndpoint, {
+          method: 'POST',
+          headers: getHeaders(),
+          credentials: 'include',
+          body: JSON.stringify({ ids })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          success = data.deleted ?? data.data?.deleted ?? ids.length;
+          showNotification?.(
+            `Deleted ${success} ${success === 1 ? itemName : itemNamePlural}`,
+            'success'
+          );
+          return { success, failed: 0 };
+        }
+      }
+
+      // Fallback to individual deletes
+      for (const id of ids) {
+        try {
+          const response = await fetch(`${itemEndpoint}/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders(),
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            success++;
+          } else {
+            failed++;
+          }
+        } catch {
+          failed++;
+        }
+      }
+
+      if (success > 0) {
+        showNotification?.(
+          `Deleted ${success} ${success === 1 ? itemName : itemNamePlural}${failed > 0 ? `, ${failed} failed` : ''}`,
+          failed > 0 ? 'warning' : 'success'
+        );
+      } else {
+        showNotification?.(`Failed to delete ${itemNamePlural}`, 'error');
+      }
+    } catch (err) {
+      logger.error('[useBulkOperations] Bulk delete failed:', err);
+      showNotification?.(`Failed to delete ${itemNamePlural}`, 'error');
+      failed = ids.length;
+    }
+
+    return { success, failed };
+  }, [bulkDeleteEndpoint, itemEndpoint, getHeaders, showNotification, itemName, itemNamePlural]);
+
+  /**
+   * Update status of multiple items at once.
+   */
+  const bulkUpdateStatus = useCallback(async (
+    ids: (number | string)[],
+    status: string
+  ): Promise<BulkOperationResult> => {
+    let success = 0;
+    let failed = 0;
+
+    try {
+      // Try bulk endpoint first
+      if (bulkStatusEndpoint) {
+        const response = await fetch(bulkStatusEndpoint, {
+          method: 'POST',
+          headers: getHeaders(),
+          credentials: 'include',
+          body: JSON.stringify({ ids, status })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          success = data.updated ?? data.data?.updated ?? ids.length;
+          showNotification?.(
+            `Updated ${success} ${success === 1 ? itemName : itemNamePlural}`,
+            'success'
+          );
+          return { success, failed: 0 };
+        }
+      }
+
+      // Fallback to individual updates
+      for (const id of ids) {
+        try {
+          const response = await fetch(`${itemEndpoint}/${id}`, {
+            method: 'PATCH',
+            headers: getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify({ status })
+          });
+
+          if (response.ok) {
+            success++;
+          } else {
+            failed++;
+          }
+        } catch {
+          failed++;
+        }
+      }
+
+      if (success > 0) {
+        showNotification?.(
+          `Updated ${success} ${success === 1 ? itemName : itemNamePlural}${failed > 0 ? `, ${failed} failed` : ''}`,
+          failed > 0 ? 'warning' : 'success'
+        );
+      } else {
+        showNotification?.(`Failed to update ${itemNamePlural}`, 'error');
+      }
+    } catch (err) {
+      logger.error('[useBulkOperations] Bulk status update failed:', err);
+      showNotification?.(`Failed to update ${itemNamePlural}`, 'error');
+      failed = ids.length;
+    }
+
+    return { success, failed };
+  }, [bulkStatusEndpoint, itemEndpoint, getHeaders, showNotification, itemName, itemNamePlural]);
+
+  return { bulkDelete, bulkUpdateStatus };
 }

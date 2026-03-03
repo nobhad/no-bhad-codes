@@ -10,6 +10,16 @@
 
 import { ICONS } from '../constants/icons';
 import { getPortalCheckboxHTML } from '../components/portal-checkbox';
+import { createLogger } from './logger';
+import { createEventManager, type EventManager } from './dom-helpers';
+
+const logger = createLogger('TableFilter');
+
+/**
+ * Cleanup function returned by createFilterUI
+ * Call this when the filter UI is destroyed or re-initialized
+ */
+export type FilterCleanup = () => void;
 
 // ===============================================
 // TYPES
@@ -72,7 +82,7 @@ export function loadFilterState(storageKey: string): FilterState {
       return { ...getDefaultFilterState(), ...parsed };
     }
   } catch (e) {
-    console.warn('[TableFilter] Failed to load filter state:', e);
+    logger.warn('Failed to load filter state:', e);
   }
   return getDefaultFilterState();
 }
@@ -81,7 +91,7 @@ export function saveFilterState(storageKey: string, state: FilterState): void {
   try {
     localStorage.setItem(storageKey, JSON.stringify(state));
   } catch (e) {
-    console.warn('[TableFilter] Failed to save filter state:', e);
+    logger.warn('Failed to save filter state:', e);
   }
 }
 
@@ -89,11 +99,22 @@ export function saveFilterState(storageKey: string, state: FilterState): void {
 // FILTER UI CREATION
 // ===============================================
 
+/**
+ * Result from createFilterUI containing the element and cleanup function
+ */
+export interface FilterUIResult {
+  element: HTMLElement;
+  cleanup: FilterCleanup;
+  /** Event manager for external access if needed */
+  events: EventManager;
+}
+
 export function createFilterUI(
   config: TableFilterConfig,
   state: FilterState,
   onStateChange: (newState: FilterState) => void
-): HTMLElement {
+): FilterUIResult {
+  const events = createEventManager();
   const container = document.createElement('div');
   container.className = 'table-filter-controls';
 
@@ -138,13 +159,14 @@ export function createFilterUI(
     }
   });
 
-  // Close on outside click
-  document.addEventListener('click', (e) => {
+  // Close on outside click (using event manager for cleanup)
+  const handleSearchOutsideClick = (e: Event) => {
     if (!searchWrapper.contains(e.target as Node)) {
       searchWrapper.classList.remove('open');
       setInputFocusable(false);
     }
-  });
+  };
+  events.on(document, 'click', handleSearchOutsideClick);
 
   // Clear search
   searchClear.addEventListener('click', (e) => {
@@ -249,19 +271,21 @@ export function createFilterUI(
     dropdownWrapper.classList.toggle('open');
   });
 
-  // Close on outside click
-  document.addEventListener('click', (e) => {
+  // Close on outside click (using event manager for cleanup)
+  const handleDropdownOutsideClick = (e: Event) => {
     if (!dropdownWrapper.contains(e.target as Node)) {
       dropdownWrapper.classList.remove('open');
     }
-  });
+  };
+  events.on(document, 'click', handleDropdownOutsideClick);
 
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  // Close on Escape (using event manager for cleanup)
+  const handleDropdownEscape = (e: Event) => {
+    if ((e as KeyboardEvent).key === 'Escape') {
       dropdownWrapper.classList.remove('open');
     }
-  });
+  };
+  events.on(document, 'keydown', handleDropdownEscape);
 
   // Status checkboxes - handle "All" option specially
   const allCheckbox = menu.querySelector('input[type="checkbox"][value="all"]') as HTMLInputElement;
@@ -346,7 +370,12 @@ export function createFilterUI(
 
   container.appendChild(dropdownWrapper);
 
-  return container;
+  // Return result with cleanup function
+  return {
+    element: container,
+    cleanup: () => events.cleanup(),
+    events
+  };
 }
 
 /**

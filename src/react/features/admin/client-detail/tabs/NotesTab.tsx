@@ -172,9 +172,9 @@ export function NotesTab({
         </h3>
         <button
           onClick={handleCancel}
-          className="tw-btn-icon"
+          className="btn-icon"
         >
-          <X className="tw-h-4 tw-w-4" />
+          <X className="icon-md" />
         </button>
       </div>
 
@@ -188,15 +188,15 @@ export function NotesTab({
       />
 
       <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-3">
-        <button className="tw-btn-ghost" onClick={handleCancel}>
+        <button className="btn-ghost" onClick={handleCancel}>
           Cancel
         </button>
         <button
-          className="tw-btn-primary"
+          className="btn-primary"
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          <Check className="tw-h-4 tw-w-4" />
+          <Check className="icon-md" />
           {isSubmitting ? 'Saving...' : (editingId ? 'Save' : 'Add Note')}
         </button>
       </div>
@@ -209,14 +209,14 @@ export function NotesTab({
       key={note.id}
       className={cn(
         'tw-card tw-group',
-        note.is_pinned && 'tw-border-white'
+        note.is_pinned && 'tw-border-primary'
       )}
     >
       {/* Note header */}
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-mb-2">
         <div className="tw-flex tw-items-center tw-gap-2">
           {note.is_pinned && (
-            <Pin className="tw-h-3 tw-w-3 tw-text-white tw-fill-current" />
+            <Pin className="icon-xs tw-text-primary tw-fill-current" />
           )}
           <span className="tw-text-muted tw-text-xs">
             {formatDate(note.created_at)}
@@ -228,26 +228,26 @@ export function NotesTab({
           <button
             onClick={() => handleTogglePin(note)}
             className={cn(
-              'tw-btn-icon',
-              note.is_pinned && 'tw-text-white'
+              'btn-icon',
+              note.is_pinned && 'tw-text-primary'
             )}
             title={note.is_pinned ? 'Unpin' : 'Pin'}
           >
-            <Pin className="tw-h-3.5 tw-w-3.5" />
+            <Pin className="icon-sm" />
           </button>
           <button
             onClick={() => handleStartEdit(note)}
-            className="tw-btn-icon"
+            className="btn-icon"
             title="Edit"
           >
-            <Pencil className="tw-h-3.5 tw-w-3.5" />
+            <Pencil className="icon-sm" />
           </button>
           <button
             onClick={() => handleDeleteClick(note)}
-            className="tw-btn-icon"
+            className="btn-icon"
             title="Delete"
           >
-            <Trash2 className="tw-h-3.5 tw-w-3.5" />
+            <Trash2 className="icon-sm" />
           </button>
         </div>
       </div>
@@ -276,8 +276,8 @@ export function NotesTab({
           Notes ({notes.length})
         </h2>
         {!isAdding && !editingId && (
-          <button className="tw-btn-secondary" onClick={handleStartAdd}>
-            <Plus className="tw-h-4 tw-w-4" />
+          <button className="btn-secondary" onClick={handleStartAdd}>
+            <Plus className="icon-md" />
             Add Note
           </button>
         )}
@@ -288,12 +288,10 @@ export function NotesTab({
 
       {/* Notes List */}
       {notes.length === 0 && !isAdding ? (
-        <div className="tw-empty-state">
-          <StickyNote className="tw-h-12 tw-w-12 tw-mb-3" />
-          <p>No notes yet</p>
-          <p className="tw-text-sm">
-            Add internal notes about this client
-          </p>
+        <div className="empty-state">
+          <StickyNote className="icon-xl" />
+          <span>No notes yet</span>
+          <span className="tw-text-sm">Add internal notes about this client</span>
         </div>
       ) : (
         <div className="tw-flex tw-flex-col tw-gap-4">

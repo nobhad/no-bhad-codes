@@ -5,14 +5,20 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
-import { Eye, Download, FileText, RefreshCw } from 'lucide-react';
+import { FileText, Inbox, RefreshCw, Eye, Download } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { usePortalInvoices } from '@react/hooks/usePortalInvoices';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { PORTAL_INVOICE_STATUS_CONFIG } from '../types';
 import type { PortalInvoice } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalInvoicesTable');
 
 interface PortalInvoicesTableProps {
   /** Auth token getter for API calls */
@@ -68,13 +74,13 @@ export function PortalInvoicesTable({
 
   // Handle preview invoice
   const handlePreview = (invoice: PortalInvoice) => {
-    window.open(`/api/invoices/${invoice.id}/pdf?preview=true`, '_blank');
+    window.open(`${buildEndpoint.invoicePdf(invoice.id)}?preview=true`, '_blank');
   };
 
   // Handle download invoice
   const handleDownload = async (invoice: PortalInvoice) => {
     try {
-      const response = await fetch(`/api/invoices/${invoice.id}/pdf`, {
+      const response = await fetch(buildEndpoint.invoicePdf(invoice.id), {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -93,7 +99,7 @@ export function PortalInvoicesTable({
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error downloading invoice:', err);
+      logger.error('Error downloading invoice:', err);
       showNotification?.('Failed to download invoice', 'error');
     }
   };
@@ -101,7 +107,7 @@ export function PortalInvoicesTable({
   // Handle download receipt
   const handleDownloadReceipt = async (invoice: PortalInvoice) => {
     try {
-      const receiptsResponse = await fetch(`/api/receipts/invoice/${invoice.id}`, {
+      const receiptsResponse = await fetch(buildEndpoint.receiptsByInvoice(invoice.id), {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -119,7 +125,7 @@ export function PortalInvoicesTable({
       }
 
       const latestReceipt = receipts[0];
-      const pdfResponse = await fetch(`/api/receipts/${latestReceipt.id}/pdf`, {
+      const pdfResponse = await fetch(buildEndpoint.receiptPdf(latestReceipt.id), {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -140,7 +146,7 @@ export function PortalInvoicesTable({
 
       showNotification?.('Receipt downloaded successfully', 'success');
     } catch (err) {
-      console.error('Error downloading receipt:', err);
+      logger.error('Error downloading receipt:', err);
       showNotification?.('Failed to download receipt', 'error');
     }
   };
@@ -148,7 +154,7 @@ export function PortalInvoicesTable({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading invoices...</span>
       </div>
@@ -158,9 +164,9 @@ export function PortalInvoicesTable({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={refetch}>
+        <button className="btn-secondary" onClick={refetch}>
           Retry
         </button>
       </div>
@@ -183,9 +189,10 @@ export function PortalInvoicesTable({
 
       {/* Invoices Table */}
       {invoices.length === 0 ? (
-        <div className="tw-empty-state">
-          No invoices yet. Your first invoice will appear here once your project begins.
-        </div>
+        <EmptyState
+          icon={<Inbox className="tw-h-6 tw-w-6" />}
+          message="No invoices yet. Your first invoice will appear here once your project begins."
+        />
       ) : (
         <table className="tw-table">
           <thead>
@@ -218,14 +225,14 @@ export function PortalInvoicesTable({
                   <td className="tw-table-cell tw-text-right">
                     <div className="tw-flex tw-justify-end tw-gap-1">
                       <button
-                        className="tw-btn-icon"
+                        className="btn-icon"
                         onClick={() => handlePreview(invoice)}
                         title="Preview"
                       >
                         <Eye className="tw-h-4 tw-w-4" />
                       </button>
                       <button
-                        className="tw-btn-icon"
+                        className="btn-icon"
                         onClick={() => handleDownload(invoice)}
                         title="Download Invoice"
                       >
@@ -233,7 +240,7 @@ export function PortalInvoicesTable({
                       </button>
                       {showReceipt && (
                         <button
-                          className="tw-btn-icon"
+                          className="btn-icon"
                           onClick={() => handleDownloadReceipt(invoice)}
                           title="Download Receipt"
                         >

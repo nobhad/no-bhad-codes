@@ -14,6 +14,13 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { getDatabase } from '../../database/init.js';
 import { errorResponse } from '../../utils/api-response.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const DELIVERABLE_COLUMNS = `
+  id, project_id, type, title, description, status, approval_status, round_number,
+  created_by_id, reviewed_by_id, review_deadline, approved_at, locked, tags,
+  archived_file_id, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 /**
@@ -162,7 +169,7 @@ router.patch(
       WHERE id = ?
     `, [dbStatus, reviewId]);
 
-    const updated = await db.get('SELECT * FROM deliverables WHERE id = ?', [reviewId]);
+    const updated = await db.get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [reviewId]);
 
     res.json({ success: true, review: updated });
   })

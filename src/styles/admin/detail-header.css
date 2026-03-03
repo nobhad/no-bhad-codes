@@ -113,7 +113,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark);
   color: var(--portal-text-light);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -148,7 +148,7 @@
   min-width: 200px;
   max-height: none;
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark);
   list-style: none;
   margin: 0;
   padding: var(--space-0-5) 0;
@@ -227,7 +227,7 @@
   height: 36px;
   min-width: auto;
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-medium);
+  border: var(--border-width) solid var(--portal-border-medium);
   border-radius: var(--radius-md);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
@@ -279,7 +279,7 @@
   margin: 0;
   list-style: none;
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-medium);
+  border: var(--border-width) solid var(--portal-border-medium);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-dropdown);
   z-index: 1000;

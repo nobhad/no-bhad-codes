@@ -69,25 +69,25 @@ export function NotesTab({
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <StickyNote className="tw-h-5 tw-w-5 tw-text-muted" />
-          <h3 className="tw-heading proj-text-base">
+          <StickyNote className="icon-lg" />
+          <h3 className="tw-heading ">
             Internal Notes
           </h3>
-          <span className="tw-text-muted proj-text-sm">
+          <span className="tw-text-muted tw-text-sm">
             (Only visible to admins)
           </span>
         </div>
 
         <div className="tw-flex tw-items-center tw-gap-2">
           {hasChanges && (
-            <span className="tw-text-muted proj-text-sm">Unsaved changes</span>
+            <span className="tw-text-muted tw-text-sm">Unsaved changes</span>
           )}
           <button
-            className="tw-btn-primary"
+            className="btn-primary"
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
           >
-            <Save className="tw-h-4 tw-w-4" />
+            <Save className="icon-md" />
             {isSaving ? 'Saving...' : 'Save'}
           </button>
         </div>

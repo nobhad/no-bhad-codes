@@ -14,6 +14,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { PortalInput } from '@react/components/portal/PortalInput';
+import { Checkbox } from '@react/components/ui/checkbox';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -190,14 +191,14 @@ export function ContactsTab({
   const renderForm = () => (
     <div className="tw-panel tw-mb-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-4">
-        <h3 className="tw-heading proj-text-base">
+        <h3 className="tw-heading ">
           {editingId ? 'Edit Contact' : 'Add Contact'}
         </h3>
         <button
           onClick={handleCancel}
-          className="tw-btn-icon"
+          className="btn-icon"
         >
-          <X className="tw-h-4 tw-w-4" />
+          <X className="icon-md" />
         </button>
       </div>
 
@@ -252,13 +253,11 @@ export function ContactsTab({
 
         <div className="tw-flex tw-items-end">
           <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={formData.is_primary}
-              onChange={(e) => handleFieldChange('is_primary', e.target.checked)}
-              className="tw-w-4 tw-h-4 contacts-checkbox"
+              onCheckedChange={(checked) => handleFieldChange('is_primary', checked === true)}
             />
-            <span className="tw-text-muted proj-text-base">
+            <span className="tw-text-muted">
               Primary Contact
             </span>
           </label>
@@ -275,11 +274,11 @@ export function ContactsTab({
       </div>
 
       <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-4">
-        <button className="tw-btn-ghost" onClick={handleCancel}>
+        <button className="btn-ghost" onClick={handleCancel}>
           Cancel
         </button>
         <button
-          className="tw-btn-primary"
+          className="btn-primary"
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
@@ -293,12 +292,12 @@ export function ContactsTab({
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading proj-text-lg">
+        <h2 className="tw-heading tw-text-lg">
           Contacts ({contacts.length})
         </h2>
         {!isAdding && !editingId && (
-          <button className="tw-btn-secondary" onClick={handleStartAdd}>
-            <Plus className="tw-h-4 tw-w-4" />
+          <button className="btn-secondary" onClick={handleStartAdd}>
+            <Plus className="icon-md" />
             Add Contact
           </button>
         )}
@@ -309,12 +308,10 @@ export function ContactsTab({
 
       {/* Contacts List */}
       {sortedContacts.length === 0 ? (
-        <div className="tw-empty-state">
-          <User className="tw-h-12 tw-w-12 tw-mb-3" />
-          <p>No contacts yet</p>
-          <p className="proj-text-base">
-            Add contacts to keep track of key people
-          </p>
+        <div className="empty-state">
+          <User className="icon-xl" />
+          <span>No contacts yet</span>
+          <span className="tw-text-sm">Add contacts to keep track of key people</span>
         </div>
       ) : (
         <div className="tw-grid tw-grid-cols-2 tw-gap-4">
@@ -323,26 +320,26 @@ export function ContactsTab({
               key={contact.id}
               className={cn(
                 'tw-card',
-                contact.is_primary && 'tw-border-white'
+                contact.is_primary && 'tw-border-primary'
               )}
             >
               {/* Contact Header */}
               <div className="tw-flex tw-items-start tw-justify-between tw-mb-3">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <div className="tw-w-10 tw-h-10 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center contacts-avatar">
-                    <User className="tw-h-5 tw-w-5 tw-text-muted" />
+                    <User className="icon-lg tw-text-muted" />
                   </div>
                   <div>
                     <div className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-heading proj-text-base">
+                      <span className="tw-heading ">
                         {contact.name}
                       </span>
                       {contact.is_primary && (
-                        <Star className="tw-h-3 tw-w-3 tw-text-white tw-fill-current" />
+                        <Star className="icon-xs tw-text-primary tw-fill-current" />
                       )}
                     </div>
                     {contact.title && (
-                      <span className="tw-text-muted proj-text-sm">
+                      <span className="tw-text-muted tw-text-sm">
                         {contact.title}
                       </span>
                     )}
@@ -351,25 +348,25 @@ export function ContactsTab({
 
                 <PortalDropdown>
                   <PortalDropdownTrigger asChild>
-                    <button className="tw-btn-icon">
-                      <Pencil className="tw-h-4 tw-w-4" />
+                    <button className="btn-icon">
+                      <Pencil className="icon-md" />
                     </button>
                   </PortalDropdownTrigger>
                   <PortalDropdownContent align="end">
                     <PortalDropdownItem onClick={() => handleStartEdit(contact)}>
-                      <Pencil className="tw-h-4 tw-w-4 tw-mr-2" />
+                      <Pencil className="icon-md tw-mr-2" />
                       Edit
                     </PortalDropdownItem>
                     {!contact.is_primary && (
                       <PortalDropdownItem onClick={() => handleSetPrimary(contact)}>
-                        <Star className="tw-h-4 tw-w-4 tw-mr-2" />
+                        <Star className="icon-md tw-mr-2" />
                         Set as Primary
                       </PortalDropdownItem>
                     )}
                     <PortalDropdownItem
                       onClick={() => handleDeleteClick(contact)}
                     >
-                      <Trash2 className="tw-h-4 tw-w-4 tw-mr-2" />
+                      <Trash2 className="icon-md tw-mr-2" />
                       Delete
                     </PortalDropdownItem>
                   </PortalDropdownContent>
@@ -379,10 +376,10 @@ export function ContactsTab({
               {/* Contact Details */}
               <div className="tw-flex tw-flex-col tw-gap-2">
                 <div className="tw-flex tw-items-center tw-gap-2">
-                  <Mail className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
+                  <Mail className="icon-sm tw-text-muted" />
                   <a
                     href={`mailto:${contact.email}`}
-                    className="tw-text-primary proj-text-sm"
+                    className="tw-text-primary tw-text-sm"
                   >
                     {contact.email}
                   </a>
@@ -390,10 +387,10 @@ export function ContactsTab({
 
                 {contact.phone && (
                   <div className="tw-flex tw-items-center tw-gap-2">
-                    <Phone className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
+                    <Phone className="icon-sm tw-text-muted" />
                     <a
                       href={`tel:${contact.phone}`}
-                      className="tw-text-muted proj-text-sm"
+                      className="tw-text-muted tw-text-sm"
                     >
                       {contact.phone}
                     </a>
@@ -402,8 +399,8 @@ export function ContactsTab({
 
                 {contact.role && (
                   <div className="tw-flex tw-items-center tw-gap-2">
-                    <Briefcase className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
-                    <span className="tw-text-muted proj-text-sm">
+                    <Briefcase className="icon-sm tw-text-muted" />
+                    <span className="tw-text-muted tw-text-sm">
                       {CONTACT_ROLE_LABELS[contact.role] || contact.role}
                     </span>
                   </div>

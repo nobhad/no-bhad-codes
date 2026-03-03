@@ -10,6 +10,13 @@
 import { ICONS } from '../constants/icons';
 import { cx } from '../utils/dom-utils';
 
+/**
+ * Extended HTMLElement with cleanup function
+ */
+interface CleanableElement extends HTMLElement {
+  _cleanup?: () => void;
+}
+
 // ===============================================
 // TYPES
 // ===============================================
@@ -228,13 +235,19 @@ export function createDropdown(config: DropdownConfig): HTMLElement {
     }
   });
 
-  // Close on outside click
+  // Close on outside click - store cleanup for later removal
   if (closeOnOutsideClick) {
-    document.addEventListener('click', (e) => {
+    const handleOutsideClick = (e: MouseEvent) => {
       if (!wrapper.contains(e.target as Node)) {
         closeDropdown(wrapper);
       }
-    });
+    };
+    document.addEventListener('click', handleOutsideClick);
+
+    // Store cleanup function on wrapper
+    (wrapper as CleanableElement)._cleanup = () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
   }
 
   wrapper.appendChild(triggerBtn);
@@ -429,13 +442,19 @@ export function createSplitButton(config: SplitButtonConfig): HTMLElement {
     dropdownBtn.setAttribute('aria-expanded', String(wrapper.classList.contains('open')));
   });
 
-  // Close on outside click
-  document.addEventListener('click', (e) => {
+  // Close on outside click - store cleanup for later removal
+  const handleOutsideClick = (e: MouseEvent) => {
     if (!wrapper.contains(e.target as Node)) {
       wrapper.classList.remove('open');
       dropdownBtn.setAttribute('aria-expanded', 'false');
     }
-  });
+  };
+  document.addEventListener('click', handleOutsideClick);
+
+  // Store cleanup function on wrapper
+  (wrapper as CleanableElement)._cleanup = () => {
+    document.removeEventListener('click', handleOutsideClick);
+  };
 
   wrapper.appendChild(primaryBtn);
   wrapper.appendChild(dropdownBtn);
@@ -629,27 +648,61 @@ export function createPopover(config: PopoverConfig): {
     }
   };
 
+  // Define handlers as named functions for cleanup
+  const handleOutsideClick = (e: MouseEvent) => {
+    if (popover && !popover.contains(e.target as Node) && !target.contains(e.target as Node)) {
+      close();
+    }
+  };
+
+  const handleEscapeKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isOpen) {
+      close();
+    }
+  };
+
   const destroy = () => {
     close();
     target.removeEventListener('click', toggle);
+    document.removeEventListener('click', handleOutsideClick);
+    document.removeEventListener('keydown', handleEscapeKey);
   };
 
   // Click to toggle
   target.addEventListener('click', toggle);
 
   // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (popover && !popover.contains(e.target as Node) && !target.contains(e.target as Node)) {
-      close();
-    }
-  });
+  document.addEventListener('click', handleOutsideClick);
 
   // Close on escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen) {
-      close();
-    }
-  });
+  document.addEventListener('keydown', handleEscapeKey);
 
   return { open, close, toggle, destroy };
+}
+
+// ===============================================
+// CLEANUP UTILITIES
+// ===============================================
+
+/**
+ * Cleanup a dropdown element's event listeners
+ * Call this before removing a dropdown from the DOM
+ */
+export function cleanupDropdown(element: HTMLElement): void {
+  const cleanable = element as CleanableElement;
+  if (cleanable._cleanup) {
+    cleanable._cleanup();
+    cleanable._cleanup = undefined;
+  }
+}
+
+/**
+ * Cleanup all dropdowns within a container
+ * Useful when unmounting a section of the DOM
+ */
+export function cleanupAllDropdowns(container: HTMLElement): void {
+  const dropdowns = container.querySelectorAll('.dropdown, .split-button');
+  dropdowns.forEach((dropdown) => {
+    cleanupDropdown(dropdown as HTMLElement);
+  });
 }

@@ -11,6 +11,15 @@
 import { ICONS } from '../constants/icons';
 import { getPortalCheckboxHTML } from '../components/portal-checkbox';
 import { getCsrfToken, CSRF_HEADER_NAME } from './api-client';
+import { createLogger } from './logger';
+import { createEventManager, type EventManager } from './dom-helpers';
+
+const logger = createLogger('BulkActions');
+
+/**
+ * Cleanup function for bulk selection handlers
+ */
+export type BulkSelectionCleanup = () => void;
 
 // ===============================================
 // TYPES
@@ -59,6 +68,22 @@ export function getSelectionState(tableId: string): BulkSelectionState {
     });
   }
   return selectionStates.get(tableId)!;
+}
+
+/**
+ * Clean up bulk action toolbar listeners
+ * Call this before removing/re-rendering the toolbar
+ */
+export function cleanupBulkToolbar(tableId: string): void {
+  const toolbar = document.getElementById(`${tableId}-bulk-toolbar`);
+  if (!toolbar) return;
+
+  // Clean up dropdown listeners
+  const dropdowns = toolbar.querySelectorAll('.bulk-dropdown');
+  dropdowns.forEach((dropdown) => {
+    const cleanup = (dropdown as HTMLElement & { _cleanup?: () => void })._cleanup;
+    if (cleanup) cleanup();
+  });
 }
 
 /**
@@ -169,7 +194,7 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
         resetSelection(config.tableId);
         config.onSelectionChange?.([]);
       } catch (error) {
-        console.error(`[BulkActions] Action ${action.id} failed:`, error);
+        logger.error(`[BulkActions] Action ${action.id} failed:`, error);
       }
     });
   });
@@ -191,7 +216,7 @@ export function createBulkActionToolbar(config: BulkActionConfig): HTMLElement {
             resetSelection(config.tableId);
             config.onSelectionChange?.([]);
           } catch (error) {
-            console.error(`[BulkActions] Action ${action.id} failed:`, error);
+            logger.error(`[BulkActions] Action ${action.id} failed:`, error);
           }
         }
       });
@@ -266,13 +291,18 @@ function createBulkActionDropdown(config: {
     wrapper.classList.toggle('open');
   });
 
-  // Close on outside click
+  // Close on outside click - store cleanup for later removal
   const closeHandler = (e: MouseEvent) => {
     if (!wrapper.contains(e.target as Node)) {
       wrapper.classList.remove('open');
     }
   };
   document.addEventListener('click', closeHandler);
+
+  // Store cleanup function on wrapper for later removal
+  (wrapper as HTMLElement & { _cleanup?: () => void })._cleanup = () => {
+    document.removeEventListener('click', closeHandler);
+  };
 
   return wrapper;
 }
@@ -316,16 +346,29 @@ export function createRowCheckbox(tableId: string, rowId: number): string {
 // ===============================================
 
 /**
- * Setup bulk selection event handlers for a table
+ * Result from setupBulkSelectionHandlers containing cleanup function
  */
-export function setupBulkSelectionHandlers(config: BulkActionConfig, allRowIds: number[]): void {
+export interface BulkSelectionResult {
+  cleanup: BulkSelectionCleanup;
+  events: EventManager;
+}
+
+/**
+ * Setup bulk selection event handlers for a table
+ * Returns cleanup function that must be called when table is destroyed/re-rendered
+ */
+export function setupBulkSelectionHandlers(
+  config: BulkActionConfig,
+  allRowIds: number[]
+): BulkSelectionResult {
   const { tableId, onSelectionChange } = config;
   const state = getSelectionState(tableId);
+  const events = createEventManager();
 
   // Header "select all" checkbox
   const headerCheckbox = document.querySelector(`#${tableId}-select-all`) as HTMLInputElement;
   if (headerCheckbox) {
-    headerCheckbox.addEventListener('change', () => {
+    const handleSelectAll = () => {
       const isChecked = headerCheckbox.checked;
 
       if (isChecked) {
@@ -348,7 +391,8 @@ export function setupBulkSelectionHandlers(config: BulkActionConfig, allRowIds: 
       updateToolbarVisibility(tableId, state.selectedIds.size);
 
       onSelectionChange?.(Array.from(state.selectedIds));
-    });
+    };
+    events.on(headerCheckbox, 'change', handleSelectAll);
   }
 
   // Individual row checkboxes with Shift+Click support
@@ -359,13 +403,14 @@ export function setupBulkSelectionHandlers(config: BulkActionConfig, allRowIds: 
 
   rowCheckboxes.forEach((checkbox, index) => {
     // Use click event to capture shift key state
-    checkbox.addEventListener('click', (e: MouseEvent) => {
+    const handleRowClick = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
       const rowId = parseInt(checkbox.dataset.rowId || '0');
       if (!rowId) return;
 
       // Shift+Click: select range from last clicked to current
-      if (e.shiftKey && state.lastClickedIndex !== -1 && state.lastClickedIndex !== index) {
-        e.preventDefault(); // Prevent default toggle
+      if (mouseEvent.shiftKey && state.lastClickedIndex !== -1 && state.lastClickedIndex !== index) {
+        mouseEvent.preventDefault(); // Prevent default toggle
 
         const start = Math.min(state.lastClickedIndex, index);
         const end = Math.max(state.lastClickedIndex, index);
@@ -389,10 +434,11 @@ export function setupBulkSelectionHandlers(config: BulkActionConfig, allRowIds: 
 
       // Normal click - update last clicked index
       state.lastClickedIndex = index;
-    });
+    };
+    events.on(checkbox, 'click', handleRowClick);
 
     // Handle actual selection state change
-    checkbox.addEventListener('change', () => {
+    const handleRowChange = () => {
       const rowId = parseInt(checkbox.dataset.rowId || '0');
       if (!rowId) return;
 
@@ -410,8 +456,15 @@ export function setupBulkSelectionHandlers(config: BulkActionConfig, allRowIds: 
       updateToolbarVisibility(tableId, state.selectedIds.size);
 
       onSelectionChange?.(Array.from(state.selectedIds));
-    });
+    };
+    events.on(checkbox, 'change', handleRowChange);
   });
+
+  // Return cleanup function
+  return {
+    cleanup: () => events.cleanup(),
+    events
+  };
 }
 
 /**

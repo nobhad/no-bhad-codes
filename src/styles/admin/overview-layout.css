@@ -26,7 +26,7 @@
 /* Overview greeting - matches subtabs spacing exactly */
 [data-page="admin"] .overview-greeting {
   font-family: "Inconsolata", "JetBrains Mono", monospace;
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   color: var(--portal-text-light);
   letter-spacing: 0.01em;
   line-height: var(--portal-header-height-line, 32px);
@@ -39,7 +39,7 @@
   font-weight: inherit;
   color: var(--color-primary);
   font-family: var(--font-mono, monospace);
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   letter-spacing: -0.5px;
   margin-left: 8px;
 }
@@ -69,7 +69,7 @@
 /* Smaller, subtle greeting that complements the page title */
 .overview-title {
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--portal-text-secondary);
   letter-spacing: 0;
@@ -78,7 +78,7 @@
 
 .overview-date {
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   font-weight: 400;
   color: var(--portal-text-muted);
 }
@@ -93,42 +93,67 @@
   gap: var(--portal-section-gap);
 }
 
-/* .overview-stat-card - base styles in portal-cards.css */
+/* =====================================================
+   STAT CARDS - Visual Hierarchy
+   Primary KPIs: Large values, prominent display
+   ===================================================== */
+
 .overview-stat-card {
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  padding: var(--space-3);
+  transition: border-color var(--transition-faster);
+}
+
+.overview-stat-card:hover {
+  border-color: var(--portal-border-color);
 }
 
 .stat-card-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--icon-gap-sm);
-  margin-bottom: var(--space-1);
+  gap: var(--icon-gap);
+  margin-bottom: var(--space-2);
 }
 
-.portal .overview-stat-card svg {
-  width: 16px;
-  height: 16px;
+/* Stat card SVG sizing for overview - color from portal-stat-cards.css */
+.portal .overview-stat-card .stat-card-top svg {
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+}
+
+/* All overview labels - consistent larger size */
+.overview-linear .field-label {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--portal-text-secondary);
 }
 
-/* .stat-card-label removed - using .field-label from unified rule in portal-cards.css */
-/* .stat-card-icon sizing in shared/portal-cards.css */
-/* .stat-card-value styling from unified rule in portal-cards.css */
-
+/* Value - LARGE and prominent */
 .stat-card-value {
-  margin-bottom: var(--space-0-5);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-3xl, 30px);
+  font-weight: 300;
+  color: var(--portal-text-light);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
-/* .stat-value-alert color from unified rule in portal-cards.css */
+/* Alert values - red text only, no border changes */
+.stat-value-alert {
+  color: var(--status-cancelled);
+}
 
 .stat-card-delta {
-  font-size: var(--font-size-xs); /* 11px - matches micro-typography scale */
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   display: block;
+  margin-top: var(--space-1);
 }
 
 .stat-delta-alert {
@@ -157,7 +182,7 @@
 
 .overview-panel {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   overflow: hidden;
 }
 
@@ -165,21 +190,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-1-5) var(--portal-panel-padding-x, 14px);
-  border-bottom: none;
+  padding: var(--space-1-5) var(--space-3);
 }
 
-/* Typography from unified h3 rule in portal-cards.css - layout only here */
+/* Section titles - layout only, typography from .field-label */
 .overview-panel-title {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-sm); /* 6px - from design-system/tokens/spacing.css */
+  gap: var(--icon-gap);
   margin: 0;
 }
 
-/* Remove margin from panel-icon when inside title (gap handles spacing) */
+/* Panel icons - inherit color from parent */
 .overview-panel-title > .panel-icon {
-  margin-right: 0;
+  width: 16px;
+  height: 16px;
+  color: inherit;
 }
 
 /* Panel action button - flex for icon alignment */
@@ -212,7 +238,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs, 10px);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   padding: 0 var(--space-0-5);
   line-height: 14px;
   min-width: 18px;
@@ -228,7 +254,7 @@
 }
 
 .overview-panel-body {
-  padding: var(--space-1-5) var(--portal-panel-padding-x, 14px);
+  padding: var(--space-2) var(--space-3);
 }
 
 /* No padding for activity feeds - they have their own item padding */
@@ -237,6 +263,7 @@
 }
 
 .overview-panel-body--compact {
+  padding: 0;
   max-height: 280px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -325,7 +352,7 @@
 .progress-fill {
   height: 100%;
   background: var(--color-primary);
-  transition: width 0.5s ease;
+  transition: width var(--transition-slow) ease;
 }
 
 .progress-pct {
@@ -382,13 +409,13 @@
   grid-template-columns: repeat(3, 1fr);
   background: transparent;
   gap: var(--space-px);
-  border-top: 1px solid var(--portal-border-subtle, var(--portal-alpha-white-08));
+  border-top: var(--border-width) solid var(--portal-border-subtle, var(--portal-alpha-white-08));
 }
 
 .revenue-kpi {
   background: transparent;
   padding: var(--space-1-5) var(--portal-panel-padding-x, 14px);
-  border-right: 1px solid var(--portal-border-subtle, var(--portal-alpha-white-08));
+  border-right: var(--border-width) solid var(--portal-border-subtle, var(--portal-alpha-white-08));
 }
 
 .revenue-kpi:last-child {
@@ -403,7 +430,7 @@
 
 .revenue-kpi-value {
   font-family: var(--font-family-mono);
-  font-size: 15px;
+  font-size: var(--font-size-base);
   font-weight: 300;
   color: var(--portal-text-light);
   letter-spacing: -0.5px;
@@ -426,8 +453,8 @@
 .activity-feed-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--portal-panel-padding-x, 14px);
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
   border-bottom: none;
   transition: background var(--transition-faster);
   cursor: default;
@@ -476,10 +503,11 @@
 }
 
 .activity-text {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-  line-height: 1.45;
+  font-size: inherit;
+  color: var(--portal-text-light);
+  line-height: 1.4;
   display: block;
+  font-weight: 400;
 }
 
 .activity-text strong {
@@ -488,10 +516,9 @@
 }
 
 .activity-time {
-  font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs, 10px);
   color: var(--portal-text-muted);
-  margin-top: var(--space-px);
+  margin-top: 2px;
   display: block;
 }
 
@@ -532,7 +559,7 @@
   align-items: flex-start;
   gap: var(--space-1);
   padding: var(--space-1);
-  border: 1px solid var(--portal-border-subtle);
+  border: var(--border-width) solid var(--portal-border-subtle);
 }
 
 .empty-state-small {
@@ -729,7 +756,7 @@
 /* Individual stat panel - matches portal card styling */
 .overview-stat-panel {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   padding: var(--portal-card-padding);
 }
 
@@ -759,7 +786,7 @@
 /* Attention banner - matches .overview-panel */
 .overview-attention-banner {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   padding: var(--portal-card-padding);
 }
 
@@ -775,7 +802,7 @@
   gap: var(--space-2);
   padding: var(--space-2);
   background: transparent;
-  border: 1px solid var(--portal-border-subtle);
+  border: var(--border-width) solid var(--portal-border-subtle);
   cursor: pointer;
   transition: border-color var(--transition-faster);
 }
@@ -828,7 +855,7 @@
   gap: var(--space-1);
   padding: var(--space-2);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   color: var(--portal-text-light);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);

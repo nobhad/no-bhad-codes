@@ -17,6 +17,10 @@ import {
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatTimeAgo } from '../../../../utils/time-utils';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('MessagingPanel');
 
 interface Message {
   id: number;
@@ -49,9 +53,11 @@ interface MessagingPanelProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination (used in overview tabs) */
+  defaultPageSize?: number;
 }
 
-export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: MessagingPanelProps) {
+export function MessagingPanel({ getAuthToken, showNotification, onNavigate, defaultPageSize: _defaultPageSize = 25 }: MessagingPanelProps) {
   const containerRef = useFadeIn();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -86,7 +92,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/messages/conversations', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS, {
         method: 'GET',
         headers: getHeaders(false),
         credentials: 'include',
@@ -109,7 +115,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
     setMessagesLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/messages/conversations/${conversationId}`, {
+      const response = await fetch(buildEndpoint.adminConversation(conversationId), {
         method: 'GET',
         headers: getHeaders(false),
         credentials: 'include',
@@ -122,7 +128,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
       setMessages(payload.messages || []);
 
       // Mark as read
-      await fetch(`/api/admin/messages/conversations/${conversationId}/read`, {
+      await fetch(buildEndpoint.adminConversationRead(conversationId), {
         method: 'POST',
         headers: getHeaders(false),
         credentials: 'include',
@@ -134,7 +140,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
       );
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
-      console.error('Failed to load messages:', err);
+      logger.error('Failed to load messages:', err);
     } finally {
       setMessagesLoading(false);
     }
@@ -174,7 +180,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
       );
       showNotification?.('Message sent', 'success');
     } catch (err) {
-      console.error('Failed to send message:', err);
+      logger.error('Failed to send message:', err);
       setNewMessage(messageContent); // Restore message on error
       showNotification?.('Failed to send message', 'error');
     } finally {
@@ -188,7 +194,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
 
   const toggleStar = useCallback(async (conversationId: number, isStarred: boolean) => {
     try {
-      await fetch(`/api/admin/messages/conversations/${conversationId}/star`, {
+      await fetch(buildEndpoint.adminConversationStar(conversationId), {
         method: isStarred ? 'DELETE' : 'POST',
         headers: getHeaders(false),
         credentials: 'include'
@@ -198,7 +204,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
         prev.map((c) => (c.id === conversationId ? { ...c, isStarred: !isStarred } : c))
       );
     } catch (err) {
-      console.error('Failed to toggle star:', err);
+      logger.error('Failed to toggle star:', err);
     }
   }, [getHeaders]);
 
@@ -304,9 +310,9 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
         {/* Conversation List */}
         <div className="tw-scroll-container tw-flex-1">
           {isLoading ? (
-            <div className="tw-loading">Loading conversations...</div>
+            <div className="loading-state">Loading conversations...</div>
           ) : filteredConversations.length === 0 ? (
-            <div className="tw-empty-state">
+            <div className="empty-state">
               <Inbox className="messaging-icon-lg" />
               <p>No conversations</p>
             </div>
@@ -367,7 +373,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
                 {selectedConversation.projectName && (
                   <button
                     onClick={() => onNavigate?.('projects', selectedConversation.projectId != null ? String(selectedConversation.projectId) : undefined)}
-                    className="tw-btn-ghost messaging-conv-project-link"
+                    className="btn-ghost messaging-conv-project-link"
                   >
                     {selectedConversation.projectName}
                   </button>
@@ -376,14 +382,14 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
               <div className="messaging-conv-actions">
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                  className={cn('tw-btn-icon', selectedConversation.isStarred ? 'tw-text-primary' : 'tw-text-muted')}
+                  className={cn('btn-icon', selectedConversation.isStarred ? 'tw-text-primary' : 'tw-text-muted')}
                 >
                   <Star
                     className="messaging-star-icon"
                     style={{ fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
                   />
                 </button>
-                <button className="tw-btn-icon">
+                <button className="btn-icon">
                   <MoreHorizontal className="messaging-more-icon" />
                 </button>
               </div>
@@ -392,10 +398,11 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
             {/* Messages */}
             <div className="tw-scroll-container messaging-messages-container">
               {messagesLoading ? (
-                <div className="tw-loading">Loading messages...</div>
+                <div className="loading-state">Loading messages...</div>
               ) : messages.length === 0 ? (
-                <div className="tw-empty-state tw-h-full">
-                  <p>No messages yet. Start the conversation!</p>
+                <div className="empty-state tw-h-full">
+                  <Inbox className="icon-xl" />
+                  <span>No messages yet. Start the conversation!</span>
                 </div>
               ) : (
                 <div className="messaging-messages-list">
@@ -449,7 +456,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
             {/* Message Input */}
             <div className="messaging-compose">
               <div className="messaging-compose-row">
-                <button className="tw-btn-icon">
+                <button className="btn-icon">
                   <Paperclip className="messaging-attachment-icon" />
                 </button>
                 <div className="messaging-compose-input-container">
@@ -468,7 +475,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
                   />
                 </div>
                 <button
-                  className="tw-btn-primary messaging-compose-send-btn"
+                  className="btn-primary messaging-compose-send-btn"
                   onClick={sendMessage}
                   disabled={!newMessage.trim() || sending}
                 >
@@ -478,7 +485,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate }: M
             </div>
           </>
         ) : (
-          <div className="tw-empty-state messaging-empty-state-full">
+          <div className="empty-state messaging-empty-state-full">
             <Users className="messaging-icon-xl" />
             <p className="messaging-empty-state-message">Select a conversation</p>
             <p className="tw-text-muted">Choose a conversation from the list to view messages</p>

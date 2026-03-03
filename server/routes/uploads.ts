@@ -183,12 +183,25 @@ async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise
   }
 
   const db = getDatabase();
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
+
+  // Client can access file if:
+  // 1. They uploaded it (regardless of project)
+  // 2. It's in their project AND has been explicitly shared with them
+  // uploaded_by now stores email, but check ID for backwards compatibility
   const row = await db.get(
     `SELECT 1
      FROM files f
-     JOIN projects p ON f.project_id = p.id
-     WHERE f.id = ? AND p.client_id = ?`,
-    [fileId, req.user?.id]
+     LEFT JOIN projects p ON f.project_id = p.id
+     WHERE f.id = ?
+       AND (
+         f.uploaded_by = ?
+         OR f.uploaded_by = ?
+         OR f.uploaded_by = ?
+         OR (p.client_id = ? AND f.shared_with_client = TRUE)
+       )`,
+    [fileId, userEmail, userId, String(userId), userId]
   );
 
   return !!row;
@@ -406,7 +419,7 @@ router.post(
               : 'general';
       const filePath = `uploads/${subDir}/${file.filename}`;
 
-      // Save to database
+      // Save to database - always use email for uploaded_by for consistency
       const result = await db.run(
         `INSERT INTO files (project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
@@ -417,7 +430,7 @@ router.post(
           file.mimetype,
           file.size,
           filePath,
-          req.user?.id,
+          req.user?.email || `${req.user?.type || 'unknown'}`,
         ]
       );
 
@@ -575,7 +588,7 @@ router.post(
           req.file.mimetype,
           req.file.size,
           projectFile.url,
-          req.user?.id,
+          req.user?.email || `${req.user?.type || 'unknown'}`,
         ]
       );
       fileId = result.lastID;
@@ -811,13 +824,16 @@ router.get(
         return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
       }
 
-      // Check access: admin, client owns the project, or uploaded the file
+      // Check access: admin, uploader, or client with explicit share permission
       const userId = req.user?.id;
+      const userEmail = req.user?.email;
       const isAdmin = req.user?.type === 'admin';
-      const isOwner = file.client_id === userId;
-      const isUploader = file.uploaded_by === userId || file.uploaded_by === String(userId);
+      // uploaded_by stores email, so compare against email (also check ID for backwards compatibility)
+      const isUploader = file.uploaded_by === userEmail || file.uploaded_by === String(userId);
+      // Client can only access project files if explicitly shared
+      const isSharedWithClient = file.client_id === userId && file.shared_with_client === 1;
 
-      if (!isAdmin && !isOwner && !isUploader) {
+      if (!isAdmin && !isUploader && !isSharedWithClient) {
         return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
       }
 
@@ -902,8 +918,10 @@ router.delete(
 
       // Check access: admin or uploader can delete
       const userId = req.user?.id;
+      const userEmail = req.user?.email;
       const isAdmin = req.user?.type === 'admin';
-      const isUploader = file.uploaded_by === userId || file.uploaded_by === String(userId);
+      // uploaded_by stores email, so compare against email (also check ID for backwards compatibility)
+      const isUploader = file.uploaded_by === userEmail || file.uploaded_by === String(userId);
       const isOwner = file.client_id === userId;
 
       if (!isAdmin && file.client_id && !isOwner) {

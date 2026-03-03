@@ -113,8 +113,8 @@
   --icon-gap-lg: 16px; /* For 20-24px icons - sidebar nav, loading states */
   --icon-gap-xl: 20px; /* For 24px+ icons */
 
-  /* Default icon gap - use this for most cases */
-  --icon-gap: var(--icon-gap-sm);
+  /* Default icon gap - responsive, scales with viewport */
+  --icon-gap: clamp(6px, 0.5vw, 8px);
 
   /* ============================================
    * PORTAL SECTION SPACING - Single Source of Truth

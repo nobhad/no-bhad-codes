@@ -42,7 +42,7 @@ function formatFileSize(bytes: number): string {
  */
 function formatDate(date: string): string {
   const d = new Date(date);
-  if (isNaN(d.getTime())) return '-';
+  if (isNaN(d.getTime())) return '';
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   const year = d.getFullYear();
@@ -54,15 +54,15 @@ function formatDate(date: string): string {
  */
 function getFileIcon(fileType: string): React.ReactNode {
   if (fileType.startsWith('image/')) {
-    return <Image className="tw-h-5 tw-w-5 tw-text-[var(--color-brand-primary)]" />;
+    return <Image className="icon-lg tw-text-[var(--color-brand-primary)]" />;
   }
   if (fileType === 'application/pdf') {
-    return <FileText className="tw-h-5 tw-w-5 tw-text-[var(--status-cancelled)]" />;
+    return <FileText className="icon-lg tw-text-[var(--status-cancelled)]" />;
   }
   if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('archive')) {
-    return <FileArchive className="tw-h-5 tw-w-5 tw-text-[var(--status-warning)]" />;
+    return <FileArchive className="icon-lg tw-text-[var(--status-warning)]" />;
   }
-  return <File className="tw-h-5 tw-w-5 tw-text-[var(--portal-text-muted)]" />;
+  return <File className="icon-lg tw-text-[var(--portal-text-muted)]" />;
 }
 
 /**
@@ -192,10 +192,10 @@ export function FilesTab({
       {/* Upload Section */}
       <div
         className={cn(
-          'tw-panel tw-border-2 tw-border-dashed tw-cursor-pointer tw-transition-colors files-upload-area',
+          'tw-panel tw-border-2 tw-border-dashed tw-cursor-pointer tw-transition-colors ',
           isDragging
-            ? 'tw-border-white tw-bg-[var(--portal-bg-hover)]'
-            : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
+            ? 'tw-border-primary tw-bg-[var(--portal-bg-hover)]'
+            : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -214,21 +214,21 @@ export function FilesTab({
           <Upload
             className={cn(
               'tw-h-8 tw-w-8',
-              isDragging ? 'tw-text-white' : 'tw-text-muted'
+              isDragging && 'tw-text-primary'
             )}
           />
           <div className="tw-text-center">
-            <p className="tw-text-primary overview-text-base">
+            <p className="tw-text-primary ">
               {isDragging ? 'Drop files here' : 'Drag and drop files here, or click to select'}
             </p>
-            <p className="tw-text-muted tw-mt-1 overview-text-sm">
+            <p className="tw-text-muted tw-mt-1 tw-text-sm">
               Supports images, PDFs, documents, and archives
             </p>
           </div>
 
           {/* Category Selector */}
           <div className="tw-flex tw-items-center tw-gap-2 tw-mt-2" onClick={(e) => e.stopPropagation()}>
-            <span className="tw-text-muted overview-text-sm">Category:</span>
+            <span className="tw-text-muted tw-text-sm">Category:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -244,7 +244,7 @@ export function FilesTab({
           </div>
 
           {isUploading && (
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-primary overview-text-base">
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-primary ">
               <div className="tw-animate-spin tw-h-4 tw-w-4 tw-border-2 tw-border-current tw-border-t-transparent files-spinner" />
               Uploading...
             </div>
@@ -254,8 +254,8 @@ export function FilesTab({
 
       {/* Files List */}
       {files.length === 0 ? (
-        <div className="tw-empty-state">
-          <Inbox className="tw-h-8 tw-w-8 tw-mb-2" />
+        <div className="empty-state">
+          <Inbox className="icon-xl tw-mb-2" />
           <span>No files uploaded yet</span>
         </div>
       ) : (
@@ -290,34 +290,34 @@ export function FilesTab({
                     <div className="tw-flex tw-items-center tw-gap-3">
                       {getFileIcon(file.file_type)}
                       <div className="tw-flex tw-flex-col">
-                        <span className="tw-text-primary tw-truncate tw-max-w-[300px] overview-text-base">
+                        <span className="tw-text-primary tw-truncate tw-max-w-[300px] ">
                           {file.original_name}
                         </span>
                         {file.category && (
-                          <span className="tw-text-muted overview-text-sm">
+                          <span className="tw-text-muted tw-text-sm">
                             {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category}
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="tw-px-4 tw-py-3 tw-text-muted overview-text-base">
+                  <td className="tw-px-4 tw-py-3 tw-text-muted ">
                     {formatFileSize(file.file_size)}
                   </td>
-                  <td className="tw-px-4 tw-py-3 tw-text-muted overview-text-base">
+                  <td className="tw-px-4 tw-py-3 tw-text-muted ">
                     {formatDate(file.created_at)}
                   </td>
                   <td className="tw-px-4 tw-py-3">
                     <button
-                      className="tw-btn-icon"
+                      className="btn-icon"
                       onClick={() => handleToggleSharing(file.id)}
                       title={file.is_shared ? 'Shared with client - click to make private' : 'Private - click to share'}
                       disabled={togglingFileId === file.id}
                     >
                       {file.is_shared ? (
-                        <Share2 className="tw-h-4 tw-w-4" />
+                        <Share2 className="icon-md" />
                       ) : (
-                        <Lock className="tw-h-4 tw-w-4 tw-text-muted" />
+                        <Lock className="icon-md" />
                       )}
                     </button>
                   </td>
@@ -325,22 +325,22 @@ export function FilesTab({
                     <div className="tw-flex tw-items-center tw-justify-end tw-gap-1">
                       {file.download_url && (
                         <button
-                          className="tw-btn-icon"
+                          className="btn-icon"
                           onClick={() => handleDownload(file)}
                           title="Download"
                         >
-                          <Download className="tw-h-4 tw-w-4" />
+                          <Download className="icon-md" />
                         </button>
                       )}
                       <button
-                        className="tw-btn-icon"
+                        className="btn-icon"
                         onClick={() => {
                           setDeletingFileId(file.id);
                           deleteDialog.open();
                         }}
                         title="Delete"
                       >
-                        <Trash2 className="tw-h-4 tw-w-4" />
+                        <Trash2 className="icon-md" />
                       </button>
                     </div>
                   </td>

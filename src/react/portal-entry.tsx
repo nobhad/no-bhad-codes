@@ -9,6 +9,9 @@ import './styles/tailwind-generated.css';
 // Note: Button styles (tw-btn-*) are now in portal-buttons.css (base portal styles)
 
 import { registerReactComponent } from './registry';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('PortalEntry');
 
 // Import all portal modules
 import { mountPortalInvoices, unmountPortalInvoices } from './features/portal/invoices';
@@ -80,4 +83,4 @@ registerReactComponent('portalOnboarding', {
 });
 
 // Log that React components are available
-console.log('[React] Portal components registered (11 modules)');
+logger.info('Portal components registered (11 modules)');

@@ -24,16 +24,16 @@ export const PortalInput = React.forwardRef<HTMLInputElement, PortalInputProps>(
         {label && (
           <label htmlFor={inputId} className="tw-field-label">
             {label}
-            {required && <span className="tw-text-white tw-ml-1">*</span>}
+            {required && <span className="tw-text-primary tw-ml-1">*</span>}
           </label>
         )}
         <input
           ref={ref}
           id={inputId}
-          className={cn('tw-input', error && 'tw-border-white', className)}
+          className={cn('tw-input', error && 'tw-border-primary', className)}
           {...props}
         />
-        {error && <span className="tw-text-xs tw-text-white">{error}</span>}
+        {error && <span className="tw-text-xs tw-text-primary">{error}</span>}
         {helperText && !error && (
           <span className="tw-text-xs tw-text-muted">{helperText}</span>
         )}

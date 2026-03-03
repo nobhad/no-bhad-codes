@@ -30,6 +30,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import {
   PortalDropdown,
@@ -43,6 +44,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { CONTRACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('ContractsTable');
 
 interface Contract {
   id: number;
@@ -86,6 +91,10 @@ interface ContractsTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 // Filter function
@@ -128,7 +137,7 @@ function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
   }
 }
 
-export function ContractsTable({ getAuthToken, showNotification, onNavigate }: ContractsTableProps) {
+export function ContractsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContractsTableProps) {
   const containerRef = useFadeIn();
 
   // Build headers helper with auth token
@@ -176,9 +185,9 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_contracts_pagination',
+    storageKey: overviewMode ? undefined : 'admin_contracts_pagination',
     totalItems: filteredContracts.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedContracts = useMemo(
@@ -197,7 +206,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
     setError(null);
 
     try {
-      const response = await fetch('/api/contracts', {
+      const response = await fetch(API_ENDPOINTS.CONTRACTS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -228,7 +237,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
   // Status change handler
   const handleStatusChange = useCallback(async (contractId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/contracts/${contractId}`, {
+      const response = await fetch(buildEndpoint.contract(contractId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -246,14 +255,14 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
       );
       showNotification?.('Contract status updated', 'success');
     } catch (err) {
-      console.error('Failed to update contract status:', err);
+      logger.error('Failed to update contract status:', err);
       showNotification?.('Failed to update contract status', 'error');
     }
   }, [getHeaders, showNotification]);
 
   const handleSendContract = useCallback(async (contractId: number) => {
     try {
-      const response = await fetch(`/api/contracts/${contractId}/send`, {
+      const response = await fetch(buildEndpoint.contractSend(contractId), {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include'
@@ -270,7 +279,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
       );
       showNotification?.('Contract sent', 'success');
     } catch (err) {
-      console.error('Failed to send contract:', err);
+      logger.error('Failed to send contract:', err);
       showNotification?.('Failed to send contract', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -281,7 +290,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
-      const response = await fetch('/api/contracts/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.CONTRACTS_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -294,7 +303,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} contract${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete contracts:', err);
+      logger.error('Failed to delete contracts:', err);
       showNotification?.('Failed to delete contracts', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -379,16 +388,6 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadContracts}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredContracts.length > 0 ? (
           <TablePagination
@@ -407,7 +406,6 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -451,8 +449,10 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={8} message={error} onRetry={loadContracts} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={8} rows={5} />
           ) : paginatedContracts.length === 0 ? (
             <AdminTableEmpty
@@ -497,7 +497,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
                   </span>
                 </AdminTableCell>
                 <AdminTableCell className="project-cell">
-                  {contract.projectName ? (
+                  {contract.projectName && (
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
@@ -507,12 +507,10 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
                     >
                       {contract.projectName}
                     </span>
-                  ) : (
-                    <span className="text-muted">-</span>
                   )}
                 </AdminTableCell>
                 <AdminTableCell className="email-cell">
-                  {contract.clientEmail || '-'}
+                  {contract.clientEmail}
                 </AdminTableCell>
                 <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
@@ -525,16 +523,18 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
                       </button>
                     </PortalDropdownTrigger>
                     <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(CONTRACT_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(contract.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
+                      {Object.entries(CONTRACT_STATUS_CONFIG)
+                        .filter(([status]) => status !== contract.status)
+                        .map(([status, config]) => (
+                          <PortalDropdownItem
+                            key={status}
+                            onClick={() => handleStatusChange(contract.id, status)}
+                          >
+                            <StatusBadge status={getStatusVariant(status)} size="sm">
+                              {config.label}
+                            </StatusBadge>
+                          </PortalDropdownItem>
+                        ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </AdminTableCell>
@@ -557,7 +557,6 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate }: C
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

@@ -54,14 +54,14 @@
 }
 
 .proposal-title {
-  font-size: 1.75rem;
+  font-size: var(--font-size-2xl);
   font-weight: 600;
   margin: 0 0 var(--proposal-spacing-sm);
   color: var(--proposal-text);
 }
 
 .proposal-subtitle {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--proposal-text-muted);
   margin: 0;
 }
@@ -106,17 +106,17 @@
 .step-number {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: var(--portal-alpha-white-20);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 }
 
 .step-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 
@@ -146,14 +146,14 @@
 }
 
 .section-title {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
 }
 
 .section-description {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--proposal-text-muted);
   margin: 0 0 var(--proposal-spacing-lg);
 }
@@ -176,7 +176,7 @@
 .tier-card,
 .maintenance-card {
   background: var(--proposal-card-bg);
-  border: 2px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-lg);
   padding: var(--proposal-spacing-lg);
   position: relative;
@@ -214,7 +214,7 @@
   color: var(--proposal-text);
   padding: 4px 16px;
   border-radius: var(--portal-radius-pill);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -227,14 +227,14 @@
 }
 
 .tier-name {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   margin: 0 0 var(--proposal-spacing-sm);
   color: var(--proposal-text);
 }
 
 .tier-tagline {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
   margin: 0;
 }
@@ -242,19 +242,19 @@
 .tier-price {
   text-align: center;
   padding: var(--proposal-spacing-md) 0;
-  border-top: 1px solid var(--proposal-card-border);
-  border-bottom: 1px solid var(--proposal-card-border);
+  border-top: var(--border-width) solid var(--proposal-card-border);
+  border-bottom: var(--border-width) solid var(--proposal-card-border);
   margin-bottom: var(--proposal-spacing-md);
 }
 
 .price-range {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--proposal-text);
 }
 
 .tier-description {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
   margin-bottom: var(--proposal-spacing-md);
   text-align: center;
@@ -272,7 +272,7 @@
   align-items: center;
   gap: var(--proposal-spacing-sm);
   padding: var(--proposal-spacing-sm) 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text);
 }
 
@@ -286,11 +286,11 @@
 .maintenance-select-btn {
   width: 100%;
   padding: var(--proposal-spacing-md);
-  border: 2px solid var(--proposal-accent);
+  border: var(--border-width) solid var(--proposal-accent);
   border-radius: var(--portal-radius-md);
   background: transparent;
   color: var(--proposal-accent);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -309,7 +309,7 @@
 /* Tier button has extra horizontal padding */
 .tier-select-btn {
   padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 /* ============================================================================
@@ -323,20 +323,20 @@
 .comparison-table-wrapper {
   overflow-x: auto;
   border-radius: var(--portal-radius-md);
-  border: 1px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
 }
 
 .comparison-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .comparison-table th,
 .comparison-table td {
   padding: var(--proposal-spacing-md);
   text-align: center;
-  border-bottom: 1px solid var(--proposal-card-border);
+  border-bottom: var(--border-width) solid var(--proposal-card-border);
 }
 
 .comparison-table th {
@@ -367,7 +367,7 @@
   background: var(--portal-bg-darker);
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.05em;
   color: var(--proposal-text-muted);
 }
@@ -384,7 +384,7 @@
 
 .feature-name-cell .feature-description {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--proposal-text-muted);
   margin-top: 2px;
 }
@@ -395,7 +395,7 @@
 
 .check-addon {
   color: var(--proposal-accent);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 }
 
@@ -417,7 +417,7 @@
 }
 
 .feature-section-title {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
@@ -435,7 +435,7 @@
   gap: var(--proposal-spacing-md);
   padding: var(--proposal-spacing-md);
   background: var(--proposal-card-bg);
-  border: 1px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-md);
   transition:
     border-color 0.3s ease,
@@ -468,7 +468,7 @@
 .feature-checkbox-custom {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-xs);
   flex-shrink: 0;
   transition:
@@ -507,7 +507,7 @@
 
 .feature-info .feature-description {
   display: block;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
 }
 
@@ -546,7 +546,7 @@
   color: var(--proposal-text);
   padding: 4px 16px;
   border-radius: var(--portal-radius-pill);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -559,26 +559,26 @@
 }
 
 .maintenance-name {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   margin: 0 0 var(--proposal-spacing-sm);
   color: var(--proposal-text);
 }
 
 .maintenance-price {
-  font-size: 1.75rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--proposal-text);
 }
 
 .billing-cycle {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 400;
   color: var(--proposal-text-muted);
 }
 
 .maintenance-description {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
   text-align: center;
   margin: 0 0 var(--proposal-spacing-md);
@@ -596,7 +596,7 @@
   align-items: flex-start;
   gap: var(--proposal-spacing-sm);
   padding: var(--proposal-spacing-sm) 0;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text);
 }
 
@@ -617,7 +617,7 @@
 
 .summary-section {
   background: var(--proposal-card-bg);
-  border: 1px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-md);
   padding: var(--proposal-spacing-lg);
   margin-bottom: var(--proposal-spacing-md);
@@ -635,26 +635,26 @@
 }
 
 .summary-tier-header h4 {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   margin: 0;
   color: var(--proposal-text);
 }
 
 .summary-tier-price {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--proposal-accent);
 }
 
 .summary-tier-description {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
   margin: 0;
 }
 
 .summary-section-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
@@ -673,7 +673,7 @@
   align-items: center;
   gap: var(--proposal-spacing-sm);
   padding: var(--proposal-spacing-sm) 0;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--proposal-text);
 }
 
@@ -697,12 +697,12 @@
 }
 
 .summary-maintenance .maintenance-name {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   margin: 0;
 }
 
 .summary-maintenance .maintenance-price {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .summary-line-items {
@@ -717,7 +717,7 @@
   gap: var(--proposal-spacing-sm);
   align-items: center;
   background: var(--portal-bg-darker);
-  border: 1px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-md);
   padding: var(--proposal-spacing-sm);
 }
@@ -725,11 +725,11 @@
 .summary-input {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
   color: var(--proposal-text);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-family: inherit;
 }
 
@@ -742,7 +742,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-sm);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--proposal-text-muted);
 }
 
@@ -764,25 +764,25 @@
 }
 
 .summary-label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--proposal-text-muted);
 }
 
 .summary-empty {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
 }
 
 .summary-notes-input {
   width: 100%;
   padding: var(--proposal-spacing-md);
-  border: 1px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-md);
   background: var(--portal-bg-darker);
   color: var(--proposal-text);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   font-family: inherit;
   resize: vertical;
   min-height: 100px;
@@ -799,7 +799,7 @@
 
 .summary-total {
   background: var(--portal-bg-darker);
-  border: 2px solid var(--proposal-accent);
+  border: var(--border-width) solid var(--proposal-accent);
   border-radius: var(--portal-radius-md);
   padding: var(--proposal-spacing-lg);
 }
@@ -813,21 +813,21 @@
 .total-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--proposal-text);
 }
 
 .total-row--final {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   padding-top: var(--proposal-spacing-md);
-  border-top: 1px solid var(--proposal-card-border);
+  border-top: var(--border-width) solid var(--proposal-card-border);
   margin-top: var(--proposal-spacing-sm);
   color: var(--proposal-accent);
 }
 
 .total-row--recurring {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
   padding-top: var(--proposal-spacing-sm);
 }
@@ -838,7 +838,7 @@
 
 .proposal-price-bar {
   background: var(--portal-bg-darker);
-  border-top: 1px solid var(--proposal-card-border);
+  border-top: var(--border-width) solid var(--proposal-card-border);
   padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
   margin: var(--proposal-spacing-lg) calc(var(--proposal-spacing-xl) * -1);
   margin-bottom: 0;
@@ -864,7 +864,7 @@
 }
 
 .price-addons {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-accent);
 }
 
@@ -875,12 +875,12 @@
 }
 
 .price-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--proposal-text-muted);
 }
 
 .price-value {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--proposal-text);
 }
@@ -899,7 +899,7 @@
 .proposal-btn {
   padding: var(--proposal-spacing-md) var(--proposal-spacing-xl);
   border-radius: var(--portal-radius-md);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -914,7 +914,7 @@
 
 .proposal-btn-secondary {
   background: transparent;
-  border: 2px solid var(--proposal-card-border);
+  border: var(--border-width) solid var(--proposal-card-border);
   color: var(--proposal-text);
 }
 
@@ -924,7 +924,7 @@
 
 .proposal-btn-primary {
   background: var(--proposal-accent);
-  border: 2px solid var(--proposal-accent);
+  border: var(--border-width) solid var(--proposal-accent);
   color: var(--proposal-text);
 }
 
@@ -947,7 +947,7 @@
   }
 
   .proposal-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 
   .tier-grid {
@@ -971,7 +971,7 @@
   }
 
   .price-value {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 
   .summary-tier-header {

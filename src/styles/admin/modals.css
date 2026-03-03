@@ -260,7 +260,7 @@
   letter-spacing: 0.5px;
   padding: 0 0 var(--space-2) 0;
   margin-bottom: var(--space-3);
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-dark);
   width: 100%;
 }
 
@@ -272,7 +272,7 @@
   display: flex;
   gap: 0;
   padding: 0 var(--space-5);
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-dark);
   flex-shrink: 0;
 }
 
@@ -397,7 +397,7 @@
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
 }
 .md-preview .md-h2 {
   font-size: var(--font-size-xl);
@@ -440,7 +440,7 @@
 
 .md-preview .md-code-block {
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   padding: var(--space-3);
   margin: var(--space-2) 0;
   overflow-x: auto;
@@ -471,7 +471,7 @@
 .md-preview .md-table td {
   padding: var(--space-2) var(--space-3);
   text-align: left;
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
 }
 .md-preview .md-table th {
   background: var(--portal-bg-medium);
@@ -486,7 +486,7 @@
 }
 .md-preview .md-hr {
   border: none;
-  border-top: 1px solid var(--portal-border);
+  border-top: var(--border-width) solid var(--portal-border);
   margin: var(--space-4) 0;
 }
 
@@ -502,7 +502,7 @@
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
-  border: 1px solid var(--dropdown-border-color);
+  border: var(--border-width) solid var(--dropdown-border-color);
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
@@ -514,13 +514,13 @@
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   border-bottom: none;
   outline: none;
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   border-top: none;
 }
 
@@ -538,18 +538,15 @@
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
-  border-bottom: 1px solid var(--color-primary);
+  border-bottom: var(--border-width) solid var(--color-primary);
   border-top: none;
 }
 
 .admin-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
   border-bottom: none;
-  border-top: 1px solid var(--color-primary);
+  border-top: var(--border-width) solid var(--color-primary);
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-caret {
-  stroke-width: 3;
-}
 
 .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   padding: var(--space-2) var(--space-3);
@@ -599,7 +596,7 @@
   background: var(--color-bg-primary);
   padding: var(--space-3);
   border-radius: var(--border-radius-sm);
-  border: 1px solid var(--portal-border-medium);
+  border: var(--border-width) solid var(--portal-border-medium);
   max-height: 200px;
   overflow-y: auto;
 }
@@ -624,7 +621,7 @@
   display: flex;
   flex-direction: column;
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-dark);
 }
 
 .invoice-info-row {
@@ -662,7 +659,7 @@
 .invoice-line-items td {
   padding: var(--space-2) var(--space-3);
   text-align: left;
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-dark);
 }
 
 .invoice-line-items th {
@@ -742,7 +739,7 @@
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
   padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: var(--border-width) solid var(--portal-border-dark);
 }
 .total-row.total-due {
   color: var(--color-warning-500);
@@ -752,7 +749,7 @@
 .invoice-notes,
 .invoice-terms {
   padding-top: var(--space-3);
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: var(--border-width) solid var(--portal-border-dark);
 }
 .invoice-notes p,
 .invoice-terms p {
@@ -792,7 +789,7 @@
 .kb-article-modal-content .form-group-inline {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   margin-bottom: var(--space-1-5);
 }
 
@@ -892,7 +889,7 @@
 
 .keyboard-help-panel {
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-bg-light);
+  border: var(--border-width) solid var(--portal-bg-light);
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
@@ -906,7 +903,7 @@
   justify-content: space-between;
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--border-width) solid var(--portal-bg-medium);
 }
 
 .keyboard-help-title {
@@ -957,7 +954,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-1-5) 0;
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--border-width) solid var(--portal-bg-medium);
 }
 
 .keyboard-help-item:last-child {
@@ -981,7 +978,7 @@
   height: 24px;
   padding: 0 var(--space-1-5);
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-bg-light);
+  border: var(--border-width) solid var(--portal-bg-light);
   font-family: var(--font-mono, monospace);
   font-size: var(--font-size-xs);
   font-weight: 500;
@@ -1058,13 +1055,13 @@
 }
 .details-panel .details-divider {
   border: none;
-  border-top: 1px solid var(--portal-border-light);
+  border-top: var(--border-width) solid var(--portal-border-light);
   margin: var(--space-4) 0;
 }
 
 .details-panel .message-box {
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border-light);
+  border: var(--border-width) solid var(--portal-border-light);
   border-radius: var(--border-radius-md);
   padding: var(--space-4);
   margin-top: var(--space-4);

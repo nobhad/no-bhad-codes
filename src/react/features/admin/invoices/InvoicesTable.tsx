@@ -11,7 +11,8 @@ import {
   AdminTableRow,
   AdminTableCell,
   AdminTableEmpty,
-  AdminTableLoading
+  AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
@@ -32,14 +33,21 @@ import { INVOICE_STATUS_CONFIG } from '../types';
 import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '../../../../utils/format-utils';
 import { INVOICES_FILTER_CONFIG, INVOICE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface InvoicesTableProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
   /** Callback when invoice is selected for detail view */
   onViewInvoice?: (invoiceId: number) => void;
+  /** Navigation callback */
+  onNavigate?: (tab: string, entityId?: string) => void;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 /**
@@ -128,7 +136,10 @@ function sortInvoices(a: Invoice, b: Invoice, sort: SortConfig): number {
 export function InvoicesTable({
   getAuthToken,
   onViewInvoice,
-  showNotification
+  onNavigate,
+  showNotification,
+  defaultPageSize = 25,
+  overviewMode = false,
 }: InvoicesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -177,9 +188,9 @@ export function InvoicesTable({
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_invoices_pagination',
+    storageKey: overviewMode ? undefined : 'admin_invoices_pagination',
     totalItems: filteredInvoices.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   // Get paginated data
@@ -332,9 +343,13 @@ export function InvoicesTable({
   // Handle view invoice
   const handleViewInvoice = useCallback(
     (invoiceId: number) => {
-      onViewInvoice?.(invoiceId);
+      if (onViewInvoice) {
+        onViewInvoice(invoiceId);
+      } else if (onNavigate) {
+        onNavigate('invoice-detail', String(invoiceId));
+      }
     },
-    [onViewInvoice]
+    [onViewInvoice, onNavigate]
   );
 
   // Handle row click
@@ -415,16 +430,6 @@ export function InvoicesTable({
             deleteLoading={deleteDialog.isLoading}
           />
         }
-        error={
-          error ? (
-            <div className="table-error-banner">
-              {error}
-              <PortalButton variant="secondary" size="sm" onClick={refetch}>
-                Retry
-              </PortalButton>
-            </div>
-          ) : undefined
-        }
         pagination={
           !isLoading && filteredInvoices.length > 0 ? (
             <TablePagination
@@ -497,8 +502,10 @@ export function InvoicesTable({
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
               <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedInvoices.length === 0 ? (
               <AdminTableEmpty
@@ -533,14 +540,14 @@ export function InvoicesTable({
 
                     {/* Invoice Number */}
                     <AdminTableCell className="invoice-cell">
-                      <span className="mono-text">{invoice.invoice_number || '-'}</span>
+                      <span className="mono-text">{invoice.invoice_number}</span>
                     </AdminTableCell>
 
                     {/* Client / Project */}
                     <AdminTableCell className="primary-cell contact-cell">
                       <div className="cell-content">
-                        <span className="cell-title">{invoice.client_name || 'Unknown Client'}</span>
-                        <span className="cell-subtitle">{invoice.project_name || '-'}</span>
+                        <span className="cell-title">{decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}</span>
+                        {invoice.project_name && <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>}
                         {/* Stacked content for responsive - hidden on desktop */}
                         <span className="invoice-stacked">{invoice.invoice_number}</span>
                         <span className="amount-stacked">{formatCurrency(invoice.amount_total)}</span>
@@ -564,7 +571,7 @@ export function InvoicesTable({
 
                     {/* Due Date */}
                     <AdminTableCell className="date-cell">
-                      {invoice.due_date ? formatDate(invoice.due_date) : '-'}
+                      {invoice.due_date && formatDate(invoice.due_date)}
                     </AdminTableCell>
 
                     {/* Actions */}

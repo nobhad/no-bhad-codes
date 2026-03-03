@@ -6,9 +6,10 @@
 
 import * as React from 'react';
 import { useCallback, useState } from 'react';
-import { Upload, File, X, Check, Image, FileText, FolderOpen } from 'lucide-react';
+import { Upload, File, X, Image, FileText, FolderOpen } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { Checkbox } from '@react/components/ui/checkbox';
 import type { StepProps, AssetData, UploadedFile } from '../types';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
@@ -162,8 +163,8 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           'tw-py-8 tw-px-4',
           'tw-border-2 tw-border-dashed tw-transition-colors tw-duration-200',
           isDragging
-            ? 'tw-border-white tw-bg-[var(--portal-bg-hover)]'
-            : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
+            ? 'tw-border-primary tw-bg-[var(--portal-bg-hover)]'
+            : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
         )}
       >
         <input
@@ -178,18 +179,18 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
         <Upload
           className={cn(
             'tw-h-8 tw-w-8 tw-mb-3',
-            isDragging ? 'tw-text-white' : 'tw-text-[var(--portal-text-muted)]'
+            isDragging ? 'tw-text-primary' : 'tw-text-[var(--portal-text-muted)]'
           )}
         />
 
-        <p className="tw-text-[14px] tw-text-white tw-font-mono tw-mb-1">
+        <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-mb-1">
           Drag and drop files here
         </p>
         <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)] tw-mb-3">
           or click to browse
         </p>
 
-        <button type="button" className="tw-btn-secondary" onClick={handleBrowseClick}>
+        <button type="button" className="btn-secondary" onClick={handleBrowseClick}>
           Browse Files
         </button>
 
@@ -200,7 +201,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Upload Error */}
       {uploadError && (
-        <div className="tw-error tw-mt-4">
+        <div className="error-state tw-mt-4">
           {uploadError}
         </div>
       )}
@@ -222,7 +223,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
                 >
                   <FileIcon className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)] tw-flex-shrink-0" />
                   <div className="tw-flex-1 tw-min-w-0">
-                    <p className="tw-text-[14px] tw-text-white tw-font-mono tw-truncate">
+                    <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-truncate">
                       {file.name}
                     </p>
                     <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
@@ -232,7 +233,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(file.id)}
-                    className="tw-btn-icon"
+                    className="btn-icon"
                     title="Remove file"
                   >
                     <X className="tw-h-4 tw-w-4" />
@@ -246,37 +247,12 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Logo Checkbox */}
       <div className="tw-mt-6">
-        <label
-          className={cn(
-            'tw-flex tw-items-center tw-gap-2 tw-cursor-pointer',
-            'tw-px-3 tw-py-2',
-            'tw-border tw-transition-colors tw-w-fit',
-            assets.logoProvided
-              ? 'tw-border-white tw-bg-white tw-text-black'
-              : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
-          )}
-        >
-          <div
-            className={cn(
-              'tw-w-4 tw-h-4 tw-border tw-flex tw-items-center tw-justify-center',
-              'tw-transition-colors',
-              assets.logoProvided
-                ? 'tw-bg-black tw-border-black'
-                : 'tw-border-white'
-            )}
-          >
-            {assets.logoProvided && <Check className="tw-h-3 tw-w-3 tw-text-white" strokeWidth={3} />}
-          </div>
-          <input
-            type="checkbox"
+        <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-px-3 tw-py-2 tw-border tw-border-[var(--portal-border-color)] tw-w-fit">
+          <Checkbox
             checked={assets.logoProvided}
-            onChange={(e) => handleChange('logoProvided', e.target.checked)}
-            className="tw-sr-only"
+            onCheckedChange={(checked) => handleChange('logoProvided', checked === true)}
           />
-          <span className={cn(
-            'tw-text-[14px] tw-font-mono',
-            assets.logoProvided ? 'tw-text-black' : 'tw-text-white'
-          )}>
+          <span className="tw-text-[14px] tw-font-mono">
             Logo included in uploaded files
           </span>
         </label>

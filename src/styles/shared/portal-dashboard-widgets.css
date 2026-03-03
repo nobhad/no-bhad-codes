@@ -32,8 +32,8 @@
 }
 
 .portal .activity-icon svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);  /* 16px - activity icons */
+  height: var(--icon-size-md);
 }
 
 .portal .activity-content {
@@ -41,7 +41,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .portal .activity-title {
@@ -117,7 +117,7 @@
 
 .portal .dashboard-tasks-kanban .kanban-column-header {
   padding: var(--space-1) var(--space-2);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);  /* 12px */
 }
 
 .portal .dashboard-tasks-kanban .kanban-card {
@@ -127,7 +127,7 @@
 .portal .dashboard-tasks-kanban .task-card-header {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
   margin-bottom: var(--space-1);
 }
 
@@ -153,7 +153,7 @@
 }
 
 .portal .dashboard-tasks-kanban .task-priority {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);  /* 12px */
   font-weight: 600;
   text-transform: uppercase;
   padding: var(--space-0-5) var(--space-1);
@@ -231,7 +231,7 @@
 .portal .task-item-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
   flex: 1;
   min-width: 0;
 }
@@ -275,7 +275,7 @@
 .portal :is(.task-priority, .task-priority-badge) {
   display: inline-flex;
   align-items: center;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);  /* 12px */
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -340,11 +340,11 @@
 
 .portal .dashboard-section-title {
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: var(--portal-text-muted);
+  font-size: var(--font-size-base);  /* 16px - matches h3 */
+  font-weight: 500;
+  color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   margin: 0 0 var(--space-1-5) 0;
 }
 
@@ -402,7 +402,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .portal .attention-count {
@@ -425,7 +425,7 @@
 
 @media (--small-mobile) {
   .portal .upcoming-tasks {
-    padding: 0.75rem;
+    padding: var(--space-3);
   }
 
   .portal .upcoming-tasks .section-header-inline {
@@ -439,7 +439,7 @@
 
   .portal .upcoming-tasks-list .task-item {
     flex-wrap: wrap;
-    padding: 0.5rem 0.75rem;
+    padding: var(--space-2) var(--space-3);
   }
 
   .portal .task-item-meta {
@@ -449,11 +449,11 @@
   }
 
   .portal .recent-activity {
-    padding: 0.75rem;
+    padding: var(--space-3);
   }
 
   .portal .activity-list li {
-    padding: 0.5rem 0.75rem;
+    padding: var(--space-2) var(--space-3);
   }
 
   /* Kanban board - enable horizontal scroll on very small screens */

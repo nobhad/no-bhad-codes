@@ -5,16 +5,17 @@
  */
 
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   LayoutDashboard,
-  FolderKanban,
-  FileText,
-  MessageSquare,
-  Receipt,
+  MessageCircleQuestion,
   ClipboardList,
-  CheckSquare,
+  MessageSquare,
+  Eye,
+  FileText,
+  HelpCircle,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
@@ -24,7 +25,7 @@ import { PortalHeader } from './PortalHeader';
 /**
  * Badge keys that can have counts
  */
-type BadgeKey = 'messages' | 'approvals';
+type BadgeKey = 'requests' | 'questionnaires' | 'messages' | 'documents';
 
 /**
  * Navigation item configuration
@@ -38,15 +39,16 @@ interface NavItemConfig {
 
 /**
  * Navigation items configuration
+ * Matches the HTML sidebar structure in client/index.html
  */
 const NAV_ITEMS: NavItemConfig[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'projects', label: 'Projects', icon: FolderKanban },
-  { id: 'files', label: 'Files', icon: FileText },
+  { id: 'requests', label: 'Requests', icon: MessageCircleQuestion, badgeKey: 'requests' },
+  { id: 'questionnaires', label: 'Questionnaires', icon: ClipboardList, badgeKey: 'questionnaires' },
   { id: 'messages', label: 'Messages', icon: MessageSquare, badgeKey: 'messages' },
-  { id: 'invoices', label: 'Invoices', icon: Receipt },
-  { id: 'questionnaires', label: 'Questionnaires', icon: ClipboardList },
-  { id: 'approvals', label: 'Approvals', icon: CheckSquare, badgeKey: 'approvals' },
+  { id: 'preview', label: 'Review', icon: Eye },
+  { id: 'files', label: 'Files', icon: FileText, badgeKey: 'documents' },
+  { id: 'help', label: 'Help', icon: HelpCircle },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -63,8 +65,10 @@ export interface PortalNavigationProps {
   };
   /** Badge counts for navigation items */
   badges?: {
+    requests?: number;
+    questionnaires?: number;
     messages?: number;
-    approvals?: number;
+    documents?: number;
   };
   /** Logout callback */
   onLogout?: () => void;
@@ -76,8 +80,34 @@ export interface PortalNavigationProps {
   onCollapsedChange?: (collapsed: boolean) => void;
 }
 
+/**
+ * Hash to tab mapping for URL-based navigation
+ */
+const HASH_TO_TAB: Record<string, string> = {
+  '/dashboard': 'dashboard',
+  '/requests': 'requests',
+  '/questionnaires': 'questionnaires',
+  '/messages': 'messages',
+  '/review': 'preview',
+  '/files': 'files',
+  '/help': 'help',
+  '/settings': 'settings',
+};
+
+/**
+ * Get current tab from URL hash
+ */
+function getTabFromHash(): string {
+  const hash = window.location.hash;
+  if (!hash || hash === '#' || hash === '#/') {
+    return 'dashboard';
+  }
+  const path = hash.startsWith('#') ? hash.slice(1) : hash;
+  return HASH_TO_TAB[path] || 'dashboard';
+}
+
 export function PortalSidebar({
-  activeTab,
+  activeTab: initialActiveTab,
   onNavigate,
   user,
   badges,
@@ -89,6 +119,27 @@ export function PortalSidebar({
   // Use controlled or uncontrolled collapsed state
   const [uncontrolledCollapsed, setUncontrolledCollapsed] = useState(defaultCollapsed);
   const isCollapsed = controlledCollapsed ?? uncontrolledCollapsed;
+
+  // Track active tab from hash changes
+  const [currentActiveTab, setCurrentActiveTab] = useState(initialActiveTab || getTabFromHash());
+
+  // Listen for hash changes to update active tab
+  useEffect(() => {
+    const handleHashChange = () => {
+      const newTab = getTabFromHash();
+      setCurrentActiveTab(newTab);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Update if controlled activeTab prop changes
+  useEffect(() => {
+    if (initialActiveTab) {
+      setCurrentActiveTab(initialActiveTab);
+    }
+  }, [initialActiveTab]);
 
   const containerRef = useFadeIn<HTMLElement>();
 
@@ -137,7 +188,7 @@ export function PortalSidebar({
               id={item.id}
               label={item.label}
               icon={item.icon}
-              isActive={activeTab === item.id}
+              isActive={currentActiveTab === item.id}
               badge={badge}
               isCollapsed={isCollapsed}
               onClick={() => handleNavigate(item.id)}
@@ -146,14 +197,28 @@ export function PortalSidebar({
         })}
       </nav>
 
-      {/* Footer - Version or branding if needed */}
-      {!isCollapsed && (
-        <div className="tw-p-3 tw-border-t tw-border-[var(--portal-border-color)]">
-          <p className="tw-section-title tw-text-center">
-            Client Portal
-          </p>
-        </div>
-      )}
+      {/* Footer with Logout */}
+      <div className="tw-p-2 tw-border-t tw-border-[var(--portal-border-color)]">
+        <button
+          onClick={onLogout}
+          className={cn(
+            'tw-w-full tw-flex tw-items-center tw-gap-3 tw-px-3 tw-py-2',
+            'tw-text-[var(--portal-text-light)] tw-bg-transparent',
+            'tw-border tw-border-transparent',
+            'hover:tw-bg-[var(--portal-bg-hover)] hover:tw-text-[var(--portal-text-light)]',
+            'tw-transition-colors tw-duration-150',
+            isCollapsed && 'tw-justify-center'
+          )}
+          aria-label="Sign out"
+        >
+          <LogOut className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
+          {!isCollapsed && (
+            <span className="tw-font-mono tw-text-xs tw-uppercase tw-tracking-wider">
+              Sign Out
+            </span>
+          )}
+        </button>
+      </div>
     </aside>
   );
 }

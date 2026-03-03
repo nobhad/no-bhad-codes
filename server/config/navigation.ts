@@ -204,7 +204,7 @@ export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
   const subtabGroups = getSubtabGroupsForRole(role);
 
   // Filter to only show top-level nav items (not grouped tabs for admin)
-  // Admin shows: overview, work, workflows, crm, documents, analytics, support, system
+  // Admin shows: dashboard, work, workflows, crm, documents, analytics, support, system
   // Client shows: all their items since they don't have groups
   const topLevelNavItems =
     role === 'admin'
@@ -248,7 +248,15 @@ export const PORTAL_CONFIGS = {
  * Tab content IDs that need to be rendered (admin only)
  */
 export const ADMIN_TAB_IDS = [
-  'overview',
+  'dashboard',
+  // Group tabs (parent dashboard components)
+  'work',
+  'crm',
+  'documents',
+  'analytics',
+  'workflows',
+  'support',
+  // Child tabs (mounted within groups or standalone)
   'leads',
   'contacts',
   'projects',
@@ -257,12 +265,8 @@ export const ADMIN_TAB_IDS = [
   'tasks',
   'client-detail',
   'messages',
-  'analytics',
-  'documents',
-  'support',
   'system',
   'project-detail',
-  'workflows',
   'questionnaires',
   'invoices',
   'contracts',

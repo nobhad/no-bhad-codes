@@ -67,4 +67,6 @@ export interface ClientPortalContext {
   showNotification: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   formatDate: (dateString: string) => string;
   escapeHtml: (text: string) => string;
+  switchView?: (view: string) => void;
+  refreshData?: () => Promise<void>;
 }

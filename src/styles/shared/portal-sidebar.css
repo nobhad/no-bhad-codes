@@ -138,12 +138,12 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 .sidebar-toggle {
   position: absolute;
   top: var(--space-1);
-  right: -12px;
+  right: calc(-1 * var(--icon-size-xs));
   background: var(--portal-bg-light);
   border: var(--portal-border);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  border-radius: var(--portal-radius-full);
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   cursor: pointer;
   z-index: var(--z-index-10);
   display: flex;
@@ -214,8 +214,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .dropdown-btn {
-  width: 40px;
-  height: 40px;
+  width: var(--btn-portal-icon-size);
+  height: var(--btn-portal-icon-size);
   padding: 0;
   background: var(--portal-bg-light);
   color: var(--portal-text-light);
@@ -232,7 +232,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .dropdown-icon {
-  font-size: 1.2rem;
+  font-size: var(--font-size-lg);
 }
 
 .dropdown-menu {
@@ -269,7 +269,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .item-icon {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 /* Logout Button (sidebar footer) */
@@ -291,7 +291,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .logout-icon {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Sidebar footer for projects sidebar */
@@ -500,13 +500,13 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   /* Badge positioning when sidebar auto-collapses */
   .portal .sidebar:not(.collapsed) .sidebar-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
-    min-width: 14px;
-    height: 14px;
-    font-size: 9px;
-    padding: 0 3px;
-    border-radius: 50%;
+    top: calc(-1 * var(--space-0-5));
+    right: calc(-1 * var(--space-0-5));
+    min-width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    font-size: var(--font-size-2xs);
+    padding: 0 var(--space-0-5);
+    border-radius: var(--portal-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -607,8 +607,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.35rem;
-  height: 1.35rem;
+  min-width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   padding: 0 var(--space-0-5);
   border-radius: var(--border-radius-full, 9999px);
   background: var(--color-danger);
@@ -621,7 +621,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     Roboto,
     sans-serif
   );
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
@@ -653,21 +653,21 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 /* Collapsed sidebar: small circle at top-right */
 .portal .sidebar.collapsed .sidebar-buttons .btn .sidebar-badge {
-  top: 2px;
-  right: 2px;
+  top: var(--space-0-5);
+  right: var(--space-0-5);
   margin: 0;
   min-width: var(--icon-size-md);
   width: var(--icon-size-md);
   height: var(--icon-size-md);
   padding: 0;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: 1;
   transform: none;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: var(--color-danger);
   color: var(--color-white);
-  box-shadow: 0 0 0 2px var(--portal-bg-dark);
+  box-shadow: 0 0 0 var(--border-width) var(--portal-bg-dark);
 }
 
 /* Collapsed - no scale on hover */
@@ -679,18 +679,18 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 @media (--laptop) {
   .portal .sidebar .sidebar-buttons .btn .sidebar-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: var(--space-0-5);
+    right: var(--space-0-5);
     margin: 0;
     min-width: var(--icon-size-md);
     width: var(--icon-size-md);
     height: var(--icon-size-md);
     padding: 0;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     font-weight: 700;
     background: var(--color-danger);
     color: var(--color-white);
-    box-shadow: 0 0 0 2px var(--portal-bg-dark);
+    box-shadow: 0 0 0 var(--border-width) var(--portal-bg-dark);
   }
 }
 
@@ -704,18 +704,18 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  min-width: 1rem;
-  height: 1rem;
+  min-width: var(--icon-size-md);
+  height: var(--icon-size-md);
   padding: 0;
   background: transparent;
   border: none;
   color: var(--portal-text-muted);
   font-family: inherit;
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
   font-weight: 400;
   line-height: 1;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--transition-faster);
   pointer-events: none;
   flex-shrink: 0;
 }

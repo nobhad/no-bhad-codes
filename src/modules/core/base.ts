@@ -24,6 +24,7 @@
 /* eslint-disable no-undef */
 
 import type { ModuleOptions, ModuleStatus, EventHandler } from '../../types/modules';
+import { createLogger, type Logger } from '../../utils/logger';
 
 export class BaseModule {
   protected name: string;
@@ -38,9 +39,11 @@ export class BaseModule {
   protected errors: string[];
   protected hasError: boolean;
   protected state: Record<string, unknown>;
+  protected logger: Logger;
 
   constructor(name: string, options: ModuleOptions = {}) {
     this.name = name;
+    this.logger = createLogger(name);
     this.isInitialized = false;
     this.isDestroyed = false;
     this.debug = options.debug || false;
@@ -327,19 +330,20 @@ export class BaseModule {
 
   /**
    * Logging methods with module context
+   * Uses centralized logger for consistent output
    */
   protected log(...args: unknown[]): void {
     if (this.debug) {
-      console.log(`[${this.name}]`, ...args);
+      this.logger.debug(args.map(String).join(' '));
     }
   }
 
   protected warn(...args: unknown[]): void {
-    console.warn(`[${this.name}]`, ...args);
+    this.logger.warn(args.map(String).join(' '));
   }
 
   protected error(...args: unknown[]): void {
-    console.error(`[${this.name}]`, ...args);
+    this.logger.error(args.map(String).join(' '));
   }
 
   /**

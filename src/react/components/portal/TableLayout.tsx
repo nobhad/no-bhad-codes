@@ -25,8 +25,6 @@ export interface TableLayoutProps {
   pagination?: React.ReactNode;
   /** Bulk actions toolbar (shown above table when items selected) */
   bulkActions?: React.ReactNode;
-  /** Error state */
-  error?: React.ReactNode;
   /** Additional className for outer container */
   className?: string;
   /** Ref for the outer container (for animations) */
@@ -40,12 +38,11 @@ export function TableLayout({
   children,
   pagination,
   bulkActions,
-  error,
   className,
   containerRef,
 }: TableLayoutProps) {
   return (
-    <div ref={containerRef} className={cn(className)}>
+    <div ref={containerRef} className={cn('table-layout', className)}>
       <div className="data-table-card">
         {/* Table Header */}
         <div className="data-table-header">
@@ -60,9 +57,6 @@ export function TableLayout({
             </div>
           )}
         </div>
-
-        {/* Error State */}
-        {error}
 
         {/* Bulk Actions */}
         {bulkActions}

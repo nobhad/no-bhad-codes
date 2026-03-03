@@ -27,7 +27,7 @@ body {
   opacity: 1;
   visibility: visible;
   color: var(--color-dark);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   text-align: center;
   text-transform: uppercase;
 }
@@ -43,7 +43,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-400);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {

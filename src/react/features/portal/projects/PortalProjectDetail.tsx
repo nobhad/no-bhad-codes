@@ -5,8 +5,6 @@
 
 import * as React from 'react';
 import {
-  ArrowLeft,
-  RefreshCw,
   ExternalLink,
   CheckCircle2,
   Circle,
@@ -14,10 +12,11 @@ import {
   MessageSquare,
   Flag,
   FileText,
+  ListTodo,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { IconButton, TabList, TabPanel } from '@react/factories';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import type {
@@ -26,6 +25,10 @@ import type {
   PortalProjectMilestone,
   PortalProjectUpdate,
 } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalProjectDetail');
 
 interface PortalProjectDetailProps {
   /** Project ID to display */
@@ -77,18 +80,25 @@ function formatRelativeTime(dateString: string): string {
  * Get update type icon
  */
 function getUpdateIcon(type: PortalProjectUpdate['update_type']) {
-  const iconClass = 'tw-h-3.5 tw-w-3.5';
   switch (type) {
     case 'milestone':
-      return <Flag className={iconClass} />;
+      return <Flag />;
     case 'status':
-      return <CheckCircle2 className={iconClass} />;
+      return <CheckCircle2 />;
     case 'deliverable':
-      return <FileText className={iconClass} />;
+      return <FileText />;
     default:
-      return <MessageSquare className={iconClass} />;
+      return <MessageSquare />;
   }
 }
+
+// Tab configuration
+type PortalProjectTab = 'milestones' | 'updates';
+
+const TABS: Array<{ id: PortalProjectTab; label: string }> = [
+  { id: 'milestones', label: 'Milestones' },
+  { id: 'updates', label: 'Updates' },
+];
 
 /**
  * PortalProjectDetail Component
@@ -108,7 +118,7 @@ export function PortalProjectDetail({
   const [updates, setUpdates] = React.useState<PortalProjectUpdate[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<'milestones' | 'updates'>('milestones');
+  const [activeTab, setActiveTab] = React.useState<PortalProjectTab>('milestones');
 
   // Build headers helper
   const getHeaders = React.useCallback(() => {
@@ -129,7 +139,7 @@ export function PortalProjectDetail({
 
     try {
       // Fetch project
-      const projectResponse = await fetch(`/api/projects/${projectId}`, {
+      const projectResponse = await fetch(buildEndpoint.project(projectId), {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include',
@@ -157,7 +167,7 @@ export function PortalProjectDetail({
 
       // Fetch milestones
       try {
-        const milestonesResponse = await fetch(`/api/projects/${projectId}/milestones`, {
+        const milestonesResponse = await fetch(buildEndpoint.projectMilestones(projectId), {
           method: 'GET',
           headers: getHeaders(),
           credentials: 'include',
@@ -171,12 +181,12 @@ export function PortalProjectDetail({
           setMilestones(milestonesArray);
         }
       } catch (err) {
-        console.warn('[PortalProjectDetail] Could not fetch milestones:', err);
+        logger.warn('[PortalProjectDetail] Could not fetch milestones:', err);
       }
 
       // Fetch updates/activity
       try {
-        const updatesResponse = await fetch(`/api/projects/${projectId}/updates`, {
+        const updatesResponse = await fetch(buildEndpoint.projectUpdates(projectId), {
           method: 'GET',
           headers: getHeaders(),
           credentials: 'include',
@@ -190,12 +200,12 @@ export function PortalProjectDetail({
           setUpdates(updatesArray);
         }
       } catch (err) {
-        console.warn('[PortalProjectDetail] Could not fetch updates:', err);
+        logger.warn('[PortalProjectDetail] Could not fetch updates:', err);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
-      console.error('[PortalProjectDetail] Error:', message);
+      logger.error('[PortalProjectDetail] Error:', message);
     } finally {
       setIsLoading(false);
     }
@@ -218,8 +228,8 @@ export function PortalProjectDetail({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
+      <div className="loading-state">
+        <span className="loading-spinner" />
         <span>Loading project...</span>
       </div>
     );
@@ -228,15 +238,15 @@ export function PortalProjectDetail({
   // Error state
   if (error || !project) {
     return (
-      <div className="tw-error">
-        <div className="tw-text-center tw-mb-4">{error || 'Project not found'}</div>
-        <div className="pdetail-error-actions">
+      <div className="error-state">
+        <p>{error || 'Project not found'}</p>
+        <div className="tw-flex tw-gap-2">
           {onBack && (
-            <button className="tw-btn-secondary" onClick={onBack}>
+            <button className="btn-secondary" onClick={onBack}>
               Go Back
             </button>
           )}
-          <button className="tw-btn-secondary" onClick={fetchProjectDetails}>
+          <button className="btn-secondary" onClick={fetchProjectDetails}>
             Retry
           </button>
         </div>
@@ -254,25 +264,30 @@ export function PortalProjectDetail({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header */}
-      <div className="pdetail-header">
-        {onBack && (
-          <button className="tw-btn-icon" onClick={onBack} title="Back to projects">
-            <ArrowLeft className="tw-h-4 tw-w-4" />
-          </button>
-        )}
-        <div className="pdetail-flex-content">
-          <div className="pdetail-title-row">
-            <h2 className="tw-heading pdetail-heading">{project.name}</h2>
-            <span className="tw-badge">{statusLabel}</span>
-          </div>
-          {project.description && (
-            <p className="tw-text-muted pdetail-description">
-              {project.description}
-            </p>
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          {/* Back Button */}
+          {onBack && (
+            <IconButton action="back" onClick={onBack} title="Back to projects" />
           )}
+
+          {/* Project Info */}
+          <div className="tw-flex tw-flex-col tw-gap-0.5">
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <h2 className="tw-heading tw-text-lg tw-m-0">{project.name}</h2>
+              <span className="tw-badge">{statusLabel}</span>
+            </div>
+            {project.description && (
+              <p className="tw-text-muted tw-text-sm tw-m-0">
+                {project.description}
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Actions */}
         {project.preview_url && (
-          <button className="tw-btn-secondary" onClick={handlePreviewClick}>
+          <button className="btn-secondary" onClick={handlePreviewClick}>
             <ExternalLink className="tw-h-4 tw-w-4" />
             Preview
           </button>
@@ -281,22 +296,22 @@ export function PortalProjectDetail({
 
       {/* Progress Section */}
       <div className="tw-panel">
-        <div className="pdetail-progress-header">
+        <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
           <span className="tw-label">Overall Progress</span>
-          <span className="tw-text-primary pdetail-text-base">{progress}%</span>
+          <span className="tw-text-primary">{progress}%</span>
         </div>
-        <div className="tw-progress-track pdetail-progress-track">
+        <div className="tw-progress-track">
           <div
             className="tw-progress-bar"
             style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
           />
         </div>
-        <div className="pdetail-progress-footer">
-          <span className="tw-text-muted pdetail-text-xs">
+        <div className="tw-flex tw-items-center tw-justify-between tw-mt-2">
+          <span className="tw-text-muted tw-text-xs">
             {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
           </span>
           {milestones.length > 0 && (
-            <span className="tw-text-muted pdetail-text-xs">
+            <span className="tw-text-muted tw-text-xs">
               {completedMilestones}/{milestones.length} milestones
             </span>
           )}
@@ -304,33 +319,27 @@ export function PortalProjectDetail({
       </div>
 
       {/* Tabs */}
-      <div className="tw-tab-list">
-        <button
-          onClick={() => setActiveTab('milestones')}
-          className={activeTab === 'milestones' ? 'tw-tab-active' : 'tw-tab'}
-        >
-          Milestones ({milestones.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('updates')}
-          className={activeTab === 'updates' ? 'tw-tab-active' : 'tw-tab'}
-        >
-          Updates ({updates.length})
-        </button>
-      </div>
+      <TabList
+        tabs={TABS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Project detail tabs"
+      />
 
       {/* Tab Content */}
-      {activeTab === 'milestones' ? (
+      <TabPanel tabId="milestones" isActive={activeTab === 'milestones'}>
         <MilestonesList
           milestones={milestones}
           containerRef={milestonesRef}
         />
-      ) : (
+      </TabPanel>
+
+      <TabPanel tabId="updates" isActive={activeTab === 'updates'}>
         <UpdatesTimeline
           updates={updates}
           containerRef={updatesRef}
         />
-      )}
+      </TabPanel>
     </div>
   );
 }
@@ -346,49 +355,51 @@ interface MilestonesListProps {
 function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
   if (milestones.length === 0) {
     return (
-      <div className="tw-empty-state">No milestones defined yet.</div>
+      <div className="empty-state">
+        <ListTodo className="tw-h-6 tw-w-6" />
+        <span>No milestones defined yet</span>
+      </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-3">
       {milestones.map((milestone) => (
         <div key={milestone.id} className="tw-card">
-          <div className="pdetail-milestone-row">
+          <div className="tw-flex tw-gap-3">
             {/* Status Icon */}
-            <div className="pdetail-milestone-icon">
+            <div className="tw-flex-shrink-0">
               {milestone.is_completed ? (
-                <CheckCircle2 className="tw-h-4 tw-w-4 pdetail-milestone-completed" />
+                <CheckCircle2 className="tw-h-4 tw-w-4 tw-text-[var(--status-completed)]" />
               ) : (
-                <Circle className="tw-h-4 tw-w-4 tw-text-muted" />
+                <Circle className="tw-h-4 tw-w-4" />
               )}
             </div>
 
             {/* Content */}
-            <div className="pdetail-flex-content">
-              <div className="pdetail-milestone-header">
+            <div className="tw-flex-1">
+              <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
                 <span
                   className={cn(
-                    milestone.is_completed ? 'tw-text-muted tw-line-through' : 'tw-text-primary',
-                    'pdetail-text-base'
+                    milestone.is_completed ? 'tw-text-muted tw-line-through' : 'tw-text-primary'
                   )}
                 >
                   {milestone.title}
                 </span>
                 {milestone.due_date && (
-                  <div className="pdetail-date-row tw-text-muted">
+                  <div className="tw-flex tw-items-center tw-gap-1 tw-text-muted">
                     <Clock className="tw-h-3 tw-w-3" />
-                    <span className="pdetail-text-xs">{formatDate(milestone.due_date)}</span>
+                    <span className="tw-text-xs">{formatDate(milestone.due_date)}</span>
                   </div>
                 )}
               </div>
               {milestone.description && (
-                <p className="tw-text-muted pdetail-description">
+                <p className="tw-text-muted tw-text-sm tw-m-0 tw-mt-1">
                   {milestone.description}
                 </p>
               )}
               {milestone.is_completed && milestone.completed_date && (
-                <span className="pdetail-completed-date">
+                <span className="tw-text-xs tw-text-muted">
                   Completed {formatDate(milestone.completed_date)}
                 </span>
               )}
@@ -411,33 +422,36 @@ interface UpdatesTimelineProps {
 function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
   if (updates.length === 0) {
     return (
-      <div className="tw-empty-state">No updates yet.</div>
+      <div className="empty-state">
+        <Activity className="tw-h-6 tw-w-6" />
+        <span>No updates yet</span>
+      </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="pdetail-timeline">
+    <div ref={containerRef} className="tw-relative">
       {/* Timeline line */}
-      <div className="pdetail-timeline-line" />
+      <div className="tw-absolute tw-left-2 tw-top-0 tw-bottom-0 tw-w-px tw-bg-[var(--portal-border)]" />
 
       {/* Updates */}
-      <div className="tw-section">
+      <div className="tw-flex tw-flex-col tw-gap-3">
         {updates.map((update) => (
-          <div key={update.id} className="pdetail-update-row">
+          <div key={update.id} className="tw-flex tw-gap-3 tw-relative">
             {/* Timeline dot */}
-            <div className="pdetail-timeline-dot">
+            <div className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-flex tw-items-center tw-justify-center tw-bg-[var(--portal-bg)] tw-z-10">
               <span className="tw-text-muted">{getUpdateIcon(update.update_type)}</span>
             </div>
 
             {/* Content */}
-            <div className="tw-card pdetail-update-card">
-              <div className="pdetail-update-header">
-                <span className="tw-text-primary pdetail-text-base">{update.title}</span>
-                <span className="tw-text-muted pdetail-text-xs">{formatRelativeTime(update.created_at)}</span>
+            <div className="tw-card tw-flex-1">
+              <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <span className="tw-text-primary">{update.title}</span>
+                <span className="tw-text-muted tw-text-xs">{formatRelativeTime(update.created_at)}</span>
               </div>
-              <p className="tw-text-muted pdetail-text-sm">{update.content}</p>
+              <p className="tw-text-muted tw-text-sm tw-m-0 tw-mt-1">{update.content}</p>
               {update.created_by && (
-                <span className="tw-text-muted pdetail-created-by">
+                <span className="tw-text-xs tw-text-muted">
                   by {update.created_by}
                 </span>
               )}

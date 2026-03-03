@@ -8,6 +8,10 @@
  * Click to edit, Enter/blur to save, Escape to cancel.
  */
 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('InlineEdit');
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -131,7 +135,7 @@ export function enableInlineEdit(config: InlineEditConfig): void {
       try {
         await onSave(newValue);
       } catch (error) {
-        console.error('[InlineEdit] Save failed:', error);
+        logger.error('[InlineEdit] Save failed:', error);
         // Restore original on error
         cleanup();
         return;

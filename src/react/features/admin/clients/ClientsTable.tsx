@@ -11,7 +11,8 @@ import {
   AdminTableRow,
   AdminTableCell,
   AdminTableEmpty,
-  AdminTableLoading
+  AdminTableLoading,
+  AdminTableError
 } from '@react/components/portal/AdminTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -37,14 +38,19 @@ import type { Client, ClientStatus, SortConfig } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
 import { CLIENTS_FILTER_CONFIG } from '../shared/filterConfigs';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface ClientsTableProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
-  /** Callback when client is selected for detail view */
-  onViewClient?: (clientId: number) => void;
+  /** Navigation callback for detail views */
+  onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 // Filter function
@@ -111,13 +117,13 @@ function sortClients(a: Client, b: Client, sort: SortConfig): number {
 function getClientDisplayName(client: Client): { primary: string; secondary: string | null } {
   if (client.client_type === 'business') {
     return {
-      primary: client.company_name || 'Unknown Company',
-      secondary: client.contact_name
+      primary: decodeHtmlEntities(client.company_name) || 'Unknown Company',
+      secondary: client.contact_name ? decodeHtmlEntities(client.contact_name) : null
     };
   }
   return {
-    primary: client.contact_name || 'Unknown',
-    secondary: client.company_name
+    primary: decodeHtmlEntities(client.contact_name) || 'Unknown',
+    secondary: client.company_name ? decodeHtmlEntities(client.company_name) : null
   };
 }
 
@@ -134,8 +140,10 @@ function getInvitationStatus(client: Client): 'invited' | 'not-invited' | 'activ
  */
 export function ClientsTable({
   getAuthToken,
-  onViewClient,
-  showNotification
+  onNavigate,
+  showNotification,
+  defaultPageSize = 25,
+  overviewMode = false,
 }: ClientsTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -172,9 +180,9 @@ export function ClientsTable({
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_clients_pagination',
+    storageKey: overviewMode ? undefined : 'admin_clients_pagination',
     totalItems: filteredClients.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   // Get paginated data
@@ -337,9 +345,9 @@ export function ClientsTable({
   // Handle view client
   const handleViewClient = useCallback(
     (clientId: number) => {
-      onViewClient?.(clientId);
+      onNavigate?.('client-detail', String(clientId));
     },
-    [onViewClient]
+    [onNavigate]
   );
 
   // Handle row click
@@ -424,16 +432,6 @@ export function ClientsTable({
           deleteLoading={deleteDialog.isLoading}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={refetch}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredClients.length > 0 ? (
           <TablePagination
@@ -507,8 +505,10 @@ export function ClientsTable({
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
               <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedClients.length === 0 ? (
               <AdminTableEmpty
@@ -573,16 +573,18 @@ export function ClientsTable({
                           </button>
                         </PortalDropdownTrigger>
                         <PortalDropdownContent sideOffset={0} align="start">
-                          {Object.entries(CLIENT_STATUS_CONFIG).map(([status, config]) => (
-                            <PortalDropdownItem
-                              key={status}
-                              onClick={() => handleStatusChange(client.id, status as ClientStatus)}
-                            >
-                              <StatusBadge status={getStatusVariant(status)} size="sm">
-                                {config.label}
-                              </StatusBadge>
-                            </PortalDropdownItem>
-                          ))}
+                          {Object.entries(CLIENT_STATUS_CONFIG)
+                            .filter(([status]) => status !== client.status)
+                            .map(([status, config]) => (
+                              <PortalDropdownItem
+                                key={status}
+                                onClick={() => handleStatusChange(client.id, status as ClientStatus)}
+                              >
+                                <StatusBadge status={getStatusVariant(status)} size="sm">
+                                  {config.label}
+                                </StatusBadge>
+                              </PortalDropdownItem>
+                            ))}
                         </PortalDropdownContent>
                       </PortalDropdown>
                     </AdminTableCell>

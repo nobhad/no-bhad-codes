@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Project, ProjectStats, ApiResponse } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
 import { decodeArrayFields } from '../utils/decodeText';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useProjects');
 
 /** Text fields in Project that may contain HTML entities */
 const PROJECT_TEXT_FIELDS = ['project_name', 'description', 'notes'] as const;
@@ -97,7 +100,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
-      console.error('[useProjects] Error:', message);
+      logger.error('[useProjects] Error:', message);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +140,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         throw new Error(data.error || 'Failed to update project');
       } catch (err) {
         const message = err instanceof Error ? err.message : 'An error occurred';
-        console.error('[useProjects] Update error:', message);
+        logger.error('[useProjects] Update error:', message);
         return false;
       }
     },
@@ -195,7 +198,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
           }
         }
       } catch (err) {
-        console.error('[useProjects] Bulk delete error:', err);
+        logger.error('[useProjects] Bulk delete error:', err);
         failed = ids.length;
       }
 

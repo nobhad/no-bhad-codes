@@ -12,6 +12,9 @@
 import { BaseModule } from '../core/base';
 import { gsap } from 'gsap';
 import { formatTextWithLineBreaks } from '../../utils/format-utils';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('ProjectsModule');
 
 interface PortfolioProject {
   id: string;
@@ -160,7 +163,7 @@ export class ProjectsModule extends BaseModule {
 
     const project = this.portfolioData.projects.find((p) => p.slug === slug);
     if (!project) {
-      console.warn('[ProjectsModule] Project not found:', slug);
+      this.warn(`Project not found: ${slug}`);
       // Navigate back to projects list
       window.location.hash = '#/projects';
       return;
@@ -186,7 +189,7 @@ export class ProjectsModule extends BaseModule {
       }
       this.portfolioData = await response.json();
     } catch (error) {
-      console.error('[ProjectsModule] Failed to load portfolio data:', error);
+      logger.error('[ProjectsModule] Failed to load portfolio data:', error);
       this.portfolioData = { projects: [], categories: [] };
     }
   }

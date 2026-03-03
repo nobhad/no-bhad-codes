@@ -265,6 +265,7 @@ export interface InvoiceReminderRow {
 export type InvoiceStatus =
   | 'draft'
   | 'sent'
+  | 'pending'
   | 'viewed'
   | 'partial'
   | 'paid'

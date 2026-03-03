@@ -46,7 +46,7 @@
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .help-search-input:focus {
@@ -79,7 +79,7 @@
   right: 0;
   margin-top: var(--space-0-5);
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   max-height: 300px;
   overflow-y: auto;
   z-index: 100;
@@ -91,7 +91,7 @@
   gap: var(--space-1);
   padding: var(--space-1-5);
   color: var(--portal-text-light);
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
   cursor: pointer;
 }
 
@@ -154,7 +154,7 @@
 .help-section-title {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   margin: 0 0 var(--space-2);
   font-family: var(--font-family-mono);
   font-size: 1.1rem;
@@ -173,7 +173,7 @@
 
 .help-accordion-item {
   overflow: hidden;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   transition: border-color var(--transition-fast);
 }
 
@@ -249,7 +249,7 @@
 .help-accordion-article {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1-5);
   color: var(--portal-text-light);
   background: none;
@@ -273,7 +273,7 @@
   align-items: flex-start;
   gap: var(--space-1-5);
   padding: var(--space-1-5);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-light);
   width: 100%;
   cursor: pointer;
@@ -315,7 +315,7 @@
 
 .help-contact-section {
   padding: var(--space-3);
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 .help-contact-content {
@@ -379,7 +379,7 @@
   align-items: flex-start;
   gap: var(--space-1-5);
   padding: var(--space-1-5);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-light);
   cursor: pointer;
 }
@@ -421,7 +421,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 .help-article-category-badge {
@@ -477,7 +477,7 @@
 .help-article-body pre {
   margin: 0 0 var(--space-1-5);
   padding: var(--space-1-5);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   overflow-x: auto;
 }
 

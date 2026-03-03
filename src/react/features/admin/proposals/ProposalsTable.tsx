@@ -1,16 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   FileText,
   Inbox,
-  Edit,
-  MoreHorizontal,
-  Trash2,
-  Copy,
-  Download,
-  Eye,
-  Send,
   ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
@@ -32,6 +24,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import {
   PortalDropdown,
@@ -45,6 +38,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { PROPOSALS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('ProposalsTable');
 
 interface Proposal {
   id: number;
@@ -198,7 +195,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/proposals', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.PROPOSALS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -230,7 +227,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
   // Status change handler
   const handleStatusChange = useCallback(async (proposalId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/admin/proposals/${proposalId}`, {
+      const response = await fetch(buildEndpoint.adminProposal(proposalId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -248,14 +245,14 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
       );
       showNotification?.('Proposal status updated', 'success');
     } catch (err) {
-      console.error('Failed to update proposal status:', err);
+      logger.error('Failed to update proposal status:', err);
       showNotification?.('Failed to update proposal status', 'error');
     }
   }, [getHeaders, showNotification]);
 
   const handleSendProposal = useCallback(async (proposalId: number) => {
     try {
-      const response = await fetch(`/api/admin/proposals/${proposalId}/send`, {
+      const response = await fetch(buildEndpoint.adminProposalSend(proposalId), {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include'
@@ -266,14 +263,14 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
       );
       showNotification?.('Proposal sent', 'success');
     } catch (err) {
-      console.error('Failed to send proposal:', err);
+      logger.error('Failed to send proposal:', err);
       showNotification?.('Failed to send proposal', 'error');
     }
   }, [getHeaders, showNotification]);
 
   const handleDuplicate = useCallback(async (proposalId: number) => {
     try {
-      const response = await fetch(`/api/admin/proposals/${proposalId}/duplicate`, {
+      const response = await fetch(buildEndpoint.adminProposalDuplicate(proposalId), {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include'
@@ -282,7 +279,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
       loadProposals();
       showNotification?.('Proposal duplicated', 'success');
     } catch (err) {
-      console.error('Failed to duplicate proposal:', err);
+      logger.error('Failed to duplicate proposal:', err);
       showNotification?.('Failed to duplicate proposal', 'error');
     }
   }, [getHeaders, showNotification, loadProposals]);
@@ -293,7 +290,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
 
     const ids = selection.selectedItems.map((p) => p.id);
     try {
-      const response = await fetch('/api/admin/proposals/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.PROPOSALS_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -306,7 +303,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} proposal${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete proposals:', err);
+      logger.error('Failed to delete proposals:', err);
       showNotification?.('Failed to delete proposals', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -391,16 +388,6 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadProposals}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredProposals.length > 0 ? (
           <TablePagination
@@ -419,7 +406,6 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -431,20 +417,12 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
               />
             </AdminTableHead>
             <AdminTableHead
-              className="name-col"
+              className="contact-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Proposal
-            </AdminTableHead>
-            <AdminTableHead
-              className="client-col"
-              sortable
-              sortDirection={sort?.column === 'client' ? sort.direction : null}
-              onClick={() => toggleSort('client')}
-            >
-              Client
             </AdminTableHead>
             <AdminTableHead
               className="amount-col"
@@ -455,25 +433,26 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
               Amount
             </AdminTableHead>
             <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead className="date-col">Valid Until</AdminTableHead>
             <AdminTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
               onClick={() => toggleSort('createdAt')}
             >
-              Created
+              Dates
             </AdminTableHead>
             <AdminTableHead className="actions-col">Actions</AdminTableHead>
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
-            <AdminTableLoading colSpan={8} rows={5} />
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={6} message={error} onRetry={loadProposals} />
+          ) : isLoading ? (
+            <AdminTableLoading colSpan={6} rows={5} />
           ) : paginatedProposals.length === 0 ? (
             <AdminTableEmpty
-              colSpan={8}
+              colSpan={6}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No proposals match your filters' : 'No proposals yet'}
             />
@@ -491,27 +470,14 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
                     aria-label={`Select ${proposal.title}`}
                   />
                 </AdminTableCell>
-                <AdminTableCell className="primary-cell">
-                  <div className="cell-with-icon">
-                    <FileText className="cell-icon" />
-                    <div className="cell-content">
-                      <span className="cell-title">{proposal.title}</span>
-                      {proposal.projectType && (
-                        <span className="cell-subtitle">{proposal.projectType}</span>
-                      )}
-                    </div>
+                <AdminTableCell className="primary-cell contact-cell">
+                  <div className="cell-content">
+                    <span className="cell-title">{proposal.title}</span>
+                    <span className="cell-subtitle">{proposal.clientName}</span>
+                    {proposal.projectType && (
+                      <span className="identity-company">{proposal.projectType}</span>
+                    )}
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
-                  <button
-                    className="link-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigate?.('clients', String(proposal.clientId));
-                    }}
-                  >
-                    {proposal.clientName}
-                  </button>
                 </AdminTableCell>
                 <AdminTableCell className="text-right">
                   {formatCurrency(proposal.amount)}
@@ -527,64 +493,46 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
                       </button>
                     </PortalDropdownTrigger>
                     <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(PROPOSAL_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(proposal.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
+                      {Object.entries(PROPOSAL_STATUS_CONFIG)
+                        .filter(([status]) => status !== proposal.status)
+                        .map(([status, config]) => (
+                          <PortalDropdownItem
+                            key={status}
+                            onClick={() => handleStatusChange(proposal.id, status)}
+                          >
+                            <StatusBadge status={getStatusVariant(status)} size="sm">
+                              {config.label}
+                            </StatusBadge>
+                          </PortalDropdownItem>
+                        ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </AdminTableCell>
                 <AdminTableCell className="date-cell">
-                  {proposal.validUntil ? (
-                    <span className={new Date(proposal.validUntil) < new Date() ? 'text-danger' : ''}>
-                      {formatDate(proposal.validUntil)}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">
-                  {formatDate(proposal.createdAt)}
+                  <div className="cell-content">
+                    <span className="cell-title">{formatDate(proposal.createdAt)}</span>
+                    {proposal.validUntil && (
+                      <span className={`cell-subtitle ${new Date(proposal.validUntil) < new Date() ? 'text-danger' : ''}`}>
+                        Valid until {formatDate(proposal.validUntil)}
+                      </span>
+                    )}
+                  </div>
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {proposal.status === 'draft' && (
-                      <IconButton
-                        action="send"
-                        title="Send"
-                        onClick={() => handleSendProposal(proposal.id)}
-                      />
+                      <>
+                        <IconButton
+                          action="send"
+                          title="Send"
+                          onClick={() => handleSendProposal(proposal.id)}
+                        />
+                        <IconButton action="edit" title="Edit" />
+                      </>
                     )}
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        {proposal.status === 'draft' && (
-                          <PortalDropdownItem>
-                            <Edit className="dropdown-icon" />
-                            Edit
-                          </PortalDropdownItem>
-                        )}
-                        <PortalDropdownItem onClick={() => handleDuplicate(proposal.id)}>
-                          <Copy className="dropdown-icon" />
-                          Duplicate
-                        </PortalDropdownItem>
-                        <PortalDropdownItem className="text-danger">
-                          <Trash2 className="dropdown-icon" />
-                          Delete
-                        </PortalDropdownItem>
-                      </PortalDropdownContent>
-                    </PortalDropdown>
+                    <IconButton action="duplicate" title="Duplicate" onClick={() => handleDuplicate(proposal.id)} />
+                    <IconButton action="delete" title="Delete" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>
@@ -592,7 +540,6 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate }: P
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

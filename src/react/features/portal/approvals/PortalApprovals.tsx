@@ -5,12 +5,18 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, Inbox, Filter } from 'lucide-react';
+import { Inbox, Filter, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { ApprovalCard } from './ApprovalCard';
 import type { PendingApproval, ApprovalEntityType, PendingApprovalsResponse } from './types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalApprovals');
 
 export interface PortalApprovalsProps {
   /** Auth token getter for API calls */
@@ -65,7 +71,7 @@ export function PortalApprovals({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/approvals/pending', {
+      const response = await fetch(API_ENDPOINTS.APPROVALS_PENDING, {
         method: 'GET',
         headers,
         credentials: 'include'
@@ -78,7 +84,7 @@ export function PortalApprovals({
       const data: PendingApprovalsResponse = await response.json();
       setApprovals(data.approvals || []);
     } catch (err) {
-      console.error('Error fetching approvals:', err);
+      logger.error('Error fetching approvals:', err);
       setError(err instanceof Error ? err.message : 'Failed to load approvals');
     } finally {
       setIsLoading(false);
@@ -102,7 +108,7 @@ export function PortalApprovals({
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`/api/approvals/requests/${id}/respond`, {
+        const response = await fetch(buildEndpoint.approvalRespond(id), {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -123,7 +129,7 @@ export function PortalApprovals({
           'success'
         );
       } catch (err) {
-        console.error(`Error ${action}ing approval:`, err);
+        logger.error(`Error ${action}ing approval:`, err);
         showNotification?.(
           err instanceof Error ? err.message : `Failed to ${action} request`,
           'error'
@@ -177,7 +183,7 @@ export function PortalApprovals({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading approvals...</span>
       </div>
@@ -187,9 +193,9 @@ export function PortalApprovals({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={fetchApprovals}>
+        <button className="btn-secondary" onClick={fetchApprovals}>
           Retry
         </button>
       </div>
@@ -201,7 +207,7 @@ export function PortalApprovals({
       {/* Header with filter */}
       <div className="approvals-header">
         <div className="approvals-filter">
-          <Filter className="tw-h-4 tw-w-4 tw-text-muted" />
+          <Filter className="tw-h-4 tw-w-4" />
           <div className="tw-tab-list approvals-tabs">
             {ENTITY_FILTER_OPTIONS.map((option) => {
               const count = option.value === 'all' ? approvals.length : countByType[option.value] || 0;
@@ -222,17 +228,15 @@ export function PortalApprovals({
         </div>
 
         {/* Refresh button */}
-        <button className="tw-btn-icon" onClick={fetchApprovals} title="Refresh">
-          <RefreshCw className="tw-h-4 tw-w-4" />
-        </button>
+        <IconButton action="refresh" onClick={fetchApprovals} title="Refresh" />
       </div>
 
       {/* Empty state */}
       {filteredApprovals.length === 0 ? (
-        <div className="tw-empty-state">
-          <Inbox className="tw-h-6 tw-w-6" />
-          <span>{approvals.length === 0 ? 'No pending approvals' : `No ${entityFilter} approvals pending`}</span>
-        </div>
+        <EmptyState
+          icon={<Inbox className="tw-h-6 tw-w-6" />}
+          message={approvals.length === 0 ? 'No pending approvals' : `No ${entityFilter} approvals pending`}
+        />
       ) : (
         /* Approvals list */
         <div ref={listRef} className="tw-section">
@@ -251,8 +255,8 @@ export function PortalApprovals({
 
       {/* Summary footer */}
       {approvals.length > 0 && (
-        <div className="tw-divider approvals-summary">
-          <span className="tw-text-muted proj-text-xs">
+        <div className="tw-panel approvals-summary">
+          <span className="tw-text-muted tw-text-xs">
             {filteredApprovals.length} of {approvals.length} pending approval{approvals.length !== 1 ? 's' : ''}
           </span>
         </div>

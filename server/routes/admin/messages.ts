@@ -43,13 +43,17 @@ router.get(
         c.email as clientEmail,
         p.id as projectId,
         p.project_name as projectName,
-        (SELECT COUNT(*) FROM messages m WHERE m.thread_id = mt.id) as messageCount,
+        (SELECT COUNT(*) FROM messages m WHERE m.thread_id = mt.id AND m.context_type = 'general') as messageCount,
         (SELECT COUNT(*) FROM messages m
          WHERE m.thread_id = mt.id
+         AND m.context_type = 'general'
          AND m.read_at IS NULL
-         AND m.sender_type != 'admin') as unreadCount,
+         AND m.sender_type != 'admin'
+         AND (m.is_internal IS NULL OR m.is_internal = 0)) as unreadCount,
         (SELECT m.message FROM messages m
          WHERE m.thread_id = mt.id
+         AND m.context_type = 'general'
+         AND (m.is_internal IS NULL OR m.is_internal = 0)
          ORDER BY m.created_at DESC LIMIT 1) as lastMessage
       FROM message_threads mt
       JOIN clients c ON mt.client_id = c.id
@@ -94,7 +98,7 @@ router.get(
       return errorResponse(res, 'Conversation not found', 404, 'NOT_FOUND');
     }
 
-    // Get all messages in the conversation
+    // Get all messages in the conversation (including internal for admin view)
     const messages = await db.all(`
       SELECT
         m.id,
@@ -102,11 +106,13 @@ router.get(
         m.sender_type as senderType,
         m.sender_name as senderName,
         m.attachments,
+        m.is_internal as isInternal,
         CASE WHEN m.read_at IS NOT NULL THEN 1 ELSE 0 END as isRead,
         m.read_at as readAt,
         m.created_at as createdAt
       FROM messages m
       WHERE m.thread_id = ?
+        AND m.context_type = 'general'
       ORDER BY m.created_at ASC
     `, [conversationId]);
 

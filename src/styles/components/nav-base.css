@@ -30,7 +30,7 @@
   /* Animation curves - navigation specific */
   --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
   --cubic-default: cubic-bezier(0.65, 0.05, 0, 1);
-  --menu-padding: 2rem;
+  --menu-padding: var(--space-8);
 
   /* Font: --font-family-acme is defined in variables.css :root (alias of --font--acme) */
 
@@ -130,7 +130,7 @@ li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: var(--space-2-5) 0;
   width: 100%;
   min-height: 40px;
   flex-wrap: nowrap;
@@ -139,11 +139,11 @@ li {
 .nav-logo-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   text-decoration: none;
   color: var(--color-nav-text);
   font-weight: 600;
-  font-size: 20px;
+  font-size: var(--font-size-xl);
   pointer-events: auto;
   text-shadow: 0 2px 4px var(--color-shadow);
   text-transform: uppercase;
@@ -152,7 +152,7 @@ li {
   /* Enhanced visibility in dark theme */
   position: relative;
   /* Smooth color transition for theme changes - matches body transition speed */
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
   /* Prevent blue tap highlight on mobile */
   -webkit-tap-highlight-color: transparent;
 }
@@ -199,7 +199,7 @@ li {
 .nav-row__right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
   pointer-events: auto;
   flex-shrink: 0;
   white-space: nowrap;
@@ -370,7 +370,7 @@ li {
   letter-spacing: 0.10em;
   display: inline-block;
   transform: translateY(-100%);
-  transition: transform 0.4s var(--cubic-menu);
+  transition: transform var(--transition-medium) var(--cubic-menu);
   flex: 0 1 auto; /* Don't grow, allow shrink, auto basis */
   text-align: left;
   white-space: nowrap; /* Prevent text wrapping to multiple lines */
@@ -384,7 +384,7 @@ li {
   position: absolute;
   inset: 0%;
   transform: scale3d(1, 0, 1);
-  transition: transform 0.4s var(--cubic-menu);
+  transition: transform var(--transition-medium) var(--cubic-menu);
   pointer-events: none;
 }
 
@@ -448,9 +448,9 @@ li {
   transform: translateY(-40%);
   background: var(--color-primary);
   color: var(--color-dark);
-  padding: 0.25rem 0.75rem;
+  padding: var(--space-1) var(--space-3);
   border-radius: 1rem;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -488,7 +488,7 @@ html[data-theme="dark"] .coming-soon-banner {
   font-weight: 400;
   position: relative;
   text-shadow: none;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   flex-shrink: 0;
   /* Remove opacity: 0 and transition to make eyebrows always visible like Osmo UI */
 }
@@ -520,7 +520,7 @@ html[data-theme="dark"] .coming-soon-banner {
     background: var(--color-primary);
     transform-origin: right center;
     transform: scaleX(0);
-    transition: transform 0.4s var(--cubic-default);
+    transition: transform var(--transition-medium) var(--cubic-default);
   }
 
   .text-link:hover::after {
@@ -540,11 +540,11 @@ html[data-theme="dark"] .coming-soon-banner {
 .menu-button {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   color: inherit;
   text-transform: uppercase;
   flex-shrink: 0;
@@ -553,7 +553,7 @@ html[data-theme="dark"] .coming-soon-banner {
   line-height: inherit;
   text-shadow: 0 2px 4px var(--color-shadow);
   /* Smooth color transition for theme changes - matches body transition speed */
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
 }
 
 /* Active/focus states - red color */
@@ -585,14 +585,14 @@ html[data-theme="dark"] .coming-soon-banner {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
+  border-radius: var(--portal-radius-full);
+  transition: background-color var(--transition-mouse) ease;
 }
 
 .menu-button-icon {
   width: 16px;
   height: 16px;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-normal) ease;
   filter: drop-shadow(0 2px 4px var(--color-shadow));
 }
 
@@ -610,7 +610,7 @@ html[data-theme="dark"] .coming-soon-banner {
   margin: 0;
   padding: 0;
   line-height: 1;
-  font-size: 20px;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   white-space: nowrap;
   font-family: var(--font-family-acme, "Acme", sans-serif);
@@ -636,8 +636,8 @@ html[data-theme="dark"] .coming-soon-banner {
    ===================================================== */
 .menu-details {
   padding-left: var(--container-padding);
-  grid-column-gap: 1.25em;
-  grid-row-gap: 1.25em;
+  grid-column-gap: var(--space-5);
+  grid-row-gap: var(--space-5);
   flex-flow: column;
   justify-content: flex-start;
   align-items: flex-start;
@@ -646,8 +646,8 @@ html[data-theme="dark"] .coming-soon-banner {
 }
 
 .socials-row {
-  grid-column-gap: 1.5em;
-  grid-row-gap: 1.5em;
+  grid-column-gap: var(--space-6);
+  grid-row-gap: var(--space-6);
   flex-flow: row;
   display: flex;
 }
@@ -688,7 +688,7 @@ html[data-theme="dark"] .coming-soon-banner {
   width: 24px;
   height: 24px;
   position: relative;
-  transition: all 0.3s var(--cubic-default);
+  transition: all var(--transition-normal) var(--cubic-default);
 }
 
 .theme-icon {
@@ -699,7 +699,7 @@ html[data-theme="dark"] .coming-soon-banner {
   width: 20px;
   height: 20px;
   color: currentColor;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-normal) ease;
   filter: drop-shadow(0 2px 4px var(--color-shadow));
 }
 
@@ -723,9 +723,9 @@ html[data-theme="dark"] .coming-soon-banner {
 /* Social Links in Menu */
 .menu-social-links {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--space-6);
   justify-content: center;
-  padding: 2rem 0;
+  padding: var(--space-8) 0;
   margin-top: auto;
 }
 
@@ -735,10 +735,10 @@ html[data-theme="dark"] .coming-soon-banner {
   justify-content: center;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: var(--color-surface-secondary);
   color: var(--color-text-primary);
-  transition: all 0.3s var(--cubic-default);
+  transition: all var(--transition-normal) var(--cubic-default);
 }
 
 .social-link:hover {
@@ -785,7 +785,7 @@ html[data-theme="dark"] .coming-soon-banner {
 }
 
 .force-transition {
-  transition: all 0.3s var(--cubic-default) !important;
+  transition: all var(--transition-normal) var(--cubic-default) !important;
 }
 
 /* =====================================================

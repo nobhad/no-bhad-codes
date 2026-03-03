@@ -27,7 +27,7 @@
 .health-score-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-xs);
@@ -96,7 +96,7 @@
 /* Tag input in client detail: fit overview card, match portal form look */
 #tab-client-detail #cd-tags-container .tag-input-wrapper {
   background: var(--portal-bg-readonly);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   border-radius: var(--border-radius-md);
   min-height: 40px;
   padding: var(--space-2) var(--space-3);
@@ -172,7 +172,7 @@
   padding: var(--space-4);
   background: var(--portal-bg-lighter);
   border-radius: var(--border-radius-md);
-  border: 1px solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark);
 }
 
 .contact-card.primary {
@@ -191,7 +191,7 @@
 }
 
 .contact-name .primary-badge {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   background: var(--portal-accent);
   color: var(--color-dark);
@@ -215,7 +215,7 @@
 .contact-detail {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
@@ -231,7 +231,7 @@
 }
 
 .contact-role-badge {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   padding: var(--space-0-5) var(--space-1);
   text-transform: uppercase;
@@ -267,13 +267,13 @@
   gap: var(--space-2);
   margin-bottom: var(--space-3);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-dark);
 }
 
 .activity-filter-btn {
   padding: var(--space-1) var(--space-2);
   background: transparent;
-  border: 1px solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark);
   border-radius: var(--border-radius-sm);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
@@ -302,7 +302,7 @@
   padding: var(--space-4);
   background: var(--portal-bg-lighter);
   border-radius: var(--border-radius-md);
-  border: 1px solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark);
 }
 
 .note-card.pinned {
@@ -399,8 +399,8 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  font-size: 0.75rem;
+  border-radius: var(--portal-radius-full);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
 }
 
@@ -428,7 +428,7 @@
 }
 
 .table-tag-mini {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   padding: var(--space-0-5) var(--space-1);
 }
 

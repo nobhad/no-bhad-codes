@@ -14,6 +14,9 @@ import './styles/main.css';
 // Vercel Analytics (privacy-focused, no cookies)
 import { inject } from '@vercel/analytics';
 import { injectSpeedInsights } from '@vercel/speed-insights';
+import { createLogger } from './utils/logger';
+
+const logger = createLogger('Main');
 
 // Initialize analytics in production
 if (import.meta.env?.PROD) {
@@ -27,7 +30,7 @@ if (typeof window !== 'undefined') {
   setTimeout(() => {
     const html = document.documentElement;
     if (html.classList.contains('intro-loading')) {
-      console.warn('[Failsafe] Forcing intro-loading removal after timeout');
+      logger.warn('Forcing intro-loading removal after timeout');
       html.classList.remove('intro-loading');
       html.classList.add('intro-complete', 'intro-finished');
     }

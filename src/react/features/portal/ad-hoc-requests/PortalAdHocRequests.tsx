@@ -5,12 +5,18 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, RefreshCw, Inbox, X } from 'lucide-react';
+import { Plus, Inbox, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { AdHocRequestCard } from './AdHocRequestCard';
 import { NewRequestForm } from './NewRequestForm';
 import type { AdHocRequest, NewAdHocRequestPayload } from './types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalAdHocRequests');
 
 export interface PortalAdHocRequestsProps {
   /** Auth token getter for API calls */
@@ -75,7 +81,7 @@ export function PortalAdHocRequests({
       const data = await response.json();
       setRequests(data.requests || []);
     } catch (err) {
-      console.error('Error fetching requests:', err);
+      logger.error('Error fetching requests:', err);
       setError(err instanceof Error ? err.message : 'Failed to load requests');
     } finally {
       setIsLoading(false);
@@ -87,7 +93,7 @@ export function PortalAdHocRequests({
    */
   const fetchProjects = useCallback(async () => {
     try {
-      const response = await fetch('/api/portal/projects', {
+      const response = await fetch(API_ENDPOINTS.PORTAL.PROJECTS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include',
@@ -99,7 +105,7 @@ export function PortalAdHocRequests({
       }
     } catch (err) {
       // Projects are optional, don't fail the whole component
-      console.warn('Could not fetch projects:', err);
+      logger.warn('Could not fetch projects:', err);
     }
   }, [getHeaders]);
 
@@ -161,7 +167,7 @@ export function PortalAdHocRequests({
       // Refresh the list
       await fetchRequests();
     } catch (err) {
-      console.error('Error submitting request:', err);
+      logger.error('Error submitting request:', err);
       showNotification?.(
         err instanceof Error ? err.message : 'Failed to submit request',
         'error'
@@ -192,7 +198,7 @@ export function PortalAdHocRequests({
       // Refresh the list
       await fetchRequests();
     } catch (err) {
-      console.error('Error approving quote:', err);
+      logger.error('Error approving quote:', err);
       showNotification?.(
         err instanceof Error ? err.message : 'Failed to approve quote',
         'error'
@@ -222,7 +228,7 @@ export function PortalAdHocRequests({
       // Refresh the list
       await fetchRequests();
     } catch (err) {
-      console.error('Error declining quote:', err);
+      logger.error('Error declining quote:', err);
       showNotification?.(
         err instanceof Error ? err.message : 'Failed to decline quote',
         'error'
@@ -240,7 +246,7 @@ export function PortalAdHocRequests({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading requests...</span>
       </div>
@@ -250,9 +256,9 @@ export function PortalAdHocRequests({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={fetchRequests}>Retry</button>
+        <button className="btn-secondary" onClick={fetchRequests}>Retry</button>
       </div>
     );
   }
@@ -268,7 +274,7 @@ export function PortalAdHocRequests({
           </p>
         </div>
         <button
-          className="tw-btn-primary adhoc-btn"
+          className="btn-primary adhoc-btn"
           onClick={() => setIsModalOpen(true)}
         >
           <Plus className="tw-h-3.5 tw-w-3.5" />
@@ -278,11 +284,10 @@ export function PortalAdHocRequests({
 
       {/* Request List */}
       {requests.length === 0 ? (
-        <div className="tw-empty-state">
-          <Inbox className="tw-h-6 tw-w-6" />
-          <p>No requests yet</p>
-          <p className="proj-text-sm">Click "New Request" to submit your first ad-hoc request</p>
-        </div>
+        <EmptyState
+          icon={<Inbox className="tw-h-6 tw-w-6" />}
+          message="No requests yet. Click 'New Request' to submit your first ad-hoc request."
+        />
       ) : (
         <div ref={listRef} className="tw-section">
           {requests.map((request) => (
@@ -305,16 +310,14 @@ export function PortalAdHocRequests({
           }}
         >
           <div className="tw-panel adhoc-modal-content">
-            <div className="tw-divider adhoc-modal-header">
+            <div className="tw-panel adhoc-modal-header">
               <div>
                 <h3 className="tw-heading">New Ad-Hoc Request</h3>
                 <p className="tw-text-muted adhoc-desc">
                   Describe what you need and we'll provide a quote
                 </p>
               </div>
-              <button className="tw-btn-icon" onClick={() => setIsModalOpen(false)}>
-                <X className="tw-h-4 tw-w-4" />
-              </button>
+              <IconButton action="close" onClick={() => setIsModalOpen(false)} />
             </div>
             <NewRequestForm
               onSubmit={handleSubmit}

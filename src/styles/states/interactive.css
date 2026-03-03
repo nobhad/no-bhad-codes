@@ -165,7 +165,7 @@
   /* Drag target */
   .is-drag-over {
     background-color: var(--color-primary-10, rgba(0, 175, 240, 0.1));
-    border: 2px dashed var(--color-primary);
+    border: var(--border-width) dashed var(--color-primary);
   }
 
   /* ============================================
@@ -179,6 +179,6 @@
 
   /* Force transitions (for GSAP compatibility) */
   .force-transition {
-    transition: all 0.3s cubic-bezier(0.65, 0.05, 0, 1);
+    transition: all var(--transition-normal) cubic-bezier(0.65, 0.05, 0, 1);
   }
 }

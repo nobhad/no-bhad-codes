@@ -30,7 +30,7 @@
   height: 28px;
   background: var(--color-primary);
   color: var(--color-white);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
   flex-shrink: 0;
@@ -95,7 +95,7 @@
 
 .modal-divider {
   border: none;
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: var(--border-width) solid var(--portal-border-dark);
   margin: var(--space-3) 0;
 }
 
@@ -158,7 +158,7 @@
   margin-left: var(--space-1);
   background: var(--color-danger);
   color: var(--color-white);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   vertical-align: middle;
@@ -199,7 +199,7 @@
   gap: var(--space-2);
   padding: var(--space-2);
   background: var(--portal-bg-medium);
-  border-left: 3px solid var(--portal-border-dark);
+  border-left: var(--border-width-thick) solid var(--portal-border-dark);
 }
 
 .history-entry--success {
@@ -277,7 +277,7 @@
   align-items: flex-end;
   margin-bottom: var(--space-3);
   padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-dark);
 }
 
 .trigger-logs-controls .form-group {
@@ -291,7 +291,7 @@
 .trigger-log-entry {
   padding: var(--space-2) var(--space-3);
   background: var(--portal-bg-medium);
-  border-left: 3px solid var(--portal-border-dark);
+  border-left: var(--border-width-thick) solid var(--portal-border-dark);
 }
 
 .trigger-log-entry--success {
@@ -417,7 +417,7 @@
   height: 24px;
   background: var(--color-primary);
   color: var(--color-white);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-xs);
   flex-shrink: 0;
@@ -516,7 +516,7 @@
 }
 
 .preview-html-container {
-  border: 1px solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark);
   background: var(--color-white);
   overflow: hidden;
 }
@@ -556,7 +556,7 @@
 .version-item {
   padding: var(--space-2);
   background: var(--portal-bg-medium);
-  border-left: 3px solid var(--color-primary);
+  border-left: var(--border-width-thick) solid var(--color-primary);
 }
 
 .version-header {

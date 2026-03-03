@@ -217,9 +217,10 @@ a {
 /* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
 /* Applies to: a, button, input, select, textarea, [tabindex] */
 /* Use box-shadow instead of outline - follows element border-radius naturally */
+/* Uses --focus-ring-* variables from portal-theme.css */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--focus-ring-color, var(--color-primary));
 }
 
 /* Remove focus ring for mouse users (non-keyboard focus) */
@@ -270,6 +271,71 @@ summary::-webkit-details-marker {
   display: flex;
   align-items: center;
   gap: var(--icon-gap-md);
+}
+
+/* ============================================
+ * ICON-TEXT SIZE MATCHING - ROOT LEVEL FIX
+ * Icons in same row as text MUST match text size
+ * Uses currentSize (1em) to match adjacent text
+ * ============================================ */
+
+/* Universal: SVGs next to text in buttons/links match text size */
+.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.sidebar-btn) > svg,
+.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.sidebar-btn) > .btn-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* Universal icon-text match: SVGs in flex rows with text inherit text size */
+.portal :is(
+  .stat-card,
+  .tw-stat-card,
+  .activity-item,
+  .task-item,
+  .attention-card,
+  .section-header-inline,
+  .card-header-with-action,
+  h3,
+  .dashboard-section-title
+) > svg,
+.portal :is(
+  .stat-card,
+  .tw-stat-card,
+  .activity-item,
+  .task-item,
+  .attention-card,
+  .section-header-inline,
+  .card-header-with-action,
+  h3,
+  .dashboard-section-title
+) > .stat-icon,
+.portal :is(
+  .stat-card,
+  .tw-stat-card,
+  .activity-item,
+  .task-item,
+  .attention-card,
+  .section-header-inline,
+  .card-header-with-action,
+  h3,
+  .dashboard-section-title
+) > .heading-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* ============================================
+ * HOVER STATE COLOR RULES - ROOT LEVEL
+ * Dark bg hover = light text & icons
+ * Light bg hover = dark text & icons
+ * ============================================ */
+
+/* Universal hover rule: when background inverts, so does text/icon color */
+.portal :is(button, a, .btn):hover > svg,
+.portal :is(button, a, .btn):hover > .btn-icon {
+  color: inherit; /* Inherits from parent's hover color */
 }
 
 details:focus-within {

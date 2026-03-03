@@ -12,6 +12,20 @@
  */
 
 /* ============================================
+   GLOBAL SVG ICON STROKE WIDTH
+   Match border thickness (2px) for visual consistency
+   ============================================ */
+
+/* Global SVG stroke-width - matches border thickness
+   Use !important to override Lucide's inline stroke-width attributes */
+[data-page="admin"] svg,
+[data-page="client-portal"] svg,
+[data-page="admin"] .lucide,
+[data-page="client-portal"] .lucide {
+  stroke-width: var(--svg-stroke-width, 2.5) !important;
+}
+
+/* ============================================
    KANBAN BOARD COMPONENT
    ============================================ */
 
@@ -42,8 +56,8 @@
   align-items: center;
   background: transparent;
   border-bottom: var(--portal-border);
-  border-left: 3px solid transparent;
-  padding-left: calc(var(--space-3) - 3px);
+  border-left: var(--border-width-thick) solid transparent;
+  padding-left: calc(var(--space-3) - var(--border-width-thick));
 }
 
 /* Status-based column left accent */
@@ -68,7 +82,7 @@
 
 .kanban-column-title {
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-light);
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -78,7 +92,7 @@
   background: transparent;
   border: var(--portal-border);
   color: var(--portal-text-secondary);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   min-width: 24px;
   height: 24px;
@@ -98,7 +112,7 @@
 }
 
 .kanban-column-content.drag-over {
-  background: rgba(var(--color-primary-rgb), 0.08);
+  background: var(--portal-alpha-primary-08);
 }
 
 .kanban-card {
@@ -123,7 +137,7 @@
 
 /* Task type label */
 .kanban-card-type {
-  font-size: 0.6875rem;
+  font-size: var(--label-font-size);
   font-weight: 600;
   color: var(--portal-text-muted);
   text-transform: uppercase;
@@ -131,7 +145,7 @@
   margin-bottom: var(--space-1);
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
 }
 
 .kanban-card-type svg {
@@ -142,14 +156,14 @@
 
 .kanban-card-title {
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--portal-text-light);
   margin-bottom: var(--space-1);
   line-height: 1.3;
 }
 
 .kanban-card-subtitle {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-2);
 }
@@ -170,7 +184,7 @@
 }
 
 .kanban-badge {
-  font-size: 0.6875rem;
+  font-size: var(--label-font-size);
   font-weight: 700;
   padding: var(--space-0-5) var(--space-1-5);
   color: var(--color-white);
@@ -202,7 +216,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--icon-gap-sm);
-  padding: 8px;
+  padding: var(--space-2);
   background: var(--portal-bg-dark);
   border: var(--portal-border);
   min-height: 42px;
@@ -223,9 +237,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-xs);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
@@ -252,7 +266,7 @@
   border: none;
   outline: none;
   color: var(--portal-text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .tag-input-field::placeholder {
@@ -264,7 +278,7 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin-top: 4px;
+  margin-top: var(--space-1);
   background: var(--portal-bg-medium);
   border: var(--portal-border);
   max-height: 200px;
@@ -282,13 +296,13 @@
   align-items: center;
   gap: var(--icon-gap-md);
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   background: transparent;
   border: none;
   text-align: left;
   cursor: pointer;
   color: var(--portal-text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   transition: background-color var(--transition-fast);
 }
 
@@ -299,7 +313,7 @@
 .tag-dropdown-color {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
 }
 
 .tag-create-item {
@@ -317,7 +331,7 @@
 
 .timeline-events {
   position: relative;
-  padding-left: 28px;
+  padding-left: var(--space-7);
 }
 
 .timeline-events::before {
@@ -347,7 +361,7 @@
   width: 16px;
   height: 16px;
   background: var(--portal-bg-medium);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -367,31 +381,31 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--space-1);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .timeline-event-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-primary);
 }
 
 .timeline-event-time {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   white-space: nowrap;
 }
 
 .timeline-event-description {
-  font-size: 0.813rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .timeline-event-user {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .timeline-load-more {
@@ -401,11 +415,11 @@
 
 @media (--mobile) {
   .timeline-events {
-    padding-left: 24px;
+    padding-left: var(--space-6);
   }
 
   .timeline-event-icon {
-    left: -24px;
+    left: calc(-1 * var(--space-6));
   }
 }
 
@@ -419,22 +433,22 @@
 }
 
 .bar-chart-label {
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .bar-chart-bar-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
 }
 
 .bar-chart-bar {
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
   transition: width var(--transition-normal) ease;
 }
 
 .bar-chart-value {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--portal-text-primary);
   min-width: 40px;
@@ -460,13 +474,13 @@
 .pie-chart-legend-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
 }
 
 .pie-chart-legend-color {
   width: 12px;
   height: 12px;
-  border-radius: 2px;
+  border-radius: var(--portal-radius-xs);
   flex-shrink: 0;
 }
 
@@ -475,7 +489,7 @@
 }
 
 .pie-chart-legend-value {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--portal-text-primary);
 }
@@ -492,7 +506,7 @@
   gap: var(--space-1-5);
   padding: var(--space-1-5);
   background: var(--portal-bg-dark);
-  border-top: 3px solid var(--color-primary);
+  border-top: var(--border-width-thick) solid var(--color-primary);
 }
 
 .kpi-card-icon {
@@ -510,7 +524,7 @@
   display: flex;
   align-items: center;
   gap: var(--icon-gap-xs);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 }
 
@@ -705,7 +719,7 @@
 .portal .list-item-compact {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1-5) var(--space-2);
   background: var(--portal-bg-medium);
   cursor: pointer;
@@ -750,7 +764,7 @@
   border-radius: 0;
 }
 .rounded-full {
-  border-radius: 9999px;
+  border-radius: var(--portal-radius-pill);
 }
 
 /* =====================================================
@@ -964,27 +978,28 @@ a.text-danger:hover {
 
 /* =====================================================
    ICON SIZING UTILITIES
+   Uses CSS variables from variables.css for consistency
    ===================================================== */
 
 .icon-xs {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
 .icon-sm {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 .icon-md {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
 }
 .icon-lg {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
 }
 .icon-xl {
-  width: 32px;
-  height: 32px;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
 }
 
 /* Flex shrink prevention for icons */
@@ -1009,7 +1024,7 @@ a.text-danger:hover {
 .focus-ring:focus,
 .focus-ring:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
+  box-shadow: var(--focus-ring);
 }
 
 /* Hover state utilities */
@@ -1105,7 +1120,7 @@ a.text-danger:hover {
     Arial,
     sans-serif
   );
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 400;
   line-height: 1.4;
   text-transform: none;
@@ -1284,7 +1299,7 @@ a.text-danger:hover {
   min-height: 200px;
   padding: var(--space-4);
   background: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .error-boundary-content {
@@ -1322,7 +1337,7 @@ a.text-danger:hover {
   width: 100%;
   padding: var(--space-2);
   background: var(--portal-bg-darkest);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-xs);
   color: var(--color-danger);
@@ -1339,7 +1354,7 @@ a.text-danger:hover {
   gap: var(--icon-gap-sm);
   padding: var(--space-1-5) var(--space-3);
   background: transparent;
-  border: 1px solid var(--portal-text-light);
+  border: var(--border-width) solid var(--portal-text-light);
   color: var(--portal-text-light);
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-sm);
@@ -1369,8 +1384,8 @@ a.text-danger:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 4rem 0;
+  gap: var(--space-3);
+  padding: var(--space-16) 0;
   color: var(--portal-text-muted);
   font-size: var(--font-size-sm, 14px);
   font-family: var(--font-family-mono, monospace);
@@ -1380,17 +1395,17 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 2rem 0;
+  gap: var(--space-2);
+  padding: var(--space-8) 0;
   color: var(--portal-text-muted);
   font-size: var(--font-size-sm, 14px);
   font-family: var(--font-family-mono, monospace);
 }
 
 .tw-error {
-  padding: 1rem;
+  padding: var(--space-4);
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm, 14px);
   font-family: var(--font-family-mono, monospace);
@@ -1406,17 +1421,17 @@ a.text-danger:hover {
 .tw-progress-bar {
   height: 100%;
   background: var(--portal-text-light);
-  transition: width 0.3s;
+  transition: width var(--transition-normal);
 }
 
 /* List items */
 .tw-list-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: var(--space-3);
+  padding: var(--space-3);
   background: transparent;
-  border-bottom: 1px solid var(--portal-alpha-white-10);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
@@ -1443,8 +1458,8 @@ a.text-danger:hover {
 
 .tw-modal {
   background: var(--portal-bg-pitch);
-  border: 1px solid var(--portal-alpha-white-30);
-  padding: 1.5rem;
+  border: var(--border-width) solid var(--portal-alpha-white-30);
+  padding: var(--space-6);
   max-width: 32rem;
   width: 100%;
   position: relative;
@@ -1454,7 +1469,7 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .tw-modal-title {
@@ -1467,12 +1482,12 @@ a.text-danger:hover {
 /* Dropdown menus */
 .tw-dropdown {
   background: var(--portal-bg-pitch);
-  border: 1px solid var(--portal-alpha-white-30);
-  padding: 0.25rem 0;
+  border: var(--border-width) solid var(--portal-alpha-white-30);
+  padding: var(--space-1) 0;
 }
 
 .tw-dropdown-item {
-  padding: 0.5rem 1rem;
+  padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm, 14px);
   font-family: var(--font-family-mono, monospace);
   color: var(--portal-text-secondary);
@@ -1494,21 +1509,21 @@ a.text-danger:hover {
 .tw-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.125rem 0.5rem;
-  font-size: 12px;
+  gap: var(--space-1-5);
+  padding: var(--space-0-5) var(--space-2);
+  font-size: var(--font-size-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: transparent;
-  border: 1px solid currentColor;
+  border: var(--border-width) solid currentColor;
   border-radius: 0;
 }
 
 .tw-status-dot {
   width: 0.5rem;
   height: 0.5rem;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: currentColor;
 }
 
@@ -1528,37 +1543,37 @@ a.text-danger:hover {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .status-panel-header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .status-panel-badge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
 }
 
 .status-panel-last-update {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .status-panel-header-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .status-panel-auto-refresh {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 12px;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
 }
 
 .status-panel-refresh-icon {
@@ -1575,13 +1590,13 @@ a.text-danger:hover {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 .status-service-title-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .status-service-icon {
@@ -1591,14 +1606,14 @@ a.text-danger:hover {
 
 .status-service-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .status-service-details {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 12px;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
 }
 
 .status-service-row {
@@ -1615,30 +1630,30 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .status-metric-value {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .status-metric-threshold {
-  font-size: 11px;
-  margin-top: 0.25rem;
+  font-size: var(--label-font-size);
+  margin-top: var(--space-1);
 }
 
 /* Incidents */
 .status-incidents-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .status-incident-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .status-incident-content {
@@ -1648,8 +1663,8 @@ a.text-danger:hover {
 .status-incident-title-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.25rem;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .status-incident-severity {
@@ -1658,35 +1673,35 @@ a.text-danger:hover {
 
 .status-incident-title {
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .status-incident-meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 12px;
+  gap: var(--space-4);
+  font-size: var(--font-size-xs);
 }
 
 .status-incident-status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .status-incident-status-text {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   text-transform: capitalize;
 }
 
 /* Section title with margin */
 .status-section-title {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 /* Retry button */
 .status-retry-btn {
-  margin-left: 1rem;
+  margin-left: var(--space-4);
 }
 
 /* Grid with 4 columns */
@@ -1720,17 +1735,17 @@ a.text-danger:hover {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .perf-heading {
-  font-size: 16px;
+  font-size: var(--font-size-base);
 }
 
 .perf-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .perf-tab-list {
@@ -1746,24 +1761,24 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .perf-kpi-value {
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-1);
 }
 
 .perf-kpi-trend-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 .perf-kpi-trend {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--icon-gap);
 }
 
 .perf-kpi-icon {
@@ -1777,12 +1792,12 @@ a.text-danger:hover {
 }
 
 .perf-progress-mt {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
 }
 
 /* Card with padding */
 .perf-card {
-  padding: 1.25rem;
+  padding: var(--space-5);
 }
 
 /* Card header */
@@ -1790,7 +1805,7 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .perf-card-icon {
@@ -1803,7 +1818,7 @@ a.text-danger:hover {
 .perf-rank {
   width: 1.5rem;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
 }
 
@@ -1813,11 +1828,11 @@ a.text-danger:hover {
 
 .perf-member-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .perf-member-role {
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 .perf-member-stats {
@@ -1826,41 +1841,41 @@ a.text-danger:hover {
 
 .perf-member-revenue {
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .perf-member-projects {
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 /* Project performance */
 .perf-projects-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .perf-project-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .perf-project-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .perf-project-client {
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 .perf-project-meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 11px;
+  gap: var(--space-4);
+  font-size: var(--label-font-size);
 }
 
 .perf-ml-auto {
@@ -1876,29 +1891,29 @@ a.text-danger:hover {
 .analytics-grid {
   display: grid;
   grid-template-columns: 1fr 3fr;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 /* Analytics main content column */
 .analytics-main {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 /* Section title with margin */
 .analytics-section-title {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 /* Small muted text */
 .analytics-empty-text {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 /* Saved query card */
 .analytics-query-card {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 .analytics-query-header {
@@ -1912,13 +1927,13 @@ a.text-danger:hover {
 }
 
 .analytics-query-name {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
 }
 
 .analytics-query-date {
   display: block;
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 .analytics-trash-icon {
@@ -1931,13 +1946,13 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 .analytics-editor-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .analytics-editor-icon {
@@ -1949,13 +1964,13 @@ a.text-danger:hover {
 .analytics-editor-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .analytics-name-input {
   width: 200px;
-  padding: 0.25rem 0.5rem;
-  font-size: 12px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
 }
 
 /* Query footer */
@@ -1963,11 +1978,11 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.75rem;
+  margin-top: var(--space-3);
 }
 
 .analytics-hint {
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 .analytics-action-icon {
@@ -1980,24 +1995,24 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .analytics-results-stats {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 14px;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
 }
 
 .analytics-results-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .analytics-view-toggle {
-  padding: 0.25rem 0.5rem;
+  padding: var(--space-1) var(--space-2);
 }
 
 /* Table overflow container */
@@ -2006,8 +2021,8 @@ a.text-danger:hover {
 }
 
 .analytics-pagination {
-  font-size: 11px;
-  margin-top: 0.5rem;
+  font-size: var(--label-font-size);
+  margin-top: var(--space-2);
   text-align: center;
 }
 
@@ -2023,7 +2038,7 @@ a.text-danger:hover {
 }
 
 .analytics-chart-hint {
-  font-size: 11px;
+  font-size: var(--label-font-size);
 }
 
 /* ============================================
@@ -2032,38 +2047,38 @@ a.text-danger:hover {
 
 /* Section title with margin */
 .overview-section-title {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 /* Text size variants */
 .overview-text-sm {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .overview-text-base {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 /* Description text with pre-wrap */
 .overview-description {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   white-space: pre-wrap;
 }
 
 /* Label with block display */
 .overview-label-block {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 /* Divider with top margin */
 .overview-divider-top {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
 }
 
 /* Link item without padding/border */
 .overview-link-item {
-  padding: 0.5rem 0;
+  padding: var(--space-2) 0;
   border-bottom: none;
 }
 
@@ -2074,7 +2089,7 @@ a.text-danger:hover {
 
 /* Empty state with custom padding */
 .overview-empty-state {
-  padding: 2rem 0;
+  padding: var(--space-8) 0;
 }
 
 /* Checkbox without border radius */
@@ -2084,7 +2099,7 @@ a.text-danger:hover {
 
 /* Expanded content with top border */
 .overview-expanded-content {
-  border-top: 1px solid var(--portal-border-subtle);
+  border-top: var(--border-width) solid var(--portal-border-subtle);
 }
 
 /* Inline stat card (no border, no padding) */
@@ -2104,28 +2119,28 @@ a.text-danger:hover {
 
 /* Text size variants */
 .tasks-text-xs {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .tasks-text-base {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 /* Text with font weight */
 .tasks-text-semibold {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
 .tasks-text-medium {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 
 /* Form heading */
 .tasks-form-heading {
-  font-size: 14px;
-  margin-bottom: 0.75rem;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-3);
 }
 
 /* Textarea height */
@@ -2150,18 +2165,18 @@ a.text-danger:hover {
 
 /* Progress track with styling */
 .tasks-progress-track {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
   max-width: 200px;
 }
 
 /* Expanded content border */
 .tasks-expanded-content {
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Description with pre-wrap */
 .tasks-description {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   white-space: pre-wrap;
 }
 
@@ -2171,7 +2186,7 @@ a.text-danger:hover {
 
 /* Panel with larger padding */
 .cdetail-panel-lg {
-  padding: 1.5rem;
+  padding: var(--space-6);
 }
 
 /* Grid 3 columns */
@@ -2181,7 +2196,7 @@ a.text-danger:hover {
 
 /* Empty state italic */
 .cdetail-empty-italic {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-style: italic;
 }
 
@@ -2201,7 +2216,7 @@ a.text-danger:hover {
 
 /* Large heading */
 .contract-heading-lg {
-  font-size: 18px;
+  font-size: var(--font-size-lg);
 }
 
 /* Panel without padding */
@@ -2211,12 +2226,12 @@ a.text-danger:hover {
 
 /* Header with bottom border */
 .contract-files-header {
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Empty state with custom padding */
 .contract-empty-state {
-  padding: 2rem;
+  padding: var(--space-8);
 }
 
 /* Warning card with white border */
@@ -2251,14 +2266,14 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 /* Left section */
 .qview-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   flex: 1;
   min-width: 0;
 }
@@ -2278,20 +2293,20 @@ a.text-danger:hover {
 
 /* Title text */
 .qview-title {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
 /* Small text (10px) */
 .qview-text-xs {
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
 }
 
 /* Progress section */
 .qview-progress-section {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -2304,7 +2319,7 @@ a.text-danger:hover {
 .qview-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
   flex-shrink: 0;
 }
 
@@ -2322,7 +2337,7 @@ a.text-danger:hover {
 
 /* Milestone header border */
 .deliv-milestone-header {
-  border-bottom: 1px solid var(--portal-border-subtle);
+  border-bottom: var(--border-width) solid var(--portal-border-subtle);
 }
 
 /* Icon box no radius */
@@ -2332,8 +2347,8 @@ a.text-danger:hover {
 
 /* Milestone description */
 .deliv-milestone-desc {
-  font-size: 12px;
-  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-0-5);
 }
 
 /* ============================================
@@ -2343,7 +2358,7 @@ a.text-danger:hover {
 /* Upload area */
 .files-upload-area {
   border-radius: 0;
-  padding: 1.5rem;
+  padding: var(--space-6);
 }
 
 /* Category select */
@@ -2354,12 +2369,12 @@ a.text-danger:hover {
 
 /* Spinner */
 .files-spinner {
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
 }
 
 /* Table header row */
 .files-table-header {
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Table row display */
@@ -2391,7 +2406,7 @@ a.text-danger:hover {
 
 .mount-error-button {
   background: transparent;
-  border: 1px solid currentColor;
+  border: var(--border-width) solid currentColor;
   padding: var(--space-2) var(--space-4);
   cursor: pointer;
   color: inherit;
@@ -2505,7 +2520,7 @@ a.text-danger:hover {
 
 /* Metadata border top */
 .activity-border-top {
-  border-top: 1px solid var(--portal-border-subtle);
+  border-top: var(--border-width) solid var(--portal-border-subtle);
 }
 
 /* ============================================
@@ -2514,7 +2529,7 @@ a.text-danger:hover {
 
 /* Thread list item border */
 .msg-thread-item {
-  border-bottom: 1px solid var(--portal-border-subtle);
+  border-bottom: var(--border-width) solid var(--portal-border-subtle);
 }
 
 /* Thread content flex */
@@ -2573,7 +2588,7 @@ a.text-danger:hover {
 
 /* Spinner circle */
 .msgtab-spinner {
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
 }
 
 /* Avatar no radius */
@@ -2588,13 +2603,13 @@ a.text-danger:hover {
 
 /* Message content */
 .msgtab-content {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   white-space: pre-wrap;
 }
 
 /* Input panel with top border */
 .msgtab-input-panel {
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
   border-radius: 0;
 }
 
@@ -2605,7 +2620,7 @@ a.text-danger:hover {
 
 /* Keyboard shortcut badge */
 .msgtab-kbd {
-  font-size: 11px;
+  font-size: var(--label-font-size);
   padding: 2px 6px;
 }
 
@@ -2618,15 +2633,18 @@ a.text-danger:hover {
   border-radius: 0;
 }
 
-/* Checkbox no radius */
+/* Checkbox - uses portal border color */
 .contacts-checkbox {
+  border: var(--border-width) solid var(--portal-border-color);
   border-radius: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 /* Notes with border top */
 .contacts-notes {
-  font-size: 12px;
-  border-top: 1px solid var(--portal-border-subtle);
+  font-size: var(--font-size-xs);
+  border-top: var(--border-width) solid var(--portal-border-subtle);
 }
 
 /* ============================================
@@ -2652,7 +2670,7 @@ a.text-danger:hover {
 
 /* Project name text */
 .projlist-name {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 400;
 }
 
@@ -2666,7 +2684,7 @@ a.text-danger:hover {
 
 /* Description */
 .projlist-desc {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   margin-bottom: 0.5rem;
 }
 
@@ -2696,7 +2714,7 @@ a.text-danger:hover {
 
 /* Stats container */
 .invtab-stats {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 /* Bold amount text */
@@ -2717,7 +2735,7 @@ a.text-danger:hover {
 
 /* Header row border */
 .invtab-header-row {
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Table row display */
@@ -2727,7 +2745,7 @@ a.text-danger:hover {
 
 /* Cell bold text */
 .invtab-cell-bold {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 
@@ -2748,7 +2766,7 @@ a.text-danger:hover {
 
 /* Hint text aligned right */
 .notes-hint {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   text-align: right;
 }
 
@@ -2766,7 +2784,7 @@ a.text-danger:hover {
 
 /* Description text */
 .adhoc-desc {
-  font-size: 11px;
+  font-size: var(--label-font-size);
   margin-top: 0.125rem;
 }
 
@@ -2830,7 +2848,7 @@ a.text-danger:hover {
 /* Tab button compact */
 .approvals-tab {
   padding: 0.25rem 0.5rem;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   border-bottom: none;
 }
 

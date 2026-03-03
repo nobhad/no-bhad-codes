@@ -121,7 +121,7 @@
 /* Blocked card highlight when has items */
 .tasks-stat-card--alert.has-items {
   background: transparent;
-  border: 1px solid var(--color-warning-500);
+  border: var(--border-width) solid var(--color-warning-500);
 }
 
 /* .stat-card-value alert color from unified rule in portal-cards.css */
@@ -147,7 +147,7 @@
 .kanban-card-project {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-2);
@@ -166,7 +166,7 @@
 .priority-indicator {
   width: var(--space-1);
   height: var(--space-1);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   flex-shrink: 0;
 }
 
@@ -195,7 +195,7 @@
   gap: var(--space-1-5);
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: 1px solid var(--portal-border-dark);
+  border-top: var(--border-width) solid var(--portal-border-dark);
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
@@ -283,9 +283,9 @@
 .task-checklist-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-0-5) 0;
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
 }
 
 .task-checklist-item:last-child {
@@ -312,7 +312,7 @@
 .task-checklist-progress {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   margin-top: var(--space-1);
 }
 
@@ -347,7 +347,7 @@
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
@@ -360,7 +360,7 @@
 
 .task-comment {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   padding: var(--space-1);
 }
 
@@ -411,7 +411,7 @@
 
 .time-summary-card {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   padding: var(--space-2);
   text-align: center;
 }
@@ -433,7 +433,7 @@
    Only page-specific overrides here */
 #time-entries-list .data-table {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
 }
 
 #time-entries-list .data-table th {
@@ -461,13 +461,13 @@
 
 .time-entry-billable.yes {
   background: transparent;
-  border: 1px solid var(--status-active);
+  border: var(--border-width) solid var(--status-active);
   color: var(--status-active);
 }
 
 .time-entry-billable.no {
   background: transparent;
-  border: 1px solid var(--portal-text-secondary);
+  border: var(--border-width) solid var(--portal-text-secondary);
   color: var(--portal-text-secondary);
 }
 
@@ -519,7 +519,7 @@
 .task-project-link {
   margin-bottom: var(--space-1);
   padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
 }
 
 .task-project-name {
@@ -559,13 +559,13 @@
 .task-milestone-tag {
   background: transparent;
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
 }
 
 .task-standalone-tag {
   background: transparent;
   color: var(--portal-text-secondary);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
 }
 
 /* Task Card Actions */
@@ -575,7 +575,7 @@
   gap: var(--space-1);
   margin-top: var(--space-1-5);
   padding-top: var(--space-1-5);
-  border-top: 1px solid var(--portal-border);
+  border-top: var(--border-width) solid var(--portal-border);
 }
 
 /* .task-delete-btn uses .icon-btn.icon-btn-outline.icon-btn-danger from portal-buttons.css */
@@ -624,7 +624,7 @@
 .tasks-stats-bar .stat-item {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
 }
 
 .tasks-stats-bar .stat-value,
@@ -665,7 +665,7 @@
 .error-banner {
   padding: var(--space-2);
   background: transparent;
-  border: 1px solid var(--status-cancelled);
+  border: var(--border-width) solid var(--status-cancelled);
   color: var(--status-cancelled);
   margin-bottom: var(--space-2);
 }
@@ -689,7 +689,7 @@
 .kanban-loading .kanban-column-skeleton {
   height: 256px;
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -760,7 +760,7 @@
   gap: var(--space-3);
   padding: var(--space-3);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   min-height: 384px;
 }
 
@@ -781,7 +781,7 @@
   font-size: var(--font-size-sm);
   padding: 2px 8px;
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   color: var(--portal-text-secondary);
 }
 
@@ -794,7 +794,7 @@
 .board-card {
   padding: var(--space-3);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }

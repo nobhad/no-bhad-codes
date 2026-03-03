@@ -154,11 +154,11 @@ export function ApprovalCard({
         {/* Actions */}
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2" onClick={(e) => e.stopPropagation()}>
           <div className="tw-flex tw-items-center tw-gap-2">
-            <button className="tw-btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
+            <button className="btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
               <Check className="tw-h-4 tw-w-4" />
               Approve
             </button>
-            <button className="tw-btn-secondary" disabled={disabled} onClick={() => setShowRejectDialog(true)}>
+            <button className="btn-secondary" disabled={disabled} onClick={() => setShowRejectDialog(true)}>
               <X className="tw-h-4 tw-w-4" />
               Reject
             </button>
@@ -166,7 +166,7 @@ export function ApprovalCard({
 
           {/* View detail link */}
           {onNavigate && (
-            <button className="tw-btn-ghost tw-text-sm" onClick={handleCardClick}>
+            <button className="btn-ghost tw-text-sm" onClick={handleCardClick}>
               View Details
               <ChevronRight className="tw-h-3 tw-w-3" />
             </button>

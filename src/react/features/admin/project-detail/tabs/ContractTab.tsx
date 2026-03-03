@@ -29,7 +29,7 @@ interface ContractTabProps {
  * Format date for display
  */
 function formatDate(date: string | undefined): string {
-  if (!date) return '-';
+  if (!date) return '';
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -102,7 +102,7 @@ export function ContractTab({
   return (
     <div className="tw-section">
       {/* Contract Status Card */}
-      <div className="tw-panel cdetail-panel-lg">
+      <div className="tw-panel ">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
           <div className="tw-flex tw-items-start tw-gap-4">
             <div
@@ -114,15 +114,15 @@ export function ContractTab({
               )}
             >
               {isSigned ? (
-                <Check className="tw-h-6 tw-w-6 tw-text-black" />
+                <Check className="icon-xl tw-text-black" />
               ) : (
-                <FileSignature className="tw-h-6 tw-w-6 tw-text-muted" />
+                <FileSignature className="icon-xl" />
               )}
             </div>
 
             <div>
               <div className="tw-flex tw-items-center tw-gap-3">
-                <h3 className="tw-heading contract-heading-lg">
+                <h3 className="tw-heading tw-text-lg">
                   Contract Status
                 </h3>
                 <span className="tw-badge">
@@ -131,14 +131,14 @@ export function ContractTab({
               </div>
 
               {isSigned && project.contract_signed_date && (
-                <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted tw-mt-2 overview-text-base">
-                  <Calendar className="tw-h-4 tw-w-4" />
+                <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted tw-mt-2 ">
+                  <Calendar className="icon-md" />
                   <span>Signed on {formatDate(project.contract_signed_date)}</span>
                 </div>
               )}
 
               {!isSigned && (
-                <p className="tw-text-muted tw-mt-2 overview-text-base">
+                <p className="tw-text-muted tw-mt-2 ">
                   {contractStatus.status === 'pending'
                     ? 'Contract has been sent and is awaiting client signature.'
                     : 'Contract has not been sent to the client yet.'}
@@ -152,17 +152,17 @@ export function ContractTab({
             {!isSigned && (
               <>
                 <button
-                  className="tw-btn-secondary"
+                  className="btn-secondary"
                   onClick={handleGenerateContract}
                 >
-                  <FileText className="tw-h-4 tw-w-4" />
+                  <FileText className="icon-md" />
                   Generate
                 </button>
                 <button
-                  className="tw-btn-primary"
+                  className="btn-primary"
                   onClick={handleSendForSignature}
                 >
-                  <ExternalLink className="tw-h-4 tw-w-4" />
+                  <ExternalLink className="icon-md" />
                   Send for Signature
                 </button>
               </>
@@ -176,7 +176,7 @@ export function ContractTab({
         {/* Project Value */}
         <div className="tw-stat-card">
           <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
-            <DollarSign className="tw-h-4 tw-w-4 tw-text-muted" />
+            <DollarSign className="icon-md" />
             <span className="tw-label">
               Contract Value
             </span>
@@ -185,7 +185,7 @@ export function ContractTab({
             {formatCurrency(project.price || project.budget)}
           </div>
           {project.deposit_amount && (
-            <div className="tw-text-muted tw-mt-1 overview-text-base">
+            <div className="tw-text-muted tw-mt-1 ">
               Deposit: {formatCurrency(project.deposit_amount)}
             </div>
           )}
@@ -194,12 +194,12 @@ export function ContractTab({
         {/* Timeline */}
         <div className="tw-stat-card">
           <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
-            <Calendar className="tw-h-4 tw-w-4 tw-text-muted" />
+            <Calendar className="icon-md" />
             <span className="tw-label">
               Project Timeline
             </span>
           </div>
-          <div className="tw-text-primary contract-heading-lg">
+          <div className="tw-text-primary tw-text-lg">
             {project.start_date && project.end_date ? (
               <>
                 {formatDate(project.start_date)} - {formatDate(project.end_date)}
@@ -217,21 +217,21 @@ export function ContractTab({
       <div className="tw-panel contract-panel-no-padding">
         <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 contract-files-header">
           <div className="tw-flex tw-items-center tw-gap-2">
-            <FileText className="tw-h-4 tw-w-4 tw-text-muted" />
-            <span className="tw-heading overview-text-base">
+            <FileText className="icon-md" />
+            <span className="tw-heading ">
               Contract Documents
             </span>
           </div>
-          <span className="tw-text-muted overview-text-sm">
+          <span className="tw-text-muted tw-text-sm">
             {contractFiles.length} file{contractFiles.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {contractFiles.length === 0 ? (
-          <div className="tw-empty-state contract-empty-state">
-            <Inbox className="tw-h-6 tw-w-6 tw-mb-2" />
+          <div className="empty-state contract-empty-state">
+            <Inbox className="icon-xl tw-mb-2" />
             <span>No contract documents</span>
-            <span className="overview-text-sm">
+            <span className="tw-text-sm">
               Upload contracts in the Files tab or generate one above
             </span>
           </div>
@@ -243,12 +243,12 @@ export function ContractTab({
                 className="tw-list-item"
               >
                 <div className="tw-flex tw-items-center tw-gap-3">
-                  <FileText className="tw-h-5 tw-w-5" />
+                  <FileText className="icon-lg" />
                   <div>
-                    <span className="tw-text-primary overview-text-base">
+                    <span className="tw-text-primary ">
                       {file.original_name}
                     </span>
-                    <div className="tw-text-muted overview-text-sm">
+                    <div className="tw-text-muted tw-text-sm">
                       {formatDate(file.created_at)}
                     </div>
                   </div>
@@ -256,11 +256,11 @@ export function ContractTab({
 
                 {file.download_url && (
                   <button
-                    className="tw-btn-icon"
+                    className="btn-icon"
                     onClick={() => handleDownload(file)}
                     title="Download"
                   >
-                    <Download className="tw-h-4 tw-w-4" />
+                    <Download className="icon-md" />
                   </button>
                 )}
               </div>
@@ -272,12 +272,12 @@ export function ContractTab({
       {/* Warning for unsigned contracts */}
       {!isSigned && project.status === 'active' && (
         <div className="tw-card tw-flex tw-items-start tw-gap-3 contract-warning">
-          <AlertTriangle className="tw-h-5 tw-w-5 tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
+          <AlertTriangle className="icon-lg tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
           <div>
-            <h4 className="tw-heading overview-text-base">
+            <h4 className="tw-heading ">
               Contract Not Signed
             </h4>
-            <p className="tw-text-muted tw-mt-1 overview-text-base">
+            <p className="tw-text-muted tw-mt-1 ">
               This project is active but the contract has not been signed.
               Consider sending the contract for signature before proceeding with work.
             </p>

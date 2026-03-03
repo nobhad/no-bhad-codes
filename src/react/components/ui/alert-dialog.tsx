@@ -98,7 +98,7 @@ const AlertDialogAction = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className={cn("tw-btn-primary", className)}
+    className={cn("btn-primary", className)}
     {...props}
   />
 ))
@@ -110,7 +110,7 @@ const AlertDialogCancel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={cn("tw-btn-secondary tw-:mt-2 tw-:sm:mt-0", className)}
+    className={cn("btn-secondary tw-:mt-2 tw-:sm:mt-0", className)}
     {...props}
   />
 ))

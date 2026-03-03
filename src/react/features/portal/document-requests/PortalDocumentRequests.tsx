@@ -5,11 +5,16 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { DocumentRequestCard, type DocumentRequest } from './DocumentRequestCard';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalDocumentRequests');
 
 export interface PortalDocumentRequestsProps {
   /** Auth token getter for API calls */
@@ -54,7 +59,7 @@ function useDocumentRequests(getAuthToken?: () => string | null) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/document-requests/my-requests', {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_REQUESTS_MY, {
         headers,
         credentials: 'include'
       });
@@ -71,7 +76,7 @@ function useDocumentRequests(getAuthToken?: () => string | null) {
         setRequests([]);
       }
     } catch (err) {
-      console.error('[useDocumentRequests] Error:', err);
+      logger.error('[useDocumentRequests] Error:', err);
       setError(err instanceof Error ? err.message : 'Failed to load document requests');
     } finally {
       setIsLoading(false);
@@ -124,7 +129,7 @@ export function PortalDocumentRequests({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading document requests...</span>
       </div>
@@ -134,9 +139,9 @@ export function PortalDocumentRequests({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={refetch}>
+        <button className="btn-secondary" onClick={refetch}>
           Retry
         </button>
       </div>
@@ -172,11 +177,10 @@ export function PortalDocumentRequests({
 
       {/* Empty State */}
       {requests.length === 0 && (
-        <div className="tw-empty-state">
-          <FileText className="tw-h-8 tw-w-8" />
-          <p>No document requests yet.</p>
-          <p className="tw-text-xs">Requests will appear here when your project team needs documents from you.</p>
-        </div>
+        <EmptyState
+          icon={<FileText className="tw-h-6 tw-w-6" />}
+          message="No document requests yet. Requests will appear here when your project team needs documents from you."
+        />
       )}
 
       {/* Action Needed Section */}

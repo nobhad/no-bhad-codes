@@ -70,8 +70,8 @@ export const ICONS = {
   // Plus icon - 16x16 for consistency
   PLUS: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
 
-  // Pencil/Edit icon
-  PENCIL: `<svg xmlns="${ICON_ATTRS.xmlns}" width="16" height="16" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
+  // Pencil/Edit icon - 18x18 for table actions (design system desktop)
+  PENCIL: `<svg xmlns="${ICON_ATTRS.xmlns}" width="18" height="18" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
 
   // Cookie icon (consent)
   COOKIE: `<svg xmlns="${ICON_ATTRS.xmlns}" width="24" height="24" viewBox="0 0 24 24" fill="${ICON_ATTRS.fill}" stroke="${ICON_ATTRS.stroke}" stroke-width="${ICON_ATTRS.strokeWidth}" stroke-linecap="${ICON_ATTRS.strokeLinecap}" stroke-linejoin="${ICON_ATTRS.strokeLinejoin}" class="lucide lucide-cookie" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>`,

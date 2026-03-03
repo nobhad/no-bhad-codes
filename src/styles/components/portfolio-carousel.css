@@ -21,7 +21,7 @@
 
 .portfolio-content > p {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   line-height: 1.6;
   margin-bottom: 3rem;
   color: var(--color-dark);
@@ -61,14 +61,14 @@
 /* Portfolio Item Card */
 .portfolio-item {
   background: var(--color-neutral-100);
-  border-radius: 12px;
+  border-radius: var(--portal-radius-lg);
   padding: 2.5rem;
   position: relative;
   box-shadow: var(--shadow-elevated-md);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
-  border: 1px solid rgba(var(--color-primary-rgb), 0.1);
+  border: var(--border-width) solid rgba(var(--color-primary-rgb), 0.1);
 }
 
 .portfolio-item:hover {
@@ -81,7 +81,7 @@
   top: 1.5rem;
   right: 1.5rem;
   font-family: monospace;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   color: var(--color-primary);
   font-weight: 700;
   text-shadow: 0 2px 8px var(--portal-alpha-black-80);
@@ -98,7 +98,7 @@
 }
 
 .portfolio-item p {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   line-height: 1.6;
   color: var(--color-dark);
   margin-bottom: 1.5rem;
@@ -115,8 +115,8 @@
   background: var(--color-primary);
   color: var(--color-neutral-100);
   padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  border-radius: var(--portal-radius-xl);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -139,11 +139,11 @@
   width: 44px;
   height: 44px;
   border: none;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: var(--color-neutral-200);
   color: var(--color-dark);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal) ease;
   box-shadow: var(--shadow-elevated-sm);
 }
 
@@ -176,10 +176,10 @@
 .indicator {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: var(--color-neutral-200);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal) ease;
   position: relative;
 }
 
@@ -197,7 +197,7 @@
 /* Call to Action */
 .portfolio-cta {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--color-primary);
   text-transform: uppercase;
@@ -252,7 +252,7 @@ html[data-theme="dark"] .indicator {
 
   .tag {
     padding: 0.2rem 0.6rem;
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
   }
 }
 
@@ -264,7 +264,7 @@ html[data-theme="dark"] .indicator {
   .portfolio-number {
     top: 1rem;
     right: 1rem;
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
   }
 
   .portfolio-controls {

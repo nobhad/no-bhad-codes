@@ -76,7 +76,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 }
 
 .hero-description {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   color: var(--color-text-primary);
   line-height: 1.6;
   margin-bottom: 0;
@@ -88,7 +88,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .projects-filter {
   padding: 3rem 0 2rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-border);
 }
 
 .filter-wrapper {
@@ -112,12 +112,12 @@ div.page-hero-desktop[data-hero-page="projects"] {
   padding: 0.75rem 1.25rem;
   background: var(--color-surface);
   color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--portal-radius-pill);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-decoration: none;
-  transition: all 0.3s var(--ease-out);
+  transition: all var(--transition-normal) var(--ease-out);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -144,8 +144,8 @@ div.page-hero-desktop[data-hero-page="projects"] {
   min-width: 20px;
   height: 20px;
   background: var(--portal-alpha-white-20);
-  border-radius: 10px;
-  font-size: 0.75rem;
+  border-radius: var(--portal-radius-pill);
+  font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: 1;
 }
@@ -177,10 +177,10 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .project-card {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--portal-radius-lg);
   overflow: hidden;
-  transition: all 0.3s var(--ease-out);
+  transition: all var(--transition-normal) var(--ease-out);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -211,7 +211,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s var(--ease-out);
+  transition: transform var(--transition-normal) var(--ease-out);
 }
 
 .project-card:hover .project-card-image img {
@@ -229,7 +229,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s var(--ease-out);
+  transition: opacity var(--transition-normal) var(--ease-out);
 }
 
 .project-card:hover .project-card-overlay {
@@ -239,7 +239,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 .view-project {
   color: var(--color-bg);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
 }
 
 .project-card-content {
@@ -258,7 +258,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 }
 
 .project-card-title {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--color-dark);
   margin: 0;
@@ -271,7 +271,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   color: var(--color-bg);
   padding: 0.25rem 0.5rem;
   border-radius: var(--portal-radius-xs);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -296,9 +296,9 @@ div.page-hero-desktop[data-hero-page="projects"] {
   background: var(--color-bg);
   color: var(--color-text-primary);
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  border: 1px solid var(--color-border);
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
+  border: var(--border-width) solid var(--color-border);
 }
 
 .project-card-footer {
@@ -306,15 +306,15 @@ div.page-hero-desktop[data-hero-page="projects"] {
   justify-content: space-between;
   align-items: center;
   padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
-  font-size: 0.875rem;
+  border-top: var(--border-width) solid var(--color-border);
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
 }
 
 .project-card-status {
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: capitalize;
 }
@@ -346,9 +346,9 @@ div.page-hero-desktop[data-hero-page="projects"] {
 .projects-loading .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--color-border);
+  border: var(--border-width-thick) solid var(--color-border);
   border-top-color: var(--color-primary);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   margin: 0 auto 1rem;
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
@@ -387,7 +387,7 @@ div.page-hero-desktop {
   }
 
   .hero-description {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
   }
 
   .projects-filter {
@@ -400,7 +400,7 @@ div.page-hero-desktop {
 
   .filter-btn {
     padding: 0.6rem 1rem;
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
   }
 
   .projects-grid {
@@ -425,7 +425,7 @@ div.page-hero-desktop {
   }
 
   .hero-description {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .filter-group {
@@ -593,7 +593,7 @@ div.page-hero-desktop {
   align-items: center;
   cursor: pointer;
   pointer-events: auto;
-  border-bottom: 2px solid var(--color-dark);
+  border-bottom: var(--border-width) solid var(--color-dark);
   transform: translateY(-105%);
   animation: project-drop-in var(--transition-length, 0.5s) cubic-bezier(0.3, 0.9, 0.3, 0.9)
     forwards;
@@ -702,7 +702,7 @@ div.page-hero-desktop {
 
 /* Category text */
 .card-category {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-dark);
   transition: color var(--transition-theme, 0.4s);
@@ -715,13 +715,13 @@ div.page-hero-desktop {
 .round-label {
   background-color: var(--color-dark);
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: var(--portal-radius-xl);
   box-shadow: var(--shadow-elevated-sm);
   color: var(--color-light);
   flex-shrink: 0;
   min-width: 40px;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   transition:
     background-color var(--transition-theme, 0.4s),
@@ -755,7 +755,7 @@ div.page-hero-desktop {
 .projects-section .heading-divider {
   background-color: var(--color-dark);
   height: 4px;
-  border-radius: 2px 0 4px 2px;
+  border-radius: var(--portal-radius-xs) 0 var(--portal-radius-sm) var(--portal-radius-xs);
   transform: scaleX(0);
   transform-origin: bottom left;
   animation: scale-in-left var(--transition-long, 0.8s) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s
@@ -795,11 +795,11 @@ div.page-hero-desktop {
   }
 
   .card-container .project-card-title h3 {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 
   .card-category {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -836,7 +836,7 @@ div.page-hero-desktop {
   }
 
   .card-container .project-card-title h3 {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
   }
 
   /* Title scale removed on mobile to prevent overlap */
@@ -847,12 +847,12 @@ div.page-hero-desktop {
   }
 
   .card-category {
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
   }
 
   .round-label {
     padding: 4px 10px;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 
   .wip-sign-container {
@@ -906,7 +906,7 @@ div.page-hero-desktop {
   }
 
   .card-container .project-card-title h3 {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .card-category {

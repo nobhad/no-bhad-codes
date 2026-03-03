@@ -203,3 +203,218 @@ export function getDate(row: DatabaseRow | undefined, key: string): Date | null 
   }
   return null;
 }
+
+// ============================================
+// DATA TRANSFORMATION UTILITIES
+// ============================================
+
+/**
+ * Known boolean field names in the database that use SQLite 0/1
+ * These will be converted to JavaScript true/false in API responses
+ */
+const BOOLEAN_FIELDS = new Set([
+  // Common boolean fields
+  'is_active',
+  'is_admin',
+  'is_billable',
+  'is_primary',
+  'is_internal',
+  'is_read',
+  'is_starred',
+  'is_archived',
+  'is_deleted',
+  'is_verified',
+  'is_paid',
+  'is_overdue',
+  'is_template',
+  'is_default',
+  'is_locked',
+  'is_hidden',
+  'is_completed',
+  'is_published',
+  'is_featured',
+  'is_enabled',
+  'is_recurring',
+  'is_public',
+  'is_system',
+  // Specific fields
+  'active',
+  'billable',
+  'billed',
+  'paid',
+  'approved',
+  'archived',
+  'deleted',
+  'locked',
+  'verified',
+  'published',
+  'featured',
+  'enabled',
+  'recurring',
+  'shared_with_client',
+  'client_visible',
+  'admin_only',
+  'requires_approval',
+  'auto_approve',
+  'notify_client',
+  'notify_admin',
+  'send_reminders',
+  'allow_comments',
+  'allow_uploads',
+  'include_in_reports',
+  // CamelCase versions (for API responses)
+  'isActive',
+  'isAdmin',
+  'isBillable',
+  'isPrimary',
+  'isInternal',
+  'isRead',
+  'isStarred',
+  'isArchived',
+  'isDeleted',
+  'isVerified',
+  'isPaid',
+  'isOverdue',
+  'isTemplate',
+  'isDefault',
+  'isLocked',
+  'isHidden',
+  'isCompleted',
+  'isPublished',
+  'isFeatured',
+  'isEnabled',
+  'isRecurring',
+  'isPublic',
+  'isSystem',
+  'sharedWithClient',
+  'clientVisible',
+  'adminOnly',
+  'requiresApproval',
+  'autoApprove',
+  'notifyClient',
+  'notifyAdmin',
+  'sendReminders',
+  'allowComments',
+  'allowUploads',
+  'includeInReports',
+]);
+
+/**
+ * Known JSON field names that should be parsed from strings
+ */
+const JSON_FIELDS = new Set([
+  'line_items',
+  'lineItems',
+  'metadata',
+  'settings',
+  'config',
+  'options',
+  'data',
+  'tags',
+  'categories',
+  'permissions',
+  'preferences',
+  'filters',
+  'columns',
+  'variables',
+  'attachments',
+  'recipients',
+  'schedule',
+]);
+
+/**
+ * Convert SQLite 0/1 to JavaScript boolean for known boolean fields
+ */
+function convertBooleanValue(key: string, value: unknown): unknown {
+  if (BOOLEAN_FIELDS.has(key) && typeof value === 'number') {
+    return value !== 0;
+  }
+  return value;
+}
+
+/**
+ * Parse JSON strings for known JSON fields
+ */
+function parseJsonValue(key: string, value: unknown): unknown {
+  if (JSON_FIELDS.has(key) && typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch {
+      // Return original value if parsing fails
+      return value;
+    }
+  }
+  return value;
+}
+
+/**
+ * Transform a database row for API response:
+ * - Convert 0/1 to boolean for known boolean fields
+ * - Parse JSON strings for known JSON fields
+ */
+export function transformRow<T extends Record<string, unknown>>(row: T | null | undefined): T | null {
+  if (!row) return null;
+
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(row)) {
+    // Skip null/undefined values
+    if (value === null || value === undefined) {
+      result[key] = value;
+      continue;
+    }
+
+    // Convert booleans
+    let transformed = convertBooleanValue(key, value);
+
+    // Parse JSON
+    transformed = parseJsonValue(key, transformed);
+
+    result[key] = transformed;
+  }
+
+  return result as T;
+}
+
+/**
+ * Transform an array of database rows for API response
+ */
+export function transformRows<T extends Record<string, unknown>>(rows: T[] | null | undefined): T[] {
+  if (!rows || !Array.isArray(rows)) return [];
+  return rows.map(row => transformRow(row)).filter((row): row is T => row !== null);
+}
+
+/**
+ * Transform nested data structures recursively
+ * Handles objects, arrays, and nested structures
+ */
+export function transformData<T>(data: T): T {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(item => transformData(item)) as T;
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      if (value === null || value === undefined) {
+        result[key] = value;
+      } else if (Array.isArray(value)) {
+        result[key] = transformData(value);
+      } else if (typeof value === 'object') {
+        result[key] = transformData(value as Record<string, unknown>);
+      } else {
+        // Apply boolean and JSON transformations
+        let transformed = convertBooleanValue(key, value);
+        transformed = parseJsonValue(key, transformed);
+        result[key] = transformed;
+      }
+    }
+    return result as T;
+  }
+
+  return data;
+}

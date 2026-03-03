@@ -9,6 +9,9 @@
  */
 
 import { showToast } from './toast-notifications';
+import { createLogger } from './logger';
+
+const logger = createLogger('FileDownload');
 
 /**
  * Download a blob as a file
@@ -45,7 +48,7 @@ export async function downloadFromUrl(
     const blob = await response.blob();
     downloadBlob(blob, filename);
   } catch (error) {
-    console.error('[FileDownload] Download error:', error);
+    logger.error('[FileDownload] Download error:', error);
     throw error;
   }
 }
@@ -63,7 +66,7 @@ export async function downloadInvoicePdf(
     await downloadFromUrl(`/api/invoices/${invoiceId}/pdf`, filename);
     showToast('Invoice downloaded successfully', 'success');
   } catch (error) {
-    console.error('[FileDownload] Invoice download error:', error);
+    logger.error('[FileDownload] Invoice download error:', error);
     showToast('Failed to download invoice', 'error');
     throw error;
   }
@@ -82,7 +85,7 @@ export async function downloadReceiptPdf(
     await downloadFromUrl(`/api/invoices/payments/${paymentId}/receipt`, filename);
     showToast('Receipt downloaded successfully', 'success');
   } catch (error) {
-    console.error('[FileDownload] Receipt download error:', error);
+    logger.error('[FileDownload] Receipt download error:', error);
     showToast('Failed to download receipt', 'error');
     throw error;
   }
@@ -98,7 +101,7 @@ export async function downloadFile(
   try {
     await downloadFromUrl(`/api/files/${fileId}/download`, filename);
   } catch (error) {
-    console.error('[FileDownload] File download error:', error);
+    logger.error('[FileDownload] File download error:', error);
     showToast('Failed to download file', 'error');
     throw error;
   }
@@ -121,7 +124,7 @@ export async function downloadDocument(
   try {
     await downloadFromUrl(`/api/document-requests/files/${documentId}/download`, filename);
   } catch (error) {
-    console.error('[FileDownload] Document download error:', error);
+    logger.error('[FileDownload] Document download error:', error);
     showToast('Failed to download document', 'error');
     throw error;
   }

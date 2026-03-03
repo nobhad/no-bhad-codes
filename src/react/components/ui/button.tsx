@@ -9,18 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "tw-btn-primary",
-        destructive: "tw-btn-danger",
-        outline: "tw-btn-secondary",
-        secondary: "tw-btn-secondary",
-        ghost: "tw-btn-ghost",
-        link: "tw-btn-ghost tw-:underline-offset-4 tw-:hover:underline",
+        default: "btn-primary",
+        destructive: "btn-danger",
+        outline: "btn-secondary",
+        secondary: "btn-secondary",
+        ghost: "btn-ghost",
+        link: "btn-ghost tw-:underline-offset-4 tw-:hover:underline",
       },
       size: {
         default: "",
         sm: "tw-:text-sm tw-:px-3 tw-:py-1",
         lg: "tw-:text-lg tw-:px-8 tw-:py-3",
-        icon: "tw-btn-icon",
+        icon: "btn-icon",
       },
     },
     defaultVariants: {

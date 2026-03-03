@@ -56,7 +56,7 @@
               <% } %>
               <div class="header-subtabs">
                 <% config.subtabGroups.forEach(group => { %>
-                  <div class="portal-subtabs header-subtab-group" data-for-tab="<%= group.forTab %>"<%- group.mode ? ` data-mode="${group.mode}"` : '' %><% if (group.forTab === 'project-detail') { %> id="project-detail-header-tabs"<% } else if (group.forTab === 'client-detail') { %> id="client-detail-header-tabs"<% } else if (group.forTab === 'workflows') { %> id="workflows-subtabs"<% } else if (group.forTab === 'support') { %> id="knowledge-base-subtabs"<% } else if (group.forTab === 'documents') { %> id="documents-subtabs"<% } %>>
+                  <div class="portal-subtabs header-subtab-group" data-for-tab="<%= group.forTab %>"<%- group.mode ? ` data-mode="${group.mode}"` : '' %><% if (group.forTab === 'project-detail') { %> id="project-detail-header-tabs"<% } else if (group.forTab === 'client-detail') { %> id="client-detail-header-tabs"<% } else if (group.forTab === 'work') { %> id="work-subtabs"<% } else if (group.forTab === 'crm') { %> id="crm-subtabs"<% } else if (group.forTab === 'workflows') { %> id="workflows-subtabs"<% } else if (group.forTab === 'support') { %> id="knowledge-base-subtabs"<% } else if (group.forTab === 'documents') { %> id="documents-subtabs"<% } else if (group.forTab === 'analytics') { %> id="analytics-subtabs"<% } %>>
                     <% group.subtabs.forEach(subtab => { %>
                       <button class="portal-subtab<%= subtab.active ? ' active' : '' %>" data-<% if (group.forTab === 'project-detail') { %>pd-tab<% } else if (group.forTab === 'client-detail') { %>cd-tab<% } else { %>subtab<% } %>="<%= subtab.id %>"><%= subtab.label %></button>
                     <% }) %>

@@ -13,6 +13,13 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { getDatabase } from '../../database/init.js';
 import { errorResponse } from '../../utils/api-response.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const PROPOSAL_REQUEST_COLUMNS = `
+  id, project_id, client_id, project_type, selected_tier, base_price, final_price,
+  maintenance_option, status, client_notes, admin_notes, created_at, reviewed_at, reviewed_by,
+  sent_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 /**
@@ -89,7 +96,7 @@ router.post(
       WHERE id = ?
     `, [proposalId]);
 
-    const updated = await db.get('SELECT * FROM proposal_requests WHERE id = ?', [proposalId]);
+    const updated = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
 
     res.json({ success: true, proposal: updated });
   })
@@ -112,7 +119,7 @@ router.post(
     const db = getDatabase();
 
     // Get the original proposal
-    const original = await db.get('SELECT * FROM proposal_requests WHERE id = ?', [proposalId]);
+    const original = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
     if (!original) {
       return errorResponse(res, 'Proposal not found', 404, 'NOT_FOUND');
     }
@@ -131,7 +138,7 @@ router.post(
       FROM proposal_requests WHERE id = ?
     `, [proposalId]);
 
-    const newProposal = await db.get('SELECT * FROM proposal_requests WHERE id = ?', [result.lastID]);
+    const newProposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [result.lastID]);
 
     res.json({ success: true, proposal: newProposal });
   })

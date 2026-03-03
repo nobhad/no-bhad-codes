@@ -10,6 +10,9 @@
 
 import { ICONS } from '../constants/icons';
 import { cx } from '../utils/dom-utils';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('ComplexComponents');
 
 // ===============================================
 // TYPES
@@ -1064,7 +1067,7 @@ export function createDataTable(config: DataTableConfig): HTMLElement {
 export function updateDataTable(_wrapper: HTMLElement, _data: Record<string, unknown>[]): void {
   // This would need more implementation to properly update
   // For now, recommend recreating the table
-  console.warn('updateDataTable: For complex updates, recreate the table');
+  logger.warn('updateDataTable: For complex updates, recreate the table');
 }
 
 /**

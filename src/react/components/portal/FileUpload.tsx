@@ -284,7 +284,7 @@ export function FileUploadProgress({
   return (
     <div
       className={cn(
-        'tw-flex tw-items-center tw-gap-3 tw-p-2 tw-border tw-border-white/20',
+        'tw-flex tw-items-center tw-gap-3 tw-p-2 tw-border tw-border-primary/20',
         error && 'tw-border-danger',
         complete && 'tw-border-success',
         className
@@ -318,7 +318,7 @@ export function FileUploadProgress({
         <button
           type="button"
           onClick={onCancel}
-          className="tw-p-1 tw-text-muted hover:tw-text-white tw-transition-colors"
+          className="tw-p-1 tw-text-muted hover:tw-text-primary tw-transition-colors"
           aria-label="Cancel upload"
         >
           <X className="tw-h-4 tw-w-4" />

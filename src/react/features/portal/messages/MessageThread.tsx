@@ -7,19 +7,19 @@ import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Send,
-  Paperclip,
   X,
   Pencil,
   Trash2,
   Check,
-  ArrowLeft,
-  RefreshCw,
   MoreVertical,
   File,
-  Download,
+  RefreshCw,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import type { Message, MessageThread as MessageThreadType, MessageAttachment } from './types';
@@ -68,6 +68,39 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
+/**
+ * Parse attachments which may be a JSON string, array, or null
+ */
+function parseAttachments(attachments: MessageAttachment[] | string | null): MessageAttachment[] {
+  if (!attachments) return [];
+  if (Array.isArray(attachments)) return attachments;
+  if (typeof attachments === 'string') {
+    try {
+      const parsed = JSON.parse(attachments);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+/**
+ * Render attachments section if present
+ */
+function renderAttachments(attachments: MessageAttachment[] | string | null): React.ReactNode {
+  const parsedAttachments = parseAttachments(attachments);
+  if (parsedAttachments.length === 0) return null;
+
+  return (
+    <div className="message-attachments-list">
+      {parsedAttachments.map((attachment, index) => (
+        <AttachmentPreview key={attachment.id || index} attachment={attachment} />
+      ))}
+    </div>
+  );
+}
+
 // ============================================================================
 // SUB-COMPONENTS
 // ============================================================================
@@ -84,19 +117,17 @@ function AttachmentPreview({ attachment }: AttachmentPreviewProps) {
   };
 
   return (
-    <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2">
+    <div className="attachment-preview-item">
       {isImage ? (
         <img src={attachment.download_url} alt={attachment.filename} className="attachment-thumbnail" />
       ) : (
-        <File className="tw-h-4 tw-w-4 tw-text-muted" />
+        <File className="icon-sm" />
       )}
-      <div className="tw-flex-1 card-content-truncate">
-        <div className="tw-text-primary tw-text-sm">{attachment.filename}</div>
-        <div className="tw-text-muted tw-text-xs">{formatFileSize(attachment.file_size)}</div>
+      <div className="attachment-preview-info card-content-truncate">
+        <div className="attachment-preview-name">{attachment.filename}</div>
+        <div className="attachment-preview-size">{formatFileSize(attachment.file_size)}</div>
       </div>
-      <button className="tw-btn-icon" onClick={handleDownload} title="Download">
-        <Download className="tw-h-4 tw-w-4" />
-      </button>
+      <IconButton action="download" onClick={handleDownload} title="Download" />
     </div>
   );
 }
@@ -110,25 +141,27 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: MessageBubbleProps) {
+  // Handle both 'message' (API) and 'content' (legacy) field names
+  const messageContent = message.message || message.content || '';
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(message.content);
+  const [editContent, setEditContent] = useState(messageContent);
   const [showActions, setShowActions] = useState(false);
   const editInputRef = useRef<HTMLTextAreaElement>(null);
   const confirmDialog = useConfirmDialog();
 
   const handleStartEdit = useCallback(() => {
-    setEditContent(message.content);
+    setEditContent(messageContent);
     setIsEditing(true);
     setShowActions(false);
-  }, [message.content]);
+  }, [messageContent]);
 
   const handleCancelEdit = useCallback(() => {
     setIsEditing(false);
-    setEditContent(message.content);
-  }, [message.content]);
+    setEditContent(messageContent);
+  }, [messageContent]);
 
   const handleSaveEdit = useCallback(async () => {
-    if (!editContent.trim() || editContent === message.content) {
+    if (!editContent.trim() || editContent === messageContent) {
       handleCancelEdit();
       return;
     }
@@ -161,67 +194,51 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
 
   return (
     <div
-      className={cn(
-        'tw-flex tw-flex-col tw-gap-1',
-        isOwn ? 'tw-items-end' : 'tw-items-start'
-      )}
+      className={cn('message-bubble-container', isOwn ? 'own' : 'other')}
       onMouseEnter={() => isOwn && !isEditing && setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       {/* Sender name for non-own messages */}
       {!isOwn && (
-        <span className="tw-text-[10px] tw-text-[var(--portal-text-muted)] tw-ml-1">
-          {message.sender_name}
+        <span className="message-sender-name">
+          {decodeHtmlEntities(message.sender_name)}
         </span>
       )}
 
-      <div className="tw-flex tw-items-start tw-gap-1.5 tw-group">
+      <div className="message-row tw-group">
         {/* Actions for own messages */}
         {isOwn && showActions && !isEditing && (
-          <div className="tw-flex tw-items-center tw-gap-0.5">
+          <div className="message-bubble-actions">
             <PortalButton
               variant="ghost"
               size="icon"
               onClick={handleStartEdit}
               title="Edit"
-              className="tw-h-6 tw-w-6"
+              className="message-action-btn"
             >
-              <Pencil className="tw-h-3 tw-w-3" />
+              <Pencil className="icon-xs" />
             </PortalButton>
             <PortalButton
               variant="ghost"
               size="icon"
               onClick={confirmDialog.open}
               title="Delete"
-              className="tw-h-6 tw-w-6 hover:tw-text-[var(--status-cancelled)]"
+              className="message-action-btn danger"
             >
-              <Trash2 className="tw-h-3 tw-w-3" />
+              <Trash2 className="icon-xs" />
             </PortalButton>
           </div>
         )}
 
         {/* Message bubble */}
-        <div
-          className={cn(
-            'tw-max-w-[280px] tw-px-3 tw-py-2 tw-rounded-lg',
-            isOwn
-              ? 'tw-bg-[var(--color-brand-primary)] tw-text-white'
-              : 'tw-bg-[var(--portal-bg-medium)] tw-text-[var(--portal-text-primary)]'
-          )}
-        >
+        <div className={cn('message-bubble', isOwn ? 'own' : 'other')}>
           {isEditing ? (
-            <div className="tw-flex tw-flex-col tw-gap-2">
+            <div className="message-edit-form">
               <textarea
                 ref={editInputRef}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className={cn(
-                  'tw-w-full tw-min-h-[60px] tw-p-2 tw-text-[12px]',
-                  'tw-bg-[var(--portal-bg-darkest)] tw-text-[var(--portal-text-primary)]',
-                  'tw-border tw-border-[var(--portal-border-dark)] tw-rounded',
-                  'focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-[var(--color-brand-primary)]',
-                  'tw-resize-none'
-                )}
+                className="message-edit-textarea"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -232,12 +249,12 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
                   }
                 }}
               />
-              <div className="tw-flex tw-justify-end tw-gap-1">
+              <div className="message-edit-actions">
                 <PortalButton
                   variant="ghost"
                   size="sm"
                   onClick={handleCancelEdit}
-                  className="tw-h-6 tw-text-[10px]"
+                  className="message-edit-btn"
                 >
                   Cancel
                 </PortalButton>
@@ -245,37 +262,31 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
                   variant="primary"
                   size="sm"
                   onClick={handleSaveEdit}
-                  className="tw-h-6 tw-text-[10px]"
+                  className="message-edit-btn"
                 >
-                  <Check className="tw-h-3 tw-w-3" />
+                  <Check className="icon-xs" />
                   Save
                 </PortalButton>
               </div>
             </div>
           ) : (
             <>
-              <p className="tw-text-[12px] tw-whitespace-pre-wrap tw-break-words">
-                {message.content}
+              <p className="message-bubble-text">
+                {decodeHtmlEntities(messageContent)}
               </p>
-              {message.attachments.length > 0 && (
-                <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-1">
-                  {message.attachments.map((attachment) => (
-                    <AttachmentPreview key={attachment.id} attachment={attachment} />
-                  ))}
-                </div>
-              )}
+              {renderAttachments(message.attachments)}
             </>
           )}
         </div>
       </div>
 
       {/* Time and edited indicator */}
-      <div className="tw-flex tw-items-center tw-gap-1 tw-mx-1">
-        <span className="tw-text-[10px] tw-text-[var(--portal-text-muted)]">
+      <div className="message-meta">
+        <span className="message-time">
           {formatMessageTime(message.created_at)}
         </span>
-        {message.is_edited && (
-          <span className="tw-text-[10px] tw-text-[var(--portal-text-muted)] tw-italic">
+        {message.updated_at && message.updated_at !== message.created_at && (
+          <span className="message-edited">
             (edited)
           </span>
         )}
@@ -374,34 +385,30 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
   }, [content]);
 
   return (
-    <div className="tw-section tw-gap-2">
+    <div className="message-composer">
       {/* Attachment previews */}
       {attachments.length > 0 && (
-        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-px-2">
+        <div className="composer-attachments-preview">
           {attachments.map((file, index) => (
             <div
               key={`${file.name}-${index}`}
-              className="tw-panel tw-flex tw-items-center tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm"
+              className="composer-attachment-item"
             >
-              <File className="tw-h-3 tw-w-3" />
+              <File className="icon-xs" />
               <span className="attachment-filename">{file.name}</span>
-              <button type="button" onClick={() => handleRemoveAttachment(index)} className="tw-btn-icon tw-p-0.5">
-                <X className="tw-h-3 tw-w-3" />
-              </button>
+              <IconButton action="close" onClick={() => handleRemoveAttachment(index)} iconSize="xs" />
             </div>
           ))}
         </div>
       )}
 
       {/* Input row */}
-      <div className="tw-flex tw-items-end tw-gap-2">
-        <input ref={fileInputRef} type="file" multiple accept={ALLOWED_FILE_TYPES.join(',')} onChange={handleFileChange} className="tw-hidden" />
+      <div className="composer-input-row">
+        <input ref={fileInputRef} type="file" multiple accept={ALLOWED_FILE_TYPES.join(',')} onChange={handleFileChange} className="file-input-hidden" />
 
-        <button className="tw-btn-icon" onClick={handleAddAttachment} disabled={disabled || isSending} title="Attach file">
-          <Paperclip className="tw-h-4 tw-w-4" />
-        </button>
+        <IconButton action="attach" onClick={handleAddAttachment} disabled={disabled || isSending} title="Attach file" />
 
-        <div className="tw-flex-1">
+        <div className="composer-textarea-wrapper">
           <textarea
             ref={textareaRef}
             value={content}
@@ -415,12 +422,12 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
         </div>
 
         <button
-          className="tw-btn-primary tw-p-2"
+          className="btn-primary tw-p-2"
           onClick={handleSend}
           disabled={disabled || isSending || (!content.trim() && attachments.length === 0)}
           title="Send message"
         >
-          <Send className="tw-h-4 tw-w-4" />
+          <Send className="icon-sm" />
         </button>
       </div>
     </div>
@@ -442,7 +449,6 @@ interface MessageThreadProps {
   onEditMessage: (messageId: number, content: string) => Promise<boolean>;
   onDeleteMessage: (messageId: number) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-  currentUserId?: number;
 }
 
 /**
@@ -460,7 +466,6 @@ export function MessageThread({
   onEditMessage,
   onDeleteMessage,
   showNotification,
-  currentUserId,
 }: MessageThreadProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const messagesRef = useStaggerChildren<HTMLDivElement>(0.05);
@@ -474,39 +479,36 @@ export function MessageThread({
   }, [messages]);
 
   return (
-    <div ref={containerRef} className="tw-flex tw-flex-col tw-h-full">
+    <div ref={containerRef} className="message-thread-container">
       {/* Header */}
-      <div className="tw-divider tw-flex tw-items-center tw-gap-3 tw-px-3 tw-py-2">
-        <button className="tw-btn-icon" onClick={onBack} title="Back to threads">
-          <ArrowLeft className="tw-h-4 tw-w-4" />
-        </button>
+      <div className="message-thread-header">
+        <IconButton action="back" onClick={onBack} title="Back to threads" />
 
         <div className="tw-flex-1 card-content-truncate">
-          <h3 className="tw-text-primary tw-text-sm">{thread.subject}</h3>
+          <h3 className="tw-text-primary tw-text-sm">{decodeHtmlEntities(thread.subject)}</h3>
           {thread.project_name && (
-            <span className="tw-text-muted tw-text-sm">{thread.project_name}</span>
+            <span className="tw-text-muted tw-text-sm">{decodeHtmlEntities(thread.project_name)}</span>
           )}
         </div>
 
-        <button className="tw-btn-icon" onClick={onRefresh} title="Refresh">
-          <RefreshCw className={cn('tw-h-4 tw-w-4', loading && 'tw-animate-spin')} />
-        </button>
+        <IconButton action="refresh" onClick={onRefresh} title="Refresh" className={loading ? 'tw-animate-spin' : ''} />
       </div>
 
       {/* Messages area */}
-      <div className="tw-scroll-container tw-flex-1 tw-p-3">
+      <div className="messages-area tw-scroll-container">
         {loading && messages.length === 0 ? (
-          <div className="tw-loading tw-h-full">
-            <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
+          <div className="loading-state tw-h-full">
+            <RefreshCw className="icon-md tw-animate-spin" />
             <span>Loading messages...</span>
           </div>
         ) : error ? (
-          <div className="tw-error tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center">
-            <div className="tw-text-center tw-mb-4">{error}</div>
-            <button className="tw-btn-secondary" onClick={onRefresh}>Retry</button>
+          <div className="error-state tw-h-full">
+            <div className="error-state-message">{error}</div>
+            <button className="btn-secondary" onClick={onRefresh}>Retry</button>
           </div>
         ) : messages.length === 0 ? (
-          <div className="tw-empty-state tw-h-full">
+          <div className="empty-state tw-h-full">
+            <MessageSquare className="icon-lg" />
             <span>No messages yet. Start the conversation!</span>
           </div>
         ) : (
@@ -515,7 +517,7 @@ export function MessageThread({
               <MessageBubble
                 key={message.id}
                 message={message}
-                isOwn={message.sender_type === 'client' || message.sender_id === currentUserId}
+                isOwn={message.sender_type === 'client'}
                 onEdit={onEditMessage}
                 onDelete={onDeleteMessage}
                 showNotification={showNotification}
@@ -527,7 +529,7 @@ export function MessageThread({
       </div>
 
       {/* Composer */}
-      <div className="tw-divider tw-p-3">
+      <div className="message-composer">
         <MessageComposer
           onSend={onSendMessage}
           disabled={loading || !!error}

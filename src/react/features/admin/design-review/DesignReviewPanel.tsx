@@ -1,13 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   Palette,
   MessageSquare,
-  MoreHorizontal,
   Inbox,
-  Image,
-  ExternalLink,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -25,15 +21,11 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem,
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface DesignReview {
   id: number;
@@ -114,7 +106,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     try {
       const params = new URLSearchParams();
       if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`/api/admin/design-reviews?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?${params}`, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -215,16 +207,6 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
           <IconButton action="add" title="Submit for Review" />
         </>
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadReviews}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredReviews.length > 0 ? (
           <TablePagination
@@ -243,7 +225,6 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -276,8 +257,10 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={7} message={error} onRetry={loadReviews} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={7} rows={5} />
           ) : paginatedReviews.length === 0 ? (
             <AdminTableEmpty
@@ -327,34 +310,16 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
                 <AdminTableCell className="date-cell">{formatDate(review.submittedAt)}</AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <IconButton action="view" />
+                    <IconButton action="view" title="View" />
                     {review.status === 'in-review' && (
                       <>
-                        <IconButton action="approve" />
+                        <IconButton action="approve" title="Approve" />
                         <IconButton action="reject" title="Request Revision" />
                       </>
                     )}
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        <PortalDropdownItem>
-                          <Image className="dropdown-icon" />
-                          View Files
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <ExternalLink className="dropdown-icon" />
-                          Share Link
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <MessageSquare className="dropdown-icon" />
-                          Add Comment
-                        </PortalDropdownItem>
-                      </PortalDropdownContent>
-                    </PortalDropdown>
+                    <IconButton icon="image" title="View Files" />
+                    <IconButton action="copy-link" title="Share Link" />
+                    <IconButton action="message" title="Add Comment" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>
@@ -362,7 +327,6 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

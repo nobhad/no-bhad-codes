@@ -69,6 +69,7 @@ let currentItems: CommandItem[] = [];
 let filteredItems: CommandItem[] = [];
 let selectedIndex = 0;
 let isOpen = false;
+let globalKeydownRegistered = false;
 
 // ============================================================================
 // FUZZY SEARCH
@@ -320,8 +321,11 @@ export function initCommandPalette(config: CommandPaletteConfig): void {
     attachItemListeners();
   }
 
-  // Register global shortcut
-  document.addEventListener('keydown', handleGlobalKeyDown);
+  // Register global shortcut (only once)
+  if (!globalKeydownRegistered) {
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    globalKeydownRegistered = true;
+  }
 }
 
 /**
@@ -411,7 +415,10 @@ export function isPaletteOpen(): boolean {
  * Destroy the command palette and remove event listeners
  */
 export function destroyCommandPalette(): void {
-  document.removeEventListener('keydown', handleGlobalKeyDown);
+  if (globalKeydownRegistered) {
+    document.removeEventListener('keydown', handleGlobalKeyDown);
+    globalKeydownRegistered = false;
+  }
 
   if (paletteInstance) {
     paletteInstance.remove();

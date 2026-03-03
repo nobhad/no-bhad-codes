@@ -9,17 +9,18 @@ import {
   CheckSquare,
   FileSignature,
   StickyNote,
-  ArrowLeft,
-  RefreshCw,
   MoreHorizontal,
   Pencil,
   Copy,
   Archive,
   FileText,
-  Trash2
+  Trash2,
+  RefreshCw,
+  FolderKanban
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { IconButton, TabList, TabPanel } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
   PortalDropdown,
@@ -41,6 +42,7 @@ import { ContractTab } from './tabs/ContractTab';
 import { NotesTab } from './tabs/NotesTab';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
 
 interface ProjectDetailProps {
   /** Project ID to display */
@@ -157,7 +159,7 @@ export function ProjectDetail({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetch(buildEndpoint.project(projectId), {
         method: 'DELETE',
         headers,
         credentials: 'include'
@@ -187,8 +189,8 @@ export function ProjectDetail({
   // Loading state
   if (isLoading && !project) {
     return (
-      <div className="tw-loading">
-        <RefreshCw className="tw-h-6 tw-w-6 tw-animate-spin" />
+      <div className="loading-state">
+        <span className="loading-spinner" />
         <span>Loading project...</span>
       </div>
     );
@@ -197,11 +199,13 @@ export function ProjectDetail({
   // Error state
   if (error && !project) {
     return (
-      <div className="tw-empty-state">
-        <div className="tw-error">{error}</div>
-        <button className="tw-btn-secondary" onClick={refetch}>
-          Retry
-        </button>
+      <div className="tw-section tw-border tw-border-portal">
+        <div className="error-state">
+          <p>{error}</p>
+          <button className="btn-secondary" onClick={refetch}>
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -209,11 +213,14 @@ export function ProjectDetail({
   // No project found
   if (!project) {
     return (
-      <div className="tw-empty-state">
-        <span>Project not found</span>
-        <button className="tw-btn-secondary" onClick={onBack}>
-          Go Back
-        </button>
+      <div className="tw-section tw-border tw-border-portal">
+        <div className="empty-state">
+          <FolderKanban className="icon-xl" />
+          <span>Project not found</span>
+          <button className="btn-secondary" onClick={onBack}>
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -224,13 +231,7 @@ export function ProjectDetail({
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-flex tw-items-center tw-gap-3">
           {/* Back Button */}
-          <button
-            className="tw-btn-icon"
-            onClick={onBack}
-            title="Back to projects"
-          >
-            <ArrowLeft className="tw-h-5 tw-w-5" />
-          </button>
+          <IconButton action="back" onClick={onBack} title="Back to projects" />
 
           {/* Project Info */}
           <div className="tw-flex tw-flex-col tw-gap-0.5">
@@ -247,14 +248,16 @@ export function ProjectDetail({
                   </button>
                 </PortalDropdownTrigger>
                 <PortalDropdownContent>
-                  {Object.entries(PROJECT_STATUS_CONFIG).map(([status, config]) => (
-                    <PortalDropdownItem
-                      key={status}
-                      onClick={() => handleStatusChange(status as ProjectStatus)}
-                    >
-                      <span className="tw-badge">{config.label}</span>
-                    </PortalDropdownItem>
-                  ))}
+                  {Object.entries(PROJECT_STATUS_CONFIG)
+                    .filter(([status]) => status !== project.status)
+                    .map(([status, config]) => (
+                      <PortalDropdownItem
+                        key={status}
+                        onClick={() => handleStatusChange(status as ProjectStatus)}
+                      >
+                        <span className="tw-badge">{config.label}</span>
+                      </PortalDropdownItem>
+                    ))}
                 </PortalDropdownContent>
               </PortalDropdown>
             </div>
@@ -276,43 +279,37 @@ export function ProjectDetail({
 
         {/* Actions */}
         <div className="tw-flex tw-items-center tw-gap-2">
-          <button
-            className="tw-btn-ghost"
-            onClick={refetch}
-            title="Refresh"
-          >
-            <RefreshCw className={cn('tw-h-4 tw-w-4', isLoading && 'tw-animate-spin')} />
-          </button>
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
           <button
-            className="tw-btn-secondary"
+            className="btn-secondary"
             onClick={() => onEdit?.(projectId)}
           >
-            <Pencil className="tw-h-4 tw-w-4" />
+            <Pencil className="icon-md" />
             Edit
           </button>
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="tw-btn-icon">
-                <MoreHorizontal className="tw-h-5 tw-w-5" />
+              <button className="btn-icon">
+                <MoreHorizontal className="icon-lg" />
               </button>
             </PortalDropdownTrigger>
             <PortalDropdownContent align="end">
               <PortalDropdownItem onClick={() => onEdit?.(projectId)}>
-                <Pencil className="tw-h-3.5 tw-w-3.5" />
+                <Pencil className="icon-sm" />
                 Edit Project
               </PortalDropdownItem>
               <PortalDropdownItem onClick={handleDuplicate}>
-                <Copy className="tw-h-3.5 tw-w-3.5" />
+                <Copy className="icon-sm" />
                 Duplicate Project
               </PortalDropdownItem>
               <PortalDropdownItem onClick={archiveDialog.open}>
-                <Archive className="tw-h-3.5 tw-w-3.5" />
+                <Archive className="icon-sm" />
                 Archive Project
               </PortalDropdownItem>
               <PortalDropdownItem onClick={handleGenerateDocuments}>
-                <FileText className="tw-h-3.5 tw-w-3.5" />
+                <FileText className="icon-sm" />
                 Generate Documents
               </PortalDropdownItem>
               <PortalDropdownSeparator />
@@ -320,7 +317,7 @@ export function ProjectDetail({
                 onClick={deleteDialog.open}
                 className="tw-text-[var(--status-cancelled)]"
               >
-                <Trash2 className="tw-h-3.5 tw-w-3.5" />
+                <Trash2 className="icon-sm" />
                 Delete Project
               </PortalDropdownItem>
             </PortalDropdownContent>
@@ -329,104 +326,92 @@ export function ProjectDetail({
       </div>
 
       {/* Tabs */}
-      <div className="tw-tab-list">
-        {TABS.map((tab) => {
-          const Icon = TAB_ICONS[tab.id];
-          const isActive = activeTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={isActive ? 'tw-tab-active' : 'tw-tab'}
-            >
-              <Icon className="tw-h-3.5 tw-w-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <TabList
+        tabs={TABS}
+        tabIcons={TAB_ICONS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Project detail tabs"
+      />
 
       {/* Tab Content */}
-      <div className="tw-section tw-min-h-400">
-        {activeTab === 'overview' && (
-          <OverviewTab
-            project={project}
-            milestones={milestones}
-            progress={progress}
-            outstandingBalance={outstandingBalance}
-            totalPaid={totalPaid}
-            onUpdateProject={updateProject}
-            onAddMilestone={addMilestone}
-            onToggleMilestone={toggleMilestoneComplete}
-            onDeleteMilestone={deleteMilestone}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="overview" isActive={activeTab === 'overview'}>
+        <OverviewTab
+          project={project}
+          milestones={milestones}
+          progress={progress}
+          outstandingBalance={outstandingBalance}
+          totalPaid={totalPaid}
+          onUpdateProject={updateProject}
+          onAddMilestone={addMilestone}
+          onToggleMilestone={toggleMilestoneComplete}
+          onDeleteMilestone={deleteMilestone}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'files' && (
-          <FilesTab
-            files={files}
-            onUploadFile={uploadFile}
-            onDeleteFile={deleteFile}
-            onToggleSharing={toggleFileSharing}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="files" isActive={activeTab === 'files'}>
+        <FilesTab
+          files={files}
+          onUploadFile={uploadFile}
+          onDeleteFile={deleteFile}
+          onToggleSharing={toggleFileSharing}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'deliverables' && (
-          <DeliverablesTab
-            milestones={milestones}
-            progress={progress}
-          />
-        )}
+      <TabPanel tabId="deliverables" isActive={activeTab === 'deliverables'}>
+        <DeliverablesTab
+          milestones={milestones}
+          progress={progress}
+        />
+      </TabPanel>
 
-        {activeTab === 'messages' && (
-          <MessagesTab
-            messages={messages}
-            isLoading={isLoading}
-            onSendMessage={sendMessage}
-            onLoadMessages={loadMessages}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="messages" isActive={activeTab === 'messages'}>
+        <MessagesTab
+          messages={messages}
+          isLoading={isLoading}
+          onSendMessage={sendMessage}
+          onLoadMessages={loadMessages}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'invoices' && (
-          <InvoicesTab
-            invoices={invoices}
-            projectId={projectId}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="invoices" isActive={activeTab === 'invoices'}>
+        <InvoicesTab
+          invoices={invoices}
+          projectId={projectId}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'tasks' && (
-          <TasksTab
-            milestones={milestones}
-            progress={progress}
-            onAddMilestone={addMilestone}
-            onUpdateMilestone={updateMilestone}
-            onDeleteMilestone={deleteMilestone}
-            onToggleMilestone={toggleMilestoneComplete}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="tasks" isActive={activeTab === 'tasks'}>
+        <TasksTab
+          milestones={milestones}
+          progress={progress}
+          onAddMilestone={addMilestone}
+          onUpdateMilestone={updateMilestone}
+          onDeleteMilestone={deleteMilestone}
+          onToggleMilestone={toggleMilestoneComplete}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'contract' && (
-          <ContractTab
-            project={project}
-            files={files}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="contract" isActive={activeTab === 'contract'}>
+        <ContractTab
+          project={project}
+          files={files}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'notes' && (
-          <NotesTab
-            project={project}
-            onUpdateProject={updateProject}
-            showNotification={showNotification}
-          />
-        )}
-      </div>
+      <TabPanel tabId="notes" isActive={activeTab === 'notes'}>
+        <NotesTab
+          project={project}
+          onUpdateProject={updateProject}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
       {/* Archive Confirmation Dialog */}
       <ConfirmDialog

@@ -144,16 +144,8 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'gauge',
     roles: ['admin', 'client'],
     order: 1,
-    activeForRole: 'client',
-  },
-  {
-    id: 'overview',
-    label: 'Overview',
-    icon: 'gauge',
-    roles: ['admin'],
-    order: 1,
     shortcut: '1',
-    activeForRole: 'admin',
+    activeForRole: 'admin', // Default active for both roles
   },
   {
     id: 'projects',
@@ -365,7 +357,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     roles: ['admin'],
     mode: 'primary',
     subtabs: [
-      { id: 'projects', label: 'Projects', roles: ['admin'], active: true },
+      { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
+      { id: 'projects', label: 'Projects', roles: ['admin'] },
       { id: 'tasks', label: 'Tasks', roles: ['admin'] },
       { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'] },
     ],
@@ -377,7 +370,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     roles: ['admin'],
     mode: 'primary',
     subtabs: [
-      { id: 'leads', label: 'Leads', roles: ['admin'], active: true },
+      { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
+      { id: 'leads', label: 'Leads', roles: ['admin'] },
       { id: 'contacts', label: 'Contacts', roles: ['admin'] },
       { id: 'messages', label: 'Messages', roles: ['admin'] },
       { id: 'clients', label: 'Clients', roles: ['admin'] },
@@ -390,7 +384,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     roles: ['admin'],
     mode: 'primary',
     subtabs: [
-      { id: 'invoices', label: 'Invoices', roles: ['admin'], active: true },
+      { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
+      { id: 'invoices', label: 'Invoices', roles: ['admin'] },
       { id: 'contracts', label: 'Contracts', roles: ['admin'] },
       { id: 'document-requests', label: 'Document Requests', roles: ['admin'] },
       { id: 'questionnaires', label: 'Questionnaires', roles: ['admin'] },
@@ -401,11 +396,12 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     id: 'analytics-subtabs',
     forTab: 'analytics',
     roles: ['admin'],
+    mode: 'primary',
     subtabs: [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
-      { id: 'business', label: 'Business', roles: ['admin'] },
-      { id: 'visitors', label: 'Visitors', roles: ['admin'] },
-      { id: 'reports', label: 'Reports & Alerts', roles: ['admin'] },
+      { id: 'revenue', label: 'Revenue', roles: ['admin'] },
+      { id: 'leads', label: 'Leads', roles: ['admin'] },
+      { id: 'projects', label: 'Projects', roles: ['admin'] },
     ],
   },
   // Admin: Workflows subtabs
@@ -413,8 +409,10 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     id: 'workflows-subtabs',
     forTab: 'workflows',
     roles: ['admin'],
+    mode: 'primary',
     subtabs: [
-      { id: 'approvals', label: 'Approvals', roles: ['admin'], active: true },
+      { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
+      { id: 'approvals', label: 'Approvals', roles: ['admin'] },
       { id: 'triggers', label: 'Triggers', roles: ['admin'] },
       { id: 'email-templates', label: 'Email Templates', roles: ['admin'] },
     ],
@@ -426,7 +424,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     roles: ['admin'],
     mode: 'primary',
     subtabs: [
-      { id: 'categories', label: 'Categories', roles: ['admin'], active: true },
+      { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
+      { id: 'categories', label: 'Categories', roles: ['admin'] },
       { id: 'articles', label: 'Articles', roles: ['admin'] },
     ],
   },
@@ -470,7 +469,6 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
 export const UNIFIED_TAB_TITLES: Record<string, string> = {
   // Shared
   dashboard: 'Dashboard',
-  overview: 'Dashboard',
   projects: 'Projects',
   files: 'Files',
   messages: 'Messages',
@@ -611,7 +609,7 @@ export function getDefaultTabForRole(role: UserRole): string {
   const defaultItem = UNIFIED_NAVIGATION.find(
     (item) => item.activeForRole === role && item.roles.includes(role)
   );
-  return defaultItem?.id || (role === 'admin' ? 'overview' : 'dashboard');
+  return defaultItem?.id || 'dashboard';
 }
 
 /**

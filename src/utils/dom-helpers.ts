@@ -8,7 +8,7 @@
  * Consolidates duplicated patterns from admin modules.
  */
 
-/* global Document */
+/* global Document, EventListenerOrEventListenerObject, AddEventListenerOptions, EventListenerOptions, HTMLElementEventMap */
 
 // ===============================================
 // CACHED ELEMENT LOOKUP
@@ -203,3 +203,110 @@ export function qsAs<T extends Element>(selector: string, parent?: Element | Doc
 export function qsaAs<T extends Element>(selector: string, parent?: Element | Document): T[] {
   return qsa(selector, parent) as T[];
 }
+
+// ===============================================
+// EVENT LISTENER MANAGER
+// ===============================================
+
+/**
+ * Listener registration for cleanup tracking
+ */
+interface ListenerRegistration {
+  element: EventTarget;
+  type: string;
+  listener: EventListenerOrEventListenerObject;
+  options?: boolean | AddEventListenerOptions;
+}
+
+/**
+ * Event listener manager for tracking and cleaning up listeners.
+ * Use this to prevent memory leaks from orphaned event listeners.
+ *
+ * @example
+ * const manager = createEventManager();
+ *
+ * // Add listeners (automatically tracked)
+ * manager.on(button, 'click', handleClick);
+ * manager.on(window, 'resize', handleResize);
+ *
+ * // Clean up all listeners when done
+ * manager.cleanup();
+ */
+export interface EventManager {
+  /** Add an event listener (tracked for cleanup) */
+  on: <K extends keyof HTMLElementEventMap>(
+    element: EventTarget,
+    type: K | string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) => void;
+  /** Remove a specific listener */
+  off: <K extends keyof HTMLElementEventMap>(
+    element: EventTarget,
+    type: K | string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions
+  ) => void;
+  /** Remove all tracked listeners */
+  cleanup: () => void;
+  /** Get count of tracked listeners */
+  count: () => number;
+}
+
+/**
+ * Create an event manager instance for a module/component.
+ * Each manager tracks its own listeners independently.
+ *
+ * @returns EventManager instance
+ *
+ * @example
+ * class MyComponent {
+ *   private events = createEventManager();
+ *
+ *   init() {
+ *     this.events.on(this.button, 'click', this.handleClick);
+ *     this.events.on(window, 'scroll', this.handleScroll, { passive: true });
+ *   }
+ *
+ *   destroy() {
+ *     this.events.cleanup(); // Removes all listeners
+ *   }
+ * }
+ */
+export function createEventManager(): EventManager {
+  const listeners: ListenerRegistration[] = [];
+
+  return {
+    on(element, type, listener, options) {
+      element.addEventListener(type, listener, options);
+      listeners.push({ element, type, listener, options });
+    },
+
+    off(element, type, listener, options) {
+      element.removeEventListener(type, listener, options);
+      const index = listeners.findIndex(
+        (l) => l.element === element && l.type === type && l.listener === listener
+      );
+      if (index !== -1) {
+        listeners.splice(index, 1);
+      }
+    },
+
+    cleanup() {
+      for (const { element, type, listener, options } of listeners) {
+        element.removeEventListener(type, listener, options);
+      }
+      listeners.length = 0;
+    },
+
+    count() {
+      return listeners.length;
+    }
+  };
+}
+
+/**
+ * Global event manager for app-wide listeners.
+ * Use createEventManager() for component-specific listeners instead.
+ */
+export const globalEventManager = createEventManager();

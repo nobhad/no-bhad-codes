@@ -16,7 +16,8 @@ import {
   loadFilterState,
   saveFilterState,
   type TableFilterConfig,
-  type FilterState
+  type FilterState,
+  type FilterCleanup
 } from './table-filter';
 import {
   createPaginationUI,
@@ -31,13 +32,18 @@ import {
   createBulkActionToolbar,
   setupBulkSelectionHandlers,
   resetSelection,
-  type BulkActionConfig
+  cleanupBulkToolbar,
+  type BulkActionConfig,
+  type BulkSelectionCleanup
 } from './table-bulk-actions';
 import { exportToCsv, type ExportConfig } from './table-export';
 import { showTableLoading, showTableEmpty } from './loading-utils';
 import { showTableError } from './error-utils';
 import { apiFetch } from './api-client';
 import type { AdminDashboardContext } from '../features/admin/admin-types';
+import { createLogger } from './logger';
+
+const logger = createLogger('TableModuleFactory');
 
 // ===============================================
 // TYPES
@@ -284,6 +290,10 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
   let storedContext: AdminDashboardContext | null = null;
   let filterUIInitialized = false;
 
+  // Cleanup functions for event listeners
+  let filterCleanup: FilterCleanup | null = null;
+  let bulkSelectionCleanup: BulkSelectionCleanup | null = null;
+
   // View mode state (for multi-view modules)
   let currentViewMode: string | undefined = config.viewModes
     ? config.defaultViewMode || config.viewModes[0]?.id || 'table'
@@ -415,23 +425,32 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     const container = getElement(`${config.moduleId}-filter-container`);
     if (!container) return;
 
+    // Cleanup previous filter UI if re-initializing
+    if (filterCleanup) {
+      filterCleanup();
+      filterCleanup = null;
+    }
+
     // Initialize view mode toggle if configured
     initializeViewModeToggle();
 
-    // Create filter UI
-    const filterUI = createFilterUI(config.filterConfig, filterState, (newState) => {
+    // Create filter UI (returns element and cleanup function)
+    const filterResult = createFilterUI(config.filterConfig, filterState, (newState) => {
       filterState = newState;
       if (data.length > 0) {
         renderTable(data, ctx);
       }
     });
 
+    // Store cleanup for later
+    filterCleanup = filterResult.cleanup;
+
     // Insert before export button (Search → Filter → Export → Refresh order)
     const exportBtnRef = container.querySelector(`#export-${config.moduleId}-btn`);
     if (exportBtnRef) {
-      container.insertBefore(filterUI, exportBtnRef);
+      container.insertBefore(filterResult.element, exportBtnRef);
     } else {
-      container.appendChild(filterUI);
+      container.appendChild(filterResult.element);
     }
 
     // Setup sortable headers after table is rendered
@@ -542,10 +561,17 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
       tableBody.appendChild(row);
     });
 
-    // Setup bulk selection handlers
+    // Setup bulk selection handlers (cleanup previous handlers first)
     if (config.bulkConfig) {
+      if (bulkSelectionCleanup) {
+        bulkSelectionCleanup();
+        bulkSelectionCleanup = null;
+      }
+      cleanupBulkToolbar(config.moduleId);
+
       const allRowIds = paginatedItems.map((item) => item.id);
-      setupBulkSelectionHandlers(config.bulkConfig, allRowIds);
+      const bulkResult = setupBulkSelectionHandlers(config.bulkConfig, allRowIds);
+      bulkSelectionCleanup = bulkResult.cleanup;
     }
 
     // Render pagination
@@ -614,7 +640,7 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
           if (response.status !== 401) {
             // Don't show error for 401 - handled by apiFetch
             const errorText = await response.text();
-            console.error(`[${config.moduleId}] API error:`, response.status, errorText);
+            logger.error(`[${config.moduleId}] API error:`, response.status, errorText);
             if (tableBody) {
               showTableError(
                 tableBody,
@@ -651,7 +677,7 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
       // Call optional callback
       config.onDataLoaded?.(data, ctx);
     } catch (error) {
-      console.error(`[${config.moduleId}] Failed to load:`, error);
+      logger.error(`[${config.moduleId}] Failed to load:`, error);
       // Reuse tableBody from outer scope (already fetched before try block)
       if (tableBody) {
         showTableError(
@@ -681,6 +707,17 @@ export function createTableModule<T extends { id: number }, TStats = unknown>(
     },
     getElement,
     resetCache: () => {
+      // Cleanup event listeners before resetting
+      if (filterCleanup) {
+        filterCleanup();
+        filterCleanup = null;
+      }
+      if (bulkSelectionCleanup) {
+        bulkSelectionCleanup();
+        bulkSelectionCleanup = null;
+      }
+      cleanupBulkToolbar(config.moduleId);
+
       cachedElements.clear();
       filterUIInitialized = false;
     },

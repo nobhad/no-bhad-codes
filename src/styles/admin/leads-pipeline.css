@@ -117,7 +117,7 @@
 .lead-detail-tabs {
   display: flex;
   gap: var(--space-0-5);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
   margin-bottom: var(--space-1-5);
   padding-bottom: var(--space-0-5);
 }
@@ -219,12 +219,12 @@
   background: var(--portal-bg-dark);
   padding: var(--space-1-5);
   margin-bottom: var(--space-1);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   position: relative;
 }
 
 .lead-note-item.pinned {
-  border-left: 3px solid var(--color-primary);
+  border-left: var(--border-width-thick) solid var(--color-primary);
 }
 
 .lead-note-header {
@@ -269,7 +269,7 @@
   width: 100%;
   padding: var(--space-1);
   background: var(--portal-bg-dark);
-  border: 1px dashed var(--portal-border);
+  border: var(--border-width) dashed var(--portal-border);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
@@ -317,13 +317,13 @@
 }
 
 .leads-analytics-section .analytics-columns-2col .analytics-column:first-child {
-  border-right: 1px solid var(--table-border-color);
+  border-right: var(--border-width) solid var(--table-border-color);
 }
 
 /* Scoring rules: border-top separator, padding for content */
 .leads-analytics-section > .analytics-column-full {
   padding: var(--space-2);
-  border-top: 1px solid var(--table-border-color);
+  border-top: var(--border-width) solid var(--table-border-color);
 }
 
 /* 3-column grid (legacy) */
@@ -351,7 +351,7 @@
 .analytics-column,
 .analytics-column-full {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   padding: var(--portal-card-padding);
   min-width: 0;
   color: var(--portal-text-light);
@@ -389,10 +389,10 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   min-width: 0;
   text-align: left;
   margin-bottom: var(--space-1);
@@ -462,7 +462,7 @@
   align-items: center;
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   margin-bottom: var(--space-1);
 }
 
@@ -548,10 +548,10 @@
 .scoring-rule-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
 }
 
 /* Mobile: no border changes needed since we use card backgrounds */
@@ -628,7 +628,7 @@
 .lead-details-tabs {
   display: flex;
   gap: var(--space-0-5);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
   margin-bottom: var(--space-1-5);
   padding-bottom: var(--space-0-5);
 }
@@ -743,7 +743,7 @@
   font-weight: 600;
   margin-left: auto;
   margin-right: var(--space-1-5);
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
 }
 
 .lead-score-badge.score-hot {
@@ -794,11 +794,11 @@
 .lead-task-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1);
   background: transparent;
   margin-bottom: var(--space-1);
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
 }
 
 .lead-task-item.task-completed {
@@ -812,7 +812,7 @@
 .task-checkbox {
   width: 18px;
   height: 18px;
-  border: 2px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   background: transparent;
   cursor: pointer;
   display: flex;
@@ -866,11 +866,11 @@
   background: transparent;
   padding: var(--space-1-5);
   margin-bottom: var(--space-1);
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
 }
 
 .lead-note-item.note-pinned {
-  border-left: 3px solid var(--color-primary);
+  border-left: var(--border-width-thick) solid var(--color-primary);
 }
 
 .note-header {

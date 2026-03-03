@@ -11,6 +11,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('AdHocAnalytics');
 
 interface SavedQuery {
   id: number;
@@ -59,7 +63,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
 
   const loadSavedQueries = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/ad-hoc-analytics/queries', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -68,7 +72,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
       const payload = data.data || data;
       setSavedQueries(payload.queries || []);
     } catch (err) {
-      console.error('Failed to load saved queries:', err);
+      logger.error('Failed to load saved queries:', err);
     }
   }, [getHeaders]);
 
@@ -83,7 +87,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
     setResult(null);
 
     try {
-      const response = await fetch('/api/admin/ad-hoc-analytics/run', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_RUN, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -109,7 +113,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
     if (!query.trim() || !queryName.trim()) return;
 
     try {
-      const response = await fetch('/api/admin/ad-hoc-analytics/queries', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -122,7 +126,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
       setQueryName('');
       showNotification?.('Query saved', 'success');
     } catch (err) {
-      console.error('Failed to save query:', err);
+      logger.error('Failed to save query:', err);
       showNotification?.('Failed to save query', 'error');
     }
   }
@@ -131,7 +135,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
     if (!confirm('Are you sure you want to delete this saved query?')) return;
 
     try {
-      const response = await fetch(`/api/admin/ad-hoc-analytics/queries/${queryId}`, {
+      const response = await fetch(buildEndpoint.adminAdHocQuery(queryId), {
         method: 'DELETE',
         headers: getHeaders(),
         credentials: 'include',
@@ -142,7 +146,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
       setSavedQueries((prev) => prev.filter((q) => q.id !== queryId));
       showNotification?.('Query deleted', 'success');
     } catch (err) {
-      console.error('Failed to delete query:', err);
+      logger.error('Failed to delete query:', err);
       showNotification?.('Failed to delete query', 'error');
     }
   }
@@ -224,7 +228,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                           e.stopPropagation();
                           deleteQuery(sq.id);
                         }}
-                        className="tw-btn-icon"
+                        className="btn-icon"
                       >
                         <Trash2 className="analytics-trash-icon" />
                       </button>
@@ -253,7 +257,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                   onChange={(e) => setQueryName(e.target.value)}
                   className="tw-input analytics-name-input"
                 />
-                <button className="tw-btn-secondary" onClick={saveQuery} disabled={!query || !queryName}>
+                <button className="btn-secondary" onClick={saveQuery} disabled={!query || !queryName}>
                   <Save className="analytics-action-icon" />
                   Save
                 </button>
@@ -270,7 +274,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
               <span className="tw-text-muted analytics-hint">
                 Use SQL-like syntax to query your data
               </span>
-              <button className="tw-btn-primary" onClick={runQuery} disabled={isLoading || !query}>
+              <button className="btn-primary" onClick={runQuery} disabled={isLoading || !query}>
                 <Play className={cn('analytics-action-icon', isLoading && 'status-panel-refresh-icon-spin')} />
                 {isLoading ? 'Running...' : 'Run Query'}
               </button>
@@ -279,7 +283,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
 
           {/* Error State */}
           {error && (
-            <div className="tw-error">{error}</div>
+            <div className="error-state">{error}</div>
           )}
 
           {/* Results */}
@@ -305,7 +309,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                       <BarChart3 className="analytics-action-icon" />
                     </button>
                   </div>
-                  <button className="tw-btn-secondary" onClick={exportResults}>
+                  <button className="btn-secondary" onClick={exportResults}>
                     <Download className="analytics-action-icon" />
                     Export
                   </button>
@@ -326,7 +330,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                       {result.rows.slice(0, 100).map((row, i) => (
                         <tr key={i} className="tw-table-row">
                           {result.columns.map((col) => (
-                            <td key={col} className="tw-table-cell">{String(row[col] ?? '-')}</td>
+                            <td key={col} className="tw-table-cell">{row[col] != null ? String(row[col]) : ''}</td>
                           ))}
                         </tr>
                       ))}
@@ -339,7 +343,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                   )}
                 </div>
               ) : (
-                <div className="tw-empty-state analytics-chart-empty">
+                <div className="empty-state analytics-chart-empty">
                   <BarChart3 className="analytics-chart-icon" />
                   <p>Chart visualization</p>
                   <p className="tw-text-muted analytics-chart-hint">Select numeric columns to visualize</p>

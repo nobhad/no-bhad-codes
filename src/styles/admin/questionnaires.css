@@ -16,7 +16,7 @@
 /* Individual question item */
 [data-page="admin"] .question-item {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   padding: var(--space-3);
 }
 
@@ -35,7 +35,7 @@
 
 [data-page="admin"] .question-type-select {
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -44,7 +44,7 @@
 [data-page="admin"] .question-required-label {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -61,7 +61,7 @@
 [data-page="admin"] .question-text {
   width: 100%;
   padding: var(--space-2);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
@@ -82,7 +82,7 @@
 [data-page="admin"] .question-options-input {
   width: 100%;
   padding: var(--space-2);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -114,7 +114,7 @@
 [data-page="admin"] .response-answer-item {
   padding: var(--space-3);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
 }
 
 [data-page="admin"] .response-question {
@@ -169,7 +169,7 @@
 /* HR separator in form */
 [data-page="admin"] #questionnaire-form hr {
   border: none;
-  border-top: 1px solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border);
   margin: var(--space-4) 0;
 }
 
@@ -195,7 +195,7 @@
 [data-page="admin"] .question-conditional {
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: 1px dashed var(--color-border);
+  border-top: var(--border-width) dashed var(--color-border);
 }
 
 [data-page="admin"] .question-conditional-toggle {
@@ -224,7 +224,7 @@
 [data-page="admin"] .conditional-question-select,
 [data-page="admin"] .conditional-value-select {
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   background-color: var(--color-background);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);

@@ -81,6 +81,7 @@ router.post(
     const label = req.body.label || null;
 
     for (const file of files) {
+      // Always use email for uploaded_by for consistency and audit trails
       const result = await db.run(
         `
       INSERT INTO files (project_id, filename, original_filename, file_path, file_size, mime_type, uploaded_by, description)
@@ -93,7 +94,7 @@ router.post(
           file.path,
           file.size,
           file.mimetype,
-          req.user!.type,
+          req.user!.email || req.user!.type,
           label,
         ]
       );

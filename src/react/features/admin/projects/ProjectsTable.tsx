@@ -12,6 +12,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -36,44 +37,22 @@ import type { Project, ProjectStatus, SortConfig } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '../../../../utils/format-utils';
-import { PROJECT_STATUS_OPTIONS, PROJECT_TYPE_OPTIONS } from '../shared/filterConfigs';
+import { PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface ProjectsTableProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
-  /** Callback when project is selected for detail view */
-  onViewProject?: (projectId: number) => void;
+  /** Navigation callback for detail views */
+  onNavigate?: (tab: string, entityId?: string) => void;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
-// Filter configuration for useTableFilters hook
-const FILTER_CONFIG = [
-  {
-    key: 'status',
-    label: 'Status',
-    options: PROJECT_STATUS_OPTIONS,
-  },
-  {
-    key: 'type',
-    label: 'Type',
-    options: PROJECT_TYPE_OPTIONS,
-  },
-];
-
-// Filter sections for FilterDropdown component
-const FILTER_SECTIONS = [
-  {
-    key: 'status',
-    label: 'STATUS',
-    options: PROJECT_STATUS_OPTIONS,
-  },
-  {
-    key: 'type',
-    label: 'TYPE',
-    options: PROJECT_TYPE_OPTIONS,
-  },
-];
 
 // Filter function
 function filterProject(
@@ -142,8 +121,10 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
  */
 export function ProjectsTable({
   getAuthToken,
-  onViewProject,
+  onNavigate,
   showNotification,
+  defaultPageSize = 25,
+  overviewMode = false,
 }: ProjectsTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -167,7 +148,7 @@ export function ProjectsTable({
     hasActiveFilters,
   } = useTableFilters<Project>({
     storageKey: 'admin_projects',
-    filters: FILTER_CONFIG,
+    filters: PROJECTS_FILTER_CONFIG,
     filterFn: filterProject,
     sortFn: sortProjects,
     defaultSort: { column: 'name', direction: 'asc' },
@@ -176,11 +157,11 @@ export function ProjectsTable({
   // Apply filters to get filtered data
   const filteredProjects = useMemo(() => applyFilters(projects), [applyFilters, projects]);
 
-  // Pagination
+  // Pagination - overview mode disables persistence
   const pagination = usePagination({
-    storageKey: 'admin_projects_pagination',
+    storageKey: overviewMode ? undefined : 'admin_projects_pagination',
     totalItems: filteredProjects.length,
-    defaultPageSize: 25,
+    defaultPageSize,
   });
 
   // Get paginated data
@@ -299,9 +280,9 @@ export function ProjectsTable({
   // Handle view project
   const handleViewProject = useCallback(
     (projectId: number) => {
-      onViewProject?.(projectId);
+      onNavigate?.('project-detail', String(projectId));
     },
-    [onViewProject]
+    [onNavigate]
   );
 
   // Handle row click
@@ -335,7 +316,7 @@ export function ProjectsTable({
               placeholder="Search projects..."
             />
             <FilterDropdown
-              sections={FILTER_SECTIONS}
+              sections={PROJECTS_FILTER_CONFIG}
               values={filterValues}
               onChange={(key, value) => setFilter(key, value)}
             />
@@ -365,16 +346,6 @@ export function ProjectsTable({
             onDelete={deleteDialog.open}
             deleteLoading={deleteDialog.isLoading}
           />
-        }
-        error={
-          error ? (
-            <div className="table-error-banner">
-              {error}
-              <PortalButton variant="secondary" size="sm" onClick={refetch}>
-                Retry
-              </PortalButton>
-            </div>
-          ) : undefined
         }
         pagination={
           !isLoading && filteredProjects.length > 0 ? (
@@ -436,33 +407,26 @@ export function ProjectsTable({
               >
                 Budget
               </AdminTableHead>
-              <AdminTableHead className="timeline-col">Timeline</AdminTableHead>
               <AdminTableHead
-                className="date-col"
+                className="timeline-col"
                 sortable
                 sortDirection={sort?.column === 'start_date' ? sort.direction : null}
                 onClick={() => toggleSort('start_date')}
               >
-                Start
-              </AdminTableHead>
-              <AdminTableHead
-                className="date-col"
-                sortable
-                sortDirection={sort?.column === 'end_date' ? sort.direction : null}
-                onClick={() => toggleSort('end_date')}
-              >
-                Target
+                Timeline
               </AdminTableHead>
               <AdminTableHead className="actions-col">Actions</AdminTableHead>
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
-              <AdminTableLoading colSpan={9} rows={5} />
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedProjects.length === 0 ? (
               <AdminTableEmpty
-                colSpan={9}
+                colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No projects match your filters' : 'No projects yet'}
               />
@@ -486,10 +450,10 @@ export function ProjectsTable({
                   {/* Project Name & Client */}
                   <AdminTableCell className="primary-cell name-col">
                     <div className="cell-content">
-                      <span className="cell-title">{project.project_name || 'Untitled Project'}</span>
+                      <span className="cell-title">{decodeHtmlEntities(project.project_name) || 'Untitled Project'}</span>
                       <span className="cell-subtitle">
-                        {project.contact_name}
-                        {project.company_name && ` - ${project.company_name}`}
+                        {decodeHtmlEntities(project.contact_name)}
+                        {project.company_name && ` - ${decodeHtmlEntities(project.company_name)}`}
                       </span>
                       {/* Stacked content for responsive - hidden on desktop */}
                       <span className="type-stacked">
@@ -506,7 +470,7 @@ export function ProjectsTable({
 
                   {/* Type */}
                   <AdminTableCell className="type-col">
-                    {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type || '-'}
+                    {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type}
                   </AdminTableCell>
 
                   {/* Status */}
@@ -521,16 +485,18 @@ export function ProjectsTable({
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent sideOffset={0} align="start">
-                        {Object.entries(PROJECT_STATUS_CONFIG).map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(project.id, status as ProjectStatus)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
+                        {Object.entries(PROJECT_STATUS_CONFIG)
+                          .filter(([status]) => status !== project.status)
+                          .map(([status, config]) => (
+                            <PortalDropdownItem
+                              key={status}
+                              onClick={() => handleStatusChange(project.id, status as ProjectStatus)}
+                            >
+                              <StatusBadge status={getStatusVariant(status)} size="sm">
+                                {config.label}
+                              </StatusBadge>
+                            </PortalDropdownItem>
+                          ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
                   </AdminTableCell>
@@ -540,19 +506,16 @@ export function ProjectsTable({
                     {formatCurrency(project.budget)}
                   </AdminTableCell>
 
-                  {/* Timeline */}
-                  <AdminTableCell className="timeline-col">
-                    {project.timeline || '-'}
-                  </AdminTableCell>
-
-                  {/* Start Date */}
-                  <AdminTableCell className="date-cell">
-                    {formatDate(project.start_date)}
-                  </AdminTableCell>
-
-                  {/* Target Date */}
-                  <AdminTableCell className="date-cell">
-                    {formatDate(project.end_date)}
+                  {/* Timeline - consolidated dates */}
+                  <AdminTableCell className="timeline-cell">
+                    <div className="cell-content">
+                      {project.timeline && (
+                        <span className="cell-title">{project.timeline}</span>
+                      )}
+                      <span className="cell-subtitle">
+                        {formatDate(project.start_date)} → {formatDate(project.end_date)}
+                      </span>
+                    </div>
                   </AdminTableCell>
 
                   {/* Actions */}

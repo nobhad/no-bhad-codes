@@ -42,8 +42,8 @@ export function NavItem({
         'tw-text-[14px] tw-font-mono tw-transition-colors tw-cursor-pointer',
         'tw-border-none tw-bg-transparent',
         isActive
-          ? 'tw-text-white tw-border-l-2 tw-border-l-white'
-          : 'tw-text-[var(--portal-text-muted)] hover:tw-text-white',
+          ? 'tw-text-primary tw-border-l-2 tw-border-l-primary'
+          : 'tw-text-[var(--portal-text-muted)] hover:tw-text-primary',
         isCollapsed && 'tw-justify-center tw-px-2'
       )}
       title={isCollapsed ? label : undefined}
@@ -53,7 +53,7 @@ export function NavItem({
       <Icon
         className={cn(
           'tw-h-4 tw-w-4 tw-flex-shrink-0',
-          isActive && 'tw-text-white'
+          isActive && 'tw-text-primary'
         )}
       />
       {!isCollapsed && (
@@ -71,7 +71,7 @@ export function NavItem({
           className={cn(
             'tw-absolute tw-top-1 tw-right-1',
             'tw-w-2 tw-h-2',
-            'tw-bg-white'
+            'tw-bg-primary'
           )}
         />
       )}

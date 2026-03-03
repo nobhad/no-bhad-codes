@@ -10,6 +10,9 @@
 
 import { cx } from '../utils/dom-utils';
 import { TIMING } from '../constants/timing';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('DataDisplay');
 
 // ===============================================
 // TYPES
@@ -334,7 +337,7 @@ export function createInfoRow(config: InfoRowConfig): HTMLElement {
         copyBtn.classList.add('copied');
         setTimeout(() => copyBtn.classList.remove('copied'), TIMING.COPY_FEEDBACK);
       } catch (err) {
-        console.error('Failed to copy:', err);
+        logger.error('Failed to copy:', err);
       }
     });
 

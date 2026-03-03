@@ -48,7 +48,7 @@
 #deliverables-upload-btn {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   white-space: nowrap;
 }
 
@@ -138,7 +138,7 @@
   display: flex;
   gap: var(--space-1);
   padding-top: var(--space-1);
-  border-top: 1px solid var(--portal-bg-light);
+  border-top: var(--border-width) solid var(--portal-bg-light);
 }
 
 /* .icon-btn base styles in shared/portal-buttons.css */
@@ -167,7 +167,7 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: 2px dashed var(--portal-bg-medium);
+  border: var(--border-width) dashed var(--portal-bg-medium);
   border-radius: var(--portal-radius-md);
   background-color: var(--portal-bg-dark);
   cursor: pointer;
@@ -262,7 +262,7 @@
   justify-content: center;
   background: var(--portal-bg-medium);
   border: var(--portal-border);
-  border-radius: 3px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-light);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -296,7 +296,7 @@
   padding: var(--space-1) var(--space-1);
   background: var(--portal-bg-dark);
   border: var(--portal-border);
-  border-radius: 3px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
   cursor: pointer;
@@ -399,7 +399,7 @@
   width: 100%;
   aspect-ratio: 1;
   border-radius: var(--portal-radius-xs);
-  border: 2px solid transparent;
+  border: var(--border-width) solid transparent;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -470,12 +470,12 @@
 
 .design-elements-list::-webkit-scrollbar-track {
   background: var(--portal-bg-light);
-  border-radius: 3px;
+  border-radius: var(--portal-radius-xs);
 }
 
 .design-elements-list::-webkit-scrollbar-thumb {
   background: var(--portal-bg-medium);
-  border-radius: 3px;
+  border-radius: var(--portal-radius-xs);
 }
 
 .design-elements-list::-webkit-scrollbar-thumb:hover {
@@ -514,7 +514,7 @@
   padding: 4px 8px;
   border: var(--portal-border);
   background: var(--portal-bg-dark);
-  border-radius: 3px;
+  border-radius: var(--portal-radius-xs);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
   cursor: pointer;
@@ -560,7 +560,7 @@
   width: 100%;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--portal-radius-xs);
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;

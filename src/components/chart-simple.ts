@@ -8,6 +8,10 @@
  * Used for: Analytics dashboard, quick stats
  */
 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('ChartSimple');
+
 export interface BarChartData {
   label: string;
   value: number;
@@ -58,7 +62,7 @@ export function createBarChart(
 ): { refresh: (data: BarChartData[]) => void; destroy: () => void } {
   const container = document.getElementById(containerId);
   if (!container) {
-    console.error('[BarChart] Container not found:', containerId);
+    logger.error('[BarChart] Container not found:', containerId);
     return { refresh: () => {}, destroy: () => {} };
   }
 
@@ -117,7 +121,7 @@ export function createPieChart(
 ): { refresh: (data: PieChartData[]) => void; destroy: () => void } {
   const container = document.getElementById(containerId);
   if (!container) {
-    console.error('[PieChart] Container not found:', containerId);
+    logger.error('[PieChart] Container not found:', containerId);
     return { refresh: () => {}, destroy: () => {} };
   }
 
@@ -218,7 +222,7 @@ export function createSparkline(
 ): { refresh: (data: number[]) => void; destroy: () => void } {
   const container = document.getElementById(containerId);
   if (!container) {
-    console.error('[Sparkline] Container not found:', containerId);
+    logger.error('[Sparkline] Container not found:', containerId);
     return { refresh: () => {}, destroy: () => {} };
   }
 
@@ -300,7 +304,7 @@ export function createKPICard(
 ): { update: (value: string | number, change?: number) => void; destroy: () => void } {
   const container = document.getElementById(containerId);
   if (!container) {
-    console.error('[KPICard] Container not found:', containerId);
+    logger.error('[KPICard] Container not found:', containerId);
     return { update: () => {}, destroy: () => {} };
   }
 

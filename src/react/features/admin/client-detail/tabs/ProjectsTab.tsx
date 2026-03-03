@@ -53,10 +53,10 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
   if (projects.length === 0) {
     return (
-      <div className="tw-empty-state">
-        <FolderKanban className="tw-h-12 tw-w-12 tw-mb-3" />
+      <div className="empty-state">
+        <FolderKanban className="icon-xl tw-mb-3" />
         <p>No projects yet</p>
-        <p className="proj-text-base">
+        <p className="">
           Projects associated with this client will appear here
         </p>
       </div>
@@ -75,25 +75,25 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
           <div className="tw-flex-1 tw-min-w-0">
             <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-              <h4 className="tw-heading tw-truncate proj-text-base">
+              <h4 className="tw-heading tw-truncate ">
                 {project.project_name}
               </h4>
-              <span className="tw-badge proj-text-xs">
+              <span className="tw-badge tw-text-xs">
                 {statusConfig?.label || project.status}
               </span>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted proj-text-sm">
-              <Clock className="tw-h-3 tw-w-3" />
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted tw-text-sm">
+              <Clock className="icon-xs" />
               <span>Created {formatDate(project.created_at)}</span>
             </div>
           </div>
 
           <button
-            className="tw-btn-ghost tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity"
+            className="btn-ghost tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity"
             onClick={() => onViewProject?.(project.id)}
           >
-            <ExternalLink className="tw-h-4 tw-w-4" />
+            <ExternalLink className="icon-md" />
             View
           </button>
         </div>
@@ -103,7 +103,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
           <div className="tw-mt-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
               <span className="tw-label">Progress</span>
-              <span className="tw-text-muted proj-text-sm">
+              <span className="tw-text-muted tw-text-sm">
                 {progress}%
               </span>
             </div>
@@ -128,11 +128,11 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
     return (
       <div>
-        <h3 className="tw-section-title proj-section-title">
+        <h3 className="tw-section-title ">
           {title} ({projectList.length})
         </h3>
         {projectList.length === 0 ? (
-          <p className="tw-text-muted proj-text-base proj-empty-italic">
+          <p className="tw-text-muted  tw-text-muted tw-italic">
             {emptyMessage}
           </p>
         ) : (
@@ -148,23 +148,23 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading proj-text-lg">
+        <h2 className="tw-heading tw-text-lg">
           Projects ({projects.length})
         </h2>
 
         {/* Summary stats */}
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-center">
-            <span className="tw-stat-value proj-text-lg">
+            <span className="tw-stat-value tw-text-lg">
               {activeProjects.length}
             </span>
-            <span className="tw-text-muted tw-ml-1 proj-text-sm">Active</span>
+            <span className="tw-text-muted tw-ml-1 tw-text-sm">Active</span>
           </div>
           <div className="tw-text-center">
-            <span className="tw-stat-value proj-text-lg">
+            <span className="tw-stat-value tw-text-lg">
               {completedProjects.length}
             </span>
-            <span className="tw-text-muted tw-ml-1 proj-text-sm">
+            <span className="tw-text-muted tw-ml-1 tw-text-sm">
               Completed
             </span>
           </div>

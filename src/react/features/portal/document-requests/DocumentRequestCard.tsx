@@ -5,11 +5,16 @@
 
 import * as React from 'react';
 import { useRef, useState, useCallback } from 'react';
-import { Upload, Clock, CheckCircle, AlertCircle, FileText, X } from 'lucide-react';
+import { Upload, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatCardDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { IconButton } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { createLogger } from '../../../../utils/logger';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('DocumentRequestCard');
 
 // File size limit: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -166,7 +171,7 @@ export function DocumentRequestCard({
       formData.append('file', selectedFile);
       formData.append('category', 'document_request');
 
-      const uploadResponse = await fetch(`/api/uploads/project/${request.project_id}`, {
+      const uploadResponse = await fetch(buildEndpoint.projectUpload(request.project_id), {
         method: 'POST',
         headers,
         credentials: 'include',
@@ -186,7 +191,7 @@ export function DocumentRequestCard({
       }
 
       // Step 2: Link uploaded file to document request
-      const linkResponse = await fetch(`/api/document-requests/${request.id}/upload`, {
+      const linkResponse = await fetch(buildEndpoint.documentRequestUpload(request.id), {
         method: 'POST',
         headers: {
           ...headers,
@@ -205,7 +210,7 @@ export function DocumentRequestCard({
       setSelectedFile(null);
       onUploadSuccess(request.id);
     } catch (err) {
-      console.error('[DocumentRequestCard] Upload error:', err);
+      logger.error('[DocumentRequestCard] Upload error:', err);
       showNotification?.(
         err instanceof Error ? err.message : 'Failed to upload document',
         'error'
@@ -260,7 +265,7 @@ export function DocumentRequestCard({
       {/* Due Date */}
       {request.due_date && (
         <div className="tw-flex tw-items-center tw-gap-1 tw-mb-2">
-          <Clock className="tw-h-4 tw-w-4 tw-text-muted" />
+          <Clock className="tw-h-4 tw-w-4" />
           <span className={cn('tw-text-sm', overdue ? 'tw-text-primary' : 'tw-text-muted')}>
             Due {formatCardDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
@@ -272,7 +277,7 @@ export function DocumentRequestCard({
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
         <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2 tw-mb-2">
-          <FileText className="tw-h-4 tw-w-4 tw-text-muted" />
+          <FileText className="tw-h-4 tw-w-4" />
           <span className="tw-text-primary tw-flex-1 tw-text-sm">
             {request.uploaded_file.filename}
           </span>
@@ -290,16 +295,14 @@ export function DocumentRequestCard({
               <FileText className="tw-h-4 tw-w-4" />
               <span className="tw-text-primary tw-flex-1 tw-text-sm">{selectedFile.name}</span>
               <span className="tw-text-muted tw-text-xs">{formatFileSize(selectedFile.size)}</span>
-              <button className="tw-btn-icon" onClick={clearSelectedFile} disabled={isUploading}>
-                <X className="tw-h-4 tw-w-4" />
-              </button>
+              <IconButton action="close" onClick={clearSelectedFile} disabled={isUploading} />
             </div>
           ) : (
             <div
               className="tw-dropzone"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="tw-h-5 tw-w-5 tw-text-muted" />
+              <Upload className="tw-h-5 tw-w-5" />
               <p className="tw-text-muted tw-text-sm">
                 Drop file here or <span className="tw-text-primary">browse</span>
               </p>
@@ -319,7 +322,7 @@ export function DocumentRequestCard({
 
           {selectedFile && (
             <div className="tw-mt-2">
-              <button className="tw-btn-primary tw-w-full" onClick={handleUpload} disabled={isUploading}>
+              <button className="btn-primary tw-w-full" onClick={handleUpload} disabled={isUploading}>
                 {isUploading ? 'Uploading...' : 'Upload Document'}
               </button>
             </div>

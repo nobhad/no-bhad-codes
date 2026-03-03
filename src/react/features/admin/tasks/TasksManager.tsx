@@ -16,11 +16,13 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
 import { usePagination } from '@react/hooks/usePagination';
 import { TASK_STATUS_OPTIONS, TASK_PRIORITY_OPTIONS } from '../shared/filterConfigs';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface Task {
   id: number;
@@ -100,7 +102,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       if (projectId) params.append('project_id', projectId);
       if (assigneeId) params.append('assignee_id', assigneeId);
 
-      const response = await fetch(`/api/admin/tasks?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.TASKS}?${params}`, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -357,16 +359,6 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
           </PortalButton>
         </>
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={fetchTasks}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         viewMode === 'list' && !loading && filteredTasks.length > 0 ? (
           <TablePagination
@@ -385,7 +377,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
         ) : undefined
       }
     >
-      {!error && (viewMode === 'list' ? (
+      {viewMode === 'list' ? (
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
@@ -410,13 +402,6 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
               >
                 Priority
               </AdminTableHead>
-              <AdminTableHead
-                sortable
-                sortDirection={sortField === 'assignee_name' ? sortDirection : null}
-                onClick={() => handleSort('assignee_name')}
-              >
-                Assignee
-              </AdminTableHead>
               <AdminTableHead>Project</AdminTableHead>
               <AdminTableHead
                 className="date-col"
@@ -431,12 +416,14 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!loading}>
-            {loading ? (
-              <AdminTableLoading colSpan={8} rows={5} />
+          <AdminTableBody animate={!loading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={fetchTasks} />
+            ) : loading ? (
+              <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <AdminTableEmpty
-                colSpan={8}
+                colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
@@ -479,14 +466,11 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                     </span>
                   </AdminTableCell>
                   <AdminTableCell>
-                    {task.assignee_name || <span className="text-muted">Unassigned</span>}
-                  </AdminTableCell>
-                  <AdminTableCell>
                     <div className="cell-content">
                       {task.client_name && (
                         <span className="cell-subtitle">{task.client_name}</span>
                       )}
-                      <span className="cell-title">{task.project_name || '-'}</span>
+                      {task.project_name && <span className="cell-title">{task.project_name}</span>}
                     </div>
                   </AdminTableCell>
                   <AdminTableCell className="date-cell">
@@ -497,7 +481,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                   </AdminTableCell>
                   <AdminTableCell className="text-right">
                     <span className="text-muted">
-                      {task.actual_hours !== null ? `${task.actual_hours}` : '-'}
+                      {task.actual_hours !== null ? `${task.actual_hours}` : ''}
                       {task.estimated_hours !== null && (
                         <span>/{task.estimated_hours}h</span>
                       )}
@@ -528,7 +512,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
         </AdminTable>
       ) : (
         renderBoardView()
-      ))}
+      )}
     </TableLayout>
   );
 }

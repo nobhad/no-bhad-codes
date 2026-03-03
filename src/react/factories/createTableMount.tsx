@@ -1,5 +1,8 @@
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('createTableMount');
 
 /**
  * Base options for table mount functions.
@@ -39,7 +42,7 @@ class MountErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBounda
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error(`[React/${this.props.displayName}] Render error:`, error, errorInfo);
+    logger.error(`[React/${this.props.displayName}] Render error:`, error, errorInfo);
     this.props.onError?.(error);
   }
 
@@ -133,9 +136,9 @@ export function createTableMount<P extends TableMountOptions>(
           </MountErrorBoundary>
         </React.StrictMode>
       );
-      console.log(`[React/${displayName}] Mounted successfully`);
+      logger.info(`[React/${displayName}] Mounted successfully`);
     } catch (err) {
-      console.error(`[React/${displayName}] Mount failed:`, err);
+      logger.error(`[React/${displayName}] Mount failed:`, err);
       // Show error state in container (avoid inline onclick for CSP compliance)
       element.innerHTML = `
         <div class="mount-error-container">

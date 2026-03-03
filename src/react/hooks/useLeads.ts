@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Lead, LeadStatus, LeadStats, ApiResponse } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
 import { decodeArrayFields } from '../utils/decodeText';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useLeads');
 
 /** Text fields in Lead that may contain HTML entities */
 const LEAD_TEXT_FIELDS = ['contact_name', 'company_name', 'notes', 'source'] as const;
@@ -125,7 +128,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
-      console.error('[useLeads] Error:', message);
+      logger.error('[useLeads] Error:', message);
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +174,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
 
         return false;
       } catch (err) {
-        console.error('[useLeads] Update error:', err);
+        logger.error('[useLeads] Update error:', err);
         return false;
       }
     },
@@ -214,7 +217,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
 
         return false;
       } catch (err) {
-        console.error('[useLeads] Bulk update error:', err);
+        logger.error('[useLeads] Bulk update error:', err);
         return false;
       }
     },
@@ -272,7 +275,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
           }
         }
       } catch (err) {
-        console.error('[useLeads] Bulk delete error:', err);
+        logger.error('[useLeads] Bulk delete error:', err);
         failed = ids.length;
       }
 

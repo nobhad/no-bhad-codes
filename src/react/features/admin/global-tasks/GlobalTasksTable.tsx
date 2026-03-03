@@ -33,6 +33,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import {
   PortalDropdown,
@@ -46,6 +47,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { GLOBAL_TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('GlobalTasksTable');
 
 interface Task {
   id: number;
@@ -91,6 +96,10 @@ interface GlobalTasksTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 // Filter function
@@ -140,7 +149,7 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
   }
 }
 
-export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }: GlobalTasksTableProps) {
+export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: GlobalTasksTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -187,11 +196,11 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
   // Apply filters
   const filteredTasks = useMemo(() => applyFilters(tasks), [applyFilters, tasks]);
 
-  // Pagination
+  // Pagination - overview mode disables persistence
   const pagination = usePagination({
-    storageKey: 'admin_global_tasks_pagination',
+    storageKey: overviewMode ? undefined : 'admin_global_tasks_pagination',
     totalItems: filteredTasks.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedTasks = useMemo(
@@ -210,7 +219,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/tasks', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.TASKS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -241,7 +250,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
   // Status change handler
   const handleStatusChange = useCallback(async (taskId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/admin/tasks/${taskId}`, {
+      const response = await fetch(buildEndpoint.adminTask(taskId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -257,7 +266,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
       );
       showNotification?.('Task status updated', 'success');
     } catch (err) {
-      console.error('Failed to update task status:', err);
+      logger.error('Failed to update task status:', err);
       showNotification?.('Failed to update task status', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -268,7 +277,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
 
     const ids = selection.selectedItems.map((t) => t.id);
     try {
-      const response = await fetch('/api/admin/tasks/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.TASKS_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -281,7 +290,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} task${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete tasks:', err);
+      logger.error('Failed to delete tasks:', err);
       showNotification?.('Failed to delete tasks', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -335,16 +344,6 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
       }
       actions={
         <>
-          <SearchFilter
-            value={search}
-            onChange={setSearch}
-            placeholder="Search tasks..."
-          />
-          <FilterDropdown
-            sections={GLOBAL_TASKS_FILTER_CONFIG}
-            values={filterValues}
-            onChange={handleFilterChange}
-          />
           <div className="view-toggle">
             <button
               onClick={() => setViewMode('list')}
@@ -361,6 +360,16 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
               <LayoutGrid className="icon-sm" />
             </button>
           </div>
+          <SearchFilter
+            value={search}
+            onChange={setSearch}
+            placeholder="Search tasks..."
+          />
+          <FilterDropdown
+            sections={GLOBAL_TASKS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={handleFilterChange}
+          />
           <IconButton
             action="download"
             disabled={filteredTasks.length === 0}
@@ -381,16 +390,6 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadTasks}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         viewMode === 'list' && !isLoading && filteredTasks.length > 0 ? (
           <TablePagination
@@ -409,7 +408,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
         ) : undefined
       }
     >
-      {!error && (viewMode === 'list' ? (
+      {viewMode === 'list' ? (
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
@@ -445,7 +444,6 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
               >
                 Status
               </AdminTableHead>
-              <AdminTableHead className="assigned-col">Assigned To</AdminTableHead>
               <AdminTableHead
                 className="date-col"
                 sortable
@@ -458,12 +456,14 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
-              <AdminTableLoading colSpan={8} rows={5} />
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={loadTasks} />
+            ) : isLoading ? (
+              <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <AdminTableEmpty
-                colSpan={8}
+                colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
@@ -500,21 +500,16 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
                       {task.dueDate && (
                         <span className="date-stacked">{formatDateShort(task.dueDate)}</span>
                       )}
-                      {task.assignedToName && (
-                        <span className="assigned-stacked">{task.assignedToName}</span>
-                      )}
                     </div>
                   </AdminTableCell>
                   <AdminTableCell className="project-cell">
-                    {task.projectName ? (
+                    {task.projectName && (
                       <span
                         onClick={() => onNavigate?.('projects', task.projectId != null ? String(task.projectId) : undefined)}
                         className="table-link"
                       >
                         {task.projectName}
                       </span>
-                    ) : (
-                      <span className="text-muted">-</span>
                     )}
                   </AdminTableCell>
                   <AdminTableCell className="priority-cell">
@@ -537,26 +532,23 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent sideOffset={0} align="start">
-                        {Object.entries(TASK_STATUS_CONFIG).map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(task.id, status)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
+                        {Object.entries(TASK_STATUS_CONFIG)
+                          .filter(([status]) => status !== task.status)
+                          .map(([status, config]) => (
+                            <PortalDropdownItem
+                              key={status}
+                              onClick={() => handleStatusChange(task.id, status)}
+                            >
+                              <StatusBadge status={getStatusVariant(status)} size="sm">
+                                {config.label}
+                              </StatusBadge>
+                            </PortalDropdownItem>
+                          ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
                   </AdminTableCell>
-                  <AdminTableCell className="assigned-cell">
-                    {task.assignedToName || (
-                      <span className="text-muted">Unassigned</span>
-                    )}
-                  </AdminTableCell>
                   <AdminTableCell className="date-cell">
-                    {task.dueDate ? (
+                    {task.dueDate && (
                       <span
                         className={cn(
                           'date-value',
@@ -567,8 +559,6 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
                       >
                         {formatDateShort(task.dueDate)}
                       </span>
-                    ) : (
-                      <span className="text-muted">-</span>
                     )}
                   </AdminTableCell>
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
@@ -588,7 +578,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate }:
           onStatusChange={handleStatusChange}
           isLoading={isLoading}
         />
-      ))}
+      )}
     </TableLayout>
   );
 }

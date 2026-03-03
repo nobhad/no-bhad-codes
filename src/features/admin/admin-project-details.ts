@@ -849,19 +849,7 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       this.secondarySidebar.setActiveTab(tabName);
     }
 
-    // Initialize modules for specific tabs
-    if (this.currentProjectId) {
-      if (tabName === 'tasks') {
-        const { initTasksModule } = await import('./modules/admin-tasks');
-        await initTasksModule(this.currentProjectId);
-      } else if (tabName === 'time') {
-        const { initTimeTrackingModule } = await import('./modules/admin-time-tracking');
-        await initTimeTrackingModule(this.currentProjectId);
-      } else if (tabName === 'files') {
-        const { initFilesModule } = await import('./modules/admin-files');
-        await initFilesModule(this.currentProjectId);
-      }
-    }
+    // React components handle their own initialization
   }
 
   /**
@@ -1690,13 +1678,16 @@ export class AdminProjectDetails implements ProjectDetailsHandler {
       });
     }
 
-    // Add Task button
+    // Add Task button - redirect to Tasks tab
     const btnAddTask = domCache.get('btnAddTask', true);
     if (btnAddTask && !btnAddTask.dataset.listenerAdded) {
       btnAddTask.dataset.listenerAdded = 'true';
-      btnAddTask.addEventListener('click', async () => {
-        const { showCreateTaskModal } = await import('./modules/admin-tasks');
-        await showCreateTaskModal();
+      btnAddTask.addEventListener('click', () => {
+        // Switch to tasks tab where the React component handles task creation
+        if (this.secondarySidebar) {
+          this.secondarySidebar.setActiveTab('tasks');
+        }
+        showToast('Use the Tasks tab to create new tasks', 'info');
       });
     }
 

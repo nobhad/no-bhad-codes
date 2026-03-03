@@ -17,15 +17,27 @@ export interface MessageAttachment {
 
 export interface Message {
   id: number;
-  thread_id: number;
-  sender_id: number;
+  thread_id?: number;
   sender_name: string;
   sender_type: 'client' | 'admin';
-  content: string;
-  attachments: MessageAttachment[];
-  is_edited: boolean;
+  /** Message content - API returns this as 'message' field */
+  message: string;
+  /** Alias for message content for convenience */
+  content?: string;
+  priority?: string;
+  reply_to?: number | null;
+  attachments: MessageAttachment[] | string | null;
+  is_pinned?: number;
+  read_at?: string | null;
   created_at: string;
   updated_at?: string;
+  reactions?: Array<{
+    id: number;
+    message_id: number;
+    reaction: string;
+    user_email: string;
+    created_at: string;
+  }>;
 }
 
 export interface MessageThread {

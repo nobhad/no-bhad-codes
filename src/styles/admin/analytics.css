@@ -9,6 +9,53 @@
  */
 
 /* ============================================
+   Analytics View Container
+   ============================================ */
+
+.analytics-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
+
+/* ============================================
+   Analytics Actions Bar - Page-level controls
+   ============================================ */
+
+.analytics-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  margin-bottom: var(--space-3);
+}
+
+/* Date range selector - button group */
+.date-range-selector {
+  display: flex;
+  gap: 0;
+  margin-right: auto;
+}
+
+.date-range-selector .btn-secondary {
+  border-radius: 0;
+  margin-left: calc(-1 * var(--border-width, 2px));
+}
+
+.date-range-selector .btn-secondary:first-child {
+  margin-left: 0;
+}
+
+.date-range-selector .btn-secondary.active {
+  background: var(--btn-portal-hover-bg);
+  color: var(--btn-portal-hover-color);
+  border-color: var(--btn-portal-hover-border);
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
    Grid Layouts
    ============================================ */
 
@@ -27,8 +74,19 @@
 
 .kpi-cards-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--portal-section-gap);
+}
+
+/* KPI row variants for specific counts */
+.kpi-cards-row--2 {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 50%;
+}
+
+.kpi-cards-row--3 {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 75%;
 }
 
 .vitals-grid {
@@ -39,16 +97,37 @@
 
 /* .health-check-grid base styles in shared/portal-cards.css */
 
-/* Uses utility classes: flex flex-wrap gap-2 */
-
 /* ============================================
-   Analytics Subtab Content Container
+   Analytics Chart Card
    ============================================ */
 
-.analytics-subtab-content {
-  /* Note: display is controlled by .active state in portal-tabs.css */
-  /* When active: display: flex; flex-direction: column; */
-  gap: var(--portal-section-gap);
+.analytics-chart-card {
+  background: transparent;
+  border: var(--border-width) solid var(--table-border-color);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.analytics-chart-card h3 {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.analytics-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analytics-card-header svg {
+  color: var(--portal-text-muted);
 }
 
 /* ============================================
@@ -57,7 +136,7 @@
 
 .analytics-section {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   overflow: hidden;
 }
 
@@ -104,24 +183,116 @@
 
 .chart-container {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   overflow: hidden;
+}
+
+/* Chart Placeholder - for charts that haven't been implemented yet */
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 200px;
+  padding: var(--space-4);
+  color: var(--portal-text-muted);
+}
+
+.chart-placeholder svg {
+  opacity: 0.5;
+}
+
+.chart-placeholder p {
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Stat Card Trend - trend indicator in KPI cards */
+.stat-card-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.stat-card-trend svg {
+  flex-shrink: 0;
+}
+
+.stat-card-trend .positive {
+  color: var(--status-active);
+}
+
+.stat-card-trend .negative {
+  color: var(--status-cancelled);
+}
+
+/* Source List - analytics lead source breakdown */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.source-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.source-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-light);
+}
+
+.source-value {
+  color: var(--portal-text-muted);
+}
+
+.source-progress-track {
+  height: 4px;
+  background: var(--portal-alpha-white-10);
+  overflow: hidden;
+}
+
+.source-progress-bar {
+  height: 100%;
+  transition: width var(--transition-normal) ease;
 }
 
 /* ============================================
    KPI Cards - base styles in portal-cards.css
    ============================================ */
 
-/* KPI-specific overrides: centered, clickable */
+/* KPI Cards - Analytics specific styling */
 .kpi-card {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: transparent;
+  border: var(--border-width) solid var(--table-border-color);
   text-align: center;
-  cursor: pointer;
+  min-height: 120px;
+  transition: border-color var(--transition-faster);
+}
+
+.kpi-card:hover {
+  border-color: var(--portal-border-color);
 }
 
 .kpi-card-icon {
-  color: var(--portal-text-secondary);
-  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-light);
 }
 
 .kpi-card-icon svg {
@@ -129,13 +300,27 @@
   height: 24px;
 }
 
-/* .kpi-card-value color from unified rule in portal-cards.css */
+.kpi-card-label {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-card-value {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--portal-text-light);
+}
 
 .kpi-card-change {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-0-5);
+  gap: var(--icon-gap);
   font-size: var(--font-size-xs);
   margin-top: auto;
 }
@@ -143,6 +328,10 @@
 .kpi-card-change .change-value {
   font-weight: 600;
   color: var(--portal-text-secondary);
+}
+
+.kpi-card-change .change-label {
+  color: var(--portal-text-muted);
 }
 
 .kpi-card-change.positive .change-value {
@@ -164,10 +353,10 @@
 
 .vital-card h4 {
   color: var(--portal-text-secondary);
-  font-size: 0.6875rem;
+  font-size: var(--label-font-size);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--label-letter-spacing);
   margin-bottom: var(--space-1);
 }
 
@@ -188,19 +377,19 @@
 
 .vital-status.good {
   background: transparent;
-  border: 1px solid var(--color-success);
+  border: var(--border-width) solid var(--color-success);
   color: var(--color-success);
 }
 
 .vital-status.needs-improvement {
   background: transparent;
-  border: 1px solid var(--color-warning);
+  border: var(--border-width) solid var(--color-warning);
   color: var(--color-warning);
 }
 
 .vital-status.poor {
   background: transparent;
-  border: 1px solid var(--color-danger);
+  border: var(--border-width) solid var(--color-danger);
   color: var(--color-danger);
 }
 
@@ -242,9 +431,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-0-5);
-  padding: 11px 14px;
+  padding: var(--portal-card-padding);
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--portal-border);
   min-width: 110px;
   text-align: center;
   transition: border-color 0.15s;
@@ -318,7 +507,7 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding-top: var(--space-1-5);
-  border-top: 1px solid var(--portal-border);
+  border-top: var(--border-width) solid var(--portal-border);
   margin-top: var(--space-2);
 }
 
@@ -379,11 +568,19 @@
    ============================================ */
 
 @media (--mobile) {
+  .analytics-actions-bar {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
   .analytics-card-grid,
   .analytics-grid,
   .kpi-cards-row,
+  .kpi-cards-row--2,
+  .kpi-cards-row--3,
   .health-check-grid {
     grid-template-columns: 1fr;
+    max-width: 100%;
   }
 
   .funnel-container {

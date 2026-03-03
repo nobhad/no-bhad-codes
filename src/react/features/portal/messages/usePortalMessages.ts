@@ -13,6 +13,10 @@ import type {
   SendMessageResponse,
   UpdateMessageResponse
 } from './types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('usePortalMessages');
 
 interface UsePortalMessagesOptions {
   getAuthToken?: () => string | null;
@@ -87,7 +91,7 @@ export function usePortalMessages({
     setThreadsError(null);
 
     try {
-      const response = await fetch('/api/messages/threads', {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGES}/threads`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -122,7 +126,7 @@ export function usePortalMessages({
       setMessagesError(null);
 
       try {
-        const response = await fetch(`/api/messages/threads/${threadId}/messages`, {
+        const response = await fetch(buildEndpoint.messageThreadMessages(threadId), {
           method: 'GET',
           headers: getHeaders(),
           credentials: 'include',
@@ -202,7 +206,7 @@ export function usePortalMessages({
           headers = getHeaders();
         }
 
-        const response = await fetch(`/api/messages/threads/${selectedThread.id}/messages`, {
+        const response = await fetch(buildEndpoint.messageThreadMessages(selectedThread.id), {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -218,14 +222,15 @@ export function usePortalMessages({
         // Optimistically add the message
         setMessages((prev) => [...prev, data.message]);
 
-        // Update thread's last message
+        // Update thread's last message (use 'message' field from API response)
+        const messageContent = data.message.message || data.message.content || '';
         setThreads((prev) =>
           prev.map((t) =>
             t.id === selectedThread.id
               ? {
                 ...t,
                 last_message_at: data.message.created_at,
-                last_message_preview: data.message.content.slice(0, 100),
+                last_message_preview: messageContent.slice(0, 100),
                 unread_count: 0
               }
               : t
@@ -234,7 +239,7 @@ export function usePortalMessages({
 
         return true;
       } catch (error) {
-        console.error('Error sending message:', error);
+        logger.error('Error sending message:', error);
         return false;
       }
     },
@@ -250,7 +255,7 @@ export function usePortalMessages({
 
       try {
         const response = await fetch(
-          `/api/messages/threads/${selectedThread.id}/messages/${messageId}`,
+          `${buildEndpoint.messageThreadMessages(selectedThread.id)}/${messageId}`,
           {
             method: 'PATCH',
             headers: getHeaders(),
@@ -270,7 +275,7 @@ export function usePortalMessages({
 
         return true;
       } catch (error) {
-        console.error('Error editing message:', error);
+        logger.error('Error editing message:', error);
         return false;
       }
     },
@@ -286,7 +291,7 @@ export function usePortalMessages({
 
       try {
         const response = await fetch(
-          `/api/messages/threads/${selectedThread.id}/messages/${messageId}`,
+          `${buildEndpoint.messageThreadMessages(selectedThread.id)}/${messageId}`,
           {
             method: 'DELETE',
             headers: getHeaders(),
@@ -303,7 +308,7 @@ export function usePortalMessages({
 
         return true;
       } catch (error) {
-        console.error('Error deleting message:', error);
+        logger.error('Error deleting message:', error);
         return false;
       }
     },

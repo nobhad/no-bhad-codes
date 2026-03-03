@@ -18,6 +18,9 @@ import type { DataService } from '../../services/data-service';
 import { SubmenuModule } from './submenu';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('NavigationModule');
 import { pulseGlow } from '../../utils/gsap-utilities';
 
 export interface NavigationModuleOptions extends ModuleOptions {
@@ -505,7 +508,7 @@ export class NavigationModule extends BaseModule {
               const parsed = JSON.parse(navData);
               navigationItems = parsed.menuItems || [];
             } catch (_e) {
-              console.warn('Failed to parse navigation data from DOM');
+              this.warn('Failed to parse navigation data from DOM');
             }
           }
         }
@@ -532,7 +535,7 @@ export class NavigationModule extends BaseModule {
       this.updateNavigationDOM(navigationItems);
       this.detectCurrentPage();
     } catch (error) {
-      console.error('Error loading navigation data:', error);
+      logger.error('Error loading navigation data:', error);
       // Continue with empty navigation rather than crashing
       this.detectCurrentPage();
     }

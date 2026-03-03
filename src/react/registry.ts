@@ -48,6 +48,10 @@ interface ReactRegistry {
   analyticsDashboard?: RegistryEntry;
   adHocAnalytics?: RegistryEntry;
   performanceMetrics?: RegistryEntry;
+  // Admin dashboard components (parent tab groups)
+  workDashboard?: RegistryEntry;
+  crmDashboard?: RegistryEntry;
+  documentsDashboard?: RegistryEntry;
   // Portal (client-facing) components
   portalInvoices?: RegistryEntry;
   portalFiles?: RegistryEntry;

@@ -12,6 +12,9 @@
 
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('createMountWrapper');
 
 // ============================================
 // TYPES
@@ -86,7 +89,7 @@ class MountErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBounda
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error(`[React/${this.props.displayName}] Render error:`, error, errorInfo);
+    logger.error(`[React/${this.props.displayName}] Render error:`, error, errorInfo);
     this.props.onError?.(error);
   }
 
@@ -174,7 +177,7 @@ export function createMountWrapper<P extends BaseMountOptions>(
     const element = resolveContainer(container);
 
     if (!element) {
-      console.error(`[React/${displayName}] Container not found:`, container);
+      logger.error(`[React/${displayName}] Container not found:`, container);
       return () => {};
     }
 
@@ -201,10 +204,10 @@ export function createMountWrapper<P extends BaseMountOptions>(
           </MountErrorBoundary>
         </React.StrictMode>
       );
-      console.log(`[React/${displayName}] Mounted successfully`);
+      logger.info(`[React/${displayName}] Mounted successfully`);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      console.error(`[React/${displayName}] Mount failed:`, error);
+      logger.error(`[React/${displayName}] Mount failed:`, error);
       onMountError?.(error, displayName);
 
       // Show error state (avoid inline onclick for CSP compliance)

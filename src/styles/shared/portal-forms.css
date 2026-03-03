@@ -38,9 +38,9 @@
   width: 100%;
   height: var(--space-7, 2.75rem);
   padding: 0 var(--space-3, 0.75rem);
-  border: 1px solid var(--portal-border-color);
-  font-size: var(--font-size-base, 14px);
-  font-family: "Inconsolata", monospace;
+  border: var(--border-width) solid var(--portal-border-color);
+  font-size: inherit;
+  font-family: inherit;
   font-weight: 400;
   line-height: var(--space-7, 2.75rem);
   background-color: transparent;
@@ -55,6 +55,14 @@
 .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
   --input-left-icon-padding: 2.25rem;
   padding: 0.4rem 16px 0.4rem var(--input-left-icon-padding);
+}
+
+/* Universal: Any container with positioned icon + input - ensure proper left padding */
+[data-page="admin"] [class*="search-container"] input,
+[data-page="admin"] [class*="search-container"] .tw-input,
+[data-page="client-portal"] [class*="search-container"] input,
+[data-page="client-portal"] [class*="search-container"] .tw-input {
+  padding-left: 2.5rem !important;
 }
 
 /* Textarea - different height/padding */
@@ -228,7 +236,7 @@
   height: var(--space-2, 16px);
   cursor: pointer;
   background: transparent;
-  border: 1px solid var(--portal-alpha-white-15);
+  border: var(--border-width) solid var(--portal-border-color);
   position: relative;
   display: flex;
   align-items: center;
@@ -245,8 +253,8 @@
   z-index: 1;
 }
 .portal-checkbox:has(input:checked) {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--portal-border-color);
+  border-color: var(--portal-border-color);
 }
 .portal-checkbox:has(input:checked)::after {
   content: "";
@@ -267,7 +275,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  border: 1px solid var(--portal-alpha-white-15);
+  border: var(--border-width) solid var(--portal-border-color);
   background: transparent;
   cursor: pointer;
   transition:
@@ -281,7 +289,7 @@
 
 .table-checkbox:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow: 0 0 0 2px var(--portal-border-color);
 }
 
 .table-checkbox:disabled {
@@ -290,14 +298,14 @@
 }
 
 .table-checkbox[data-state="checked"] {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--portal-border-color);
+  border-color: var(--portal-border-color);
 }
 
 .table-checkbox-indicator {
   display: grid;
   place-content: center;
-  color: var(--color-white);
+  color: var(--portal-bg-pitch);
 }
 
 .table-checkbox-icon {
@@ -354,7 +362,7 @@
   gap: var(--space-2, 0.5rem);
   padding: var(--space-2, 0.5rem);
   background: transparent;
-  border: 2px dashed var(--portal-alpha-white-15);
+  border: var(--border-width) dashed var(--portal-alpha-white-15);
   transition: border-color var(--transition-fast, 150ms);
   cursor: pointer;
 }
@@ -510,7 +518,7 @@ input.search-bar-input {
   font-weight: 700;
   font-family: var(--font-family-mono, monospace);
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   border-radius: 0;
   color: var(--portal-text-light);
   outline: none;
@@ -533,6 +541,28 @@ input.search-bar-input {
   border-color: var(--color-error) !important;
 }
 
+/* Input with icon - ensure placeholder never overlaps icon */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  color: var(--portal-text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-with-icon .tw-input,
+.input-with-icon input {
+  padding-left: 2.5rem !important;
+}
+
 /* Select dropdown */
 .tw-select {
   padding: 0.5rem 2rem 0.5rem 1rem;
@@ -540,7 +570,7 @@ input.search-bar-input {
   font-weight: 700;
   font-family: var(--font-family-mono, monospace);
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   border-radius: 0;
   color: var(--portal-text-light);
   cursor: pointer;
@@ -565,7 +595,7 @@ input.search-bar-input {
   font-weight: 700;
   font-family: var(--font-family-mono, monospace);
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   border-radius: 0;
   color: var(--portal-text-light);
   outline: none;
@@ -586,12 +616,13 @@ input.search-bar-input {
   cursor: not-allowed;
 }
 
-/* Checkbox */
-.tw-checkbox {
+/* Checkbox - all checkbox variants use same border */
+.tw-checkbox,
+.data-table-checkbox {
   width: 1rem;
   height: 1rem;
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   border-radius: 0;
   cursor: pointer;
 }
@@ -604,7 +635,7 @@ input.search-bar-input {
 
 /* Form error text */
 .form-error-text {
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   color: var(--status-cancelled);
 }
 
@@ -634,11 +665,11 @@ input.search-bar-input {
 }
 
 .qform-heading {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .qform-description {
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
 }
 
 /* Save status */
@@ -652,11 +683,11 @@ input.search-bar-input {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
 }
 
 .qform-unsaved {
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   color: var(--status-pending);
 }
 
@@ -668,7 +699,7 @@ input.search-bar-input {
 }
 
 .qform-progress-text {
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -681,7 +712,7 @@ input.search-bar-input {
 }
 
 .qform-question-number {
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -691,7 +722,7 @@ input.search-bar-input {
 }
 
 .qform-question-help {
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   margin-top: 0.125rem;
 }
 
@@ -718,7 +749,7 @@ input.search-bar-input {
 .qform-readonly-notice {
   text-align: center;
   padding: 0.75rem 0;
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
 }
 
 /* Select dropdown styles */
@@ -750,7 +781,7 @@ input.search-bar-input {
 }
 
 .qform-chevron-icon {
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-mouse) ease;
 }
 
 /* Multi-select */
@@ -761,7 +792,7 @@ input.search-bar-input {
 }
 
 .qform-multiselect-btn {
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   padding: 0.375rem 0.75rem;
 }
 
@@ -787,11 +818,11 @@ input.search-bar-input {
 }
 
 .qform-file-name {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .qform-file-size {
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   flex-shrink: 0;
 }
 
@@ -802,7 +833,7 @@ input.search-bar-input {
   justify-content: center;
   gap: 0.5rem;
   padding: 1.5rem;
-  border: 2px dashed var(--portal-border-color);
+  border: var(--border-width) dashed var(--portal-border-color);
   cursor: pointer;
 }
 
@@ -816,11 +847,11 @@ input.search-bar-input {
 }
 
 .qform-dropzone-label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .qform-dropzone-hint {
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   margin-top: 0.25rem;
 }
 

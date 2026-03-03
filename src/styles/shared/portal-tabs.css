@@ -18,32 +18,21 @@
    ===================================================== */
 
 /* Content panel visibility - hidden by default */
-.tab-content,
-.portal-subtab-content,
-.analytics-subtab-content,
-.documents-subtab-content {
+.tab-content {
   display: none;
 }
 
 /* React tab content panel - always visible, React handles conditional rendering */
 .tab-content-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-  min-height: 400px;
+  display: block;
+  min-height: auto;
 }
 
-/* Consistent spacing between sections within ALL tab/subtab content panels
-   Using flex + gap instead of margin so hidden elements don't affect spacing
-   Uses --portal-section-gap from variables.css as single source of truth */
+/* Consistent spacing between sections within tab content panels
+   Using flex + gap instead of margin so hidden elements don't affect spacing */
 .tab-content.active,
-.portal-tab-panel.active,
-.portal-subtab-content.active,
-.analytics-subtab-content.active,
-.documents-subtab-content.active {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
+.portal-tab-panel.active {
+  display: block;
 }
 
 /* =====================================================
@@ -52,12 +41,12 @@
    ===================================================== */
 .portal-tabs {
   display: flex;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   margin-bottom: var(--space-3);
   overflow: visible;
   position: relative;
   padding: 0;
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
 }
 
 /* Hide inline tabs for project/client detail - tabs are now in header */
@@ -66,18 +55,20 @@
   display: none;
 }
 
+/* Uses root-level subtab variables from portal-theme.css */
 .portal-tabs button {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-2);
   background: transparent;
   border: none;
   color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: normal;
+  font-family: var(--subtab-font-family);
+  font-size: var(--subtab-font-size);
+  font-weight: var(--subtab-font-weight);
+  text-transform: var(--subtab-text-transform);
+  letter-spacing: var(--subtab-letter-spacing);
   cursor: pointer;
   transition: all var(--transition-mouse) ease;
   white-space: nowrap;
@@ -107,11 +98,11 @@
   position: relative;
   color: var(--color-primary);
   background: transparent;
-  font-weight: 500;
+  /* font-weight inherited from base button rule */
   z-index: 10;
   margin-bottom: 0;
   box-shadow: none;
-  border-bottom: 2px solid var(--color-primary);
+  border-bottom: var(--border-width) solid var(--color-primary);
 }
 
 /* Remove the pseudo-element overlay */
@@ -133,24 +124,20 @@
 .portal-tab-panel {
   display: none;
   background: transparent;
-  padding: var(--space-3) 0;
+  padding: var(--space-1) 0;
   position: relative;
   z-index: 2;
-  margin-top: 0 !important;
+  margin-top: 0;
   box-shadow: none;
 }
 
 .portal-tab-panel.active {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  display: block;
 }
 
 /* Tab content wrapper - contains each tab's content */
 .tab-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  display: block;
 }
 
 /* =====================================================
@@ -173,9 +160,9 @@
 .tab-section-heading {
   font-family: var(--font-family-sans, system-ui, sans-serif);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--label-font-weight, 500);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--label-letter-spacing, 0.05em);
   color: var(--portal-text-secondary);
   margin: 0;
   /* Use same padding as admin-table-header for alignment */
@@ -252,12 +239,12 @@
 
   .portal-tabs::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 2px;
+    border-radius: var(--portal-radius-xs);
   }
 
   .portal-tabs::-webkit-scrollbar-thumb {
     background: var(--portal-bg-light);
-    border-radius: 2px;
+    border-radius: var(--portal-radius-xs);
   }
 
   .portal-tabs::-webkit-scrollbar-thumb:hover {
@@ -266,7 +253,7 @@
 
   .portal-tabs button {
     padding: var(--space-1) var(--space-1-5);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);  /* 14px on mobile */
   }
 
   .portal-tab-panel {
@@ -287,7 +274,7 @@
 @media (--compact-mobile) {
   .portal-tabs button {
     padding: var(--space-0-5) var(--space-1);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);  /* 14px on compact mobile */
   }
 }
 
@@ -295,7 +282,7 @@
 @media (--small-mobile) {
   .portal-tabs button {
     padding: var(--space-0-5) var(--space-1);
-    font-size: 0.7rem;
+    font-size: var(--font-size-xs);  /* 12px on small mobile */
   }
 
   .portal-tab-panel {
@@ -317,16 +304,18 @@
 .view-toggle {
   display: inline-flex;
   gap: var(--space-0-5);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
 }
 
+/* Uses root-level subtab variables from portal-theme.css */
 .view-toggle button {
   padding: var(--space-1) var(--space-1-5);
   border: none;
   background: transparent;
   color: var(--portal-text-muted);
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-family: var(--subtab-font-family);
+  font-size: var(--subtab-font-size);
+  font-weight: var(--subtab-font-weight);
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
@@ -351,7 +340,7 @@
 
 .view-toggle button.active {
   color: var(--color-primary);
-  border-bottom: 2px solid var(--color-primary);
+  border-bottom: var(--border-width) solid var(--color-primary);
 }
 
 .view-toggle button svg,
@@ -364,7 +353,7 @@
 @media (--small-mobile) {
   .view-toggle button {
     padding: var(--space-0-5) var(--space-1);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);  /* 12px on small mobile */
   }
 
   .view-toggle button svg,
@@ -382,16 +371,18 @@
 .tw-tab-list {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--portal-alpha-white-20);
+  border-bottom: var(--border-width) solid var(--portal-alpha-white-20);
 }
 
+/* Uses root-level subtab variables from portal-theme.css */
 .tw-tab {
   padding: 0.75rem 1rem;
-  font-size: var(--font-size-sm, 14px);
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--subtab-font-family);
+  font-size: var(--subtab-font-size);
+  font-weight: var(--subtab-font-weight);
   color: var(--portal-text-muted);
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: var(--border-width) solid transparent;
   background: transparent;
   cursor: pointer;
   transition: color var(--transition-fast);
@@ -402,14 +393,287 @@
   color: var(--portal-text-light);
 }
 
+/* Active state extends .tw-tab - only override what changes */
 .tw-tab-active {
   padding: 0.75rem 1rem;
-  font-size: var(--font-size-sm, 14px);
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--subtab-font-family);
+  font-size: var(--subtab-font-size);
+  font-weight: var(--subtab-font-weight);
   color: var(--portal-text-light);
   border: none;
-  border-bottom: 2px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
   background: transparent;
   cursor: pointer;
   margin-bottom: -1px;
+}
+
+/* =====================================================
+   PORTAL-TAB CLASS (for factory component targeting)
+   ===================================================== */
+
+.portal-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-secondary);
+  font-family: var(--subtab-font-family);
+  font-size: var(--subtab-font-size);
+  font-weight: var(--subtab-font-weight);
+  text-transform: var(--subtab-text-transform);
+  letter-spacing: var(--subtab-letter-spacing);
+  cursor: pointer;
+  transition: all var(--transition-mouse) ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.portal-tab:hover:not(.active):not(.portal-tab--disabled) {
+  color: var(--portal-text-primary);
+}
+
+.portal-tab.active {
+  color: var(--color-primary);
+  border-bottom: var(--border-width) solid var(--color-primary);
+}
+
+.portal-tab--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.portal-tab-icon {
+  width: var(--icon-size-xs, 14px);
+  height: var(--icon-size-xs, 14px);
+  flex-shrink: 0;
+}
+
+.portal-tab-label {
+  flex-shrink: 0;
+}
+
+.portal-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-0-5);
+  background: var(--portal-bg-light);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--portal-radius-full);
+}
+
+.portal-tab.active .portal-tab-badge {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* =====================================================
+   TAB SIZE VARIANTS
+   ===================================================== */
+
+.portal-tabs--sm .portal-tab,
+.portal-tabs--sm button {
+  padding: var(--space-0-5) var(--space-1-5);
+  font-size: var(--font-size-xs);
+}
+
+.portal-tabs--sm .portal-tab-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.portal-tabs--lg .portal-tab,
+.portal-tabs--lg button {
+  padding: var(--space-1-5) var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.portal-tabs--lg .portal-tab-icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+/* =====================================================
+   TAB STYLE VARIANTS
+   ===================================================== */
+
+/* Pills variant */
+.portal-tabs--pills {
+  gap: var(--space-0-5);
+  border-bottom: none;
+}
+
+.portal-tabs--pills .portal-tab,
+.portal-tabs--pills button {
+  border-radius: var(--portal-radius-full);
+  border-bottom: none;
+}
+
+.portal-tabs--pills .portal-tab.active,
+.portal-tabs--pills button.active {
+  background: var(--color-primary);
+  color: white;
+  border-bottom: none;
+}
+
+/* Underline variant (default, explicit) */
+.portal-tabs--underline {
+  border-bottom: var(--border-width) solid var(--portal-border);
+}
+
+/* Contained variant */
+.portal-tabs--contained {
+  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-md);
+  padding: var(--space-0-5);
+  border-bottom: none;
+  gap: var(--space-0-5);
+}
+
+.portal-tabs--contained .portal-tab,
+.portal-tabs--contained button {
+  border-radius: var(--portal-radius-sm);
+  border-bottom: none;
+}
+
+.portal-tabs--contained .portal-tab.active,
+.portal-tabs--contained button.active {
+  background: var(--portal-bg-light);
+  border-bottom: none;
+}
+
+/* =====================================================
+   SUBTABS (Secondary Navigation)
+   ===================================================== */
+
+.portal-subtabs {
+  display: flex;
+  gap: var(--space-0-5);
+  border-bottom: var(--border-width) solid var(--portal-border);
+  margin-bottom: var(--space-2);
+}
+
+.portal-subtabs--sm {
+  gap: var(--space-0-25);
+}
+
+.portal-subtab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  padding: var(--space-0-5) var(--space-1-5);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted);
+  font-family: var(--subtab-font-family);
+  font-size: var(--font-size-xs);
+  font-weight: var(--subtab-font-weight);
+  text-transform: var(--subtab-text-transform);
+  letter-spacing: var(--subtab-letter-spacing);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  position: relative;
+  margin-bottom: -1px;
+}
+
+.portal-subtab:hover:not(.active):not(.portal-subtab--disabled) {
+  color: var(--portal-text-primary);
+}
+
+.portal-subtab.active {
+  color: var(--color-primary);
+  border-bottom: var(--border-width) solid var(--color-primary);
+}
+
+.portal-subtab--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.portal-subtab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 var(--space-0-25);
+  background: var(--portal-bg-light);
+  color: var(--portal-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: var(--portal-radius-full);
+}
+
+.portal-subtab.active .portal-subtab-badge {
+  background: var(--color-primary);
+  color: white;
+}
+
+.portal-subtab-content {
+  display: none;
+}
+
+.portal-subtab-content.active {
+  display: block;
+}
+
+/* =====================================================
+   VIEW TOGGLE ENHANCEMENTS
+   ===================================================== */
+
+.view-toggle-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-0-5);
+  padding: var(--space-1) var(--space-1-5);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted);
+  font-family: var(--subtab-font-family);
+  font-size: var(--subtab-font-size);
+  font-weight: var(--subtab-font-weight);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  margin-bottom: -1px;
+}
+
+.view-toggle-option:hover:not(.active) {
+  color: var(--portal-text-primary);
+}
+
+.view-toggle-option.active {
+  color: var(--color-primary);
+  border-bottom: var(--border-width) solid var(--color-primary);
+}
+
+.view-toggle-option:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.view-toggle-icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.view-toggle-label {
+  flex-shrink: 0;
+}
+
+.view-toggle--sm .view-toggle-option {
+  padding: var(--space-0-5) var(--space-1);
+}
+
+.view-toggle--sm .view-toggle-icon {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
