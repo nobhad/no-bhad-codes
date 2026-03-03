@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Client, ClientStats, ApiResponse } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { decodeArrayFields } from '../utils/decodeText';
+
+/** Text fields in Client that may contain HTML entities */
+const CLIENT_TEXT_FIELDS = ['company_name', 'contact_name'] as const;
 
 interface UseClientsOptions {
   /** Auth token getter for API calls */
@@ -99,7 +103,9 @@ export function useClients({
       const data: ApiResponse<{ clients: Client[] }> = await response.json();
 
       if (data.success && data.data) {
-        setClients(data.data.clients || []);
+        // Decode HTML entities in text fields to prevent double-encoding
+        const clients = data.data.clients || [];
+        setClients(decodeArrayFields(clients, CLIENT_TEXT_FIELDS));
       } else {
         throw new Error(data.error || 'Failed to load clients');
       }

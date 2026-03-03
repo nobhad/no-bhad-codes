@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Lead, LeadStatus, LeadStats, ApiResponse } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { decodeArrayFields } from '../utils/decodeText';
+
+/** Text fields in Lead that may contain HTML entities */
+const LEAD_TEXT_FIELDS = ['contact_name', 'company_name', 'notes', 'source'] as const;
 
 interface UseLeadsOptions {
   /** Auth token getter for API calls */
@@ -104,17 +108,20 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
       const data = await response.json();
 
       // Handle different response formats
+      let leadsArray: Lead[] = [];
       if (data.success && data.data) {
         // Could be { leads: [...] } or direct array
-        const leadsArray = Array.isArray(data.data) ? data.data : data.data.leads || [];
-        setLeads(leadsArray);
+        leadsArray = Array.isArray(data.data) ? data.data : data.data.leads || [];
       } else if (Array.isArray(data)) {
-        setLeads(data);
+        leadsArray = data;
       } else if (data.leads && Array.isArray(data.leads)) {
-        setLeads(data.leads);
+        leadsArray = data.leads;
       } else {
         throw new Error(data.error || 'Failed to load leads');
       }
+
+      // Decode HTML entities in text fields to prevent double-encoding
+      setLeads(decodeArrayFields(leadsArray, LEAD_TEXT_FIELDS));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);

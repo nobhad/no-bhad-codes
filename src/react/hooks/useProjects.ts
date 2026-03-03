@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project, ProjectStats, ApiResponse } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { decodeArrayFields } from '../utils/decodeText';
+
+/** Text fields in Project that may contain HTML entities */
+const PROJECT_TEXT_FIELDS = ['project_name', 'description', 'notes'] as const;
 
 interface UseProjectsOptions {
   /** Auto-fetch on mount */
@@ -77,16 +81,19 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       // 2. { success, data: { projects: [...] } }
       // 3. { success, data: [...] }
       // 4. Direct array [...]
+      let projectsArray: Project[] = [];
       if (data.projects && Array.isArray(data.projects)) {
-        setProjects(data.projects);
+        projectsArray = data.projects;
       } else if (data.success && data.data) {
-        const projectsArray = Array.isArray(data.data) ? data.data : data.data.projects || [];
-        setProjects(projectsArray);
+        projectsArray = Array.isArray(data.data) ? data.data : data.data.projects || [];
       } else if (Array.isArray(data)) {
-        setProjects(data);
+        projectsArray = data;
       } else {
         throw new Error(data.error || 'Failed to load projects');
       }
+
+      // Decode HTML entities in text fields to prevent double-encoding
+      setProjects(decodeArrayFields(projectsArray, PROJECT_TEXT_FIELDS));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
