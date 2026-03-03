@@ -163,7 +163,7 @@ router.get(
     let params: (string | number | null)[] = [];
 
     if (req.user!.type === 'admin') {
-      // Admin can see all threads
+      // Admin can see all threads - internal messages visible to admin only
       query = `
       SELECT
         mt.*,
@@ -172,7 +172,7 @@ router.get(
         c.email as client_email,
         p.project_name,
         COUNT(m.id) as message_count,
-        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'admin' THEN 1 END) as unread_count
+        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'admin' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
       FROM message_threads mt
       JOIN clients c ON mt.client_id = c.id
       LEFT JOIN projects p ON mt.project_id = p.id
@@ -181,13 +181,13 @@ router.get(
       ORDER BY mt.last_message_at DESC
     `;
     } else {
-      // Client can only see their own threads
+      // Client can only see their own threads - exclude internal messages
       query = `
       SELECT
         mt.*,
         p.project_name,
-        COUNT(m.id) as message_count,
-        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'client' THEN 1 END) as unread_count
+        COUNT(CASE WHEN m.is_internal IS NULL OR m.is_internal = 0 THEN 1 END) as message_count,
+        COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'client' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
       FROM message_threads mt
       LEFT JOIN projects p ON mt.project_id = p.id
       LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
@@ -450,7 +450,9 @@ router.get(
       CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
     FROM messages m
     LEFT JOIN pinned_messages pm ON m.id = pm.message_id AND pm.thread_id = ?
-    WHERE m.thread_id = ? AND m.context_type = 'general'
+    WHERE m.thread_id = ?
+      AND m.context_type = 'general'
+      AND (m.is_internal IS NULL OR m.is_internal = 0)
     ORDER BY m.created_at ASC
   `,
       [threadId, threadId]

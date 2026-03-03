@@ -8,6 +8,10 @@
  * Used for: Client activities, Project activities
  */
 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('Timeline');
+
 export interface TimelineEvent {
   id: number | string;
   type: string;
@@ -107,7 +111,7 @@ export function createTimeline(config: TimelineConfig): {
 } {
   const container = document.getElementById(config.containerId);
   if (!container) {
-    console.error('[Timeline] Container not found:', config.containerId);
+    logger.error('[Timeline] Container not found:', config.containerId);
     return {
       refresh: () => {},
       appendEvents: () => {},

@@ -22,9 +22,14 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('TimeTrackingPanel');
 
 interface TimeEntry {
   id: number;
@@ -142,7 +147,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
       if (projectId) params.set('projectId', projectId);
       params.set('range', dateRange);
 
-      const response = await fetch(`/api/admin/time-entries?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.TIME_ENTRIES}?${params}`, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -171,7 +176,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
 
   async function startTimer() {
     try {
-      const response = await fetch('/api/admin/time-entries/start', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.TIME_ENTRIES_START, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -189,7 +194,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         projectName: payload.projectName,
       });
     } catch (err) {
-      console.error('Failed to start timer:', err);
+      logger.error('Failed to start timer:', err);
       showNotification?.('Failed to start timer', 'error');
     }
   }
@@ -198,7 +203,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
     if (!activeTimer) return;
 
     try {
-      const response = await fetch(`/api/admin/time-entries/${activeTimer.entryId}/stop`, {
+      const response = await fetch(buildEndpoint.adminTimeEntryStop(activeTimer.entryId), {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -211,7 +216,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
       loadTimeEntries();
       showNotification?.('Timer stopped', 'success');
     } catch (err) {
-      console.error('Failed to stop timer:', err);
+      logger.error('Failed to stop timer:', err);
       showNotification?.('Failed to stop timer', 'error');
     }
   }
@@ -341,16 +346,6 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
           </div>
         ) : undefined
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadTimeEntries}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredEntries.length > 0 ? (
           <TablePagination
@@ -369,7 +364,6 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -403,8 +397,10 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={7} message={error} onRetry={loadTimeEntries} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={7} rows={5} />
           ) : paginatedEntries.length === 0 ? (
             <AdminTableEmpty
@@ -422,15 +418,13 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
                   </div>
                 </AdminTableCell>
                 <AdminTableCell>
-                  {entry.projectName ? (
+                  {entry.projectName && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId != null ? String(entry.projectId) : undefined); }}
                       className="link-btn"
                     >
                       {entry.projectName}
                     </button>
-                  ) : (
-                    <span className="text-muted">-</span>
                   )}
                 </AdminTableCell>
                 <AdminTableCell className="date-cell">{formatDateShort(entry.date)}</AdminTableCell>
@@ -451,7 +445,6 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

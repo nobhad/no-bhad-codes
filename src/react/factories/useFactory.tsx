@@ -14,6 +14,9 @@ import { ICON_SIZES, CONTEXT_DEFAULTS } from '../../factories/constants';
 import { BUTTON_ACTIONS } from '../../factories/buttons/button-actions';
 import { BUTTON_SETS } from '../../factories/buttons/button-sets';
 import type { UIContext, ButtonConfig, IconSizeKey } from '../../factories/types';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useFactory');
 
 // ============================================
 // BUTTON FACTORY HOOK
@@ -419,7 +422,7 @@ export function useActionHandlers<T = unknown>(options: UseActionHandlersOptions
       } else if (onUnknownAction) {
         onUnknownAction(action, id, row);
       } else {
-        console.warn(`[useActionHandlers] No handler for action: ${action}`);
+        logger.warn(`No handler for action: ${action}`);
       }
     },
     [handlers, onUnknownAction]

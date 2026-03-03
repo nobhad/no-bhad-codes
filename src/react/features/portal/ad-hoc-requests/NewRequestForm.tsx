@@ -230,7 +230,7 @@ export function NewRequestForm({
               type="button"
               onClick={() => setPriority(p)}
               disabled={loading}
-              className={cn('tw-flex-1 tw-text-xs', priority === p ? 'tw-btn-primary' : 'tw-btn-secondary')}
+              className={cn('tw-flex-1 tw-text-xs', priority === p ? 'btn-primary' : 'btn-secondary')}
               style={{
                 color: priority === p ? 'var(--portal-text-light)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
                 backgroundColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
@@ -272,7 +272,7 @@ export function NewRequestForm({
           className={cn('tw-dropzone', loading && 'tw-cursor-not-allowed')}
           style={{ opacity: loading ? 0.5 : 1 }}
         >
-          <Upload className="tw-h-5 tw-w-5 tw-text-muted" />
+          <Upload className="tw-h-5 tw-w-5" />
           <div className="tw-text-center">
             <p className="tw-text-secondary tw-text-xs">
               Drop files here or{' '}
@@ -314,7 +314,7 @@ export function NewRequestForm({
                 className="tw-list-item tw-justify-between"
               >
                 <div className="tw-flex tw-items-center tw-gap-2 card-content-truncate">
-                  <Paperclip className="tw-h-3 tw-w-3 tw-text-muted tw-shrink-0" />
+                  <Paperclip className="tw-h-3 tw-w-3 tw-shrink-0" />
                   <span className="tw-text-primary tw-text-xs">
                     {file.name}
                   </span>
@@ -326,7 +326,7 @@ export function NewRequestForm({
                   type="button"
                   onClick={() => handleRemoveFile(index)}
                   disabled={loading}
-                  className="tw-btn-icon"
+                  className="btn-icon"
                 >
                   <X className="tw-h-3 tw-w-3" />
                 </button>
@@ -341,7 +341,7 @@ export function NewRequestForm({
         {onCancel && (
           <button
             type="button"
-            className="tw-btn-secondary"
+            className="btn-secondary"
             onClick={onCancel}
             disabled={loading}
           >
@@ -350,7 +350,7 @@ export function NewRequestForm({
         )}
         <button
           type="submit"
-          className="tw-btn-primary tw-flex tw-items-center tw-gap-1.5"
+          className="btn-primary tw-flex tw-items-center tw-gap-1.5"
           disabled={loading}
         >
           {loading && <RefreshCw className="tw-h-3.5 tw-w-3.5 tw-animate-spin" />}

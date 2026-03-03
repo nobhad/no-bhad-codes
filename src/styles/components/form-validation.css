@@ -27,7 +27,7 @@
 .login-error {
   margin: 0;
   color: var(--color-danger);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   display: none;
 }
 
@@ -38,7 +38,7 @@
 
 .field-error {
   color: var(--color-error-500);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   min-height: 1.2em;
   margin-top: 4px;
   display: none; /* Hidden by default */
@@ -65,14 +65,14 @@
 
 .form-message {
   padding: 0.5rem 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
   margin-bottom: 1rem;
   font-weight: 500;
 }
 
 .form-message.success {
   background-color: rgba(var(--color-success-rgb, 16, 185, 129), 0.1);
-  border: 1px solid var(--color-success-500);
+  border: var(--border-width) solid var(--color-success-500);
   color: var(--color-success-500);
 }
 
@@ -100,9 +100,9 @@
   transform: translateY(-50%);
   width: 1rem;
   height: 1rem;
-  border: 2px solid transparent;
+  border: var(--border-width) solid transparent;
   border-top-color: currentColor;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 

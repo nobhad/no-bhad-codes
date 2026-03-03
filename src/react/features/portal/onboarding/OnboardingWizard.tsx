@@ -27,6 +27,10 @@ import type {
   StepValidationResult,
 } from './types';
 import { ONBOARDING_STEPS, DRAFT_STORAGE_KEY, DRAFT_SAVE_INTERVAL } from './types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('OnboardingWizard');
 
 /**
  * Validate a specific step's data
@@ -138,7 +142,7 @@ export function OnboardingWizard({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/client-info/onboarding', {
+      const response = await fetch(API_ENDPOINTS.ONBOARDING, {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -171,7 +175,7 @@ export function OnboardingWizard({
         }
       }
     } catch (error) {
-      console.error('Failed to load onboarding progress:', error);
+      logger.error('Failed to load onboarding progress:', error);
       // Try localStorage as fallback
       try {
         const localData = localStorage.getItem(DRAFT_STORAGE_KEY);
@@ -228,7 +232,7 @@ export function OnboardingWizard({
           isComplete: false,
         };
 
-        const response = await fetch('/api/client-info/onboarding/save', {
+        const response = await fetch(API_ENDPOINTS.ONBOARDING_SAVE, {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -250,7 +254,7 @@ export function OnboardingWizard({
           }
         }
       } catch (error) {
-        console.error('Failed to save progress:', error);
+        logger.error('Failed to save progress:', error);
         // Save to localStorage as fallback
         saveDraftToLocal();
         if (!silent) {
@@ -286,7 +290,7 @@ export function OnboardingWizard({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/client-info/onboarding/complete', {
+      const response = await fetch(API_ENDPOINTS.ONBOARDING_COMPLETE, {
         method: 'POST',
         headers,
         credentials: 'include',
@@ -306,7 +310,7 @@ export function OnboardingWizard({
         showNotification?.(errorData.error || 'Failed to submit onboarding', 'error');
       }
     } catch (error) {
-      console.error('Failed to submit onboarding:', error);
+      logger.error('Failed to submit onboarding:', error);
       showNotification?.('Failed to submit. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
@@ -467,7 +471,7 @@ export function OnboardingWizard({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading tw-h-64">
+      <div className="loading-state tw-h-64">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading...</span>
       </div>
@@ -477,9 +481,9 @@ export function OnboardingWizard({
   // Error state
   if (loadError) {
     return (
-      <div className="tw-error tw-h-64 tw-flex tw-flex-col tw-items-center tw-justify-center">
+      <div className="error-state tw-h-64 tw-flex tw-flex-col tw-items-center tw-justify-center">
         <p>{loadError}</p>
-        <button className="tw-btn-secondary tw-mt-4" onClick={loadProgress}>
+        <button className="btn-secondary tw-mt-4" onClick={loadProgress}>
           Retry
         </button>
       </div>
@@ -531,7 +535,7 @@ export function OnboardingWizard({
         <div>
           {!isFirstStep && (
             <button
-              className="tw-btn-secondary"
+              className="btn-secondary"
               onClick={handleBack}
               disabled={isSubmitting}
             >
@@ -544,7 +548,7 @@ export function OnboardingWizard({
         <div className="tw-flex tw-items-center tw-gap-2">
           {/* Save Progress Button */}
           <button
-            className="tw-btn-ghost"
+            className="btn-ghost"
             onClick={() => saveProgress(false)}
             disabled={isSaving || isSubmitting}
           >
@@ -557,7 +561,7 @@ export function OnboardingWizard({
           {/* Next/Submit Button */}
           {isLastStep ? (
             <button
-              className="tw-btn-primary"
+              className="btn-primary"
               onClick={submitOnboarding}
               disabled={isSubmitting}
             >
@@ -570,7 +574,7 @@ export function OnboardingWizard({
             </button>
           ) : (
             <button
-              className="tw-btn-primary"
+              className="btn-primary"
               onClick={handleNext}
               disabled={isSubmitting}
             >

@@ -108,7 +108,7 @@
   align-items: center;
   gap: var(--space-0-5);
   padding-top: var(--space-1);
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 .template-card-actions .use-template-btn {
@@ -151,7 +151,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-1-5) var(--space-2);
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 /* h3 styling from unified rule in portal-cards.css - only layout here */
@@ -179,7 +179,7 @@
 .template-editor-modal .form-input {
   width: 100%;
   padding: var(--space-1) var(--space-1-5);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   font-size: var(--font-size-sm);
   background-color: var(--portal-bg-dark);
   color: var(--portal-text-primary);
@@ -212,14 +212,14 @@
   justify-content: flex-end;
   gap: var(--space-1);
   padding: var(--space-1-5) var(--space-2);
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Uses utility classes: flex flex-col gap-2 */
 
 .template-editor-section {
   background-color: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-1-5);
 }
 
@@ -249,7 +249,7 @@
   gap: var(--space-1);
   align-items: center;
   background-color: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-1);
 }
 
@@ -294,7 +294,7 @@
 /* Preview container styles - exclude buttons which may use .template-preview for action identification */
 .template-preview:not(button):not(.icon-btn) {
   background-color: var(--portal-bg-darker);
-  border: 1px dashed var(--portal-border-color);
+  border: var(--border-width) dashed var(--portal-border-color);
   padding: var(--space-1-5);
 }
 
@@ -374,13 +374,13 @@
   gap: var(--space-0-5);
   padding: var(--space-1);
   background-color: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .version-info {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   flex-wrap: wrap;
 }
 
@@ -399,7 +399,7 @@
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   padding-left: var(--space-1);
-  border-left: 1px solid var(--portal-border-color);
+  border-left: var(--border-width) solid var(--portal-border-color);
 }
 
 .version-summary {
@@ -510,14 +510,14 @@
   gap: var(--space-1-5);
   padding: var(--space-1);
   background-color: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .custom-item-row .item-info {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
 }
 
 .item-type-badge {
@@ -551,7 +551,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: var(--space-1);
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 .items-total {
@@ -609,17 +609,17 @@
 .comment-item {
   padding: var(--space-1);
   background-color: var(--portal-bg-darker);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .comment-item.comment-internal {
-  border-left: 3px solid var(--color-warning);
+  border-left: var(--border-width-thick) solid var(--color-warning);
 }
 
 .comment-header {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   margin-bottom: var(--space-0-5);
   flex-wrap: wrap;
 }
@@ -662,7 +662,7 @@
 .add-comment-form textarea {
   width: 100%;
   padding: var(--space-1);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   background: var(--portal-bg-darker);
   color: var(--portal-text-primary);
   font-size: var(--font-size-sm);
@@ -704,9 +704,9 @@
 .activity-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-0-5) 0;
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 .activity-item:last-child {

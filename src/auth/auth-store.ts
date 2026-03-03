@@ -31,6 +31,9 @@ import {
 
 import { authEndpoints, adminAuthEndpoints } from '../config/api';
 import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/api-client';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('AuthStore');
 
 // ============================================
 // Auth Store Implementation
@@ -48,6 +51,10 @@ function createAuthStore(): AuthStore {
   let refreshTimer: number | null = null;
   let inactivityTimer: number | null = null;
 
+  // Event listener cleanup storage
+  let activityListenerCleanup: (() => void) | null = null;
+  let storageListenerCleanup: (() => void) | null = null;
+
   // ============================================
   // State Management
   // ============================================
@@ -62,7 +69,7 @@ function createAuthStore(): AuthStore {
       try {
         listener(state);
       } catch (error) {
-        console.error('Auth listener error:', error);
+        logger.error('Auth listener error:', error);
       }
     });
   }
@@ -82,7 +89,7 @@ function createAuthStore(): AuthStore {
       sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, expiresAt.toString());
       sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.SESSION_ID, sessionId);
     } catch (error) {
-      console.error('Failed to save session:', error);
+      logger.error('Failed to save session:', error);
     }
   }
 
@@ -108,7 +115,7 @@ function createAuthStore(): AuthStore {
         createdAt: Date.now()
       };
     } catch (error) {
-      console.error('Failed to load session:', error);
+      logger.error('Failed to load session:', error);
       return null;
     }
   }
@@ -387,13 +394,23 @@ function createAuthStore(): AuthStore {
             credentials: 'include'
           }).catch((error) => {
             // Logout API failure is non-critical - local cleanup continues
-            console.warn('[AuthStore] Logout API call failed:', error);
+            logger.warn('Logout API call failed:', error);
           });
         }
       } finally {
         clearSession();
         stopRefreshTimer();
         stopInactivityTimer();
+
+        // Cleanup event listeners
+        if (activityListenerCleanup) {
+          activityListenerCleanup();
+          activityListenerCleanup = null;
+        }
+        if (storageListenerCleanup) {
+          storageListenerCleanup();
+          storageListenerCleanup = null;
+        }
 
         setState({
           ...INITIAL_AUTH_STATE,
@@ -579,7 +596,7 @@ function createAuthStore(): AuthStore {
     }
 
     // Listen for storage changes (multi-tab sync)
-    window.addEventListener('storage', (event) => {
+    const handleStorageChange = (event: globalThis.StorageEvent) => {
       if (event.key === AUTH_STORAGE_KEYS.SESSION.USER) {
         if (!event.newValue) {
           // Session was cleared in another tab
@@ -592,20 +609,30 @@ function createAuthStore(): AuthStore {
           emitEvent(AUTH_EVENTS.LOGOUT);
         }
       }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    storageListenerCleanup = () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+
+    // Extend session on activity - use named handler for cleanup
+    const handleActivity = () => {
+      if (state.isAuthenticated) {
+        startInactivityTimer();
+      }
+    };
+
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'] as const;
+    activityEvents.forEach((eventType) => {
+      window.addEventListener(eventType, handleActivity, { passive: true });
     });
 
-    // Extend session on activity
-    ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach((eventType) => {
-      window.addEventListener(
-        eventType,
-        () => {
-          if (state.isAuthenticated) {
-            startInactivityTimer();
-          }
-        },
-        { passive: true }
-      );
-    });
+    // Store cleanup function
+    activityListenerCleanup = () => {
+      activityEvents.forEach((eventType) => {
+        window.removeEventListener(eventType, handleActivity);
+      });
+    };
   }
 
   initialize();

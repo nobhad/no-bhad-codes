@@ -7,8 +7,8 @@ import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { ClientsTable } from './ClientsTable';
 
 export interface ClientsMountOptions extends BaseMountOptions {
-  /** Callback when client is clicked for detail view */
-  onViewClient?: (clientId: number) => void;
+  /** Navigation callback for detail views */
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 export const {

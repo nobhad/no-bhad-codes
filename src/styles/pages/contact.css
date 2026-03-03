@@ -221,7 +221,7 @@ section.contact-section .contact-hero-desktop {
 
   /* Crescent eye - less bright white fill */
   .avatar-blurb-svg #EYE {
-    fill: #f5f5f5;
+    fill: var(--color-gray-100);
   }
 
   /* Star glow - white fill with glow that overflows slightly */
@@ -385,7 +385,7 @@ section.contact-section .contact-hero-desktop {
   font-weight: 800;
   text-decoration: underline;
   color: var(--color-black);
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
 }
 
 .contact-card-link:hover,
@@ -423,8 +423,8 @@ section.contact-section .contact-hero-desktop {
   background-color: var(--color-danger);
   color: white;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   white-space: nowrap;
   z-index: 10;
@@ -442,7 +442,7 @@ label.text-small {
   color: var(--color-text-inverse);
   opacity: 1;
   pointer-events: none;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 /* Inputs and Textareas */
@@ -453,7 +453,7 @@ label.text-small {
   caret-color: var(--color-text-inverse);
   color: var(--color-text-inverse);
   font-family: inherit;
-  font-size: 1.2rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   box-sizing: border-box;
   --placeholder-opacity: 0;
@@ -463,7 +463,7 @@ label.text-small {
 .input-item input {
   width: 100%;
   height: var(--contact-input-height);
-  border-radius: 0 20px 20px 20px;
+  border-radius: 0 var(--portal-radius-xl) var(--portal-radius-xl) var(--portal-radius-xl);
   padding: 1.75rem 1rem 0.5rem 1.5rem;
   line-height: 1.4;
 }
@@ -476,7 +476,7 @@ label.text-small {
   height: auto;
   resize: none;
   overflow: hidden;
-  border-radius: 0 20px 20px 20px;
+  border-radius: 0 var(--portal-radius-xl) var(--portal-radius-xl) var(--portal-radius-xl);
   padding: 1.5rem 1rem 0.5rem 1.5rem;
 }
 
@@ -540,7 +540,7 @@ input:-webkit-autofill:active {
   z-index: 17;
   width: 120px;
   height: 120px;
-  border-radius: 64px;
+  border-radius: var(--portal-radius-full);
   border: none;
   box-shadow: var(--shadow-elevated-lg);
   background-color: var(--color-primary);
@@ -564,7 +564,7 @@ input:-webkit-autofill:active {
 .submit-button span {
   display: none;
   color: var(--bg);
-  font-size: 1.2rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
 }
 
@@ -656,7 +656,7 @@ html[data-theme="dark"] .submit-button {
 
 html[data-theme="dark"] .submit-button:focus,
 html[data-theme="dark"] .submit-button:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-white);
   outline-offset: 3px;
 }
 
@@ -688,7 +688,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
   color: var(--color-text-primary);
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.2s ease;
+  transition: color var(--transition-mouse) ease;
 }
 
 .email-box .a-wrapper a:hover,
@@ -700,7 +700,7 @@ html[data-theme="dark"] .submit-button:focus-visible {
 /* Hidden by default - shown via .field-error--visible or :not(:empty) */
 .contact-form .field-error {
   color: var(--color-danger);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   min-height: 1.2em;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -723,8 +723,8 @@ html[data-theme="dark"] .submit-button:focus-visible {
   background-color: var(--color-danger);
   color: var(--color-white);
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   z-index: 50; /* Above main content (1) but below nav (100) */
   pointer-events: none;
@@ -754,7 +754,7 @@ section.contact-section .contact-form textarea.error {
 .form-message {
   padding: clamp(12px, 3vw, 20px);
   margin-bottom: clamp(12px, 2vw, 16px);
-  border-radius: 8px;
+  border-radius: var(--portal-radius-md);
   font-weight: 600;
   font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   text-align: center;
@@ -828,7 +828,7 @@ section.contact-section .contact-form textarea.error {
     display: block;
     width: 100%;
     margin-bottom: 1rem;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     line-height: 1.6;
     color: var(--color-text-primary);
     text-align: left;
@@ -932,7 +932,7 @@ section.contact-section .contact-form textarea.error {
   .contact-section p.contact-options {
     display: block;
     margin-bottom: 1rem;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     line-height: 1.6;
   }
 
@@ -986,11 +986,11 @@ section.contact-section .contact-form textarea.error {
 @media (prefers-contrast: high) {
   .input-item input,
   .input-item textarea {
-    border-width: 3px !important;
+    border-width: var(--border-width-thick) !important;
   }
 
   .submit-button {
-    border-width: 3px;
+    border-width: var(--border-width-thick);
   }
 }
 

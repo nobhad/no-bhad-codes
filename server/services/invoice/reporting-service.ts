@@ -200,6 +200,7 @@ export class InvoiceReportingService {
     const statusBreakdown: Record<Invoice['status'], number> = {
       draft: 0,
       sent: 0,
+      pending: 0,
       viewed: 0,
       partial: 0,
       paid: 0,

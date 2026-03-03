@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Client, ClientStats, ApiResponse } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
 import { decodeArrayFields } from '../utils/decodeText';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useClients');
 
 /** Text fields in Client that may contain HTML entities */
 const CLIENT_TEXT_FIELDS = ['company_name', 'contact_name'] as const;
@@ -112,7 +115,7 @@ export function useClients({
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
-      console.error('[useClients] Error:', message);
+      logger.error('[useClients] Error:', message);
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +148,7 @@ export function useClients({
 
         return false;
       } catch (err) {
-        console.error('[useClients] Update error:', err);
+        logger.error('[useClients] Update error:', err);
         return false;
       }
     },
@@ -198,7 +201,7 @@ export function useClients({
           setClients((prev) => prev.filter((client) => !ids.includes(client.id)));
         }
       } catch (err) {
-        console.error('[useClients] Bulk delete error:', err);
+        logger.error('[useClients] Bulk delete error:', err);
         failed = ids.length - success;
       }
 
@@ -237,7 +240,7 @@ export function useClients({
 
         return false;
       } catch (err) {
-        console.error('[useClients] Send invite error:', err);
+        logger.error('[useClients] Send invite error:', err);
         return false;
       }
     },

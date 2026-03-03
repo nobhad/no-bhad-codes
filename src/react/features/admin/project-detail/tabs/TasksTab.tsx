@@ -142,21 +142,21 @@ export function TasksTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div>
-            <span className="tw-text-muted tasks-text-base">Progress: </span>
-            <span className="tw-text-primary tasks-text-semibold">
+            <span className="tw-text-muted ">Progress: </span>
+            <span className="tw-text-primary tw-font-semibold">
               {progress}%
             </span>
           </div>
           <div>
-            <span className="tw-text-muted tasks-text-base">Completed: </span>
-            <span className="tw-text-primary tasks-text-semibold">
+            <span className="tw-text-muted ">Completed: </span>
+            <span className="tw-text-primary tw-font-semibold">
               {completedCount}/{totalCount}
             </span>
           </div>
         </div>
 
-        <button className="tw-btn-primary" onClick={() => setShowAddForm(true)}>
-          <Plus className="tw-h-4 tw-w-4" />
+        <button className="btn-primary" onClick={() => setShowAddForm(true)}>
+          <Plus className="icon-md" />
           Add Milestone
         </button>
       </div>
@@ -195,7 +195,7 @@ export function TasksTab({
             />
 
             <div className="tw-flex tw-items-center tw-gap-2">
-              <Calendar className="tw-h-4 tw-w-4 tw-text-muted" />
+              <Calendar className="icon-md" />
               <input
                 type="date"
                 value={newMilestoneDueDate}
@@ -206,7 +206,7 @@ export function TasksTab({
 
             <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-2">
               <button
-                className="tw-btn-ghost"
+                className="btn-ghost"
                 onClick={() => {
                   setShowAddForm(false);
                   setNewMilestoneTitle('');
@@ -217,7 +217,7 @@ export function TasksTab({
                 Cancel
               </button>
               <button
-                className="tw-btn-primary"
+                className="btn-primary"
                 onClick={handleAddMilestone}
                 disabled={isAdding}
               >
@@ -230,10 +230,10 @@ export function TasksTab({
 
       {/* Milestones List */}
       {milestones.length === 0 ? (
-        <div className="tw-empty-state">
-          <Inbox className="tw-h-8 tw-w-8 tw-mb-2" />
+        <div className="empty-state">
+          <Inbox className="icon-xl tw-mb-2" />
           <span>No milestones yet</span>
-          <span className="tasks-text-xs">Add milestones to track project progress</span>
+          <span className="tw-text-xs">Add milestones to track project progress</span>
         </div>
       ) : (
         <div className="tw-flex tw-flex-col tw-gap-2">
@@ -254,7 +254,7 @@ export function TasksTab({
                   onClick={() => toggleExpand(milestone.id)}
                 >
                   {/* Drag Handle */}
-                  <GripVertical className="tw-h-4 tw-w-4 tw-text-muted tasks-drag-handle" />
+                  <GripVertical className="icon-md tasks-drag-handle" />
 
                   {/* Checkbox */}
                   <button
@@ -265,12 +265,12 @@ export function TasksTab({
                     className={cn(
                       'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors tw-flex-shrink-0 tasks-checkbox',
                       milestone.is_completed
-                        ? 'tw-bg-white tw-border-white'
-                        : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
+                        ? 'tw-bg-white tw-border-primary'
+                        : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
                     )}
                   >
                     {milestone.is_completed && (
-                      <Check className="tw-h-3 tw-w-3 tw-text-black" />
+                      <Check className="icon-xs tw-text-black" />
                     )}
                   </button>
 
@@ -282,14 +282,14 @@ export function TasksTab({
                           milestone.is_completed
                             ? 'tw-text-muted tw-line-through'
                             : 'tw-text-primary',
-                          'tasks-text-medium'
+                          ''
                         )}
                       >
                         {milestone.title}
                       </span>
 
                       {milestone.task_count !== undefined && milestone.task_count > 0 && (
-                        <span className="tw-text-muted tasks-text-xs">
+                        <span className="tw-text-muted tw-text-xs">
                           ({milestone.completed_task_count || 0}/{milestone.task_count} tasks)
                         </span>
                       )}
@@ -308,22 +308,22 @@ export function TasksTab({
 
                   {/* Due Date */}
                   {milestone.due_date && (
-                    <span className="tw-text-muted tw-flex tw-items-center tw-gap-1 tasks-text-xs">
-                      <Calendar className="tw-h-3 tw-w-3" />
+                    <span className="tw-text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
+                      <Calendar className="icon-xs" />
                       {formatDate(milestone.due_date)}
                     </span>
                   )}
 
                   {/* Order indicator */}
-                  <span className="tw-text-muted tw-w-6 tw-text-center tasks-text-xs">
+                  <span className="tw-text-muted tw-w-6 tw-text-center tw-text-xs">
                     #{index + 1}
                   </span>
 
                   {/* Expand icon */}
                   {isExpanded ? (
-                    <ChevronDown className="tw-h-4 tw-w-4 tw-text-muted" />
+                    <ChevronDown className="icon-md" />
                   ) : (
-                    <ChevronRight className="tw-h-4 tw-w-4 tw-text-muted" />
+                    <ChevronRight className="icon-md" />
                   )}
                 </div>
 
@@ -347,7 +347,7 @@ export function TasksTab({
                           {milestone.deliverables.map((deliverable, idx) => (
                             <li
                               key={idx}
-                              className="tw-text-muted tw-flex tw-items-start tw-gap-2 tasks-text-base"
+                              className="tw-text-muted tw-flex tw-items-start tw-gap-2 "
                             >
                               <span>•</span>
                               {deliverable}
@@ -359,7 +359,7 @@ export function TasksTab({
 
                     {/* Completed Date */}
                     {milestone.is_completed && milestone.completed_date && (
-                      <div className="tw-mt-3 tw-text-primary tasks-text-xs">
+                      <div className="tw-mt-3 tw-text-primary tw-text-xs">
                         Completed on {formatDate(milestone.completed_date)}
                       </div>
                     )}
@@ -367,14 +367,14 @@ export function TasksTab({
                     {/* Actions */}
                     <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-4">
                       <button
-                        className="tw-btn-ghost"
+                        className="btn-ghost"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeletingMilestoneId(milestone.id);
                           deleteDialog.open();
                         }}
                       >
-                        <Trash2 className="tw-h-3 tw-w-3" />
+                        <Trash2 className="icon-xs" />
                         Delete
                       </button>
                     </div>

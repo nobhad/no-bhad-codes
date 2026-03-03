@@ -86,6 +86,18 @@ function shouldLog(level: LogLevel): boolean {
 }
 
 /**
+ * Error context for structured error logging
+ */
+export interface ErrorContext {
+  /** Error object if available */
+  error?: Error | unknown;
+  /** Additional metadata */
+  metadata?: Record<string, unknown>;
+  /** User-facing error message */
+  userMessage?: string;
+}
+
+/**
  * Logger interface
  */
 export interface Logger {
@@ -94,6 +106,8 @@ export interface Logger {
   info: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
+  /** Log error with structured context */
+  errorWithContext: (message: string, context: ErrorContext) => void;
   /** Create a child logger with extended prefix */
   child: (subPrefix: string) => Logger;
 }
@@ -151,6 +165,32 @@ export function createLogger(prefix: string): Logger {
       if (shouldLog('ERROR')) {
         console.error(formatMessage(prefix, config.timestamps), ...args);
       }
+    },
+
+    /**
+     * Log error with structured context
+     * Useful for catch blocks where you want to capture error details
+     */
+    errorWithContext(message: string, context: ErrorContext): void {
+      if (!shouldLog('ERROR')) return;
+
+      const formattedPrefix = formatMessage(prefix, config.timestamps);
+      const errorDetails: string[] = [message];
+
+      if (context.error instanceof Error) {
+        errorDetails.push(`Error: ${context.error.message}`);
+        if (debug && context.error.stack) {
+          errorDetails.push(`Stack: ${context.error.stack}`);
+        }
+      } else if (context.error) {
+        errorDetails.push(`Error: ${String(context.error)}`);
+      }
+
+      if (context.metadata && Object.keys(context.metadata).length > 0) {
+        errorDetails.push(`Metadata: ${JSON.stringify(context.metadata)}`);
+      }
+
+      console.error(formattedPrefix, errorDetails.join(' | '));
     },
 
     /**

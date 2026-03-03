@@ -47,7 +47,7 @@
    Drag-and-drop file upload area
    ===================================================== */
 .portal .upload-dropzone {
-  border: 2px dashed var(--portal-text-light);
+  border: var(--border-width) dashed var(--portal-text-light);
   padding: var(--space-4);
   text-align: center;
   background: transparent;
@@ -137,7 +137,7 @@
 
 .portal .folder-panel-header h4 {
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -154,12 +154,12 @@
 .portal .folder-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1-5);
   color: var(--portal-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   margin-bottom: 2px;
 }
 
@@ -196,7 +196,7 @@
 }
 
 .portal .files-path {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
@@ -260,7 +260,7 @@
 }
 
 .portal .files-filter-bar :is(.form-select, .form-input) {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   padding: var(--space-1) var(--space-1-5);
   background: transparent;
   border: var(--portal-border);
@@ -338,7 +338,7 @@
   gap: var(--space-1-5);
   padding: var(--space-1-5);
   background: transparent;
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   color: var(--portal-text-light);
   transition: border-color var(--transition-fast) ease;
 }
@@ -384,12 +384,12 @@
 }
 
 .portal .file-date {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
 .portal .file-meta {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
 }
 
@@ -427,7 +427,7 @@
   text-decoration: none;
   font-weight: 600;
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   transition: all var(--transition-fast);
 }
 
@@ -555,7 +555,7 @@
 
 .portal .files-list-section .file-item:hover {
   border-color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
 }
 
 /* =====================================================

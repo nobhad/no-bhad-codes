@@ -5,8 +5,9 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, ChevronRight, RefreshCw, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { QuestionnaireForm } from './QuestionnaireForm';
 import { QUESTIONNAIRE_STATUS_CONFIG } from './types';
@@ -15,6 +16,7 @@ import type {
   PortalQuestionnaireResponse,
   QuestionnaireStatus
 } from './types';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 /**
  * Format date for display
@@ -43,7 +45,7 @@ function getStatusIcon(status: QuestionnaireStatus): React.ReactNode {
     case 'rejected':
       return <AlertCircle className={cn(iconClass, 'tw-text-[var(--status-cancelled)]')} />;
     default:
-      return <FileText className={cn(iconClass, 'tw-text-muted')} />;
+      return <FileText className={iconClass} />;
   }
 }
 
@@ -79,7 +81,7 @@ export function PortalQuestionnairesView({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/questionnaires/my-responses', {
+      const response = await fetch(API_ENDPOINTS.QUESTIONNAIRES_MY_RESPONSES, {
         credentials: 'include',
         headers,
       });
@@ -145,7 +147,7 @@ export function PortalQuestionnairesView({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading questionnaires...</span>
       </div>
@@ -155,9 +157,9 @@ export function PortalQuestionnairesView({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={fetchResponses}>Retry</button>
+        <button className="btn-secondary" onClick={fetchResponses}>Retry</button>
       </div>
     );
   }
@@ -165,9 +167,11 @@ export function PortalQuestionnairesView({
   // Empty state
   if (responses.length === 0) {
     return (
-      <div ref={containerRef} className="tw-empty-state">
-        <FileText className="tw-h-6 tw-w-6" />
-        <p>No questionnaires assigned yet</p>
+      <div ref={containerRef}>
+        <EmptyState
+          icon={<FileText className="tw-h-6 tw-w-6" />}
+          message="No questionnaires assigned yet"
+        />
       </div>
     );
   }
@@ -251,7 +255,7 @@ export function PortalQuestionnairesView({
                   </span>
                 </div>
                 {isActionable && (
-                  <ChevronRight className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
+                  <ChevronRight className="tw-h-3.5 tw-w-3.5" />
                 )}
               </div>
             </div>

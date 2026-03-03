@@ -8,6 +8,10 @@
  * Used for: Clients, Files, Projects
  */
 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('TagInput');
+
 export interface Tag {
   id: number;
   name: string;
@@ -35,7 +39,7 @@ export function createTagInput(config: TagInputConfig): {
 } {
   const container = document.getElementById(config.containerId);
   if (!container) {
-    console.error('[TagInput] Container not found:', config.containerId);
+    logger.error('[TagInput] Container not found:', config.containerId);
     return {
       refresh: () => {},
       destroy: () => {}
@@ -158,7 +162,7 @@ export function createTagInput(config: TagInputConfig): {
         selectedTags = selectedTags.filter((t) => t.id !== tagId);
         render();
       } catch (error) {
-        console.error('[TagInput] Failed to remove tag:', error);
+        logger.error('[TagInput] Failed to remove tag:', error);
       }
     } else {
       selectedTags = selectedTags.filter((t) => t.id !== tagId);
@@ -184,7 +188,7 @@ export function createTagInput(config: TagInputConfig): {
         selectedTags = [...selectedTags, tag];
         render();
       } catch (error) {
-        console.error('[TagInput] Failed to add tag:', error);
+        logger.error('[TagInput] Failed to add tag:', error);
       }
     } else {
       selectedTags = [...selectedTags, tag];
@@ -213,7 +217,7 @@ export function createTagInput(config: TagInputConfig): {
         render();
       }
     } catch (error) {
-      console.error('[TagInput] Failed to create tag:', error);
+      logger.error('[TagInput] Failed to create tag:', error);
     }
 
     if (inputEl) {

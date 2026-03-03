@@ -1,15 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   Zap,
-  MoreHorizontal,
   Inbox,
-  Eye,
-  Edit,
-  Trash2,
-  Play,
-  Pause,
   User,
   ChevronDown,
 } from 'lucide-react';
@@ -32,6 +25,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import {
   PortalDropdown,
@@ -45,6 +39,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('AdHocRequestsTable');
 
 interface AdHocRequest {
   id: number;
@@ -83,6 +81,10 @@ interface AdHocRequestsTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 const AD_HOC_STATUS_CONFIG: Record<string, { label: string }> = {
@@ -140,7 +142,7 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
   }
 }
 
-export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate }: AdHocRequestsTableProps) {
+export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -187,11 +189,11 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
   // Apply filters
   const filteredRequests = useMemo(() => applyFilters(requests), [applyFilters, requests]);
 
-  // Pagination
+  // Pagination - overview mode disables persistence
   const pagination = usePagination({
-    storageKey: 'admin_ad_hoc_requests_pagination',
+    storageKey: overviewMode ? undefined : 'admin_ad_hoc_requests_pagination',
     totalItems: filteredRequests.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedRequests = useMemo(
@@ -212,7 +214,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       const params = new URLSearchParams();
       if (clientId) params.set('clientId', clientId);
       if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`/api/ad-hoc-requests?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.AD_HOC_REQUESTS}?${params}`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -243,7 +245,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/ad-hoc-requests/${requestId}`, {
+      const response = await fetch(buildEndpoint.adHocRequest(requestId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -261,7 +263,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       );
       showNotification?.('Status updated', 'success');
     } catch (err) {
-      console.error('Failed to update request status:', err);
+      logger.error('Failed to update request status:', err);
       showNotification?.('Failed to update status', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -272,7 +274,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
     const ids = selection.selectedItems.map((r) => r.id);
     try {
-      const response = await fetch('/api/ad-hoc-requests/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.AD_HOC_REQUESTS_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -285,7 +287,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete requests:', err);
+      logger.error('Failed to delete requests:', err);
       showNotification?.('Failed to delete requests', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -379,16 +381,6 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadRequests}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredRequests.length > 0 ? (
           <TablePagination
@@ -407,7 +399,6 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -449,8 +440,10 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={8} message={error} onRetry={loadRequests} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={8} rows={5} />
           ) : paginatedRequests.length === 0 ? (
             <AdminTableEmpty
@@ -519,16 +512,18 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                       </button>
                     </PortalDropdownTrigger>
                     <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(AD_HOC_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(request.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
+                      {Object.entries(AD_HOC_STATUS_CONFIG)
+                        .filter(([status]) => status !== request.status)
+                        .map(([status, config]) => (
+                          <PortalDropdownItem
+                            key={status}
+                            onClick={() => handleStatusChange(request.id, status)}
+                          >
+                            <StatusBadge status={getStatusVariant(status)} size="sm">
+                              {config.label}
+                            </StatusBadge>
+                          </PortalDropdownItem>
+                        ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </AdminTableCell>
@@ -542,40 +537,22 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                     </span>
                   ) : request.estimatedHours ? (
                     <span className="text-muted">{request.estimatedHours}h est</span>
-                  ) : '-'}
+                  ) : null}
                 </AdminTableCell>
                 <AdminTableCell className="date-cell">
-                  {request.dueDate ? formatDate(request.dueDate) : <span className="text-muted">-</span>}
+                  {request.dueDate && formatDate(request.dueDate)}
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        {request.status === 'pending' && (
-                          <PortalDropdownItem onClick={() => handleStatusChange(request.id, 'in-progress')}>
-                            <Play className="dropdown-icon" />
-                            Start
-                          </PortalDropdownItem>
-                        )}
-                        {request.status === 'in-progress' && (
-                          <PortalDropdownItem onClick={() => handleStatusChange(request.id, 'on-hold')}>
-                            <Pause className="dropdown-icon" />
-                            Put On Hold
-                          </PortalDropdownItem>
-                        )}
-                        <PortalDropdownItem className="text-danger">
-                          <Trash2 className="dropdown-icon" />
-                          Delete
-                        </PortalDropdownItem>
-                      </PortalDropdownContent>
-                    </PortalDropdown>
+                    {request.status === 'pending' && (
+                      <IconButton action="start" title="Start" onClick={() => handleStatusChange(request.id, 'in-progress')} />
+                    )}
+                    {request.status === 'in-progress' && (
+                      <IconButton action="pause" title="Put On Hold" onClick={() => handleStatusChange(request.id, 'on-hold')} />
+                    )}
+                    <IconButton action="delete" title="Delete" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>
@@ -583,7 +560,6 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

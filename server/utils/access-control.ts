@@ -70,6 +70,9 @@ export async function canAccessInvoice(req: JWTAuthRequest, invoiceId: number): 
 
 /**
  * Check if user can access a specific file
+ * Client can access if:
+ * 1. They uploaded the file
+ * 2. File is in their project AND explicitly shared with them
  */
 export async function canAccessFile(req: JWTAuthRequest, fileId: number): Promise<boolean> {
   if (await isUserAdmin(req)) {
@@ -77,12 +80,22 @@ export async function canAccessFile(req: JWTAuthRequest, fileId: number): Promis
   }
 
   const db = getDatabase();
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
+
+  // uploaded_by now stores email, but check ID for backwards compatibility
   const row = await db.get(
     `SELECT 1
      FROM files f
-     JOIN projects p ON f.project_id = p.id
-     WHERE f.id = ? AND p.client_id = ?`,
-    [fileId, req.user?.id]
+     LEFT JOIN projects p ON f.project_id = p.id
+     WHERE f.id = ?
+       AND (
+         f.uploaded_by = ?
+         OR f.uploaded_by = ?
+         OR f.uploaded_by = ?
+         OR (p.client_id = ? AND f.shared_with_client = TRUE)
+       )`,
+    [fileId, userEmail, userId, String(userId), userId]
   );
 
   return !!row;

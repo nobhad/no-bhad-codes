@@ -11,7 +11,8 @@ import {
   AdminTableRow,
   AdminTableCell,
   AdminTableEmpty,
-  AdminTableLoading
+  AdminTableLoading,
+  AdminTableError
 } from '@react/components/portal/AdminTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -35,44 +36,22 @@ import { useExport, LEADS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import type { Lead, LeadStatus, SortConfig } from '../types';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
-import { LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS } from '../shared/filterConfigs';
+import { LEADS_FILTER_CONFIG } from '../shared/filterConfigs';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface LeadsTableProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
-  /** Callback when lead is selected for detail view */
-  onViewLead?: (leadId: number) => void;
+  /** Navigation callback for detail views */
+  onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
-// Filter configuration for useTableFilters hook
-const FILTER_CONFIG = [
-  {
-    key: 'status',
-    label: 'Status',
-    options: LEAD_STATUS_OPTIONS,
-  },
-  {
-    key: 'source',
-    label: 'Source',
-    options: LEAD_SOURCE_OPTIONS,
-  },
-];
-
-// Filter sections for FilterDropdown component
-const FILTER_SECTIONS = [
-  {
-    key: 'status',
-    label: 'STATUS',
-    options: LEAD_STATUS_OPTIONS,
-  },
-  {
-    key: 'source',
-    label: 'SOURCE',
-    options: LEAD_SOURCE_OPTIONS,
-  },
-];
 
 // Filter function
 function filterLead(
@@ -136,8 +115,10 @@ function sortLeads(a: Lead, b: Lead, sort: SortConfig): number {
  */
 export function LeadsTable({
   getAuthToken,
-  onViewLead,
-  showNotification
+  onNavigate,
+  showNotification,
+  defaultPageSize = 25,
+  overviewMode = false,
 }: LeadsTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -161,7 +142,7 @@ export function LeadsTable({
     hasActiveFilters
   } = useTableFilters<Lead>({
     storageKey: 'admin_leads',
-    filters: FILTER_CONFIG,
+    filters: LEADS_FILTER_CONFIG,
     filterFn: filterLead,
     sortFn: sortLeads,
     defaultSort: { column: 'created_at', direction: 'desc' }
@@ -172,9 +153,9 @@ export function LeadsTable({
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_leads_pagination',
+    storageKey: overviewMode ? undefined : 'admin_leads_pagination',
     totalItems: filteredLeads.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   // Get paginated data
@@ -286,9 +267,9 @@ export function LeadsTable({
   // Handle view lead
   const handleViewLead = useCallback(
     (leadId: number) => {
-      onViewLead?.(leadId);
+      onNavigate?.('lead-detail', String(leadId));
     },
-    [onViewLead]
+    [onNavigate]
   );
 
   // Handle row click
@@ -322,7 +303,7 @@ export function LeadsTable({
               placeholder="Search leads..."
             />
             <FilterDropdown
-              sections={FILTER_SECTIONS}
+              sections={LEADS_FILTER_CONFIG}
               values={filterValues}
               onChange={handleFilterChange}
             />
@@ -352,16 +333,6 @@ export function LeadsTable({
             onDelete={deleteDialog.open}
             deleteLoading={deleteDialog.isLoading}
           />
-        }
-        error={
-          error ? (
-            <div className="table-error-banner">
-              {error}
-              <PortalButton variant="secondary" size="sm" onClick={refetch}>
-                Retry
-              </PortalButton>
-            </div>
-          ) : undefined
         }
         pagination={
           !isLoading && filteredLeads.length > 0 ? (
@@ -399,14 +370,6 @@ export function LeadsTable({
               >
                 Contact
               </AdminTableHead>
-              <AdminTableHead
-                className="company-col"
-                sortable
-                sortDirection={sort?.column === 'company' ? sort.direction : null}
-                onClick={() => toggleSort('company')}
-              >
-                Company
-              </AdminTableHead>
               <AdminTableHead className="type-col">Project Type</AdminTableHead>
               <AdminTableHead
                 className="status-col"
@@ -436,12 +399,14 @@ export function LeadsTable({
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
-              <AdminTableLoading colSpan={8} rows={5} />
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
+              <AdminTableLoading colSpan={7} rows={5} />
             ) : paginatedLeads.length === 0 ? (
               <AdminTableEmpty
-                colSpan={8}
+                colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No leads match your filters' : 'No leads yet'}
               />
@@ -462,15 +427,20 @@ export function LeadsTable({
                     />
                   </AdminTableCell>
 
-                  {/* Contact Name & Email (with stacked content for responsive) */}
+                  {/* Contact - consolidated name, email, company, phone */}
                   <AdminTableCell className="primary-cell contact-cell">
                     <div className="cell-content">
-                      <span className="cell-title">{lead.contact_name || 'Unknown'}</span>
-                      <span className="cell-subtitle">{lead.email}</span>
-                      {/* Stacked content - shown when columns hidden */}
-                      {lead.company_name && (
-                        <span className="company-stacked">{lead.company_name}</span>
+                      <span className="cell-title">{decodeHtmlEntities(lead.contact_name) || 'Unknown'}</span>
+                      <span className="cell-subtitle">{decodeHtmlEntities(lead.email)}</span>
+                      {(lead.company_name || lead.phone) && (
+                        <span className="identity-company">
+                          {[
+                            lead.company_name && decodeHtmlEntities(lead.company_name),
+                            lead.phone
+                          ].filter(Boolean).join(' • ')}
+                        </span>
                       )}
+                      {/* Stacked content for narrow viewports */}
                       {lead.project_type && (
                         <span className="type-stacked">
                           {PROJECT_TYPE_LABELS[lead.project_type] || lead.project_type}
@@ -484,19 +454,9 @@ export function LeadsTable({
                     </div>
                   </AdminTableCell>
 
-                  {/* Company (hidden on narrow viewports) */}
-                  <AdminTableCell className="company-cell">
-                    <div className="cell-content">
-                      <span className="cell-title">{lead.company_name || '-'}</span>
-                      {lead.phone && (
-                        <span className="cell-subtitle">{lead.phone}</span>
-                      )}
-                    </div>
-                  </AdminTableCell>
-
                   {/* Project Type */}
                   <AdminTableCell className="type-cell">
-                    {PROJECT_TYPE_LABELS[lead.project_type || ''] || lead.project_type || '-'}
+                    {PROJECT_TYPE_LABELS[lead.project_type || ''] || lead.project_type}
                   </AdminTableCell>
 
                   {/* Status */}
@@ -511,23 +471,25 @@ export function LeadsTable({
                         </button>
                       </PortalDropdownTrigger>
                       <PortalDropdownContent sideOffset={0} align="start">
-                        {Object.entries(LEAD_STATUS_CONFIG).map(([status, config]) => (
-                          <PortalDropdownItem
-                            key={status}
-                            onClick={() => handleStatusChange(lead.id, status as LeadStatus)}
-                          >
-                            <StatusBadge status={getStatusVariant(status)} size="sm">
-                              {config.label}
-                            </StatusBadge>
-                          </PortalDropdownItem>
-                        ))}
+                        {Object.entries(LEAD_STATUS_CONFIG)
+                          .filter(([status]) => status !== lead.status)
+                          .map(([status, config]) => (
+                            <PortalDropdownItem
+                              key={status}
+                              onClick={() => handleStatusChange(lead.id, status as LeadStatus)}
+                            >
+                              <StatusBadge status={getStatusVariant(status)} size="sm">
+                                {config.label}
+                              </StatusBadge>
+                            </PortalDropdownItem>
+                          ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
                   </AdminTableCell>
 
                   {/* Source */}
                   <AdminTableCell className="source-cell">
-                    {LEAD_SOURCE_LABELS[lead.source || ''] || lead.source || '-'}
+                    {LEAD_SOURCE_LABELS[lead.source || ''] || lead.source}
                   </AdminTableCell>
 
                   {/* Created Date */}

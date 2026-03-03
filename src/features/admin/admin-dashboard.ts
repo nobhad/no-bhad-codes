@@ -51,31 +51,10 @@ type DashboardDOMKeys = Record<string, string>;
 
 const logger = createLogger('AdminDashboard');
 
-// Dynamic module loaders for code splitting
-import {
-  loadLeadsModule,
-  loadContactsModule,
-  loadProjectsModule,
-  loadClientsModule,
-  loadInvoicesModule,
-  loadContractsModule,
-  loadMessagesModule,
-  loadAnalyticsModule,
-  loadOverviewModule,
-  loadPerformanceModule,
-  loadSystemStatusModule,
-  loadProposalsModule,
-  loadKnowledgeBaseModule,
-  loadDocumentsModule,
-  loadDocumentRequestsModule,
-  loadAdHocRequestsModule,
-  loadGlobalTasksModule,
-  loadWorkflowsModule,
-  loadQuestionnairesModule,
-  loadEmailTemplatesModule
-} from './modules';
+// React module loader - direct React mounting without vanilla JS fallback
+import { mountReactModule, hasReactModule } from './ReactModuleLoader';
 
-// Deliverables manager module
+// Deliverables module initialization (event delegation for deliverables modal)
 import { initializeDeliverablesModule } from './modules/admin-deliverables';
 
 // Chart.js is loaded dynamically to reduce initial bundle size
@@ -123,7 +102,7 @@ interface PerformanceMetricsDisplay {
 
 /** Admin tab titles for dynamic page header */
 const ADMIN_TAB_TITLES: Record<string, string> = {
-  overview: 'Dashboard',
+  dashboard: 'Dashboard',
   leads: 'Leads',
   contacts: 'Contacts',
   projects: 'Projects',
@@ -146,19 +125,39 @@ const ADMIN_TAB_TITLES: Record<string, string> = {
   'project-detail': 'Project Details'
 };
 
+// Tab groups that use INTERNAL VIEW pattern (one component handles all subtabs)
+// These dispatch events instead of calling switchTab() for each subtab
 const ADMIN_TAB_GROUPS = {
   work: {
     label: 'Work',
-    tabs: ['projects', 'tasks', 'ad-hoc-requests'],
-    defaultTab: 'projects'
+    tabs: ['overview', 'projects', 'tasks', 'ad-hoc-requests'],
+    defaultTab: 'overview'
   },
   crm: {
     label: 'CRM',
-    tabs: ['leads', 'contacts', 'messages', 'clients'],
-    defaultTab: 'leads'
+    tabs: ['overview', 'leads', 'contacts', 'messages', 'clients'],
+    defaultTab: 'overview'
+  },
+  documents: {
+    label: 'Documents',
+    tabs: ['overview', 'invoices', 'contracts', 'document-requests', 'questionnaires'],
+    defaultTab: 'overview'
+  },
+  workflows: {
+    label: 'Workflows',
+    tabs: ['overview', 'approvals', 'triggers', 'email-templates'],
+    defaultTab: 'overview'
+  },
+  support: {
+    label: 'Knowledge Base',
+    tabs: ['overview', 'categories', 'articles'],
+    defaultTab: 'overview'
+  },
+  analytics: {
+    label: 'Analytics',
+    tabs: ['overview', 'revenue', 'leads', 'projects'],
+    defaultTab: 'overview'
   }
-  // Note: 'documents' and 'support' are NOT in ADMIN_TAB_GROUPS because they use
-  // single tab containers with internal card switching, not separate tab containers.
 } as const;
 
 type AdminTabGroup = keyof typeof ADMIN_TAB_GROUPS;
@@ -174,9 +173,18 @@ function getAdminGroupForTab(tabName: string): AdminTabGroup | null {
   return null;
 }
 
+// Groups that have a parent dashboard component (mount the group, not the defaultTab)
+const GROUPS_WITH_PARENT_COMPONENT = ['analytics', 'workflows', 'support', 'work', 'crm', 'documents'] as const;
+
 function resolveAdminTab(tabName: string): { group: AdminTabGroup | null; tab: string } {
   if (tabName in ADMIN_TAB_GROUPS) {
     const group = tabName as AdminTabGroup;
+    // If this group has a parent component, return the group name as the tab
+    // The parent component handles subtab switching internally
+    if ((GROUPS_WITH_PARENT_COMPONENT as readonly string[]).includes(group)) {
+      return { group, tab: group };
+    }
+    // For groups without parent components, resolve to defaultTab
     return { group, tab: ADMIN_TAB_GROUPS[group].defaultTab };
   }
 
@@ -185,7 +193,7 @@ function resolveAdminTab(tabName: string): { group: AdminTabGroup | null; tab: s
 
 // Dashboard data management
 class AdminDashboard {
-  private currentTab = 'overview';
+  private currentTab = 'dashboard';
   private currentGroup: string | null = null;
   private refreshInterval: NodeJS.Timeout | null = null;
   private charts: Map<string, { destroy: () => void }> = new Map();
@@ -202,7 +210,7 @@ class AdminDashboard {
   private projectDetails: AdminProjectDetails;
 
   // Clients module reference for breadcrumbs
-  private clientsModule: { getCurrentClientName?: () => string | null } | null = null;
+  // Note: Client name is now managed by the React ClientDetail component
 
   // DOM element cache
   private domCache = createDOMCache<DashboardDOMKeys>();
@@ -353,11 +361,16 @@ class AdminDashboard {
     const tab = params.get('tab');
     const projectIdParam = params.get('projectId');
 
+    // Ensure URL shows /admin (not /admin/login) after successful auth
+    if (window.location.pathname === '/admin/login') {
+      const url = new URL(window.location.href);
+      url.pathname = '/admin';
+      window.history.replaceState({}, '', url.toString());
+    }
+
+    // Navigate to specified tab (switchTab handles URL updates)
     if (tab && ADMIN_TAB_TITLES[tab]) {
       this.switchTab(tab);
-      const url = new URL(window.location.href);
-      url.searchParams.delete('tab');
-      window.history.replaceState({}, '', url.toString());
     }
 
     if (projectIdParam) {
@@ -603,8 +616,8 @@ class AdminDashboard {
 
     const currentTab = tab || this.currentTab;
 
-    // Only show greeting on Overview tab
-    if (currentTab !== 'overview') {
+    // Only show greeting on Dashboard tab
+    if (currentTab !== 'dashboard') {
       greetingEl.style.display = 'none';
       return;
     }
@@ -652,6 +665,17 @@ class AdminDashboard {
 
   private setupEventListeners(): void {
     logger.log('setupEventListeners() called');
+
+    // Handle browser back/forward navigation
+    window.addEventListener('popstate', (_e) => {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab') || 'dashboard';
+      if (ADMIN_TAB_TITLES[tab]) {
+        // Use internal tab switch without updating URL (already updated by popstate)
+        this.switchTabInternal(tab);
+      }
+    });
+
     // Logout button - try direct query first, then fallback to domCache
     const logoutBtn =
       document.getElementById('btn-logout') ||
@@ -702,9 +726,9 @@ class AdminDashboard {
     const detailsOverlay = document.getElementById('details-overlay');
     if (detailsOverlay) {
       detailsOverlay.addEventListener('click', () => {
-        if (typeof window.closeDetailsPanel === 'function') {
-          window.closeDetailsPanel();
-        }
+        // Hide the overlay - React components handle their own panel state
+        detailsOverlay.classList.add('hidden');
+        detailsOverlay.classList.remove('open');
       });
     }
 
@@ -947,20 +971,11 @@ class AdminDashboard {
   }
 
   private async loadLeads(): Promise<void> {
-    // Delegate to leads module for code splitting
-    const leadsModule = await loadLeadsModule();
-
-    // Ensure tab structure is rendered first (needed for React mount container)
+    // React component handles its own data loading
     const tabContainer = document.getElementById('tab-leads');
-    if (
-      tabContainer &&
-      !document.getElementById('react-leads-mount') &&
-      !document.getElementById('leads-table-body')
-    ) {
-      leadsModule.renderLeadsTab(tabContainer);
+    if (tabContainer) {
+      await mountReactModule('leads', tabContainer, this.moduleContext);
     }
-
-    await leadsModule.loadLeads(this.moduleContext);
   }
 
   // NOTE: updateLeadsDisplay moved to admin-leads module
@@ -1240,9 +1255,11 @@ class AdminDashboard {
   }
 
   private async loadProjects(): Promise<void> {
-    // Delegate to projects module for code splitting
-    const projectsModule = await loadProjectsModule();
-    await projectsModule.loadProjects(this.moduleContext);
+    // React component handles its own data loading
+    const tabContainer = document.getElementById('tab-projects');
+    if (tabContainer) {
+      await mountReactModule('projects', tabContainer, this.moduleContext);
+    }
   }
 
   // NOTE: updateProjectsDisplay moved to admin-projects module
@@ -1400,9 +1417,11 @@ class AdminDashboard {
   private selectedThreadId: number | null = null;
 
   private async loadClientThreads(): Promise<void> {
-    // Delegate to messaging module for code splitting
-    const messagesModule = await loadMessagesModule();
-    await messagesModule.loadClientThreads(this.moduleContext);
+    // React component handles its own data loading
+    const tabContainer = document.getElementById('tab-messages');
+    if (tabContainer) {
+      await mountReactModule('messages', tabContainer, this.moduleContext);
+    }
   }
 
   // NOTE: populateClientDropdown moved to admin-messages module
@@ -1642,57 +1661,26 @@ class AdminDashboard {
       // Strip any quotes from mode value (handles malformed HTML attributes)
       const mode = group.dataset.mode?.replace(/["']/g, '');
 
-      // KNOWLEDGE BASE subtabs (support tab) - check BEFORE primary mode
-      // Support uses mode="primary" for styling but handles subtabs via events
-      if (forTab === 'support') {
-        const subtab = target.dataset.subtab;
+      // ============================================
+      // SUBTAB HANDLING - UNIFIED PATTERN
+      // All tab groups use internal view pattern: one component handles all subtabs
+      // Components listen for '<groupName>SubtabChange' events
+      // ============================================
+
+      const subtab = target.dataset.subtab;
+
+      // TAB GROUPS - dispatch events for internal view switching
+      // Event naming: <groupName>SubtabChange (e.g., workSubtabChange, crmSubtabChange)
+      if (forTab && forTab in ADMIN_TAB_GROUPS) {
         if (!subtab) return;
         updateSubtabActiveState(group, subtab, 'subtab');
-        document.dispatchEvent(
-          new CustomEvent('knowledgeBaseSubtabChange', { detail: { subtab } })
-        );
+        // Convert forTab to event name (support -> knowledgeBase for backwards compatibility)
+        const eventName = forTab === 'support' ? 'knowledgeBase' : forTab;
+        document.dispatchEvent(new CustomEvent(`${eventName}SubtabChange`, { detail: { subtab } }));
         return;
       }
 
-      // DOCUMENTS subtabs - check BEFORE primary mode
-      // Documents uses mode="primary" for styling but handles subtabs via events
-      if (forTab === 'documents') {
-        const subtab = target.dataset.subtab;
-        if (!subtab) return;
-        updateSubtabActiveState(group, subtab, 'subtab');
-        document.dispatchEvent(new CustomEvent('documentsSubtabChange', { detail: { subtab } }));
-        return;
-      }
-
-      // PRIMARY subtabs (work, CRM): switch main tabs
-      if (mode === 'primary') {
-        const subtab = target.dataset.subtab;
-        if (!subtab || subtab === dashboard.currentTab) return;
-        // Update active state immediately (single source of truth)
-        updateSubtabActiveState(group, subtab, 'subtab');
-        dashboard.switchTab(subtab);
-        return;
-      }
-
-      // ANALYTICS subtabs
-      if (forTab === 'analytics') {
-        const subtab = target.dataset.subtab;
-        if (!subtab) return;
-        updateSubtabActiveState(group, subtab, 'subtab');
-        document.dispatchEvent(new CustomEvent('analyticsSubtabChange', { detail: { subtab } }));
-        return;
-      }
-
-      // WORKFLOWS subtabs
-      if (forTab === 'workflows') {
-        const subtab = target.dataset.subtab;
-        if (!subtab) return;
-        updateSubtabActiveState(group, subtab, 'subtab');
-        document.dispatchEvent(new CustomEvent('workflowsSubtabChange', { detail: { subtab } }));
-        return;
-      }
-
-      // PROJECT DETAIL subtabs
+      // Project Detail (uses pd-tab data attribute)
       if (forTab === 'project-detail') {
         const tabName = target.dataset.pdTab;
         if (!tabName) return;
@@ -1701,12 +1689,13 @@ class AdminDashboard {
         return;
       }
 
-      // CLIENT DETAIL subtabs
+      // Client Detail (uses cd-tab data attribute)
       if (forTab === 'client-detail') {
         const tabName = target.dataset.cdTab;
         if (!tabName) return;
         updateSubtabActiveState(group, tabName, 'cdTab');
         document.dispatchEvent(new CustomEvent('clientDetailTabChange', { detail: { tabName } }));
+
       }
     });
   }
@@ -1755,6 +1744,15 @@ class AdminDashboard {
   }
 
   private switchTab(tabName: string): void {
+    this.switchTabInternal(tabName, true);
+  }
+
+  /**
+   * Internal tab switch - optionally updates URL.
+   * @param tabName - The tab to switch to
+   * @param updateUrl - Whether to update the browser URL (false for popstate handling)
+   */
+  private switchTabInternal(tabName: string, updateUrl = false): void {
     const resolved = resolveAdminTab(tabName);
     const activeTab = resolved.tab;
 
@@ -1762,7 +1760,7 @@ class AdminDashboard {
       btn.classList.remove('active');
     });
 
-    // Update active tab content (HTML uses tab-{name} format, e.g., tab-overview)
+    // Update active tab content (HTML uses tab-{name} format, e.g., tab-dashboard)
     document.querySelectorAll('.tab-content').forEach((content) => {
       content.classList.remove('active');
     });
@@ -1773,6 +1771,18 @@ class AdminDashboard {
 
     this.currentTab = activeTab;
     this.updateActiveGroupState(resolved.group, activeTab);
+
+    // Update URL to reflect current tab (without page reload)
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      url.pathname = '/admin';
+      if (activeTab === 'dashboard') {
+        url.searchParams.delete('tab');
+      } else {
+        url.searchParams.set('tab', activeTab);
+      }
+      window.history.pushState({ tab: activeTab }, '', url.toString());
+    }
 
     // Update page title in unified header
     this.updateAdminPageTitle(activeTab);
@@ -1796,8 +1806,8 @@ class AdminDashboard {
 
     // Handle detail views with dynamic names
     if (tabName === 'client-detail') {
-      const clientName = this.clientsModule?.getCurrentClientName?.() || 'Client';
-      titleEl.textContent = clientName;
+      // Client name is managed by the React ClientDetail component
+      titleEl.textContent = 'Client';
       return;
     }
 
@@ -1823,7 +1833,7 @@ class AdminDashboard {
     const list = document.getElementById('breadcrumb-list');
     if (!list) return;
 
-    const goOverview = (): void => this.switchTab('overview');
+    const goOverview = (): void => this.switchTab('dashboard');
     const goClients = (): void => this.switchTab('clients');
     const goProjects = (): void => this.switchTab('projects');
 
@@ -1843,7 +1853,7 @@ class AdminDashboard {
     }
 
     switch (tabName) {
-    case 'overview':
+    case 'dashboard':
       items.push({ label: 'Dashboard', href: false });
       break;
     case 'clients':
@@ -1863,12 +1873,10 @@ class AdminDashboard {
       items.push({ label: 'Tasks', href: false });
       break;
     case 'client-detail': {
-      // Get client name from clients module
-      const clientName = this.clientsModule?.getCurrentClientName?.() || 'Client';
-      const clientLabel = clientName.length > 40 ? `${clientName.slice(0, 37)}...` : clientName;
+      // Client name is managed by the React ClientDetail component
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Clients', href: true, onClick: goClients });
-      items.push({ label: clientLabel, href: false });
+      items.push({ label: 'Client', href: false });
       break;
     }
     case 'leads':
@@ -1880,7 +1888,7 @@ class AdminDashboard {
       items.push({ label: 'Projects', href: false });
       break;
     case 'project-detail': {
-      // Get project name - will be populated asynchronously if needed
+      // Get project name from project details handler
       const projectName = this.projectDetails.getCurrentProjectName();
       const label = projectName
         ? projectName.length > 40
@@ -1890,33 +1898,6 @@ class AdminDashboard {
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
       items.push({ label: 'Projects', href: true, onClick: goProjects });
       items.push({ label, href: false });
-
-      // If no name yet, try to get it from the projects module after a short delay
-      if (!projectName) {
-        setTimeout(async () => {
-          try {
-            const mod = await loadProjectsModule();
-            const modProjectName = mod.getCurrentProjectName?.();
-            if (modProjectName) {
-              // Re-render breadcrumbs with actual name
-              const listEl = document.getElementById('breadcrumb-list');
-              if (listEl) {
-                const truncLabel =
-                    modProjectName.length > 40
-                      ? `${modProjectName.slice(0, 37)}...`
-                      : modProjectName;
-                renderBreadcrumbs(listEl, [
-                  { label: 'Dashboard', href: true, onClick: goOverview },
-                  { label: 'Projects', href: true, onClick: goProjects },
-                  { label: truncLabel, href: false }
-                ]);
-              }
-            }
-          } catch {
-            /* ignore */
-          }
-        }, 50);
-      }
       break;
     }
     case 'messages':
@@ -2070,30 +2051,13 @@ class AdminDashboard {
     this.showLoading(true);
 
     try {
-      // Load both overview module (stats) and analytics module (charts)
-      const [overviewModule, analyticsModule] = await Promise.all([
-        loadOverviewModule(),
-        loadAnalyticsModule()
-      ]);
-
-      // Render the overview tab structure first (dynamic rendering)
-      const tabContainer = document.getElementById('tab-overview');
+      // Mount dashboard React component - it handles its own data loading
+      const tabContainer = document.getElementById('tab-dashboard');
       if (tabContainer) {
-        await overviewModule.renderOverviewTab(tabContainer, this.moduleContext);
+        await mountReactModule('dashboard', tabContainer, this.moduleContext);
       }
-
-      await Promise.all([
-        // Overview stats (Active Projects, Clients, Revenue MTD, Recent Activity)
-        overviewModule.loadOverviewData(this.moduleContext),
-        // Analytics charts and KPIs
-        analyticsModule.loadAnalyticsCharts(this.moduleContext),
-        analyticsModule.loadPerformanceData(this.moduleContext),
-        analyticsModule.loadAnalyticsData(this.moduleContext),
-        analyticsModule.loadVisitorsData(this.moduleContext),
-        this.loadSystemData()
-      ]);
     } catch (error) {
-      logger.error(' Error loading data:', error);
+      logger.error('Error loading dashboard data:', error);
     } finally {
       this.showLoading(false);
     }
@@ -2103,297 +2067,30 @@ class AdminDashboard {
     this.showLoading(true);
 
     try {
+      // Get the tab container - try both ID formats (tab-{name} and {name}-tab)
+      const tabContainer = document.getElementById(`tab-${tabName}`)
+        || document.getElementById(`${tabName}-tab`);
+
+      // Check if there's a React module for this tab
+      if (hasReactModule(tabName) && tabContainer) {
+        // Mount React component directly - no vanilla JS fallback
+        await mountReactModule(tabName, tabContainer, this.moduleContext);
+        return;
+      }
+
+      // Handle special cases without React modules
       switch (tabName) {
-      case 'overview':
-        // Dynamically render overview tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-overview');
-          const overviewModule = await loadOverviewModule();
-
-          // Render the tab structure dynamically (may mount React component)
-          if (tabContainer) {
-            await overviewModule.renderOverviewTab(tabContainer, this.moduleContext);
-          }
-
-          // Load overview stats - only needed for vanilla rendering
-          // React component handles its own data loading
-          await overviewModule.loadOverviewData(this.moduleContext);
-
-          // Load analytics charts (Revenue chart, Project status, etc.)
-          const analyticsModule = await loadAnalyticsModule();
-          await analyticsModule.loadAnalyticsCharts(this.moduleContext);
-        }
-        break;
-      case 'performance':
-        // Use analytics module for performance data
-        {
-          const analyticsModule = await loadAnalyticsModule();
-          await analyticsModule.loadPerformanceData(this.moduleContext);
-        }
-        break;
-      case 'analytics':
-        // Dynamically render analytics tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-analytics');
-          const analyticsModule = await loadAnalyticsModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            analyticsModule.renderAnalyticsTab(tabContainer);
-          }
-
-          // Load analytics charts and data
-          await analyticsModule.loadAnalyticsCharts(this.moduleContext);
-        }
-        break;
       case 'visitors':
-        // Use analytics module for visitors data
-        {
-          const analyticsModule = await loadAnalyticsModule();
-          await analyticsModule.loadVisitorsData(this.moduleContext);
-        }
+        // Visitors is a sub-view of analytics, not a separate tab
+        // The analytics React component handles this internally
+        logger.log('Visitors view requested - handled by analytics component');
         break;
-      case 'leads':
-        // Dynamically render leads tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-leads');
-          const leadsModule = await loadLeadsModule();
 
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            leadsModule.renderLeadsTab(tabContainer);
-          }
+        // Note: Group tabs (work, crm, documents, analytics, workflows, support)
+        // are now handled by their parent dashboard components via hasReactModule().
 
-          // Load leads data
-          await leadsModule.loadLeads(this.moduleContext);
-        }
-        break;
-      case 'contacts':
-        // Dynamically render contacts tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-contacts');
-          const contactsModule = await loadContactsModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            contactsModule.renderContactsTab(tabContainer);
-          }
-
-          // Load contacts data
-          await contactsModule.loadContacts(this.moduleContext);
-        }
-        break;
-      case 'projects':
-        // Dynamically render projects tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-projects');
-          const projectsModule = await loadProjectsModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            projectsModule.renderProjectsTab(tabContainer);
-          }
-
-          // Load projects data
-          await projectsModule.loadProjects(this.moduleContext);
-        }
-        break;
-      case 'proposals':
-        // Use proposals module
-        {
-          const proposalsModule = await loadProposalsModule();
-          await proposalsModule.loadProposals(this.moduleContext);
-        }
-        break;
-      case 'clients':
-        // Dynamically render clients tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-clients');
-          const clientsModule = await loadClientsModule();
-          this.clientsModule = clientsModule;
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            clientsModule.renderClientsTab(tabContainer);
-          }
-
-          // Load clients data
-          await clientsModule.loadClients(this.moduleContext);
-        }
-        break;
-      case 'invoices':
-        // Dynamically render invoices tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-invoices');
-          const invoicesModule = await loadInvoicesModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            invoicesModule.renderInvoicesTab(tabContainer);
-          }
-
-          // Load invoices data
-          await invoicesModule.loadInvoicesData(this.moduleContext);
-        }
-        break;
-      case 'contracts':
-        // Dynamically render contracts tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-contracts');
-          const contractsModule = await loadContractsModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            contractsModule.renderContractsTab(tabContainer);
-          }
-
-          // Load contracts data
-          await contractsModule.loadContracts(this.moduleContext);
-        }
-        break;
-      case 'tasks':
-        // Dynamically render tasks tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-tasks');
-          const globalTasksModule = await loadGlobalTasksModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            globalTasksModule.renderGlobalTasksTab(tabContainer);
-          }
-
-          // Load tasks data
-          await globalTasksModule.loadGlobalTasks(this.moduleContext);
-        }
-        break;
-      case 'client-detail':
-        // Client detail view - data loaded by showClientDetails in admin-clients module
-        // Ensure clients module is loaded for breadcrumbs
-        if (!this.clientsModule) {
-          this.clientsModule = await loadClientsModule();
-        }
-        break;
-      case 'messages':
-        // Dynamically render messages tab, then load data
-        {
-          const tabContainer = document.getElementById('tab-messages');
-          const messagesModule = await loadMessagesModule();
-
-          // Render the tab structure dynamically
-          if (tabContainer) {
-            messagesModule.renderMessagesTab(tabContainer);
-          }
-
-          // Setup messaging listeners AFTER the tab is rendered
-          // (must happen after renderMessagesTab creates the DOM elements)
-          messagesModule.setupMessageListeners(this.moduleContext);
-
-          // Load messages data
-          await messagesModule.loadClientThreads(this.moduleContext);
-        }
-        break;
-      case 'support': {
-        // Dynamically render knowledge-base tab, then load data
-        const tabContainer = document.getElementById('tab-support');
-        const kbModule = await loadKnowledgeBaseModule();
-
-        // Render the tab structure dynamically
-        if (tabContainer) {
-          kbModule.renderKnowledgeBaseTab(tabContainer);
-        }
-
-        // Load knowledge base data
-        await kbModule.loadKnowledgeBase(this.moduleContext);
-        break;
-      }
-      case 'documents': {
-        // Unified documents tab - single container with internal card switching
-        // Pattern matches support/knowledge-base tab
-        const tabContainer = document.getElementById('tab-documents');
-        const documentsModule = await loadDocumentsModule();
-
-        // Render the tab structure dynamically (creates all subtab cards)
-        if (tabContainer) {
-          documentsModule.renderDocumentsTab(tabContainer);
-        }
-
-        // Load all documents subtab data
-        await documentsModule.loadDocuments(this.moduleContext);
-        break;
-      }
-      case 'document-requests': {
-        // Dynamically render document-requests tab, then load data
-        const tabContainer = document.getElementById('tab-document-requests');
-        const drModule = await loadDocumentRequestsModule();
-
-        // Render the tab structure dynamically
-        if (tabContainer) {
-          drModule.renderDocumentRequestsTab(tabContainer);
-        }
-
-        // Load document requests data
-        await drModule.loadDocumentRequests(this.moduleContext);
-        break;
-      }
-      case 'ad-hoc-requests': {
-        // Dynamically render ad-hoc-requests tab, then load data
-        const tabContainer = document.getElementById('tab-ad-hoc-requests');
-        const requestsModule = await loadAdHocRequestsModule();
-
-        // Render the tab structure dynamically
-        if (tabContainer) {
-          requestsModule.renderAdHocRequestsTab(tabContainer);
-        }
-
-        // Load data
-        await requestsModule.loadAdHocRequests(this.moduleContext);
-        break;
-      }
-      case 'questionnaires': {
-        // Dynamically render questionnaires tab, then load data
-        const tabContainer = document.getElementById('tab-questionnaires');
-        const questionnairesModule = await loadQuestionnairesModule();
-
-        // Render the tab structure dynamically
-        if (tabContainer) {
-          questionnairesModule.renderQuestionnairesTab(tabContainer);
-        }
-
-        // Load questionnaires data
-        await questionnairesModule.loadQuestionnairesModule(this.moduleContext);
-        break;
-      }
-      case 'system':
-        await this.loadSystemData();
-        break;
-      case 'workflows': {
-        // Dynamically render workflows tab, then load data
-        const tabContainer = document.getElementById('tab-workflows');
-        const wfModule = await loadWorkflowsModule();
-
-        // Render the tab structure dynamically
-        if (tabContainer) {
-          wfModule.renderWorkflowsTab(tabContainer);
-        }
-
-        // Load workflows data
-        await wfModule.loadWorkflowsData(this.moduleContext);
-        break;
-      }
-      case 'email-templates': {
-        // Dynamically render email-templates tab, then load data
-        const tabContainer = document.getElementById('tab-email-templates');
-        const emailTemplatesModule = await loadEmailTemplatesModule();
-
-        // Render the tab structure dynamically
-        if (tabContainer) {
-          emailTemplatesModule.renderEmailTemplatesTab(tabContainer);
-        }
-
-        // Load email templates data
-        await emailTemplatesModule.loadEmailTemplatesData(this.moduleContext);
-        break;
-      }
+      default:
+        logger.warn(`No handler for tab: ${tabName}`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -2406,7 +2103,7 @@ class AdminDashboard {
         error
       });
 
-      // Show user-friendly error in the tab container (avoid inline onclick for CSP compliance)
+      // Show user-friendly error in the tab container
       const tabContainer = document.getElementById(`tab-${tabName}`);
       if (tabContainer) {
         tabContainer.innerHTML = `
@@ -2438,14 +2135,12 @@ class AdminDashboard {
     }
   }
 
-  private async loadOverviewData(): Promise<void> {
-    // Delegate to overview module for real visitor tracking data
-    const overviewModule = await loadOverviewModule();
-    await overviewModule.loadOverviewData(this.moduleContext);
-
-    // Load real Chart.js charts
-    this.loadChart('visitors-chart', 'visitors');
-    this.loadChart('sources-chart', 'sources');
+  private async loadDashboardDataLegacy(): Promise<void> {
+    // Dashboard React component handles its own data loading
+    const tabContainer = document.getElementById('tab-dashboard');
+    if (tabContainer) {
+      await mountReactModule('dashboard', tabContainer, this.moduleContext);
+    }
   }
 
   private async loadPerformanceData(): Promise<void> {
@@ -2453,11 +2148,13 @@ class AdminDashboard {
       // Initialize the PerformanceDashboard component for admin use
       await this.initializePerformanceDashboard();
 
-      // Delegate to performance module for real metrics
-      const performanceModule = await loadPerformanceModule();
-      await performanceModule.loadPerformanceData(this.moduleContext);
+      // Performance React component handles its own data loading
+      const tabContainer = document.getElementById('tab-performance');
+      if (tabContainer) {
+        await mountReactModule('performance', tabContainer, this.moduleContext);
+      }
     } catch (error) {
-      logger.error(' Error loading performance data:', error);
+      logger.error('Error loading performance data:', error);
     }
   }
 
@@ -2557,9 +2254,11 @@ class AdminDashboard {
   }
 
   private async loadAnalyticsData(): Promise<void> {
-    // Delegate to analytics module for code splitting
-    const analyticsModule = await loadAnalyticsModule();
-    await analyticsModule.loadAnalyticsData(this.moduleContext);
+    // React component handles its own data loading
+    const tabContainer = document.getElementById('tab-analytics');
+    if (tabContainer) {
+      await mountReactModule('analytics', tabContainer, this.moduleContext);
+    }
   }
 
   // NOTE: Analytics helper methods (getAnalyticsData, formatAnalyticsData, formatPageUrl, formatInteractionType)
@@ -2569,17 +2268,11 @@ class AdminDashboard {
   // NOTE: formatProjectType moved to shared format-utils.ts
 
   private async loadSystemData(): Promise<void> {
-    // Dynamically render system status tab, then load data
+    // System status React component handles its own data loading
     const tabContainer = document.getElementById('tab-system');
-    const systemStatusModule = await loadSystemStatusModule();
-
-    // Render the tab structure dynamically
     if (tabContainer) {
-      systemStatusModule.renderSystemStatusTab(tabContainer);
+      await mountReactModule('system', tabContainer, this.moduleContext);
     }
-
-    // Load system data
-    await systemStatusModule.loadSystemData(this.moduleContext);
   }
 
   // NOTE: getApplicationStatus moved to admin-system-status module

@@ -11,6 +11,9 @@
  */
 
 import { useAdminStore } from './admin';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('StateBridge');
 
 // Type for the vanilla app state (will be imported from existing code)
 interface VanillaAppState {
@@ -36,7 +39,7 @@ let isInitialized = false;
  */
 export function initStateBridge(stateManager: VanillaStateManager): void {
   if (isInitialized) {
-    console.warn('[StateBridge] Already initialized');
+    logger.warn('Already initialized');
     return;
   }
 

@@ -76,6 +76,7 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   pdf: { icon: 'file-text', title: 'Download PDF', ariaLabel: 'Download PDF' },
   copy: { icon: 'copy', title: 'Copy', ariaLabel: 'Copy to clipboard' },
   'copy-link': { icon: 'copy', title: 'Copy Link', ariaLabel: 'Copy link to clipboard' },
+  duplicate: { icon: 'copy', title: 'Duplicate', ariaLabel: 'Duplicate' },
 
   // ============================================
   // CONVERT / TRANSFORM

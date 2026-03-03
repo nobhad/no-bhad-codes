@@ -63,7 +63,7 @@
   width: var(--space-1);
   height: var(--space-1);
   background: var(--color-primary);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   z-index: 1;
 }
 
@@ -141,7 +141,7 @@
   min-width: var(--table-col-lg);
   padding: var(--space-3) var(--space-1-5) var(--space-1-5) var(--space-1-5);
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   box-shadow: var(--shadow-dropdown-xl);
   opacity: 0;
   visibility: hidden;
@@ -179,7 +179,7 @@
 .filter-checkbox {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1);
   margin: 0 calc(-1 * var(--space-1));
   cursor: pointer;
@@ -235,7 +235,7 @@
   width: 100%;
   padding: var(--space-1) var(--space-1);
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   height: var(--space-4);
@@ -255,7 +255,7 @@
   width: 100%;
   padding: var(--space-1) var(--space-2);
   background: transparent;
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-muted);
   font-size: var(--font-size-sm);
   cursor: pointer;

@@ -56,7 +56,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         {/* Project Name */}
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">
-            Project Name <span className="tw-text-white">*</span>
+            Project Name <span className="tw-text-primary">*</span>
           </label>
           <div className="tw-relative">
             <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
@@ -67,23 +67,23 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               placeholder="My Awesome Project"
               value={projectOverview.projectName}
               onChange={(e) => handleChange('projectName', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('projectName') && 'tw-border-white')}
+              className={cn('tw-input tw-pl-10', getFieldError('projectName') && 'tw-border-primary')}
             />
           </div>
           {getFieldError('projectName') && (
-            <span className="tw-text-[12px] tw-text-white">{getFieldError('projectName')}</span>
+            <span className="tw-text-[12px] tw-text-primary">{getFieldError('projectName')}</span>
           )}
         </div>
 
         {/* Project Type */}
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">
-            Project Type <span className="tw-text-white">*</span>
+            Project Type <span className="tw-text-primary">*</span>
           </label>
           <select
             value={projectOverview.projectType}
             onChange={(e) => handleChange('projectType', e.target.value)}
-            className={cn('tw-select tw-w-full', getFieldError('projectType') && 'tw-border-white')}
+            className={cn('tw-select tw-w-full', getFieldError('projectType') && 'tw-border-primary')}
           >
             <option value="">Select project type...</option>
             {PROJECT_TYPES.map((type) => (
@@ -93,7 +93,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             ))}
           </select>
           {getFieldError('projectType') && (
-            <span className="tw-text-[12px] tw-text-white">{getFieldError('projectType')}</span>
+            <span className="tw-text-[12px] tw-text-primary">{getFieldError('projectType')}</span>
           )}
         </div>
       </div>
@@ -101,17 +101,17 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       {/* Project Description */}
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
         <label className="tw-field-label">
-          Project Description <span className="tw-text-white">*</span>
+          Project Description <span className="tw-text-primary">*</span>
         </label>
         <textarea
           value={projectOverview.projectDescription}
           onChange={(e) => handleChange('projectDescription', e.target.value)}
           placeholder="Describe your project goals, what you want to achieve, and any specific requirements..."
           rows={4}
-          className={cn('tw-textarea', getFieldError('projectDescription') && 'tw-border-white')}
+          className={cn('tw-textarea', getFieldError('projectDescription') && 'tw-border-primary')}
         />
         {getFieldError('projectDescription') && (
-          <span className="tw-text-[12px] tw-text-white">{getFieldError('projectDescription')}</span>
+          <span className="tw-text-[12px] tw-text-primary">{getFieldError('projectDescription')}</span>
         )}
       </div>
 

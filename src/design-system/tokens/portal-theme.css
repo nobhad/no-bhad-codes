@@ -47,8 +47,7 @@
    * BORDER SYSTEM
    * ---------------------------------------- */
   --portal-border-color: #ffffff;
-  --portal-border-width: 1px;
-  --portal-border: var(--portal-border-width) solid var(--portal-border-color);
+  --portal-border: var(--border-width) solid var(--portal-border-color);
   --portal-border-subtle: rgba(255, 255, 255, 0.08);
 
   /* Border aliases for backwards compatibility */
@@ -82,6 +81,17 @@
   --portal-alpha-black-70: rgba(0, 0, 0, 0.7);
   --portal-alpha-black-80: rgba(0, 0, 0, 0.8);
 
+  /* Semantic color alphas - for colored highlights/backgrounds */
+  --portal-alpha-primary-08: rgba(var(--color-primary-rgb), 0.08);
+  --portal-alpha-primary-10: rgba(var(--color-primary-rgb), 0.1);
+  --portal-alpha-primary-20: rgba(var(--color-primary-rgb), 0.2);
+  --portal-alpha-primary-25: rgba(var(--color-primary-rgb), 0.25);
+  --portal-alpha-success-10: rgba(var(--color-success-rgb), 0.1);
+  --portal-alpha-success-15: rgba(var(--color-success-rgb), 0.15);
+  --portal-alpha-success-25: rgba(var(--color-success-rgb), 0.25);
+  --portal-alpha-warning-10: rgba(var(--color-warning-rgb), 0.1);
+  --portal-alpha-danger-10: rgba(var(--color-danger-rgb), 0.1);
+
   /* ----------------------------------------
    * BORDER RADIUS - BRUTALIST (sharp corners)
    * ---------------------------------------- */
@@ -93,6 +103,24 @@
   --portal-radius-xl: 0;
   --portal-radius-pill: 0;
   --portal-radius-full: 50%; /* Exception for circular avatars/indicators */
+
+  /* ----------------------------------------
+   * HOVER STATE COLORS - SEMANTIC CONTRAST
+   * Dark bg = light text/icons
+   * Light bg = dark text/icons
+   * ---------------------------------------- */
+  --hover-bg-color: var(--portal-text-light);        /* White bg on hover */
+  --hover-text-color: var(--portal-bg-pitch);        /* Black text on hover */
+  --hover-icon-color: var(--portal-bg-pitch);        /* Black icons on hover */
+  --hover-border-color: var(--portal-text-light);    /* White border on hover */
+
+  /* ----------------------------------------
+   * FOCUS STATE COLORS
+   * ---------------------------------------- */
+  --focus-ring-color: var(--color-primary);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 0px;
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--portal-alpha-primary-25);
 
   /* ----------------------------------------
    * BUTTON COLORS
@@ -110,6 +138,7 @@
    * LAYOUT TOKENS
    * See: src/design-system/tokens/spacing.css
    * ---------------------------------------- */
+  --portal-section-gap: 24px;  /* Gap between sections (tables, cards, panels) */
 
   /* ----------------------------------------
    * FIELD/LABEL SPACING
@@ -125,6 +154,17 @@
   --label-font-weight: 500;
   --label-text-transform: uppercase;
   --label-letter-spacing: 0.05em;
+
+  /* ----------------------------------------
+   * SUBTAB FONT STYLING - ROOT LEVEL
+   * Single source for all subtab buttons
+   * MUST match h3 heading size for consistency
+   * ---------------------------------------- */
+  --subtab-font-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
+  --subtab-font-size: var(--font-size-base);  /* 16px - matches h3 */
+  --subtab-font-weight: 500;
+  --subtab-text-transform: uppercase;
+  --subtab-letter-spacing: 0.05em;
 
   /* ----------------------------------------
    * DASHBOARD LAYOUT TOKENS
@@ -204,6 +244,22 @@ html[data-theme="light"] body[data-page="client-portal"] {
    * ---------------------------------------- */
   --portal-border-color: #000000;
   --portal-border-subtle: rgba(0, 0, 0, 0.08);
+
+  /* ----------------------------------------
+   * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)
+   * Light bg = dark text/icons
+   * ---------------------------------------- */
+  --hover-bg-color: var(--portal-text-light);        /* Black bg on hover */
+  --hover-text-color: var(--portal-bg-pitch);        /* White text on hover */
+  --hover-icon-color: var(--portal-bg-pitch);        /* White icons on hover */
+  --hover-border-color: var(--portal-text-light);    /* Black border on hover */
+
+  /* ----------------------------------------
+   * FOCUS STATE COLORS (Light Mode)
+   * ---------------------------------------- */
+  --focus-ring-color: var(--color-primary);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 0px;
 
   /* ----------------------------------------
    * BUTTON COLORS (Light Mode)

@@ -129,12 +129,10 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
   if (activities.length === 0) {
     return (
-      <div className="tw-empty-state">
-        <Clock className="tw-h-12 tw-w-12 tw-mb-3" />
-        <p>No activity yet</p>
-        <p className="proj-text-base">
-          Activity will appear here as you interact with this client
-        </p>
+      <div className="empty-state">
+        <Clock className="icon-xl" />
+        <span>No activity yet</span>
+        <span className="tw-text-sm">Activity will appear here as you interact with this client</span>
       </div>
     );
   }
@@ -143,10 +141,10 @@ export function ActivityTab({ activities }: ActivityTabProps) {
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading proj-text-lg">
+        <h2 className="tw-heading tw-text-lg">
           Activity Log
         </h2>
-        <span className="tw-text-muted proj-text-base">
+        <span className="tw-text-muted ">
           {activities.length} {activities.length === 1 ? 'event' : 'events'}
         </span>
       </div>
@@ -157,7 +155,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
           <div key={group.date}>
             {/* Date Header */}
             <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-              <span className="tw-heading proj-text-base">
+              <span className="tw-heading ">
                 {group.label}
               </span>
               <div className="tw-flex-1 tw-h-px activity-divider-line" />
@@ -180,7 +178,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                       <div
                         className="tw-absolute tw--left-5 tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-border tw-border-[var(--portal-border-color)] activity-timeline-dot"
                       >
-                        <Icon className={cn('tw-h-3.5 tw-w-3.5', iconColor)} />
+                        <Icon className={cn('icon-sm', iconColor)} />
                       </div>
 
                       {/* Activity content */}
@@ -192,18 +190,18 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                       >
                         <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
                           <div className="tw-flex-1">
-                            <h4 className="tw-heading proj-text-base">
+                            <h4 className="tw-heading ">
                               {activity.title}
                             </h4>
                             {activity.description && (
-                              <p className="tw-text-muted tw-mt-1 proj-text-sm">
+                              <p className="tw-text-muted tw-mt-1 tw-text-sm">
                                 {activity.description}
                               </p>
                             )}
                           </div>
 
                           <span
-                            className="tw-text-muted tw-whitespace-nowrap proj-text-sm"
+                            className="tw-text-muted tw-whitespace-nowrap tw-text-sm"
                             title={formatFullDate(activity.created_at)}
                           >
                             {formatRelativeTime(activity.created_at)}
@@ -214,7 +212,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                         {(activity.created_by || activity.metadata) && (
                           <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2 activity-border-top">
                             {activity.created_by && (
-                              <span className="tw-text-muted proj-text-sm">
+                              <span className="tw-text-muted tw-text-sm">
                                 by {activity.created_by}
                               </span>
                             )}
@@ -222,7 +220,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                               Object.entries(activity.metadata).map(([key, value]) => (
                                 <span
                                   key={key}
-                                  className="tw-text-muted proj-text-sm"
+                                  className="tw-text-muted tw-text-sm"
                                 >
                                   {key}: {String(value)}
                                 </span>

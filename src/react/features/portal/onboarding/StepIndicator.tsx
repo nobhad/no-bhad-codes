@@ -57,8 +57,8 @@ export function StepIndicator({
                 'tw-w-7 tw-h-7',
                 'tw-text-[14px] tw-font-mono',
                 'tw-transition-all tw-duration-200',
-                'tw-border tw-border-white',
-                'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white focus:tw-ring-offset-2 focus:tw-ring-offset-black',
+                'tw-border tw-border-primary',
+                'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary focus:tw-ring-offset-2 focus:tw-ring-offset-black',
                 isCompleted && [
                   'tw-bg-white',
                   'tw-text-black',
@@ -94,7 +94,7 @@ export function StepIndicator({
                 className={cn(
                   'tw-w-8 tw-h-[1px] tw-transition-colors tw-duration-200',
                   index < currentIndex || isStepCompleted(steps[index + 1]?.id)
-                    ? 'tw-bg-white'
+                    ? 'tw-bg-primary'
                     : 'tw-bg-[var(--portal-border-subtle)]'
                 )}
               />
@@ -159,8 +159,8 @@ export function StepIndicatorDetailed({
                     'tw-w-8 tw-h-8',
                     'tw-text-[14px] tw-font-mono',
                     'tw-transition-all tw-duration-200',
-                    'tw-border tw-border-white',
-                    'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white focus:tw-ring-offset-2 focus:tw-ring-offset-black',
+                    'tw-border tw-border-primary',
+                    'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary focus:tw-ring-offset-2 focus:tw-ring-offset-black',
                     isCompleted && [
                       'tw-bg-white',
                       'tw-text-black',
@@ -195,7 +195,7 @@ export function StepIndicatorDetailed({
                     className={cn(
                       'tw-flex-1 tw-h-[1px] tw-mx-2 tw-transition-colors tw-duration-200',
                       index < currentIndex
-                        ? 'tw-bg-white'
+                        ? 'tw-bg-primary'
                         : 'tw-bg-[var(--portal-border-subtle)]'
                     )}
                   />
@@ -207,7 +207,7 @@ export function StepIndicatorDetailed({
                 className={cn(
                   'tw-mt-2 tw-text-[11px] tw-text-center tw-max-w-[80px] tw-leading-tight tw-font-mono',
                   isCurrent
-                    ? 'tw-text-white tw-font-bold'
+                    ? 'tw-text-primary tw-font-bold'
                     : 'tw-text-[var(--portal-text-muted)]'
                 )}
               >

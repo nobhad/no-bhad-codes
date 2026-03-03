@@ -8,6 +8,9 @@ import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Pencil, Loader2, Check, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { createLogger } from '../../../utils/logger';
+
+const logger = createLogger('InlineEditField');
 
 export interface InlineEditFieldProps {
   /** Field label */
@@ -125,7 +128,7 @@ export function InlineEditField({
         setError('Failed to save');
       }
     } catch (err) {
-      console.error('[InlineEditField] Save error:', err);
+      logger.error('[InlineEditField] Save error:', err);
       setError('Failed to save');
     } finally {
       setIsSaving(false);
@@ -319,7 +322,7 @@ export function InlineEditSelect({
         setIsEditing(false);
       }
     } catch (err) {
-      console.error('[InlineEditSelect] Save error:', err);
+      logger.error('[InlineEditSelect] Save error:', err);
     } finally {
       setIsSaving(false);
     }

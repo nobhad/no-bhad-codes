@@ -87,7 +87,7 @@ export function AdHocRequestCard({
                 {request.title}
               </h3>
               {hasAttachments && (
-                <Paperclip className="tw-h-3 tw-w-3 tw-text-muted tw-shrink-0" />
+                <Paperclip className="tw-h-3 tw-w-3 tw-shrink-0" />
               )}
             </div>
             <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
@@ -114,7 +114,7 @@ export function AdHocRequestCard({
             )}
             <button
               type="button"
-              className="tw-btn-icon"
+              className="btn-icon"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
@@ -131,7 +131,7 @@ export function AdHocRequestCard({
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="tw-divider tw-flex tw-flex-col tw-gap-3 tw-mt-3 tw-pt-3">
+          <div className="tw-section tw-border-t tw-border-[var(--portal-border-color)] tw-mt-3 tw-pt-3">
             {/* Description */}
             <div>
               <label className="tw-label">Description</label>
@@ -143,7 +143,7 @@ export function AdHocRequestCard({
             {/* Project */}
             {request.project_name && (
               <div className="tw-flex tw-items-center tw-gap-2">
-                <FileText className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
+                <FileText className="tw-h-3.5 tw-w-3.5" />
                 <span className="tw-text-secondary tw-text-xs">
                   Project: {request.project_name}
                 </span>
@@ -161,7 +161,7 @@ export function AdHocRequestCard({
                       className="tw-list-item tw-justify-between"
                     >
                       <div className="tw-flex tw-items-center tw-gap-2 card-content-truncate">
-                        <Paperclip className="tw-h-3 tw-w-3 tw-text-muted tw-shrink-0" />
+                        <Paperclip className="tw-h-3 tw-w-3 tw-shrink-0" />
                         <span className="tw-text-primary tw-text-xs">
                           {attachment.filename}
                         </span>
@@ -173,7 +173,7 @@ export function AdHocRequestCard({
                         <a
                           href={attachment.download_url}
                           download={attachment.filename}
-                          className="tw-btn-icon"
+                          className="btn-icon"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Download className="tw-h-3 tw-w-3" />
@@ -194,7 +194,7 @@ export function AdHocRequestCard({
                   {request.quote!.hours_estimated > 0 && (
                     <div className="tw-flex tw-items-center tw-justify-between">
                       <div className="tw-flex tw-items-center tw-gap-2">
-                        <Clock className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
+                        <Clock className="tw-h-3.5 tw-w-3.5" />
                         <span className="tw-text-secondary tw-text-xs">
                           Estimated Hours
                         </span>
@@ -209,7 +209,7 @@ export function AdHocRequestCard({
                   {request.quote!.flat_fee && request.quote!.flat_fee > 0 && (
                     <div className="tw-flex tw-items-center tw-justify-between">
                       <div className="tw-flex tw-items-center tw-gap-2">
-                        <DollarSign className="tw-h-3.5 tw-w-3.5 tw-text-muted" />
+                        <DollarSign className="tw-h-3.5 tw-w-3.5" />
                         <span className="tw-text-secondary tw-text-xs">
                           Flat Fee
                         </span>
@@ -221,7 +221,7 @@ export function AdHocRequestCard({
                   )}
 
                   {/* Total */}
-                  <div className="tw-divider tw-flex tw-items-center tw-justify-between tw-pt-2 tw-mt-2">
+                  <div className="tw-flex tw-items-center tw-justify-between tw-pt-2 tw-mt-2 tw-border-t tw-border-[var(--portal-border-color)]">
                     <span className="tw-text-primary tw-text-xs tw-font-semibold">
                       Total
                     </span>
@@ -254,7 +254,7 @@ export function AdHocRequestCard({
             {canRespond && (
               <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-2">
                 <button
-                  className="tw-btn-secondary tw-flex tw-items-center tw-gap-1.5"
+                  className="btn-secondary tw-flex tw-items-center tw-gap-1.5"
                   onClick={() => setShowDeclineDialog(true)}
                   disabled={disabled || isLoading}
                 >
@@ -262,7 +262,7 @@ export function AdHocRequestCard({
                   Decline
                 </button>
                 <button
-                  className="tw-btn-primary tw-flex tw-items-center tw-gap-1.5"
+                  className="btn-primary tw-flex tw-items-center tw-gap-1.5"
                   onClick={() => setShowApproveDialog(true)}
                   disabled={disabled || isLoading}
                 >
@@ -290,14 +290,14 @@ export function AdHocRequestCard({
             </p>
             <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-4">
               <button
-                className="tw-btn-secondary"
+                className="btn-secondary"
                 onClick={() => setShowApproveDialog(false)}
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
-                className="tw-btn-primary tw-flex tw-items-center tw-gap-1.5"
+                className="btn-primary tw-flex tw-items-center tw-gap-1.5"
                 onClick={handleApprove}
                 disabled={isLoading}
               >
@@ -324,14 +324,14 @@ export function AdHocRequestCard({
             </p>
             <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-4">
               <button
-                className="tw-btn-secondary"
+                className="btn-secondary"
                 onClick={() => setShowDeclineDialog(false)}
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
-                className="tw-btn-danger tw-flex tw-items-center tw-gap-1.5"
+                className="btn-danger tw-flex tw-items-center tw-gap-1.5"
                 onClick={handleDecline}
                 disabled={isLoading}
               >

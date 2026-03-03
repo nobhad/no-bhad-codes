@@ -13,6 +13,7 @@
  */
 
 import { Response } from 'express';
+import { transformData } from '../database/row-helpers.js';
 
 // ============================================
 // TYPES & INTERFACES
@@ -91,6 +92,9 @@ export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
 
 /**
  * Send a success response with data wrapped in `data` property
+ * Automatically transforms data:
+ * - Converts SQLite 0/1 to boolean for known boolean fields
+ * - Parses JSON strings for known JSON fields
  * @example sendSuccess(res, { user: {...} }, 'User created')
  */
 export function sendSuccess<T>(
@@ -108,7 +112,8 @@ export function sendSuccess<T>(
   }
 
   if (data !== undefined) {
-    response.data = data;
+    // Transform data to convert 0/1 to booleans and parse JSON fields
+    response.data = transformData(data);
   }
 
   return res.status(statusCode).json(response);
@@ -299,6 +304,9 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T[]> {
 
 /**
  * Send a paginated response
+ * Automatically transforms data:
+ * - Converts SQLite 0/1 to boolean for known boolean fields
+ * - Parses JSON strings for known JSON fields
  * @example sendPaginated(res, users, { page: 1, perPage: 10, total: 100 })
  */
 export function sendPaginated<T>(
@@ -315,7 +323,8 @@ export function sendPaginated<T>(
 
   const response: PaginatedApiResponse<T> = {
     success: true,
-    data,
+    // Transform data to convert 0/1 to booleans and parse JSON fields
+    data: transformData(data),
     pagination: {
       page: pagination.page,
       perPage: pagination.perPage,

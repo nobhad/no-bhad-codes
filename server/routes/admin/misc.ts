@@ -7,6 +7,23 @@ import { errorResponse, errorResponseWithPayload } from '../../utils/api-respons
 import { getDatabase } from '../../database/init.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const CLIENT_CONTACT_COLUMNS = `
+  id, client_id, first_name, last_name, email, phone, title, department,
+  role, is_primary, notes, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
+const PROJECT_TASK_COLUMNS = `
+  id, project_id, milestone_id, title, description, status, priority, assigned_to,
+  due_date, estimated_hours, actual_hours, sort_order, parent_task_id,
+  created_at, updated_at, completed_at
+`.replace(/\s+/g, ' ').trim();
+
+const FILE_COLUMNS = `
+  id, project_id, filename, original_filename, file_path, file_size, mime_type,
+  file_type, description, uploaded_by, created_at, folder_id, category
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 /**
@@ -517,7 +534,7 @@ router.patch(
     );
 
     const updatedContact = await db.get(
-      'SELECT * FROM client_contacts WHERE id = ?',
+      `SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
       [contactId]
     );
 
@@ -650,7 +667,7 @@ router.put(
       values
     );
 
-    const updatedTask = await db.get('SELECT * FROM project_tasks WHERE id = ?', [taskId]);
+    const updatedTask = await db.get(`SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`, [taskId]);
 
     res.json({ success: true, task: updatedTask });
   })
@@ -684,9 +701,15 @@ router.get(
         f.uploaded_by as uploadedBy,
         f.project_id as projectId,
         f.created_at as createdAt,
-        p.project_name as projectName
+        f.shared_with_client as sharedWithClient,
+        f.shared_at as sharedAt,
+        f.shared_by as sharedBy,
+        p.project_name as projectName,
+        p.client_id as clientId,
+        c.company_name as clientName
       FROM files f
       LEFT JOIN projects p ON f.project_id = p.id
+      LEFT JOIN clients c ON p.client_id = c.id
       WHERE 1=1
     `;
     const params: (string | number)[] = [];
@@ -730,7 +753,7 @@ router.delete(
     const db = getDatabase();
 
     // Check if file exists
-    const file = await db.get('SELECT * FROM files WHERE id = ?', [fileId]);
+    const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ?`, [fileId]);
     if (!file) {
       return errorResponse(res, 'File not found', 404, 'NOT_FOUND');
     }
@@ -885,8 +908,9 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const db = getDatabase();
-    const { range = '30d' } = req.query;
+    try {
+      const db = getDatabase();
+      const { range = '30d' } = req.query;
 
     // Calculate date ranges for current and previous periods
     let daysBack = 30;
@@ -904,18 +928,18 @@ router.get(
     const previousStartStr = previousStart.toISOString().split('T')[0];
     const nowStr = now.toISOString().split('T')[0];
 
-    // Get current period revenue
+    // Get current period revenue (use updated_at as fallback for paid_date)
     const currentRevenue = await db.get(`
-      SELECT COALESCE(SUM(total), 0) as value
+      SELECT COALESCE(SUM(amount_total), 0) as value
       FROM invoices
-      WHERE status = 'paid' AND DATE(paid_at) >= ? AND DATE(paid_at) <= ?
+      WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ? AND DATE(COALESCE(paid_date, updated_at)) <= ?
     `, [currentStartStr, nowStr]);
 
     // Get previous period revenue
     const previousRevenue = await db.get(`
-      SELECT COALESCE(SUM(total), 0) as value
+      SELECT COALESCE(SUM(amount_total), 0) as value
       FROM invoices
-      WHERE status = 'paid' AND DATE(paid_at) >= ? AND DATE(paid_at) < ?
+      WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ? AND DATE(COALESCE(paid_date, updated_at)) < ?
     `, [previousStartStr, currentStartStr]);
 
     // Get current period clients
@@ -955,36 +979,37 @@ router.get(
       WHERE DATE(created_at) >= ? AND DATE(created_at) < ?
     `, [previousStartStr, currentStartStr]);
 
-    // Get conversion rate (leads converted to clients)
+    // Get conversion rate (leads converted to active projects)
     const leadsStats = await db.get(`
       SELECT
         COUNT(*) as total,
-        SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
-      FROM contact_submissions
+        COALESCE(SUM(CASE WHEN status IN ('active', 'in-progress', 'in_progress', 'completed') THEN 1 ELSE 0 END), 0) as converted
+      FROM projects
+      WHERE deleted_at IS NULL
     `);
     const leadsStatsPrevious = await db.get(`
       SELECT
         COUNT(*) as total,
-        SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted
-      FROM contact_submissions
-      WHERE DATE(created_at) < ?
+        COALESCE(SUM(CASE WHEN status IN ('active', 'in-progress', 'in_progress', 'completed') THEN 1 ELSE 0 END), 0) as converted
+      FROM projects
+      WHERE deleted_at IS NULL AND DATE(created_at) < ?
     `, [currentStartStr]);
 
-    const currentConversionRate = leadsStats?.total > 0
-      ? Math.round((leadsStats.converted / leadsStats.total) * 100)
+    const currentConversionRate = (leadsStats?.total || 0) > 0
+      ? Math.round(((leadsStats?.converted || 0) / leadsStats.total) * 100)
       : 0;
-    const previousConversionRate = leadsStatsPrevious?.total > 0
-      ? Math.round((leadsStatsPrevious.converted / leadsStatsPrevious.total) * 100)
+    const previousConversionRate = (leadsStatsPrevious?.total || 0) > 0
+      ? Math.round(((leadsStatsPrevious?.converted || 0) / leadsStatsPrevious.total) * 100)
       : 0;
 
-    // Get average project value
+    // Get average project value (use expected_value column)
     const avgProjectValue = await db.get(`
-      SELECT COALESCE(AVG(budget), 0) as value
-      FROM projects WHERE deleted_at IS NULL AND budget > 0
+      SELECT COALESCE(AVG(expected_value), 0) as value
+      FROM projects WHERE deleted_at IS NULL AND expected_value > 0
     `);
     const avgProjectValuePrevious = await db.get(`
-      SELECT COALESCE(AVG(budget), 0) as value
-      FROM projects WHERE deleted_at IS NULL AND budget > 0 AND DATE(created_at) < ?
+      SELECT COALESCE(AVG(expected_value), 0) as value
+      FROM projects WHERE deleted_at IS NULL AND expected_value > 0 AND DATE(created_at) < ?
     `, [currentStartStr]);
 
     // Calculate percentage changes
@@ -996,11 +1021,11 @@ router.get(
     // Revenue chart data (by month or day depending on range)
     const revenueChartData = await db.all(`
       SELECT
-        strftime('%Y-%m-%d', paid_at) as date,
-        SUM(total) as revenue
+        strftime('%Y-%m-%d', COALESCE(paid_date, updated_at)) as date,
+        SUM(amount_total) as revenue
       FROM invoices
-      WHERE status = 'paid' AND DATE(paid_at) >= ?
-      GROUP BY strftime('%Y-%m-%d', paid_at)
+      WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ?
+      GROUP BY strftime('%Y-%m-%d', COALESCE(paid_date, updated_at))
       ORDER BY date ASC
     `, [currentStartStr]);
 
@@ -1011,31 +1036,29 @@ router.get(
       GROUP BY status
     `);
 
-    // Lead funnel data
+    // Lead funnel data - use project statuses directly
     const leadFunnelData = await db.all(`
       SELECT status, COUNT(*) as count
-      FROM contact_submissions
+      FROM projects
+      WHERE deleted_at IS NULL
       GROUP BY status
       ORDER BY
         CASE status
-          WHEN 'new' THEN 1
-          WHEN 'contacted' THEN 2
-          WHEN 'qualified' THEN 3
-          WHEN 'proposal_sent' THEN 4
-          WHEN 'converted' THEN 5
-          WHEN 'lost' THEN 6
-          ELSE 7
+          WHEN 'pending' THEN 1
+          WHEN 'active' THEN 2
+          WHEN 'in_progress' THEN 3
+          WHEN 'in-progress' THEN 3
+          WHEN 'completed' THEN 4
+          WHEN 'cancelled' THEN 5
+          ELSE 6
         END
     `);
 
-    // Source breakdown
+    // Source breakdown - simplified query
     const sourceBreakdownData = await db.all(`
-      SELECT
-        COALESCE(source, 'Direct') as source,
-        COUNT(*) as count
-      FROM contact_submissions
-      GROUP BY source
-      ORDER BY count DESC
+      SELECT 'Direct' as source, COUNT(*) as count
+      FROM projects
+      WHERE deleted_at IS NULL
     `);
 
     const totalLeads = sourceBreakdownData.reduce((sum: number, s: { count: number }) => sum + s.count, 0);
@@ -1105,6 +1128,10 @@ router.get(
       leadsChart,
       sourceBreakdown
     });
+    } catch (error) {
+      console.error('[Analytics Error]', error);
+      return errorResponse(res, 'Failed to load analytics data', 500, 'ANALYTICS_ERROR');
+    }
   })
 );
 

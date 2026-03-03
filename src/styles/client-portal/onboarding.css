@@ -59,9 +59,9 @@
 .onboarding-step-indicator {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   opacity: 0.5;
   transition:
     opacity var(--transition-medium),
@@ -87,17 +87,17 @@
 .onboarding-step-number {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  border: 1px solid var(--portal-border-color);
+  border-radius: var(--portal-radius-full);
+  border: var(--border-width) solid var(--portal-border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 }
 
 .onboarding-step-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .onboarding-step-description {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--portal-text-muted);
   margin: 0 0 var(--space-3);
 }
@@ -168,7 +168,7 @@
 }
 
 .onboarding-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--portal-text-light);
 }
@@ -183,10 +183,10 @@
 .onboarding-textarea {
   width: 100%;
   padding: var(--space-2);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   background: transparent;
   color: var(--portal-text-light);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   font-family: inherit;
   transition: border-color var(--transition-fast);
 }
@@ -230,9 +230,9 @@
 .onboarding-checkbox-label {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-2);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   cursor: pointer;
   transition: border-color var(--transition-fast);
 }
@@ -253,7 +253,7 @@
 }
 
 .onboarding-checkbox-text {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--portal-text-light);
 }
 
@@ -274,7 +274,7 @@
 }
 
 .onboarding-asset-card {
-  border: 2px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-3);
   text-align: center;
   cursor: pointer;
@@ -304,14 +304,14 @@
 }
 
 .onboarding-asset-title {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--portal-text-light);
   margin: 0 0 var(--space-0-5);
 }
 
 .onboarding-asset-status {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
 }
 
@@ -330,12 +330,12 @@
 }
 
 .onboarding-review-section {
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-3);
 }
 
 .onboarding-review-section-title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -354,7 +354,7 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 .onboarding-review-item:last-child {
@@ -362,12 +362,12 @@
 }
 
 .onboarding-review-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
 }
 
 .onboarding-review-value {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--portal-text-light);
   font-weight: 500;
   text-align: right;
@@ -387,10 +387,10 @@
 }
 
 .onboarding-review-tag {
-  border: 1px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   color: var(--color-primary);
   padding: var(--space-0-5) var(--space-2);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
@@ -400,7 +400,7 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: 2px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   cursor: pointer;
   transition: border-color var(--transition-fast);
 }
@@ -422,7 +422,7 @@
 }
 
 .onboarding-confirm-text {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   color: var(--portal-text-light);
   line-height: 1.5;
 }
@@ -437,7 +437,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) 0 0;
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
   margin-top: var(--space-3);
 }
 
@@ -448,7 +448,7 @@
 
 .onboarding-btn {
   padding: var(--space-2) var(--space-4);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -457,7 +457,7 @@
     transform var(--transition-fast);
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
 }
 
 .onboarding-btn:active {
@@ -466,7 +466,7 @@
 
 .onboarding-btn-secondary {
   background: transparent;
-  border: 2px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-light);
 }
 
@@ -476,7 +476,7 @@
 
 .onboarding-btn-primary {
   background: var(--color-primary);
-  border: 2px solid var(--color-primary);
+  border: var(--border-width) solid var(--color-primary);
   color: var(--portal-text-light);
 }
 
@@ -486,7 +486,7 @@
 
 .onboarding-btn-success {
   background: var(--color-success);
-  border: 2px solid var(--color-success);
+  border: var(--border-width) solid var(--color-success);
   color: var(--portal-text-light);
 }
 
@@ -519,9 +519,9 @@
 .onboarding-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--portal-border-color);
+  border: var(--border-width-thick) solid var(--portal-border-color);
   border-top-color: var(--color-primary);
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   animation: spin 0.8s linear infinite;
 }
 

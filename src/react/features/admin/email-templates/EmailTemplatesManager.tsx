@@ -1,15 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   Mail,
-  Eye,
-  Edit,
-  Copy,
-  Trash2,
-  MoreHorizontal,
   Inbox,
-  Send,
   Tag,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
@@ -17,6 +10,7 @@ import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDate } from '@react/utils/formatDate';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge } from '@react/components/portal/StatusBadge';
 import {
@@ -28,16 +22,12 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem,
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface TemplateVariable {
   name: string;
@@ -74,10 +64,12 @@ interface EmailTemplatesManagerProps {
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Default page size for pagination (10 for overview, 25 for individual tabs) */
+  defaultPageSize?: number;
 }
 
 
-export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotification }: EmailTemplatesManagerProps) {
+export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25 }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,7 +100,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/email-templates', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -169,7 +161,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
     return result;
   }, [templates, searchQuery, categoryFilter, statusFilter, sort]);
 
-  const pagination = usePagination({ totalItems: filteredTemplates.length });
+  const pagination = usePagination({ totalItems: filteredTemplates.length, defaultPageSize });
   const paginatedTemplates = filteredTemplates.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -227,16 +219,6 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
           <IconButton action="add" title="New Template" />
         </>
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadTemplates}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredTemplates.length > 0 ? (
           <TablePagination
@@ -255,7 +237,6 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -281,8 +262,10 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={6} message={error} onRetry={loadTemplates} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={6} rows={5} />
           ) : paginatedTemplates.length === 0 ? (
             <AdminTableEmpty
@@ -297,7 +280,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                   <div className="cell-with-icon">
                     <Mail className="cell-icon" />
                     <div className="cell-content">
-                      <span className="cell-title">{template.name}</span>
+                      <span className="cell-title">{decodeHtmlEntities(template.name)}</span>
                       {template.variables.length > 0 && (
                         <span className="cell-subtitle">
                           {template.variables.length} variables
@@ -307,7 +290,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                   </div>
                 </AdminTableCell>
                 <AdminTableCell>
-                  <span className="cell-truncate">{template.subject}</span>
+                  <span className="cell-truncate">{decodeHtmlEntities(template.subject)}</span>
                 </AdminTableCell>
                 <AdminTableCell>
                   <div className="cell-with-icon">
@@ -323,35 +306,11 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                 <AdminTableCell className="date-cell">{formatDate(template.updated_at)}</AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        <PortalDropdownItem>
-                          <Eye className="dropdown-icon" />
-                          Preview
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <Edit className="dropdown-icon" />
-                          Edit
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <Send className="dropdown-icon" />
-                          Send Test
-                        </PortalDropdownItem>
-                        <PortalDropdownItem>
-                          <Copy className="dropdown-icon" />
-                          Duplicate
-                        </PortalDropdownItem>
-                        <PortalDropdownItem className="text-danger">
-                          <Trash2 className="dropdown-icon" />
-                          Delete
-                        </PortalDropdownItem>
-                      </PortalDropdownContent>
-                    </PortalDropdown>
+                    <IconButton action="preview" title="Preview" />
+                    <IconButton action="edit" title="Edit" />
+                    <IconButton action="test" title="Send Test" />
+                    <IconButton action="duplicate" title="Duplicate" />
+                    <IconButton action="delete" title="Delete" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>
@@ -359,7 +318,6 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

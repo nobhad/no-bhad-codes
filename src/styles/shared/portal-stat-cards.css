@@ -121,8 +121,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 1em;  /* Matches adjacent text size */
+  height: 1em;
   color: var(--portal-text-light);
   flex-shrink: 0;
 }
@@ -162,7 +162,7 @@
    ===================================================== */
 
 .portal :is(.stat-card, .tw-stat-card) :is(.stat-secondary, .stat-change, .stat-meta) {
-  font-size: 0.7rem;
+  font-size: var(--font-size-2xs);  /* 10px */
   color: var(--portal-text-muted);
   letter-spacing: 0.02em;
   margin: 0;
@@ -244,7 +244,7 @@
 
 .tw-stat-card {
   background: transparent;
-  border: 1px solid var(--portal-alpha-white-20);
+  border: var(--border-width) solid var(--portal-alpha-white-20);
   padding: var(--space-2, 1rem);
   display: flex;
   flex-direction: column;

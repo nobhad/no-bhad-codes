@@ -34,6 +34,9 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { FileUploadDropzone } from './FileUploadDropzone';
+import { createLogger } from '../../../../utils/logger';
+
+const logger = createLogger('PortalFilesManager');
 
 // ============================================================================
 // TYPES
@@ -267,7 +270,7 @@ function FiltersBar({
 }: FiltersBarProps) {
   return (
     <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
-      <Filter className="tw-h-4 tw-w-4 tw-text-muted" />
+      <Filter className="tw-h-4 tw-w-4" />
 
       {/* Project filter */}
       <select
@@ -297,7 +300,7 @@ function FiltersBar({
 
       {/* Clear filters */}
       {hasActiveFilters && (
-        <button className="tw-btn-ghost" onClick={onClearFilters}>
+        <button className="btn-ghost" onClick={onClearFilters}>
           <X className="tw-h-3 tw-w-3" />
           Clear
         </button>
@@ -436,7 +439,7 @@ export function PortalFilesManager({
       if (err instanceof Error && err.name === 'AbortError') {
         return;
       }
-      console.error('[PortalFilesManager] Error fetching files:', err);
+      logger.error('[PortalFilesManager] Error fetching files:', err);
       setError(err instanceof Error ? err.message : 'Failed to load files');
     } finally {
       setIsLoading(false);
@@ -477,7 +480,7 @@ export function PortalFilesManager({
         // Refresh file list
         await fetchFiles();
       } catch (err) {
-        console.error('[PortalFilesManager] Upload error:', err);
+        logger.error('[PortalFilesManager] Upload error:', err);
         showNotification?.(err instanceof Error ? err.message : 'Upload failed', 'error');
         throw err;
       } finally {
@@ -533,7 +536,7 @@ export function PortalFilesManager({
       setFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
       showNotification?.('File deleted successfully', 'success');
     } catch (err) {
-      console.error('[PortalFilesManager] Delete error:', err);
+      logger.error('[PortalFilesManager] Delete error:', err);
       showNotification?.(err instanceof Error ? err.message : 'Failed to delete file', 'error');
     }
 
@@ -552,7 +555,7 @@ export function PortalFilesManager({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading files...</span>
       </div>
@@ -562,9 +565,9 @@ export function PortalFilesManager({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={fetchFiles}>
+        <button className="btn-secondary" onClick={fetchFiles}>
           Retry
         </button>
       </div>
@@ -731,7 +734,7 @@ export function PortalFilesManager({
               <span className="tw-text-muted">{pagination.pageInfo}</span>
               <div className="tw-flex tw-items-center tw-gap-1">
                 <button
-                  className="tw-btn-ghost"
+                  className="btn-ghost"
                   onClick={pagination.prevPage}
                   disabled={!pagination.canGoPrev}
                 >
@@ -741,7 +744,7 @@ export function PortalFilesManager({
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
                 <button
-                  className="tw-btn-ghost"
+                  className="btn-ghost"
                   onClick={pagination.nextPage}
                   disabled={!pagination.canGoNext}
                 >

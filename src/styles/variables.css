@@ -115,6 +115,14 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --font-size-2xl: 1.5rem; /* 24px - page titles */
   --font-size-3xl: 2rem; /* 32px - hero text */
 
+  /* Border Width - DISCOTHÈQUE uses 2px borders consistently */
+  --border-width: 2px;
+  --border-width-thick: 3px;   /* For focus states, emphasized borders */
+  --border-width-heavy: 4px;   /* For strong visual emphasis */
+
+  /* SVG Stroke Width - matches border thickness for visual consistency */
+  --svg-stroke-width: 2.5;
+
   /* Icon Sizes - standardized icon dimensions */
   --icon-size-xs: 12px;
   --icon-size-sm: 14px;
@@ -123,12 +131,33 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --icon-size-xl: 24px;
   --icon-size-2xl: 32px;
 
+  /* Icon-Text Size Matching - icons in same row as text MUST match text size */
+  --icon-text-size: var(--font-size-sm); /* 14px - matches body text */
+
+  /* Sidebar Icon Size - SINGLE VALUE for both open & collapsed states */
+  --sidebar-icon-size: 20px;
+
   /* Button Icon Sizes - portal icon button dimensions */
   --btn-portal-icon-size: 32px;
   --btn-portal-icon-size-sm: 28px;
   --btn-portal-icon-size-xs: 24px;
   --btn-table-icon-size: 24px;
   --btn-portal-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
+
+  /* Dropdown caret sizing and spacing - consistent across all dropdowns */
+  --dropdown-caret-size: var(--icon-size-xs);
+  --dropdown-caret-gap: var(--space-2); /* Gap between text and caret */
+
+  /* Dropdown text styling - single source of truth for all dropdowns */
+  --dropdown-font-size: inherit;
+  --dropdown-font-weight: inherit;
+  --dropdown-font-family: inherit;
+  --dropdown-letter-spacing: inherit;
+  --dropdown-text-transform: none;
+
+  /* Status dot sizing - single source of truth for ALL status indicators */
+  --status-dot-size: 8px;
+  --status-dot-gap: var(--space-2); /* Gap between dot and text */
 
   /* Letter Spacing - standardized tracking */
   --letter-spacing-label: 0.05em;

@@ -16,34 +16,38 @@ export {
 } from '../../utils/format-utils';
 
 /**
- * Format date as "MM/DD" - for compact displays
+ * Format date as "MM/DD/YYYY" - standard date display
+ * Empty string for null/invalid dates (no placeholders)
  */
 export function formatDateShort(date: string | Date | undefined | null): string {
-  if (!date) return '-';
+  if (!date) return '';
   const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '-';
+  if (isNaN(d.getTime())) return '';
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
-  return `${month}/${day}`;
+  const year = d.getFullYear();
+  return `${month}/${day}/${year}`;
 }
 
 /**
  * Format date as "2026-02-11" (ISO format)
+ * Empty string for null/invalid dates (no placeholders)
  */
 export function formatDateISO(date: string | Date | undefined | null): string {
-  if (!date) return '-';
+  if (!date) return '';
   const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '-';
+  if (isNaN(d.getTime())) return '';
   return d.toISOString().split('T')[0];
 }
 
 /**
- * Format relative date - "Today", "Yesterday", "Feb 11"
+ * Format relative date - "Today", "Yesterday", "MM/DD/YYYY"
+ * Empty string for null/invalid dates (no placeholders)
  */
 export function formatDateRelative(date: string | Date | undefined | null): string {
-  if (!date) return '-';
+  if (!date) return '';
   const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '-';
+  if (isNaN(d.getTime())) return '';
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());

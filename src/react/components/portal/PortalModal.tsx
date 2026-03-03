@@ -81,7 +81,7 @@ export function PortalModal({
             </div>
 
             {showCloseButton && (
-              <DialogPrimitive.Close className="tw-btn-close">
+              <DialogPrimitive.Close className="btn-close">
                 <X className="tw-h-4 tw-w-4" />
                 <span className="tw-sr-only">Close</span>
               </DialogPrimitive.Close>
@@ -92,7 +92,7 @@ export function PortalModal({
           <div className="tw-py-4 tw-scroll-container tw-max-h-[60vh]">{children}</div>
 
           {/* Footer */}
-          {footer && <div className="tw-flex tw-justify-end tw-gap-2 tw-pt-4 tw-border-t tw-border-white/20">{footer}</div>}
+          {footer && <div className="tw-flex tw-justify-end tw-gap-2 tw-pt-4 tw-border-t tw-border-primary/20">{footer}</div>}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

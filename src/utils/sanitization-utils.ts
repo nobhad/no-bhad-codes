@@ -7,6 +7,10 @@
  * Security utilities for sanitizing user input and preventing XSS attacks.
  */
 
+import { createLogger } from './logger';
+
+const logger = createLogger('Security');
+
 export class SanitizationUtils {
   /**
    * HTML entities that need to be escaped
@@ -360,7 +364,7 @@ export class SanitizationUtils {
       url: window.location.href
     };
 
-    console.warn('🚨 Security violation detected:', violation);
+    logger.warn('Security violation detected:', violation);
 
     // In production, you might want to send this to your monitoring service
     // fetch('/api/security-violation', {

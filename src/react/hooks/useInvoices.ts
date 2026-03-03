@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Invoice, InvoiceStats, ApiResponse } from '@react/features/admin/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useInvoices');
 
 interface UseInvoicesOptions {
   /** Auth token getter for API calls */
@@ -105,7 +109,7 @@ export function useInvoices({
     setError(null);
 
     try {
-      const response = await fetch('/api/invoices', {
+      const response = await fetch(API_ENDPOINTS.INVOICES, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -135,7 +139,7 @@ export function useInvoices({
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
-      console.error('[useInvoices] Error:', message);
+      logger.error('[useInvoices] Error:', message);
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +149,7 @@ export function useInvoices({
   const updateInvoice = useCallback(
     async (id: number, updates: Partial<Invoice>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/invoices/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -168,7 +172,7 @@ export function useInvoices({
 
         return false;
       } catch (err) {
-        console.error('[useInvoices] Update error:', err);
+        logger.error('[useInvoices] Update error:', err);
         return false;
       }
     },
@@ -204,7 +208,7 @@ export function useInvoices({
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`/api/invoices/${id}/pdf`, {
+        const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}/pdf`, {
           method: 'GET',
           headers,
           credentials: 'include'
@@ -233,7 +237,7 @@ export function useInvoices({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } catch (err) {
-        console.error('[useInvoices] Download PDF error:', err);
+        logger.error('[useInvoices] Download PDF error:', err);
         throw err;
       }
     },
@@ -248,7 +252,7 @@ export function useInvoices({
 
       for (const id of ids) {
         try {
-          const response = await fetch(`/api/invoices/${id}`, {
+          const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}`, {
             method: 'DELETE',
             headers: getHeaders(),
             credentials: 'include'

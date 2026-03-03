@@ -4,13 +4,20 @@
  */
 
 import * as React from 'react';
-import { FolderOpen, RefreshCw, ExternalLink, ChevronRight } from 'lucide-react';
+import { FolderOpen, ChevronRight, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import type { PortalProject, PortalProjectStatus } from '../types';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('PortalProjectsList');
 
 /**
  * Transform API response to PortalProject interface
@@ -97,7 +104,7 @@ export function PortalProjectsList({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/projects', {
+      const response = await fetch(API_ENDPOINTS.PROJECTS, {
         method: 'GET',
         headers,
         credentials: 'include',
@@ -133,7 +140,7 @@ export function PortalProjectsList({
       }
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
-      console.error('[PortalProjectsList] Error:', message);
+      logger.error('[PortalProjectsList] Error:', message);
     } finally {
       setIsLoading(false);
     }
@@ -160,7 +167,7 @@ export function PortalProjectsList({
   // Loading state
   if (isLoading) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading projects...</span>
       </div>
@@ -170,9 +177,9 @@ export function PortalProjectsList({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={fetchProjects}>
+        <button className="btn-secondary" onClick={fetchProjects}>
           Retry
         </button>
       </div>
@@ -182,9 +189,11 @@ export function PortalProjectsList({
   // Empty state
   if (projects.length === 0) {
     return (
-      <div ref={containerRef} className="tw-empty-state">
-        <FolderOpen className="tw-h-8 tw-w-8" />
-        <span>No projects yet. Your projects will appear here once they begin.</span>
+      <div ref={containerRef}>
+        <EmptyState
+          icon={<FolderOpen className="tw-h-6 tw-w-6" />}
+          message="No projects yet. Your projects will appear here once they begin."
+        />
       </div>
     );
   }
@@ -244,21 +253,21 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
       {/* Header: Name and Status */}
       <div className="projlist-header">
         <div className="projlist-name-wrap">
-          <FolderOpen className="tw-h-4 tw-w-4 tw-text-muted" />
+          <FolderOpen className="tw-h-4 tw-w-4" />
           <span className="tw-text-primary projlist-name">
-            {project.name}
+            {decodeHtmlEntities(project.name)}
           </span>
         </div>
         <div className="projlist-status-wrap">
           <span className="tw-badge">{statusLabel}</span>
-          <ChevronRight className="tw-h-4 tw-w-4 tw-text-muted" />
+          <ChevronRight className="tw-h-4 tw-w-4" />
         </div>
       </div>
 
       {/* Description */}
       {project.description && (
         <p className="tw-text-muted projlist-desc">
-          {project.description}
+          {decodeHtmlEntities(project.description)}
         </p>
       )}
 
@@ -266,7 +275,7 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
       <div className="projlist-progress">
         <div className="projlist-progress-header">
           <span className="tw-label">Progress</span>
-          <span className="tw-text-primary proj-text-sm">{project.progress}%</span>
+          <span className="tw-text-primary tw-text-sm">{project.progress}%</span>
         </div>
         <div className="tw-progress-track">
           <div
@@ -278,13 +287,11 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
 
       {/* Footer: Date and Preview */}
       <div className="projlist-footer">
-        <span className="tw-text-muted proj-text-xs">
+        <span className="tw-text-muted tw-text-xs">
           {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
         </span>
         {project.preview_url && (
-          <button className="tw-btn-icon" onClick={onPreviewClick} title="View Preview">
-            <ExternalLink className="tw-h-4 tw-w-4" />
-          </button>
+          <IconButton action="external-link" onClick={onPreviewClick} title="View Preview" />
         )}
       </div>
     </div>

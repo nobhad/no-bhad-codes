@@ -57,7 +57,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         {/* Contact Name */}
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">
-            Contact Name <span className="tw-text-white">*</span>
+            Contact Name <span className="tw-text-primary">*</span>
           </label>
           <div className="tw-relative">
             <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
@@ -68,18 +68,18 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="Your full name"
               value={basicInfo.contactName}
               onChange={(e) => handleChange('contactName', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('contactName') && 'tw-border-white')}
+              className={cn('tw-input tw-pl-10', getFieldError('contactName') && 'tw-border-primary')}
             />
           </div>
           {getFieldError('contactName') && (
-            <span className="tw-text-[12px] tw-text-white">{getFieldError('contactName')}</span>
+            <span className="tw-text-[12px] tw-text-primary">{getFieldError('contactName')}</span>
           )}
         </div>
 
         {/* Contact Email */}
         <div className="tw-flex tw-flex-col tw-gap-1">
           <label className="tw-field-label">
-            Email Address <span className="tw-text-white">*</span>
+            Email Address <span className="tw-text-primary">*</span>
           </label>
           <div className="tw-relative">
             <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
@@ -90,11 +90,11 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="your@email.com"
               value={basicInfo.contactEmail}
               onChange={(e) => handleChange('contactEmail', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('contactEmail') && 'tw-border-white')}
+              className={cn('tw-input tw-pl-10', getFieldError('contactEmail') && 'tw-border-primary')}
             />
           </div>
           {getFieldError('contactEmail') && (
-            <span className="tw-text-[12px] tw-text-white">{getFieldError('contactEmail')}</span>
+            <span className="tw-text-[12px] tw-text-primary">{getFieldError('contactEmail')}</span>
           )}
         </div>
 
@@ -110,11 +110,11 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="(555) 123-4567"
               value={basicInfo.contactPhone}
               onChange={(e) => handleChange('contactPhone', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('contactPhone') && 'tw-border-white')}
+              className={cn('tw-input tw-pl-10', getFieldError('contactPhone') && 'tw-border-primary')}
             />
           </div>
           {getFieldError('contactPhone') && (
-            <span className="tw-text-[12px] tw-text-white">{getFieldError('contactPhone')}</span>
+            <span className="tw-text-[12px] tw-text-primary">{getFieldError('contactPhone')}</span>
           )}
         </div>
 
@@ -205,8 +205,8 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                 'tw-px-3 tw-py-2',
                 'tw-border tw-transition-colors',
                 basicInfo.preferredContactMethod === method
-                  ? 'tw-border-white tw-bg-white tw-text-black'
-                  : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
+                  ? 'tw-border-primary tw-bg-white tw-text-black'
+                  : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
               )}
             >
               <input
@@ -222,7 +222,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                   'tw-w-3 tw-h-3 tw-border tw-flex tw-items-center tw-justify-center',
                   basicInfo.preferredContactMethod === method
                     ? 'tw-border-black tw-bg-black'
-                    : 'tw-border-white'
+                    : 'tw-border-primary'
                 )}
               >
                 {basicInfo.preferredContactMethod === method && (
@@ -231,7 +231,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               </span>
               <span className={cn(
                 'tw-text-[14px] tw-font-mono tw-capitalize',
-                basicInfo.preferredContactMethod === method ? 'tw-text-black' : 'tw-text-white'
+                basicInfo.preferredContactMethod === method ? 'tw-text-black' : 'tw-text-primary'
               )}>
                 {method}
               </span>

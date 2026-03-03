@@ -22,11 +22,11 @@ export const PortalButton = React.forwardRef<HTMLButtonElement, PortalButtonProp
   ({ className, variant = 'primary', size = 'md', loading, icon, children, disabled, ...props }, ref) => {
     // Build class list based on variant and size
     const variantClasses: Record<string, string> = {
-      primary: 'tw-btn-primary',
-      secondary: 'tw-btn-secondary',
-      danger: 'tw-btn-danger',
-      ghost: 'tw-btn-ghost',
-      icon: 'tw-btn-icon',
+      primary: 'btn-primary',
+      secondary: 'btn-secondary',
+      danger: 'btn-danger',
+      ghost: 'btn-ghost',
+      icon: 'btn-icon',
     };
 
     const sizeClasses: Record<string, string> = {
@@ -36,7 +36,7 @@ export const PortalButton = React.forwardRef<HTMLButtonElement, PortalButtonProp
       icon: '',
     };
 
-    const baseClass = variantClasses[variant] || 'tw-btn-primary';
+    const baseClass = variantClasses[variant] || 'btn-primary';
     const sizeClass = sizeClasses[size] || '';
 
     return (

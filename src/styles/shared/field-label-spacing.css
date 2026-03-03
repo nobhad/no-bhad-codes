@@ -20,21 +20,21 @@
 .field-label,
 .meta-label {
   display: block;
-  font-size: 0.6875rem;
-  font-weight: 500;
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--label-letter-spacing);
   margin-bottom: var(--field-label-value-gap, 0.25rem);
   line-height: 1.2;
 }
 
 /* Label variants */
 .field-label--lg {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 .field-label--sm {
-  font-size: 0.625rem;
+  font-size: var(--font-size-2xs);
 }
 .field-label--normal-case {
   text-transform: none;
@@ -55,7 +55,7 @@
    META VALUE - Base styling for all values
    ===================================================== */
 .meta-value {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 400;
   color: var(--portal-text-light);
   line-height: 1.4;
@@ -63,10 +63,10 @@
 
 /* Value variants */
 .meta-value--sm {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 .meta-value--lg {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
 }
 .meta-value--secondary {
   color: var(--portal-text-secondary);
@@ -165,23 +165,23 @@
    STAT LABEL - Compact variant for stat cards
    ===================================================== */
 .stat-label {
-  font-size: 0.6875rem;
-  font-weight: 500;
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--label-letter-spacing);
   margin: 0;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--portal-text-light);
   line-height: 1.2;
 }
 
 .stat-value--sm {
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
 }
 .stat-value--primary {
   color: var(--color-primary);

@@ -10,6 +10,9 @@
 
 import * as React from 'react';
 import { cn } from '@react/lib/utils';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('IconButton');
 import {
   Eye,
   EyeOff,
@@ -92,6 +95,8 @@ import {
   Percent,
   Lock,
   Unlock,
+  Share2,
+  UserX,
   type LucideIcon
 } from 'lucide-react';
 // Icon/button sizes controlled by CSS variables - no JS constants needed
@@ -238,7 +243,12 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
   locked: Lock,
   secure: Lock,
   unlock: Unlock,
-  unlocked: Unlock
+  unlocked: Unlock,
+  share: Share2,
+  'share-2': Share2,
+  unshare: UserX,
+  'user-x': UserX,
+  revoke: UserX
 };
 
 /**
@@ -301,14 +311,14 @@ export function IconButton({
   // Determine icon name
   const iconName = icon ?? actionDef?.icon;
   if (!iconName) {
-    console.warn(`[IconButton] No icon specified. Provide 'action' or 'icon' prop.`);
+    logger.warn(`No icon specified. Provide 'action' or 'icon' prop.`);
     return null;
   }
 
   // Get the Lucide icon component
   const IconComponent = getLucideIcon(iconName);
   if (!IconComponent) {
-    console.warn(`[IconButton] Unknown icon: ${iconName}`);
+    logger.warn(`Unknown icon: ${iconName}`);
     return null;
   }
 

@@ -2,6 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { App } from './App';
 import './styles/globals.css';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('React');
 
 // Store roots for cleanup during HMR
 const mountedRoots = new Map<string, Root>();
@@ -22,7 +25,7 @@ export function mountReactApp(
     typeof element === 'string' ? document.querySelector<HTMLElement>(element) : element;
 
   if (!container) {
-    console.error(`[React] Mount target not found: ${element}`);
+    logger.error(`[React] Mount target not found: ${element}`);
     return () => {};
   }
 

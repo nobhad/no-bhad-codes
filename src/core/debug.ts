@@ -12,6 +12,9 @@ import type { Application } from './app';
 import { container } from './container';
 import { appState } from './state';
 import { componentStore } from '../components';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('Debug');
 
 // Type definitions for window globals
 interface ServiceInstance {
@@ -90,13 +93,13 @@ export function setupDebugHelpers(app: Application): void {
  * Test business card debugging helper
  */
 function testBusinessCard(app: Application): void {
-  console.log('=== BUSINESS CARD DEBUG TEST ===');
-  console.log('Overlay elements:', {
+  logger.log('=== BUSINESS CARD DEBUG TEST ===');
+  logger.log('Overlay elements:', {
     overlayContainer: !!document.getElementById('overlay-business-card-container'),
     overlayCard: !!document.getElementById('overlay-business-card'),
     overlayInner: !!document.getElementById('overlay-business-card-inner')
   });
-  console.log('Section elements:', {
+  logger.log('Section elements:', {
     sectionCard: !!document.getElementById('business-card'),
     sectionInner: !!document.getElementById('business-card-inner'),
     sectionContainer: !!document.querySelector('.business-card-container')
@@ -105,7 +108,7 @@ function testBusinessCard(app: Application): void {
   const renderer = app.getModule('SectionCardRenderer');
   const interactions = app.getModule('SectionCardInteractions');
 
-  console.log('SectionCardRenderer:', {
+  logger.log('SectionCardRenderer:', {
     exists: !!renderer,
     status:
       renderer &&
@@ -115,7 +118,7 @@ function testBusinessCard(app: Application): void {
         ? renderer.getStatus()
         : 'No status method'
   });
-  console.log('SectionCardInteractions:', {
+  logger.log('SectionCardInteractions:', {
     exists: !!interactions,
     status:
       interactions &&
@@ -127,10 +130,10 @@ function testBusinessCard(app: Application): void {
   });
 
   if (renderer && 'getCardElements' in renderer && typeof renderer.getCardElements === 'function') {
-    console.log('Renderer elements:', renderer.getCardElements());
+    logger.log('Renderer elements:', renderer.getCardElements());
   }
 
-  console.log(
+  logger.log(
     'All business card elements:',
     Array.from(document.querySelectorAll('[id*="business-card"], [class*="business-card"]')).map(
       (el) => ({
@@ -144,8 +147,8 @@ function testBusinessCard(app: Application): void {
   // Test clicking on section card
   const sectionCard = document.getElementById('business-card');
   if (sectionCard) {
-    console.log('Section card click listeners:', sectionCard.onclick);
-    console.log('Section card style:', {
+    logger.log('Section card click listeners:', sectionCard.onclick);
+    logger.log('Section card style:', {
       cursor: sectionCard.style.cursor,
       pointerEvents: sectionCard.style.pointerEvents
     });

@@ -67,7 +67,7 @@
 }
 
 .portal-project-card .progress-bar {
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   height: 12px;
   overflow: hidden;
 }
@@ -100,7 +100,7 @@
 }
 
 .upload-request-modal-content {
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   width: 100%;
   max-width: 500px;
   max-height: 80vh;
@@ -114,7 +114,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2);
-  border-bottom: 1px solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 .upload-request-modal-content .modal-header h2,
@@ -146,7 +146,7 @@
   align-items: flex-start;
   gap: var(--space-1);
   padding: var(--space-1-5);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   cursor: pointer;
   transition: border-color var(--transition-faster);
 }
@@ -201,7 +201,7 @@
 }
 
 .upload-request-other-wrap {
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
   padding-top: var(--space-1-5);
 }
 
@@ -215,7 +215,7 @@
   min-height: 60px;
   padding: var(--space-1);
   background: transparent;
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-primary);
   font-size: var(--font-size-sm);
   resize: vertical;
@@ -231,7 +231,7 @@
   justify-content: flex-end;
   gap: var(--space-1);
   padding: var(--space-2);
-  border-top: 1px solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 @media (--mobile) {

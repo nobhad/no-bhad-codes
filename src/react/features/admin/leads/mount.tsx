@@ -7,8 +7,8 @@ import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { LeadsTable } from './LeadsTable';
 
 export interface LeadsMountOptions extends BaseMountOptions {
-  /** Callback when lead is viewed */
-  onViewLead?: (leadId: number) => void;
+  /** Navigation callback for detail views */
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 export const {

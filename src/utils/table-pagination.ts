@@ -11,6 +11,9 @@
 
 import { ICONS } from '../constants/icons';
 import { createTableDropdown } from './table-dropdown';
+import { createLogger } from './logger';
+
+const logger = createLogger('TablePagination');
 
 // ===============================================
 // TYPES
@@ -53,7 +56,7 @@ export function loadPaginationState(storageKey: string): Partial<PaginationState
       return { pageSize: parsed.pageSize || 25 };
     }
   } catch (e) {
-    console.warn('[TablePagination] Failed to load pagination state:', e);
+    logger.warn('Failed to load pagination state:', e);
   }
   return {};
 }
@@ -62,7 +65,7 @@ export function savePaginationState(storageKey: string, state: PaginationState):
   try {
     localStorage.setItem(storageKey, JSON.stringify({ pageSize: state.pageSize }));
   } catch (e) {
-    console.warn('[TablePagination] Failed to save pagination state:', e);
+    logger.warn('Failed to save pagination state:', e);
   }
 }
 

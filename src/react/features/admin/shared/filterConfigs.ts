@@ -189,11 +189,13 @@ export const INVOICES_FILTER_CONFIG: FilterConfig[] = [
 ];
 
 export const LEADS_FILTER_CONFIG: FilterConfig[] = [
-  { key: 'status', label: 'STATUS', options: LEAD_STATUS_OPTIONS }
+  { key: 'status', label: 'STATUS', options: LEAD_STATUS_OPTIONS },
+  { key: 'source', label: 'SOURCE', options: LEAD_SOURCE_OPTIONS }
 ];
 
 export const PROJECTS_FILTER_CONFIG: FilterConfig[] = [
-  { key: 'status', label: 'STATUS', options: PROJECT_STATUS_OPTIONS }
+  { key: 'status', label: 'STATUS', options: PROJECT_STATUS_OPTIONS },
+  { key: 'type', label: 'TYPE', options: PROJECT_TYPE_OPTIONS }
 ];
 
 export const QUESTIONNAIRES_FILTER_CONFIG: FilterConfig[] = [

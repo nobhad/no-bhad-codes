@@ -12,6 +12,9 @@ import type {
   StateMiddleware,
   ComputedProperty
 } from './types';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('StateManager');
 
 export class StateManager<T = AppState> {
   private state: T;
@@ -52,7 +55,7 @@ export class StateManager<T = AppState> {
           return;
         }
       } catch (error) {
-        console.warn('Failed to restore state from localStorage:', error);
+        logger.warn('Failed to restore state from localStorage:', error);
       }
     }
 
@@ -105,7 +108,7 @@ export class StateManager<T = AppState> {
       try {
         localStorage.setItem(this.persistenceKey, JSON.stringify(this.state));
       } catch (error) {
-        console.warn('Failed to persist state to localStorage:', error);
+        logger.warn('Failed to persist state to localStorage:', error);
       }
     }
 

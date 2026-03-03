@@ -15,6 +15,9 @@
 
 import { AUTH_EVENTS } from '../auth/auth-constants';
 import { ROUTES } from '../constants/api-endpoints';
+import { createLogger } from './logger';
+
+const logger = createLogger('ApiClient');
 
 // ============================================
 // CSRF TOKEN MANAGEMENT
@@ -191,12 +194,12 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
       const data: ApiErrorResponse = await clonedResponse.json();
 
       if (isTokenExpiredError(data)) {
-        console.warn('[ApiClient] Session expired:', data.code);
+        logger.warn('Session expired:', data.code);
         handleSessionExpired();
       }
     } catch {
       // If we can't parse the response, still treat 401 as potential session issue
-      console.warn('[ApiClient] 401 response, unable to parse body');
+      logger.warn('401 response, unable to parse body');
     }
   }
 

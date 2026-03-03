@@ -391,7 +391,7 @@ main {
 
 /* Header transitions - only during intro completion */
 .intro-complete .header {
-  transition: opacity 0.5s ease-in-out;
+  transition: opacity var(--transition-slow) ease-in-out;
 }
 
 /* After intro finishes, disable opacity/visibility transitions to prevent flicker on navigation */

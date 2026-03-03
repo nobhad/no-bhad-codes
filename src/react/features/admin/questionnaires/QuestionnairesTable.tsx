@@ -12,6 +12,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
@@ -24,6 +25,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -31,6 +33,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('QuestionnairesTable');
 
 interface Questionnaire {
   id: number;
@@ -56,6 +62,10 @@ interface QuestionnairesTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 const QUESTIONNAIRE_STATUS_CONFIG: Record<string, { label: string }> = {
@@ -121,7 +131,7 @@ function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig
   }
 }
 
-export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification, onNavigate }: QuestionnairesTableProps) {
+export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: QuestionnairesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
 
@@ -162,9 +172,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_questionnaires_pagination',
+    storageKey: overviewMode ? undefined : 'admin_questionnaires_pagination',
     totalItems: filteredQuestionnaires.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedQuestionnaires = useMemo(
@@ -187,7 +197,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       if (clientId) params.append('client_id', clientId);
       if (projectId) params.append('project_id', projectId);
 
-      const response = await fetch(`/api/questionnaires?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.QUESTIONNAIRES}?${params}`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -211,7 +221,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   // Status change handler
   const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/questionnaires/${questionnaireId}`, {
+      const response = await fetch(buildEndpoint.questionnaire(questionnaireId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -229,14 +239,14 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       );
       showNotification?.('Questionnaire status updated', 'success');
     } catch (err) {
-      console.error('Failed to update questionnaire status:', err);
+      logger.error('Failed to update questionnaire status:', err);
       showNotification?.('Failed to update questionnaire status', 'error');
     }
   }, [getHeaders, showNotification]);
 
   const handleSendQuestionnaire = useCallback(async (id: number) => {
     try {
-      const response = await fetch(`/api/questionnaires/${id}/send`, {
+      const response = await fetch(buildEndpoint.questionnaireSend(id), {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include'
@@ -256,7 +266,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
     const ids = selection.selectedItems.map((q) => q.id);
     try {
-      const response = await fetch('/api/questionnaires/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.QUESTIONNAIRES_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -269,7 +279,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete questionnaires:', err);
+      logger.error('Failed to delete questionnaires:', err);
       showNotification?.('Failed to delete questionnaires', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -372,16 +382,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={fetchQuestionnaires}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredQuestionnaires.length > 0 ? (
           <TablePagination
@@ -400,7 +400,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -434,8 +433,10 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={7} message={error} onRetry={fetchQuestionnaires} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={7} rows={5} />
           ) : paginatedQuestionnaires.length === 0 ? (
             <AdminTableEmpty
@@ -461,16 +462,16 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                   <div className="cell-with-icon">
                     <ClipboardList className="cell-icon" />
                     <div className="cell-content">
-                      <span className="cell-title">{questionnaire.title}</span>
+                      <span className="cell-title">{decodeHtmlEntities(questionnaire.title)}</span>
                       {questionnaire.description && (
-                        <span className="cell-subtitle">{questionnaire.description}</span>
+                        <span className="cell-subtitle">{decodeHtmlEntities(questionnaire.description)}</span>
                       )}
                     </div>
                   </div>
                 </AdminTableCell>
                 <AdminTableCell>
                   <span className="table-link">
-                    {questionnaire.client_name}
+                    {decodeHtmlEntities(questionnaire.client_name)}
                   </span>
                 </AdminTableCell>
                 <AdminTableCell>
@@ -479,7 +480,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                   </StatusBadge>
                 </AdminTableCell>
                 <AdminTableCell className={cn(isOverdue(questionnaire) && 'text-danger')}>
-                  {questionnaire.due_date ? formatDate(questionnaire.due_date) : '-'}
+                  {questionnaire.due_date && formatDate(questionnaire.due_date)}
                 </AdminTableCell>
                 <AdminTableCell>
                   <div className="cell-content">
@@ -516,7 +517,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

@@ -346,11 +346,11 @@
 .secondary-tab-horizontal {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-2) var(--space-3);
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: var(--border-width) solid transparent;
   cursor: pointer;
   color: var(--portal-text-secondary);
   font-family: var(--font-family-sans, system-ui, sans-serif);

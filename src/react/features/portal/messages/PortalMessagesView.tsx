@@ -7,12 +7,15 @@ import * as React from 'react';
 import { useState, useCallback } from 'react';
 import {
   MessageSquare,
-  RefreshCw,
   ChevronRight,
   Inbox,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { usePortalMessages } from './usePortalMessages';
 import { MessageThread } from './MessageThread';
@@ -69,37 +72,37 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
       className={cn('tw-list-item msg-thread-item', isSelected && 'tw-table-row-selected')}
     >
       {/* Icon */}
-      <div className={hasUnread ? 'tw-text-primary' : 'tw-text-muted'}>
+      <div className={hasUnread ? 'tw-text-primary' : ''}>
         <MessageSquare className="tw-h-4 tw-w-4" />
       </div>
 
       {/* Content */}
       <div className="msg-thread-content">
         <div className="msg-thread-row">
-          <span className="tw-text-primary proj-text-base">{thread.subject}</span>
-          <span className="tw-text-muted proj-text-xs msg-time-noshrink">
+          <span className="tw-text-primary ">{decodeHtmlEntities(thread.subject)}</span>
+          <span className="tw-text-muted tw-text-xs msg-time-noshrink">
             {formatThreadTime(thread.last_message_at)}
           </span>
         </div>
 
         {thread.project_name && (
-          <span className="tw-text-muted proj-text-xs">{thread.project_name}</span>
+          <span className="tw-text-muted tw-text-xs">{decodeHtmlEntities(thread.project_name)}</span>
         )}
 
         <div className="msg-thread-preview-row">
-          <span className={cn(hasUnread ? 'tw-text-primary' : 'tw-text-muted', 'proj-text-sm')}>
-            {truncatePreview(thread.last_message_preview)}
+          <span className={cn(hasUnread ? 'tw-text-primary' : 'tw-text-muted', 'tw-text-sm')}>
+            {truncatePreview(decodeHtmlEntities(thread.last_message_preview))}
           </span>
 
           {hasUnread && (
-            <span className="tw-badge proj-text-xs">
+            <span className="tw-badge tw-text-xs">
               {thread.unread_count > UNREAD_BADGE_MAX ? `${UNREAD_BADGE_MAX}+` : thread.unread_count}
             </span>
           )}
         </div>
       </div>
 
-      <ChevronRight className="tw-h-4 tw-w-4 tw-text-muted" />
+      <ChevronRight className="tw-h-4 tw-w-4" />
     </button>
   );
 }
@@ -127,7 +130,7 @@ function ThreadList({
   // Loading state
   if (loading && threads.length === 0) {
     return (
-      <div className="tw-loading">
+      <div className="loading-state">
         <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
         <span>Loading messages...</span>
       </div>
@@ -137,9 +140,9 @@ function ThreadList({
   // Error state
   if (error) {
     return (
-      <div className="tw-error">
+      <div className="error-state">
         <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="tw-btn-secondary" onClick={onRefresh}>Retry</button>
+        <button className="btn-secondary" onClick={onRefresh}>Retry</button>
       </div>
     );
   }
@@ -147,10 +150,11 @@ function ThreadList({
   // Empty state
   if (threads.length === 0) {
     return (
-      <div ref={containerRef} className="tw-empty-state">
-        <Inbox className="tw-h-6 tw-w-6" />
-        <p>No messages yet</p>
-        <p className="proj-text-sm">New conversations will appear here</p>
+      <div ref={containerRef}>
+        <EmptyState
+          icon={<Inbox className="tw-h-6 tw-w-6" />}
+          message="No messages yet. New conversations will appear here."
+        />
       </div>
     );
   }
@@ -158,11 +162,9 @@ function ThreadList({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header with refresh */}
-      <div className="tw-divider msg-header-flex">
+      <div className="tw-panel msg-header-flex">
         <h3 className="tw-section-title">Messages</h3>
-        <button className="tw-btn-icon" onClick={onRefresh} title="Refresh">
-          <RefreshCw className={cn('tw-h-4 tw-w-4', loading && 'tw-animate-spin')} />
-        </button>
+        <IconButton action="refresh" onClick={onRefresh} title="Refresh" className={loading ? 'tw-animate-spin' : ''} />
       </div>
 
       {/* Thread list */}

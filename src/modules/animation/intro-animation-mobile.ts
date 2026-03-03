@@ -39,6 +39,9 @@ import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import type { ModuleOptions } from '../../types/modules';
 import { SVG_PATH, SVG_VIEWBOX, REPLAY_CONFIG } from '../../config/intro-animation-config';
 import * as SvgBuilder from './intro/svg-builder';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('MobileIntro');
 
 // Register MorphSVG plugin with GSAP
 gsap.registerPlugin(MorphSVGPlugin);
@@ -706,7 +709,7 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.log('[MobileIntro] Paw entry animation complete');
       this.log('Paw entry animation complete');
     } catch (error) {
-      console.error('[MobileIntro] Failed to load desktop entry animation:', error);
+      logger.error('[MobileIntro] Failed to load desktop entry animation:', error);
       this.log('Failed to load paw animation, falling back to simple fade');
 
       // Fallback to simple fade if paw animation fails
@@ -795,7 +798,7 @@ export class MobileIntroAnimationModule extends BaseModule {
       this.log('[MobileIntro] Paw exit animation complete');
       this.log('Paw exit animation complete');
     } catch (error) {
-      console.error('[MobileIntro] Failed to load desktop exit animation:', error);
+      logger.error('[MobileIntro] Failed to load desktop exit animation:', error);
       this.log('Failed to load paw animation, falling back to simple fade');
 
       // Fallback to simple fade if paw animation fails

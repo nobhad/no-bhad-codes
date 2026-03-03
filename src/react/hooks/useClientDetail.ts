@@ -10,6 +10,10 @@ import type {
   ClientTag,
   ApiResponse
 } from '@react/features/admin/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useClientDetail');
 
 interface UseClientDetailOptions {
   /** Client ID to fetch */
@@ -119,7 +123,7 @@ export function useClientDetail({
   // Fetch client details
   const fetchClient = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -136,7 +140,7 @@ export function useClientDetail({
       }
       throw new Error(result.error || 'Failed to load client');
     } catch (err) {
-      console.error('[useClientDetail] Error fetching client:', err);
+      logger.error('[useClientDetail] Error fetching client:', err);
       throw err;
     }
   }, [clientId, getHeaders]);
@@ -144,7 +148,7 @@ export function useClientDetail({
   // Fetch health score
   const fetchHealth = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/health`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/health`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -161,7 +165,7 @@ export function useClientDetail({
       }
       return null;
     } catch (err) {
-      console.error('[useClientDetail] Error fetching health:', err);
+      logger.error('[useClientDetail] Error fetching health:', err);
       return null;
     }
   }, [clientId, getHeaders]);
@@ -169,7 +173,7 @@ export function useClientDetail({
   // Fetch contacts
   const fetchContacts = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/contacts`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -185,7 +189,7 @@ export function useClientDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useClientDetail] Error fetching contacts:', err);
+      logger.error('[useClientDetail] Error fetching contacts:', err);
       return [];
     }
   }, [clientId, getHeaders]);
@@ -193,7 +197,7 @@ export function useClientDetail({
   // Fetch activities
   const fetchActivities = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/activities`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/activities`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -209,7 +213,7 @@ export function useClientDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useClientDetail] Error fetching activities:', err);
+      logger.error('[useClientDetail] Error fetching activities:', err);
       return [];
     }
   }, [clientId, getHeaders]);
@@ -217,7 +221,7 @@ export function useClientDetail({
   // Fetch notes
   const fetchNotes = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/notes`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/notes`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -233,7 +237,7 @@ export function useClientDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useClientDetail] Error fetching notes:', err);
+      logger.error('[useClientDetail] Error fetching notes:', err);
       return [];
     }
   }, [clientId, getHeaders]);
@@ -241,7 +245,7 @@ export function useClientDetail({
   // Fetch stats
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/stats`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/stats`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -258,7 +262,7 @@ export function useClientDetail({
       }
       return null;
     } catch (err) {
-      console.error('[useClientDetail] Error fetching stats:', err);
+      logger.error('[useClientDetail] Error fetching stats:', err);
       return null;
     }
   }, [clientId, getHeaders]);
@@ -266,7 +270,7 @@ export function useClientDetail({
   // Fetch projects
   const fetchProjects = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/projects`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/projects`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -282,7 +286,7 @@ export function useClientDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useClientDetail] Error fetching projects:', err);
+      logger.error('[useClientDetail] Error fetching projects:', err);
       return [];
     }
   }, [clientId, getHeaders]);
@@ -290,7 +294,7 @@ export function useClientDetail({
   // Fetch tags
   const fetchTags = useCallback(async () => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/tags`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -306,7 +310,7 @@ export function useClientDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useClientDetail] Error fetching tags:', err);
+      logger.error('[useClientDetail] Error fetching tags:', err);
       return [];
     }
   }, [clientId, getHeaders]);
@@ -314,7 +318,7 @@ export function useClientDetail({
   // Fetch available tags
   const fetchAvailableTags = useCallback(async () => {
     try {
-      const response = await fetch('/api/clients/tags', {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/tags`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -330,7 +334,7 @@ export function useClientDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useClientDetail] Error fetching available tags:', err);
+      logger.error('[useClientDetail] Error fetching available tags:', err);
       return [];
     }
   }, [getHeaders]);
@@ -387,7 +391,7 @@ export function useClientDetail({
   const updateClient = useCallback(
     async (updates: Partial<Client>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${clientId}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -408,7 +412,7 @@ export function useClientDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useClientDetail] Update error:', err);
+        logger.error('[useClientDetail] Update error:', err);
         return false;
       }
     },
@@ -419,7 +423,7 @@ export function useClientDetail({
   const addContact = useCallback(
     async (contact: Omit<ClientContact, 'id' | 'client_id' | 'created_at'>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${clientId}/contacts`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, {
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include',
@@ -440,7 +444,7 @@ export function useClientDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useClientDetail] Add contact error:', err);
+        logger.error('[useClientDetail] Add contact error:', err);
         return false;
       }
     },
@@ -451,7 +455,7 @@ export function useClientDetail({
   const updateContact = useCallback(
     async (id: number, updates: Partial<ClientContact>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/contacts/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -472,7 +476,7 @@ export function useClientDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useClientDetail] Update contact error:', err);
+        logger.error('[useClientDetail] Update contact error:', err);
         return false;
       }
     },
@@ -483,7 +487,7 @@ export function useClientDetail({
   const deleteContact = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/contacts/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENT_CONTACTS}/${id}`, {
           method: 'DELETE',
           headers: getHeaders(),
           credentials: 'include'
@@ -499,7 +503,7 @@ export function useClientDetail({
         }));
         return true;
       } catch (err) {
-        console.error('[useClientDetail] Delete contact error:', err);
+        logger.error('[useClientDetail] Delete contact error:', err);
         return false;
       }
     },
@@ -510,7 +514,7 @@ export function useClientDetail({
   const addNote = useCallback(
     async (content: string): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${clientId}/notes`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/notes`, {
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include',
@@ -531,7 +535,7 @@ export function useClientDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useClientDetail] Add note error:', err);
+        logger.error('[useClientDetail] Add note error:', err);
         return false;
       }
     },
@@ -542,7 +546,7 @@ export function useClientDetail({
   const updateNote = useCallback(
     async (id: number, updates: Partial<ClientNote>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/notes/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.NOTES}/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -563,7 +567,7 @@ export function useClientDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useClientDetail] Update note error:', err);
+        logger.error('[useClientDetail] Update note error:', err);
         return false;
       }
     },
@@ -574,7 +578,7 @@ export function useClientDetail({
   const deleteNote = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/notes/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.NOTES}/${id}`, {
           method: 'DELETE',
           headers: getHeaders(),
           credentials: 'include'
@@ -590,7 +594,7 @@ export function useClientDetail({
         }));
         return true;
       } catch (err) {
-        console.error('[useClientDetail] Delete note error:', err);
+        logger.error('[useClientDetail] Delete note error:', err);
         return false;
       }
     },
@@ -611,7 +615,7 @@ export function useClientDetail({
   const addTag = useCallback(
     async (tagId: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${clientId}/tags`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, {
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include',
@@ -632,7 +636,7 @@ export function useClientDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useClientDetail] Add tag error:', err);
+        logger.error('[useClientDetail] Add tag error:', err);
         return false;
       }
     },
@@ -643,7 +647,7 @@ export function useClientDetail({
   const removeTag = useCallback(
     async (tagId: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/clients/${clientId}/tags/${tagId}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags/${tagId}`, {
           method: 'DELETE',
           headers: getHeaders(),
           credentials: 'include'
@@ -659,7 +663,7 @@ export function useClientDetail({
         }));
         return true;
       } catch (err) {
-        console.error('[useClientDetail] Remove tag error:', err);
+        logger.error('[useClientDetail] Remove tag error:', err);
         return false;
       }
     },
@@ -669,7 +673,7 @@ export function useClientDetail({
   // Send invitation
   const sendInvitation = useCallback(async (): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/clients/${clientId}/invite`, {
+      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/invite`, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include'
@@ -694,7 +698,7 @@ export function useClientDetail({
       }
       return false;
     } catch (err) {
-      console.error('[useClientDetail] Send invitation error:', err);
+      logger.error('[useClientDetail] Send invitation error:', err);
       return false;
     }
   }, [clientId, getHeaders]);

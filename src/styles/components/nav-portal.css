@@ -22,7 +22,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   background: none;
   border: none;
   cursor: pointer;
@@ -106,7 +106,7 @@
   right: 20px;
   width: 320px;
   background: var(--color-neutral-300);
-  border: 3px solid var(--color-border);
+  border: var(--border-width-thick) solid var(--color-border);
   padding: 1.5rem;
   z-index: var(--z-index-portal-dropdown);
   opacity: 0;
@@ -151,7 +151,7 @@
 /* Dropdown header */
 .portal-dropdown-header {
   font-family: var(--font-family-acme);
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   text-transform: uppercase;
   margin-bottom: 1rem;
   color: var(--color-text-primary);
@@ -166,8 +166,8 @@ html[data-theme="dark"] .portal-dropdown-header {
   display: flex;
   width: 100%;
   height: 44px;
-  border: 2px solid var(--color-border);
-  border-radius: 24px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--portal-radius-pill);
   margin-bottom: 1rem;
   box-sizing: border-box;
   overflow: hidden;
@@ -180,7 +180,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   background: transparent;
   border: none;
   font-family: var(--font-family-acme);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   font-weight: normal;
   line-height: 40px;
   text-transform: uppercase;
@@ -192,11 +192,11 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .portal-toggle-btn:first-child {
-  border-right: 1px solid var(--color-border);
+  border-right: var(--border-width) solid var(--color-border);
 }
 
 .portal-dropdown .portal-toggle-btn:last-child {
-  border-left: 1px solid var(--color-border);
+  border-left: var(--border-width) solid var(--color-border);
 }
 
 .portal-dropdown .portal-toggle-btn:hover:not(.active) {
@@ -223,9 +223,9 @@ html[data-theme="dark"] .portal-dropdown-header {
   height: 48px;
   background: var(--color-bg-inverse);
   border: none;
-  border-radius: 24px;
+  border-radius: var(--portal-radius-pill);
   padding: 0 1rem;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   color: var(--color-neutral-300);
   margin-bottom: 0.75rem;
   box-sizing: border-box;
@@ -284,9 +284,9 @@ html[data-theme="dark"] .portal-dropdown-header {
   background: var(--color-bg-inverse);
   color: var(--color-neutral-300);
   border: none;
-  border-radius: 24px;
+  border-radius: var(--portal-radius-pill);
   font-family: var(--font-family-acme);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   text-transform: uppercase;
   cursor: pointer;
   transition:
@@ -320,7 +320,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 .portal-dropdown .dropdown-link {
   display: block;
   margin-top: 0.75rem;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -343,7 +343,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 /* Magic link info */
 .portal-dropdown .magic-info {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   opacity: 0.7;
   margin-top: 0.5rem;
@@ -352,7 +352,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 
 /* Forgot password info */
 .portal-dropdown .forgot-info {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   margin-bottom: 1rem;
   text-align: left;
@@ -368,7 +368,7 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 .portal-dropdown .reset-sent-message {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   text-align: center;
   line-height: 1.5;
@@ -447,7 +447,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   height: 90vh;
   max-height: 85vh;
   z-index: var(--z-index-portal-modal, 9600);
-  border-radius: 10px;
+  border-radius: var(--portal-radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-dropdown-xl);
   background-color: var(--color-terminal-bg);
@@ -465,7 +465,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   z-index: 10;
   background: var(--color-overlay-light);
   border: none;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   width: 36px;
   height: 36px;
   display: flex;

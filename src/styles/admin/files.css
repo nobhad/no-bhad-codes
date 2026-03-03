@@ -57,7 +57,7 @@
 .folder-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1-5);
   cursor: pointer;
   color: var(--portal-text-secondary);
@@ -151,10 +151,10 @@
 .file-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1-5);
   background: transparent;
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   cursor: pointer;
   transition: all var(--transition-faster);
   margin-bottom: var(--space-0-5);
@@ -504,7 +504,7 @@
 .access-log-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-0-5) var(--space-1);
   background: transparent;
   font-size: var(--font-size-sm);
@@ -600,11 +600,11 @@
 }
 
 .pending-request-item.priority-urgent {
-  border-left: 3px solid var(--status-cancelled);
+  border-left: var(--border-width-thick) solid var(--status-cancelled);
 }
 
 .pending-request-item.priority-high {
-  border-left: 3px solid var(--color-warning-500);
+  border-left: var(--border-width-thick) solid var(--color-warning-500);
 }
 
 .pending-request-info {
@@ -656,7 +656,7 @@
 .pending-request-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   margin-bottom: var(--space-0-5);
@@ -702,7 +702,7 @@
 .upload-file-preview-item {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--icon-gap);
   padding: var(--space-1);
   background: transparent;
   border: var(--portal-border);

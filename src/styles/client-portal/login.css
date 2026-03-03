@@ -28,7 +28,7 @@
 }
 
 .set-password-card {
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: clamp(1.5rem, 4vw, 2.5rem);
 }
 

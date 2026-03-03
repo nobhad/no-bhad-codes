@@ -48,6 +48,7 @@ import { getStatusBadgeHTML, createStatusBadge } from '../../components/status-b
 import { renderEmptyState } from '../../components/empty-state';
 import { initPortalHeader, type PortalHeader } from '../shared/portal-header';
 import { createLogger } from '../../utils/logger';
+import { getReactComponent } from '../../react/registry';
 
 const logger = createLogger('ClientPortal');
 
@@ -1906,6 +1907,9 @@ export class ClientPortalModule extends BaseModule {
     this.dashboardSection.classList.remove('hidden');
     this.dashboardSection.style.display = 'flex';
 
+    // Mount React navigation sidebar
+    this.mountReactNavigation();
+
     // Set initial breadcrumb at top of page (Dashboard when on main dashboard tab)
     loadNavigationModule().then((navModule) => {
       navModule.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
@@ -1935,6 +1939,92 @@ export class ClientPortalModule extends BaseModule {
 
   /** Reference to shared portal header instance */
   private portalHeader: PortalHeader | null = null;
+
+  /** Flag to track if React navigation has been mounted */
+  private reactNavigationMounted = false;
+
+  /**
+   * Mount React navigation sidebar
+   */
+  private async mountReactNavigation(): Promise<void> {
+    if (this.reactNavigationMounted) return;
+
+    const container = document.getElementById('react-portal-navigation-mount');
+    if (!container) {
+      logger.warn('React navigation mount container not found');
+      return;
+    }
+
+    const component = getReactComponent('portalNavigation');
+    if (!component) {
+      logger.warn('React portal navigation component not registered');
+      return;
+    }
+
+    try {
+      // Get current user info
+      const user = this.currentUserData
+        ? {
+          name: this.currentUserData.name || 'Client',
+          email: this.currentUserData.email || ''
+        }
+        : undefined;
+
+      // Get current active tab from hash
+      const hash = window.location.hash;
+      const activeTab = this.getTabFromHash(hash);
+
+      component.mount(container, {
+        activeTab,
+        onNavigate: (tab: string) => {
+          loadNavigationModule().then((navModule) => {
+            navModule.navigateTo(tab, {
+              loadFiles: () => this.loadFiles(),
+              loadInvoices: () => this.loadInvoices(),
+              loadProjectPreview: () => this.loadProjectPreview(),
+              loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
+              loadHelp: () => this.loadHelp(),
+              loadDocumentRequests: () => this.loadDocumentRequests(),
+              loadAdHocRequests: () => this.loadAdHocRequests(),
+              loadQuestionnaires: () => this.loadQuestionnaires(),
+              loadSettings: () => this.loadUserSettings(),
+              loadDashboard: () => this.loadDashboardStats()
+            });
+          });
+        },
+        user,
+        badges: {}, // Will be updated when counts are loaded
+        onLogout: () => this.logout(),
+        getAuthToken: () => sessionStorage.getItem('client_auth_token')
+      });
+
+      this.reactNavigationMounted = true;
+      logger.log('React navigation mounted');
+    } catch (error) {
+      logger.error('Failed to mount React navigation:', error);
+    }
+  }
+
+  /**
+   * Get tab name from URL hash
+   */
+  private getTabFromHash(hash: string): string {
+    if (!hash || hash === '#' || hash === '#/') {
+      return 'dashboard';
+    }
+    const path = hash.startsWith('#') ? hash.slice(1) : hash;
+    const hashToTab: Record<string, string> = {
+      '/dashboard': 'dashboard',
+      '/requests': 'requests',
+      '/questionnaires': 'questionnaires',
+      '/messages': 'messages',
+      '/review': 'preview',
+      '/files': 'files',
+      '/help': 'help',
+      '/settings': 'settings'
+    };
+    return hashToTab[path] || 'dashboard';
+  }
 
   /**
    * Initialize the shared portal header (notification bell, theme toggle)

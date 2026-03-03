@@ -41,8 +41,8 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
     <div className="tw-card">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <Icon className="tw-h-4 tw-w-4 tw-text-white" />
-          <h4 className="tw-text-[14px] tw-font-mono tw-text-white">
+          <Icon className="tw-h-4 tw-w-4 tw-text-primary" />
+          <h4 className="tw-text-[14px] tw-font-mono tw-text-primary">
             {title}
           </h4>
           {stepNumber && (
@@ -55,7 +55,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
           <button
             type="button"
             onClick={onEdit}
-            className="tw-btn-ghost tw-text-[12px]"
+            className="btn-ghost tw-text-[12px]"
           >
             <Edit3 className="tw-h-3 tw-w-3" />
             Edit
@@ -68,7 +68,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
             <span className="tw-text-[var(--portal-text-muted)] tw-min-w-[100px] tw-flex-shrink-0">
               {item.label}:
             </span>
-            <span className="tw-text-white">{item.value || '-'}</span>
+            <span className="tw-text-primary">{item.value || '-'}</span>
           </div>
         ))}
       </div>
@@ -110,7 +110,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
 
       {/* Validation Errors Banner */}
       {hasErrors && (
-        <div className="tw-error tw-flex tw-items-start tw-gap-3">
+        <div className="error-state tw-flex tw-items-start tw-gap-3">
           <AlertCircle className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-mt-0.5" />
           <div>
             <p className="tw-text-[14px] tw-font-bold tw-font-mono">
@@ -176,7 +176,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
           <h4 className="tw-label tw-mb-2">
             Project Description
           </h4>
-          <p className="tw-text-[14px] tw-text-white tw-font-mono tw-whitespace-pre-wrap">
+          <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
             {projectOverview.projectDescription}
           </p>
         </div>
@@ -255,17 +255,17 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
           <h4 className="tw-label tw-mb-2">
             Additional Notes
           </h4>
-          <p className="tw-text-[14px] tw-text-white tw-font-mono tw-whitespace-pre-wrap">
+          <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
             {requirements.additionalNotes}
           </p>
         </div>
       )}
 
       {/* Submission Notice */}
-      <div className="tw-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-white">
-        <Check className="tw-h-4 tw-w-4 tw-text-white tw-flex-shrink-0 tw-mt-0.5" />
+      <div className="tw-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-primary">
+        <Check className="tw-h-4 tw-w-4 tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
         <div>
-          <p className="tw-text-[14px] tw-font-bold tw-font-mono tw-text-white">
+          <p className="tw-text-[14px] tw-font-bold tw-font-mono tw-text-primary">
             Ready to submit
           </p>
           <p className="tw-text-[14px] tw-text-[var(--portal-text-muted)] tw-mt-1 tw-font-mono">

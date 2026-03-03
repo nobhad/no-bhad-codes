@@ -28,6 +28,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import {
   PortalDropdown,
@@ -41,6 +42,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { CONTACTS_FILTER_CONFIG, CONTACT_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('ContactsTable');
 
 interface Contact {
   id: number;
@@ -71,6 +76,10 @@ interface ContactsTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 const CONTACT_STATUS_CONFIG: Record<string, { label: string }> = {
@@ -120,7 +129,7 @@ function sortContacts(a: Contact, b: Contact, sort: SortConfig): number {
   }
 }
 
-export function ContactsTable({ getAuthToken, showNotification, onNavigate }: ContactsTableProps) {
+export function ContactsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContactsTableProps) {
   const containerRef = useFadeIn();
 
   // Build headers helper with auth token
@@ -167,9 +176,9 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_contacts_pagination',
+    storageKey: overviewMode ? undefined : 'admin_contacts_pagination',
     totalItems: filteredContacts.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedContacts = useMemo(
@@ -188,7 +197,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/contacts', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.CONTACTS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -218,7 +227,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
   // Status change handler
   const handleStatusChange = useCallback(async (contactId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/admin/contacts/${contactId}`, {
+      const response = await fetch(buildEndpoint.adminContact(contactId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -236,14 +245,14 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
       );
       showNotification?.('Contact status updated', 'success');
     } catch (err) {
-      console.error('Failed to update contact status:', err);
+      logger.error('Failed to update contact status:', err);
       showNotification?.('Failed to update contact status', 'error');
     }
   }, [getHeaders, showNotification]);
 
   const togglePrimary = useCallback(async (contactId: number, isPrimary: boolean) => {
     try {
-      const response = await fetch(`/api/admin/contacts/${contactId}`, {
+      const response = await fetch(buildEndpoint.adminContact(contactId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -259,7 +268,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
       );
       showNotification?.(isPrimary ? 'Removed primary status' : 'Set as primary contact', 'success');
     } catch (err) {
-      console.error('Failed to update contact:', err);
+      logger.error('Failed to update contact:', err);
       showNotification?.('Failed to update contact', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -270,7 +279,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
-      const response = await fetch('/api/admin/contacts/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.CONTACTS_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -283,7 +292,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} contact${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete contacts:', err);
+      logger.error('Failed to delete contacts:', err);
       showNotification?.('Failed to delete contacts', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -366,16 +375,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadContacts}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredContacts.length > 0 ? (
           <TablePagination
@@ -394,7 +393,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -407,29 +405,12 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
             </AdminTableHead>
             <AdminTableHead className="star-col"></AdminTableHead>
             <AdminTableHead
-              className="name-col"
+              className="contact-col"
               sortable
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
-              Name
-            </AdminTableHead>
-            <AdminTableHead
-              className="email-col"
-              sortable
-              sortDirection={sort?.column === 'email' ? sort.direction : null}
-              onClick={() => toggleSort('email')}
-            >
-              Email
-            </AdminTableHead>
-            <AdminTableHead className="phone-col">Phone</AdminTableHead>
-            <AdminTableHead
-              className="company-col"
-              sortable
-              sortDirection={sort?.column === 'company' ? sort.direction : null}
-              onClick={() => toggleSort('company')}
-            >
-              Company
+              Contact
             </AdminTableHead>
             <AdminTableHead className="client-col">Client</AdminTableHead>
             <AdminTableHead className="status-col">Status</AdminTableHead>
@@ -437,12 +418,14 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
-            <AdminTableLoading colSpan={9} rows={5} />
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={6} message={error} onRetry={loadContacts} />
+          ) : isLoading ? (
+            <AdminTableLoading colSpan={6} rows={5} />
           ) : paginatedContacts.length === 0 ? (
             <AdminTableEmpty
-              colSpan={9}
+              colSpan={6}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No contacts match your filters' : 'No contacts yet'}
             />
@@ -476,52 +459,24 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
                     )}
                   </button>
                 </AdminTableCell>
-                <AdminTableCell className="primary-cell">
+                <AdminTableCell className="primary-cell contact-cell">
                   <div className="cell-content">
                     <span className="cell-title">
                       {contact.firstName} {contact.lastName}
                     </span>
+                    <span className="cell-subtitle">{contact.email}</span>
+                    {(contact.company || contact.phone) && (
+                      <span className="identity-company">
+                        {[contact.company, contact.phone].filter(Boolean).join(' • ')}
+                      </span>
+                    )}
                     {contact.role && (
                       <span className="cell-subtitle">{contact.role}</span>
                     )}
                   </div>
                 </AdminTableCell>
-                <AdminTableCell className="email-cell">
-                  <a
-                    href={`mailto:${contact.email}`}
-                    className="cell-link"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Mail className="cell-icon-sm" />
-                    {contact.email}
-                  </a>
-                </AdminTableCell>
-                <AdminTableCell className="phone-cell">
-                  {contact.phone ? (
-                    <a
-                      href={`tel:${contact.phone}`}
-                      className="cell-link cell-link-muted"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Phone className="cell-icon-sm" />
-                      {contact.phone}
-                    </a>
-                  ) : (
-                    <span className="text-muted">-</span>
-                  )}
-                </AdminTableCell>
-                <AdminTableCell className="company-cell">
-                  {contact.company ? (
-                    <span className="cell-with-icon">
-                      <Building className="cell-icon-sm text-muted" />
-                      {contact.company}
-                    </span>
-                  ) : (
-                    <span className="text-muted">-</span>
-                  )}
-                </AdminTableCell>
                 <AdminTableCell className="client-cell">
-                  {contact.clientName ? (
+                  {contact.clientName && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -531,8 +486,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
                     >
                       {contact.clientName}
                     </button>
-                  ) : (
-                    <span className="text-muted">-</span>
                   )}
                 </AdminTableCell>
                 <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
@@ -546,16 +499,18 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
                       </button>
                     </PortalDropdownTrigger>
                     <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(CONTACT_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(contact.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
+                      {Object.entries(CONTACT_STATUS_CONFIG)
+                        .filter(([status]) => status !== contact.status)
+                        .map(([status, config]) => (
+                          <PortalDropdownItem
+                            key={status}
+                            onClick={() => handleStatusChange(contact.id, status)}
+                          >
+                            <StatusBadge status={getStatusVariant(status)} size="sm">
+                              {config.label}
+                            </StatusBadge>
+                          </PortalDropdownItem>
+                        ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </AdminTableCell>
@@ -570,7 +525,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate }: Co
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

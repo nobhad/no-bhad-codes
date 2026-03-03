@@ -15,6 +15,7 @@ import type {
   ConditionalRule,
   QuestionType
 } from './types';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
 
 // ============================================================================
 // CONSTANTS
@@ -189,7 +190,7 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
           {selectedOption?.label || question.placeholder || 'Select an option'}
         </span>
         <ChevronDown className={cn(
-          'tw-h-3.5 tw-w-3.5 tw-text-muted qform-chevron-icon',
+          'tw-h-3.5 tw-w-3.5 qform-chevron-icon',
           isOpen && 'tw-rotate-180'
         )} />
       </button>
@@ -242,7 +243,7 @@ function MultiselectInput({ question, value, onChange, disabled }: QuestionInput
             type="button"
             onClick={() => handleToggle(option.value)}
             disabled={disabled}
-            className={cn(isSelected ? 'tw-btn-primary' : 'tw-btn-secondary', 'qform-multiselect-btn')}
+            className={cn(isSelected ? 'btn-primary' : 'btn-secondary', 'qform-multiselect-btn')}
           >
             {option.label}
           </button>
@@ -351,7 +352,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
             <button
               type="button"
               onClick={handleRemove}
-              className="tw-btn-icon"
+              className="btn-icon"
             >
               <X className="tw-h-3.5 tw-w-3.5" />
             </button>
@@ -369,7 +370,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
             disabled && 'qform-dropzone-disabled'
           )}
         >
-          <Upload className="tw-h-5 tw-w-5 tw-text-muted" />
+          <Upload className="tw-h-5 tw-w-5" />
           <div className="qform-dropzone-text">
             <span className="tw-text-primary qform-dropzone-label">
               Drop file here or click to upload
@@ -477,7 +478,7 @@ export function QuestionnaireForm({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const saveResponse = await fetch(`/api/questionnaires/responses/${response.id}/save`, {
+      const saveResponse = await fetch(buildEndpoint.questionnaireResponseSave(response.id), {
         method: 'POST',
         credentials: 'include',
         headers,
@@ -572,7 +573,7 @@ export function QuestionnaireForm({
       await saveAnswers();
 
       // Then submit
-      const submitResponse = await fetch(`/api/questionnaires/responses/${response.id}/submit`, {
+      const submitResponse = await fetch(buildEndpoint.questionnaireResponseSubmit(response.id), {
         method: 'POST',
         credentials: 'include',
         headers,
@@ -600,7 +601,7 @@ export function QuestionnaireForm({
       <div className="qform-header">
         <div className="qform-header-left">
           <button
-            className="tw-btn-icon"
+            className="btn-icon"
             onClick={onBack}
             title="Back to questionnaires"
           >
@@ -704,7 +705,7 @@ export function QuestionnaireForm({
       {!isReadOnly && (
         <div className="qform-actions">
           <button
-            className="tw-btn-secondary qform-btn-with-icon"
+            className="btn-secondary qform-btn-with-icon"
             onClick={saveAnswers}
             disabled={isSaving || !hasUnsavedChanges}
           >
@@ -713,7 +714,7 @@ export function QuestionnaireForm({
           </button>
 
           <button
-            className="tw-btn-primary qform-btn-with-icon"
+            className="btn-primary qform-btn-with-icon"
             onClick={handleSubmit}
             disabled={progress < 100 || isSubmitting}
           >

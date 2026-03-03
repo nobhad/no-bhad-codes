@@ -53,8 +53,8 @@
   min-height: 0; /* Allow flex to shrink */
   max-height: 100%; /* Don't exceed parent */
   background: var(--color-terminal-bg-panel);
-  border: 1px solid var(--color-terminal-border);
-  border-radius: 10px;
+  border: var(--border-width) solid var(--color-terminal-border);
+  border-radius: var(--portal-radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-terminal);
 }
@@ -65,8 +65,8 @@
 
 .terminal-header {
   background: var(--color-terminal-bg-light);
-  border-bottom: 1px solid var(--color-terminal-border);
-  padding: 10px 16px;
+  border-bottom: var(--border-width) solid var(--color-terminal-border);
+  padding: var(--space-2-5, 10px) var(--space-4);
   display: flex;
   align-items: center;
   gap: var(--icon-gap-xl);
@@ -81,7 +81,7 @@
 .terminal-btn {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   border: none;
   cursor: default;
 }
@@ -114,7 +114,7 @@
 /* Terminal title */
 .terminal-title {
   color: var(--color-terminal-text-muted);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   flex: 1;
   text-align: center;
   font-family: inherit;
@@ -127,11 +127,11 @@
 .terminal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .terminal-body > * {
@@ -155,7 +155,7 @@
 .terminal-body::-webkit-scrollbar-thumb,
 .terminal-window::-webkit-scrollbar-thumb {
   background: var(--color-terminal-scrollbar);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
 }
 
 .terminal-body::-webkit-scrollbar-thumb:hover,
@@ -168,8 +168,8 @@
    ============================================================================ */
 
 .terminal-input-area {
-  border-top: 1px solid var(--color-terminal-border);
-  padding: 10px 20px;
+  border-top: var(--border-width) solid var(--color-terminal-border);
+  padding: var(--space-2-5, 10px) var(--space-5);
   background: var(--color-terminal-bg-panel);
   display: flex;
   align-items: center;
@@ -197,7 +197,7 @@ input.terminal-input,
   outline: none;
   caret-color: transparent;
   box-shadow: none;
-  padding: 4px 0;
+  padding: var(--space-1) 0;
 }
 
 input.terminal-input::placeholder,
@@ -279,12 +279,12 @@ input.terminal-input:-webkit-autofill,
   background: var(--color-terminal-green-dark);
   color: var(--color-terminal-bg);
   border: none;
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   font-family: inherit;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 4px;
+  transition: all var(--transition-mouse);
+  border-radius: var(--portal-radius-sm);
 }
 
 .terminal-send:hover:not(:disabled),
@@ -311,7 +311,7 @@ input.terminal-input:-webkit-autofill,
 
 .typing-cursor {
   display: inline;
-  margin-left: 2px;
+  margin-left: var(--space-0-5);
   color: var(--color-terminal-green);
 }
 
@@ -320,7 +320,7 @@ input.terminal-input:-webkit-autofill,
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   color: var(--color-terminal-green-dark);
 }
 
@@ -350,9 +350,9 @@ input.terminal-input:-webkit-autofill,
 .terminal .terminal-progress,
 .terminal-intake .terminal-progress,
 .terminal-progress {
-  padding: 1rem 20px 8px 20px;
+  padding: var(--space-4) var(--space-5) var(--space-2) var(--space-5);
   background: var(--color-terminal-bg-panel);
-  border-bottom: 1px solid var(--color-terminal-border);
+  border-bottom: var(--border-width) solid var(--color-terminal-border);
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -362,7 +362,7 @@ input.terminal-input:-webkit-autofill,
 
 .terminal-progress .progress-label {
   color: var(--color-terminal-text-muted);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -374,7 +374,7 @@ input.terminal-input:-webkit-autofill,
   min-width: 0;
   height: 6px;
   background: var(--color-terminal-border);
-  border-radius: 3px;
+  border-radius: var(--portal-radius-xs);
   overflow: hidden;
   display: block;
   border: none;
@@ -384,13 +384,13 @@ input.terminal-input:-webkit-autofill,
 .terminal-progress .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-terminal-green-dark), var(--color-terminal-green));
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  border-radius: var(--portal-radius-xs);
+  transition: width var(--transition-normal) ease;
 }
 
 .terminal-progress .progress-percent {
   color: var(--color-terminal-green);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   min-width: 40px;
   text-align: right;
 }
@@ -478,7 +478,7 @@ body[data-page="client-intake"] .terminal-window {
    ============================================================================ */
 
 .terminal-login-info {
-  padding: 0 0 12px 0;
+  padding: 0 0 var(--space-3) 0;
   color: var(--color-terminal-text-muted);
   font-size: 16px;
   line-height: 1.6;
@@ -500,11 +500,11 @@ body[data-page="client-intake"] .terminal-window {
 .terminal-chat {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 16px;
+  gap: var(--space-4);
   min-height: 0; /* Allow flex to shrink - input area must stay visible */
 }
 
@@ -523,7 +523,7 @@ body[data-page="client-intake"] .terminal-window {
 
 .terminal-chat::-webkit-scrollbar-thumb {
   background: var(--color-terminal-scrollbar);
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
 }
 
 .terminal-chat::-webkit-scrollbar-thumb:hover {
@@ -535,16 +535,16 @@ body[data-page="client-intake"] .terminal-window {
    ============================================================================ */
 
 .chat-message {
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 /* Clickable messages to go back and edit */
 .chat-message.clickable-message {
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  padding: 2px 4px;
-  margin-left: -4px;
-  border-radius: 3px;
+  transition: background-color var(--transition-mouse) ease;
+  padding: var(--space-0-5) var(--space-1);
+  margin-left: calc(-1 * var(--space-1));
+  border-radius: var(--portal-radius-xs);
 }
 
 .chat-message.clickable-message:hover {
@@ -587,7 +587,7 @@ body[data-page="client-intake"] .terminal-window {
 /* AI Messages - bright green with ❯ prompt */
 .chat-message.ai .message-content {
   color: var(--color-terminal-green);
-  font-size: 17px;
+  font-size: var(--font-size-base);
   line-height: 1.6;
 }
 
@@ -599,7 +599,7 @@ body[data-page="client-intake"] .terminal-window {
 
 /* User Messages - light text with $ prompt */
 .chat-message.user {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .terminal .chat-message.user .message-content {
@@ -615,12 +615,12 @@ body[data-page="client-intake"] .terminal-window {
 /* System Messages - summary/review styling */
 .chat-message.system .message-content {
   color: var(--color-terminal-green);
-  font-size: 15px;
+  font-size: var(--font-size-base);
   font-style: normal;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.6;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
 }
 
 /* Summary value highlighting - answers in blue for readability */
@@ -675,21 +675,21 @@ body[data-page="client-intake"] .terminal-window {
 .chat-options {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  padding-left: 20px;
+  gap: var(--space-0-5);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-left: var(--space-5);
 }
 
 .chat-option {
   background: transparent;
   border: none;
   color: var(--color-terminal-blue);
-  padding: 2px 0;
+  padding: var(--space-0-5) 0;
   font-family: inherit;
   font-size: 16px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--transition-mouse);
   text-align: left;
 }
 
@@ -722,13 +722,13 @@ body[data-page="client-intake"] .terminal-window {
   background: var(--color-terminal-green-dark);
   border: none;
   color: var(--color-terminal-bg);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   font-family: inherit;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   text-align: left;
-  border-radius: 4px;
+  border-radius: var(--portal-radius-sm);
 }
 
 .terminal .confirm-btn:hover {
@@ -812,7 +812,7 @@ svg.terminal-avatar-img #Eye image {
   }
 
   .terminal-body {
-    padding: 12px;
+    padding: var(--space-3);
   }
 
   /* Mobile: Force filters on SVG elements */
@@ -857,7 +857,7 @@ svg.terminal-avatar-img #Eye image {
   }
 
   .terminal-chat {
-    padding: 12px;
+    padding: var(--space-3);
     max-height: calc(100vh - 280px);
   }
 
@@ -877,15 +877,15 @@ svg.terminal-avatar-img #Eye image {
 
 @media (--small-mobile) {
   .terminal-header {
-    padding: 6px 12px;
+    padding: var(--space-1-5) var(--space-3);
   }
 
   .terminal-title {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
   }
 
   .terminal-input-area {
-    padding: 12px;
+    padding: var(--space-3);
   }
 
   .terminal-prompt {

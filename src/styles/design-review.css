@@ -35,7 +35,7 @@
   border-radius: var(--portal-radius-md);
   padding: var(--space-2);
   overflow: hidden;
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--border-width) solid var(--portal-bg-medium);
 }
 
 .design-viewer-header {
@@ -43,14 +43,14 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--border-width) solid var(--portal-bg-medium);
 }
 
 .round-selector {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-light);
 }
 
@@ -60,7 +60,7 @@
 }
 
 .round-selector select {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   padding: 6px 12px;
 }
 
@@ -73,7 +73,7 @@
 /* .icon-btn base styles in shared/portal-buttons.css */
 
 #design-zoom-level {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   min-width: 40px;
   text-align: center;
@@ -93,7 +93,7 @@
 .annotation-canvas {
   max-width: 100%;
   max-height: 100%;
-  border: 2px solid var(--portal-bg-light);
+  border: var(--border-width) solid var(--portal-bg-light);
   border-radius: var(--portal-radius-xs);
   cursor: crosshair;
   box-shadow: 0 4px 12px var(--portal-alpha-black-15);
@@ -115,7 +115,7 @@
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-md);
   padding: var(--space-2);
-  border: 1px solid var(--portal-bg-medium);
+  border: var(--border-width) solid var(--portal-bg-medium);
   overflow-y: auto;
 }
 
@@ -128,12 +128,12 @@
   flex-direction: column;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--border-width) solid var(--portal-bg-medium);
 }
 
 .annotation-tools-section h3 {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -147,7 +147,7 @@
 #design-clear-annotations {
   width: 100%;
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================
@@ -159,12 +159,12 @@
   flex-direction: column;
   gap: var(--space-2);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--portal-bg-medium);
+  border-bottom: var(--border-width) solid var(--portal-bg-medium);
 }
 
 .design-elements-section h3 {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;

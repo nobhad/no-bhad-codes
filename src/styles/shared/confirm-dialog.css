@@ -101,7 +101,6 @@
 .confirm-dialog-icon svg {
   width: var(--icon-size-2xl);
   height: var(--icon-size-2xl);
-  stroke-width: 1.5;
 }
 
 /* All icons use same color as title text */
@@ -138,7 +137,7 @@
   justify-content: center;
   padding: var(--space-1-5) var(--space-3);
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;

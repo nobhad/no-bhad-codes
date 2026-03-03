@@ -49,7 +49,7 @@
 
 .auth-gate-container {
   background: var(--portal-bg-darkest);
-  border: 2px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: clamp(1.5rem, 4vw, 2.5rem);
   width: 100%;
   max-width: min(500px, 90vw);
@@ -126,7 +126,7 @@
 .auth-gate .form-input {
   width: 100%;
   padding: var(--space-2) var(--space-3);
-  border: 2px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   font-size: var(--font-size-base, 1rem);
   background-color: var(--portal-bg-darkest);
   color: var(--portal-text-light);
@@ -188,11 +188,11 @@
 .auth-gate .auth-error {
   display: none;
   color: var(--color-danger);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   margin-bottom: 1rem;
   padding: 0.75rem;
   background-color: transparent;
-  border: 1px solid var(--color-danger);
+  border: var(--border-width) solid var(--color-danger);
   font-weight: 500;
   text-align: center;
 }
@@ -208,7 +208,7 @@
 .auth-gate-form .error-message {
   display: none;
   color: var(--color-danger);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   margin-top: 0.25rem;
   font-weight: 500;
 }
@@ -226,8 +226,8 @@
 .auth-gate-form .auth-submit {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
-  border: 2px solid var(--portal-border-color);
-  font-size: 0.9rem;
+  border: var(--border-width) solid var(--portal-border-color);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: "Inconsolata", "JetBrains Mono", monospace;
@@ -279,7 +279,7 @@
 .auth-link {
   color: var(--portal-text-secondary);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   transition: color var(--transition-fast);
 }
 

@@ -214,9 +214,9 @@ export function ModalDropdown({
         className={cn(
           'modal-dropdown-trigger tw-w-full tw-flex tw-items-center tw-justify-between',
           'tw-px-3 tw-py-2 tw-text-left',
-          'tw-border tw-border-white/20 tw-bg-transparent',
+          'tw-border tw-border-primary/20 tw-bg-transparent',
           'tw-transition-colors',
-          'hover:tw-border-white/40',
+          'hover:tw-border-primary/40',
           'focus:tw-outline-none focus:tw-border-primary',
           disabled && 'tw-opacity-50 tw-cursor-not-allowed',
           error && 'tw-border-danger',
@@ -248,17 +248,17 @@ export function ModalDropdown({
         <div className="modal-dropdown-overlay tw-fixed tw-inset-0 tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50">
           <div
             ref={dropdownRef}
-            className="tw-w-full tw-max-w-md tw-mx-4 tw-bg-[var(--portal-bg-dark)] tw-border tw-border-white/20 tw-max-h-[80vh] tw-flex tw-flex-col"
+            className="tw-w-full tw-max-w-md tw-mx-4 tw-bg-[var(--portal-bg-dark)] tw-border tw-border-primary/20 tw-max-h-[80vh] tw-flex tw-flex-col"
             role="listbox"
             aria-label={label || 'Select options'}
           >
             {/* Header */}
-            <div className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-border-b tw-border-white/20">
+            <div className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-border-b tw-border-primary/20">
               <span className="tw-font-medium">{label || 'Select'}</span>
               <button
                 type="button"
                 onClick={handleClose}
-                className="tw-p-1 tw-text-muted hover:tw-text-white tw-transition-colors"
+                className="tw-p-1 tw-text-muted hover:tw-text-primary tw-transition-colors"
                 aria-label="Close"
               >
                 <X className="tw-h-5 tw-w-5" />
@@ -267,7 +267,7 @@ export function ModalDropdown({
 
             {/* Search Input */}
             {searchable && (
-              <div className="tw-p-3 tw-border-b tw-border-white/20">
+              <div className="tw-p-3 tw-border-b tw-border-primary/20">
                 <div className="tw-relative">
                   <Search className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 tw-h-4 tw-w-4 tw-text-muted" />
                   <input
@@ -280,7 +280,7 @@ export function ModalDropdown({
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={searchPlaceholder}
-                    className="tw-w-full tw-pl-10 tw-pr-3 tw-py-2 tw-bg-transparent tw-border tw-border-white/20 focus:tw-border-primary focus:tw-outline-none"
+                    className="tw-w-full tw-pl-10 tw-pr-3 tw-py-2 tw-bg-transparent tw-border tw-border-primary/20 focus:tw-border-primary focus:tw-outline-none"
                   />
                 </div>
               </div>
@@ -323,7 +323,7 @@ export function ModalDropdown({
                             'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
                             isSelected
                               ? 'tw-bg-primary tw-border-primary'
-                              : 'tw-border-white/40'
+                              : 'tw-border-primary/40'
                           )}
                         >
                           {isSelected && <Check className="tw-h-3 tw-w-3 tw-text-black" />}
@@ -348,18 +348,18 @@ export function ModalDropdown({
 
             {/* Footer for multi-select */}
             {multiple && (
-              <div className="tw-flex tw-justify-end tw-gap-2 tw-p-3 tw-border-t tw-border-white/20">
+              <div className="tw-flex tw-justify-end tw-gap-2 tw-p-3 tw-border-t tw-border-primary/20">
                 <button
                   type="button"
                   onClick={() => onChange([])}
-                  className="tw-btn-secondary tw-text-sm"
+                  className="btn-secondary tw-text-sm"
                 >
                   Clear
                 </button>
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="tw-btn-primary tw-text-sm"
+                  className="btn-primary tw-text-sm"
                 >
                   Done
                 </button>

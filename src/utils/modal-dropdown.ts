@@ -17,6 +17,10 @@ let globalHandlersInitialized = false;
 // Track active dropdown for repositioning on scroll/resize
 let activeDropdown: HTMLElement | null = null;
 
+// Store global handler references for cleanup
+let globalClickHandler: ((e: MouseEvent) => void) | null = null;
+let globalKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
+
 /**
  * Position the dropdown menu using fixed positioning
  * This allows the menu to escape modal overflow constraints
@@ -91,7 +95,7 @@ function setupGlobalDropdownHandlers(): void {
   globalHandlersInitialized = true;
 
   // Close dropdowns on click outside
-  document.addEventListener('click', (e) => {
+  globalClickHandler = (e: MouseEvent) => {
     const target = e.target as Node;
     document.querySelectorAll('.custom-dropdown[data-modal-dropdown].open').forEach((dropdown) => {
       if (!dropdown.contains(target)) {
@@ -102,10 +106,11 @@ function setupGlobalDropdownHandlers(): void {
         }
       }
     });
-  });
+  };
+  document.addEventListener('click', globalClickHandler);
 
   // Close dropdowns on escape key
-  document.addEventListener('keydown', (e) => {
+  globalKeydownHandler = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       document
         .querySelectorAll('.custom-dropdown[data-modal-dropdown].open')
@@ -115,13 +120,38 @@ function setupGlobalDropdownHandlers(): void {
         });
       activeDropdown = null;
     }
-  });
+  };
+  document.addEventListener('keydown', globalKeydownHandler);
 
   // Reposition on scroll (capture phase to catch modal scroll)
   document.addEventListener('scroll', handleScrollOrResize, true);
 
   // Reposition on resize
   window.addEventListener('resize', handleScrollOrResize);
+}
+
+/**
+ * Cleanup global dropdown handlers
+ * Call this when unmounting the app or cleaning up
+ */
+export function cleanupGlobalDropdownHandlers(): void {
+  if (!globalHandlersInitialized) return;
+
+  if (globalClickHandler) {
+    document.removeEventListener('click', globalClickHandler);
+    globalClickHandler = null;
+  }
+
+  if (globalKeydownHandler) {
+    document.removeEventListener('keydown', globalKeydownHandler);
+    globalKeydownHandler = null;
+  }
+
+  document.removeEventListener('scroll', handleScrollOrResize, true);
+  window.removeEventListener('resize', handleScrollOrResize);
+
+  globalHandlersInitialized = false;
+  activeDropdown = null;
 }
 
 export interface ModalDropdownOptions {

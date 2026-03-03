@@ -10,6 +10,10 @@
 
 /* global DragEvent */
 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('KanbanBoard');
+
 export interface KanbanColumn {
   id: string;
   title: string;
@@ -49,7 +53,7 @@ export function createKanbanBoard(config: KanbanConfig): {
 } {
   const container = document.getElementById(config.containerId);
   if (!container) {
-    console.error('[KanbanBoard] Container not found:', config.containerId);
+    logger.error('[KanbanBoard] Container not found:', config.containerId);
     return {
       refresh: () => {},
       destroy: () => {}
@@ -254,7 +258,7 @@ export function createKanbanBoard(config: KanbanConfig): {
           }
         }
       } catch (error) {
-        console.error('[KanbanBoard] Failed to move item:', error);
+        logger.error('[KanbanBoard] Failed to move item:', error);
         // Re-render to reset state
         render();
       }

@@ -58,14 +58,14 @@ function buildNavigationItems(config: AdminCommandPaletteConfig): CommandItem[] 
       shortcut: '⌘1',
       icon: ICONS.LAYOUT_DASHBOARD,
       section: 'navigation',
-      keywords: ['home', 'overview', 'main'],
+      keywords: ['home', 'dashboard', 'main'],
       action: () => {
-        config.switchTab('overview');
+        config.switchTab('dashboard');
         addRecentItem({
           id: 'nav-dashboard',
           label: 'Dashboard',
           icon: ICONS.LAYOUT_DASHBOARD,
-          action: () => config.switchTab('overview')
+          action: () => config.switchTab('dashboard')
         });
       }
     },
@@ -498,7 +498,7 @@ function hideKeyboardShortcutsPanel(): void {
  * Matches the data-shortcut attributes in admin/index.html
  */
 const SIDEBAR_SHORTCUTS: Record<string, string> = {
-  '1': 'overview',
+  '1': 'dashboard',
   '2': 'work',
   '3': 'crm',
   '4': 'documents',

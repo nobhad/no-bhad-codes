@@ -18,7 +18,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { TIMING } from '../../../../constants/timing';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface ServiceStatus {
   id: string;
@@ -64,14 +66,14 @@ interface SystemStatusPanelProps {
 }
 
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
-  server: <Server className="tw-h-5 tw-w-5" />,
-  database: <Database className="tw-h-5 tw-w-5" />,
-  cloud: <Cloud className="tw-h-5 tw-w-5" />,
-  mail: <Mail className="tw-h-5 tw-w-5" />,
-  payment: <CreditCard className="tw-h-5 tw-w-5" />,
-  storage: <HardDrive className="tw-h-5 tw-w-5" />,
-  api: <Wifi className="tw-h-5 tw-w-5" />,
-  auth: <Shield className="tw-h-5 tw-w-5" />,
+  server: <Server className="icon-lg" />,
+  database: <Database className="icon-lg" />,
+  cloud: <Cloud className="icon-lg" />,
+  mail: <Mail className="icon-lg" />,
+  payment: <CreditCard className="icon-lg" />,
+  storage: <HardDrive className="icon-lg" />,
+  api: <Wifi className="icon-lg" />,
+  auth: <Shield className="icon-lg" />,
 };
 
 export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }: SystemStatusPanelProps) {
@@ -103,13 +105,21 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/system-status', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.SYSTEM_STATUS, {
         headers: getHeaders(),
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to load system status');
       const result = await response.json();
-      setData(result);
+      // Handle wrapped response (e.g., { data: {...} })
+      const payload = result.data || result;
+      setData({
+        services: Array.isArray(payload.services) ? payload.services : [],
+        metrics: Array.isArray(payload.metrics) ? payload.metrics : [],
+        incidents: Array.isArray(payload.incidents) ? payload.incidents : [],
+        overallStatus: payload.overallStatus || 'operational',
+        lastUpdated: payload.lastUpdated || new Date().toISOString(),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load system status');
     } finally {
@@ -155,20 +165,20 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
       case 'operational':
       case 'good':
       case 'resolved':
-        return <CheckCircle className="tw-h-4 tw-w-4" />;
+        return <CheckCircle className="icon-md" />;
       case 'degraded':
       case 'warning':
       case 'monitoring':
       case 'identified':
-        return <AlertCircle className="tw-h-4 tw-w-4" />;
+        return <AlertCircle className="icon-md" />;
       case 'outage':
       case 'critical':
       case 'investigating':
-        return <XCircle className="tw-h-4 tw-w-4" />;
+        return <XCircle className="icon-md" />;
       case 'maintenance':
-        return <Clock className="tw-h-4 tw-w-4" />;
+        return <Clock className="icon-md" />;
       default:
-        return <Activity className="tw-h-4 tw-w-4" />;
+        return <Activity className="icon-md" />;
     }
   }
 
@@ -200,15 +210,13 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
         </div>
         <div className="status-panel-header-right">
           <label className="tw-text-muted status-panel-auto-refresh">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="tw-checkbox"
+              onCheckedChange={(checked) => setAutoRefresh(checked === true)}
             />
             Auto-refresh
           </label>
-          <button className="tw-btn-secondary" onClick={loadStatus} disabled={isLoading}>
+          <button className="btn-secondary" onClick={loadStatus} disabled={isLoading}>
             <RefreshCw className={cn('status-panel-refresh-icon', isLoading && 'status-panel-refresh-icon-spin')} />
             Refresh
           </button>
@@ -217,9 +225,9 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
 
       {/* Error State */}
       {error && (
-        <div className="tw-error">
+        <div className="error-state">
           {error}
-          <button className="tw-btn-secondary status-retry-btn" onClick={loadStatus}>
+          <button className="btn-secondary status-retry-btn" onClick={loadStatus}>
             Retry
           </button>
         </div>
@@ -228,7 +236,7 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
       {/* Services Grid */}
       <div>
         <h3 className="tw-section-title status-section-title">Services</h3>
-        <div className="tw-grid-stats tw-grid-4-cols">
+        <div className="tw-grid-stats">
           {data.services.map((service) => (
             <div key={service.id} className="tw-stat-card">
               <div className="status-service-header">
@@ -268,7 +276,7 @@ export function SystemStatusPanel({ onNavigate, getAuthToken, showNotification }
       {/* Metrics */}
       <div>
         <h3 className="tw-section-title status-section-title">System Metrics</h3>
-        <div className="tw-grid-stats tw-grid-4-cols">
+        <div className="tw-grid-stats">
           {data.metrics.map((metric) => (
             <div key={metric.id} className="tw-stat-card">
               <div className="status-metric-header">

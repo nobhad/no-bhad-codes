@@ -15,8 +15,44 @@ import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { createLogger } from '../../../utils/logger';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { apiFetch } from '../../../utils/api-client';
+import { getReactComponent } from '../../../react/registry';
 
 const logger = createLogger('Deliverables');
+
+// ============================================
+// REACT INTEGRATION
+// ============================================
+
+let _reactMounted = false;
+let _reactContainer: HTMLElement | null = null;
+
+function _shouldUseReactDeliverables(): boolean {
+  return true;
+}
+
+async function _mountReactDeliverables(
+  container: HTMLElement,
+  projectId: number
+): Promise<boolean> {
+  const component = getReactComponent('deliverablesTable');
+  if (!component) {
+    logger.warn('React deliverables table not registered');
+    return false;
+  }
+
+  try {
+    component.mount(container, {
+      projectId,
+      getAuthToken: () => null
+    });
+    _reactMounted = true;
+    _reactContainer = container;
+    return true;
+  } catch (error) {
+    logger.error('Failed to mount React deliverables:', error);
+    return false;
+  }
+}
 
 // Simple DOM helper
 function el(id: string): HTMLElement | null {

@@ -8,6 +8,10 @@
  * repeated querySelector/getElementById calls.
  */
 
+import { createLogger } from './logger';
+
+const logger = createLogger('DOMCache');
+
 /**
  * Creates a DOM element cache for a module.
  * Elements are lazily cached on first access.
@@ -37,7 +41,7 @@ export function createDOMCache<T extends Record<string, string>>() {
 
       const selector = selectors[key];
       if (!selector) {
-        console.warn(`[DOMCache] No selector registered for key: ${String(key)}`);
+        logger.warn(`No selector registered for key: ${String(key)}`);
         return null;
       }
 

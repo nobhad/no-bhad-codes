@@ -10,7 +10,7 @@
 .rich-text-editor {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   overflow: hidden;
   background: var(--color-black);
 }
@@ -22,7 +22,7 @@
   gap: var(--space-0-5);
   padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-dark);
-  border-bottom: 1px solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border);
 }
 
 .rich-text-toolbar .ql-formats {
@@ -31,7 +31,7 @@
   gap: var(--space-0-5);
   margin-right: var(--space-1-5);
   padding-right: var(--space-1-5);
-  border-right: 1px solid var(--portal-border-light);
+  border-right: var(--border-width) solid var(--portal-border-light);
 }
 
 .rich-text-toolbar .ql-formats:last-child {
@@ -49,7 +49,7 @@
   height: 28px;
   padding: 0;
   background: transparent;
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   color: var(--portal-text-light);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
@@ -71,7 +71,7 @@
   height: 28px;
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
   cursor: pointer;
@@ -84,7 +84,7 @@
 .rich-text-toolbar select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+  box-shadow: var(--focus-ring);
 }
 
 /* Quill toolbar icons - make them visible on dark theme */
@@ -169,7 +169,7 @@
 }
 
 .rich-text-content .ql-editor blockquote {
-  border-left: 3px solid var(--color-primary);
+  border-left: var(--border-width-thick) solid var(--color-primary);
   padding-left: var(--space-2);
   margin: var(--space-2) 0;
   color: var(--portal-text-secondary);
@@ -193,7 +193,7 @@
 /* Variable highlighting */
 .rich-text-content .ql-editor .variable,
 .rich-text-content .ql-editor [data-variable] {
-  background: rgba(var(--color-primary-rgb), 0.2);
+  background: var(--portal-alpha-primary-20);
   color: var(--color-primary);
   padding: var(--space-px) var(--space-0-5);
   font-family: var(--font-family-mono);
@@ -203,7 +203,7 @@
 /* Focus state */
 .rich-text-editor:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+  box-shadow: var(--focus-ring);
 }
 
 /* Disabled state */
@@ -229,14 +229,14 @@
 /* Fix Quill tooltip on dark theme */
 .ql-snow .ql-tooltip {
   background: var(--portal-bg-dark);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-light);
   box-shadow: none;
 }
 
 .ql-snow .ql-tooltip input[type="text"] {
   background: var(--color-black);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-light);
   padding: var(--space-1);
 }
@@ -256,7 +256,7 @@
   gap: var(--space-0-5);
   padding: var(--space-1) var(--space-1-5);
   background: var(--portal-bg-dark);
-  border-top: 1px solid var(--portal-border);
+  border-top: var(--border-width) solid var(--portal-border);
 }
 
 .rich-text-variables-label {
@@ -271,7 +271,7 @@
   align-items: center;
   padding: var(--space-0-5) var(--space-1);
   background: var(--portal-bg-medium);
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
   color: var(--color-primary);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
@@ -280,7 +280,7 @@
 }
 
 .rich-text-variable-btn:hover {
-  background: rgba(var(--color-primary-rgb), 0.1);
+  background: var(--portal-alpha-primary-10);
   border-color: var(--color-primary);
 }
 

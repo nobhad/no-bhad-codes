@@ -15,6 +15,10 @@ import './styles/bundles/site.css';
 import { inject } from '@vercel/analytics';
 import { injectSpeedInsights } from '@vercel/speed-insights';
 
+import { createLogger } from './utils/logger';
+
+const logger = createLogger('MainSite');
+
 // Initialize analytics in production
 if (import.meta.env?.PROD) {
   inject();
@@ -27,7 +31,7 @@ if (typeof window !== 'undefined') {
   setTimeout(() => {
     const html = document.documentElement;
     if (html.classList.contains('intro-loading')) {
-      console.warn('[Failsafe] Forcing intro-loading removal after timeout');
+      logger.warn('Forcing intro-loading removal after timeout');
       html.classList.remove('intro-loading');
       html.classList.add('intro-complete', 'intro-finished');
     }

@@ -7,8 +7,8 @@ import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
 import { ProjectsTable } from './ProjectsTable';
 
 export interface ProjectsMountOptions extends BaseMountOptions {
-  /** Callback when project is selected */
-  onViewProject?: (projectId: number) => void;
+  /** Navigation callback for detail views */
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 export const {

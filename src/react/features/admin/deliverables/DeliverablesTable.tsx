@@ -1,16 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   Package,
   AlertCircle,
-  MoreHorizontal,
   Inbox,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  ExternalLink,
   ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
@@ -32,6 +25,7 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import {
   PortalDropdown,
@@ -45,6 +39,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { DELIVERABLES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('DeliverablesTable');
 
 interface Deliverable {
   id: number;
@@ -201,7 +199,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     try {
       const params = new URLSearchParams();
       if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`/api/admin/deliverables?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.DELIVERABLES}?${params}`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -232,7 +230,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   // Status change handler
   const handleStatusChange = useCallback(async (deliverableId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/admin/deliverables/${deliverableId}`, {
+      const response = await fetch(buildEndpoint.adminDeliverable(deliverableId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -250,7 +248,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       );
       showNotification?.('Deliverable status updated', 'success');
     } catch (err) {
-      console.error('Failed to update deliverable status:', err);
+      logger.error('Failed to update deliverable status:', err);
       showNotification?.('Failed to update deliverable status', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -261,7 +259,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
     const ids = selection.selectedItems.map((d) => d.id);
     try {
-      const response = await fetch('/api/admin/deliverables/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -274,7 +272,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} deliverable${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete deliverables:', err);
+      logger.error('Failed to delete deliverables:', err);
       showNotification?.('Failed to delete deliverables', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -365,16 +363,6 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadDeliverables}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredDeliverables.length > 0 ? (
           <TablePagination
@@ -393,7 +381,6 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -435,8 +422,10 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={8} message={error} onRetry={loadDeliverables} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={8} rows={5} />
           ) : paginatedDeliverables.length === 0 ? (
             <AdminTableEmpty
@@ -489,23 +478,25 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                       </button>
                     </PortalDropdownTrigger>
                     <PortalDropdownContent sideOffset={0} align="start">
-                      {Object.entries(DELIVERABLE_STATUS_CONFIG).map(([status, config]) => (
-                        <PortalDropdownItem
-                          key={status}
-                          onClick={() => handleStatusChange(deliverable.id, status)}
-                        >
-                          <StatusBadge status={getStatusVariant(status)} size="sm">
-                            {config.label}
-                          </StatusBadge>
-                        </PortalDropdownItem>
-                      ))}
+                      {Object.entries(DELIVERABLE_STATUS_CONFIG)
+                        .filter(([status]) => status !== deliverable.status)
+                        .map(([status, config]) => (
+                          <PortalDropdownItem
+                            key={status}
+                            onClick={() => handleStatusChange(deliverable.id, status)}
+                          >
+                            <StatusBadge status={getStatusVariant(status)} size="sm">
+                              {config.label}
+                            </StatusBadge>
+                          </PortalDropdownItem>
+                        ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </AdminTableCell>
                 <AdminTableCell>v{deliverable.version}</AdminTableCell>
                 <AdminTableCell>{deliverable.files}</AdminTableCell>
                 <AdminTableCell className="date-cell">
-                  {deliverable.dueDate ? (
+                  {deliverable.dueDate && (
                     <span
                       className={cn(
                         'due-date',
@@ -517,37 +508,17 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                       )}
                       {formatDate(deliverable.dueDate)}
                     </span>
-                  ) : (
-                    <span className="text-muted">-</span>
                   )}
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        {deliverable.files > 0 && (
-                          <PortalDropdownItem>
-                            <Download className="dropdown-icon" />
-                            Download
-                          </PortalDropdownItem>
-                        )}
-                        <PortalDropdownItem>
-                          <ExternalLink className="dropdown-icon" />
-                          Share Link
-                        </PortalDropdownItem>
-                        <PortalDropdownItem className="text-danger">
-                          <Trash2 className="dropdown-icon" />
-                          Delete
-                        </PortalDropdownItem>
-                      </PortalDropdownContent>
-                    </PortalDropdown>
+                    {deliverable.files > 0 && (
+                      <IconButton action="download" title="Download" />
+                    )}
+                    <IconButton action="copy-link" title="Share Link" />
+                    <IconButton action="delete" title="Delete" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>
@@ -555,7 +526,6 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

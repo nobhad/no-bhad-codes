@@ -6,16 +6,16 @@ import {
   Clock,
   FolderKanban,
   StickyNote,
-  ArrowLeft,
-  RefreshCw,
   MoreHorizontal,
   Pencil,
   Mail,
   Archive,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { IconButton, TabList, TabPanel } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
   PortalDropdown,
@@ -34,6 +34,7 @@ import { ProjectsTab } from './tabs/ProjectsTab';
 import { NotesTab } from './tabs/NotesTab';
 import type { ClientDetailTab, ClientStatus } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
 
 interface ClientDetailProps {
   /** Client ID to display */
@@ -149,7 +150,7 @@ export function ClientDetail({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`/api/clients/${clientId}`, {
+      const response = await fetch(buildEndpoint.client(clientId), {
         method: 'DELETE',
         headers,
         credentials: 'include'
@@ -188,8 +189,8 @@ export function ClientDetail({
   // Loading state
   if (isLoading && !client) {
     return (
-      <div className="tw-loading">
-        <RefreshCw className="tw-h-6 tw-w-6 tw-animate-spin" />
+      <div className="loading-state">
+        <span className="loading-spinner" />
         <span>Loading client...</span>
       </div>
     );
@@ -198,9 +199,9 @@ export function ClientDetail({
   // Error state
   if (error && !client) {
     return (
-      <div className="tw-empty-state">
-        <div className="tw-error">{error}</div>
-        <button className="tw-btn-secondary" onClick={refetch}>
+      <div className="error-state">
+        <p>{error}</p>
+        <button className="btn-secondary" onClick={refetch}>
           Retry
         </button>
       </div>
@@ -210,9 +211,10 @@ export function ClientDetail({
   // No client found
   if (!client) {
     return (
-      <div className="tw-empty-state">
+      <div className="empty-state">
+        <Users className="icon-xl" />
         <span>Client not found</span>
-        <button className="tw-btn-secondary" onClick={onBack}>
+        <button className="btn-secondary" onClick={onBack}>
           Go Back
         </button>
       </div>
@@ -225,13 +227,7 @@ export function ClientDetail({
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-flex tw-items-center tw-gap-3">
           {/* Back Button */}
-          <button
-            className="tw-btn-icon"
-            onClick={onBack}
-            title="Back to clients"
-          >
-            <ArrowLeft className="tw-h-5 tw-w-5" />
-          </button>
+          <IconButton action="back" onClick={onBack} title="Back to clients" />
 
           {/* Client Info */}
           <div className="tw-flex tw-flex-col tw-gap-0.5">
@@ -248,14 +244,16 @@ export function ClientDetail({
                   </button>
                 </PortalDropdownTrigger>
                 <PortalDropdownContent>
-                  {Object.entries(CLIENT_STATUS_CONFIG).map(([status, config]) => (
-                    <PortalDropdownItem
-                      key={status}
-                      onClick={() => handleStatusChange(status as ClientStatus)}
-                    >
-                      <span className="tw-badge">{config.label}</span>
-                    </PortalDropdownItem>
-                  ))}
+                  {Object.entries(CLIENT_STATUS_CONFIG)
+                    .filter(([status]) => status !== client.status)
+                    .map(([status, config]) => (
+                      <PortalDropdownItem
+                        key={status}
+                        onClick={() => handleStatusChange(status as ClientStatus)}
+                      >
+                        <span className="tw-badge">{config.label}</span>
+                      </PortalDropdownItem>
+                    ))}
                 </PortalDropdownContent>
               </PortalDropdown>
             </div>
@@ -278,39 +276,33 @@ export function ClientDetail({
 
         {/* Actions */}
         <div className="tw-flex tw-items-center tw-gap-2">
-          <button
-            className="tw-btn-ghost"
-            onClick={refetch}
-            title="Refresh"
-          >
-            <RefreshCw className={cn('tw-h-4 tw-w-4', isLoading && 'tw-animate-spin')} />
-          </button>
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
           {!client.invitation_sent_at && (
-            <button className="tw-btn-secondary" onClick={handleSendInvitation}>
-              <Mail className="tw-h-4 tw-w-4" />
+            <button className="btn-secondary" onClick={handleSendInvitation}>
+              <Mail className="icon-md" />
               Send Invite
             </button>
           )}
 
-          <button className="tw-btn-secondary" onClick={() => onEdit?.(clientId)}>
-            <Pencil className="tw-h-4 tw-w-4" />
+          <button className="btn-secondary" onClick={() => onEdit?.(clientId)}>
+            <Pencil className="icon-md" />
             Edit
           </button>
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="tw-btn-icon">
-                <MoreHorizontal className="tw-h-5 tw-w-5" />
+              <button className="btn-icon">
+                <MoreHorizontal className="icon-lg" />
               </button>
             </PortalDropdownTrigger>
             <PortalDropdownContent align="end">
               <PortalDropdownItem onClick={() => onEdit?.(clientId)}>
-                <Pencil className="tw-h-3.5 tw-w-3.5" />
+                <Pencil className="icon-sm" />
                 Edit Client
               </PortalDropdownItem>
               <PortalDropdownItem onClick={archiveDialog.open}>
-                <Archive className="tw-h-3.5 tw-w-3.5" />
+                <Archive className="icon-sm" />
                 Archive Client
               </PortalDropdownItem>
               <PortalDropdownSeparator />
@@ -318,7 +310,7 @@ export function ClientDetail({
                 onClick={deleteDialog.open}
                 className="tw-text-[var(--status-cancelled)]"
               >
-                <Trash2 className="tw-h-3.5 tw-w-3.5" />
+                <Trash2 className="icon-sm" />
                 Delete Client
               </PortalDropdownItem>
             </PortalDropdownContent>
@@ -327,67 +319,57 @@ export function ClientDetail({
       </div>
 
       {/* Tabs */}
-      <div className="tw-tab-list">
-        {TABS.map((tab) => {
-          const Icon = TAB_ICONS[tab.id];
-          const isActive = activeTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={isActive ? 'tw-tab-active' : 'tw-tab'}
-            >
-              <Icon className="tw-h-3.5 tw-w-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <TabList
+        tabs={TABS}
+        tabIcons={TAB_ICONS}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        ariaLabel="Client detail tabs"
+      />
 
       {/* Tab Content */}
-      <div className="tw-section tw-min-h-400">
-        {activeTab === 'overview' && (
-          <OverviewTab
-            client={client}
-            health={health}
-            stats={stats}
-            tags={tags}
-            availableTags={availableTags}
-            onUpdateClient={updateClient}
-            onAddTag={addTag}
-            onRemoveTag={removeTag}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="overview" isActive={activeTab === 'overview'}>
+        <OverviewTab
+          client={client}
+          health={health}
+          stats={stats}
+          tags={tags}
+          availableTags={availableTags}
+          onUpdateClient={updateClient}
+          onAddTag={addTag}
+          onRemoveTag={removeTag}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'contacts' && (
-          <ContactsTab
-            contacts={contacts}
-            onAddContact={addContact}
-            onUpdateContact={updateContact}
-            onDeleteContact={deleteContact}
-            showNotification={showNotification}
-          />
-        )}
+      <TabPanel tabId="contacts" isActive={activeTab === 'contacts'}>
+        <ContactsTab
+          contacts={contacts}
+          onAddContact={addContact}
+          onUpdateContact={updateContact}
+          onDeleteContact={deleteContact}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
-        {activeTab === 'activity' && <ActivityTab activities={activities} />}
+      <TabPanel tabId="activity" isActive={activeTab === 'activity'}>
+        <ActivityTab activities={activities} />
+      </TabPanel>
 
-        {activeTab === 'projects' && (
-          <ProjectsTab projects={projects} onViewProject={onViewProject} />
-        )}
+      <TabPanel tabId="projects" isActive={activeTab === 'projects'}>
+        <ProjectsTab projects={projects} onViewProject={onViewProject} />
+      </TabPanel>
 
-        {activeTab === 'notes' && (
-          <NotesTab
-            notes={notes}
-            onAddNote={addNote}
-            onUpdateNote={(noteId, content) => updateNote(noteId, { content })}
-            onDeleteNote={deleteNote}
-            onTogglePin={(noteId, isPinned) => updateNote(noteId, { is_pinned: isPinned })}
-            showNotification={showNotification}
-          />
-        )}
-      </div>
+      <TabPanel tabId="notes" isActive={activeTab === 'notes'}>
+        <NotesTab
+          notes={notes}
+          onAddNote={addNote}
+          onUpdateNote={(noteId, content) => updateNote(noteId, { content })}
+          onDeleteNote={deleteNote}
+          onTogglePin={(noteId, isPinned) => updateNote(noteId, { is_pinned: isPinned })}
+          showNotification={showNotification}
+        />
+      </TabPanel>
 
       {/* Archive Confirmation Dialog */}
       <ConfirmDialog

@@ -49,24 +49,12 @@ const MODULE_LOADERS: Record<string, ModuleLoader> = {
   questionnaires: () => import('../shared/PortalQuestionnaires').then((m) => ({ default: m.default }))
 
   // ========== ADMIN-ONLY MODULES ==========
-  // These modules are only available to admin users
-  // 'overview': () => import('../admin/modules/admin-overview'),
-  // 'tasks': () => import('../admin/modules/admin-tasks'),
-  // 'leads': () => import('../admin/modules/admin-leads'),
-  // 'contacts': () => import('../admin/modules/admin-contacts'),
-  // 'clients': () => import('../admin/modules/admin-clients'),
-  // 'contracts': () => import('../admin/modules/admin-contracts'),
-  // 'document-requests': () => import('../admin/modules/admin-document-requests'),
-  // 'analytics': () => import('../admin/modules/admin-analytics'),
-  // 'workflows': () => import('../admin/modules/admin-workflows'),
-  // 'support': () => import('../admin/modules/admin-knowledge-base'),
-  // 'system': () => import('../admin/modules/admin-system-status'),
+  // Admin modules use ReactModuleLoader for direct React mounting
+  // See: src/features/admin/ReactModuleLoader.ts
 
   // ========== CLIENT-ONLY MODULES ==========
-  // These modules are only available to client users
-  // 'approvals': () => import('../client/modules/portal-approvals'),
-  // 'review': () => import('../client/modules/portal-views'),
-  // 'help': () => import('../client/modules/portal-help'),
+  // Client modules use ReactModuleLoader for direct React mounting
+  // See: src/features/client/ReactModuleLoader.ts
 };
 
 /**

@@ -34,7 +34,7 @@
    ===================================================== */
 .portal-section {
   background: transparent;
-  border: 1px solid var(--table-border-color);
+  border: var(--border-width) solid var(--table-border-color);
   overflow: hidden;
 }
 
@@ -54,7 +54,7 @@
 .portal .content-section > h3:first-child {
   padding: var(--portal-section-heading-padding);
   margin: 0;
-  border-bottom: 1px solid var(--table-border-color);
+  border-bottom: var(--border-width) solid var(--table-border-color);
 }
 
 /* =====================================================
@@ -85,12 +85,11 @@
    Migrate to semantic classes when touching existing code.
    ===================================================== */
 
-/* Primary label variables for consistency */
-:root {
-  --label-font-size: 0.6875rem; /* 11px */
-  --label-font-weight: 400;
-  --label-letter-spacing: 0.05em;
-}
+/* Label variables defined in portal-theme.css (single source of truth)
+   --label-font-size: 0.75rem (12px)
+   --label-font-weight: 500
+   --label-letter-spacing: 0.05em
+*/
 
 /* Primary semantic label classes */
 .portal :is(.field-label, .section-label, .stat-label) {
@@ -197,11 +196,11 @@ html[data-theme="light"] .portal :is(
   display: block;
   margin-bottom: var(--space-1);
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.6875rem; /* 11px - matches table column headers */
-  font-weight: 400;
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
   color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: var(--label-text-transform);
+  letter-spacing: var(--label-letter-spacing);
 }
 
 /* =====================================================
@@ -252,7 +251,7 @@ html[data-theme="light"] .portal :is(
   height: 1.25em;
   flex-shrink: 0;
   vertical-align: middle;
-  margin-right: var(--icon-gap-md); /* 8px - for larger icons */
+  color: inherit;
 }
 
 .portal h2 > .heading-icon svg,
@@ -261,7 +260,7 @@ html[data-theme="light"] .portal :is(
   height: 100%;
 }
 
-/* Icons next to h3 headings (panels, cards) - standard gap */
+/* Icons next to h3 headings (panels, cards) - use parent gap for spacing */
 .portal h3 > .heading-icon,
 .portal .panel-icon {
   display: inline-flex;
@@ -271,7 +270,7 @@ html[data-theme="light"] .portal :is(
   height: 1em;
   flex-shrink: 0;
   vertical-align: middle;
-  margin-right: var(--icon-gap-sm); /* 6px - default icon gap */
+  color: inherit;
 }
 
 .portal h3 > .heading-icon svg,
@@ -307,7 +306,7 @@ html[data-theme="light"] .portal :is(
 /* Card header - Sans-serif font, uppercase */
 .portal .portal-card-header {
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);  /* 18px - card titles */
   font-weight: 400;
   color: var(--portal-text-light);
   text-transform: uppercase;
@@ -513,7 +512,7 @@ html[data-theme="light"] .portal :is(
 .portal .health-indicator {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   flex-shrink: 0;
 }
 
@@ -604,7 +603,7 @@ html[data-theme="light"] .portal :is(
 .portal .summary-card {
   background: transparent;
   border: var(--portal-border);
-  padding: 11px 14px;
+  padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   transition: border-color 0.15s;
 }
@@ -668,7 +667,7 @@ html[data-theme="light"] .portal :is(
   background: transparent;
   border: var(--portal-border);
   color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
+  font-size: inherit;
   transition: border-color 0.15s;
 }
 

@@ -26,9 +26,14 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('FilesManager');
 
 interface FileItem {
   id: number;
@@ -44,6 +49,9 @@ interface FileItem {
   createdAt: string;
   updatedAt: string;
   url?: string;
+  sharedWithClient?: boolean | number;
+  sharedAt?: string;
+  sharedBy?: string;
 }
 
 interface FileStats {
@@ -124,7 +132,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       if (projectId) params.set('projectId', projectId);
       if (clientId) params.set('clientId', clientId);
 
-      const response = await fetch(`/api/admin/files?${params}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.FILES}?${params}`, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -248,7 +256,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
-      const response = await fetch(`/api/admin/files/${fileId}`, {
+      const response = await fetch(buildEndpoint.adminFile(fileId), {
         method: 'DELETE',
         headers: getHeaders(),
         credentials: 'include',
@@ -259,8 +267,44 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
       showNotification?.('File deleted successfully', 'success');
     } catch (err) {
-      console.error('Failed to delete file:', err);
+      logger.error('Failed to delete file:', err);
       showNotification?.('Failed to delete file', 'error');
+    }
+  }
+
+  async function handleToggleShare(file: FileItem) {
+    const isCurrentlyShared = file.sharedWithClient === true || file.sharedWithClient === 1;
+    const action = isCurrentlyShared ? 'unshare' : 'share';
+
+    try {
+      const response = await fetch(buildEndpoint.fileAction(file.id, action), {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error(`Failed to ${action} file`);
+
+      // Update local state
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === file.id
+            ? {
+                ...f,
+                sharedWithClient: !isCurrentlyShared,
+                sharedAt: !isCurrentlyShared ? new Date().toISOString() : undefined,
+              }
+            : f
+        )
+      );
+
+      showNotification?.(
+        isCurrentlyShared ? 'File access revoked from client' : 'File shared with client',
+        'success'
+      );
+    } catch (err) {
+      logger.error(`Failed to ${action} file:`, err);
+      showNotification?.(`Failed to ${action} file`, 'error');
     }
   }
 
@@ -316,16 +360,6 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
           </PortalButton>
         </>
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadFiles}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredFiles.length > 0 ? (
           <TablePagination
@@ -344,7 +378,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
         ) : undefined
       }
     >
-      {!error && (viewMode === 'list' ? (
+      {viewMode === 'list' ? (
         <AdminTable>
           <AdminTableHeader>
             <AdminTableRow>
@@ -356,6 +390,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                 Name
               </AdminTableHead>
               <AdminTableHead>Project</AdminTableHead>
+              <AdminTableHead className="text-center">Shared</AdminTableHead>
               <AdminTableHead
                 className="text-right"
                 sortable
@@ -376,12 +411,14 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
             </AdminTableRow>
           </AdminTableHeader>
 
-          <AdminTableBody animate={!isLoading}>
-            {isLoading ? (
-              <AdminTableLoading colSpan={5} rows={5} />
+          <AdminTableBody animate={!isLoading && !error}>
+            {error ? (
+              <AdminTableError colSpan={6} message={error} onRetry={loadFiles} />
+            ) : isLoading ? (
+              <AdminTableLoading colSpan={6} rows={5} />
             ) : paginatedFiles.length === 0 ? (
               <AdminTableEmpty
-                colSpan={5}
+                colSpan={6}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No files match your filters' : 'No files yet'}
               />
@@ -395,7 +432,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                     </div>
                   </AdminTableCell>
                   <AdminTableCell>
-                    {file.projectName ? (
+                    {file.projectName && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -405,12 +442,20 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                       >
                         {file.projectName}
                       </button>
-                    ) : (
-                      <span className="text-muted">-</span>
+                    )}
+                  </AdminTableCell>
+                  <AdminTableCell className="text-center">
+                    {file.type !== 'folder' && file.projectId && (
+                      <span
+                        className={`status-badge ${file.sharedWithClient ? 'status-active' : 'status-muted'}`}
+                        title={file.sharedWithClient && file.sharedAt ? `Shared on ${formatDateShort(file.sharedAt)}` : 'Not shared'}
+                      >
+                        {file.sharedWithClient ? 'Yes' : 'No'}
+                      </span>
                     )}
                   </AdminTableCell>
                   <AdminTableCell className="text-right">
-                    {file.type === 'folder' ? '-' : formatFileSize(file.size || 0)}
+                    {file.type !== 'folder' && formatFileSize(file.size || 0)}
                   </AdminTableCell>
                   <AdminTableCell className="date-cell">{formatDateShort(file.updatedAt)}</AdminTableCell>
                   <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
@@ -419,6 +464,14 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                         <>
                           <IconButton action="preview" />
                           <IconButton action="download" />
+                          {file.projectId && (
+                            <IconButton
+                              icon={file.sharedWithClient ? 'unshare' : 'share'}
+                              title={file.sharedWithClient ? 'Revoke client access' : 'Share with client'}
+                              onClick={() => handleToggleShare(file)}
+                              className={file.sharedWithClient ? 'status-active' : undefined}
+                            />
+                          )}
                         </>
                       )}
                       <IconButton action="delete" onClick={() => handleDelete(file.id)} />
@@ -437,7 +490,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
           onDelete={handleDelete}
           hasActiveFilters={hasActiveFilters}
         />
-      ))}
+      )}
     </TableLayout>
   );
 }

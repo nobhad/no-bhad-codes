@@ -25,10 +25,15 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
 }
 
-/* Dropdown caret after text */
+/* Dropdown caret after text - must override button > svg order */
 .custom-dropdown-trigger > svg,
-.custom-dropdown-trigger .custom-dropdown-caret {
+.custom-dropdown-trigger .custom-dropdown-caret,
+.dropdown-trigger > .dropdown-caret,
+button.dropdown-trigger > svg.dropdown-caret,
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline).dropdown-trigger > svg,
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > .dropdown-caret {
   order: 1;
+  margin-left: auto;
 }
 
 /* ============================================
@@ -67,7 +72,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 }
 .btn-warning:hover {
   background: var(--color-warning-500);
-  color: var(--color-black);
+  color: var(--portal-bg-pitch);
   border-color: var(--color-warning-500);
 }
 
@@ -125,9 +130,9 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   border: var(--portal-border);
 }
 .btn-outline:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
+  background: var(--btn-portal-hover-bg);
+  color: var(--btn-portal-hover-color);
+  border-color: var(--btn-portal-hover-border);
 }
 
 /* Ghost button - transparent, minimal */
@@ -205,8 +210,8 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 .btn-auth {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
-  border: 2px solid var(--portal-border-light);
-  font-size: 0.9rem;
+  border: var(--border-width) solid var(--portal-border-light);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: var(--font-family-sans, system-ui, sans-serif);
@@ -219,9 +224,9 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 }
 
 .btn-auth:hover {
-  background-color: var(--color-primary);
-  color: var(--portal-bg-dark);
-  border-color: var(--color-primary);
+  background-color: var(--btn-portal-hover-bg);
+  color: var(--btn-portal-hover-color);
+  border-color: var(--btn-portal-hover-border);
 }
 
 .btn-auth:disabled {
@@ -241,7 +246,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 .portal .sidebar-btn {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-lg, 1rem);
+  gap: var(--icon-gap-sm, 8px);
   width: 100%;
   padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem)
     var(--sidebar-icon-indent, 18px);
@@ -271,9 +276,6 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   flex-shrink: 0;
   width: var(--sidebar-icon-size, 20px);
   height: var(--sidebar-icon-size, 20px);
-}
-.portal .sidebar-btn .btn-icon svg {
-  stroke-width: 2.5;
 }
 .portal .sidebar-btn .btn-text {
   flex: 1;
@@ -325,32 +327,32 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 }
 .icon-btn.icon-btn-success:hover {
   color: var(--color-success-500);
-  background-color: rgba(var(--color-success-rgb), 0.1);
+  background-color: var(--portal-alpha-success-10);
 }
 .icon-btn.icon-btn-active {
   color: var(--status-active);
-  background: rgba(var(--color-success-rgb), 0.15);
+  background: var(--portal-alpha-success-15);
 }
 .icon-btn.icon-btn-active:hover {
-  background: rgba(var(--color-success-rgb), 0.25);
+  background: var(--portal-alpha-success-25);
 }
 .icon-btn.icon-btn-warning {
   color: var(--color-warning);
 }
 .icon-btn.icon-btn-warning:hover {
   color: var(--color-warning);
-  background-color: rgba(var(--color-warning-rgb, 245, 158, 11), 0.1);
+  background-color: var(--portal-alpha-warning-10);
 }
 /* Outline variant - icon button with border */
 .icon-btn.icon-btn-outline {
-  border: 1px solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border);
 }
 .icon-btn.icon-btn-outline:hover {
   border-color: var(--color-primary);
 }
 .icon-btn.icon-btn-outline.icon-btn-danger:hover {
   border-color: var(--color-danger);
-  background: rgba(var(--color-danger-rgb), 0.1);
+  background: var(--portal-alpha-danger-10);
 }
 /* Size modifiers */
 .icon-btn.icon-btn-sm {
@@ -368,12 +370,12 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 .icon-btn svg {
   width: var(--btn-portal-icon-inner-size);
   height: var(--btn-portal-icon-inner-size);
-  stroke-width: 2.5;
 }
 
 /* Icon button focus */
+/* Uses --focus-ring-* variables from portal-theme.css */
 .icon-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
@@ -412,7 +414,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   .icon-btn {
     -webkit-user-select: none;
     user-select: none;
-    -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 255, 0, 0), 0.1);
+    -webkit-tap-highlight-color: var(--portal-alpha-primary-10);
   }
 }
 
@@ -597,20 +599,14 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   left: -9999px;
 }
 
-/* Icon sizing */
+/* Icon sizing - SAME SIZE as open state, use --sidebar-icon-size */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon {
   margin: 0;
-  width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-}
-
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon svg {
-  stroke-width: 2;
-  transition: stroke-width var(--transition-faster);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
 }
 
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover) .btn-icon svg {
-  stroke-width: 2.5;
   filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
 }
 
@@ -654,19 +650,14 @@ button > :is(.icon-wrap, .tab-icon, svg) {
     left: -9999px;
   }
 
+  /* Icon sizing - SAME SIZE regardless of sidebar state, use --sidebar-icon-size */
   .portal .sidebar .sidebar-btn .btn-icon {
     margin: 0;
-    width: var(--icon-size-xl);
-    height: var(--icon-size-xl);
-  }
-
-  .portal .sidebar .sidebar-btn .btn-icon svg {
-    stroke-width: 2;
-    transition: stroke-width var(--transition-faster);
+    width: var(--sidebar-icon-size);
+    height: var(--sidebar-icon-size);
   }
 
   .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon svg {
-    stroke-width: 2.5;
     filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
   }
 }
@@ -676,7 +667,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
  * ============================================ */
 .toggle-group {
   display: flex;
-  border: 1px solid var(--btn-portal-border-color);
+  border: var(--border-width) solid var(--btn-portal-border-color);
   background: transparent;
 }
 .toggle-btn {
@@ -685,7 +676,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   background: transparent;
   border: none;
   font-family: var(--btn-portal-font-family);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   font-weight: normal;
   text-transform: uppercase;
   color: var(--color-white);
@@ -695,7 +686,7 @@ button > :is(.icon-wrap, .tab-icon, svg) {
     color 0.2s ease;
 }
 .toggle-btn:not(:last-child) {
-  border-right: 1px solid var(--btn-portal-border-color);
+  border-right: var(--border-width) solid var(--btn-portal-border-color);
 }
 .toggle-btn:hover:not(.active) {
   background: var(--portal-alpha-white-10);
@@ -875,9 +866,9 @@ button > :is(.icon-wrap, .tab-icon, svg) {
   width: 30px;
   height: 30px;
   background: transparent;
-  border-radius: 50%;
+  border-radius: var(--portal-radius-full);
   color: var(--portal-text-light);
-  font-size: 16px;
+  font-size: var(--font-size-base);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -887,4 +878,29 @@ button > :is(.icon-wrap, .tab-icon, svg) {
 
 .tw-btn-close:hover {
   opacity: 0.6;
+}
+
+/* ============================================
+ * ACTION BAR - Unified height for buttons and dropdowns in same row
+ * ============================================
+ * Use .action-bar class on container to ensure all children
+ * (buttons, dropdowns, selects) have consistent height
+ */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* All actionable items in action bar - consistent height */
+.action-bar > :is(button, .btn, .btn-primary, .btn-secondary, .btn-outline, select, .form-select, [class*="dropdown-trigger"], [class*="date-selector"]) {
+  height: var(--action-bar-item-height, 36px);
+  min-height: var(--action-bar-item-height, 36px);
+  box-sizing: border-box;
+}
+
+/* Ensure flex children align properly */
+.action-bar > * {
+  display: inline-flex;
+  align-items: center;
 }

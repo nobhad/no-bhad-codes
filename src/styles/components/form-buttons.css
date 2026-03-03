@@ -132,7 +132,7 @@ input.form-button.form-valid {
   .btn:not(.sidebar-btn),
   .form-button,
   .login-btn {
-    border-width: 3px;
+    border-width: var(--border-width-thick);
   }
 }
 

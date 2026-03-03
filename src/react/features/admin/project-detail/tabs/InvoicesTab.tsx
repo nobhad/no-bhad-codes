@@ -64,9 +64,9 @@ function getDisplayStatus(invoice: Invoice): InvoiceStatus {
  * Format date
  */
 function formatDate(date: string | undefined): string {
-  if (!date) return '-';
+  if (!date) return '';
   const d = new Date(date);
-  if (isNaN(d.getTime())) return '-';
+  if (isNaN(d.getTime())) return '';
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   const year = d.getFullYear();
@@ -194,21 +194,21 @@ export function InvoicesTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-6 invtab-stats">
           <div>
-            <span className="tw-text-muted">Outstanding: </span>
+            <span className="tw-text-muted ">Outstanding: </span>
             <span
               className={cn(
                 totalOutstanding > 0
                   ? 'tw-text-primary'
                   : 'tw-text-muted',
-                'invtab-amount-bold'
+                'tw-font-semibold'
               )}
             >
               {formatCurrency(totalOutstanding)}
             </span>
           </div>
           <div>
-            <span className="tw-text-muted">Paid: </span>
-            <span className="tw-text-primary invtab-amount-bold">
+            <span className="tw-text-muted ">Paid: </span>
+            <span className="tw-text-primary tw-font-semibold">
               {formatCurrency(totalPaid)}
             </span>
           </div>
@@ -231,8 +231,8 @@ export function InvoicesTab({
 
           {/* Create Invoice */}
           {onCreateInvoice && (
-            <button className="tw-btn-primary" onClick={onCreateInvoice}>
-              <Plus className="tw-h-4 tw-w-4" />
+            <button className="btn-primary" onClick={onCreateInvoice}>
+              <Plus className="icon-md" />
               New Invoice
             </button>
           )}
@@ -241,8 +241,8 @@ export function InvoicesTab({
 
       {/* Invoices List */}
       {filteredInvoices.length === 0 ? (
-        <div className="tw-empty-state">
-          <Inbox className="tw-h-8 tw-w-8 tw-mb-2" />
+        <div className="empty-state">
+          <Inbox className="icon-xl tw-mb-2" />
           <span>
             {statusFilter === 'all' ? 'No invoices yet' : `No ${statusFilter} invoices`}
           </span>
@@ -284,12 +284,12 @@ export function InvoicesTab({
                     onClick={() => onViewInvoice?.(invoice.id)}
                   >
                     <td className="tw-px-4 tw-py-3">
-                      <span className="tw-text-primary invtab-cell-bold">
-                        {invoice.invoice_number || '-'}
+                      <span className="tw-text-primary tw-font-semibold">
+                        {invoice.invoice_number}
                       </span>
                     </td>
                     <td className="tw-px-4 tw-py-3">
-                      <span className="tw-text-primary invtab-cell-bold">
+                      <span className="tw-text-primary tw-font-semibold">
                         {formatCurrency(invoice.amount_total)}
                       </span>
                     </td>
@@ -304,7 +304,7 @@ export function InvoicesTab({
                           isOverdue(invoice)
                             ? 'tw-text-primary'
                             : 'tw-text-muted',
-                          'proj-text-base'
+                          ''
                         )}
                       >
                         {formatDate(invoice.due_date)}
@@ -313,52 +313,52 @@ export function InvoicesTab({
                     <td className="tw-px-4 tw-py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="tw-flex tw-items-center tw-justify-end tw-gap-1">
                         <button
-                          className="tw-btn-icon"
+                          className="btn-icon"
                           onClick={() => onViewInvoice?.(invoice.id)}
                           title="View invoice"
                         >
-                          <Eye className="tw-h-4 tw-w-4" />
+                          <Eye className="icon-md" />
                         </button>
 
                         {canSend && (
                           <button
-                            className="tw-btn-icon"
+                            className="btn-icon"
                             onClick={() => handleSend(invoice.id)}
                             disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
                             title="Send invoice"
                           >
-                            <Send className="tw-h-4 tw-w-4" />
+                            <Send className="icon-md" />
                           </button>
                         )}
 
                         {canMarkPaid && (
                           <button
-                            className="tw-btn-icon"
+                            className="btn-icon"
                             onClick={() => {
                               setDeletingInvoiceId(invoice.id);
                               markPaidDialog.open();
                             }}
                             title="Mark as paid"
                           >
-                            <Check className="tw-h-4 tw-w-4" />
+                            <Check className="icon-md" />
                           </button>
                         )}
 
                         {!isDraft && onDownloadPdf && (
                           <button
-                            className="tw-btn-icon"
+                            className="btn-icon"
                             onClick={() => handleDownloadPdf(invoice.id)}
                             disabled={actionLoading?.type === 'download' && actionLoading?.id === invoice.id}
                             title="Download PDF"
                           >
-                            <Download className="tw-h-4 tw-w-4" />
+                            <Download className="icon-md" />
                           </button>
                         )}
 
                         <PortalDropdown>
                           <PortalDropdownTrigger asChild>
-                            <button className="tw-btn-icon">
-                              <MoreHorizontal className="tw-h-4 tw-w-4" />
+                            <button className="btn-icon">
+                              <MoreHorizontal className="icon-md" />
                             </button>
                           </PortalDropdownTrigger>
                           <PortalDropdownContent align="end">
@@ -374,7 +374,7 @@ export function InvoicesTab({
                                     deleteDialog.open();
                                   }}
                                 >
-                                  <Trash2 className="tw-h-4 tw-w-4 tw-mr-2" />
+                                  <Trash2 className="icon-md tw-mr-2" />
                                   Delete
                                 </PortalDropdownItem>
                               </>

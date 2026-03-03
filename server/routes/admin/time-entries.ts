@@ -15,6 +15,12 @@ import { getDatabase } from '../../database/init.js';
 import { errorResponse } from '../../utils/api-response.js';
 import { projectService } from '../../services/project-service.js';
 
+// Explicit column lists for SELECT queries (avoid SELECT *)
+const TIME_ENTRY_COLUMNS = `
+  id, project_id, task_id, user_id, user_name, description, hours, date,
+  billable, hourly_rate, start_time, end_time, created_at, updated_at
+`.replace(/\s+/g, ' ').trim();
+
 const router = express.Router();
 
 /**
@@ -176,7 +182,7 @@ router.post(
       WHERE id = ?
     `, [Math.round(hours * 100) / 100, entryId]);
 
-    const updated = await db.get('SELECT * FROM time_entries WHERE id = ?', [entryId]);
+    const updated = await db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [entryId]);
 
     res.json({ success: true, entry: updated });
   })
@@ -217,7 +223,7 @@ router.post(
       hourlyRate || null,
     ]);
 
-    const entry = await db.get('SELECT * FROM time_entries WHERE id = ?', [result.lastID]);
+    const entry = await db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [result.lastID]);
 
     res.json({ success: true, entry });
   })

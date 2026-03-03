@@ -25,14 +25,14 @@ export function formatFileSize(bytes: number): string {
  * @param amount - Number or string to format (handles null/undefined/NaN)
  * @param options - Formatting options
  * @param options.showCents - Whether to show decimal places (default: false)
- * @param options.fallback - Value to return for invalid input (default: '-')
- * @returns Formatted currency string (e.g., "$1,234" or "-" for invalid)
+ * @param options.fallback - Value to return for invalid input (default: '' empty)
+ * @returns Formatted currency string (e.g., "$1,234" or "" for invalid)
  */
 export function formatCurrency(
   amount: number | string | null | undefined,
   options: { showCents?: boolean; fallback?: string } = {}
 ): string {
-  const { showCents = false, fallback = '-' } = options;
+  const { showCents = false, fallback = '' } = options;
 
   // Handle null/undefined
   if (amount === null || amount === undefined) return fallback;

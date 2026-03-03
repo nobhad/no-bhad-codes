@@ -13,6 +13,9 @@ import type { ButtonConfig, ButtonGroupConfig, UIContext } from '../types';
 import { renderIcon } from '../icons/icon-factory';
 import { getButtonAction } from './button-actions';
 import { BUTTON_SETS, getButtonSet, type ButtonSetName } from './button-sets';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('ButtonFactory');
 
 // ============================================
 // BUTTON RENDERING
@@ -47,7 +50,7 @@ export function renderButton(config: ButtonConfig): string {
 
   const actionDef = getButtonAction(action);
   if (!actionDef) {
-    console.warn(`[ButtonFactory] Unknown action: ${action}`);
+    logger.warn(`Unknown action: ${action}`);
     return '';
   }
 
@@ -64,7 +67,7 @@ export function renderButton(config: ButtonConfig): string {
   });
 
   if (!iconHtml) {
-    console.warn(`[ButtonFactory] Icon not found for action: ${action}`);
+    logger.warn(`Icon not found for action: ${action}`);
     return '';
   }
 
@@ -120,10 +123,11 @@ export function renderButtonGroup(config: ButtonGroupConfig): string {
   const buttonsHtml = renderButtons(contextualButtons);
   if (!buttonsHtml) return '';
 
-  const defaults = CONTEXT_DEFAULTS[context];
-  const className = ['button-group', wrapperClass].filter(Boolean).join(' ');
+  // Use CSS class modifiers for context-specific gaps
+  const contextModifier = `button-group--${context}`;
+  const className = ['button-group', contextModifier, wrapperClass].filter(Boolean).join(' ');
 
-  return `<div class="${className}" style="display:flex;gap:${defaults.gap}px">${buttonsHtml}</div>`;
+  return `<div class="${className}">${buttonsHtml}</div>`;
 }
 
 /**

@@ -126,7 +126,7 @@ export function createSecondarySidebar(config: SecondarySidebarConfig): Secondar
     backBtn.className = 'secondary-sidebar-back';
     backBtn.setAttribute('aria-label', 'Go back');
     backBtn.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
+      '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
     backBtn.addEventListener('click', onBack);
     header.appendChild(backBtn);
   }

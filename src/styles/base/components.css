@@ -58,7 +58,7 @@
  */
 .portal-label {
   font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-size: 0.6875rem;
+  font-size: var(--label-font-size);
   font-weight: 400;
   color: var(--portal-text-secondary);
   text-transform: uppercase;

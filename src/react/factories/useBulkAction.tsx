@@ -9,6 +9,9 @@
  */
 
 import { useCallback, useState } from 'react';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useBulkAction');
 
 // ============================================
 // TYPES
@@ -198,7 +201,7 @@ export function useBulkAction<T>(options: UseBulkActionOptions<T>): UseBulkActio
         await refetch?.();
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        console.error(`[useBulkAction] ${actionName} failed:`, error);
+        logger.error(`[useBulkAction] ${actionName} failed:`, error);
         showNotification?.(errorMessage, 'error');
         onError?.(error);
       } finally {

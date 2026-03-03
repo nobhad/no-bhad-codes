@@ -62,8 +62,8 @@ export function PortalHeader({
         <div
           className={cn(
             'tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center',
-            'tw-border tw-border-white tw-bg-transparent',
-            'tw-text-white tw-font-bold tw-font-mono',
+            'tw-border tw-border-primary tw-bg-transparent',
+            'tw-text-primary tw-font-bold tw-font-mono',
             isCollapsed ? 'tw-w-8 tw-h-8 tw-text-[11px]' : 'tw-w-9 tw-h-9 tw-text-[12px]'
           )}
         >
@@ -81,7 +81,7 @@ export function PortalHeader({
         {/* Name and Email */}
         {!isCollapsed && user && (
           <div className="tw-flex-1 tw-min-w-0">
-            <p className="tw-text-[12px] tw-font-bold tw-text-white tw-truncate tw-font-mono">
+            <p className="tw-text-[12px] tw-font-bold tw-text-primary tw-truncate tw-font-mono">
               {user.name}
             </p>
             <p className="tw-text-[10px] tw-text-[var(--portal-text-muted)] tw-truncate tw-font-mono">
@@ -103,7 +103,7 @@ export function PortalHeader({
           <button
             onClick={onToggleCollapse}
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="tw-btn-icon"
+            className="btn-icon"
           >
             {isCollapsed ? (
               <ChevronRight className="tw-h-4 tw-w-4" />
@@ -118,7 +118,7 @@ export function PortalHeader({
           <button
             onClick={onLogout}
             title="Sign out"
-            className="tw-btn-icon"
+            className="btn-icon"
           >
             <LogOut className="tw-h-4 tw-w-4" />
           </button>

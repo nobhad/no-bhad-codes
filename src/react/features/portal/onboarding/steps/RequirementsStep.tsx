@@ -5,9 +5,10 @@
  */
 
 import * as React from 'react';
-import { Palette, Check, FileText, Link2 } from 'lucide-react';
+import { Palette, FileText, Link2, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { Checkbox } from '@react/components/ui/checkbox';
 import type { StepProps, RequirementsData } from '../types';
 import { DESIGN_STYLES, FEATURE_OPTIONS } from '../types';
 
@@ -63,7 +64,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
       {/* Design Style Selection */}
       <div className="tw-flex tw-flex-col tw-gap-2">
         <label className="tw-field-label">
-          Design Style <span className="tw-text-white">*</span>
+          Design Style <span className="tw-text-primary">*</span>
         </label>
         <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-2">
           {DESIGN_STYLES.map((style) => (
@@ -78,8 +79,8 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'tw-text-[14px] tw-text-center tw-font-mono',
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white',
                 requirements.designStyle === style
-                  ? 'tw-border-white tw-bg-white tw-text-black'
-                  : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-white'
+                  ? 'tw-border-primary tw-bg-white tw-text-black'
+                  : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-primary'
               )}
             >
               <Palette className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
@@ -88,7 +89,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
           ))}
         </div>
         {getFieldError('designStyle') && (
-          <span className="tw-text-[12px] tw-text-white">{getFieldError('designStyle')}</span>
+          <span className="tw-text-[12px] tw-text-primary">{getFieldError('designStyle')}</span>
         )}
       </div>
 
@@ -107,77 +108,23 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
       {/* Checkboxes */}
       <div className="tw-flex tw-flex-wrap tw-gap-4 tw-mt-4">
         {/* Brand Guidelines */}
-        <label
-          className={cn(
-            'tw-flex tw-items-center tw-gap-2 tw-cursor-pointer',
-            'tw-px-3 tw-py-2',
-            'tw-border tw-transition-colors',
-            requirements.brandGuidelines
-              ? 'tw-border-white tw-bg-white tw-text-black'
-              : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
-          )}
-        >
-          <div
-            className={cn(
-              'tw-w-4 tw-h-4 tw-border tw-flex tw-items-center tw-justify-center',
-              'tw-transition-colors',
-              requirements.brandGuidelines
-                ? 'tw-bg-black tw-border-black'
-                : 'tw-border-white'
-            )}
-          >
-            {requirements.brandGuidelines && (
-              <Check className="tw-h-3 tw-w-3 tw-text-white" strokeWidth={3} />
-            )}
-          </div>
-          <input
-            type="checkbox"
+        <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-px-3 tw-py-2 tw-border tw-border-[var(--portal-border-color)]">
+          <Checkbox
             checked={requirements.brandGuidelines}
-            onChange={(e) => handleChange('brandGuidelines', e.target.checked)}
-            className="tw-sr-only"
+            onCheckedChange={(checked) => handleChange('brandGuidelines', checked === true)}
           />
-          <span className={cn(
-            'tw-text-[14px] tw-font-mono',
-            requirements.brandGuidelines ? 'tw-text-black' : 'tw-text-white'
-          )}>
+          <span className="tw-text-[14px] tw-font-mono">
             I have brand guidelines
           </span>
         </label>
 
         {/* Content Ready */}
-        <label
-          className={cn(
-            'tw-flex tw-items-center tw-gap-2 tw-cursor-pointer',
-            'tw-px-3 tw-py-2',
-            'tw-border tw-transition-colors',
-            requirements.contentReady
-              ? 'tw-border-white tw-bg-white tw-text-black'
-              : 'tw-border-[var(--portal-border-color)] hover:tw-border-white'
-          )}
-        >
-          <div
-            className={cn(
-              'tw-w-4 tw-h-4 tw-border tw-flex tw-items-center tw-justify-center',
-              'tw-transition-colors',
-              requirements.contentReady
-                ? 'tw-bg-black tw-border-black'
-                : 'tw-border-white'
-            )}
-          >
-            {requirements.contentReady && (
-              <Check className="tw-h-3 tw-w-3 tw-text-white" strokeWidth={3} />
-            )}
-          </div>
-          <input
-            type="checkbox"
+        <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-px-3 tw-py-2 tw-border tw-border-[var(--portal-border-color)]">
+          <Checkbox
             checked={requirements.contentReady}
-            onChange={(e) => handleChange('contentReady', e.target.checked)}
-            className="tw-sr-only"
+            onCheckedChange={(checked) => handleChange('contentReady', checked === true)}
           />
-          <span className={cn(
-            'tw-text-[14px] tw-font-mono',
-            requirements.contentReady ? 'tw-text-black' : 'tw-text-white'
-          )}>
+          <span className="tw-text-[14px] tw-font-mono">
             Content is ready/prepared
           </span>
         </label>
@@ -211,8 +158,8 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'tw-text-[14px] tw-font-mono',
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white',
                 isSelected
-                  ? 'tw-border-white tw-bg-white tw-text-black'
-                  : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-white'
+                  ? 'tw-border-primary tw-bg-white tw-text-black'
+                  : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-primary'
               )}
             >
               <div
@@ -221,7 +168,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                   'tw-transition-colors',
                   isSelected
                     ? 'tw-bg-black tw-border-black'
-                    : 'tw-border-white'
+                    : 'tw-border-primary'
                 )}
               >
                 {isSelected && <Check className="tw-h-3 tw-w-3 tw-text-white" strokeWidth={3} />}

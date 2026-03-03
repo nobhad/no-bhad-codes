@@ -5,6 +5,9 @@
 
 import { StateManager } from './state-manager';
 import type { AppState, StateMiddleware } from './types';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('AppState');
 
 // Navigator with Network Information API
 interface NavigatorWithConnection {
@@ -71,17 +74,11 @@ export const appState = new StateManager<AppState>(initialState);
 // Built-in middleware
 const loggingMiddleware: StateMiddleware<AppState> = (store) => (next) => (action) => {
   if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.group(`🔄 Action: ${action.type}`);
-
-    console.log('Payload:', action.payload);
-
-    console.log('Previous State:', store.getState());
+    logger.log(`Action: ${action.type}`);
+    logger.log('Payload:', action.payload);
+    logger.log('Previous State:', store.getState());
     next(action);
-
-    console.log('Next State:', store.getState());
-    // eslint-disable-next-line no-console
-    console.groupEnd();
+    logger.log('Next State:', store.getState());
   } else {
     next(action);
   }
@@ -91,7 +88,7 @@ const errorHandlingMiddleware: StateMiddleware<AppState> = (store) => (next) => 
   try {
     next(action);
   } catch (error) {
-    console.error('State update error:', error);
+    logger.error('State update error:', error);
     store.setState({
       lastError: error instanceof Error ? error.message : 'Unknown error',
       errorCount: store.getState().errorCount + 1

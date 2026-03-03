@@ -11,6 +11,9 @@
 import { ICONS } from '../constants/icons';
 import { formatDate } from '../utils/format-utils';
 import { SanitizationUtils } from '../utils/sanitization-utils';
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('NotificationBell');
 
 // ============================================
 // Types
@@ -210,7 +213,7 @@ export class NotificationBell {
       );
 
       if (!response.ok) {
-        console.warn('[NotificationBell] Failed to fetch notifications');
+        logger.warn('Failed to fetch notifications');
         return;
       }
 
@@ -221,7 +224,7 @@ export class NotificationBell {
       this.updateBadge();
       this.renderNotifications();
     } catch (error) {
-      console.error('[NotificationBell] Fetch error:', error);
+      logger.error('[NotificationBell] Fetch error:', error);
     }
   }
 
@@ -286,7 +289,7 @@ export class NotificationBell {
         }
       }
     } catch (error) {
-      console.error('[NotificationBell] Mark read error:', error);
+      logger.error('[NotificationBell] Mark read error:', error);
     }
   }
 
@@ -307,7 +310,7 @@ export class NotificationBell {
         this.renderNotifications();
       }
     } catch (error) {
-      console.error('[NotificationBell] Mark all read error:', error);
+      logger.error('[NotificationBell] Mark all read error:', error);
     }
   }
 

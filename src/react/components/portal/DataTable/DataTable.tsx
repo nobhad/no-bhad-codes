@@ -217,9 +217,9 @@ export function DataTable<T extends { id: number }>({
         return renderCell(item, column, index);
       }
 
-      // Default: return raw value
+      // Default: return raw value (empty cells stay empty, no placeholder)
       const value = (item as Record<string, unknown>)[column.key];
-      return value != null ? String(value) : '-';
+      return value != null ? String(value) : '';
     },
     [renderCell]
   );
@@ -314,7 +314,7 @@ export function DataTable<T extends { id: number }>({
 
       {/* Error State */}
       {error && (
-        <div className="tw-error">
+        <div className="error-state">
           {error}
           <PortalButton variant="secondary" size="sm" onClick={onRefetch} className="tw-ml-4">
             Retry
@@ -368,7 +368,7 @@ export function DataTable<T extends { id: number }>({
           ) : paginatedData.length === 0 ? (
             <AdminTableEmpty
               colSpan={columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}
-              icon={<Inbox className="tw-h-8 tw-w-8" />}
+              icon={<Inbox className="tw-h-6 tw-w-6" />}
               message={hasActiveFilters ? emptyFilteredMessage : emptyMessage}
             />
           ) : (
@@ -460,7 +460,7 @@ export function DataTable<T extends { id: number }>({
               <div className="tw-flex tw-items-center tw-gap-1">
                 <button
                   type="button"
-                  className="tw-btn-icon"
+                  className="btn-icon"
                   onClick={pagination.firstPage}
                   disabled={!pagination.canGoPrev}
                   title="First page"
@@ -469,7 +469,7 @@ export function DataTable<T extends { id: number }>({
                 </button>
                 <button
                   type="button"
-                  className="tw-btn-icon"
+                  className="btn-icon"
                   onClick={pagination.prevPage}
                   disabled={!pagination.canGoPrev}
                   title="Previous page"
@@ -486,7 +486,7 @@ export function DataTable<T extends { id: number }>({
 
                 <button
                   type="button"
-                  className="tw-btn-icon"
+                  className="btn-icon"
                   onClick={pagination.nextPage}
                   disabled={!pagination.canGoNext}
                   title="Next page"
@@ -495,7 +495,7 @@ export function DataTable<T extends { id: number }>({
                 </button>
                 <button
                   type="button"
-                  className="tw-btn-icon"
+                  className="btn-icon"
                   onClick={pagination.lastPage}
                   disabled={!pagination.canGoNext}
                   title="Last page"

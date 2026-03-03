@@ -96,7 +96,7 @@
   gap: var(--space-0-5);
   margin: 0 0 var(--space-1) 0;
   padding: var(--space-1);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
 }
@@ -120,7 +120,7 @@
   display: grid;
   gap: var(--space-0-5);
   padding: var(--space-1);
-  border: 1px solid var(--portal-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
 }

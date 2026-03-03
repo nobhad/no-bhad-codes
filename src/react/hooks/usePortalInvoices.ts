@@ -5,6 +5,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { PortalInvoice, PortalInvoiceSummary } from '../features/portal/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('usePortalInvoices');
 
 interface UsePortalInvoicesOptions {
   /** Auth token getter for API calls */
@@ -51,7 +55,7 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('/api/invoices/me', {
+      const response = await fetch(`${API_ENDPOINTS.INVOICES}/me`, {
         headers,
         credentials: 'include'
       });
@@ -70,7 +74,7 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
         setSummary(data.summary);
       }
     } catch (err) {
-      console.error('[usePortalInvoices] Error:', err);
+      logger.error('[usePortalInvoices] Error:', err);
       setError(err instanceof Error ? err.message : 'Failed to load invoices');
     } finally {
       setIsLoading(false);

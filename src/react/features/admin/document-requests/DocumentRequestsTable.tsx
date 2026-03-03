@@ -3,12 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   FileUp,
   FileCheck,
-  AlertCircle,
-  MoreHorizontal,
   Inbox,
-  Trash2,
-  Download,
-  ChevronDown,
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -29,19 +24,18 @@ import {
   AdminTableCell,
   AdminTableEmpty,
   AdminTableLoading,
+  AdminTableError,
 } from '@react/components/portal/AdminTable';
-import {
-  PortalDropdown,
-  PortalDropdownTrigger,
-  PortalDropdownContent,
-  PortalDropdownItem,
-} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { DOCUMENT_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
+import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+
+const logger = createLogger('DocumentRequestsTable');
 
 interface DocumentRequest {
   id: number;
@@ -73,6 +67,10 @@ interface DocumentRequestsTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  /** Default page size for pagination */
+  defaultPageSize?: number;
+  /** Overview mode - disables pagination persistence */
+  overviewMode?: boolean;
 }
 
 const DOCUMENT_REQUEST_STATUS_CONFIG: Record<string, { label: string }> = {
@@ -134,7 +132,7 @@ function sortDocumentRequests(a: DocumentRequest, b: DocumentRequest, sort: Sort
   }
 }
 
-export function DocumentRequestsTable({ getAuthToken, showNotification, onNavigate }: DocumentRequestsTableProps) {
+export function DocumentRequestsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DocumentRequestsTableProps) {
   const containerRef = useFadeIn();
 
   // Build headers helper with auth token
@@ -182,9 +180,9 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_document_requests_pagination',
+    storageKey: overviewMode ? undefined : 'admin_document_requests_pagination',
     totalItems: filteredRequests.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedRequests = useMemo(
@@ -202,7 +200,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/document-requests', {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_REQUESTS, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -232,7 +230,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/document-requests/${requestId}`, {
+      const response = await fetch(buildEndpoint.documentRequest(requestId), {
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
@@ -250,7 +248,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
       );
       showNotification?.('Request status updated', 'success');
     } catch (err) {
-      console.error('Failed to update request status:', err);
+      logger.error('Failed to update request status:', err);
       showNotification?.('Failed to update request status', 'error');
     }
   }, [getHeaders, showNotification]);
@@ -261,7 +259,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
     const ids = selection.selectedItems.map((r) => r.id);
     try {
-      const response = await fetch('/api/document-requests/bulk-delete', {
+      const response = await fetch(API_ENDPOINTS.DOCUMENT_REQUESTS_BULK_DELETE, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
@@ -274,7 +272,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
-      console.error('Failed to delete requests:', err);
+      logger.error('Failed to delete requests:', err);
       showNotification?.('Failed to delete requests', 'error');
     }
   }, [selection, getHeaders, showNotification]);
@@ -364,16 +362,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
           onDelete={handleBulkDelete}
         />
       }
-      error={
-        error ? (
-          <div className="table-error-banner">
-            {error}
-            <PortalButton variant="secondary" size="sm" onClick={loadRequests}>
-              Retry
-            </PortalButton>
-          </div>
-        ) : undefined
-      }
       pagination={
         !isLoading && filteredRequests.length > 0 ? (
           <TablePagination
@@ -392,7 +380,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         ) : undefined
       }
     >
-      {!error && (
       <AdminTable>
         <AdminTableHeader>
           <AdminTableRow>
@@ -426,8 +413,10 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
           </AdminTableRow>
         </AdminTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
-          {isLoading ? (
+        <AdminTableBody animate={!isLoading && !error}>
+          {error ? (
+            <AdminTableError colSpan={7} message={error} onRetry={loadRequests} />
+          ) : isLoading ? (
             <AdminTableLoading colSpan={7} rows={5} />
           ) : paginatedRequests.length === 0 ? (
             <AdminTableEmpty
@@ -477,43 +466,26 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                   </StatusBadge>
                 </AdminTableCell>
                 <AdminTableCell className={cn(isOverdue(request.dueDate) && 'text-danger')}>
-                  {request.dueDate ? formatDate(request.dueDate) : '-'}
+                  {request.dueDate && formatDate(request.dueDate)}
                 </AdminTableCell>
                 <AdminTableCell className="text-right">
-                  {request.documents > 0 ? (
+                  {request.documents > 0 && (
                     <span className="cell-with-icon">
                       <FileCheck className="cell-icon-sm" />
                       {request.documents}
                     </span>
-                  ) : (
-                    '-'
                   )}
                 </AdminTableCell>
                 <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {request.status === 'pending' && (
-                      <IconButton action="send" title="Send Reminder" />
+                      <IconButton action="remind" title="Send Reminder" />
                     )}
-                    <PortalDropdown>
-                      <PortalDropdownTrigger asChild>
-                        <button className="icon-btn">
-                          <MoreHorizontal />
-                        </button>
-                      </PortalDropdownTrigger>
-                      <PortalDropdownContent>
-                        {request.documents > 0 && (
-                          <PortalDropdownItem>
-                            <Download className="dropdown-icon" />
-                            Download All
-                          </PortalDropdownItem>
-                        )}
-                        <PortalDropdownItem className="text-danger">
-                          <Trash2 className="dropdown-icon" />
-                          Delete
-                        </PortalDropdownItem>
-                      </PortalDropdownContent>
-                    </PortalDropdown>
+                    {request.documents > 0 && (
+                      <IconButton action="download" title="Download All" />
+                    )}
+                    <IconButton action="delete" title="Delete" />
                   </div>
                 </AdminTableCell>
               </AdminTableRow>
@@ -521,7 +493,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
           )}
         </AdminTableBody>
       </AdminTable>
-      )}
     </TableLayout>
   );
 }

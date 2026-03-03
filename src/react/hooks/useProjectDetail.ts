@@ -7,6 +7,10 @@ import type {
   Message,
   ApiResponse
 } from '@react/features/admin/types';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('useProjectDetail');
 
 interface UseProjectDetailOptions {
   /** Project ID to fetch */
@@ -137,7 +141,7 @@ export function useProjectDetail({
   // Fetch project details
   const fetchProject = useCallback(async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -163,7 +167,7 @@ export function useProjectDetail({
       }
       throw new Error(result.error || 'Failed to load project');
     } catch (err) {
-      console.error('[useProjectDetail] Error fetching project:', err);
+      logger.error('[useProjectDetail] Error fetching project:', err);
       throw err;
     }
   }, [projectId, getHeaders]);
@@ -171,7 +175,7 @@ export function useProjectDetail({
   // Fetch milestones
   const fetchMilestones = useCallback(async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/milestones`, {
+      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -188,7 +192,7 @@ export function useProjectDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useProjectDetail] Error fetching milestones:', err);
+      logger.error('[useProjectDetail] Error fetching milestones:', err);
       return [];
     }
   }, [projectId, getHeaders]);
@@ -196,7 +200,7 @@ export function useProjectDetail({
   // Fetch files
   const fetchFiles = useCallback(async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/files`, {
+      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/files`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -212,7 +216,7 @@ export function useProjectDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useProjectDetail] Error fetching files:', err);
+      logger.error('[useProjectDetail] Error fetching files:', err);
       return [];
     }
   }, [projectId, getHeaders]);
@@ -220,7 +224,7 @@ export function useProjectDetail({
   // Fetch invoices
   const fetchInvoices = useCallback(async () => {
     try {
-      const response = await fetch(`/api/invoices/project/${projectId}`, {
+      const response = await fetch(`${API_ENDPOINTS.INVOICES}/project/${projectId}`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -236,7 +240,7 @@ export function useProjectDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useProjectDetail] Error fetching invoices:', err);
+      logger.error('[useProjectDetail] Error fetching invoices:', err);
       return [];
     }
   }, [projectId, getHeaders]);
@@ -244,7 +248,7 @@ export function useProjectDetail({
   // Fetch messages
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/messages`, {
+      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/messages`, {
         method: 'GET',
         headers: getHeaders(),
         credentials: 'include'
@@ -260,7 +264,7 @@ export function useProjectDetail({
       }
       return [];
     } catch (err) {
-      console.error('[useProjectDetail] Error fetching messages:', err);
+      logger.error('[useProjectDetail] Error fetching messages:', err);
       return [];
     }
   }, [projectId, getHeaders]);
@@ -298,7 +302,7 @@ export function useProjectDetail({
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/projects/${projectId}/messages`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/messages`, {
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include',
@@ -319,7 +323,7 @@ export function useProjectDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useProjectDetail] Send message error:', err);
+        logger.error('[useProjectDetail] Send message error:', err);
         return false;
       }
     },
@@ -330,7 +334,7 @@ export function useProjectDetail({
   const updateProject = useCallback(
     async (updates: Partial<Project>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/projects/${projectId}`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -351,7 +355,7 @@ export function useProjectDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useProjectDetail] Update error:', err);
+        logger.error('[useProjectDetail] Update error:', err);
         return false;
       }
     },
@@ -362,7 +366,7 @@ export function useProjectDetail({
   const addMilestone = useCallback(
     async (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/projects/${projectId}/milestones`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones`, {
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include',
@@ -383,7 +387,7 @@ export function useProjectDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useProjectDetail] Add milestone error:', err);
+        logger.error('[useProjectDetail] Add milestone error:', err);
         return false;
       }
     },
@@ -394,7 +398,7 @@ export function useProjectDetail({
   const updateMilestone = useCallback(
     async (id: number, updates: Partial<ProjectMilestone>): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/milestones/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.MILESTONES}/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -415,7 +419,7 @@ export function useProjectDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useProjectDetail] Update milestone error:', err);
+        logger.error('[useProjectDetail] Update milestone error:', err);
         return false;
       }
     },
@@ -426,7 +430,7 @@ export function useProjectDetail({
   const deleteMilestone = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/milestones/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.MILESTONES}/${id}`, {
           method: 'DELETE',
           headers: getHeaders(),
           credentials: 'include'
@@ -442,7 +446,7 @@ export function useProjectDetail({
         }));
         return true;
       } catch (err) {
-        console.error('[useProjectDetail] Delete milestone error:', err);
+        logger.error('[useProjectDetail] Delete milestone error:', err);
         return false;
       }
     },
@@ -481,7 +485,7 @@ export function useProjectDetail({
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`/api/projects/${projectId}/files`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/files`, {
           method: 'POST',
           headers,
           credentials: 'include',
@@ -502,7 +506,7 @@ export function useProjectDetail({
         }
         return false;
       } catch (err) {
-        console.error('[useProjectDetail] Upload file error:', err);
+        logger.error('[useProjectDetail] Upload file error:', err);
         return false;
       }
     },
@@ -513,7 +517,7 @@ export function useProjectDetail({
   const deleteFile = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`/api/files/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.FILES}/${id}`, {
           method: 'DELETE',
           headers: getHeaders(),
           credentials: 'include'
@@ -529,7 +533,7 @@ export function useProjectDetail({
         }));
         return true;
       } catch (err) {
-        console.error('[useProjectDetail] Delete file error:', err);
+        logger.error('[useProjectDetail] Delete file error:', err);
         return false;
       }
     },
@@ -543,7 +547,7 @@ export function useProjectDetail({
       if (!file) return false;
 
       try {
-        const response = await fetch(`/api/files/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.FILES}/${id}`, {
           method: 'PUT',
           headers: getHeaders(),
           credentials: 'include',
@@ -560,7 +564,7 @@ export function useProjectDetail({
         }));
         return true;
       } catch (err) {
-        console.error('[useProjectDetail] Toggle file sharing error:', err);
+        logger.error('[useProjectDetail] Toggle file sharing error:', err);
         return false;
       }
     },

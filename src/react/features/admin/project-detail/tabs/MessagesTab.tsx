@@ -87,19 +87,19 @@ export function MessagesTab({
   );
 
   return (
-    <div className="tw-flex tw-flex-col msgtab-container">
+    <div className="tw-panel tw-flex tw-flex-col msgtab-container">
       {/* Messages List */}
-      <div className="tw-flex-1 tw-overflow-y-auto tw-scroll-container tw-panel msgtab-panel">
+      <div className="tw-flex-1 tw-overflow-y-auto tw-scroll-container msgtab-panel">
         {isLoading ? (
-          <div className="tw-loading">
-            <div className="tw-animate-spin tw-h-6 tw-w-6 tw-border-2 tw-border-current tw-border-t-transparent msgtab-spinner" />
+          <div className="loading-state">
+            <span className="loading-spinner" />
             Loading messages...
           </div>
         ) : messages.length === 0 ? (
-          <div className="tw-empty-state">
-            <MessageSquare className="tw-h-8 tw-w-8 tw-mb-2" />
+          <div className="empty-state">
+            <MessageSquare className="icon-xl" />
             <span>No messages yet</span>
-            <span className="proj-text-sm">Start a conversation with your client</span>
+            <span className="tw-text-sm">Start a conversation with your client</span>
           </div>
         ) : (
           <div className="tw-flex tw-flex-col tw-gap-4">
@@ -123,7 +123,7 @@ export function MessagesTab({
                         : 'tw-bg-transparent tw-border tw-border-[var(--portal-border-color)]'
                     )}
                   >
-                    <User className={cn('tw-h-4 tw-w-4', isAdmin ? 'tw-text-black' : 'tw-text-white')} />
+                    <User className={cn('icon-md', isAdmin ? 'tw-text-black' : 'tw-text-primary')} />
                   </div>
 
                   {/* Message Content */}
@@ -134,9 +134,9 @@ export function MessagesTab({
                     )}
                   >
                     {/* Sender and Time */}
-                    <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted proj-text-sm">
+                    <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted tw-text-sm">
                       <span>{message.sender_name || (isAdmin ? 'You' : 'Client')}</span>
-                      <Clock className="tw-h-3 tw-w-3" />
+                      <Clock className="icon-xs" />
                       <span>{formatMessageTime(message.created_at)}</span>
                     </div>
 
@@ -146,7 +146,7 @@ export function MessagesTab({
                         'tw-px-4 tw-py-2 msgtab-bubble',
                         isAdmin
                           ? 'tw-bg-white tw-text-black'
-                          : 'tw-border tw-border-[var(--portal-border-color)] tw-text-white'
+                          : 'tw-border tw-border-[var(--portal-border-color)] tw-text-primary'
                       )}
                     >
                       <p className="msgtab-content">{message.content}</p>
@@ -161,7 +161,7 @@ export function MessagesTab({
       </div>
 
       {/* Message Input */}
-      <div className="tw-panel msgtab-input-panel">
+      <div className="tw-border-t tw-border-[var(--portal-border-color)] tw-pt-4 msgtab-input-panel">
         <div className="tw-flex tw-gap-3">
           <textarea
             ref={textareaRef}
@@ -173,15 +173,15 @@ export function MessagesTab({
             className="tw-textarea tw-flex-1 msgtab-textarea"
           />
           <button
-            className="tw-btn-primary tw-self-end"
+            className="btn-primary tw-self-end"
             onClick={handleSend}
             disabled={!newMessage.trim() || isSending}
           >
-            <Send className="tw-h-4 tw-w-4" />
+            <Send className="icon-md" />
             {isSending ? 'Sending...' : 'Send'}
           </button>
         </div>
-        <div className="tw-text-muted tw-mt-2 proj-text-sm">
+        <div className="tw-text-muted tw-mt-2 tw-text-sm">
           Press <kbd className="tw-badge msgtab-kbd">Cmd+Enter</kbd> to send
         </div>
       </div>

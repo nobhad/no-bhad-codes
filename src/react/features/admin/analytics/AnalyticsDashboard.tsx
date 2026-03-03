@@ -16,6 +16,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
+import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface KPI {
   id: string;
@@ -24,7 +25,6 @@ interface KPI {
   change?: number;
   changeLabel?: string;
   icon: React.ReactNode;
-  color: string;
 }
 
 interface ChartData {
@@ -57,19 +57,31 @@ interface AnalyticsDashboardProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification }: AnalyticsDashboardProps) {
+type AnalyticsSubtab = 'overview' | 'revenue' | 'leads' | 'projects';
+
+export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyticsData | null>(null);
-
-  // Filters
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-  const [activeSubtab, setActiveSubtab] = useState<'overview' | 'revenue' | 'leads' | 'projects'>(
-    'overview'
-  );
+  const [activeSubtab, setActiveSubtab] = useState<AnalyticsSubtab>('overview');
 
-  // Auth headers helper
+  // Listen for subtab change events from header (standardized pattern)
+  useEffect(() => {
+    function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
+      const subtab = e.detail.subtab as AnalyticsSubtab;
+      if (['overview', 'revenue', 'leads', 'projects'].includes(subtab)) {
+        setActiveSubtab(subtab);
+      }
+    }
+
+    document.addEventListener('analyticsSubtabChange', handleSubtabChange as EventListener);
+    return () => {
+      document.removeEventListener('analyticsSubtabChange', handleSubtabChange as EventListener);
+    };
+  }, []);
+
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -86,7 +98,7 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/analytics?range=${dateRange}`, {
+      const response = await fetch(`${API_ENDPOINTS.ADMIN.ANALYTICS}?range=${dateRange}`, {
         headers: getHeaders(),
         credentials: 'include',
       });
@@ -113,8 +125,7 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
           value: formatCurrency(data.kpis.revenue.value),
           change: data.kpis.revenue.change,
           changeLabel: 'vs last period',
-          icon: <DollarSign className="tw-h-5 tw-w-5" />,
-          color: 'var(--status-completed)',
+          icon: <DollarSign className="icon-lg" />,
         },
         {
           id: 'clients',
@@ -122,8 +133,7 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
           value: data.kpis.clients.value,
           change: data.kpis.clients.change,
           changeLabel: 'new this period',
-          icon: <Users className="tw-h-5 tw-w-5" />,
-          color: 'var(--status-active)',
+          icon: <Users className="icon-lg" />,
         },
         {
           id: 'projects',
@@ -131,8 +141,7 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
           value: data.kpis.projects.value,
           change: data.kpis.projects.change,
           changeLabel: 'vs last period',
-          icon: <Briefcase className="tw-h-5 tw-w-5" />,
-          color: 'var(--color-brand-primary)',
+          icon: <Briefcase className="icon-lg" />,
         },
         {
           id: 'invoices',
@@ -140,8 +149,7 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
           value: data.kpis.invoices.value,
           change: data.kpis.invoices.change,
           changeLabel: 'this period',
-          icon: <FileText className="tw-h-5 tw-w-5" />,
-          color: 'var(--status-pending)',
+          icon: <FileText className="icon-lg" />,
         },
         {
           id: 'conversion',
@@ -149,8 +157,7 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
           value: `${data.kpis.conversionRate.value}%`,
           change: data.kpis.conversionRate.change,
           changeLabel: 'vs last period',
-          icon: <TrendingUp className="tw-h-5 tw-w-5" />,
-          color: 'var(--status-qualified)',
+          icon: <TrendingUp className="icon-lg" />,
         },
         {
           id: 'avgValue',
@@ -158,18 +165,10 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
           value: formatCurrency(data.kpis.avgProjectValue.value),
           change: data.kpis.avgProjectValue.change,
           changeLabel: 'vs last period',
-          icon: <BarChart3 className="tw-h-5 tw-w-5" />,
-          color: 'var(--status-new)',
+          icon: <BarChart3 className="icon-lg" />,
         },
       ]
     : [];
-
-  const subtabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'revenue', label: 'Revenue' },
-    { id: 'leads', label: 'Leads' },
-    { id: 'projects', label: 'Projects' },
-  ];
 
   const dateRangeOptions = [
     { value: '7d', label: 'Last 7 days' },
@@ -179,53 +178,36 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
   ];
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
-      {/* Header */}
-      <div className="perf-header">
-        {/* Subtabs */}
-        <div className="tw-tab-list">
-          {subtabs.map((tab) => (
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="analytics-view">
+      {/* Actions Bar - page-level controls */}
+      <div className="analytics-actions-bar action-bar">
+        {/* Date range selector - button group on desktop, dropdown on mobile */}
+        <div className="date-range-selector">
+          {dateRangeOptions.map((option) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveSubtab(tab.id as typeof activeSubtab)}
-              className={activeSubtab === tab.id ? 'tw-tab-active' : 'tw-tab'}
+              key={option.value}
+              className={cn('btn-secondary', dateRange === option.value && 'active')}
+              onClick={() => setDateRange(option.value as typeof dateRange)}
             >
-              {tab.label}
+              {option.label}
             </button>
           ))}
         </div>
-
-        {/* Actions */}
-        <div className="perf-controls">
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value as typeof dateRange)}
-            className="tw-select"
-          >
-            {dateRangeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <button className="tw-btn-secondary" onClick={loadAnalytics} disabled={isLoading}>
-            <RefreshCw className={cn('status-panel-refresh-icon', isLoading && 'status-panel-refresh-icon-spin')} />
-            Refresh
-          </button>
-
-          <button className="tw-btn-secondary">
-            <Download className="analytics-action-icon" />
-            Export
-          </button>
-        </div>
+        <button className="btn-secondary" onClick={loadAnalytics} disabled={isLoading}>
+          <RefreshCw className={cn('icon-sm', isLoading && 'animate-spin')} />
+          Refresh
+        </button>
+        <button className="btn-secondary">
+          <Download className="icon-sm" />
+          Export
+        </button>
       </div>
 
       {/* Error State */}
       {error && (
-        <div className="tw-error">
+        <div className="error-state">
           {error}
-          <button className="tw-btn-secondary status-retry-btn" onClick={loadAnalytics}>
+          <button className="btn-secondary" onClick={loadAnalytics}>
             Retry
           </button>
         </div>
@@ -233,99 +215,228 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
 
       {/* Loading State */}
       {isLoading ? (
-        <AnalyticsSkeleton />
+        <div className="loading-state">Loading analytics data...</div>
       ) : (
         <>
-          {/* KPIs Grid */}
-          <div className="tw-grid-stats tw-grid-6-cols">
-            {kpis.map((kpi) => (
-              <div key={kpi.id} className="tw-stat-card">
-                <div className="perf-kpi-header">
-                  <span style={{ color: kpi.color }}>{kpi.icon}</span>
-                  <span className="tw-stat-label">{kpi.label}</span>
-                </div>
-                <div className="tw-stat-value">{kpi.value}</div>
-                {kpi.change !== undefined && (
-                  <div className="perf-kpi-trend">
-                    {kpi.change >= 0 ? (
-                      <TrendingUp className="perf-trend-icon" />
-                    ) : (
-                      <TrendingDown className="perf-trend-icon" />
+          {/* Overview Subtab - Show all KPIs and charts */}
+          {activeSubtab === 'overview' && (
+            <>
+              {/* KPIs Grid */}
+              <div className="kpi-cards-row">
+                {kpis.map((kpi) => (
+                  <div key={kpi.id} className="kpi-card">
+                    <div className="kpi-card-icon">{kpi.icon}</div>
+                    <span className="kpi-card-label">{kpi.label}</span>
+                    <div className="kpi-card-value">{kpi.value}</div>
+                    {kpi.change !== undefined && (
+                      <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+                        {kpi.change >= 0 ? (
+                          <TrendingUp className="icon-xs" />
+                        ) : (
+                          <TrendingDown className="icon-xs" />
+                        )}
+                        <span className="change-value">
+                          {kpi.change >= 0 ? '+' : ''}
+                          {kpi.change}%
+                        </span>
+                        <span className="change-label">{kpi.changeLabel}</span>
+                      </div>
                     )}
-                    <span className="tw-text-muted">
-                      {kpi.change >= 0 ? '+' : ''}
-                      {kpi.change}% {kpi.changeLabel}
-                    </span>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Charts */}
-          <div className="tw-grid-cards tw-grid-2-cols">
-            {/* Revenue Chart */}
-            <div className="tw-card perf-card">
-              <div className="perf-card-header">
-                <h3 className="tw-section-title">Revenue Over Time</h3>
-                <LineChart className="perf-card-icon" />
+              {/* Charts Grid */}
+              <div className="analytics-card-grid">
+                <div className="analytics-chart-card">
+                  <div className="analytics-card-header">
+                    <h3>Revenue Over Time</h3>
+                    <LineChart className="icon-md" />
+                  </div>
+                  <ChartPlaceholder data={data?.revenueChart} type="line" />
+                </div>
+
+                <div className="analytics-chart-card">
+                  <div className="analytics-card-header">
+                    <h3>Projects by Status</h3>
+                    <PieChart className="icon-md" />
+                  </div>
+                  <ChartPlaceholder data={data?.projectsChart} type="pie" />
+                </div>
+
+                <div className="analytics-chart-card">
+                  <div className="analytics-card-header">
+                    <h3>Lead Funnel</h3>
+                    <BarChart3 className="icon-md" />
+                  </div>
+                  <ChartPlaceholder data={data?.leadsChart} type="bar" />
+                </div>
+
+                <div className="analytics-chart-card">
+                  <h3>Lead Sources</h3>
+                  <div className="source-list">
+                    {data?.sourceBreakdown?.map((source, index) => (
+                      <div key={source.source} className="source-item">
+                        <div className="source-row">
+                          <span>{source.source}</span>
+                          <span className="source-value">
+                            {source.count} ({source.percentage}%)
+                          </span>
+                        </div>
+                        <div className="source-progress-track">
+                          <div
+                            className="source-progress-bar"
+                            style={{ width: `${source.percentage}%`, backgroundColor: getSourceColor(index) }}
+                          />
+                        </div>
+                      </div>
+                    )) || <div className="empty-state">No data available</div>}
+                  </div>
+                </div>
               </div>
-              <div className="analytics-chart-empty tw-flex tw-items-center tw-justify-center">
+            </>
+          )}
+
+          {/* Revenue Subtab */}
+          {activeSubtab === 'revenue' && (
+            <>
+              <div className="kpi-cards-row kpi-cards-row--3">
+                {kpis
+                  .filter((kpi) => ['revenue', 'invoices', 'avgValue'].includes(kpi.id))
+                  .map((kpi) => (
+                    <div key={kpi.id} className="kpi-card">
+                      <div className="kpi-card-icon">{kpi.icon}</div>
+                      <span className="kpi-card-label">{kpi.label}</span>
+                      <div className="kpi-card-value">{kpi.value}</div>
+                      {kpi.change !== undefined && (
+                        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+                          {kpi.change >= 0 ? (
+                            <TrendingUp className="icon-xs" />
+                          ) : (
+                            <TrendingDown className="icon-xs" />
+                          )}
+                          <span className="change-value">
+                            {kpi.change >= 0 ? '+' : ''}
+                            {kpi.change}%
+                          </span>
+                          <span className="change-label">{kpi.changeLabel}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+
+              <div className="analytics-chart-card">
+                <div className="analytics-card-header">
+                  <h3>Revenue Over Time</h3>
+                  <LineChart className="icon-md" />
+                </div>
                 <ChartPlaceholder data={data?.revenueChart} type="line" />
               </div>
-            </div>
+            </>
+          )}
 
-            {/* Projects Chart */}
-            <div className="tw-card perf-card">
-              <div className="perf-card-header">
-                <h3 className="tw-section-title">Projects by Status</h3>
-                <PieChart className="perf-card-icon" />
+          {/* Leads Subtab */}
+          {activeSubtab === 'leads' && (
+            <>
+              <div className="kpi-cards-row kpi-cards-row--2">
+                {kpis
+                  .filter((kpi) => ['clients', 'conversion'].includes(kpi.id))
+                  .map((kpi) => (
+                    <div key={kpi.id} className="kpi-card">
+                      <div className="kpi-card-icon">{kpi.icon}</div>
+                      <span className="kpi-card-label">{kpi.label}</span>
+                      <div className="kpi-card-value">{kpi.value}</div>
+                      {kpi.change !== undefined && (
+                        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+                          {kpi.change >= 0 ? (
+                            <TrendingUp className="icon-xs" />
+                          ) : (
+                            <TrendingDown className="icon-xs" />
+                          )}
+                          <span className="change-value">
+                            {kpi.change >= 0 ? '+' : ''}
+                            {kpi.change}%
+                          </span>
+                          <span className="change-label">{kpi.changeLabel}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
-              <div className="analytics-chart-empty tw-flex tw-items-center tw-justify-center">
+
+              <div className="analytics-card-grid">
+                <div className="analytics-chart-card">
+                  <div className="analytics-card-header">
+                    <h3>Lead Funnel</h3>
+                    <BarChart3 className="icon-md" />
+                  </div>
+                  <ChartPlaceholder data={data?.leadsChart} type="bar" />
+                </div>
+
+                <div className="analytics-chart-card">
+                  <h3>Lead Sources</h3>
+                  <div className="source-list">
+                    {data?.sourceBreakdown?.map((source, index) => (
+                      <div key={source.source} className="source-item">
+                        <div className="source-row">
+                          <span>{source.source}</span>
+                          <span className="source-value">
+                            {source.count} ({source.percentage}%)
+                          </span>
+                        </div>
+                        <div className="source-progress-track">
+                          <div
+                            className="source-progress-bar"
+                            style={{ width: `${source.percentage}%`, backgroundColor: getSourceColor(index) }}
+                          />
+                        </div>
+                      </div>
+                    )) || <div className="empty-state">No data available</div>}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Projects Subtab */}
+          {activeSubtab === 'projects' && (
+            <>
+              <div className="kpi-cards-row kpi-cards-row--2">
+                {kpis
+                  .filter((kpi) => ['projects', 'avgValue'].includes(kpi.id))
+                  .map((kpi) => (
+                    <div key={kpi.id} className="kpi-card">
+                      <div className="kpi-card-icon">{kpi.icon}</div>
+                      <span className="kpi-card-label">{kpi.label}</span>
+                      <div className="kpi-card-value">{kpi.value}</div>
+                      {kpi.change !== undefined && (
+                        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+                          {kpi.change >= 0 ? (
+                            <TrendingUp className="icon-xs" />
+                          ) : (
+                            <TrendingDown className="icon-xs" />
+                          )}
+                          <span className="change-value">
+                            {kpi.change >= 0 ? '+' : ''}
+                            {kpi.change}%
+                          </span>
+                          <span className="change-label">{kpi.changeLabel}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+
+              <div className="analytics-chart-card">
+                <div className="analytics-card-header">
+                  <h3>Projects by Status</h3>
+                  <PieChart className="icon-md" />
+                </div>
                 <ChartPlaceholder data={data?.projectsChart} type="pie" />
               </div>
-            </div>
-
-            {/* Leads Chart */}
-            <div className="tw-card perf-card">
-              <div className="perf-card-header">
-                <h3 className="tw-section-title">Lead Funnel</h3>
-                <BarChart3 className="perf-card-icon" />
-              </div>
-              <div className="analytics-chart-empty tw-flex tw-items-center tw-justify-center">
-                <ChartPlaceholder data={data?.leadsChart} type="bar" />
-              </div>
-            </div>
-
-            {/* Source Breakdown */}
-            <div className="tw-card perf-card">
-              <div className="perf-card-header">
-                <h3 className="tw-section-title">Lead Sources</h3>
-              </div>
-              <div className="perf-projects-list">
-                {data?.sourceBreakdown?.map((source, index) => (
-                  <div key={source.source}>
-                    <div className="perf-kpi-trend-row">
-                      <span>{source.source}</span>
-                      <span className="tw-text-muted">
-                        {source.count} ({source.percentage}%)
-                      </span>
-                    </div>
-                    <div className="tw-progress-track">
-                      <div
-                        className="tw-progress-bar"
-                        style={{ width: `${source.percentage}%`, backgroundColor: getSourceColor(index) }}
-                      />
-                    </div>
-                  </div>
-                )) || (
-                  <div className="tw-empty-state tw-py-8">
-                    No data available
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </>
       )}
     </div>
@@ -334,32 +445,17 @@ export function AnalyticsDashboard({ onNavigate, getAuthToken, showNotification 
 
 function ChartPlaceholder({
   data,
-  type,
 }: {
   data?: ChartData;
   type: 'line' | 'bar' | 'pie';
 }) {
-  // Placeholder for chart visualization
-  // In production, you would use Chart.js or similar
   return (
-    <div className="tw-empty-state tw-p-0">
-      <BarChart3 className="analytics-chart-icon" />
-      <p>Chart visualization</p>
-      <p className="tw-text-muted analytics-chart-hint">
-        {data?.labels?.length || 0} data points
-      </p>
+    <div className="chart-placeholder">
+      <BarChart3 className="icon-xl tw-text-muted" />
+      <p className="tw-text-muted">{data?.labels?.length || 0} data points</p>
     </div>
   );
 }
-
-function AnalyticsSkeleton() {
-  return (
-    <div className="tw-loading tw-flex-col tw-py-16">
-      <div className="tw-opacity-30">Loading analytics data...</div>
-    </div>
-  );
-}
-
 
 function getSourceColor(index: number): string {
   const colors = [
