@@ -9,50 +9,60 @@
  *
  * Usage:
  *   import { API_ENDPOINTS } from '../../../constants/api-endpoints';
- *   fetch(`${API_ENDPOINTS.LEADS}/${leadId}`)
+ *   fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}`)
+ *   fetch(`${API_ENDPOINTS.ADMIN.LEADS}/${leadId}`)
  */
 
 export const API_ENDPOINTS = {
-  // Admin features
-  LEADS: '/api/leads',
-  CONTACTS: '/api/contacts',
+  // Core entity endpoints
   CLIENTS: '/api/clients',
   PROJECTS: '/api/projects',
   INVOICES: '/api/invoices',
-  TASKS: '/api/tasks',
   MESSAGES: '/api/messages',
   CONTRACTS: '/api/contracts',
   PROPOSALS: '/api/proposals',
   QUESTIONNAIRES: '/api/questionnaires',
   DOCUMENT_REQUESTS: '/api/document-requests',
   AD_HOC_REQUESTS: '/api/ad-hoc-requests',
-  WORKFLOWS: '/api/workflows',
   TRIGGERS: '/api/triggers',
   APPROVALS: '/api/approvals',
   EMAIL_TEMPLATES: '/api/email-templates',
   KNOWLEDGE_BASE: '/api/kb',
   ANALYTICS: '/api/analytics',
-  SYSTEM: '/api/system',
   DELIVERABLES: '/api/v1/deliverables',
   FILES: '/api/uploads',
 
   // Client portal features
   CLIENT_INFO: '/api/client-info',
   INTAKE: '/api/intake',
-  ONBOARDING: '/api/onboarding',
-  NOTIFICATIONS: '/api/notifications',
+  ONBOARDING: '/api/client-info/onboarding',
 
   // Auth
   AUTH: '/api/auth',
 
-  // Admin-specific endpoints (bulk operations, admin routes)
+  // Admin-specific endpoints (require admin authentication)
   ADMIN: {
     LEADS: '/api/admin/leads',
     LEADS_BULK_STATUS: '/api/admin/leads/bulk/status',
     LEADS_BULK_DELETE: '/api/admin/leads/bulk/delete',
+    PROJECTS: '/api/admin/projects',
     PROJECTS_BULK_DELETE: '/api/admin/projects/bulk/delete',
-    CONTACTS: '/api/admin/contacts'
-  }
+    CONTACTS: '/api/admin/contacts',
+    TASKS: '/api/admin/tasks',
+    TASKS_BULK_DELETE: '/api/admin/tasks/bulk-delete',
+    WORKFLOWS: '/api/admin/workflows',
+    WORKFLOWS_BULK_STATUS: '/api/admin/workflows/bulk-status',
+    WORKFLOWS_BULK_DELETE: '/api/admin/workflows/bulk-delete',
+    NOTIFICATIONS: '/api/admin/notifications',
+    ANALYTICS: '/api/admin/analytics',
+    DELIVERABLES: '/api/admin/deliverables',
+    DELETED_ITEMS: '/api/admin/deleted-items',
+    FILES: '/api/admin/files',
+    CLIENTS: '/api/admin/clients'
+  },
+
+  // Client contacts (nested under clients)
+  CLIENT_CONTACTS: '/api/clients/contacts'
 } as const;
 
 export type ApiEndpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];
