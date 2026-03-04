@@ -15,7 +15,7 @@ const mockDb = vi.hoisted(() => {
     run: vi.fn(),
     get: vi.fn(),
     all: vi.fn(),
-    transaction: vi.fn(),
+    transaction: vi.fn()
   };
   // Transaction passes a context with run method
   db.transaction.mockImplementation(async (fn: (ctx: { run: typeof db.run }) => unknown) =>
@@ -25,7 +25,7 @@ const mockDb = vi.hoisted(() => {
 });
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb,
+  getDatabase: () => mockDb
 }));
 
 vi.mock('../../../server/services/settings-service', () => ({
@@ -34,13 +34,13 @@ vi.mock('../../../server/services/settings-service', () => ({
       name: 'Test Business',
       contact: 'Test Contact',
       email: 'test@example.com',
-      website: 'https://test.com',
+      website: 'https://test.com'
     }),
     getPaymentSettings: vi.fn().mockResolvedValue({
       venmoHandle: '@test',
-      paypalEmail: 'paypal@test.com',
-    }),
-  },
+      paypalEmail: 'paypal@test.com'
+    })
+  }
 }));
 
 import { InvoiceService, Invoice, InvoiceLineItem } from '../../../server/services/invoice-service';
@@ -72,7 +72,7 @@ describe('Invoice Service', () => {
       status: 'sent',
       dueDate: '2026-02-15',
       invoiceType: 'standard',
-      lineItems: [],
+      lineItems: []
     };
 
     expect(service.calculateLateFee(invoice)).toBe(0);
@@ -91,7 +91,7 @@ describe('Invoice Service', () => {
       status: 'paid',
       dueDate: '2026-02-01',
       invoiceType: 'standard',
-      lineItems: [],
+      lineItems: []
     };
 
     expect(service.calculateLateFee(invoice)).toBe(0);
@@ -112,7 +112,7 @@ describe('Invoice Service', () => {
       invoiceType: 'standard',
       lineItems: [],
       lateFeeRate: 25,
-      lateFeeType: 'flat',
+      lateFeeType: 'flat'
     };
 
     expect(service.calculateLateFee(invoice)).toBe(25);
@@ -133,7 +133,7 @@ describe('Invoice Service', () => {
       invoiceType: 'standard',
       lineItems: [],
       lateFeeRate: 10,
-      lateFeeType: 'percentage',
+      lateFeeType: 'percentage'
     };
 
     // Outstanding = 800, fee = 10% of 800
@@ -155,7 +155,7 @@ describe('Invoice Service', () => {
       invoiceType: 'standard',
       lineItems: [],
       lateFeeRate: 1,
-      lateFeeType: 'daily_percentage',
+      lateFeeType: 'daily_percentage'
     };
 
     // 5 days overdue, 1% per day of 1000
@@ -178,7 +178,7 @@ describe('Invoice Service', () => {
       terms: 'Net 30',
       status: 'pending',
       generated_invoice_id: null,
-      created_at: '2024-07-01',
+      created_at: '2024-07-01'
     });
 
     const result = await service.scheduleInvoice({
@@ -187,7 +187,7 @@ describe('Invoice Service', () => {
       scheduledDate: '2024-07-15',
       lineItems,
       notes: 'Follow up',
-      terms: 'Net 30',
+      terms: 'Net 30'
     });
 
     expect(mockDb.run).toHaveBeenCalledWith(
@@ -201,7 +201,7 @@ describe('Invoice Service', () => {
       scheduledDate: '2024-07-15',
       triggerType: 'date',
       lineItems,
-      status: 'pending',
+      status: 'pending'
     });
   });
 
@@ -215,14 +215,14 @@ describe('Invoice Service', () => {
         trigger_type: 'date',
         trigger_milestone_id: null,
         line_items: JSON.stringify([
-          { description: 'Phase 1', quantity: 1, rate: 300, amount: 300 },
+          { description: 'Phase 1', quantity: 1, rate: 300, amount: 300 }
         ]),
         notes: null,
         terms: null,
         status: 'pending',
         generated_invoice_id: null,
-        created_at: '2024-07-20',
-      },
+        created_at: '2024-07-20'
+      }
     ]);
 
     const result = await service.getScheduledInvoices(9);
@@ -252,14 +252,14 @@ describe('Invoice Service', () => {
         trigger_type: 'date',
         trigger_milestone_id: null,
         line_items: JSON.stringify([
-          { description: 'Phase 2', quantity: 1, rate: 800, amount: 800 },
+          { description: 'Phase 2', quantity: 1, rate: 800, amount: 800 }
         ]),
         notes: 'Auto',
         terms: 'Net 15',
         status: 'pending',
         generated_invoice_id: null,
-        created_at: '2024-06-20',
-      },
+        created_at: '2024-06-20'
+      }
     ]);
 
     const createInvoiceSpy = vi.spyOn(service, 'createInvoice').mockResolvedValue({
@@ -272,7 +272,7 @@ describe('Invoice Service', () => {
       currency: 'USD',
       status: 'draft',
       invoiceType: 'standard',
-      lineItems: [],
+      lineItems: []
     } as Invoice);
 
     const count = await service.processScheduledInvoices();
@@ -305,7 +305,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-03-01',
       last_generated_at: null,
       is_active: 1,
-      created_at: '2024-01-10',
+      created_at: '2024-01-10'
     });
 
     const result = await service.createRecurringInvoice({
@@ -316,7 +316,7 @@ describe('Invoice Service', () => {
       lineItems,
       notes: 'Monthly',
       terms: 'Net 10',
-      startDate: '2024-01-10',
+      startDate: '2024-01-10'
     });
 
     const [, params] = mockDb.run.mock.calls[0];
@@ -344,7 +344,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-07-13',
       last_generated_at: null,
       is_active: 1,
-      created_at: '2024-07-01',
+      created_at: '2024-07-01'
     });
 
     const result = await service.createRecurringInvoice({
@@ -354,7 +354,7 @@ describe('Invoice Service', () => {
       dayOfWeek: 5,
       lineItems,
       notes: 'Weekly',
-      startDate: '2024-07-01',
+      startDate: '2024-07-01'
     });
 
     const [, params] = mockDb.run.mock.calls.at(-1)!;
@@ -380,8 +380,8 @@ describe('Invoice Service', () => {
         next_generation_date: '2024-06-08',
         last_generated_at: null,
         is_active: 1,
-        created_at: '2024-06-01',
-      },
+        created_at: '2024-06-01'
+      }
     ]);
 
     const result = await service.getRecurringInvoices(7);
@@ -409,7 +409,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-01-17',
       last_generated_at: null,
       is_active: 1,
-      created_at: '2024-01-10',
+      created_at: '2024-01-10'
     });
 
     const result = await service.updateRecurringInvoice(6, {
@@ -417,7 +417,7 @@ describe('Invoice Service', () => {
       dayOfWeek: 2,
       lineItems,
       notes: 'Updated',
-      terms: 'Net 20',
+      terms: 'Net 20'
     });
 
     expect(mockDb.run).toHaveBeenCalledWith(
@@ -445,7 +445,7 @@ describe('Invoice Service', () => {
       next_generation_date: '2024-02-20',
       last_generated_at: null,
       is_active: 0,
-      created_at: '2024-01-20',
+      created_at: '2024-01-20'
     });
 
     await service.resumeRecurringInvoice(8);
@@ -468,7 +468,7 @@ describe('Invoice Service', () => {
         day_of_month: 15,
         day_of_week: null,
         line_items: JSON.stringify([
-          { description: 'Maintenance', quantity: 1, rate: 150, amount: 150 },
+          { description: 'Maintenance', quantity: 1, rate: 150, amount: 150 }
         ]),
         notes: 'Recurring',
         terms: 'Net 10',
@@ -477,8 +477,8 @@ describe('Invoice Service', () => {
         next_generation_date: '2024-07-15',
         last_generated_at: null,
         is_active: 1,
-        created_at: '2024-01-15',
-      },
+        created_at: '2024-01-15'
+      }
     ]);
 
     const createInvoiceSpy = vi.spyOn(service, 'createInvoice').mockResolvedValue({
@@ -491,7 +491,7 @@ describe('Invoice Service', () => {
       currency: 'USD',
       status: 'draft',
       invoiceType: 'standard',
-      lineItems: [],
+      lineItems: []
     } as Invoice);
 
     const count = await service.processRecurringInvoices();
@@ -514,7 +514,7 @@ describe('Invoice Service', () => {
     it('calculates simple subtotal without tax or discount', () => {
       const lineItems: InvoiceLineItem[] = [
         { description: 'Service A', quantity: 1, rate: 500, amount: 500 },
-        { description: 'Service B', quantity: 2, rate: 250, amount: 500 },
+        { description: 'Service B', quantity: 2, rate: 250, amount: 500 }
       ];
 
       const result = service.calculateInvoiceTotals(lineItems);
@@ -527,7 +527,7 @@ describe('Invoice Service', () => {
 
     it('calculates invoice-level percentage tax', () => {
       const lineItems: InvoiceLineItem[] = [
-        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 },
+        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 }
       ];
 
       const result = service.calculateInvoiceTotals(lineItems, 10); // 10% tax
@@ -539,7 +539,7 @@ describe('Invoice Service', () => {
 
     it('calculates invoice-level percentage discount', () => {
       const lineItems: InvoiceLineItem[] = [
-        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 },
+        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 }
       ];
 
       const result = service.calculateInvoiceTotals(lineItems, 0, 'percentage', 20);
@@ -551,7 +551,7 @@ describe('Invoice Service', () => {
 
     it('calculates invoice-level fixed discount', () => {
       const lineItems: InvoiceLineItem[] = [
-        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 },
+        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 }
       ];
 
       const result = service.calculateInvoiceTotals(lineItems, 0, 'fixed', 150);
@@ -563,7 +563,7 @@ describe('Invoice Service', () => {
 
     it('applies tax on discounted amount', () => {
       const lineItems: InvoiceLineItem[] = [
-        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 },
+        { description: 'Service', quantity: 1, rate: 1000, amount: 1000 }
       ];
 
       // 20% discount, then 10% tax
@@ -579,7 +579,7 @@ describe('Invoice Service', () => {
     it('handles per-line item tax', () => {
       const lineItems: InvoiceLineItem[] = [
         { description: 'Taxable', quantity: 1, rate: 500, amount: 500, taxRate: 10 },
-        { description: 'Non-taxable', quantity: 1, rate: 500, amount: 500 },
+        { description: 'Non-taxable', quantity: 1, rate: 500, amount: 500 }
       ];
 
       const result = service.calculateInvoiceTotals(lineItems);
@@ -598,9 +598,9 @@ describe('Invoice Service', () => {
           rate: 500,
           amount: 500,
           discountType: 'percentage',
-          discountValue: 20,
+          discountValue: 20
         },
-        { description: 'Full price', quantity: 1, rate: 500, amount: 500 },
+        { description: 'Full price', quantity: 1, rate: 500, amount: 500 }
       ];
 
       const result = service.calculateInvoiceTotals(lineItems);
@@ -613,7 +613,7 @@ describe('Invoice Service', () => {
 
     it('ensures total is never negative', () => {
       const lineItems: InvoiceLineItem[] = [
-        { description: 'Service', quantity: 1, rate: 100, amount: 100 },
+        { description: 'Service', quantity: 1, rate: 100, amount: 100 }
       ];
 
       // Discount larger than subtotal
@@ -631,8 +631,8 @@ describe('Invoice Service', () => {
           rate: 400,
           amount: 400,
           discountType: 'fixed',
-          discountValue: 50,
-        },
+          discountValue: 50
+        }
       ];
 
       // Invoice-level: 10% discount, 8% tax
@@ -670,7 +670,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       // Mock line items query
       mockDb.all.mockResolvedValueOnce([]);
@@ -707,7 +707,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -732,7 +732,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -762,7 +762,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -787,7 +787,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -812,7 +812,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       mockDb.all.mockResolvedValueOnce([]);
 
@@ -836,7 +836,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       });
       mockDb.all.mockResolvedValueOnce([]);
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -871,7 +871,7 @@ describe('Invoice Service', () => {
       contact_name: 'Test',
       client_email: 'test@test.com',
       project_name: 'Test Project',
-      project_description: 'Desc',
+      project_description: 'Desc'
     };
 
     it('returns all invoices when no filters specified', async () => {
@@ -1049,7 +1049,7 @@ describe('Invoice Service', () => {
     it('returns deposits with available credit', async () => {
       mockDb.all.mockResolvedValueOnce([
         { id: 10, invoice_number: 'DEP-001', amount_total: 500, paid_date: '2026-01-15' },
-        { id: 11, invoice_number: 'DEP-002', amount_total: 300, paid_date: '2026-02-01' },
+        { id: 11, invoice_number: 'DEP-002', amount_total: 300, paid_date: '2026-02-01' }
       ]);
       // Applied credits for first deposit
       mockDb.get
@@ -1064,20 +1064,20 @@ describe('Invoice Service', () => {
         invoiceNumber: 'DEP-001',
         totalAmount: 500,
         amountApplied: 200,
-        availableAmount: 300,
+        availableAmount: 300
       });
       expect(result[1]).toMatchObject({
         invoiceId: 11,
         invoiceNumber: 'DEP-002',
         totalAmount: 300,
         amountApplied: 0,
-        availableAmount: 300,
+        availableAmount: 300
       });
     });
 
     it('excludes fully applied deposits', async () => {
       mockDb.all.mockResolvedValueOnce([
-        { id: 12, invoice_number: 'DEP-003', amount_total: 500, paid_date: '2026-01-15' },
+        { id: 12, invoice_number: 'DEP-003', amount_total: 500, paid_date: '2026-01-15' }
       ]);
       // Fully applied
       mockDb.get.mockResolvedValueOnce({ total_applied: 500 });
@@ -1104,7 +1104,7 @@ describe('Invoice Service', () => {
       contact_name: 'Test',
       client_email: 'test@test.com',
       project_name: 'Test Project',
-      project_description: 'Desc',
+      project_description: 'Desc'
     };
 
     const mockTargetInvoice = {
@@ -1121,7 +1121,7 @@ describe('Invoice Service', () => {
       contact_name: 'Test',
       client_email: 'test@test.com',
       project_name: 'Test Project',
-      project_description: 'Desc',
+      project_description: 'Desc'
     };
 
     it('applies deposit credit to an invoice', async () => {
@@ -1147,7 +1147,7 @@ describe('Invoice Service', () => {
         depositInvoiceId: 20,
         depositInvoiceNumber: 'DEP-010',
         amount: 500,
-        appliedBy: 'admin@test.com',
+        appliedBy: 'admin@test.com'
       });
 
       // Verify the credit insert
@@ -1218,7 +1218,7 @@ describe('Invoice Service', () => {
           deposit_invoice_number: 'DEP-010',
           amount: 500,
           applied_at: '2026-02-15T10:00:00Z',
-          applied_by: 'admin@test.com',
+          applied_by: 'admin@test.com'
         },
         {
           id: 2,
@@ -1227,8 +1227,8 @@ describe('Invoice Service', () => {
           deposit_invoice_number: 'DEP-011',
           amount: 200,
           applied_at: '2026-02-16T10:00:00Z',
-          applied_by: null,
-        },
+          applied_by: null
+        }
       ]);
 
       const result = await service.getInvoiceCredits(30);
@@ -1238,7 +1238,7 @@ describe('Invoice Service', () => {
         id: 1,
         invoiceId: 30,
         depositInvoiceId: 20,
-        amount: 500,
+        amount: 500
       });
       expect(result[1].amount).toBe(200);
     });
@@ -1291,7 +1291,7 @@ describe('Invoice Service', () => {
 
       expect(result).toBe(5);
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("SET status = 'overdue'"),
+        expect.stringContaining('SET status = \'overdue\''),
         ['2026-03-01']
       );
     });
@@ -1332,7 +1332,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       };
 
       // Initial fetch
@@ -1345,7 +1345,7 @@ describe('Invoice Service', () => {
         ...overdueInvoice,
         late_fee_amount: 50,
         amount_total: 1050,
-        late_fee_applied_at: '2026-03-10T12:00:00Z',
+        late_fee_applied_at: '2026-03-10T12:00:00Z'
       });
       mockDb.all.mockResolvedValueOnce([]);
 
@@ -1377,7 +1377,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       };
 
       mockDb.get.mockResolvedValueOnce(alreadyApplied);
@@ -1409,7 +1409,7 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       };
 
       mockDb.get.mockResolvedValueOnce(notOverdue);
@@ -1441,7 +1441,7 @@ describe('Invoice Service', () => {
       contact_name: 'Test',
       client_email: 'test@test.com',
       project_name: 'Test Project',
-      project_description: 'Desc',
+      project_description: 'Desc'
     };
 
     it('updates draft invoice with new line items', async () => {
@@ -1455,12 +1455,12 @@ describe('Invoice Service', () => {
       // Return updated invoice
       mockDb.get.mockResolvedValueOnce({ ...mockDraftInvoice, amount_total: 800 });
       mockDb.all.mockResolvedValueOnce([
-        { description: 'New Service', quantity: 1, unit_price: 800, amount: 800 },
+        { description: 'New Service', quantity: 1, unit_price: 800, amount: 800 }
       ]);
 
       const newLineItems = [{ description: 'New Service', quantity: 1, rate: 800, amount: 800 }];
 
-      const result = await service.updateInvoice(50, { lineItems: newLineItems });
+      const _result = await service.updateInvoice(50, { lineItems: newLineItems });
 
       expect(mockDb.run).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE invoices SET'),
@@ -1531,13 +1531,13 @@ describe('Invoice Service', () => {
         contact_name: 'Test',
         client_email: 'test@test.com',
         project_name: 'Test Project',
-        project_description: 'Desc',
+        project_description: 'Desc'
       };
 
       // Get original
       mockDb.get.mockResolvedValueOnce(originalInvoice);
       mockDb.all.mockResolvedValueOnce([
-        { description: 'Service', quantity: 1, unit_price: 1000, amount: 1000 },
+        { description: 'Service', quantity: 1, unit_price: 1000, amount: 1000 }
       ]);
 
       // Insert duplicate
@@ -1552,11 +1552,11 @@ describe('Invoice Service', () => {
         id: 61,
         invoice_number: expect.stringContaining('INV-'),
         status: 'draft',
-        amount_paid: 0,
+        amount_paid: 0
       });
       mockDb.all.mockResolvedValueOnce([]);
 
-      const result = await service.duplicateInvoice(60);
+      const _result = await service.duplicateInvoice(60);
 
       expect(mockDb.run).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO invoices'),

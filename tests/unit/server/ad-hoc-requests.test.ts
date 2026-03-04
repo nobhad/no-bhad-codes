@@ -15,7 +15,7 @@ import { getDatabase } from '../../../server/database/init';
 
 // Mock database setup
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: vi.fn(),
+  getDatabase: vi.fn()
 }));
 
 describe('Ad Hoc Requests - Time Entry Endpoints', () => {
@@ -25,14 +25,14 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
 
   describe('GET /api/ad-hoc-requests/:requestId/time-entries', () => {
     it('should fetch time entries for an ad hoc request', async () => {
-      const requestId = 1;
+      const _requestId = 1;
       const mockEntries = [
         {
           id: 1,
@@ -44,7 +44,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
           billable: 1,
           hourly_rate: 150,
           description: 'UI implementation',
-          created_at: '2026-02-10T10:00:00Z',
+          created_at: '2026-02-10T10:00:00Z'
         },
         {
           id: 2,
@@ -56,8 +56,8 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
           billable: 1,
           hourly_rate: null,
           description: 'Code review',
-          created_at: '2026-02-09T14:00:00Z',
-        },
+          created_at: '2026-02-09T14:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValue(mockEntries);
@@ -86,15 +86,15 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
           id: 1,
           date: '2026-02-10',
           hours: 3,
-          user_name: 'John',
-        },
+          user_name: 'John'
+        }
       ];
 
       mockDb.all.mockResolvedValue(mockEntries);
 
       const entries = await mockDb.all('SELECT * FROM time_entries WHERE date >= ? AND date <= ?', [
         '2026-02-01',
-        '2026-02-28',
+        '2026-02-28'
       ]);
 
       expect(entries).toHaveLength(1);
@@ -107,14 +107,14 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
 
   describe('POST /api/ad-hoc-requests/:requestId/time-entries', () => {
     it('should log time entry for an ad hoc request', async () => {
-      const requestId = 1;
+      const _requestId = 1;
       const timeEntryData = {
         userName: 'John Doe',
         hours: 4.5,
         date: '2026-02-10',
         description: 'Implementation work',
         billable: true,
-        hourlyRate: 150,
+        hourlyRate: 150
       };
 
       const insertedEntry = {
@@ -124,7 +124,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
         date: '2026-02-10',
         description: 'Implementation work',
         billable: true,
-        hourly_rate: 150,
+        hourly_rate: 150
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
@@ -141,7 +141,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
           timeEntryData.date,
           timeEntryData.description,
           1,
-          timeEntryData.hourlyRate,
+          timeEntryData.hourlyRate
         ]
       );
 
@@ -156,7 +156,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
       const invalidData = {
         userName: '',
         hours: null,
-        date: null,
+        date: null
       };
 
       // Validation would fail
@@ -192,7 +192,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
         hours: 3,
         date: '2026-02-10',
         billable: true,
-        hourlyRate: 200, // custom rate overrides request default
+        hourlyRate: 200 // custom rate overrides request default
       };
 
       expect(timeEntry.hourlyRate).toBe(200);
@@ -203,7 +203,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
         userName: 'John',
         hours: 2,
         date: '2026-02-10',
-        billable: true, // default
+        billable: true // default
       };
 
       expect(timeEntry.billable).toBe(true);
@@ -215,7 +215,7 @@ describe('Ad Hoc Requests - Time Entry Endpoints', () => {
         hours: 1,
         date: '2026-02-10',
         billable: false,
-        description: 'Research',
+        description: 'Research'
       };
 
       expect(nonBillableEntry.billable).toBe(false);
@@ -230,7 +230,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -246,7 +246,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
         status: 'completed',
         quotedPrice: 2500,
         hourlyRate: 150,
-        estimatedHours: null,
+        estimatedHours: null
       };
 
       mockDb.get.mockResolvedValue(request);
@@ -261,18 +261,18 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should reject invoice generation for non-completed requests', async () => {
       const request = {
         id: 1,
-        status: 'in_progress',
+        status: 'in_progress'
       };
 
       expect(request.status).not.toBe('completed');
     });
 
     it('should include billable time entries in invoice calculation', async () => {
-      const requestId = 1;
+      const _requestId = 1;
       const timeEntries = [
         { hours: 4, billable: 1, hourlyRate: 150 },
         { hours: 2, billable: 1, hourlyRate: 150 },
-        { hours: 1, billable: 0, hourlyRate: 150 }, // non-billable, excluded
+        { hours: 1, billable: 0, hourlyRate: 150 } // non-billable, excluded
       ];
 
       const billableHours = timeEntries
@@ -287,14 +287,14 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
         id: 1,
         title: 'Feature Request',
         quotedPrice: 3000,
-        hourlyRate: 200,
+        hourlyRate: 200
       };
 
       const lineItem = {
         description: `Ad hoc request #${request.id}: ${request.title}`,
         quantity: 1,
         rate: request.quotedPrice,
-        amount: request.quotedPrice,
+        amount: request.quotedPrice
       };
 
       expect(lineItem.description).toContain('Ad hoc request #1');
@@ -304,7 +304,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should use hourly rate calculation if set', async () => {
       const request = {
         estimatedHours: 10,
-        hourlyRate: 150,
+        hourlyRate: 150
       };
 
       const amount = request.estimatedHours * request.hourlyRate;
@@ -314,11 +314,11 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
 
     it('should use flat rate if specified', async () => {
       const request = {
-        flatRate: 2000,
+        flatRate: 2000
       };
 
       const lineItem = {
-        amount: request.flatRate,
+        amount: request.flatRate
       };
 
       expect(lineItem.amount).toBe(2000);
@@ -328,7 +328,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
       const request = {
         quotedPrice: 2500,
         flatRate: 2000,
-        hourlyRate: 150,
+        hourlyRate: 150
       };
 
       // Priority: quotedPrice > flatRate > (estimatedHours * hourlyRate)
@@ -369,11 +369,11 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
 
   describe('POST /api/ad-hoc-requests/invoice/bundle', () => {
     it('should bundle multiple ad hoc requests into one invoice', async () => {
-      const requestIds = [1, 2, 3];
+      const _requestIds = [1, 2, 3];
       const requests = [
         { id: 1, projectId: 100, clientId: 5, title: 'Feature A', quotedPrice: 1000 },
         { id: 2, projectId: 100, clientId: 5, title: 'Feature B', quotedPrice: 1500 },
-        { id: 3, projectId: 100, clientId: 5, title: 'Bug Fix', quotedPrice: 500 },
+        { id: 3, projectId: 100, clientId: 5, title: 'Bug Fix', quotedPrice: 500 }
       ];
 
       const totalAmount = requests.reduce((sum, r) => sum + r.quotedPrice, 0);
@@ -385,7 +385,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should require all requests to have same projectId', async () => {
       const requests = [
         { id: 1, projectId: 100 },
-        { id: 2, projectId: 101 }, // different project!
+        { id: 2, projectId: 101 } // different project!
       ];
 
       const sameProject = requests.every((r) => r.projectId === requests[0].projectId);
@@ -396,7 +396,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should require all requests to have same clientId', async () => {
       const requests = [
         { id: 1, clientId: 5 },
-        { id: 2, clientId: 6 }, // different client!
+        { id: 2, clientId: 6 } // different client!
       ];
 
       const sameClient = requests.every((r) => r.clientId === requests[0].clientId);
@@ -407,7 +407,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should require all requests to be completed', async () => {
       const requests = [
         { id: 1, status: 'completed' },
-        { id: 2, status: 'in_progress' }, // not completed!
+        { id: 2, status: 'in_progress' } // not completed!
       ];
 
       const allCompleted = requests.every((r) => r.status === 'completed');
@@ -418,12 +418,12 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should create line item for each bundled request', async () => {
       const requests = [
         { id: 1, title: 'Feature A', quotedPrice: 1000 },
-        { id: 2, title: 'Feature B', quotedPrice: 1500 },
+        { id: 2, title: 'Feature B', quotedPrice: 1500 }
       ];
 
       const lineItems = requests.map((r) => ({
         description: `Ad hoc request #${r.id}: ${r.title}`,
-        amount: r.quotedPrice,
+        amount: r.quotedPrice
       }));
 
       expect(lineItems).toHaveLength(2);
@@ -456,7 +456,7 @@ describe('Ad Hoc Requests - Invoice Generation Endpoints', () => {
     it('should include notes in bundled invoice', async () => {
       const bundleData = {
         requestIds: [1, 2],
-        note: 'Bundled ad hoc work for Q1',
+        note: 'Bundled ad hoc work for Q1'
       };
 
       expect(bundleData.note).toContain('Bundled');
@@ -478,7 +478,7 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
   beforeEach(() => {
     mockDb = {
       get: vi.fn(),
-      all: vi.fn(),
+      all: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -490,14 +490,14 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
           month: '2026-02',
           totalRevenue: 5000,
           invoiceCount: 3,
-          requestCount: 5,
+          requestCount: 5
         },
         {
           month: '2026-01',
           totalRevenue: 3500,
           invoiceCount: 2,
-          requestCount: 3,
-        },
+          requestCount: 3
+        }
       ];
 
       mockDb.all.mockResolvedValue(mockData);
@@ -515,13 +515,13 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
         {
           clientName: 'Acme Corp',
           totalRevenue: 7500,
-          invoiceCount: 4,
+          invoiceCount: 4
         },
         {
           clientName: 'Beta Inc',
           totalRevenue: 2000,
-          invoiceCount: 1,
-        },
+          invoiceCount: 1
+        }
       ];
 
       mockDb.all.mockResolvedValue(mockData);
@@ -560,7 +560,7 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
     it('should support limit parameter', async () => {
       mockDb.all.mockResolvedValue([
         { month: '2026-02', totalRevenue: 5000 },
-        { month: '2026-01', totalRevenue: 3500 },
+        { month: '2026-01', totalRevenue: 3500 }
       ]);
 
       const data = await mockDb.all('SELECT ... LIMIT 12');
@@ -572,7 +572,7 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
       const mockData = {
         totalRevenue: 5000,
         invoiceCount: 3,
-        averageAmount: 1666.67,
+        averageAmount: 1666.67
       };
 
       const average = mockData.totalRevenue / mockData.invoiceCount;
@@ -583,7 +583,7 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
     it('should track largest invoice amount', async () => {
       const mockData = {
         totalRevenue: 5000,
-        largestAmount: 2000,
+        largestAmount: 2000
       };
 
       expect(mockData.largestAmount).toBe(2000);
@@ -596,13 +596,13 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
         {
           month: '2026-02',
           totalRevenue: 3000,
-          invoiceCount: 2,
-        },
+          invoiceCount: 2
+        }
       ];
 
       mockDb.all.mockResolvedValue(mockData);
 
-      const data = await mockDb.all('SELECT ... WHERE r.client_id = ?', [clientId]);
+      const _data = await mockDb.all('SELECT ... WHERE r.client_id = ?', [clientId]);
 
       expect(mockDb.all).toHaveBeenCalledWith(
         expect.any(String),
@@ -638,7 +638,7 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
       const metrics = {
         totalRevenue: 5000,
         invoiceCount: 3,
-        averageAmount: 1666.67,
+        averageAmount: 1666.67
       };
 
       expect(metrics.invoiceCount).toBe(3);
@@ -648,7 +648,7 @@ describe('Ad Hoc Requests - Analytics Endpoints', () => {
       const clients = [
         { clientName: 'Acme', totalRevenue: 5000 },
         { clientName: 'Beta', totalRevenue: 3000 },
-        { clientName: 'Gamma', totalRevenue: 1500 },
+        { clientName: 'Gamma', totalRevenue: 1500 }
       ];
 
       const sorted = [...clients].sort((a, b) => b.totalRevenue - a.totalRevenue);
@@ -666,7 +666,7 @@ describe('Ad Hoc Requests - Error Handling', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -683,7 +683,7 @@ describe('Ad Hoc Requests - Error Handling', () => {
     const invalidEntry = {
       userName: '',
       hours: null,
-      date: null,
+      date: null
     };
 
     const isValid = invalidEntry.userName && invalidEntry.hours !== null && invalidEntry.date;
@@ -712,7 +712,7 @@ describe('Ad Hoc Requests - Error Handling', () => {
   it('should validate request is linked to task before logging time', async () => {
     const request = {
       id: 1,
-      taskId: null, // not linked
+      taskId: null // not linked
     };
 
     expect(request.taskId).toBeNull();

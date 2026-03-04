@@ -9,7 +9,7 @@ describe('Deliverable Service', () => {
     mockDb = {
       run: vi.fn(),
       get: vi.fn(),
-      all: vi.fn(),
+      all: vi.fn()
     };
     service = new DeliverableService(mockDb);
   });
@@ -34,7 +34,7 @@ describe('Deliverable Service', () => {
         locked: 0,
         tags: 'design,final',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const deliverable = await service.createDeliverable(
@@ -49,7 +49,7 @@ describe('Deliverable Service', () => {
       expect(deliverable).toMatchObject({
         id: 1,
         title: 'Homepage Design',
-        status: 'draft',
+        status: 'draft'
       });
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -71,7 +71,7 @@ describe('Deliverable Service', () => {
         locked: 0,
         tags: '',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const deliverable = await service.getDeliverableById(1);
@@ -103,8 +103,8 @@ describe('Deliverable Service', () => {
           approved_at: '2026-02-10T13:00:00.000Z',
           tags: '',
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T13:00:00.000Z',
-        },
+          updated_at: '2026-02-10T13:00:00.000Z'
+        }
       ]);
 
       const result = await service.getProjectDeliverables(100, { limit: 50, offset: 0 });
@@ -133,8 +133,8 @@ describe('Deliverable Service', () => {
           approved_at: null,
           tags: '',
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       const result = await service.getProjectDeliverables(100, { status: 'revision_requested' });
@@ -160,7 +160,7 @@ describe('Deliverable Service', () => {
         locked: 0,
         tags: '',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       mockDb.get.mockResolvedValueOnce({
@@ -179,13 +179,13 @@ describe('Deliverable Service', () => {
         locked: 0,
         tags: '',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:01:00.000Z',
+        updated_at: '2026-02-10T12:01:00.000Z'
       });
 
       const deliverable = await service.updateDeliverable(1, {
         title: 'New Title',
         description: 'New description',
-        status: 'pending_review',
+        status: 'pending_review'
       });
 
       expect(deliverable.title).toBe('New Title');
@@ -210,7 +210,7 @@ describe('Deliverable Service', () => {
         approved_at: '2026-02-10T13:00:00.000Z',
         tags: '',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T13:00:00.000Z',
+        updated_at: '2026-02-10T13:00:00.000Z'
       });
 
       const deliverable = await service.lockDeliverable(1, 2);
@@ -238,7 +238,7 @@ describe('Deliverable Service', () => {
         approved_at: null,
         tags: '',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const deliverable = await service.requestRevision(1, 'Needs color adjustments', 2);
@@ -266,7 +266,7 @@ describe('Deliverable Service', () => {
         description: '',
         tags: '',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       mockDb.get.mockResolvedValueOnce({ max_version: null }); // First version
@@ -281,7 +281,7 @@ describe('Deliverable Service', () => {
         file_type: 'application/x-photoshop',
         uploaded_by_id: 1,
         change_notes: 'Initial design',
-        created_at: '2026-02-10T12:00:00.000Z',
+        created_at: '2026-02-10T12:00:00.000Z'
       }); // Get version by ID
 
       const version = await service.uploadVersion(
@@ -315,7 +315,7 @@ describe('Deliverable Service', () => {
         locked: 0,
         tags: '',
         created_at: '',
-        updated_at: '',
+        updated_at: ''
       });
 
       mockDb.get.mockResolvedValueOnce({ max_version: 2 }); // Already has 2 versions
@@ -332,7 +332,7 @@ describe('Deliverable Service', () => {
         file_type: 'application/x-photoshop',
         uploaded_by_id: 1,
         change_notes: 'Updated colors',
-        created_at: '2026-02-10T12:05:00.000Z',
+        created_at: '2026-02-10T12:05:00.000Z'
       });
 
       const version = await service.uploadVersion(
@@ -359,7 +359,7 @@ describe('Deliverable Service', () => {
         file_type: 'application/x-photoshop',
         uploaded_by_id: 1,
         change_notes: 'Latest version',
-        created_at: '2026-02-10T12:05:00.000Z',
+        created_at: '2026-02-10T12:05:00.000Z'
       });
 
       const version = await service.getLatestVersion(1);
@@ -384,14 +384,14 @@ describe('Deliverable Service', () => {
         resolved: 0,
         resolved_at: null,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const comment = await service.addComment(1, 2, 'The color scheme is too bright', {
         x: 150,
         y: 200,
         annotationType: 'highlight',
-        elementId: 'logo',
+        elementId: 'logo'
       });
 
       expect(comment.comment_text).toBe('The color scheme is too bright');
@@ -413,8 +413,8 @@ describe('Deliverable Service', () => {
           resolved: 0,
           resolved_at: null,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       const comments = await service.getDeliverableComments(1, { elementId: 'logo' });
@@ -437,7 +437,7 @@ describe('Deliverable Service', () => {
         resolved: 1,
         resolved_at: '2026-02-10T12:05:00.000Z',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:05:00.000Z',
+        updated_at: '2026-02-10T12:05:00.000Z'
       });
 
       const comment = await service.resolveComment(1);
@@ -458,7 +458,7 @@ describe('Deliverable Service', () => {
         approval_status: 'pending',
         revision_count: 0,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const element = await service.createDesignElement(1, 'logo', 'Company logo design');
@@ -477,7 +477,7 @@ describe('Deliverable Service', () => {
           approval_status: 'pending',
           revision_count: 0,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
+          updated_at: '2026-02-10T12:00:00.000Z'
         },
         {
           id: 2,
@@ -487,8 +487,8 @@ describe('Deliverable Service', () => {
           approval_status: 'approved',
           revision_count: 1,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       const elements = await service.getDeliverableElements(1);
@@ -508,7 +508,7 @@ describe('Deliverable Service', () => {
         approval_status: 'approved',
         revision_count: 0,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:01:00.000Z',
+        updated_at: '2026-02-10T12:01:00.000Z'
       });
 
       const element = await service.updateElementApprovalStatus(1, 'approved');
@@ -526,7 +526,7 @@ describe('Deliverable Service', () => {
         approval_status: 'revision_needed',
         revision_count: 1,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:01:00.000Z',
+        updated_at: '2026-02-10T12:01:00.000Z'
       });
 
       const element = await service.updateElementApprovalStatus(1, 'revision_needed');
@@ -547,7 +547,7 @@ describe('Deliverable Service', () => {
         feedback: 'Colors need adjustment',
         design_elements_reviewed: '[1,2]',
         review_duration_minutes: 15,
-        created_at: '2026-02-10T12:00:00.000Z',
+        created_at: '2026-02-10T12:00:00.000Z'
       });
 
       const review = await service.createReview(
@@ -573,7 +573,7 @@ describe('Deliverable Service', () => {
           feedback: 'Round 1 feedback',
           design_elements_reviewed: '[]',
           review_duration_minutes: null,
-          created_at: '2026-02-10T12:00:00.000Z',
+          created_at: '2026-02-10T12:00:00.000Z'
         },
         {
           id: 2,
@@ -583,8 +583,8 @@ describe('Deliverable Service', () => {
           feedback: 'Round 2 approved',
           design_elements_reviewed: '[]',
           review_duration_minutes: null,
-          created_at: '2026-02-10T13:00:00.000Z',
-        },
+          created_at: '2026-02-10T13:00:00.000Z'
+        }
       ]);
 
       const reviews = await service.getDeliverableReviews(1);

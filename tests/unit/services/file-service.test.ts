@@ -13,18 +13,18 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 const mockDb = vi.hoisted(() => ({
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn(),
+  all: vi.fn()
 }));
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb,
+  getDatabase: () => mockDb
 }));
 
 // Mock user service
 vi.mock('../../../server/services/user-service', () => ({
   userService: {
-    getUserIdByEmail: vi.fn().mockResolvedValue(1),
-  },
+    getUserIdByEmail: vi.fn().mockResolvedValue(1)
+  }
 }));
 
 describe('File Service', () => {
@@ -41,7 +41,7 @@ describe('File Service', () => {
       mockDb.get.mockResolvedValue({
         id: 1,
         project_id: 10,
-        filename: 'test.pdf',
+        filename: 'test.pdf'
       });
 
       const { fileService } = await import('../../../server/services/file-service');
@@ -75,7 +75,7 @@ describe('File Service', () => {
           id: 1,
           file_id: 1,
           version_number: 2,
-          filename: 'test_v2.pdf',
+          filename: 'test_v2.pdf'
         });
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -86,7 +86,7 @@ describe('File Service', () => {
           file_path: '/uploads/test_v2.pdf',
           file_size: 1024,
           uploaded_by: 'admin@test.com',
-          comment: 'Updated version',
+          comment: 'Updated version'
         });
 
         expect(version.version_number).toBe(2);
@@ -119,7 +119,7 @@ describe('File Service', () => {
           fileService.uploadNewVersion(999, {
             filename: 'test.pdf',
             original_filename: 'test.pdf',
-            file_path: '/uploads/test.pdf',
+            file_path: '/uploads/test.pdf'
           })
         ).rejects.toThrow('File not found');
       });
@@ -129,7 +129,7 @@ describe('File Service', () => {
       it('returns all versions ordered by version number', async () => {
         mockDb.all.mockResolvedValue([
           { id: 2, version_number: 2, is_current: true },
-          { id: 1, version_number: 1, is_current: false },
+          { id: 1, version_number: 1, is_current: false }
         ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -155,7 +155,7 @@ describe('File Service', () => {
           file_path: '/uploads/original.pdf',
           file_size: 512,
           mime_type: 'application/pdf',
-          uploaded_by: 'admin@test.com',
+          uploaded_by: 'admin@test.com'
         });
 
         // Mock for uploadNewVersion
@@ -166,7 +166,7 @@ describe('File Service', () => {
           file_id: 1,
           version_number: 3,
           filename: 'original.pdf',
-          comment: 'Restored from version 1',
+          comment: 'Restored from version 1'
         });
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -212,7 +212,7 @@ describe('File Service', () => {
     describe('getFolders', () => {
       it('returns folders with counts', async () => {
         mockDb.all.mockResolvedValue([
-          { id: 1, name: 'Folder 1', file_count: 5, subfolder_count: 2 },
+          { id: 1, name: 'Folder 1', file_count: 5, subfolder_count: 2 }
         ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -352,7 +352,7 @@ describe('File Service', () => {
           total_views: 100,
           total_downloads: 25,
           unique_viewers: 10,
-          last_accessed: '2026-02-10T12:00:00Z',
+          last_accessed: '2026-02-10T12:00:00Z'
         });
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -375,7 +375,7 @@ describe('File Service', () => {
 
         expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('SET is_archived = TRUE'), [
           'admin@test.com',
-          1,
+          1
         ]);
       });
     });
@@ -420,7 +420,7 @@ describe('File Service', () => {
 
         expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('SET is_locked = TRUE'), [
           'admin@test.com',
-          1,
+          1
         ]);
       });
 
@@ -479,16 +479,16 @@ describe('File Service', () => {
           total_size: 1024000,
           archived_count: 5,
           recent_uploads: 10,
-          expiring_soon: 2,
+          expiring_soon: 2
         });
         mockDb.all
           .mockResolvedValueOnce([
             { category: 'document', count: 30 },
-            { category: 'image', count: 20 },
+            { category: 'image', count: 20 }
           ])
           .mockResolvedValueOnce([
             { file_type: 'pdf', count: 25 },
-            { file_type: 'png', count: 15 },
+            { file_type: 'png', count: 15 }
           ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -507,7 +507,7 @@ describe('File Service', () => {
         mockDb.all.mockResolvedValue([{ id: 1, original_filename: 'report.pdf' }]);
 
         const { fileService } = await import('../../../server/services/file-service');
-        const results = await fileService.searchFiles(10, 'report');
+        const _results = await fileService.searchFiles(10, 'report');
 
         expect(mockDb.all).toHaveBeenCalledWith(
           expect.stringContaining('original_filename LIKE ?'),
@@ -556,7 +556,7 @@ describe('File Service', () => {
 
         expect(workflow.status).toBe('pending_review');
         expect(mockDb.run).toHaveBeenCalledWith(
-          expect.stringContaining("SET status = 'pending_review'"),
+          expect.stringContaining('SET status = \'pending_review\''),
           expect.any(Array)
         );
       });
@@ -577,7 +577,7 @@ describe('File Service', () => {
             id: 1,
             file_id: 1,
             status: 'approved',
-            approved_by: 'admin@test.com',
+            approved_by: 'admin@test.com'
           });
         });
 
@@ -605,7 +605,7 @@ describe('File Service', () => {
         mockDb.all.mockResolvedValue([
           { status: 'draft', count: 5 },
           { status: 'approved', count: 10 },
-          { status: 'pending_review', count: 3 },
+          { status: 'pending_review', count: 3 }
         ]);
 
         const { fileService } = await import('../../../server/services/file-service');
@@ -626,7 +626,7 @@ describe('File Service', () => {
         id: 100,
         project_id: 10,
         category: 'deliverable',
-        shared_with_client: true,
+        shared_with_client: true
       });
 
       const { fileService } = await import('../../../server/services/file-service');
@@ -638,13 +638,13 @@ describe('File Service', () => {
         fileName: 'design.pdf',
         fileSize: 2048,
         fileType: 'application/pdf',
-        uploadedBy: 'admin@test.com',
+        uploadedBy: 'admin@test.com'
       });
 
       expect(file.id).toBe(100);
       // The SQL uses 'deliverable' as a literal value and TRUE for shared_with_client
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining("'deliverable'"),
+        expect.stringContaining('\'deliverable\''),
         expect.any(Array)
       );
     });
@@ -662,7 +662,7 @@ describe('File Service', () => {
         fileName: 'image.png',
         fileSize: 1024,
         fileType: 'image/png',
-        uploadedBy: 'admin@test.com',
+        uploadedBy: 'admin@test.com'
       });
 
       expect(mockDb.run).toHaveBeenCalledWith(

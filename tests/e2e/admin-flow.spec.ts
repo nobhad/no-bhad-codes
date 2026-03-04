@@ -42,7 +42,7 @@ test.describe('Admin Flow', () => {
     // 5. Wait for projects content (table or empty state)
     await expect(page.locator('#tab-projects')).toBeVisible();
     await expect(page.locator('#projects-table-body, .empty-state, .loading-row')).toBeVisible({
-      timeout: 10000,
+      timeout: 10000
     });
 
     // 6. Projects section loaded - wait for loading to complete

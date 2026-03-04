@@ -8,11 +8,10 @@
  */
 
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
-import nodemailer from 'nodemailer';
 import {
   emailService,
   sendNewIntakeNotification,
-  sendWelcomeEmail,
+  sendWelcomeEmail
 } from '../../../server/services/email-service';
 
 // Create mock transporter
@@ -20,15 +19,15 @@ const mockSendMail = vi.fn();
 const mockVerify = vi.fn();
 const mockTransporter = {
   sendMail: mockSendMail,
-  verify: mockVerify,
+  verify: mockVerify
 };
 
 // Mock nodemailer with proper exports
 vi.mock('nodemailer', () => ({
   default: {
-    createTransport: vi.fn(() => mockTransporter),
+    createTransport: vi.fn(() => mockTransporter)
   },
-  createTransport: vi.fn(() => mockTransporter),
+  createTransport: vi.fn(() => mockTransporter)
 }));
 
 describe('Email Service', () => {
@@ -40,9 +39,9 @@ describe('Email Service', () => {
       secure: false,
       auth: {
         user: 'test@example.com',
-        pass: 'password',
+        pass: 'password'
       },
-      from: 'test@example.com',
+      from: 'test@example.com'
     });
   });
 
@@ -66,7 +65,7 @@ describe('Email Service', () => {
         projectType: 'WEB_DEVELOPMENT',
         projectDescription: 'Test project',
         timeline: '3 months',
-        budget: '$10,000',
+        budget: '$10,000'
       };
 
       const result = await sendNewIntakeNotification(intakeData, 1);
@@ -84,7 +83,7 @@ describe('Email Service', () => {
         projectType: 'WEB_DEVELOPMENT',
         projectDescription: 'Test project',
         timeline: '3 months',
-        budget: '$10,000',
+        budget: '$10,000'
       };
 
       const result = await sendNewIntakeNotification(intakeData, 1);
@@ -105,7 +104,7 @@ describe('Email Service', () => {
         domainHosting: 'Yes',
         features: ['Feature 1', 'Feature 2'],
         designLevel: 'Professional',
-        additionalInfo: 'Additional information',
+        additionalInfo: 'Additional information'
       };
 
       await sendNewIntakeNotification(intakeData, 1);
@@ -125,7 +124,7 @@ describe('Email Service', () => {
         projectType: 'WEB_DEVELOPMENT',
         projectDescription: 'Test project',
         timeline: '3 months',
-        budget: '$10,000',
+        budget: '$10,000'
       };
 
       const result = await sendNewIntakeNotification(intakeData, 1);
@@ -165,9 +164,9 @@ describe('Email Service', () => {
           secure: false,
           auth: {
             user: 'test@example.com',
-            pass: 'password',
+            pass: 'password'
           },
-          from: 'test@example.com',
+          from: 'test@example.com'
         })
       ).resolves.not.toThrow();
 

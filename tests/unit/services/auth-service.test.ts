@@ -29,8 +29,8 @@ vi.mock('../../../src/auth', () => ({
     subscribe: vi.fn(),
     getSessionTimeRemaining: vi.fn(),
     extendSession: vi.fn(),
-    clearError: vi.fn(),
-  },
+    clearError: vi.fn()
+  }
 }));
 
 describe('AuthService', () => {
@@ -53,19 +53,19 @@ describe('AuthService', () => {
         companyName: 'Test Company',
         contactName: 'Test User',
         status: 'active',
-        role: 'client' as const,
+        role: 'client' as const
       };
       mockLogin.mockResolvedValueOnce({ success: true, data: mockUser });
 
       const result = await authService.login({
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123'
       });
 
       expect(result.success).toBe(true);
       expect(mockLogin).toHaveBeenCalledWith({
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123'
       });
     });
 
@@ -73,12 +73,12 @@ describe('AuthService', () => {
       mockLogin.mockResolvedValueOnce({
         success: false,
         error: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS',
+        code: 'INVALID_CREDENTIALS'
       });
 
       const result = await authService.login({
         email: 'test@example.com',
-        password: 'wrong-password',
+        password: 'wrong-password'
       });
 
       expect(result.success).toBe(false);
@@ -88,12 +88,12 @@ describe('AuthService', () => {
     it('should handle network errors', async () => {
       mockLogin.mockResolvedValueOnce({
         success: false,
-        error: 'Network error',
+        error: 'Network error'
       });
 
       const result = await authService.login({
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123'
       });
 
       expect(result.success).toBe(false);
@@ -118,7 +118,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         companyName: 'Test Company',
         contactName: 'Test User',
-        status: 'active',
+        status: 'active'
       };
       mockGetCurrentUser.mockReturnValue(mockUser);
       mockIsAuthenticated.mockReturnValue(true);
@@ -155,7 +155,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         companyName: 'Test Company',
         contactName: 'Test User',
-        status: 'active',
+        status: 'active'
       };
       mockGetCurrentUser.mockReturnValue(mockUser);
       mockIsAuthenticated.mockReturnValue(true);

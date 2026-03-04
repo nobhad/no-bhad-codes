@@ -15,8 +15,8 @@ import { auditLogger } from '../../../server/services/audit-logger';
 // Mock audit logger
 vi.mock('../../../server/services/audit-logger', () => ({
   auditLogger: {
-    log: vi.fn().mockResolvedValue(undefined),
-  },
+    log: vi.fn().mockResolvedValue(undefined)
+  }
 }));
 
 describe('Audit Middleware', () => {
@@ -37,7 +37,7 @@ describe('Audit Middleware', () => {
       query: {},
       ip: '127.0.0.1',
       socket: { remoteAddress: '127.0.0.1' },
-      get: vi.fn().mockReturnValue('test-agent'),
+      get: vi.fn().mockReturnValue('test-agent')
     };
 
     mockRes = {
@@ -51,7 +51,7 @@ describe('Audit Middleware', () => {
         if (event === 'finish') {
           finishCallback = callback;
         }
-      }),
+      })
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -108,7 +108,7 @@ describe('Audit Middleware', () => {
           entityType: 'client',
           entityId: '1',
           requestMethod: 'POST',
-          requestPath: '/api/clients',
+          requestPath: '/api/clients'
         })
       );
     });
@@ -133,7 +133,7 @@ describe('Audit Middleware', () => {
           action: 'update',
           entityType: 'project',
           entityId: '123',
-          requestMethod: 'PUT',
+          requestMethod: 'PUT'
         })
       );
     });
@@ -157,7 +157,7 @@ describe('Audit Middleware', () => {
           action: 'delete',
           entityType: 'invoice',
           entityId: '456',
-          newValue: undefined, // DELETE should have undefined newValue
+          newValue: undefined // DELETE should have undefined newValue
         })
       );
     });
@@ -194,7 +194,7 @@ describe('Audit Middleware', () => {
       (mockReq as any).user = {
         id: 1,
         email: 'admin@example.com',
-        type: 'admin',
+        type: 'admin'
       };
 
       const middleware = auditMiddleware();
@@ -210,7 +210,7 @@ describe('Audit Middleware', () => {
         expect.objectContaining({
           userId: 1,
           userEmail: 'admin@example.com',
-          userType: 'admin',
+          userType: 'admin'
         })
       );
     });
@@ -219,7 +219,7 @@ describe('Audit Middleware', () => {
       (mockReq as any).user = {
         id: 2,
         email: 'client@example.com',
-        type: 'client',
+        type: 'client'
       };
 
       const middleware = auditMiddleware();
@@ -233,7 +233,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          userType: 'client',
+          userType: 'client'
         })
       );
     });
@@ -250,7 +250,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          userType: 'system',
+          userType: 'system'
         })
       );
     });
@@ -267,7 +267,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityId: '999',
+          entityId: '999'
         })
       );
     });
@@ -284,7 +284,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityId: '888',
+          entityId: '888'
         })
       );
     });
@@ -302,7 +302,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityId: '777',
+          entityId: '777'
         })
       );
     });
@@ -320,7 +320,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'login',
+          action: 'login'
         })
       );
     });
@@ -338,7 +338,7 @@ describe('Audit Middleware', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'upload',
+          action: 'upload'
         })
       );
     });

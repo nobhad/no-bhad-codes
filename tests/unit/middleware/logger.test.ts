@@ -17,8 +17,8 @@ vi.mock('../../../server/services/logger', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn(),
-  },
+    error: vi.fn()
+  }
 }));
 
 describe('Request Logger Middleware', () => {
@@ -37,12 +37,12 @@ describe('Request Logger Middleware', () => {
       path: '/api/test',
       body: {},
       ip: '127.0.0.1',
-      get: vi.fn().mockReturnValue('test-agent'),
+      get: vi.fn().mockReturnValue('test-agent')
     };
 
     mockRes = {
       statusCode: 200,
-      json: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis()
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -85,8 +85,8 @@ describe('Request Logger Middleware', () => {
         category: 'request',
         metadata: {
           ip: '127.0.0.1',
-          userAgent: 'test-agent',
-        },
+          userAgent: 'test-agent'
+        }
       });
       expect(mockNext).toHaveBeenCalled();
     });
@@ -99,8 +99,8 @@ describe('Request Logger Middleware', () => {
         'GET /api/test',
         expect.objectContaining({
           metadata: expect.objectContaining({
-            body: { name: 'Test', email: 'test@example.com' },
-          }),
+            body: { name: 'Test', email: 'test@example.com' }
+          })
         })
       );
     });
@@ -111,7 +111,7 @@ describe('Request Logger Middleware', () => {
         password: 'secret123',
         token: 'abc123',
         secret: 'my-secret',
-        key: 'api-key',
+        key: 'api-key'
       };
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
@@ -124,9 +124,9 @@ describe('Request Logger Middleware', () => {
               password: '[REDACTED]',
               token: '[REDACTED]',
               secret: '[REDACTED]',
-              key: '[REDACTED]',
-            },
-          }),
+              key: '[REDACTED]'
+            }
+          })
         })
       );
     });
@@ -147,8 +147,8 @@ describe('Request Logger Middleware', () => {
           category: 'response',
           metadata: expect.objectContaining({
             statusCode: 200,
-            duration: 100,
-          }),
+            duration: 100
+          })
         })
       );
     });
@@ -170,8 +170,8 @@ describe('Request Logger Middleware', () => {
           category: 'response',
           metadata: expect.objectContaining({
             statusCode: 404,
-            duration: 100,
-          }),
+            duration: 100
+          })
         })
       );
     });
@@ -190,13 +190,13 @@ describe('Request Logger Middleware', () => {
       expect(loggerService.warn).toHaveBeenCalledWith(
         expect.stringContaining('GET /api/test - 500'),
         expect.objectContaining({
-          category: 'response',
+          category: 'response'
         })
       );
     });
 
     it('should preserve original json method functionality', () => {
-      const originalJson = mockRes.json;
+      const _originalJson = mockRes.json;
       requestLogger(mockReq as Request, mockRes as Response, mockNext);
 
       const responseBody = { data: 'test' };
@@ -213,8 +213,8 @@ describe('Request Logger Middleware', () => {
         'GET /api/test',
         expect.objectContaining({
           metadata: expect.not.objectContaining({
-            body: expect.anything(),
-          }),
+            body: expect.anything()
+          })
         })
       );
     });
@@ -227,8 +227,8 @@ describe('Request Logger Middleware', () => {
         'GET /api/test',
         expect.objectContaining({
           metadata: expect.not.objectContaining({
-            body: expect.anything(),
-          }),
+            body: expect.anything()
+          })
         })
       );
     });
@@ -247,8 +247,8 @@ describe('Request Logger Middleware', () => {
         expect.any(String),
         expect.objectContaining({
           metadata: expect.objectContaining({
-            duration: 250,
-          }),
+            duration: 250
+          })
         })
       );
     });

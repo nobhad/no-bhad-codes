@@ -11,7 +11,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   validateFormCompletion,
   initFormValidation,
-  initAllFormsValidation,
+  initAllFormsValidation
 } from '../../../src/utils/form-validation';
 
 describe('Form Validation', () => {
@@ -176,7 +176,7 @@ describe('Form Validation', () => {
       document.body.appendChild(form1);
       document.body.appendChild(form2);
 
-      const initSpy = vi.spyOn({ initFormValidation }, 'initFormValidation' as any);
+      const _initSpy = vi.spyOn({ initFormValidation }, 'initFormValidation' as any);
 
       initAllFormsValidation();
 

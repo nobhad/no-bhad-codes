@@ -14,12 +14,12 @@ import { RouterService, Route } from '../../../src/services/router-service';
 const mockLocation = {
   hash: '',
   pathname: '/',
-  href: 'http://localhost/',
+  href: 'http://localhost/'
 };
 
 Object.defineProperty(window, 'location', {
   value: mockLocation,
-  writable: true,
+  writable: true
 });
 
 // Mock window.history
@@ -28,12 +28,12 @@ const mockHistory = {
   replaceState: vi.fn(),
   back: vi.fn(),
   forward: vi.fn(),
-  go: vi.fn(),
+  go: vi.fn()
 };
 
 Object.defineProperty(window, 'history', {
   value: mockHistory,
-  writable: true,
+  writable: true
 });
 
 describe('RouterService', () => {
@@ -62,7 +62,7 @@ describe('RouterService', () => {
       const customRouter = new RouterService({
         defaultRoute: '/home',
         smoothScrolling: false,
-        scrollOffset: 100,
+        scrollOffset: 100
       });
 
       expect(customRouter).toBeInstanceOf(RouterService);
@@ -75,7 +75,7 @@ describe('RouterService', () => {
       const route: Route = {
         path: '/test',
         section: 'test-section',
-        title: 'Test Page',
+        title: 'Test Page'
       };
 
       routerService.addRoute(route);
@@ -88,7 +88,7 @@ describe('RouterService', () => {
       const route: Route = {
         path: '/protected',
         section: 'protected',
-        beforeEnter,
+        beforeEnter
       };
 
       routerService.addRoute(route);
@@ -101,7 +101,7 @@ describe('RouterService', () => {
       const route: Route = {
         path: '/test',
         section: 'test',
-        onEnter,
+        onEnter
       };
 
       routerService.addRoute(route);
@@ -118,7 +118,7 @@ describe('RouterService', () => {
     it('should navigate to a registered route', async () => {
       const route: Route = {
         path: '/test',
-        section: 'test-section',
+        section: 'test-section'
       };
 
       routerService.addRoute(route);
@@ -134,7 +134,7 @@ describe('RouterService', () => {
       const route: Route = {
         path: '/test',
         section: 'test',
-        onEnter,
+        onEnter
       };
 
       routerService.addRoute(route);
@@ -150,11 +150,11 @@ describe('RouterService', () => {
       const route1: Route = {
         path: '/route1',
         section: 'route1',
-        onLeave,
+        onLeave
       };
       const route2: Route = {
         path: '/route2',
-        section: 'route2',
+        section: 'route2'
       };
 
       routerService.addRoute(route1);
@@ -173,7 +173,7 @@ describe('RouterService', () => {
       const route: Route = {
         path: '/protected',
         section: 'protected',
-        beforeEnter,
+        beforeEnter
       };
 
       routerService.addRoute(route);
@@ -189,7 +189,7 @@ describe('RouterService', () => {
       const route: Route = {
         path: '/protected',
         section: 'protected',
-        beforeEnter,
+        beforeEnter
       };
 
       routerService.addRoute(route);
@@ -218,7 +218,7 @@ describe('RouterService', () => {
     it('should handle hash change events', async () => {
       const route: Route = {
         path: '#/test',
-        section: 'test',
+        section: 'test'
       };
 
       routerService.addRoute(route);

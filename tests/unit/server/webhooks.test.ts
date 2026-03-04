@@ -9,7 +9,7 @@ describe('Webhook Service', () => {
     mockDb = {
       run: vi.fn(),
       get: vi.fn(),
-      all: vi.fn(),
+      all: vi.fn()
     };
     service = new WebhookService(mockDb);
   });
@@ -32,7 +32,7 @@ describe('Webhook Service', () => {
         retry_max_attempts: 3,
         retry_backoff_seconds: 60,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const webhook = await service.createWebhook(
@@ -46,7 +46,7 @@ describe('Webhook Service', () => {
       expect(webhook).toMatchObject({
         id: 1,
         name: 'Test Webhook',
-        url: 'https://example.com/webhook',
+        url: 'https://example.com/webhook'
       });
       expect(mockDb.run).toHaveBeenCalled();
     });
@@ -66,7 +66,7 @@ describe('Webhook Service', () => {
         retry_max_attempts: 3,
         retry_backoff_seconds: 60,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       const webhook = await service.getWebhookById(1);
@@ -103,7 +103,7 @@ describe('Webhook Service', () => {
           secret_key: 'whk_1',
           retry_enabled: 1,
           retry_max_attempts: 3,
-          retry_backoff_seconds: 60,
+          retry_backoff_seconds: 60
         },
         {
           id: 2,
@@ -118,8 +118,8 @@ describe('Webhook Service', () => {
           secret_key: 'whk_2',
           retry_enabled: 1,
           retry_max_attempts: 3,
-          retry_backoff_seconds: 60,
-        },
+          retry_backoff_seconds: 60
+        }
       ]);
 
       const webhooks = await service.listWebhooks();
@@ -144,8 +144,8 @@ describe('Webhook Service', () => {
           secret_key: 'whk_1',
           retry_enabled: 1,
           retry_max_attempts: 3,
-          retry_backoff_seconds: 60,
-        },
+          retry_backoff_seconds: 60
+        }
       ]);
 
       const webhooks = await service.listWebhooks(true);
@@ -172,7 +172,7 @@ describe('Webhook Service', () => {
         retry_max_attempts: 3,
         retry_backoff_seconds: 60,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       mockDb.get.mockResolvedValueOnce({
@@ -189,14 +189,14 @@ describe('Webhook Service', () => {
         retry_max_attempts: 5,
         retry_backoff_seconds: 60,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:01:00.000Z',
+        updated_at: '2026-02-10T12:01:00.000Z'
       });
 
       const webhook = await service.updateWebhook(1, {
         name: 'Updated Webhook',
         url: 'https://newurl.com/webhook',
         method: 'PUT',
-        retry_max_attempts: 5,
+        retry_max_attempts: 5
       });
 
       expect(webhook.name).toBe('Updated Webhook');
@@ -226,7 +226,7 @@ describe('Webhook Service', () => {
         secret_key: 'whk_123',
         retry_enabled: 1,
         retry_max_attempts: 3,
-        retry_backoff_seconds: 60,
+        retry_backoff_seconds: 60
       });
 
       const webhook = await service.toggleWebhook(1, false);
@@ -255,7 +255,7 @@ describe('Webhook Service', () => {
         delivered_at: '2026-02-10T12:01:00.000Z',
         next_retry_at: null,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:01:00.000Z',
+        updated_at: '2026-02-10T12:01:00.000Z'
       });
 
       const delivery = await service.getDeliveryById(1);
@@ -282,8 +282,8 @@ describe('Webhook Service', () => {
           delivered_at: '2026-02-10T12:00:00.000Z',
           next_retry_at: null,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       const result = await service.getWebhookDeliveries(1, { limit: 50, offset: 0 });
@@ -310,8 +310,8 @@ describe('Webhook Service', () => {
           delivered_at: null,
           next_retry_at: '2026-02-10T12:05:00.000Z',
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:01.000Z',
-        },
+          updated_at: '2026-02-10T12:00:01.000Z'
+        }
       ]);
 
       const result = await service.getWebhookDeliveries(1, { status: 'failed' });
@@ -325,7 +325,7 @@ describe('Webhook Service', () => {
         total: 100,
         success: 85,
         failed: 10,
-        retrying: 5,
+        retrying: 5
       });
 
       const stats = await service.getDeliveryStats(1);
@@ -354,7 +354,7 @@ describe('Webhook Service', () => {
         delivered_at: null,
         next_retry_at: null,
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       mockDb.run.mockResolvedValueOnce(undefined);
@@ -362,7 +362,7 @@ describe('Webhook Service', () => {
       // Manually call processPendingRetries logic (simplified)
       const now = Date.now();
       const baseBackoff = 60000; // 60 seconds for attempt 1
-      const expectedNextRetry = now + baseBackoff;
+      const _expectedNextRetry = now + baseBackoff;
 
       // Verify retry scheduling would use exponential backoff
       const attempt1Backoff = 60 * 1000; // 60s
@@ -389,7 +389,7 @@ describe('Webhook Service', () => {
         delivered_at: null,
         next_retry_at: '2026-02-10T12:10:00.000Z',
         created_at: '2026-02-10T12:00:00.000Z',
-        updated_at: '2026-02-10T12:00:00.000Z',
+        updated_at: '2026-02-10T12:00:00.000Z'
       });
 
       // Max attempts = 3, so after 3 attempts, should mark as failed
@@ -415,8 +415,8 @@ describe('Webhook Service', () => {
           retry_max_attempts: 3,
           retry_backoff_seconds: 60,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
@@ -456,8 +456,8 @@ describe('Webhook Service', () => {
           retry_max_attempts: 3,
           retry_backoff_seconds: 60,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
@@ -488,8 +488,8 @@ describe('Webhook Service', () => {
           retry_max_attempts: 3,
           retry_backoff_seconds: 60,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
@@ -520,8 +520,8 @@ describe('Webhook Service', () => {
           retry_max_attempts: 3,
           retry_backoff_seconds: 60,
           created_at: '2026-02-10T12:00:00.000Z',
-          updated_at: '2026-02-10T12:00:00.000Z',
-        },
+          updated_at: '2026-02-10T12:00:00.000Z'
+        }
       ]);
 
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });

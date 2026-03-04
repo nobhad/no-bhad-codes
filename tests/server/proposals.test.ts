@@ -8,7 +8,7 @@
  * Tests authentication, authorization, and core functionality.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../../server/app';
 
@@ -44,7 +44,7 @@ describe('Proposal Routes - Authentication', () => {
         selectedTier: 'good',
         basePrice: 1000,
         finalPrice: 1200,
-        features: [],
+        features: []
       });
       // 401 = no auth, 403 = CSRF blocked
       expect([401, 403]).toContain(res.status);
@@ -81,7 +81,7 @@ describe('Proposal Routes - Authentication', () => {
     it('blocks unauthenticated template creation', async () => {
       const res = await request(app).post('/api/proposals/templates').send({
         name: 'Test Template',
-        projectType: 'web-app',
+        projectType: 'web-app'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -94,7 +94,7 @@ describe('Proposal Routes - Authentication', () => {
       const res = await request(app).post('/api/proposals/99999/sign').send({
         signerName: 'John Doe',
         signerEmail: 'john@example.com',
-        signatureData: 'base64signature',
+        signatureData: 'base64signature'
       });
       // Should return 400/404 for non-existent proposal, not 401 (it's public)
       expect([400, 404, 500]).toContain(res.status);
@@ -119,7 +119,7 @@ describe('Proposal Routes - Authentication', () => {
 
     it('blocks unauthenticated comment creation', async () => {
       const res = await request(app).post('/api/proposals/1/comments').send({
-        content: 'Test comment',
+        content: 'Test comment'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -217,7 +217,7 @@ describe('Proposal Routes - With Admin Token', () => {
           selectedTier: 'good',
           basePrice: 1000,
           finalPrice: 1200,
-          features: [],
+          features: []
         });
 
       expect(res.status).toBe(400);
@@ -236,7 +236,7 @@ describe('Proposal Routes - With Admin Token', () => {
           selectedTier: 'invalid-tier',
           basePrice: 1000,
           finalPrice: 1200,
-          features: [],
+          features: []
         });
 
       expect(res.status).toBe(400);
@@ -249,7 +249,7 @@ describe('Proposal Routes - With Admin Token', () => {
         .post('/api/proposals')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          projectType: 'web-app',
+          projectType: 'web-app'
         });
 
       expect(res.status).toBe(400);
@@ -268,7 +268,7 @@ describe('Proposal Routes - With Admin Token', () => {
           selectedTier: 'good',
           basePrice: -1000,
           finalPrice: -1200,
-          features: [],
+          features: []
         });
 
       expect([400, 422]).toContain(res.status);
@@ -297,7 +297,7 @@ describe('Proposal Routes - With Admin Token', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           signerEmail: 'test@example.com',
-          signatureData: 'base64data',
+          signatureData: 'base64data'
         });
 
       expect([400, 404]).toContain(res.status);
@@ -312,7 +312,7 @@ describe('Proposal Routes - With Admin Token', () => {
         .send({
           signerName: 'Test User',
           signerEmail: 'invalid-email',
-          signatureData: 'base64data',
+          signatureData: 'base64data'
         });
 
       expect([400, 404, 422]).toContain(res.status);
@@ -345,7 +345,7 @@ describe('Proposal Routes - Input Sanitization', () => {
         basePrice: 1000,
         finalPrice: 1200,
         clientNotes: '<script>alert("xss")</script>',
-        features: [],
+        features: []
       });
 
     // Should either sanitize the input or reject it
@@ -359,7 +359,7 @@ describe('Proposal Routes - Input Sanitization', () => {
 
     const res = await request(app)
       .get('/api/proposals')
-      .query({ search: "'; DROP TABLE proposals; --" })
+      .query({ search: '\'; DROP TABLE proposals; --' })
       .set('Authorization', `Bearer ${adminToken}`);
 
     // Should not crash - either return results or empty
@@ -375,7 +375,7 @@ describe('Proposal Routes - Project Type Config', () => {
     'e-commerce',
     'web-app',
     'browser-extension',
-    'other',
+    'other'
   ];
 
   validProjectTypes.forEach((projectType) => {

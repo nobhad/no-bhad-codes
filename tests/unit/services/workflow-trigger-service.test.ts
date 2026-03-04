@@ -13,25 +13,25 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 const mockDb = vi.hoisted(() => ({
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn(),
+  all: vi.fn()
 }));
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: () => mockDb,
+  getDatabase: () => mockDb
 }));
 
 // Mock email service
 vi.mock('../../../server/services/email-service', () => ({
   emailService: {
-    sendEmail: vi.fn(),
-  },
+    sendEmail: vi.fn()
+  }
 }));
 
 // Mock user service
 vi.mock('../../../server/services/user-service', () => ({
   userService: {
-    getUserIdByEmail: vi.fn().mockResolvedValue(1),
-  },
+    getUserIdByEmail: vi.fn().mockResolvedValue(1)
+  }
 }));
 
 // Mock fetch globally for webhook tests
@@ -63,7 +63,7 @@ describe('Workflow Trigger Service', () => {
       await workflowTriggerService.emit('invoice.created', {
         entityId: 1,
         invoiceNumber: 'INV-001',
-        triggeredBy: 'admin@test.com',
+        triggeredBy: 'admin@test.com'
       });
 
       expect(mockDb.run).toHaveBeenCalledWith(
@@ -83,8 +83,8 @@ describe('Workflow Trigger Service', () => {
           action_type: 'notify',
           action_config: JSON.stringify({ channel: 'test', message: 'Invoice created' }),
           is_active: true,
-          priority: 0,
-        },
+          priority: 0
+        }
       ]);
 
       const { workflowTriggerService } =
@@ -92,7 +92,7 @@ describe('Workflow Trigger Service', () => {
 
       await workflowTriggerService.emit('invoice.created', {
         entityId: 1,
-        triggeredBy: 'admin@test.com',
+        triggeredBy: 'admin@test.com'
       });
 
       // Should log trigger execution
@@ -113,8 +113,8 @@ describe('Workflow Trigger Service', () => {
           action_type: 'notify',
           action_config: JSON.stringify({ channel: 'test', message: 'Test' }),
           is_active: true,
-          priority: 0,
-        },
+          priority: 0
+        }
       ]);
 
       const { workflowTriggerService } =
@@ -122,7 +122,7 @@ describe('Workflow Trigger Service', () => {
 
       await workflowTriggerService.emit('invoice.created', {
         entityId: 1,
-        status: 'draft', // Does not match 'paid'
+        status: 'draft' // Does not match 'paid'
       });
 
       // Should log as skipped
@@ -145,7 +145,7 @@ describe('Workflow Trigger Service', () => {
 
       await workflowTriggerService.emit('invoice.created', {
         entityId: 1,
-        triggeredBy: 'admin@test.com',
+        triggeredBy: 'admin@test.com'
       });
 
       expect(listener).toHaveBeenCalledWith(expect.objectContaining({ entityId: 1 }));
@@ -180,7 +180,7 @@ describe('Workflow Trigger Service', () => {
     it('returns all triggers when no event type specified', async () => {
       mockDb.all.mockResolvedValue([
         { id: 1, name: 'Trigger 1', event_type: 'invoice.created' },
-        { id: 2, name: 'Trigger 2', event_type: 'project.created' },
+        { id: 2, name: 'Trigger 2', event_type: 'project.created' }
       ]);
 
       const { workflowTriggerService } =
@@ -202,7 +202,7 @@ describe('Workflow Trigger Service', () => {
       const triggers = await workflowTriggerService.getTriggers('invoice.created');
       expect(triggers).toHaveLength(1);
       expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE event_type = ?'), [
-        'invoice.created',
+        'invoice.created'
       ]);
     });
   });
@@ -217,7 +217,7 @@ describe('Workflow Trigger Service', () => {
         action_type: 'notify',
         action_config: { channel: 'sales', message: 'Invoice paid!' },
         is_active: true,
-        priority: 0,
+        priority: 0
       });
 
       const { workflowTriggerService } =
@@ -227,7 +227,7 @@ describe('Workflow Trigger Service', () => {
         name: 'New Trigger',
         event_type: 'invoice.paid',
         action_type: 'notify',
-        action_config: { channel: 'sales', message: 'Invoice paid!' },
+        action_config: { channel: 'sales', message: 'Invoice paid!' }
       });
 
       expect(trigger.name).toBe('New Trigger');
@@ -243,7 +243,7 @@ describe('Workflow Trigger Service', () => {
       mockDb.get.mockResolvedValue({
         id: 1,
         name: 'Conditional Trigger',
-        conditions: { status: 'overdue' },
+        conditions: { status: 'overdue' }
       });
 
       const { workflowTriggerService } =
@@ -254,7 +254,7 @@ describe('Workflow Trigger Service', () => {
         event_type: 'invoice.created',
         action_type: 'send_email',
         action_config: { template: 'overdue_notice' },
-        conditions: { status: 'overdue' },
+        conditions: { status: 'overdue' }
       });
 
       expect(mockDb.run).toHaveBeenCalledWith(
@@ -271,7 +271,7 @@ describe('Workflow Trigger Service', () => {
         id: 1,
         name: 'Updated Trigger',
         is_active: false,
-        priority: 10,
+        priority: 10
       });
 
       const { workflowTriggerService } =
@@ -280,7 +280,7 @@ describe('Workflow Trigger Service', () => {
       const trigger = await workflowTriggerService.updateTrigger(1, {
         name: 'Updated Trigger',
         is_active: false,
-        priority: 10,
+        priority: 10
       });
 
       expect(trigger?.name).toBe('Updated Trigger');
@@ -365,13 +365,13 @@ describe('Workflow Trigger Service', () => {
   describe('getTriggerLogs', () => {
     it('returns logs for specific trigger', async () => {
       mockDb.all.mockResolvedValue([
-        { id: 1, trigger_id: 5, event_type: 'invoice.paid', action_result: 'success' },
+        { id: 1, trigger_id: 5, event_type: 'invoice.paid', action_result: 'success' }
       ]);
 
       const { workflowTriggerService } =
         await import('../../../server/services/workflow-trigger-service');
 
-      const logs = await workflowTriggerService.getTriggerLogs(5, 50);
+      const _logs = await workflowTriggerService.getTriggerLogs(5, 50);
 
       expect(mockDb.all).toHaveBeenCalledWith(
         expect.stringContaining('WHERE l.trigger_id = ?'),
@@ -405,7 +405,7 @@ describe('Workflow Trigger Service', () => {
 
       expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('WHERE event_type = ?'), [
         'invoice.paid',
-        50,
+        50
       ]);
     });
 
@@ -436,8 +436,8 @@ describe('Workflow Trigger Service', () => {
           action_type: 'notify',
           action_config: JSON.stringify({ channel: 'test', message: 'Test' }),
           is_active: true,
-          priority: 0,
-        },
+          priority: 0
+        }
       ]);
 
       const { workflowTriggerService } =
@@ -446,7 +446,7 @@ describe('Workflow Trigger Service', () => {
       // Should execute - status matches
       await workflowTriggerService.emit('invoice.created', {
         entityId: 1,
-        status: 'sent',
+        status: 'sent'
       });
 
       const successLogCalls = mockDb.run.mock.calls.filter(
@@ -466,8 +466,8 @@ describe('Workflow Trigger Service', () => {
           action_type: 'notify',
           action_config: JSON.stringify({ channel: 'test', message: 'Large invoice!' }),
           is_active: true,
-          priority: 0,
-        },
+          priority: 0
+        }
       ]);
 
       const { workflowTriggerService } =
@@ -476,7 +476,7 @@ describe('Workflow Trigger Service', () => {
       // Should execute - amount > 1000
       await workflowTriggerService.emit('invoice.created', {
         entityId: 1,
-        amount: 2000,
+        amount: 2000
       });
 
       const successLogCalls = mockDb.run.mock.calls.filter(
@@ -499,11 +499,11 @@ describe('Workflow Trigger Service', () => {
           action_config: JSON.stringify({
             url: 'https://example.com/webhook',
             method: 'POST',
-            headers: { 'X-Custom': 'header' },
+            headers: { 'X-Custom': 'header' }
           }),
           is_active: true,
-          priority: 0,
-        },
+          priority: 0
+        }
       ]);
 
       mockFetch.mockResolvedValue({ status: 200 });
@@ -513,7 +513,7 @@ describe('Workflow Trigger Service', () => {
 
       await workflowTriggerService.emit('invoice.paid', {
         entityId: 1,
-        amount: 500,
+        amount: 500
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
@@ -522,8 +522,8 @@ describe('Workflow Trigger Service', () => {
           method: 'POST',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
-            'X-Custom': 'header',
-          }),
+            'X-Custom': 'header'
+          })
         })
       );
     });

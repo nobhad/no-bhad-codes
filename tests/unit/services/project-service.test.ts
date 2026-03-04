@@ -13,30 +13,30 @@
  * - Project metrics (burndown, velocity)
  */
 
-import { describe, it, expect, beforeEach, vi, beforeAll, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock dependencies before imports
 const mockDb = {
   get: vi.fn(),
   all: vi.fn(),
   run: vi.fn(),
-  transaction: vi.fn(),
+  transaction: vi.fn()
 };
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: vi.fn(() => mockDb),
+  getDatabase: vi.fn(() => mockDb)
 }));
 
 vi.mock('../../../server/services/user-service', () => ({
   userService: {
     getUserIdByEmail: vi.fn().mockResolvedValue(1),
-    getUserIdByEmailOrName: vi.fn().mockResolvedValue(1),
-  },
+    getUserIdByEmailOrName: vi.fn().mockResolvedValue(1)
+  }
 }));
 
 vi.mock('../../../server/services/progress-calculator', () => ({
   checkAndUpdateMilestoneCompletion: vi.fn().mockResolvedValue(undefined),
-  updateProjectProgress: vi.fn().mockResolvedValue(undefined),
+  updateProjectProgress: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('../../../server/services/logger', () => ({
@@ -44,8 +44,8 @@ vi.mock('../../../server/services/logger', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn(),
-  },
+    debug: vi.fn()
+  }
 }));
 
 // Import service after mocks
@@ -68,7 +68,7 @@ describe('ProjectService - Task Management', () => {
         priority: 'medium',
         sort_order: 1,
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.get.mockResolvedValueOnce({ max_order: 0 }); // Max sort order
@@ -105,7 +105,7 @@ describe('ProjectService - Task Management', () => {
           priority: 'medium',
           sort_order: 1,
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
+          updated_at: '2026-02-27T00:00:00Z'
         },
         {
           id: 2,
@@ -115,8 +115,8 @@ describe('ProjectService - Task Management', () => {
           priority: 'high',
           sort_order: 2,
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
-        },
+          updated_at: '2026-02-27T00:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockTasks);
@@ -138,8 +138,8 @@ describe('ProjectService - Task Management', () => {
           priority: 'high',
           sort_order: 1,
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
-        },
+          updated_at: '2026-02-27T00:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockTasks);
@@ -171,7 +171,7 @@ describe('ProjectService - Task Management', () => {
         priority: 'medium',
         sort_order: 1,
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.get.mockResolvedValueOnce(mockTask);
@@ -198,7 +198,7 @@ describe('ProjectService - Task Management', () => {
     it('updates task title', async () => {
       const currentTask = {
         milestone_id: null,
-        project_id: 1,
+        project_id: 1
       };
       const updatedTask = {
         id: 1,
@@ -208,7 +208,7 @@ describe('ProjectService - Task Management', () => {
         priority: 'medium',
         sort_order: 1,
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       // First db.get checks if task exists
@@ -228,7 +228,7 @@ describe('ProjectService - Task Management', () => {
     it('updates task status and triggers progress update', async () => {
       const currentTask = {
         milestone_id: 2,
-        project_id: 1,
+        project_id: 1
       };
       const updatedTask = {
         id: 1,
@@ -240,7 +240,7 @@ describe('ProjectService - Task Management', () => {
         sort_order: 1,
         completed_at: '2026-02-27T00:00:00Z',
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       // First db.get checks if task exists
@@ -264,7 +264,7 @@ describe('ProjectService - Task Management', () => {
       mockDb.get.mockResolvedValueOnce({
         id: 1,
         milestone_id: 1,
-        project_id: 1,
+        project_id: 1
       });
       mockDb.run.mockResolvedValueOnce({ changes: 1 }); // Delete checklist items
       mockDb.run.mockResolvedValueOnce({ changes: 1 }); // Delete comments
@@ -293,7 +293,7 @@ describe('ProjectService - Task Dependencies', () => {
         task_id: 2,
         depends_on_task_id: 1,
         dependency_type: 'finish_to_start',
-        created_at: '2026-02-27T00:00:00Z',
+        created_at: '2026-02-27T00:00:00Z'
       };
 
       // Check no circular dependency
@@ -335,8 +335,8 @@ describe('ProjectService - Task Dependencies', () => {
           priority: 'medium',
           sort_order: 1,
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
-        },
+          updated_at: '2026-02-27T00:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockBlockedTasks);
@@ -365,7 +365,7 @@ describe('ProjectService - Task Comments', () => {
         author_user_id: 1,
         content: 'Test comment',
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
@@ -387,7 +387,7 @@ describe('ProjectService - Task Comments', () => {
           author: 'user1@example.com',
           content: 'First comment',
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
+          updated_at: '2026-02-27T00:00:00Z'
         },
         {
           id: 2,
@@ -395,8 +395,8 @@ describe('ProjectService - Task Comments', () => {
           author: 'user2@example.com',
           content: 'Second comment',
           created_at: '2026-02-27T01:00:00Z',
-          updated_at: '2026-02-27T01:00:00Z',
-        },
+          updated_at: '2026-02-27T01:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockComments);
@@ -431,7 +431,7 @@ describe('ProjectService - Checklist Items', () => {
         content: 'Checklist item',
         is_completed: 0,
         sort_order: 1,
-        created_at: '2026-02-27T00:00:00Z',
+        created_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.get.mockResolvedValueOnce({ max_order: 0 });
@@ -475,8 +475,8 @@ describe('ProjectService - Time Tracking', () => {
           billable: 1,
           hourly_rate: 100,
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
-        },
+          updated_at: '2026-02-27T00:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockEntries);
@@ -507,7 +507,7 @@ describe('ProjectService - Time Tracking', () => {
         date: '2026-02-27',
         billable: 1,
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.run.mockResolvedValueOnce({ changes: 1 });
@@ -533,19 +533,19 @@ describe('ProjectService - Time Tracking', () => {
         total: 40,
         billable: 35,
         non_billable: 5,
-        amount: 3500,
+        amount: 3500
       });
       mockDb.all.mockResolvedValueOnce([
         { user_name: 'dev1', hours: 25, amount: 2500 },
-        { user_name: 'dev2', hours: 15, amount: 1000 },
+        { user_name: 'dev2', hours: 15, amount: 1000 }
       ]);
       mockDb.all.mockResolvedValueOnce([
         { task_id: 1, task_title: 'Task 1', hours: 20 },
-        { task_id: 2, task_title: 'Task 2', hours: 20 },
+        { task_id: 2, task_title: 'Task 2', hours: 20 }
       ]);
       mockDb.all.mockResolvedValueOnce([
         { week_start: '2026-02-17', hours: 20 },
-        { week_start: '2026-02-24', hours: 20 },
+        { week_start: '2026-02-24', hours: 20 }
       ]);
 
       const result = await projectService.getProjectTimeStats(1);
@@ -578,7 +578,7 @@ describe('ProjectService - Templates', () => {
         default_tasks: '[]',
         estimated_hours: 100,
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.run.mockResolvedValueOnce({ lastID: 1 });
@@ -590,7 +590,7 @@ describe('ProjectService - Templates', () => {
         projectType: 'web',
         defaultMilestones: [],
         defaultTasks: [],
-        estimatedHours: 100,
+        estimatedHours: 100
       });
 
       expect(result.name).toBe('Web Project Template');
@@ -607,7 +607,7 @@ describe('ProjectService - Templates', () => {
           default_milestones: '[]',
           default_tasks: '[]',
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
+          updated_at: '2026-02-27T00:00:00Z'
         },
         {
           id: 2,
@@ -616,8 +616,8 @@ describe('ProjectService - Templates', () => {
           default_milestones: '[]',
           default_tasks: '[]',
           created_at: '2026-02-27T00:00:00Z',
-          updated_at: '2026-02-27T00:00:00Z',
-        },
+          updated_at: '2026-02-27T00:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockTemplates);
@@ -647,7 +647,7 @@ describe('ProjectService - Templates', () => {
         default_milestones: '[]',
         default_tasks: '[]',
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
+        updated_at: '2026-02-27T00:00:00Z'
       };
 
       mockDb.get.mockResolvedValueOnce(mockTemplate);
@@ -697,7 +697,7 @@ describe('ProjectService - Tags', () => {
     it('returns tags for a project', async () => {
       const mockTags = [
         { id: 1, name: 'urgent', color: '#ff0000' },
-        { id: 2, name: 'feature', color: '#00ff00' },
+        { id: 2, name: 'feature', color: '#00ff00' }
       ];
 
       mockDb.all.mockResolvedValueOnce(mockTags);
@@ -723,7 +723,7 @@ describe('ProjectService - Metrics', () => {
       mockDb.get.mockResolvedValueOnce({
         start_date: '2026-02-20',
         estimated_end_date: '2026-02-22',
-        estimated_hours: 24,
+        estimated_hours: 24
       });
       // For each day, it queries time entries
       mockDb.get.mockResolvedValueOnce({ hours: 8 });
@@ -753,7 +753,7 @@ describe('ProjectService - Metrics', () => {
     it('returns velocity data for a project', async () => {
       mockDb.all.mockResolvedValueOnce([
         { week_start: '2026-02-17', hours: 40, tasks: 5 },
-        { week_start: '2026-02-10', hours: 32, tasks: 4 },
+        { week_start: '2026-02-10', hours: 32, tasks: 4 }
       ]);
 
       const result = await projectService.getProjectVelocity(1);
@@ -785,8 +785,8 @@ describe('ProjectService - getAllTasks', () => {
         project_name: 'Project 1',
         client_name: 'Client 1',
         created_at: '2026-02-27T00:00:00Z',
-        updated_at: '2026-02-27T00:00:00Z',
-      },
+        updated_at: '2026-02-27T00:00:00Z'
+      }
     ];
 
     mockDb.all.mockResolvedValueOnce(mockTasks);
