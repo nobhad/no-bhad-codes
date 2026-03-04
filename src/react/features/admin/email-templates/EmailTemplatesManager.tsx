@@ -25,7 +25,9 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
-import { EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface TemplateVariable {
@@ -68,6 +70,46 @@ interface EmailTemplatesManagerProps {
   overviewMode?: boolean;
 }
 
+function filterTemplate(
+  template: EmailTemplate,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !template.name.toLowerCase().includes(query) &&
+      !template.subject.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
+
+  if (filters.category && filters.category !== 'all') {
+    if (template.category !== filters.category) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    const isActive = filters.status === 'active';
+    if (template.is_active !== isActive) return false;
+  }
+
+  return true;
+}
+
+function sortTemplates(a: EmailTemplate, b: EmailTemplate, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'name':
+    return multiplier * a.name.localeCompare(b.name);
+  case 'updated_at':
+    return multiplier * a.updated_at.localeCompare(b.updated_at);
+  default:
+    return 0;
+  }
+}
 
 export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
@@ -79,10 +121,6 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     active: 0,
     categories: []
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
@@ -95,6 +133,22 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     }
     return headers;
   }, [getAuthToken]);
+
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<EmailTemplate>({
+    storageKey: overviewMode ? undefined : 'admin_email_templates',
+    filters: EMAIL_TEMPLATES_FILTER_CONFIG,
+    filterFn: filterTemplate,
+    sortFn: sortTemplates
+  });
 
   const loadTemplates = useCallback(async () => {
     setIsLoading(true);
@@ -120,7 +174,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     loadTemplates();
   }, [loadTemplates]);
 
-  // Build category filter options dynamically from stats
+  // Dynamic category filter options built from stats
   const categoryFilterOptions = useMemo(() => {
     return [
       { value: 'all', label: 'All Categories' },
@@ -128,63 +182,13 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     ];
   }, [stats.categories]);
 
-  const filteredTemplates = useMemo(() => {
-    let result = [...templates];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (t) =>
-          t.name.toLowerCase().includes(query) ||
-          t.subject.toLowerCase().includes(query)
-      );
-    }
-    if (categoryFilter !== 'all') {
-      result = result.filter((t) => t.category === categoryFilter);
-    }
-    if (statusFilter !== 'all') {
-      const isActive = statusFilter === 'active';
-      result = result.filter((t) => t.is_active === isActive);
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-        case 'name': aVal = a.name; bVal = b.name; break;
-        case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [templates, searchQuery, categoryFilter, statusFilter, sort]);
+  const filteredTemplates = useMemo(() => applyFilters(templates), [applyFilters, templates]);
 
   const pagination = usePagination({ storageKey: overviewMode ? undefined : 'admin_email_templates_pagination', totalItems: filteredTemplates.length, defaultPageSize });
   const paginatedTemplates = filteredTemplates.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  function handleFilterChange(key: string, value: string) {
-    if (key === 'category') {
-      setCategoryFilter(value);
-    } else if (key === 'status') {
-      setStatusFilter(value);
-    }
-  }
-
-  const hasActiveFilters = searchQuery || categoryFilter !== 'all' || statusFilter !== 'all';
 
   return (
     <TableLayout
@@ -203,8 +207,8 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search templates..."
           />
           <FilterDropdown
@@ -212,8 +216,8 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
               { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
               { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS }
             ]}
-            values={{ category: categoryFilter, status: statusFilter }}
-            onChange={handleFilterChange}
+            values={filterValues}
+            onChange={setFilter}
           />
           <IconButton action="export" />
           <IconButton action="add" title="New Template" />
