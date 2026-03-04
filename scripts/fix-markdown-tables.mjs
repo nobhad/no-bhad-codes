@@ -24,11 +24,11 @@ for (let i = 0; i < lines.length; i++) {
   // Fix heading duplicates by appending a small suffix
   const h = line.match(/^(#{1,6})\s*(.+?)\s*$/);
   if (h) {
-    const text = h[2];
-    const key = text.toLowerCase();
+    const headingText = h[2];
+    const key = headingText.toLowerCase();
     const count = headings.get(key) || 0;
     if (count > 0) {
-      const newText = `${h[1]} ${text} (duplicate ${count + 1})`;
+      const newText = `${h[1]} ${headingText} (duplicate ${count + 1})`;
       out.push(newText);
       headings.set(key, count + 1);
       continue;

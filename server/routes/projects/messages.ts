@@ -3,7 +3,7 @@ import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -34,7 +34,7 @@ router.get(
       [projectId]
     );
 
-    res.json({ messages });
+    sendSuccess(res, { messages });
   })
 );
 
@@ -87,10 +87,7 @@ router.post(
       [result.lastID]
     );
 
-    res.status(201).json({
-      success: true,
-      data: newMessage
-    });
+    sendSuccess(res, newMessage, undefined, 201);
   })
 );
 
@@ -120,9 +117,7 @@ router.put(
       [projectId, req.user!.type]
     );
 
-    res.json({
-      message: 'Messages marked as read'
-    });
+    sendSuccess(res, undefined, 'Messages marked as read');
   })
 );
 

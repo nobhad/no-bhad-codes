@@ -209,9 +209,9 @@ class DocumentRequestService {
               COALESCE(c.company_name, c.contact_name) as client_name,
               p.project_name as project_name,
               f.original_filename as file_name
-       FROM document_requests dr
-       LEFT JOIN clients c ON dr.client_id = c.id
-       LEFT JOIN projects p ON dr.project_id = p.id
+       FROM active_document_requests dr
+       LEFT JOIN active_clients c ON dr.client_id = c.id
+       LEFT JOIN active_projects p ON dr.project_id = p.id
        LEFT JOIN files f ON dr.file_id = f.id
        WHERE dr.id = ?`,
       [id]
@@ -230,8 +230,8 @@ class DocumentRequestService {
       SELECT dr.*,
              p.project_name as project_name,
              f.original_filename as file_name
-      FROM document_requests dr
-      LEFT JOIN projects p ON dr.project_id = p.id
+      FROM active_document_requests dr
+      LEFT JOIN active_projects p ON dr.project_id = p.id
       LEFT JOIN files f ON dr.file_id = f.id
       WHERE dr.client_id = ?
     `;
@@ -259,9 +259,9 @@ class DocumentRequestService {
             COALESCE(c.company_name, c.contact_name) as client_name,
             p.project_name as project_name,
             f.original_filename as file_name
-     FROM document_requests dr
-     LEFT JOIN clients c ON dr.client_id = c.id
-     LEFT JOIN projects p ON dr.project_id = p.id
+     FROM active_document_requests dr
+     LEFT JOIN active_clients c ON dr.client_id = c.id
+     LEFT JOIN active_projects p ON dr.project_id = p.id
      LEFT JOIN files f ON dr.file_id = f.id`;
 
     const params: (string | number)[] = [];
@@ -296,7 +296,7 @@ class DocumentRequestService {
          SUM(CASE WHEN status IN ('uploaded', 'under_review') THEN 1 ELSE 0 END) as uploaded,
          SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
          SUM(CASE WHEN due_date < DATE('now') AND status NOT IN ('approved', 'rejected') THEN 1 ELSE 0 END) as overdue
-       FROM document_requests`
+       FROM active_document_requests`
     );
 
     return {
@@ -319,9 +319,9 @@ class DocumentRequestService {
               COALESCE(c.company_name, c.contact_name) as client_name,
               p.project_name as project_name,
               f.original_filename as file_name
-       FROM document_requests dr
-       LEFT JOIN clients c ON dr.client_id = c.id
-       LEFT JOIN projects p ON dr.project_id = p.id
+       FROM active_document_requests dr
+       LEFT JOIN active_clients c ON dr.client_id = c.id
+       LEFT JOIN active_projects p ON dr.project_id = p.id
        LEFT JOIN files f ON dr.file_id = f.id
        WHERE dr.status IN ('requested', 'viewed', 'uploaded', 'under_review')
        ORDER BY
@@ -350,9 +350,9 @@ class DocumentRequestService {
               COALESCE(c.company_name, c.contact_name) as client_name,
               p.project_name as project_name,
               f.original_filename as file_name
-       FROM document_requests dr
-       LEFT JOIN clients c ON dr.client_id = c.id
-       LEFT JOIN projects p ON dr.project_id = p.id
+       FROM active_document_requests dr
+       LEFT JOIN active_clients c ON dr.client_id = c.id
+       LEFT JOIN active_projects p ON dr.project_id = p.id
        LEFT JOIN files f ON dr.file_id = f.id
        WHERE dr.status = 'uploaded'
        ORDER BY dr.uploaded_at ASC`
@@ -666,9 +666,9 @@ class DocumentRequestService {
       `SELECT dr.*,
               COALESCE(c.company_name, c.contact_name) as client_name,
               p.project_name as project_name
-       FROM document_requests dr
-       LEFT JOIN clients c ON dr.client_id = c.id
-       LEFT JOIN projects p ON dr.project_id = p.id
+       FROM active_document_requests dr
+       LEFT JOIN active_clients c ON dr.client_id = c.id
+       LEFT JOIN active_projects p ON dr.project_id = p.id
        WHERE dr.status IN ('requested', 'viewed')
          AND dr.due_date < date('now')
        ORDER BY dr.due_date ASC`
@@ -688,8 +688,8 @@ class DocumentRequestService {
       `SELECT dr.*,
               COALESCE(c.company_name, c.contact_name) as client_name,
               f.original_filename as file_name
-       FROM document_requests dr
-       LEFT JOIN clients c ON dr.client_id = c.id
+       FROM active_document_requests dr
+       LEFT JOIN active_clients c ON dr.client_id = c.id
        LEFT JOIN files f ON dr.file_id = f.id
        WHERE dr.project_id = ?
          AND dr.status NOT IN ('approved', 'rejected')
@@ -719,8 +719,8 @@ class DocumentRequestService {
     const requests = await db.all(
       `SELECT dr.*,
               p.project_name as project_name
-       FROM document_requests dr
-       LEFT JOIN projects p ON dr.project_id = p.id
+       FROM active_document_requests dr
+       LEFT JOIN active_projects p ON dr.project_id = p.id
        WHERE dr.client_id = ?
          AND dr.status IN ('requested', 'viewed')
        ORDER BY
@@ -971,7 +971,7 @@ class DocumentRequestService {
          SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
          SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected,
          SUM(CASE WHEN status IN ('requested', 'viewed') AND due_date < date('now') THEN 1 ELSE 0 END) as overdue
-       FROM document_requests
+       FROM active_document_requests
        WHERE client_id = ?`,
       [clientId]
     )) as {

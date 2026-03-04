@@ -257,7 +257,7 @@
   align-items: center;
   gap: var(--icon-gap);
   position: relative;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 .account-file-icon {
@@ -659,7 +659,7 @@
   justify-content: center;
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
-  z-index: 10;
+  z-index: var(--z-index-elevated);
 }
 
 /* Update card flex */

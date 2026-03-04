@@ -209,7 +209,7 @@ async function handleContractSigned(data: {
 
   if (!projectId && data.entityId) {
     // entityId might be the contract ID, get the project from it
-    const contract = await db.get('SELECT project_id FROM contracts WHERE id = ?', [data.entityId]);
+    const contract = await db.get('SELECT project_id FROM active_contracts WHERE id = ?', [data.entityId]);
     if (contract) {
       projectId = getNumber(contract as Record<string, unknown>, 'project_id');
     }
@@ -222,7 +222,7 @@ async function handleContractSigned(data: {
 
   try {
     // Get current project status
-    const project = await db.get('SELECT id, status, project_name FROM projects WHERE id = ?', [
+    const project = await db.get('SELECT id, status, project_name FROM active_projects WHERE id = ?', [
       projectId
     ]);
 
@@ -323,7 +323,7 @@ async function handleMilestoneCompleted(data: {
       `SELECT m.id, m.project_id, m.title, m.description, m.due_date,
               m.deliverables, p.client_id, p.project_name, p.price as project_price
        FROM milestones m
-       JOIN projects p ON m.project_id = p.id
+       JOIN active_projects p ON m.project_id = p.id
        WHERE m.id = ?`,
       [milestoneId]
     )) as Record<string, unknown> | undefined;
@@ -396,7 +396,7 @@ async function handleMilestoneCompleted(data: {
     }
 
     // Check if an invoice already exists for this milestone
-    const existingInvoice = await db.get('SELECT id FROM invoices WHERE milestone_id = ?', [
+    const existingInvoice = await db.get('SELECT id FROM active_invoices WHERE milestone_id = ?', [
       milestoneId
     ]);
 
@@ -451,7 +451,7 @@ async function handleMilestoneCompleted(data: {
 async function getClientEmail(clientId: number): Promise<{ email: string; name: string } | null> {
   const db = getDatabase();
   const client = (await db.get(
-    'SELECT email, contact_name, company_name FROM clients WHERE id = ?',
+    'SELECT email, contact_name, company_name FROM active_clients WHERE id = ?',
     [clientId]
   )) as Record<string, unknown> | undefined;
 
@@ -546,7 +546,7 @@ async function notifyProposalAccepted(data: {
   const proposal = (await db.get(
     `SELECT p.project_name, p.client_id, c.email, c.contact_name
      FROM proposal_requests p
-     JOIN clients c ON p.client_id = c.id
+     JOIN active_clients c ON p.client_id = c.id
      WHERE p.id = ?`,
     [proposalId]
   )) as Record<string, unknown> | undefined;
@@ -576,7 +576,7 @@ async function notifyContractSigned(data: {
   if (!projectId) return;
 
   const db = getDatabase();
-  const project = (await db.get('SELECT project_name, client_id FROM projects WHERE id = ?', [
+  const project = (await db.get('SELECT project_name, client_id FROM active_projects WHERE id = ?', [
     projectId
   ])) as Record<string, unknown> | undefined;
 
@@ -607,8 +607,8 @@ async function notifyDeliverableApproved(data: {
   const db = getDatabase();
   const deliverable = (await db.get(
     `SELECT d.title, p.client_id, p.project_name
-     FROM deliverables d
-     JOIN projects p ON d.project_id = p.id
+     FROM active_deliverables d
+     JOIN active_projects p ON d.project_id = p.id
      WHERE d.id = ?`,
     [deliverableId]
   )) as Record<string, unknown> | undefined;
@@ -639,7 +639,7 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
   const questionnaire = (await db.get(
     `SELECT q.title, p.client_id, p.project_name
      FROM questionnaires q
-     JOIN projects p ON q.project_id = p.id
+     JOIN active_projects p ON q.project_id = p.id
      WHERE q.id = ?`,
     [questionnaireId]
   )) as Record<string, unknown> | undefined;
@@ -669,8 +669,8 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
   const db = getDatabase();
   const docRequest = (await db.get(
     `SELECT dr.title, p.client_id, p.project_name
-     FROM document_requests dr
-     JOIN projects p ON dr.project_id = p.id
+     FROM active_document_requests dr
+     JOIN active_projects p ON dr.project_id = p.id
      WHERE dr.id = ?`,
     [requestId]
   )) as Record<string, unknown> | undefined;
@@ -700,8 +700,8 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
   const db = getDatabase();
   const invoice = (await db.get(
     `SELECT i.invoice_number, i.total_amount, i.client_id, p.project_name
-     FROM invoices i
-     LEFT JOIN projects p ON i.project_id = p.id
+     FROM active_invoices i
+     LEFT JOIN active_projects p ON i.project_id = p.id
      WHERE i.id = ?`,
     [invoiceId]
   )) as Record<string, unknown> | undefined;
@@ -736,7 +736,7 @@ async function notifyMilestoneCompleted(data: {
   const milestone = (await db.get(
     `SELECT m.title, p.client_id, p.project_name
      FROM milestones m
-     JOIN projects p ON m.project_id = p.id
+     JOIN active_projects p ON m.project_id = p.id
      WHERE m.id = ?`,
     [milestoneId]
   )) as Record<string, unknown> | undefined;

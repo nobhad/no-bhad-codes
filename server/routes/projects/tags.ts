@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
+import { sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const tags = await projectService.getProjectTags(projectId);
-    res.json({ tags });
+    sendSuccess(res, { tags });
   })
 );
 
@@ -30,7 +31,7 @@ router.post(
     const tagId = parseInt(req.params.tagId);
 
     await projectService.addTagToProject(projectId, tagId);
-    res.status(201).json({ message: 'Tag added to project successfully' });
+    sendSuccess(res, undefined, 'Tag added to project successfully', 201);
   })
 );
 
@@ -44,7 +45,7 @@ router.delete(
     const tagId = parseInt(req.params.tagId);
 
     await projectService.removeTagFromProject(projectId, tagId);
-    res.json({ message: 'Tag removed from project successfully' });
+    sendSuccess(res, undefined, 'Tag removed from project successfully');
   })
 );
 

@@ -73,7 +73,7 @@
   transition: all var(--transition-mouse) ease;
   white-space: nowrap;
   position: relative;
-  z-index: 0;
+  z-index: var(--z-index-base);
   box-shadow: none;
 }
 
@@ -99,7 +99,7 @@
   color: var(--color-primary);
   background: transparent;
   /* font-weight inherited from base button rule */
-  z-index: 10;
+  z-index: var(--z-index-elevated);
   margin-bottom: 0;
   box-shadow: none;
   border-bottom: var(--border-width) solid var(--color-primary);
@@ -126,7 +126,7 @@
   background: transparent;
   padding: 0;
   position: relative;
-  z-index: 2;
+  z-index: var(--z-index-content);
   margin-top: 0;
   box-shadow: none;
 }
@@ -200,7 +200,7 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--transition-mouse) ease;
-  z-index: 5;
+  z-index: var(--z-index-content);
 }
 
 .portal-tabs-wrapper::before {

@@ -64,7 +64,7 @@
   height: var(--space-1);
   background: var(--color-primary);
   border-radius: var(--portal-radius-full);
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 /* Search dropdown - higher specificity to override .search-bar display:flex */
@@ -125,7 +125,7 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--space-2);
   text-align: center;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 .filter-count-badge.visible {

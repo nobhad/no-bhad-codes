@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -61,7 +61,7 @@ router.get(
       ORDER BY mt.last_message_at DESC
     `);
 
-    res.json({ conversations });
+    sendSuccess(res, { conversations });
   })
 );
 
@@ -115,7 +115,7 @@ router.get(
       ORDER BY m.created_at ASC
     `, [conversationId]);
 
-    res.json({
+    sendSuccess(res, {
       conversation,
       messages
     });
@@ -147,7 +147,7 @@ router.post(
       AND read_at IS NULL
     `, [conversationId]);
 
-    res.json({ success: true });
+    sendSuccess(res);
   })
 );
 
@@ -221,7 +221,7 @@ router.post(
       WHERE id = ?
     `, [result.lastID]);
 
-    res.json({ success: true, message });
+    sendSuccess(res, { message });
   })
 );
 
@@ -249,7 +249,7 @@ router.post(
       WHERE id = ?
     `, [starred ? 1 : 0, conversationId]);
 
-    res.json({ success: true, starred });
+    sendSuccess(res, { starred });
   })
 );
 

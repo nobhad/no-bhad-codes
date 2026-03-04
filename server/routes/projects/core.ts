@@ -10,7 +10,7 @@ import { getString, getNumber } from '../../database/row-helpers.js';
 import { notDeleted } from '../../database/query-helpers.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
@@ -116,7 +116,7 @@ router.get(
       delete project.unread_count;
     }
 
-    res.json({ projects });
+    sendSuccess(res, { projects });
   })
 );
 
@@ -191,7 +191,7 @@ router.get(
       [projectId]
     );
 
-    res.json({
+    sendSuccess(res, {
       project,
       files,
       messages,
@@ -271,11 +271,7 @@ router.post(
       name
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Project request submitted successfully. We will review and get back to you soon!',
-      project: newProject
-    });
+    sendSuccess(res, { project: newProject }, 'Project request submitted successfully. We will review and get back to you soon!', 201);
   })
 );
 
@@ -344,10 +340,7 @@ router.post(
       name
     });
 
-    res.status(201).json({
-      message: 'Project created successfully',
-      project: newProject
-    });
+    sendSuccess(res, { project: newProject }, 'Project created successfully', 201);
   })
 );
 
@@ -591,10 +584,7 @@ router.put(
       }
     }
 
-    res.json({
-      message: 'Project updated successfully',
-      project: updatedProject
-    });
+    sendSuccess(res, { project: updatedProject }, 'Project updated successfully');
   })
 );
 
@@ -614,12 +604,10 @@ router.delete(
       return errorResponse(res, result.message, 404, 'PROJECT_NOT_FOUND');
     }
 
-    res.json({
-      success: true,
-      message: result.message,
+    sendSuccess(res, {
       projectId,
       affectedItems: result.affectedItems
-    });
+    }, result.message);
   })
 );
 
@@ -780,15 +768,13 @@ router.post(
       ]
     );
 
-    res.json({
-      success: true,
-      message: 'Project report saved to files',
+    sendSuccess(res, {
       file: {
         id: result.lastID,
         filename,
         size: pdfBytes.length
       }
-    });
+    }, 'Project report saved to files');
   })
 );
 
@@ -844,15 +830,13 @@ router.post(
       ]
     );
 
-    res.json({
-      success: true,
-      message: 'Statement of Work saved to files',
+    sendSuccess(res, {
       file: {
         id: result.lastID,
         filename,
         size: pdfBytes.length
       }
-    });
+    }, 'Statement of Work saved to files');
   })
 );
 

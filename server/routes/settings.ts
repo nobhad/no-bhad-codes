@@ -17,7 +17,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { rateLimit } from '../middleware/security.js';
 import { settingsService } from '../services/settings-service.js';
 import { auditLogger } from '../services/audit-logger.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -62,7 +62,7 @@ router.get(
       value: s.isSensitive ? '********' : s.value
     }));
 
-    res.json(filtered);
+    sendSuccess(res, filtered);
   })
 );
 
@@ -98,7 +98,7 @@ router.get(
       return errorResponse(res, 'Setting not found', 404);
     }
 
-    res.json({
+    sendSuccess(res, {
       ...setting,
       value: setting.isSensitive ? '********' : setting.value
     });
@@ -163,7 +163,7 @@ router.put(
       changes: { key: req.params.key, newValue: value }
     });
 
-    res.json(setting);
+    sendSuccess(res, setting);
   })
 );
 
@@ -208,7 +208,7 @@ router.delete(
       changes: { key: req.params.key }
     });
 
-    res.json({ success: true, message: 'Setting deleted' });
+    sendSuccess(res, null, 'Setting deleted');
   })
 );
 
@@ -232,7 +232,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const businessInfo = await settingsService.getBusinessInfo();
-    res.json(businessInfo);
+    sendSuccess(res, businessInfo);
   })
 );
 
@@ -283,7 +283,7 @@ router.put(
       changes: req.body
     });
 
-    res.json(businessInfo);
+    sendSuccess(res, businessInfo);
   })
 );
 
@@ -306,7 +306,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const paymentSettings = await settingsService.getPaymentSettings();
-    res.json(paymentSettings);
+    sendSuccess(res, paymentSettings);
   })
 );
 
@@ -351,7 +351,7 @@ router.put(
       changes: req.body
     });
 
-    res.json(paymentSettings);
+    sendSuccess(res, paymentSettings);
   })
 );
 
@@ -374,7 +374,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceSettings = await settingsService.getInvoiceSettings();
-    res.json(invoiceSettings);
+    sendSuccess(res, invoiceSettings);
   })
 );
 

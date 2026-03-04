@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -92,7 +92,7 @@ router.get(
       ORDER BY created_at DESC
     `);
 
-    res.json({ queries });
+    sendSuccess(res, { queries });
   })
 );
 
@@ -141,7 +141,7 @@ router.post(
         }
       });
 
-      res.json({
+      sendSuccess(res, {
         result: {
           columns,
           rows,
@@ -209,7 +209,7 @@ router.post(
       WHERE id = ?
     `, [result.lastID]);
 
-    res.json({ success: true, query: savedQuery });
+    sendSuccess(res, { query: savedQuery });
   })
 );
 
@@ -240,7 +240,7 @@ router.delete(
 
     await db.run('DELETE FROM saved_analytics_queries WHERE id = ?', [queryId]);
 
-    res.json({ success: true });
+    sendSuccess(res);
   })
 );
 

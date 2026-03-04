@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
+import { sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const health = await projectService.calculateProjectHealth(projectId);
-    res.json({ health });
+    sendSuccess(res, { health });
   })
 );
 
@@ -27,7 +28,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const burndown = await projectService.getProjectBurndown(projectId);
-    res.json({ burndown });
+    sendSuccess(res, { burndown });
   })
 );
 
@@ -38,7 +39,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
     const velocity = await projectService.getProjectVelocity(projectId);
-    res.json({ velocity });
+    sendSuccess(res, { velocity });
   })
 );
 

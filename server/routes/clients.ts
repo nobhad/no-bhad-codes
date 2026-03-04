@@ -16,7 +16,7 @@ import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { getString, getNumber } from '../database/row-helpers.js';
-import { notDeleted } from '../database/query-helpers.js';
+
 import { softDeleteService } from '../services/soft-delete-service.js';
 import { notificationPreferencesService } from '../services/notification-preferences-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
@@ -79,7 +79,7 @@ router.get(
               billing_name, billing_company, billing_address, billing_address2, billing_city,
               billing_state, billing_zip, billing_country,
               created_at, updated_at
-       FROM clients WHERE id = ?`,
+       FROM active_clients WHERE id = ?`,
       [req.user!.id]
     );
 
@@ -113,7 +113,7 @@ router.put(
     );
 
     const updatedClient = await db.get(
-      'SELECT id, email, company_name, contact_name, phone, client_type FROM clients WHERE id = ?',
+      'SELECT id, email, company_name, contact_name, phone, client_type FROM active_clients WHERE id = ?',
       [req.user!.id]
     );
 
@@ -162,7 +162,7 @@ router.put(
     }
 
     const db = getDatabase();
-    const client = await db.get('SELECT password_hash FROM clients WHERE id = ?', [req.user!.id]);
+    const client = await db.get('SELECT password_hash FROM active_clients WHERE id = ?', [req.user!.id]);
 
     if (!client) {
       return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
@@ -257,7 +257,7 @@ router.get(
          billing_address as address, billing_address2 as address2,
          billing_city as city, billing_state as state,
          billing_zip as zip, billing_country as country
-       FROM clients WHERE id = ?`,
+       FROM active_clients WHERE id = ?`,
       [req.user!.id]
     );
 
@@ -329,14 +329,14 @@ router.get(
 
     // Get active projects count
     const projectsResult = await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE client_id = ? AND status IN (\'planning\', \'in-progress\', \'review\')',
+      'SELECT COUNT(*) as count FROM active_projects WHERE client_id = ? AND status IN (\'planning\', \'in-progress\', \'review\')',
       [clientId]
     );
     const activeProjects = projectsResult?.count || 0;
 
     // Get pending invoices count (sent, viewed, partial, overdue)
     const invoicesResult = await db.get(
-      `SELECT COUNT(*) as count FROM invoices
+      `SELECT COUNT(*) as count FROM active_invoices
        WHERE client_id = ? AND status IN ('sent', 'viewed', 'partial', 'overdue')`,
       [clientId]
     );
@@ -344,8 +344,8 @@ router.get(
 
     // Get unread messages count
     const messagesResult = await db.get(
-      `SELECT COUNT(*) as count FROM messages m
-       JOIN message_threads t ON m.thread_id = t.id
+      `SELECT COUNT(*) as count FROM active_messages m
+       JOIN active_message_threads t ON m.thread_id = t.id
        WHERE t.client_id = ? AND m.read_at IS NULL AND m.sender_type = 'admin'`,
       [clientId]
     );
@@ -362,7 +362,7 @@ router.get(
           pu.created_at as date,
           CAST(NULL as INTEGER) as entity_id
         FROM project_updates pu
-        JOIN projects p ON pu.project_id = p.id
+        JOIN active_projects p ON pu.project_id = p.id
         WHERE p.client_id = ?
 
         UNION ALL
@@ -374,8 +374,8 @@ router.get(
           t.subject as context,
           m.created_at as date,
           t.id as entity_id
-        FROM messages m
-        JOIN message_threads t ON m.thread_id = t.id
+        FROM active_messages m
+        JOIN active_message_threads t ON m.thread_id = t.id
         WHERE t.client_id = ? AND m.sender_type = 'admin'
 
         UNION ALL
@@ -393,7 +393,7 @@ router.get(
           i.invoice_number as context,
           i.updated_at as date,
           i.id as entity_id
-        FROM invoices i
+        FROM active_invoices i
         WHERE i.client_id = ?
 
         UNION ALL
@@ -406,7 +406,7 @@ router.get(
           f.created_at as date,
           f.id as entity_id
         FROM files f
-        JOIN projects p ON f.project_id = p.id
+        JOIN active_projects p ON f.project_id = p.id
         WHERE p.client_id = ?
 
         UNION ALL
@@ -424,7 +424,7 @@ router.get(
           dr.title as context,
           dr.updated_at as date,
           dr.id as entity_id
-        FROM document_requests dr
+        FROM active_document_requests dr
         WHERE dr.client_id = ?
 
         UNION ALL
@@ -442,8 +442,8 @@ router.get(
           p.project_name as context,
           COALESCE(c.signed_at, c.sent_at, c.updated_at) as date,
           c.id as entity_id
-        FROM contracts c
-        JOIN projects p ON c.project_id = p.id
+        FROM active_contracts c
+        JOIN active_projects p ON c.project_id = p.id
         WHERE c.client_id = ?
       ) AS activity
       ORDER BY date DESC
@@ -453,7 +453,7 @@ router.get(
 
     // Get pending document requests count
     const docRequestsResult = await db.get(
-      `SELECT COUNT(*) as count FROM document_requests
+      `SELECT COUNT(*) as count FROM active_document_requests
        WHERE client_id = ? AND status IN ('requested', 'rejected')`,
       [clientId]
     );
@@ -461,7 +461,7 @@ router.get(
 
     // Get pending contracts count (sent but not signed)
     const contractsResult = await db.get(
-      `SELECT COUNT(*) as count FROM contracts
+      `SELECT COUNT(*) as count FROM active_contracts
        WHERE client_id = ? AND status = 'sent'`,
       [clientId]
     );
@@ -515,9 +515,8 @@ router.get(
             c.invitation_sent_at, c.invitation_expires_at,
             c.health_score, c.health_status,
             COUNT(p.id) as project_count
-          FROM clients c
-          LEFT JOIN projects p ON c.id = p.client_id AND ${notDeleted('p')}
-          WHERE ${notDeleted('c')}
+          FROM active_clients c
+          LEFT JOIN active_projects p ON c.id = p.client_id
           GROUP BY c.id
           ORDER BY c.created_at DESC
         `);
@@ -683,8 +682,8 @@ router.get(
           SELECT
             c.id, c.email, c.company_name, c.contact_name, c.phone,
             c.status, c.client_type, c.created_at, c.updated_at
-          FROM clients c
-          WHERE c.id = ? AND ${notDeleted('c')}
+          FROM active_clients c
+          WHERE c.id = ?
         `,
           [clientId]
         );
@@ -709,8 +708,8 @@ router.get(
             id, project_name as name, description, status, priority, start_date,
             estimated_end_date as due_date, actual_end_date as completed_at,
             budget_range as budget, created_at, updated_at
-          FROM projects
-          WHERE client_id = ? AND ${notDeleted()}
+          FROM active_projects
+          WHERE client_id = ?
           ORDER BY created_at DESC
         `,
           [clientId]
@@ -764,7 +763,7 @@ router.post(
     const db = getDatabase();
 
     // Check if email already exists
-    const existingClient = await db.get('SELECT id FROM clients WHERE email = ?', [
+    const existingClient = await db.get('SELECT id FROM active_clients WHERE email = ?', [
       email.toLowerCase()
     ]);
 
@@ -798,7 +797,7 @@ router.post(
     const newClient = await db.get(
       `
     SELECT id, email, company_name, contact_name, phone, status, client_type, created_at
-    FROM clients WHERE id = ?
+    FROM active_clients WHERE id = ?
   `,
       [result.lastID]
     );
@@ -901,7 +900,7 @@ router.put(
         return errorResponse(res, 'Invalid email format', 400, 'INVALID_EMAIL');
       }
       const normalized = trimmed.toLowerCase();
-      const existing = await db.get('SELECT id FROM clients WHERE email = ? AND id != ?', [
+      const existing = await db.get('SELECT id FROM active_clients WHERE email = ? AND id != ?', [
         normalized,
         clientId
       ]);
@@ -946,7 +945,7 @@ router.put(
     // Get updated client
     const updatedClient = await db.get(
       `SELECT id, email, company_name, contact_name, phone, status, client_type, created_at, updated_at
-       FROM clients WHERE id = ?`,
+       FROM active_clients WHERE id = ?`,
       [clientId]
     );
 
@@ -968,8 +967,8 @@ router.get(
       SELECT
         id, project_name, description, status, priority, start_date,
         estimated_end_date, actual_end_date, budget_range, created_at, updated_at
-      FROM projects
-      WHERE client_id = ? AND ${notDeleted()}
+      FROM active_projects
+      WHERE client_id = ?
       ORDER BY created_at DESC
       `,
       [clientId]
@@ -991,7 +990,7 @@ router.post(
 
     // Get client details
     const client = await db.get(
-      'SELECT id, email, contact_name, company_name, status, invitation_sent_at FROM clients WHERE id = ?',
+      'SELECT id, email, contact_name, company_name, status, invitation_sent_at FROM active_clients WHERE id = ?',
       [clientId]
     );
 

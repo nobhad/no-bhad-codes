@@ -52,7 +52,7 @@
   color: var(--btn-portal-hover-color);
   border-color: var(--btn-portal-hover-border);
   position: relative;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 /* ============================================

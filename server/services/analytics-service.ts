@@ -919,39 +919,39 @@ class AnalyticsService {
 
     // Total revenue (paid invoices)
     const revenue = await db.get(
-      'SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = \'paid\''
+      'SELECT COALESCE(SUM(total_amount), 0) as total FROM active_invoices WHERE status = \'paid\''
     );
     kpis.push({ type: 'total_revenue', value: Number(revenue?.total ?? 0) });
 
     // Monthly revenue
     const monthlyRevenue = await db.get(
-      `SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices
+      `SELECT COALESCE(SUM(total_amount), 0) as total FROM active_invoices
        WHERE status = 'paid' AND paid_at >= date('now', 'start of month')`
     );
     kpis.push({ type: 'monthly_revenue', value: Number(monthlyRevenue?.total ?? 0) });
 
     // Active clients
     const activeClients = await db.get(
-      'SELECT COUNT(*) as count FROM clients WHERE status = \'active\''
+      'SELECT COUNT(*) as count FROM active_clients WHERE status = \'active\''
     );
     kpis.push({ type: 'active_clients', value: Number(activeClients?.count ?? 0) });
 
     // Active projects
     const activeProjects = await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in_progress\', \'active\')'
+      'SELECT COUNT(*) as count FROM active_projects WHERE status IN (\'in_progress\', \'active\')'
     );
     kpis.push({ type: 'active_projects', value: Number(activeProjects?.count ?? 0) });
 
     // Pipeline value
     const pipelineValue = await db.get(
-      `SELECT COALESCE(SUM(expected_value), 0) as total FROM projects
+      `SELECT COALESCE(SUM(expected_value), 0) as total FROM active_projects
        WHERE status = 'pending' AND expected_value IS NOT NULL`
     );
     kpis.push({ type: 'pipeline_value', value: Number(pipelineValue?.total ?? 0) });
 
     // New leads this month
     const newLeads = await db.get(
-      `SELECT COUNT(*) as count FROM projects
+      `SELECT COUNT(*) as count FROM active_projects
        WHERE status = 'pending' AND created_at >= date('now', 'start of month')`
     );
     kpis.push({ type: 'new_leads_monthly', value: Number(newLeads?.count ?? 0) });
@@ -959,14 +959,14 @@ class AnalyticsService {
     // Outstanding invoices
     const outstanding = await db.get(
       `SELECT COALESCE(SUM(total_amount - COALESCE(paid_amount, 0)), 0) as total
-       FROM invoices WHERE status IN ('sent', 'overdue')`
+       FROM active_invoices WHERE status IN ('sent', 'overdue')`
     );
     kpis.push({ type: 'outstanding_invoices', value: Number(outstanding?.total ?? 0) });
 
     // Overdue invoices
     const overdue = await db.get(
       `SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total
-       FROM invoices WHERE status = 'overdue'`
+       FROM active_invoices WHERE status = 'overdue'`
     );
     kpis.push({
       type: 'overdue_invoices',
@@ -979,7 +979,7 @@ class AnalyticsService {
       `SELECT
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as won,
         COUNT(CASE WHEN status IN ('completed', 'cancelled') THEN 1 END) as total_closed
-       FROM projects`
+       FROM active_projects`
     );
     const totalClosed = Number(conversion?.total_closed ?? 0);
     const won = Number(conversion?.won ?? 0);
@@ -1256,7 +1256,7 @@ class AnalyticsService {
           COUNT(*) as invoice_count,
           SUM(amount_total) as total_revenue,
           AVG(amount_total) as avg_invoice
-        FROM invoices
+        FROM active_invoices
         WHERE status = 'paid'
       `;
       const params: string[] = [];
@@ -1279,7 +1279,7 @@ class AnalyticsService {
           SUM(amount_total) as total_revenue,
           COUNT(*) as total_invoices,
           AVG(amount_total) as avg_invoice
-        FROM invoices WHERE status = 'paid'
+        FROM active_invoices WHERE status = 'paid'
       `);
 
       return { data, summary: summary ?? {} };
@@ -1305,7 +1305,7 @@ class AnalyticsService {
         COALESCE(SUM(p.expected_value), 0) as total_value,
         ps.win_probability
       FROM pipeline_stages ps
-      LEFT JOIN projects p ON ps.id = p.pipeline_stage_id
+      LEFT JOIN active_projects p ON ps.id = p.pipeline_stage_id
       GROUP BY ps.id
       ORDER BY ps.sort_order
     `);
@@ -1315,7 +1315,7 @@ class AnalyticsService {
         COUNT(*) as total_leads,
         SUM(expected_value) as total_pipeline_value,
         COUNT(CASE WHEN pipeline_stage_id = (SELECT id FROM pipeline_stages WHERE is_won = TRUE) THEN 1 END) as won_count
-      FROM projects WHERE status = 'pending' OR pipeline_stage_id IS NOT NULL
+      FROM active_projects WHERE status = 'pending' OR pipeline_stage_id IS NOT NULL
     `);
 
     return { data, summary: summary ?? {} };
@@ -1331,8 +1331,8 @@ class AnalyticsService {
         p.*,
         c.company_name,
         c.contact_name
-      FROM projects p
-      LEFT JOIN clients c ON p.client_id = c.id
+      FROM active_projects p
+      LEFT JOIN active_clients c ON p.client_id = c.id
       WHERE 1=1
     `;
     const params: (string | number)[] = [];
@@ -1356,7 +1356,7 @@ class AnalyticsService {
         COUNT(CASE WHEN status IN ('active', 'in-progress') THEN 1 END) as active_projects,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_projects,
         COALESCE(SUM(actual_hours), 0) as total_hours
-      FROM projects
+      FROM active_projects
     `);
 
     return { data, summary: summary ?? {} };
@@ -1373,9 +1373,9 @@ class AnalyticsService {
         COUNT(DISTINCT p.id) as project_count,
         COALESCE(SUM(i.total_amount), 0) as total_revenue,
         COUNT(DISTINCT CASE WHEN i.status = 'paid' THEN i.id END) as paid_invoices
-      FROM clients c
-      LEFT JOIN projects p ON c.id = p.client_id
-      LEFT JOIN invoices i ON c.id = i.client_id AND i.status = 'paid'
+      FROM active_clients c
+      LEFT JOIN active_projects p ON c.id = p.client_id
+      LEFT JOIN active_invoices i ON c.id = i.client_id AND i.status = 'paid'
       GROUP BY c.id
       ORDER BY total_revenue DESC
     `);
@@ -1385,7 +1385,7 @@ class AnalyticsService {
         COUNT(*) as total_clients,
         COUNT(CASE WHEN status = 'active' THEN 1 END) as active_clients,
         AVG(lifetime_value) as avg_lifetime_value
-      FROM clients
+      FROM active_clients
     `);
 
     return { data, summary: summary ?? {} };
@@ -1433,8 +1433,8 @@ class AnalyticsService {
         c.contact_name,
         ps.name as stage_name,
         ls.name as source_name
-      FROM projects p
-      LEFT JOIN clients c ON p.client_id = c.id
+      FROM active_projects p
+      LEFT JOIN active_clients c ON p.client_id = c.id
       LEFT JOIN pipeline_stages ps ON p.pipeline_stage_id = ps.id
       LEFT JOIN lead_sources ls ON p.lead_source_id = ls.id
       WHERE p.status = 'pending' OR p.pipeline_stage_id IS NOT NULL
@@ -1446,7 +1446,7 @@ class AnalyticsService {
         COUNT(*) as total_leads,
         AVG(lead_score) as avg_score,
         SUM(expected_value) as total_value
-      FROM projects
+      FROM active_projects
       WHERE status = 'pending' OR pipeline_stage_id IS NOT NULL
     `);
 
@@ -1464,9 +1464,9 @@ class AnalyticsService {
         c.company_name,
         c.contact_name,
         p.project_name
-      FROM invoices i
-      LEFT JOIN clients c ON i.client_id = c.id
-      LEFT JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      LEFT JOIN active_clients c ON i.client_id = c.id
+      LEFT JOIN active_projects p ON i.project_id = p.id
       WHERE 1=1
     `;
     const params: (string | number)[] = [];
@@ -1490,7 +1490,7 @@ class AnalyticsService {
         SUM(total_amount) as total_amount,
         SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END) as paid_amount,
         SUM(CASE WHEN status IN ('sent', 'overdue') THEN total_amount ELSE 0 END) as outstanding_amount
-      FROM invoices
+      FROM active_invoices
     `);
 
     return { data, summary: summary ?? {} };
@@ -1737,7 +1737,7 @@ class AnalyticsService {
         SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END) as revenue,
         COUNT(*) as invoice_count,
         AVG(CASE WHEN status = 'paid' THEN total_amount ELSE NULL END) as average_invoice
-      FROM invoices
+      FROM active_invoices
       WHERE paid_at IS NOT NULL
     `;
 
@@ -1845,15 +1845,15 @@ class AnalyticsService {
     // Since migration 086, leads/intakes are stored in projects table
     const [contacts, leads, proposals, clients] = (await Promise.all([
       db.get(
-        `SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new')${dateFilter}`,
+        `SELECT COUNT(*) as count FROM active_projects WHERE status IN ('pending', 'new')${dateFilter}`,
         params
       ),
       db.get(
-        `SELECT COUNT(*) as count FROM projects WHERE status IN ('pending', 'new', 'in-progress')${dateFilter}`,
+        `SELECT COUNT(*) as count FROM active_projects WHERE status IN ('pending', 'new', 'in-progress')${dateFilter}`,
         params
       ),
       db.get(`SELECT COUNT(*) as count FROM proposals WHERE 1=1${dateFilter}`, params),
-      db.get(`SELECT COUNT(*) as count FROM clients WHERE 1=1${dateFilter}`, params)
+      db.get(`SELECT COUNT(*) as count FROM active_clients WHERE 1=1${dateFilter}`, params)
     ])) as Array<{ count: number } | undefined>;
 
     const contactCount = contacts?.count || 0;
@@ -1891,7 +1891,7 @@ class AnalyticsService {
         SELECT
           AVG(COALESCE(budget, 0)) as average_value,
           AVG(JULIANDAY(COALESCE(end_date, date('now'))) - JULIANDAY(start_date)) as average_duration
-        FROM projects
+        FROM active_projects
         WHERE status != 'cancelled' AND start_date IS NOT NULL
       `),
       db.all(`
@@ -1899,7 +1899,7 @@ class AnalyticsService {
           project_type as type,
           COUNT(*) as count,
           SUM(COALESCE(budget, 0)) as total_value
-        FROM projects
+        FROM active_projects
         WHERE status != 'cancelled'
         GROUP BY project_type
         ORDER BY count DESC
@@ -1907,7 +1907,7 @@ class AnalyticsService {
       `),
       db.all(`
         SELECT status, COUNT(*) as count
-        FROM projects
+        FROM active_projects
         GROUP BY status
         ORDER BY count DESC
       `)
@@ -1963,10 +1963,9 @@ class AnalyticsService {
         COUNT(DISTINCT p.id) as project_count,
         MIN(p.created_at) as first_project_date,
         MAX(p.created_at) as last_project_date
-      FROM clients c
-      LEFT JOIN projects p ON c.id = p.client_id
-      LEFT JOIN invoices i ON p.id = i.project_id
-      WHERE c.deleted_at IS NULL
+      FROM active_clients c
+      LEFT JOIN active_projects p ON c.id = p.client_id
+      LEFT JOIN active_invoices i ON p.id = i.project_id
       GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
       HAVING total_revenue > 0
       ORDER BY total_revenue DESC
@@ -2030,12 +2029,11 @@ class AnalyticsService {
         c.id as client_id,
         COALESCE(c.contact_name, c.company_name) as client_name,
         c.updated_at as last_activity,
-        (SELECT COUNT(*) FROM messages m JOIN message_threads t ON m.thread_id = t.id WHERE t.client_id = c.id AND m.created_at > datetime('now', '-30 days')) as recent_messages,
-        (SELECT COUNT(*) FROM invoices i WHERE i.client_id = c.id AND i.status = 'paid') as paid_invoices,
+        (SELECT COUNT(*) FROM active_messages m JOIN active_message_threads t ON m.thread_id = t.id WHERE t.client_id = c.id AND m.created_at > datetime('now', '-30 days')) as recent_messages,
+        (SELECT COUNT(*) FROM active_invoices i WHERE i.client_id = c.id AND i.status = 'paid') as paid_invoices,
         (SELECT AVG(JULIANDAY(i.paid_at) - JULIANDAY(i.due_date))
-         FROM invoices i WHERE i.client_id = c.id AND i.status = 'paid' AND i.paid_at IS NOT NULL) as avg_payment_days
-      FROM clients c
-      WHERE c.deleted_at IS NULL
+         FROM active_invoices i WHERE i.client_id = c.id AND i.status = 'paid' AND i.paid_at IS NOT NULL) as avg_payment_days
+      FROM active_clients c
       ORDER BY c.updated_at DESC
       LIMIT ?
     `,
@@ -2099,10 +2097,9 @@ class AnalyticsService {
         COALESCE(c.contact_name, c.company_name) as client_name,
         c.updated_at as last_contact,
         GROUP_CONCAT(DISTINCT p.project_type) as project_types,
-        (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND project_type = 'maintenance') as has_maintenance
-      FROM clients c
-      LEFT JOIN projects p ON c.id = p.client_id
-      WHERE c.deleted_at IS NULL
+        (SELECT COUNT(*) FROM active_projects WHERE client_id = c.id AND project_type = 'maintenance') as has_maintenance
+      FROM active_clients c
+      LEFT JOIN active_projects p ON c.id = p.client_id
       GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
       HAVING has_maintenance = 0
     `)) as Array<{
@@ -2172,8 +2169,8 @@ class AnalyticsService {
         i.due_date,
         CAST(JULIANDAY('now') - JULIANDAY(i.due_date) AS INTEGER) as days_overdue,
         (SELECT COUNT(*) FROM invoice_reminders WHERE invoice_id = i.id) as reminders_sent
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
       WHERE i.status IN ('sent', 'overdue')
         AND i.due_date < date('now')
       ORDER BY days_overdue DESC
@@ -2224,9 +2221,9 @@ class AnalyticsService {
         CAST(JULIANDAY('now') - JULIANDAY(a.created_at) AS INTEGER) as days_waiting,
         (SELECT COUNT(*) FROM approval_reminders WHERE approval_id = a.id) as reminders_sent
       FROM approvals a
-      LEFT JOIN projects p ON a.entity_type = 'project' AND a.entity_id = p.id
-      LEFT JOIN deliverables d ON a.entity_type = 'deliverable' AND a.entity_id = d.id
-      LEFT JOIN clients c ON COALESCE(p.client_id, (SELECT project_id FROM deliverables WHERE id = a.entity_id)) IN (SELECT id FROM projects WHERE client_id = c.id)
+      LEFT JOIN active_projects p ON a.entity_type = 'project' AND a.entity_id = p.id
+      LEFT JOIN active_deliverables d ON a.entity_type = 'deliverable' AND a.entity_id = d.id
+      LEFT JOIN active_clients c ON COALESCE(p.client_id, (SELECT project_id FROM active_deliverables WHERE id = a.entity_id)) IN (SELECT id FROM active_projects WHERE client_id = c.id)
       WHERE a.status = 'pending'
       ORDER BY days_waiting DESC
     `)) as Array<{
@@ -2269,7 +2266,7 @@ class AnalyticsService {
           SUM(CASE WHEN status = 'submitted' THEN 1 ELSE 0 END) as submitted,
           SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
           SUM(CASE WHEN status = 'pending' AND due_date < date('now') THEN 1 ELSE 0 END) as overdue
-        FROM document_requests
+        FROM active_document_requests
       `),
       db.all(`
         SELECT
@@ -2277,8 +2274,8 @@ class AnalyticsService {
           COALESCE(c.contact_name, c.company_name) as client_name,
           SUM(CASE WHEN dr.status = 'pending' THEN 1 ELSE 0 END) as pending,
           SUM(CASE WHEN dr.status = 'pending' AND dr.due_date < date('now') THEN 1 ELSE 0 END) as overdue
-        FROM clients c
-        JOIN document_requests dr ON dr.client_id = c.id
+        FROM active_clients c
+        JOIN active_document_requests dr ON dr.client_id = c.id
         GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
         HAVING pending > 0
         ORDER BY overdue DESC, pending DESC
@@ -2332,9 +2329,9 @@ class AnalyticsService {
         (SELECT COUNT(*) FROM project_tasks WHERE project_id = p.id AND status = 'completed') as completed_tasks,
         (SELECT COUNT(*) FROM project_tasks WHERE project_id = p.id) as total_tasks,
         (SELECT COUNT(*) FROM project_tasks WHERE project_id = p.id AND status != 'completed' AND due_date < date('now')) as overdue_tasks,
-        (SELECT COUNT(*) FROM invoices WHERE project_id = p.id AND status IN ('sent', 'overdue') AND due_date < date('now')) as overdue_invoices
-      FROM projects p
-      JOIN clients c ON p.client_id = c.id
+        (SELECT COUNT(*) FROM active_invoices WHERE project_id = p.id AND status IN ('sent', 'overdue') AND due_date < date('now')) as overdue_invoices
+      FROM active_projects p
+      JOIN active_clients c ON p.client_id = c.id
       WHERE p.status IN ('active', 'in_progress', 'review')
       ORDER BY p.estimated_end_date ASC
     `)) as Array<{

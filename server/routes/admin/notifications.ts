@@ -10,7 +10,7 @@
 
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { authenticateToken, requireAdmin, type AuthenticatedRequest } from '../../middleware/auth.js';
 
@@ -39,7 +39,7 @@ router.get(
       [req.user!.id, limit]
     );
 
-    res.json({ success: true, notifications });
+    sendSuccess(res, { notifications });
   })
 );
 
@@ -68,7 +68,7 @@ router.put(
       return errorResponse(res, 'Notification not found', 404, 'NOT_FOUND');
     }
 
-    res.json({ success: true, message: 'Notification marked as read' });
+    sendSuccess(res, undefined, 'Notification marked as read');
   })
 );
 
@@ -89,7 +89,7 @@ router.put(
       [req.user!.id]
     );
 
-    res.json({ success: true, message: 'All notifications marked as read' });
+    sendSuccess(res, undefined, 'All notifications marked as read');
   })
 );
 

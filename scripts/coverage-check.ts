@@ -51,7 +51,7 @@ const DEFAULT_THRESHOLDS: CoverageThresholds = {
 };
 
 // Custom thresholds for different modules
-const MODULE_THRESHOLDS: Record<string, CoverageThresholds> = {
+const _MODULE_THRESHOLDS: Record<string, CoverageThresholds> = {
   'src/core/': { lines: 85, functions: 85, branches: 85, statements: 85 },
   'src/services/': { lines: 80, functions: 80, branches: 80, statements: 80 },
   'server/services/': { lines: 80, functions: 80, branches: 80, statements: 80 }

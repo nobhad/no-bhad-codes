@@ -30,7 +30,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const entityType = req.query.entityType as EntityType | undefined;
     const workflows = await approvalService.getWorkflowDefinitions(entityType);
-    res.json({ workflows });
+    sendSuccess(res, { workflows });
   })
 );
 
@@ -53,7 +53,7 @@ router.get(
     }
 
     const steps = await approvalService.getWorkflowSteps(id);
-    res.json({ workflow, steps });
+    sendSuccess(res, { workflow, steps });
   })
 );
 
@@ -104,11 +104,7 @@ router.post(
       is_default
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Workflow created',
-      workflow
-    });
+    sendSuccess(res, { workflow }, 'Workflow created', 201);
   })
 );
 
@@ -141,11 +137,7 @@ router.post(
       auto_approve_after_hours
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Step added',
-      step
-    });
+    sendSuccess(res, { step }, 'Step added', 201);
   })
 );
 
@@ -177,11 +169,7 @@ router.post(
         notes
       );
 
-      res.status(201).json({
-        success: true,
-        message: 'Approval workflow started',
-        instance
-      });
+      sendSuccess(res, { instance }, 'Approval workflow started', 201);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to start workflow';
       return errorResponse(res, message, 400);
@@ -198,7 +186,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const workflows = await approvalService.getActiveWorkflows();
-    res.json({ workflows });
+    sendSuccess(res, { workflows });
   })
 );
 
@@ -236,13 +224,13 @@ router.get(
 
     const instance = await approvalService.getEntityWorkflow(entityType as EntityType, id);
     if (!instance) {
-      return res.json({ instance: null, requests: [], history: [] });
+      return sendSuccess(res, { instance: null, requests: [], history: [] });
     }
 
     const requests = await approvalService.getApprovalRequests(instance.id);
     const history = await approvalService.getApprovalHistory(instance.id);
 
-    res.json({ instance, requests, history });
+    sendSuccess(res, { instance, requests, history });
   })
 );
 
@@ -267,7 +255,7 @@ router.get(
     const requests = await approvalService.getApprovalRequests(id);
     const history = await approvalService.getApprovalHistory(id);
 
-    res.json({ instance, requests, history });
+    sendSuccess(res, { instance, requests, history });
   })
 );
 
@@ -304,11 +292,7 @@ router.post(
 
     try {
       const instance = await approvalService.approve(requestId, approverEmail, comment);
-      res.json({
-        success: true,
-        message: 'Approved',
-        instance
-      });
+      sendSuccess(res, { instance }, 'Approved');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to approve';
       return errorResponse(res, message, 400);
@@ -349,11 +333,7 @@ router.post(
 
     try {
       const instance = await approvalService.reject(requestId, approverEmail, reason);
-      res.json({
-        success: true,
-        message: 'Rejected',
-        instance
-      });
+      sendSuccess(res, { instance }, 'Rejected');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to reject';
       return errorResponse(res, message, 400);
@@ -379,11 +359,7 @@ router.post(
 
     try {
       const instance = await approvalService.cancelWorkflow(instanceId, cancelledBy, reason);
-      res.json({
-        success: true,
-        message: 'Workflow cancelled',
-        instance
-      });
+      sendSuccess(res, { instance }, 'Workflow cancelled');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to cancel workflow';
       return errorResponse(res, message, 400);

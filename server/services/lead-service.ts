@@ -378,8 +378,8 @@ class LeadService {
     // Get project data
     const projectRow = await db.get(
       `SELECT p.*, c.contact_name, c.company_name, c.client_type
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.id = ?`,
       [projectId]
     );
@@ -475,7 +475,7 @@ class LeadService {
     const db = getDatabase();
 
     // Get all leads (projects in pending status)
-    const leads = (await db.all('SELECT id FROM projects WHERE status = \'pending\'')) as unknown as {
+    const leads = (await db.all('SELECT id FROM active_projects WHERE status = \'pending\'')) as unknown as {
       id: number;
     }[];
 
@@ -545,8 +545,8 @@ class LeadService {
     for (const stage of stages) {
       const leads = (await db.all(
         `SELECT p.*, c.contact_name, c.company_name
-         FROM projects p
-         LEFT JOIN clients c ON p.client_id = c.id
+         FROM active_projects p
+         LEFT JOIN active_clients c ON p.client_id = c.id
          WHERE p.pipeline_stage_id = ? AND p.status = 'pending'
          ORDER BY p.lead_score DESC`,
         [stage.id]
@@ -570,8 +570,8 @@ class LeadService {
     // Also get leads without a stage
     const unstaged = (await db.all(
       `SELECT p.*, c.contact_name, c.company_name
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.pipeline_stage_id IS NULL AND p.status = 'pending'
        ORDER BY p.lead_score DESC`
     )) as unknown as ProjectRow[];
@@ -600,16 +600,16 @@ class LeadService {
         COUNT(*) as total_leads,
         SUM(COALESCE(expected_value, 0)) as total_value,
         AVG(julianday('now') - julianday(created_at)) as avg_days
-       FROM projects
+       FROM active_projects
        WHERE status = 'pending'`
     )) as { total_leads: number; total_value: number | string; avg_days: number } | undefined;
 
     const wonCount = (await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE won_at IS NOT NULL'
+      'SELECT COUNT(*) as count FROM active_projects WHERE won_at IS NOT NULL'
     )) as { count: number } | undefined;
 
     const lostCount = (await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE lost_at IS NOT NULL'
+      'SELECT COUNT(*) as count FROM active_projects WHERE lost_at IS NOT NULL'
     )) as { count: number } | undefined;
 
     const totalClosed = (wonCount?.count || 0) + (lostCount?.count || 0);
@@ -621,7 +621,7 @@ class LeadService {
     for (const stage of stages) {
       const stageStats = (await db.get(
         `SELECT COUNT(*) as count, SUM(COALESCE(expected_value, 0)) as value
-         FROM projects
+         FROM active_projects
          WHERE pipeline_stage_id = ? AND status = 'pending'`,
         [stage.id]
       )) as { count: number; value: number | string } | undefined;
@@ -839,7 +839,7 @@ class LeadService {
     const rows = (await db.all(
       `SELECT t.*, p.project_name
        FROM lead_tasks t
-       JOIN projects p ON t.project_id = p.id
+       JOIN active_projects p ON t.project_id = p.id
        WHERE t.status = 'pending'
          AND t.due_date < DATE('now')
        ORDER BY t.due_date ASC`
@@ -860,7 +860,7 @@ class LeadService {
     const rows = (await db.all(
       `SELECT t.*, p.project_name
        FROM lead_tasks t
-       JOIN projects p ON t.project_id = p.id
+       JOIN active_projects p ON t.project_id = p.id
        WHERE t.status = 'pending'
          AND t.due_date >= DATE('now')
          AND t.due_date <= DATE('now', '+' || ? || ' days')
@@ -1016,8 +1016,8 @@ class LeadService {
     const db = getDatabase();
     const rows = (await db.all(
       `SELECT p.*, c.contact_name, c.company_name
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.assigned_to = ? AND p.status = 'pending'
        ORDER BY p.lead_score DESC`,
       [assignee]
@@ -1032,8 +1032,8 @@ class LeadService {
     const db = getDatabase();
     const rows = (await db.all(
       `SELECT p.*, c.contact_name, c.company_name
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE (p.assigned_to IS NULL OR p.assigned_to = '') AND p.status = 'pending'
        ORDER BY p.lead_score DESC`
     )) as unknown as ProjectRow[];
@@ -1060,8 +1060,8 @@ class LeadService {
     // Get the lead
     const lead = (await db.get(
       `SELECT p.*, c.contact_name, c.company_name, c.email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.id = ?`,
       [projectId]
     )) as unknown as LeadMatchRow | undefined;
@@ -1073,8 +1073,8 @@ class LeadService {
     // Find potential matches
     const potentialMatches = (await db.all(
       `SELECT p.*, c.contact_name, c.company_name, c.email as client_email
-       FROM projects p
-       LEFT JOIN clients c ON p.client_id = c.id
+       FROM active_projects p
+       LEFT JOIN active_clients c ON p.client_id = c.id
        WHERE p.id != ? AND p.status = 'pending'`,
       [projectId]
     )) as unknown as LeadMatchRow[];
@@ -1279,34 +1279,34 @@ class LeadService {
 
     // Total leads
     const totalLeads = (await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE status = \'pending\''
+      'SELECT COUNT(*) as count FROM active_projects WHERE status = \'pending\''
     )) as { count: number } | undefined;
 
     // New leads this month
     const newLeadsThisMonth = (await db.get(
-      `SELECT COUNT(*) as count FROM projects
+      `SELECT COUNT(*) as count FROM active_projects
        WHERE status = 'pending' AND created_at >= DATE('now', 'start of month')`
     )) as { count: number } | undefined;
 
     // Conversion rate
     const wonCount = (await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE won_at IS NOT NULL'
+      'SELECT COUNT(*) as count FROM active_projects WHERE won_at IS NOT NULL'
     )) as { count: number } | undefined;
     const lostCount = (await db.get(
-      'SELECT COUNT(*) as count FROM projects WHERE lost_at IS NOT NULL'
+      'SELECT COUNT(*) as count FROM active_projects WHERE lost_at IS NOT NULL'
     )) as { count: number } | undefined;
     const totalClosed = (wonCount?.count || 0) + (lostCount?.count || 0);
     const conversionRate = totalClosed > 0 ? (wonCount?.count || 0) / totalClosed : 0;
 
     // Average lead score
     const avgScore = (await db.get(
-      'SELECT AVG(lead_score) as avg FROM projects WHERE status = \'pending\''
+      'SELECT AVG(lead_score) as avg FROM active_projects WHERE status = \'pending\''
     )) as { avg: number | null } | undefined;
 
     // Average days to close
     const avgDays = (await db.get(
       `SELECT AVG(julianday(won_at) - julianday(created_at)) as avg
-       FROM projects WHERE won_at IS NOT NULL`
+       FROM active_projects WHERE won_at IS NOT NULL`
     )) as { avg: number | null } | undefined;
 
     // Top sources
@@ -1325,7 +1325,7 @@ class LeadService {
         SUM(COALESCE(p.expected_value, 0)) as total_value,
         SUM(CASE WHEN p.won_at IS NOT NULL THEN 1 ELSE 0 END) as won_count
        FROM lead_sources ls
-       LEFT JOIN projects p ON p.lead_source_id = ls.id
+       LEFT JOIN active_projects p ON p.lead_source_id = ls.id
        GROUP BY ls.id
        ORDER BY lead_count DESC
        LIMIT 5`
@@ -1342,7 +1342,7 @@ class LeadService {
           ELSE '0-19'
         END as range,
         COUNT(*) as count
-       FROM projects
+       FROM active_projects
        WHERE status = 'pending'
        GROUP BY range
        ORDER BY range DESC`
@@ -1380,7 +1380,7 @@ class LeadService {
     for (const stage of stages) {
       const stats = (await db.get(
         `SELECT COUNT(*) as count, SUM(COALESCE(expected_value, 0)) as value
-         FROM projects
+         FROM active_projects
          WHERE pipeline_stage_id = ?`,
         [stage.id]
       )) as { count: number; value: number | string | null } | undefined;
@@ -1431,7 +1431,7 @@ class LeadService {
         SUM(COALESCE(p.expected_value, 0)) as total_value,
         SUM(CASE WHEN p.won_at IS NOT NULL THEN 1 ELSE 0 END) as won_count
        FROM lead_sources ls
-       LEFT JOIN projects p ON p.lead_source_id = ls.id
+       LEFT JOIN active_projects p ON p.lead_source_id = ls.id
        GROUP BY ls.id
        ORDER BY lead_count DESC`
     )) as unknown as SourcePerfRow[];

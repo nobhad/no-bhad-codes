@@ -450,7 +450,7 @@ body[data-page="client-portal"] {
 .portal-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: var(--z-index-20);
   background: transparent;
   border-bottom: var(--border-width) solid var(--portal-alpha-white-15);
 }

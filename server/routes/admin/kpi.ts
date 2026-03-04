@@ -2,7 +2,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { queryStats } from '../../services/query-stats.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -46,7 +46,7 @@ router.get(
       jsFiles.sort((a, b) => b.size - a.size);
       cssFiles.sort((a, b) => b.size - a.size);
 
-      res.json({
+      sendSuccess(res, {
         total: totalJs + totalCss,
         js: totalJs,
         css: totalCss,
@@ -86,21 +86,18 @@ router.get(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const stats = queryStats.getStats();
 
-    res.json({
-      success: true,
-      data: {
-        ...stats,
-        threshold: queryStats.getThreshold(),
-        summary: {
-          totalQueries: stats.totalQueries,
-          slowQueries: stats.slowQueries,
-          slowQueryPercentage:
-            stats.totalQueries > 0
-              ? `${((stats.slowQueries / stats.totalQueries) * 100).toFixed(2)}%`
-              : '0%',
-          avgExecutionTime: `${stats.avgExecutionTime}ms`,
-          maxExecutionTime: `${stats.maxExecutionTime}ms`
-        }
+    sendSuccess(res, {
+      ...stats,
+      threshold: queryStats.getThreshold(),
+      summary: {
+        totalQueries: stats.totalQueries,
+        slowQueries: stats.slowQueries,
+        slowQueryPercentage:
+          stats.totalQueries > 0
+            ? `${((stats.slowQueries / stats.totalQueries) * 100).toFixed(2)}%`
+            : '0%',
+        avgExecutionTime: `${stats.avgExecutionTime}ms`,
+        maxExecutionTime: `${stats.maxExecutionTime}ms`
       }
     });
   })
@@ -123,10 +120,7 @@ router.post(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     queryStats.reset();
 
-    res.json({
-      success: true,
-      message: 'Query statistics reset successfully'
-    });
+    sendSuccess(res, undefined, 'Query statistics reset successfully');
   })
 );
 

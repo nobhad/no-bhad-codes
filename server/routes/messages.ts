@@ -45,8 +45,8 @@ async function canAccessMessage(req: AuthenticatedRequest, messageId: number): P
   const db = getDatabase();
   const row = await db.get(
     `SELECT 1
-     FROM messages m
-     JOIN message_threads mt ON m.thread_id = mt.id
+     FROM active_messages m
+     JOIN active_message_threads mt ON m.thread_id = mt.id
      WHERE m.id = ? AND mt.client_id = ?`,
     [messageId, req.user?.id]
   );
@@ -60,7 +60,7 @@ async function canAccessProject(req: AuthenticatedRequest, projectId: number): P
   }
 
   const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
+  const row = await db.get('SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?', [
     projectId,
     req.user?.id
   ]);
@@ -173,10 +173,10 @@ router.get(
         p.project_name,
         COUNT(m.id) as message_count,
         COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'admin' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
-      FROM message_threads mt
-      JOIN clients c ON mt.client_id = c.id
-      LEFT JOIN projects p ON mt.project_id = p.id
-      LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
+      FROM active_message_threads mt
+      JOIN active_clients c ON mt.client_id = c.id
+      LEFT JOIN active_projects p ON mt.project_id = p.id
+      LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
       GROUP BY mt.id
       ORDER BY mt.last_message_at DESC
     `;
@@ -188,9 +188,9 @@ router.get(
         p.project_name,
         COUNT(CASE WHEN m.is_internal IS NULL OR m.is_internal = 0 THEN 1 END) as message_count,
         COUNT(CASE WHEN m.read_at IS NULL AND m.sender_type != 'client' AND (m.is_internal IS NULL OR m.is_internal = 0) THEN 1 END) as unread_count
-      FROM message_threads mt
-      LEFT JOIN projects p ON mt.project_id = p.id
-      LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
+      FROM active_message_threads mt
+      LEFT JOIN active_projects p ON mt.project_id = p.id
+      LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
       WHERE mt.client_id = ?
       GROUP BY mt.id
       ORDER BY mt.last_message_at DESC
@@ -219,9 +219,9 @@ router.post(
     if (project_id) {
       let project;
       if (req.user!.type === 'admin') {
-        project = await db.get('SELECT id FROM projects WHERE id = ?', [project_id]);
+        project = await db.get('SELECT id FROM active_projects WHERE id = ?', [project_id]);
       } else {
-        project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
+        project = await db.get('SELECT id FROM active_projects WHERE id = ? AND client_id = ?', [
           project_id,
           req.user!.id
         ]);
@@ -243,7 +243,7 @@ router.post(
     );
 
     const newThread = await db.get(
-      `SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`,
+      `SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`,
       [result.lastID]
     );
 
@@ -282,9 +282,9 @@ router.post(
     // Verify thread access
     let thread;
     if (req.user!.type === 'admin') {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
     } else {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
         req.user!.id
       ]);
@@ -309,7 +309,7 @@ router.post(
     }
 
     // Get the actual sender name from the clients table
-    const senderClient = (await db.get('SELECT contact_name, email FROM clients WHERE id = ?', [
+    const senderClient = (await db.get('SELECT contact_name, email FROM active_clients WHERE id = ?', [
       req.user!.id
     ])) as { contact_name: string | null; email: string } | undefined;
     const sender_name: string =
@@ -353,7 +353,7 @@ router.post(
     );
 
     const newMessage = await db.get(
-      `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE id = ?`,
+      `SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE id = ?`,
       [result.lastID]
     );
 
@@ -364,7 +364,7 @@ router.post(
       if (recipientType === 'client') {
         // Notify client
         const clientId = getNumber(thread, 'client_id');
-        const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
+        const client = await db.get('SELECT email, contact_name FROM active_clients WHERE id = ?', [
           clientId
         ]);
 
@@ -430,9 +430,9 @@ router.get(
     // Verify thread access
     let thread;
     if (req.user!.type === 'admin') {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
     } else {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
         req.user!.id
       ]);
@@ -448,7 +448,7 @@ router.get(
       m.id, m.sender_type, m.sender_name, m.message, m.priority, m.reply_to,
       m.attachments, m.read_at, m.created_at, m.updated_at,
       CASE WHEN pm.id IS NOT NULL THEN 1 ELSE 0 END as is_pinned
-    FROM messages m
+    FROM active_messages m
     LEFT JOIN pinned_messages pm ON m.id = pm.message_id AND pm.thread_id = ?
     WHERE m.thread_id = ?
       AND m.context_type = 'general'
@@ -514,9 +514,9 @@ router.put(
     // Verify thread access
     let thread;
     if (req.user!.type === 'admin') {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
     } else {
-      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
+      thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
         req.user!.id
       ]);
@@ -586,7 +586,7 @@ router.post(
     }
 
     // Get the actual sender name from the clients table
-    const inquirySender = await db.get('SELECT contact_name, email FROM clients WHERE id = ?', [
+    const inquirySender = await db.get('SELECT contact_name, email FROM active_clients WHERE id = ?', [
       req.user!.id
     ]);
     const inquirySenderName =
@@ -1189,7 +1189,7 @@ router.post(
     const db = getDatabase();
 
     // Verify thread exists
-    const thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ?`, [threadId]);
+    const thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM active_message_threads WHERE id = ?`, [threadId]);
     if (!thread) {
       return errorResponse(res, 'Thread not found', 404, 'THREAD_NOT_FOUND');
     }
@@ -1208,7 +1208,7 @@ router.post(
     // Process mentions in the internal message
     await messageService.processMentions(result.lastID!, message.trim());
 
-    const newMessage = await db.get(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE id = ?`, [result.lastID]);
+    const newMessage = await db.get(`SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE id = ?`, [result.lastID]);
 
     sendCreated(res, { messageData: newMessage }, 'Internal message sent');
   })
@@ -1224,7 +1224,7 @@ router.get(
     const db = getDatabase();
 
     const messages = await db.all(
-      `SELECT ${MESSAGE_COLUMNS} FROM messages
+      `SELECT ${MESSAGE_COLUMNS} FROM active_messages
       WHERE thread_id = ? AND is_internal = TRUE AND context_type = 'general'
       ORDER BY created_at ASC`,
       [threadId]
@@ -1257,8 +1257,8 @@ router.get(
       COUNT(CASE WHEN m.sender_type = 'admin' THEN m.id END) as admin_messages,
       COUNT(CASE WHEN m.message_type = 'inquiry' THEN m.id END) as inquiries,
       COUNT(CASE WHEN m.priority = 'urgent' THEN m.id END) as urgent_messages
-    FROM message_threads mt
-    LEFT JOIN messages m ON mt.id = m.thread_id AND m.context_type = 'general'
+    FROM active_message_threads mt
+    LEFT JOIN active_messages m ON mt.id = m.thread_id AND m.context_type = 'general'
   `);
 
     const recentActivity = await db.all(`
@@ -1270,8 +1270,8 @@ router.get(
       mt.last_message_by,
       c.company_name,
       c.contact_name
-    FROM message_threads mt
-    JOIN clients c ON mt.client_id = c.id
+    FROM active_message_threads mt
+    JOIN active_clients c ON mt.client_id = c.id
     ORDER BY mt.last_message_at DESC
     LIMIT 10
   `);
@@ -1318,9 +1318,9 @@ router.get(
     // First, find the message containing this attachment and verify access
     // Use exact JSON match to prevent substring attacks
     const messageQuery = req.user!.type === 'admin'
-      ? 'SELECT m.id, m.attachments, m.thread_id FROM messages m WHERE m.attachments LIKE ? ESCAPE \'\\\''
-      : `SELECT m.id, m.attachments, m.thread_id FROM messages m
-         JOIN message_threads mt ON m.thread_id = mt.id
+      ? 'SELECT m.id, m.attachments, m.thread_id FROM active_messages m WHERE m.attachments LIKE ? ESCAPE \'\\\''
+      : `SELECT m.id, m.attachments, m.thread_id FROM active_messages m
+         JOIN active_message_threads mt ON m.thread_id = mt.id
          WHERE m.attachments LIKE ? ESCAPE '\\' AND mt.client_id = ?`;
 
     const params = req.user!.type === 'admin'

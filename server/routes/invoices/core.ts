@@ -166,12 +166,11 @@ router.get(
         };
 
         const result = await getInvoiceService().searchInvoices(filters);
-        // Return plain array (frontend expects direct array)
-        return res.json(result.invoices.map(toSnakeCaseInvoice));
+        return sendSuccess(res, { invoices: result.invoices.map(toSnakeCaseInvoice) });
       }
 
       const invoices = await getInvoiceService().getAllInvoices(limit, offset);
-      res.json(invoices.map(toSnakeCaseInvoice));
+      sendSuccess(res, { invoices: invoices.map(toSnakeCaseInvoice) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'

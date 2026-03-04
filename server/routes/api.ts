@@ -19,7 +19,7 @@ import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -236,11 +236,7 @@ Received: ${new Date().toISOString()}
         `Contact form processed successfully - messageId: ${messageId}, from: ${email}`
       );
 
-      res.json({
-        success: true,
-        message: 'Message received, thanks!',
-        messageId
-      });
+      sendSuccess(res, { messageId }, 'Message received, thanks!');
     } catch (_error) {
       await logger.error('Contact form processing error');
       errorResponse(res, 'Failed to process contact form', 500, 'CONTACT_PROCESSING_ERROR');
@@ -350,10 +346,7 @@ router.get(
         }
       };
 
-      res.json({
-        success: true,
-        data: health
-      });
+      sendSuccess(res, health);
     } catch (_error) {
       await logger.error('Health check error');
       errorResponse(res, 'Health check failed', 500, 'HEALTH_CHECK_ERROR');
@@ -434,10 +427,7 @@ router.get(
         }
       };
 
-      res.json({
-        success: true,
-        ...result
-      });
+      sendSuccess(res, result);
     } catch (_error) {
       await logger.error('Data query error');
       errorResponse(res, 'Data query failed', 500, 'DATA_QUERY_ERROR');
@@ -518,10 +508,7 @@ router.get(
         }
       };
 
-      res.json({
-        success: true,
-        data: status
-      });
+      sendSuccess(res, status);
     } catch (_error) {
       await logger.error('API status error');
       errorResponse(res, 'Status check failed', 500, 'STATUS_ERROR');

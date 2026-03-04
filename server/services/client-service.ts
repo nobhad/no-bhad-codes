@@ -574,7 +574,7 @@ class ClientService {
     const rows = (await db.all(
       `SELECT ca.*, c.contact_name, c.company_name
        FROM client_activities ca
-       JOIN clients c ON ca.client_id = c.id
+       JOIN active_clients c ON ca.client_id = c.id
        ORDER BY ca.created_at DESC
        LIMIT ?`,
       [limit]
@@ -1012,7 +1012,7 @@ class ClientService {
     const db = getDatabase();
 
     return (await db.all(
-      `SELECT c.* FROM clients c
+      `SELECT c.* FROM active_clients c
        JOIN client_tags ct ON c.id = ct.client_id
        WHERE ct.tag_id = ?
        ORDER BY c.company_name ASC, c.contact_name ASC`,
@@ -1031,7 +1031,7 @@ class ClientService {
     const db = getDatabase();
 
     // Get client data
-    const client = (await db.get(`SELECT ${CLIENT_COLUMNS} FROM clients WHERE id = ?`, [clientId])) as unknown as
+    const client = (await db.get(`SELECT ${CLIENT_COLUMNS} FROM active_clients WHERE id = ?`, [clientId])) as unknown as
       | ClientRow
       | undefined;
 
@@ -1045,7 +1045,7 @@ class ClientService {
         COUNT(*) as total_invoices,
         SUM(CASE WHEN status = 'paid' AND (paid_date IS NULL OR paid_date <= due_date) THEN 1 ELSE 0 END) as paid_on_time,
         AVG(CASE WHEN status = 'paid' AND paid_date > due_date THEN julianday(paid_date) - julianday(due_date) ELSE 0 END) as avg_days_overdue
-       FROM invoices
+       FROM active_invoices
        WHERE client_id = ?`,
       [clientId]
     )) as { total_invoices: number; paid_on_time: number; avg_days_overdue: number } | undefined;
@@ -1066,8 +1066,8 @@ class ClientService {
     // Calculate engagement score (0-25 points)
     const messageData = (await db.get(
       `SELECT COUNT(*) as message_count, MAX(created_at) as last_message
-       FROM messages
-       WHERE project_id IN (SELECT id FROM projects WHERE client_id = ?)`,
+       FROM active_messages
+       WHERE project_id IN (SELECT id FROM active_projects WHERE client_id = ?)`,
       [clientId]
     )) as { message_count: number; last_message: string | null } | undefined;
 
@@ -1091,7 +1091,7 @@ class ClientService {
         COUNT(*) as total,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
         SUM(CASE WHEN status = 'on-hold' THEN 1 ELSE 0 END) as on_hold
-       FROM projects
+       FROM active_projects
        WHERE client_id = ?`,
       [clientId]
     )) as { total: number; completed: number; on_hold: number } | undefined;
@@ -1170,7 +1170,7 @@ class ClientService {
     const db = getDatabase();
 
     return (await db.all(
-      `SELECT ${CLIENT_COLUMNS} FROM clients
+      `SELECT ${CLIENT_COLUMNS} FROM active_clients
        WHERE health_status IN ('at_risk', 'critical')
        ORDER BY health_score ASC`
     )) as unknown as ClientRow[];
@@ -1184,7 +1184,7 @@ class ClientService {
 
     const result = (await db.get(
       `SELECT SUM(CAST(amount_paid AS DECIMAL)) as total
-       FROM invoices
+       FROM active_invoices
        WHERE client_id = ? AND status = 'paid'`,
       [clientId]
     )) as { total: number | string | null } | undefined;
@@ -1212,7 +1212,7 @@ class ClientService {
         COUNT(*) as total,
         SUM(CASE WHEN LOWER(status) IN ('pending', 'active', 'in-progress', 'in-review') THEN 1 ELSE 0 END) as active,
         SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed
-       FROM projects
+       FROM active_projects
        WHERE client_id = ?`,
       [clientId]
     )) as { total: number; active: number; completed: number } | undefined;
@@ -1223,7 +1223,7 @@ class ClientService {
         SUM(CAST(amount_total AS DECIMAL)) as invoiced,
         SUM(CASE WHEN status = 'paid' THEN CAST(amount_total AS DECIMAL) ELSE 0 END) as paid,
         SUM(CASE WHEN status NOT IN ('paid', 'cancelled', 'voided') THEN CAST(amount_total AS DECIMAL) - COALESCE(CAST(amount_paid AS DECIMAL), 0) ELSE 0 END) as outstanding
-       FROM invoices
+       FROM active_invoices
        WHERE client_id = ?`,
       [clientId]
     )) as
@@ -1237,7 +1237,7 @@ class ClientService {
     // Get average payment days
     const paymentDays = (await db.get(
       `SELECT AVG(julianday(paid_date) - julianday(issued_date)) as avg_days
-       FROM invoices
+       FROM active_invoices
        WHERE client_id = ? AND status = 'paid' AND paid_date IS NOT NULL AND issued_date IS NOT NULL`,
       [clientId]
     )) as { avg_days: number | null } | undefined;
@@ -1245,8 +1245,8 @@ class ClientService {
     // Get message count
     const messageCount = (await db.get(
       `SELECT COUNT(*) as count
-       FROM messages
-       WHERE project_id IN (SELECT id FROM projects WHERE client_id = ?)`,
+       FROM active_messages
+       WHERE project_id IN (SELECT id FROM active_projects WHERE client_id = ?)`,
       [clientId]
     )) as { count: number } | undefined;
 
@@ -1345,7 +1345,7 @@ class ClientService {
     const db = getDatabase();
 
     return (await db.all(
-      `SELECT ${CLIENT_COLUMNS} FROM clients
+      `SELECT ${CLIENT_COLUMNS} FROM active_clients
        WHERE next_follow_up_date IS NOT NULL
          AND next_follow_up_date <= DATE('now')
          AND status = 'active'

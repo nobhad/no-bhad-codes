@@ -16,7 +16,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 // Matches the actual time_entries schema after migration 070
 const TIME_ENTRY_COLUMNS = `
@@ -98,7 +98,7 @@ router.get(
       0
     );
 
-    res.json({
+    sendSuccess(res, {
       entries,
       stats: {
         totalHours: Math.round(totalHours * 100) / 100,
@@ -143,8 +143,7 @@ router.post(
       description || ''
     ]);
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       entryId: result.lastID,
       projectName: project.project_name
     });
@@ -187,7 +186,7 @@ router.post(
 
     const updated = await db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [entryId]);
 
-    res.json({ success: true, entry: updated });
+    sendSuccess(res, { entry: updated });
   })
 );
 
@@ -231,7 +230,7 @@ router.post(
 
     const entry = await db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [result.lastID]);
 
-    res.json({ success: true, entry });
+    sendSuccess(res, { entry });
   })
 );
 
@@ -258,7 +257,7 @@ router.delete(
 
     await db.run('DELETE FROM time_entries WHERE id = ?', [entryId]);
 
-    res.json({ success: true });
+    sendSuccess(res);
   })
 );
 
