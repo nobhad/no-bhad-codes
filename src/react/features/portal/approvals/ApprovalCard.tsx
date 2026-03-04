@@ -103,8 +103,7 @@ export function ApprovalCard({
   return (
     <>
       <div
-        className={cn('portal-card', onNavigate && 'portal-card card-clickable')}
-        style={{ borderColor: overdue ? 'var(--portal-text-light)' : undefined }}
+        className={cn('portal-card', onNavigate && 'card-clickable', overdue && 'text-status-cancelled')}
         onClick={onNavigate ? handleCardClick : undefined}
       >
         {/* Header */}

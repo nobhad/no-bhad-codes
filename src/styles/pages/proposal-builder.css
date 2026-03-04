@@ -55,7 +55,7 @@
 
 .proposal-title {
   font-size: var(--font-size-2xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--proposal-spacing-sm);
   color: var(--proposal-text);
 }
@@ -112,12 +112,12 @@
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .step-label {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .step-divider {
@@ -147,7 +147,7 @@
 
 .section-title {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
 }
@@ -215,7 +215,7 @@
   padding: 4px 16px;
   border-radius: var(--portal-radius-pill);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
@@ -228,7 +228,7 @@
 
 .tier-name {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--proposal-spacing-sm);
   color: var(--proposal-text);
 }
@@ -249,7 +249,7 @@
 
 .price-range {
   font-size: var(--font-size-2xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--proposal-text);
 }
 
@@ -291,7 +291,7 @@
   background: transparent;
   color: var(--proposal-accent);
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition:
     background-color 0.3s ease,
@@ -341,7 +341,7 @@
 
 .comparison-table th {
   background: var(--portal-bg-medium);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--proposal-text);
 }
 
@@ -365,7 +365,7 @@
 
 .category-row td {
   background: var(--portal-bg-darker);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   font-size: var(--font-size-xs);
   letter-spacing: var(--letter-spacing-label);
@@ -378,7 +378,7 @@
 
 .feature-name-cell .feature-name {
   display: block;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--proposal-text);
 }
 
@@ -396,7 +396,7 @@
 .check-addon {
   color: var(--proposal-accent);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .check-none {
@@ -418,7 +418,7 @@
 
 .feature-section-title {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
 }
@@ -500,7 +500,7 @@
 
 .feature-info .feature-name {
   display: block;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--proposal-text);
   margin-bottom: 2px;
 }
@@ -512,7 +512,7 @@
 }
 
 .feature-price {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--proposal-accent);
   white-space: nowrap;
 }
@@ -547,7 +547,7 @@
   padding: 4px 16px;
   border-radius: var(--portal-radius-pill);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
@@ -560,20 +560,20 @@
 
 .maintenance-name {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--proposal-spacing-sm);
   color: var(--proposal-text);
 }
 
 .maintenance-price {
   font-size: var(--font-size-2xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--proposal-text);
 }
 
 .billing-cycle {
   font-size: var(--font-size-sm);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--proposal-text-muted);
 }
 
@@ -636,14 +636,14 @@
 
 .summary-tier-header h4 {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0;
   color: var(--proposal-text);
 }
 
 .summary-tier-price {
   font-size: var(--font-size-xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--proposal-accent);
 }
 
@@ -655,7 +655,7 @@
 
 .summary-section-title {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
   text-transform: uppercase;
@@ -687,7 +687,7 @@
 
 .addon-price {
   color: var(--proposal-accent);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .summary-maintenance {
@@ -819,7 +819,7 @@
 
 .total-row--final {
   font-size: var(--font-size-xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   padding-top: var(--proposal-spacing-md);
   border-top: var(--border-width) solid var(--proposal-card-border);
   margin-top: var(--proposal-spacing-sm);
@@ -859,7 +859,7 @@
 }
 
 .price-tier {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--proposal-text);
 }
 
@@ -881,7 +881,7 @@
 
 .price-value {
   font-size: var(--font-size-2xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--proposal-text);
 }
 
@@ -900,7 +900,7 @@
   padding: var(--proposal-spacing-md) var(--proposal-spacing-xl);
   border-radius: var(--portal-radius-md);
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition:
     background-color 0.3s ease,

@@ -39,7 +39,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
     <div className="portal-card">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <Icon className="tw-h-4 tw-w-4 tw-text-primary" />
+          <Icon className="icon-sm tw-text-primary" />
           <h4 className="tw-text-[14px] tw-font-mono tw-text-primary">
             {title}
           </h4>
@@ -193,7 +193,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
             label: 'Brand Guide',
             value: requirements?.brandGuidelines ? (
               <span className="tw-flex tw-items-center tw-gap-1">
-                <Check className="tw-h-3 tw-w-3 tw-text-[var(--status-active)]" />
+                <Check className="icon-xs text-status-active" />
                 Yes
               </span>
             ) : (
@@ -204,7 +204,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
             label: 'Content Ready',
             value: requirements?.contentReady ? (
               <span className="tw-flex tw-items-center tw-gap-1">
-                <Check className="tw-h-3 tw-w-3 tw-text-[var(--status-active)]" />
+                <Check className="icon-xs text-status-active" />
                 Yes
               </span>
             ) : (
@@ -237,7 +237,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
             label: 'Logo',
             value: assets?.logoProvided ? (
               <span className="tw-flex tw-items-center tw-gap-1">
-                <Check className="tw-h-3 tw-w-3 tw-text-[var(--status-active)]" />
+                <Check className="icon-xs text-status-active" />
                 Included
               </span>
             ) : (

@@ -330,7 +330,7 @@
 .note-content {
   font-size: var(--font-size-sm);
   color: var(--portal-text-light);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
 }
 

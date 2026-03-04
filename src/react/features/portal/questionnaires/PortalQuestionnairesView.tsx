@@ -6,7 +6,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';

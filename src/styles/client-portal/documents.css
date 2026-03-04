@@ -34,7 +34,7 @@
 
 .portal .documents-card-title {
   display: block;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-0-5);
 }
 

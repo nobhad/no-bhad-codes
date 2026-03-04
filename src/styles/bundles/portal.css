@@ -63,7 +63,7 @@
     background-color: var(--portal-bg-darker);
     color: var(--portal-text-primary);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     border-radius: 0; /* DISCOTHÈQUE: sharp corners */
     transition: top var(--transition-mouse) ease;
   }

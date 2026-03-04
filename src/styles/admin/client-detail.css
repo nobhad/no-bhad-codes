@@ -243,7 +243,7 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 .stats-compact .field-label {

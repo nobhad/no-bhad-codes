@@ -22,6 +22,8 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface Conversation {
@@ -47,6 +49,46 @@ interface MessagesTableProps {
   overviewMode?: boolean;
 }
 
+function filterConversation(
+  conversation: Conversation,
+  _filters: Record<string, string>,
+  search: string
+): boolean {
+  // Always exclude archived
+  if (conversation.isArchived) return false;
+
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !conversation.clientName.toLowerCase().includes(query) &&
+      !conversation.projectName?.toLowerCase().includes(query) &&
+      !conversation.lastMessage?.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function sortConversations(a: Conversation, b: Conversation, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'client':
+    return multiplier * a.clientName.localeCompare(b.clientName);
+  case 'unread':
+    return multiplier * (a.unreadCount - b.unreadCount);
+  case 'lastMessageAt': {
+    const aVal = a.lastMessageAt || '';
+    const bVal = b.lastMessageAt || '';
+    return multiplier * aVal.localeCompare(bVal);
+  }
+  default:
+    return 0;
+  }
+}
+
 export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, overviewMode = false }: MessagesTableProps) {
   const containerRef = useFadeIn();
 
@@ -64,8 +106,20 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const {
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Conversation>({
+    storageKey: overviewMode ? undefined : 'admin_messages',
+    filters: [],
+    filterFn: filterConversation,
+    sortFn: sortConversations
+  });
 
   const loadConversations = useCallback(async () => {
     setIsLoading(true);
@@ -93,39 +147,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
     loadConversations();
   }, [loadConversations]);
 
-  const filteredConversations = useMemo(() => {
-    let result = conversations.filter(c => !c.isArchived);
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (c) =>
-          c.clientName.toLowerCase().includes(query) ||
-          c.projectName?.toLowerCase().includes(query) ||
-          c.lastMessage?.toLowerCase().includes(query)
-      );
-    }
-
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-        case 'client': aVal = a.clientName; bVal = b.clientName; break;
-        case 'unread': aVal = a.unreadCount; bVal = b.unreadCount; break;
-        case 'lastMessageAt':
-          aVal = a.lastMessageAt || '';
-          bVal = b.lastMessageAt || '';
-          break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return result;
-  }, [conversations, searchQuery, sort]);
+  const filteredConversations = useMemo(() => applyFilters(conversations), [applyFilters, conversations]);
 
   const pagination = usePagination({
     totalItems: filteredConversations.length,
@@ -138,17 +160,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
     pagination.page * pagination.pageSize
   );
 
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
-  const hasActiveFilters = Boolean(searchQuery);
 
   return (
     <TableLayout
@@ -166,8 +178,8 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search messages..."
           />
           <IconButton action="refresh" onClick={loadConversations} disabled={isLoading} title="Refresh" />

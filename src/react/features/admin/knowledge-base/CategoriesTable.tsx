@@ -23,6 +23,8 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface Category {
@@ -44,6 +46,40 @@ interface CategoriesTableProps {
   overviewMode?: boolean;
 }
 
+function filterCategory(
+  category: Category,
+  _filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !category.name.toLowerCase().includes(query) &&
+      !category.description?.toLowerCase().includes(query) &&
+      !category.slug?.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function sortCategories(a: Category, b: Category, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'name':
+    return multiplier * a.name.localeCompare(b.name);
+  case 'article_count':
+    return multiplier * (a.article_count - b.article_count);
+  case 'sort_order':
+    return multiplier * ((a.sort_order ?? 0) - (b.sort_order ?? 0));
+  default:
+    return 0;
+  }
+}
+
 export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
   const containerRef = useFadeIn();
 
@@ -61,8 +97,20 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const {
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Category>({
+    storageKey: overviewMode ? undefined : 'admin_kb_categories',
+    filters: [],
+    filterFn: filterCategory,
+    sortFn: sortCategories
+  });
 
   const loadCategories = useCallback(async () => {
     setIsLoading(true);
@@ -86,33 +134,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
     loadCategories();
   }, [loadCategories]);
 
-  const filteredCategories = useMemo(() => {
-    let result = [...categories];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (c) =>
-          c.name.toLowerCase().includes(query) ||
-          c.description?.toLowerCase().includes(query) ||
-          c.slug?.toLowerCase().includes(query)
-      );
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-        case 'name': aVal = a.name; bVal = b.name; break;
-        case 'article_count': aVal = a.article_count; bVal = b.article_count; break;
-        case 'sort_order': aVal = a.sort_order ?? 0; bVal = b.sort_order ?? 0; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [categories, searchQuery, sort]);
+  const filteredCategories = useMemo(() => applyFilters(categories), [applyFilters, categories]);
 
   const pagination = usePagination({
     totalItems: filteredCategories.length,
@@ -125,16 +147,6 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
     pagination.page * pagination.pageSize
   );
 
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  const hasActiveFilters = Boolean(searchQuery);
   const activeCount = categories.filter(c => c.is_active !== false).length;
 
   return (
@@ -153,8 +165,8 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search categories..."
           />
           <IconButton action="refresh" onClick={loadCategories} disabled={isLoading} title="Refresh" />

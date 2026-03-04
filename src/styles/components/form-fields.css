@@ -165,7 +165,7 @@ select::-ms-expand {
 label {
   display: block;
   margin-bottom: 0;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
 }
@@ -175,7 +175,7 @@ label {
   margin: 0;
   color: var(--color-text-primary);
   font-size: clamp(0.875rem, 2vw, 1rem);
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
   text-align: center;
 }
 

@@ -114,7 +114,7 @@
 
 .help-suggestion-title {
   margin: 0;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .help-suggestion-category {
@@ -187,7 +187,7 @@
   background: none;
   border: none;
   color: var(--portal-text-light);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: left;
   cursor: pointer;
 }
@@ -214,7 +214,7 @@
   margin-left: var(--space-1);
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-secondary);
 }
 
@@ -299,7 +299,7 @@
 .help-featured-card-title {
   margin: 0;
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .help-featured-card-summary {
@@ -398,7 +398,7 @@
 
 .help-result-title {
   margin: 0;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .help-result-category {
@@ -427,7 +427,7 @@
 .help-article-category-badge {
   padding: var(--space-0-5) var(--space-1-5);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   color: var(--color-primary);
 }

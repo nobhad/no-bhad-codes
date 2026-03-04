@@ -133,7 +133,7 @@
   gap: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
   margin-bottom: var(--space-4);
   padding: var(--space-2) 0;
@@ -228,11 +228,11 @@
 .worksub-intro h1 {
   font-size: 3rem;
   font-family: var(--font-family-acme);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   color: var(--color-dark);
   margin: 0 0 var(--space-6);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 /* Intro content - two column layout */
@@ -288,7 +288,7 @@
   padding: 0;
   color: var(--color-text-muted, var(--portal-alpha-black-50));
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -299,7 +299,7 @@
 
 .intro-left-group .text-medium {
   color: var(--color-dark);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 [data-theme="dark"] .intro-left-group .text-medium {
@@ -322,7 +322,7 @@
   padding: 0;
   color: var(--color-text-muted, var(--portal-alpha-black-50));
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -343,7 +343,7 @@
   padding: var(--space-1) var(--space-2-5);
   border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   transition:
     background-color var(--transition-theme, 0.4s),
     color var(--transition-theme, 0.4s);
@@ -361,7 +361,7 @@
 @media (--mobile) {
   .intro-content > p {
     font-size: var(--font-size-sm);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
   }
 }
 
@@ -432,7 +432,7 @@
 
 .section-heading-wrapper h2 {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
 }
@@ -505,7 +505,7 @@
   background-color: var(--color-dark);
   color: var(--color-light);
   border-radius: var(--portal-radius-pill);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
   transition:
     transform var(--transition-mouse, 0.2s),
@@ -632,7 +632,7 @@
   .intro-content > p,
   .intro-content > .text-medium {
     font-size: var(--font-size-sm);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
   }
 
   /* Tools */
@@ -662,7 +662,7 @@
 
   .case-study-heading {
     font-size: var(--font-size-sm);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
     letter-spacing: var(--letter-spacing-label);
     padding-bottom: var(--space-1);
@@ -670,12 +670,12 @@
 
   .case-study-text {
     font-size: var(--font-size-sm);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
   }
 
   .case-study-list li {
     font-size: var(--font-size-sm);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
     padding-left: var(--space-4);
   }
 
@@ -791,7 +791,7 @@
 
 .case-study-heading {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
   padding-bottom: var(--space-2);
@@ -827,7 +827,7 @@
   position: relative;
   padding-left: var(--space-6);
   font-size: 1.05rem;
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   color: var(--color-dark);
 }
 
@@ -873,7 +873,7 @@
   .case-study-text,
   #project-description {
     font-size: var(--font-size-sm);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
   }
 
   .case-study-list li {
@@ -919,7 +919,7 @@
   padding: var(--space-1-5) var(--space-3-5);
   border-radius: var(--portal-radius-xl);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
 }
@@ -1010,13 +1010,13 @@
   font-size: var(--font-size-2xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-alpha-black-50);
 }
 
 .project-nav-title {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
 }
 

@@ -22,7 +22,7 @@
 .portfolio-content > p {
   text-align: center;
   font-size: var(--font-size-lg);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   margin-bottom: 3rem;
   color: var(--color-dark);
   max-width: 600px;
@@ -83,7 +83,7 @@
   font-family: monospace;
   font-size: var(--font-size-sm);
   color: var(--color-primary);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-shadow: 0 2px 8px var(--portal-alpha-black-80);
 }
 
@@ -93,13 +93,13 @@
   text-transform: uppercase;
   color: var(--color-dark);
   margin-bottom: 1rem;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   text-shadow: 0 2px 4px var(--color-shadow);
 }
 
 .portfolio-item p {
   font-size: var(--font-size-base);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   color: var(--color-dark);
   margin-bottom: 1.5rem;
 }
@@ -117,7 +117,7 @@
   padding: 0.25rem 0.75rem;
   border-radius: var(--portal-radius-xl);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
@@ -198,7 +198,7 @@
 .portfolio-cta {
   text-align: center;
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;

@@ -272,7 +272,7 @@
   color: var(--portal-text-light);
   font-size: inherit;
   font-family: inherit;
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   outline: none;
   resize: vertical;
 }

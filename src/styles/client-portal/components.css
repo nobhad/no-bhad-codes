@@ -170,7 +170,7 @@
 
 .upload-request-option-title {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-primary);
   display: flex;
   align-items: center;
@@ -185,12 +185,12 @@
 
 .upload-request-option-desc .overdue {
   color: var(--status-cancelled);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .upload-request-badge {
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding: 2px 6px;
   text-transform: uppercase;
 }

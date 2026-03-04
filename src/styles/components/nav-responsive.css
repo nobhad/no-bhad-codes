@@ -397,7 +397,7 @@
   z-index: 1;
   text-transform: uppercase;
   font-family: var(--font-family-acme);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 0.9;
   position: relative;
   font-size: calc(var(--menu-heading-size) * 0.6); /* 60% of main menu size */
@@ -413,7 +413,7 @@
   color: var(--color-primary);
   text-transform: uppercase;
   font-family: monospace;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   position: static;
   text-shadow: none;
   font-size: calc(var(--menu-heading-size) * 0.25); /* Proportional to submenu heading */

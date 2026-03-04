@@ -88,7 +88,7 @@
   /* Paragraphs */
   .about-text-column p {
     font-size: var(--font-size-base);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
     color: var(--color-dark);
     margin: 0 0 1.25rem 0;
   }

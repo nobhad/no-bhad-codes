@@ -127,7 +127,7 @@
   margin: 0;
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-secondary);

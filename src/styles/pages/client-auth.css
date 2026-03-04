@@ -108,7 +108,7 @@
 /* .form-group base styles in portal-forms.css */
 
 .auth-form label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   font-size: clamp(0.8rem, 2vw, 0.9rem);
   text-align: left;
@@ -369,7 +369,7 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
 /* .login-form .form-group - base styles in portal-forms.css */
 
 .login-form label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   font-size: var(--font-size-sm);
   text-align: left;
@@ -502,7 +502,7 @@ br.desktop-only {
 
   .mobile-portal-title {
     font-size: var(--font-size-2xl);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     margin: 0;
     margin-bottom: 0.5rem;
     text-transform: uppercase;

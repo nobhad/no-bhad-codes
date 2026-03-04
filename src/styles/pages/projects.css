@@ -56,10 +56,10 @@ div.page-hero-desktop[data-hero-page="projects"] {
 .hero-title {
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-family: var(--font-family-acme);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   text-transform: uppercase;
   text-shadow: 0 2px 4px var(--color-shadow);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 1.5rem;
   color: var(--color-dark);
 }
@@ -78,7 +78,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 .hero-description {
   font-size: var(--font-size-xl);
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   margin-bottom: 0;
 }
 
@@ -146,7 +146,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   background: var(--portal-alpha-white-20);
   border-radius: var(--portal-radius-pill);
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 1;
 }
 
@@ -238,7 +238,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .view-project {
   color: var(--color-bg);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-lg);
 }
 
@@ -259,10 +259,10 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .project-card-title {
   font-size: var(--font-size-xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-dark);
   margin: 0;
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
   flex-grow: 1;
 }
 
@@ -280,7 +280,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .project-card-description {
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   margin-bottom: 1rem;
   flex-grow: 1;
 }
@@ -673,7 +673,7 @@ div.page-hero-desktop {
 /* Title text */
 .card-container .project-card-title h3 {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
   white-space: nowrap;
@@ -704,7 +704,7 @@ div.page-hero-desktop {
 /* Category text */
 .card-category {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   transition: color var(--transition-theme, 0.4s);
 }
@@ -723,7 +723,7 @@ div.page-hero-desktop {
   min-width: 40px;
   text-align: center;
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   transition:
     background-color var(--transition-theme, 0.4s),
     color var(--transition-theme, 0.4s),
@@ -898,7 +898,7 @@ div.page-hero-desktop {
   section.projects-section h2 {
     font-size: 2.5rem;
     font-family: var(--font-family-acme);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
   }
 }

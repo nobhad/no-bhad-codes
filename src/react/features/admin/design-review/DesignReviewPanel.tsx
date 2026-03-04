@@ -24,6 +24,9 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { DESIGN_REVIEWS_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface DesignReview {
@@ -61,14 +64,42 @@ interface DesignReviewPanelProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'in-review', label: 'In Review' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'revision-requested', label: 'Needs Revision' },
-  { value: 'rejected', label: 'Rejected' }
-];
+function filterReview(
+  review: DesignReview,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !review.title.toLowerCase().includes(query) &&
+      !review.projectName.toLowerCase().includes(query) &&
+      !review.clientName.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
+  if (filters.status && filters.status !== 'all') {
+    if (review.status !== filters.status) return false;
+  }
+  return true;
+}
+
+function sortReviews(a: DesignReview, b: DesignReview, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'project':
+    return multiplier * a.projectName.localeCompare(b.projectName);
+  case 'submittedAt':
+    return multiplier * a.submittedAt.localeCompare(b.submittedAt);
+  default:
+    return 0;
+  }
+}
 
 export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNotification: _showNotification }: DesignReviewPanelProps) {
   const containerRef = useFadeIn();
@@ -83,9 +114,6 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     needsRevision: 0,
     avgReviewTime: '0'
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
@@ -98,6 +126,22 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     }
     return headers;
   }, [getAuthToken]);
+
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<DesignReview>({
+    storageKey: 'admin_design_reviews',
+    filters: DESIGN_REVIEWS_FILTER_CONFIG,
+    filterFn: filterReview,
+    sortFn: sortReviews
+  });
 
   const loadReviews = useCallback(async () => {
     setIsLoading(true);
@@ -125,53 +169,13 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     loadReviews();
   }, [loadReviews]);
 
-  const filteredReviews = useMemo(() => {
-    let result = [...reviews];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.title.toLowerCase().includes(query) ||
-          r.projectName.toLowerCase().includes(query) ||
-          r.clientName.toLowerCase().includes(query)
-      );
-    }
-    if (statusFilter !== 'all') {
-      result = result.filter((r) => r.status === statusFilter);
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-        case 'title': aVal = a.title; bVal = b.title; break;
-        case 'project': aVal = a.projectName; bVal = b.projectName; break;
-        case 'submittedAt': aVal = a.submittedAt; bVal = b.submittedAt; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [reviews, searchQuery, statusFilter, sort]);
+  const filteredReviews = useMemo(() => applyFilters(reviews), [applyFilters, reviews]);
 
   const pagination = usePagination({ storageKey: 'admin_design_review_pagination', totalItems: filteredReviews.length });
   const paginatedReviews = filteredReviews.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  const hasActiveFilters = searchQuery || statusFilter !== 'all';
 
   return (
     <TableLayout
@@ -192,16 +196,14 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search reviews..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }
-            ]}
-            values={{ status: statusFilter }}
-            onChange={(key, value) => setStatusFilter(value)}
+            sections={DESIGN_REVIEWS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={setFilter}
           />
           <IconButton action="add" title="Submit for Review" />
         </>

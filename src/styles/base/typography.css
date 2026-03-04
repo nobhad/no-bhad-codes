@@ -30,7 +30,7 @@ h4,
 h5,
 h6 {
   font-family: var(--font-family-acme);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   text-transform: uppercase;
   text-shadow: 0 2px 4px var(--color-shadow);
   margin: 0;
@@ -75,7 +75,7 @@ h6,
 
 /* Paragraph styling */
 p {
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   margin: 0;
 }
 
@@ -157,16 +157,16 @@ section h2 + hr {
 
 /* Font weights */
 .font-normal {
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 .font-medium {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .font-semibold {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .font-bold {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Font styles */
@@ -213,7 +213,7 @@ section h2 + hr {
 /* Large emphasized text */
 .p-large {
   font-size: clamp(1rem, 2.5vw, 1.25rem);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* ============================================
@@ -222,7 +222,7 @@ section h2 + hr {
 
 /* Links in paragraphs - bold with animated underline */
 p a {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
   position: relative;
   color: var(--color-primary, currentColor);

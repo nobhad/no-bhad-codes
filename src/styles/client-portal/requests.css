@@ -68,7 +68,7 @@
 }
 
 .portal .requests-card-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 

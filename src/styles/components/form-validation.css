@@ -67,7 +67,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: var(--portal-radius-sm);
   margin-bottom: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .form-message.success {

@@ -426,7 +426,7 @@
 
 .card-contact {
   font-size: var(--font-size-xs);
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
   color: var(--color-card-text); /* Always dark text for light card */
 }
 

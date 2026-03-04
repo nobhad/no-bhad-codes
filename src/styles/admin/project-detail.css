@@ -1701,7 +1701,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 .document-section {

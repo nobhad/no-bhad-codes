@@ -621,7 +621,7 @@ html[data-wireframe="true"] *:focus-visible {
   background-color: var(--color-dark);
   color: var(--color-light);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   border-radius: var(--portal-radius-sm);
   transition: top var(--transition-mouse) ease;
 }

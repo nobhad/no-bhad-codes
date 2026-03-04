@@ -384,7 +384,7 @@
 .task-comment-body {
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* ============================================
