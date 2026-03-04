@@ -8,14 +8,14 @@ import { useState, useCallback } from 'react';
 import {
   MessageSquare,
   ChevronRight,
-  Inbox,
-  RefreshCw,
+  Inbox
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter } from '@react/components/portal/TableFilters';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { usePortalMessages } from './usePortalMessages';
 import { MessageThread } from './MessageThread';
@@ -42,14 +42,14 @@ function formatThreadTime(dateString: string): string {
     return 'Yesterday';
   } else if (diffDays < 7) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
-  } else {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
 }
 
 function truncatePreview(text: string, maxLength: number = 60): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + '...';
+  return `${text.slice(0, maxLength).trim()  }...`;
 }
 
 // ============================================================================
@@ -69,28 +69,28 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
     <button
       type="button"
       onClick={onClick}
-      className={cn('tw-list-item msg-thread-item', isSelected && 'tw-table-row-selected')}
+      className={cn('tw-list-item message-thread-item', isSelected && 'tw-table-row-selected')}
     >
       {/* Icon */}
       <div className={hasUnread ? 'tw-text-primary' : ''}>
-        <MessageSquare className="tw-h-4 tw-w-4" />
+        <MessageSquare className="icon-xs" />
       </div>
 
       {/* Content */}
-      <div className="msg-thread-content">
-        <div className="msg-thread-row">
+      <div className="message-thread-content">
+        <div className="message-thread-row">
           <span className="tw-text-primary ">{decodeHtmlEntities(thread.subject)}</span>
-          <span className="tw-text-muted tw-text-xs msg-time-noshrink">
+          <span className="text-muted tw-text-xs message-timestamp">
             {formatThreadTime(thread.last_message_at)}
           </span>
         </div>
 
         {thread.project_name && (
-          <span className="tw-text-muted tw-text-xs">{decodeHtmlEntities(thread.project_name)}</span>
+          <span className="text-muted tw-text-xs">{decodeHtmlEntities(thread.project_name)}</span>
         )}
 
-        <div className="msg-thread-preview-row">
-          <span className={cn(hasUnread ? 'tw-text-primary' : 'tw-text-muted', 'tw-text-sm')}>
+        <div className="message-thread-preview-row">
+          <span className={cn(hasUnread ? 'tw-text-primary' : 'text-muted', 'tw-text-sm')}>
             {truncatePreview(decodeHtmlEntities(thread.last_message_preview))}
           </span>
 
@@ -102,7 +102,7 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
         </div>
       </div>
 
-      <ChevronRight className="tw-h-4 tw-w-4" />
+      <ChevronRight className="icon-xs" />
     </button>
   );
 }
@@ -122,62 +122,40 @@ function ThreadList({
   loading,
   error,
   onSelectThread,
-  onRefresh,
+  onRefresh
 }: ThreadListProps) {
-  const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(0.05);
 
   // Loading state
   if (loading && threads.length === 0) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading messages...</span>
-      </div>
-    );
+    return <LoadingState message="Loading messages..." />;
   }
 
   // Error state
   if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={onRefresh}>Retry</button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={onRefresh} />;
   }
 
   // Empty state
   if (threads.length === 0) {
     return (
-      <div ref={containerRef}>
-        <EmptyState
-          icon={<Inbox className="tw-h-6 tw-w-6" />}
-          message="No messages yet. New conversations will appear here."
-        />
-      </div>
+      <EmptyState
+        icon={<Inbox className="icon-lg" />}
+        message="No messages yet. New conversations will appear here."
+      />
     );
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Header with refresh */}
-      <div className="tw-panel msg-header-flex">
-        <h3 className="tw-section-title">Messages</h3>
-        <IconButton action="refresh" onClick={onRefresh} title="Refresh" className={loading ? 'tw-animate-spin' : ''} />
-      </div>
-
-      {/* Thread list */}
-      <div ref={listRef} className="tw-section msg-thread-list">
-        {threads.map((thread) => (
-          <ThreadListItem
-            key={thread.id}
-            thread={thread}
-            isSelected={selectedThread?.id === thread.id}
-            onClick={() => onSelectThread(thread)}
-          />
-        ))}
-      </div>
+    <div ref={listRef} className="message-thread-list">
+      {threads.map((thread) => (
+        <ThreadListItem
+          key={thread.id}
+          thread={thread}
+          isSelected={selectedThread?.id === thread.id}
+          onClick={() => onSelectThread(thread)}
+        />
+      ))}
     </div>
   );
 }
@@ -192,7 +170,7 @@ function ThreadList({
  */
 export function PortalMessagesView({
   getAuthToken,
-  showNotification,
+  showNotification
 }: PortalMessagesProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -209,8 +187,23 @@ export function PortalMessagesView({
     refreshMessages,
     sendMessage,
     editMessage,
-    deleteMessage,
+    deleteMessage
   } = usePortalMessages({ getAuthToken });
+
+  // Search filter for threads
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  // Filter threads by search
+  const filteredThreads = React.useMemo(() => {
+    if (!searchQuery) return threads;
+    const s = searchQuery.toLowerCase();
+    return threads.filter(
+      (t) =>
+        t.subject?.toLowerCase().includes(s) ||
+        t.project_name?.toLowerCase().includes(s) ||
+        t.last_message_preview?.toLowerCase().includes(s)
+    );
+  }, [threads, searchQuery]);
 
   // Track if we're viewing a thread (for mobile layout)
   const [viewingThread, setViewingThread] = useState(false);
@@ -224,10 +217,10 @@ export function PortalMessagesView({
     setViewingThread(false);
   }, []);
 
-  return (
-    <div ref={containerRef} className="tw-flex tw-flex-col tw-h-full tw-min-h-[400px]">
-      {/* Thread View (when a thread is selected) */}
-      {viewingThread && selectedThread ? (
+  // Thread detail view
+  if (viewingThread && selectedThread) {
+    return (
+      <div ref={containerRef} className="tw-section">
         <MessageThread
           thread={selectedThread}
           messages={messages}
@@ -240,17 +233,31 @@ export function PortalMessagesView({
           onDeleteMessage={deleteMessage}
           showNotification={showNotification}
         />
-      ) : (
-        /* Thread List */
-        <ThreadList
-          threads={threads}
-          selectedThread={selectedThread}
-          loading={threadsLoading}
-          error={threadsError}
-          onSelectThread={handleSelectThread}
-          onRefresh={refreshThreads}
-        />
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  // Thread list view
+  return (
+    <TableLayout
+      containerRef={containerRef}
+      title="MESSAGES"
+      stats={<TableStats items={[{ value: threads.length, label: 'total' }]} />}
+      actions={
+        <>
+          <SearchFilter value={searchQuery} onChange={setSearchQuery} placeholder="Search messages..." />
+          <IconButton action="refresh" onClick={refreshThreads} loading={threadsLoading} title="Refresh" />
+        </>
+      }
+    >
+      <ThreadList
+        threads={filteredThreads}
+        selectedThread={selectedThread}
+        loading={threadsLoading}
+        error={threadsError}
+        onSelectThread={handleSelectThread}
+        onRefresh={refreshThreads}
+      />
+    </TableLayout>
   );
 }

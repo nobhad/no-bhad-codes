@@ -6,9 +6,8 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, RefreshCw, Check, Save, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Save, Loader2 } from 'lucide-react';
 import { gsap } from 'gsap';
-import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { StepIndicator } from './StepIndicator';
 import {
@@ -16,7 +15,7 @@ import {
   ProjectOverviewStep,
   RequirementsStep,
   AssetsStep,
-  ConfirmationStep,
+  ConfirmationStep
 } from './steps';
 import type {
   OnboardingWizardProps,
@@ -24,7 +23,7 @@ import type {
   OnboardingFormData,
   OnboardingProgress,
   ValidationError,
-  StepValidationResult,
+  StepValidationResult
 } from './types';
 import { ONBOARDING_STEPS, DRAFT_STORAGE_KEY, DRAFT_SAVE_INTERVAL } from './types';
 import { createLogger } from '../../../../utils/logger';
@@ -39,52 +38,53 @@ function validateStep(step: OnboardingStep, data: Partial<OnboardingFormData>): 
   const errors: ValidationError[] = [];
 
   switch (step) {
-    case 'basic-info': {
-      const { basicInfo } = data;
-      if (!basicInfo?.contactName?.trim()) {
-        errors.push({ field: 'contactName', message: 'Contact name is required' });
-      }
-      if (!basicInfo?.contactEmail?.trim()) {
-        errors.push({ field: 'contactEmail', message: 'Email address is required' });
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(basicInfo.contactEmail)) {
-        errors.push({ field: 'contactEmail', message: 'Please enter a valid email address' });
-      }
-      break;
+  case 'basic-info': {
+    const { basicInfo } = data;
+    if (!basicInfo?.contactName?.trim()) {
+      errors.push({ field: 'contactName', message: 'Contact name is required' });
     }
-    case 'project-overview': {
-      const { projectOverview } = data;
-      if (!projectOverview?.projectName?.trim()) {
-        errors.push({ field: 'projectName', message: 'Project name is required' });
-      }
-      if (!projectOverview?.projectType) {
-        errors.push({ field: 'projectType', message: 'Please select a project type' });
-      }
-      if (!projectOverview?.projectDescription?.trim()) {
-        errors.push({ field: 'projectDescription', message: 'Project description is required' });
-      }
-      break;
+    if (!basicInfo?.contactEmail?.trim()) {
+      errors.push({ field: 'contactEmail', message: 'Email address is required' });
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(basicInfo.contactEmail)) {
+      errors.push({ field: 'contactEmail', message: 'Please enter a valid email address' });
     }
-    case 'requirements': {
-      const { requirements } = data;
-      if (!requirements?.designStyle) {
-        errors.push({ field: 'designStyle', message: 'Please select a design style' });
-      }
-      break;
+    break;
+  }
+  case 'project-overview': {
+    const { projectOverview } = data;
+    if (!projectOverview?.projectName?.trim()) {
+      errors.push({ field: 'projectName', message: 'Project name is required' });
     }
-    case 'assets':
-      // Assets step has no required fields
-      break;
-    case 'confirmation':
-      // Confirmation validates all previous steps
-      const basicValidation = validateStep('basic-info', data);
-      const projectValidation = validateStep('project-overview', data);
-      const requirementsValidation = validateStep('requirements', data);
-      errors.push(
-        ...basicValidation.errors,
-        ...projectValidation.errors,
-        ...requirementsValidation.errors
-      );
-      break;
+    if (!projectOverview?.projectType) {
+      errors.push({ field: 'projectType', message: 'Please select a project type' });
+    }
+    if (!projectOverview?.projectDescription?.trim()) {
+      errors.push({ field: 'projectDescription', message: 'Project description is required' });
+    }
+    break;
+  }
+  case 'requirements': {
+    const { requirements } = data;
+    if (!requirements?.designStyle) {
+      errors.push({ field: 'designStyle', message: 'Please select a design style' });
+    }
+    break;
+  }
+  case 'assets':
+    // Assets step has no required fields
+    break;
+  case 'confirmation': {
+    // Confirmation validates all previous steps
+    const basicValidation = validateStep('basic-info', data);
+    const projectValidation = validateStep('project-overview', data);
+    const requirementsValidation = validateStep('requirements', data);
+    errors.push(
+      ...basicValidation.errors,
+      ...projectValidation.errors,
+      ...requirementsValidation.errors
+    );
+    break;
+  }
   }
 
   return { isValid: errors.length === 0, errors };
@@ -103,7 +103,7 @@ function getStepIndex(step: OnboardingStep): number {
 export function OnboardingWizard({
   getAuthToken,
   onComplete,
-  showNotification,
+  showNotification
 }: OnboardingWizardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const stepContainerRef = useRef<HTMLDivElement>(null);
@@ -135,7 +135,7 @@ export function OnboardingWizard({
     try {
       // Try to load from API first
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       };
       const token = getAuthToken?.();
       if (token) {
@@ -145,7 +145,7 @@ export function OnboardingWizard({
       const response = await fetch(API_ENDPOINTS.ONBOARDING, {
         method: 'GET',
         headers,
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -200,7 +200,7 @@ export function OnboardingWizard({
       completedSteps,
       formData,
       lastSavedAt: new Date().toISOString(),
-      isComplete: false,
+      isComplete: false
     };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(progress));
     setLastSavedAt(new Date());
@@ -217,7 +217,7 @@ export function OnboardingWizard({
 
       try {
         const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         };
         const token = getAuthToken?.();
         if (token) {
@@ -229,14 +229,14 @@ export function OnboardingWizard({
           completedSteps,
           formData,
           lastSavedAt: new Date().toISOString(),
-          isComplete: false,
+          isComplete: false
         };
 
         const response = await fetch(API_ENDPOINTS.ONBOARDING_SAVE, {
           method: 'POST',
           headers,
           credentials: 'include',
-          body: JSON.stringify(progress),
+          body: JSON.stringify(progress)
         });
 
         if (response.ok) {
@@ -283,7 +283,7 @@ export function OnboardingWizard({
 
     try {
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       };
       const token = getAuthToken?.();
       if (token) {
@@ -296,8 +296,8 @@ export function OnboardingWizard({
         credentials: 'include',
         body: JSON.stringify({
           formData,
-          completedAt: new Date().toISOString(),
-        }),
+          completedAt: new Date().toISOString()
+        })
       });
 
       if (response.ok) {
@@ -353,7 +353,7 @@ export function OnboardingWizard({
                 { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }
               );
             }
-          },
+          }
         });
       } else {
         setCurrentStep(step);
@@ -443,22 +443,22 @@ export function OnboardingWizard({
       data: formData,
       onUpdate: handleUpdateData,
       errors: validationErrors,
-      isSubmitting,
+      isSubmitting
     };
 
     switch (currentStep) {
-      case 'basic-info':
-        return <BasicInfoStep {...stepProps} />;
-      case 'project-overview':
-        return <ProjectOverviewStep {...stepProps} />;
-      case 'requirements':
-        return <RequirementsStep {...stepProps} />;
-      case 'assets':
-        return <AssetsStep {...stepProps} />;
-      case 'confirmation':
-        return <ConfirmationStep {...stepProps} onGoToStep={goToStep} />;
-      default:
-        return null;
+    case 'basic-info':
+      return <BasicInfoStep {...stepProps} />;
+    case 'project-overview':
+      return <ProjectOverviewStep {...stepProps} />;
+    case 'requirements':
+      return <RequirementsStep {...stepProps} />;
+    case 'assets':
+      return <AssetsStep {...stepProps} />;
+    case 'confirmation':
+      return <ConfirmationStep {...stepProps} onGoToStep={goToStep} />;
+    default:
+      return null;
     }
   };
 
@@ -472,7 +472,7 @@ export function OnboardingWizard({
   if (isLoading) {
     return (
       <div className="loading-state tw-h-64">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
+        <span className="loading-spinner" />
         <span>Loading...</span>
       </div>
     );
@@ -481,7 +481,7 @@ export function OnboardingWizard({
   // Error state
   if (loadError) {
     return (
-      <div className="error-state tw-h-64 tw-flex tw-flex-col tw-items-center tw-justify-center">
+      <div className="error-state tw-h-64">
         <p>{loadError}</p>
         <button className="btn-secondary tw-mt-4" onClick={loadProgress}>
           Retry
@@ -491,21 +491,21 @@ export function OnboardingWizard({
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="portal-main-container">
       {/* Header with Step Indicator */}
       <div className="tw-flex tw-flex-col tw-gap-4">
         <div className="tw-flex tw-items-center tw-justify-between">
           <div>
-            <h2 className="tw-heading tw-text-xl">
+            <h2 className="heading tw-text-xl">
               Client Onboarding
             </h2>
-            <p className="tw-text-muted tw-text-[14px] tw-mt-0.5">
+            <p className="text-muted tw-text-[14px] tw-mt-0.5">
               {currentStepConfig?.description}
             </p>
           </div>
           {lastSavedAt && (
-            <div className="tw-flex tw-items-center tw-gap-1.5 tw-label">
-              <Save className="tw-h-3 tw-w-3" />
+            <div className="tw-flex tw-items-center tw-gap-1.5 label">
+              <Save className="icon-xs" />
               <span>
                 Saved{' '}
                 {lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -539,7 +539,7 @@ export function OnboardingWizard({
               onClick={handleBack}
               disabled={isSubmitting}
             >
-              <ChevronLeft className="tw-h-4 tw-w-4" />
+              <ChevronLeft className="icon-xs" />
               Back
             </button>
           )}
@@ -553,7 +553,7 @@ export function OnboardingWizard({
             disabled={isSaving || isSubmitting}
           >
             {isSaving ? (
-              <Loader2 className="tw-h-4 tw-w-4 tw-animate-spin" />
+              <Loader2 className="icon-xs loading-spin" />
             ) : null}
             Save Progress
           </button>
@@ -566,9 +566,9 @@ export function OnboardingWizard({
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Loader2 className="tw-h-4 tw-w-4 tw-animate-spin" />
+                <Loader2 className="icon-xs loading-spin" />
               ) : (
-                <Check className="tw-h-4 tw-w-4" />
+                <Check className="icon-xs" />
               )}
               Complete Onboarding
             </button>
@@ -579,7 +579,7 @@ export function OnboardingWizard({
               disabled={isSubmitting}
             >
               Continue
-              <ChevronRight className="tw-h-4 tw-w-4" />
+              <ChevronRight className="icon-xs" />
             </button>
           )}
         </div>

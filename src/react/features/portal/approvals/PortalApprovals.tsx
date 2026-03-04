@@ -1,18 +1,21 @@
 /**
  * PortalApprovals
- * Main approvals list view for client portal
+ * Main approvals list view for client portal.
+ * Filter select + refresh are in the data-table-header actions row.
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { Inbox, Filter, RefreshCw } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Inbox } from 'lucide-react';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { PORTAL_APPROVALS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { IconButton } from '@react/factories';
-import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
 import { ApprovalCard } from './ApprovalCard';
-import type { PendingApproval, ApprovalEntityType, PendingApprovalsResponse } from './types';
+import type { PendingApproval, PendingApprovalsResponse } from './types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
@@ -27,18 +30,38 @@ export interface PortalApprovalsProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-/** Filter options for entity types */
-const ENTITY_FILTER_OPTIONS: { value: ApprovalEntityType | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'proposal', label: 'Proposals' },
-  { value: 'invoice', label: 'Invoices' },
-  { value: 'contract', label: 'Contracts' },
-  { value: 'deliverable', label: 'Deliverables' },
-  { value: 'project', label: 'Projects' }
-];
+/**
+ * Filter approval by search and entity type
+ */
+function filterApproval(
+  approval: PendingApproval,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      approval.entity_type?.toLowerCase().includes(s) ||
+      approval.entity_name?.toLowerCase().includes(s) ||
+      approval.description?.toLowerCase().includes(s) ||
+      approval.project_name?.toLowerCase().includes(s);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.entityType && filters.entityType !== 'all') {
+    if (approval.entity_type !== filters.entityType) return false;
+  }
+
+  return true;
+}
 
 /**
  * PortalApprovals Component
+ *
+ * Layout:
+ * - data-table-card bordered content box
+ * - data-table-header with title + stats + filter select + refresh (all inline)
+ * - Cards content inside the box
  */
 export function PortalApprovals({
   getAuthToken,
@@ -52,24 +75,28 @@ export function PortalApprovals({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submittingIds, setSubmittingIds] = useState<Set<number>>(new Set());
-  const [entityFilter, setEntityFilter] = useState<ApprovalEntityType | 'all'>('all');
 
-  /**
-   * Fetch pending approvals from API
-   */
+  // Table filters
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    applyFilters
+  } = useTableFilters<PendingApproval>({
+    storageKey: 'portal_approvals',
+    filters: PORTAL_APPROVALS_FILTER_CONFIG,
+    filterFn: filterApproval
+  });
+
   const fetchApprovals = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-      };
-
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
       const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
       const response = await fetch(API_ENDPOINTS.APPROVALS_PENDING, {
         method: 'GET',
@@ -77,9 +104,7 @@ export function PortalApprovals({
         credentials: 'include'
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch approvals');
-      }
+      if (!response.ok) throw new Error('Failed to fetch approvals');
 
       const data: PendingApprovalsResponse = await response.json();
       setApprovals(data.approvals || []);
@@ -91,22 +116,14 @@ export function PortalApprovals({
     }
   }, [getAuthToken]);
 
-  /**
-   * Submit approval response
-   */
   const submitResponse = useCallback(
     async (id: number, action: 'approve' | 'reject', comment?: string) => {
       setSubmittingIds((prev) => new Set(prev).add(id));
 
       try {
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json'
-        };
-
+        const headers: HeadersInit = { 'Content-Type': 'application/json' };
         const token = getAuthToken?.();
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
+        if (token) headers['Authorization'] = `Bearer ${token}`;
 
         const response = await fetch(buildEndpoint.approvalRespond(id), {
           method: 'POST',
@@ -115,17 +132,11 @@ export function PortalApprovals({
           body: JSON.stringify({ action, comment })
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to ${action} request`);
-        }
+        if (!response.ok) throw new Error(`Failed to ${action} request`);
 
-        // Remove from list on success
         setApprovals((prev) => prev.filter((a) => a.id !== id));
-
         showNotification?.(
-          action === 'approve'
-            ? 'Request approved successfully'
-            : 'Request rejected successfully',
+          action === 'approve' ? 'Request approved successfully' : 'Request rejected successfully',
           'success'
         );
       } catch (err) {
@@ -147,31 +158,22 @@ export function PortalApprovals({
   );
 
   const handleApprove = useCallback(
-    async (id: number, comment?: string) => {
-      await submitResponse(id, 'approve', comment);
-    },
+    async (id: number, comment?: string) => submitResponse(id, 'approve', comment),
     [submitResponse]
   );
 
   const handleReject = useCallback(
-    async (id: number, comment?: string) => {
-      await submitResponse(id, 'reject', comment);
-    },
+    async (id: number, comment?: string) => submitResponse(id, 'reject', comment),
     [submitResponse]
   );
 
-  // Fetch approvals on mount
   useEffect(() => {
     fetchApprovals();
   }, [fetchApprovals]);
 
-  // Filter approvals by entity type
-  const filteredApprovals =
-    entityFilter === 'all'
-      ? approvals
-      : approvals.filter((a) => a.entity_type === entityFilter);
+  const filteredApprovals = useMemo(() => applyFilters(approvals), [applyFilters, approvals]);
 
-  // Count by entity type for filter badges
+  // Count by entity type for stats
   const countByType = approvals.reduce(
     (acc, a) => {
       acc[a.entity_type] = (acc[a.entity_type] || 0) + 1;
@@ -180,66 +182,48 @@ export function PortalApprovals({
     {} as Record<string, number>
   );
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading approvals...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={fetchApprovals}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Header with filter */}
-      <div className="approvals-header">
-        <div className="approvals-filter">
-          <Filter className="tw-h-4 tw-w-4" />
-          <div className="tw-tab-list approvals-tabs">
-            {ENTITY_FILTER_OPTIONS.map((option) => {
-              const count = option.value === 'all' ? approvals.length : countByType[option.value] || 0;
-              const isActive = entityFilter === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => setEntityFilter(option.value)}
-                  className={cn(isActive ? 'tw-tab-active' : 'tw-tab', 'approvals-tab')}
-                >
-                  {option.label}
-                  {count > 0 && <span className="approvals-count">{count}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Refresh button */}
-        <IconButton action="refresh" onClick={fetchApprovals} title="Refresh" />
-      </div>
-
-      {/* Empty state */}
-      {filteredApprovals.length === 0 ? (
+    <TableLayout
+      containerRef={containerRef}
+      title="APPROVALS"
+      stats={
+        <TableStats
+          items={[
+            { value: approvals.length, label: 'total' },
+            { value: countByType.proposal || 0, label: 'proposals', variant: 'pending', hideIfZero: true },
+            { value: countByType.invoice || 0, label: 'invoices', hideIfZero: true },
+            { value: countByType.contract || 0, label: 'contracts', hideIfZero: true },
+            { value: countByType.deliverable || 0, label: 'deliverables', hideIfZero: true }
+          ]}
+        />
+      }
+      actions={
+        <>
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search approvals..." />
+          <FilterDropdown
+            sections={PORTAL_APPROVALS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={(key, value) => setFilter(key, value)}
+          />
+          <IconButton action="refresh" onClick={fetchApprovals} title="Refresh" loading={isLoading} />
+        </>
+      }
+    >
+      {isLoading ? (
+        <LoadingState message="Loading approvals..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchApprovals} />
+      ) : filteredApprovals.length === 0 ? (
         <EmptyState
-          icon={<Inbox className="tw-h-6 tw-w-6" />}
-          message={approvals.length === 0 ? 'No pending approvals' : `No ${entityFilter} approvals pending`}
+          icon={<Inbox className="icon-lg" />}
+          message={
+            approvals.length === 0
+              ? 'No pending approvals'
+              : 'No approvals match the current filters.'
+          }
         />
       ) : (
-        /* Approvals list */
-        <div ref={listRef} className="tw-section">
+        <div ref={listRef} className="portal-cards-list">
           {filteredApprovals.map((approval) => (
             <ApprovalCard
               key={approval.id}
@@ -252,15 +236,6 @@ export function PortalApprovals({
           ))}
         </div>
       )}
-
-      {/* Summary footer */}
-      {approvals.length > 0 && (
-        <div className="tw-panel approvals-summary">
-          <span className="tw-text-muted tw-text-xs">
-            {filteredApprovals.length} of {approvals.length} pending approval{approvals.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-      )}
-    </div>
+    </TableLayout>
   );
 }

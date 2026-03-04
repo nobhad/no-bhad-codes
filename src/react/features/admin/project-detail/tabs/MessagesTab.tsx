@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, User, Clock } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Message } from '../../types';
 
 interface MessagesTabProps {
@@ -134,7 +133,7 @@ export function MessagesTab({
                     )}
                   >
                     {/* Sender and Time */}
-                    <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted tw-text-sm">
+                    <div className="tw-flex tw-items-center tw-gap-2 text-muted tw-text-sm">
                       <span>{message.sender_name || (isAdmin ? 'You' : 'Client')}</span>
                       <Clock className="icon-xs" />
                       <span>{formatMessageTime(message.created_at)}</span>
@@ -181,7 +180,7 @@ export function MessagesTab({
             {isSending ? 'Sending...' : 'Send'}
           </button>
         </div>
-        <div className="tw-text-muted tw-mt-2 tw-text-sm">
+        <div className="text-muted tw-mt-2 tw-text-sm">
           Press <kbd className="tw-badge msgtab-kbd">Cmd+Enter</kbd> to send
         </div>
       </div>

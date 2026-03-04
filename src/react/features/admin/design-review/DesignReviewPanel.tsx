@@ -3,26 +3,25 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Palette,
   MessageSquare,
-  Inbox,
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDate } from '@react/utils/formatDate';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -68,10 +67,10 @@ const STATUS_FILTER_OPTIONS = [
   { value: 'in-review', label: 'In Review' },
   { value: 'approved', label: 'Approved' },
   { value: 'revision-requested', label: 'Needs Revision' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: 'rejected', label: 'Rejected' }
 ];
 
-export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNotification }: DesignReviewPanelProps) {
+export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNotification: _showNotification }: DesignReviewPanelProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +81,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     inReview: 0,
     approved: 0,
     needsRevision: 0,
-    avgReviewTime: '0',
+    avgReviewTime: '0'
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -92,7 +91,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -108,7 +107,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
       if (projectId) params.set('projectId', projectId);
       const response = await fetch(`${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?${params}`, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load design reviews');
       const data = await response.json();
@@ -145,9 +144,9 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
         let aVal: string | number = '';
         let bVal: string | number = '';
         switch (sort.column) {
-          case 'title': aVal = a.title; bVal = b.title; break;
-          case 'project': aVal = a.projectName; bVal = b.projectName; break;
-          case 'submittedAt': aVal = a.submittedAt; bVal = b.submittedAt; break;
+        case 'title': aVal = a.title; bVal = b.title; break;
+        case 'project': aVal = a.projectName; bVal = b.projectName; break;
+        case 'submittedAt': aVal = a.submittedAt; bVal = b.submittedAt; break;
         }
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
@@ -157,7 +156,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     return result;
   }, [reviews, searchQuery, statusFilter, sort]);
 
-  const pagination = usePagination({ totalItems: filteredReviews.length });
+  const pagination = usePagination({ storageKey: 'admin_design_review_pagination', totalItems: filteredReviews.length });
   const paginatedReviews = filteredReviews.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -185,7 +184,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
             { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
             { value: stats.inReview, label: 'in review', variant: 'active', hideIfZero: true },
             { value: stats.approved, label: 'approved', variant: 'completed', hideIfZero: true },
-            { value: stats.needsRevision, label: 'needs revision', variant: 'overdue', hideIfZero: true },
+            { value: stats.needsRevision, label: 'needs revision', variant: 'overdue', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inReview} In Review • ${stats.approved} Approved • Avg: ${stats.avgReviewTime}`}
         />
@@ -199,7 +198,7 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
           />
           <FilterDropdown
             sections={[
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
+              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }
             ]}
             values={{ status: statusFilter }}
             onChange={(key, value) => setStatusFilter(value)}
@@ -225,53 +224,53 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Design
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'project' ? sort.direction : null}
               onClick={() => toggleSort('project')}
             >
               Project
-            </AdminTableHead>
-            <AdminTableHead>Status</AdminTableHead>
-            <AdminTableHead className="text-center">Ver</AdminTableHead>
-            <AdminTableHead className="text-right">Comments</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead>Status</PortalTableHead>
+            <PortalTableHead className="text-center">Ver</PortalTableHead>
+            <PortalTableHead className="text-right">Comments</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'submittedAt' ? sort.direction : null}
               onClick={() => toggleSort('submittedAt')}
             >
               Submitted
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={7} message={error} onRetry={loadReviews} />
+            <PortalTableError colSpan={7} message={error} onRetry={loadReviews} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedReviews.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No reviews match your filters' : 'No design reviews yet'}
             />
           ) : (
             paginatedReviews.map((review) => (
-              <AdminTableRow key={review.id} clickable>
-                <AdminTableCell className="primary-cell">
+              <PortalTableRow key={review.id} clickable>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <Palette className="cell-icon" />
                     <div className="cell-content">
@@ -281,8 +280,8 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
                       </span>
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -292,23 +291,23 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
                   >
                     {review.projectName}
                   </button>
-                </AdminTableCell>
-                <AdminTableCell className="status-cell">
+                </PortalTableCell>
+                <PortalTableCell className="status-cell">
                   <StatusBadge status={getStatusVariant(review.status)} size="sm">
                     {review.status.replace('-', ' ')}
                   </StatusBadge>
-                </AdminTableCell>
-                <AdminTableCell className="text-center">v{review.version}</AdminTableCell>
-                <AdminTableCell className="text-right">
+                </PortalTableCell>
+                <PortalTableCell className="text-center">v{review.version}</PortalTableCell>
+                <PortalTableCell className="text-right">
                   {review.comments > 0 && (
                     <span className="cell-with-icon-inline">
                       <MessageSquare className="cell-icon-sm" />
                       {review.comments}
                     </span>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(review.submittedAt)}</AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">{formatDate(review.submittedAt)}</PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {review.status === 'in-review' && (
@@ -321,12 +320,12 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
                     <IconButton action="copy-link" title="Share Link" />
                     <IconButton action="message" title="Add Comment" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

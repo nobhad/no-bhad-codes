@@ -4,7 +4,7 @@ import {
   FileText,
   Folder,
   Inbox,
-  CheckCircle,
+  CheckCircle
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -13,16 +13,16 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { formatDate } from '@react/utils/formatDate';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -75,16 +75,16 @@ interface ArticlesTableProps {
 const STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'All Status' },
   { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' },
+  { value: 'draft', label: 'Draft' }
 ];
 
-export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
+export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
 
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -100,7 +100,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
     totalArticles: 0,
     totalViews: 0,
     published: 0,
-    draft: 0,
+    draft: 0
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -114,7 +114,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
       // Load categories for filter
       const categoriesRes = await fetch(API_ENDPOINTS.ADMIN.KB_CATEGORIES, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (categoriesRes.ok) {
         const catData = await categoriesRes.json();
@@ -124,7 +124,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
       // Load articles
       const articlesRes = await fetch(API_ENDPOINTS.ADMIN.KB_ARTICLES, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!articlesRes.ok) throw new Error('Failed to load articles');
       const artData = await articlesRes.json();
@@ -133,7 +133,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
       // Load stats
       const statsRes = await fetch(API_ENDPOINTS.ADMIN.KB_STATS, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -154,8 +154,8 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
     { value: 'all', label: 'All Categories' },
     ...categories.map((cat) => ({
       value: String(cat.id),
-      label: `${cat.name} (${cat.article_count})`,
-    })),
+      label: `${cat.name} (${cat.article_count})`
+    }))
   ], [categories]);
 
   const filteredArticles = useMemo(() => {
@@ -183,9 +183,9 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
         let aVal: string | number = '';
         let bVal: string | number = '';
         switch (sort.column) {
-          case 'title': aVal = a.title; bVal = b.title; break;
-          case 'view_count': aVal = a.view_count; bVal = b.view_count; break;
-          case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
+        case 'title': aVal = a.title; bVal = b.title; break;
+        case 'view_count': aVal = a.view_count; bVal = b.view_count; break;
+        case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
         }
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
@@ -198,7 +198,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
   const pagination = usePagination({
     totalItems: filteredArticles.length,
     storageKey: overviewMode ? undefined : 'admin_kb_articles_pagination',
-    defaultPageSize,
+    defaultPageSize
   });
 
   const paginatedArticles = filteredArticles.slice(
@@ -234,7 +234,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
           items={[
             { value: stats.totalArticles, label: 'articles' },
             { value: stats.published, label: 'published', variant: 'completed', hideIfZero: true },
-            { value: stats.draft, label: 'draft', variant: 'pending', hideIfZero: true },
+            { value: stats.draft, label: 'draft', variant: 'pending', hideIfZero: true }
           ]}
           tooltip={`${stats.totalArticles} Articles • ${stats.published} Published • ${stats.draft} Draft • ${stats.totalViews} Views`}
         />
@@ -249,7 +249,7 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
           <FilterDropdown
             sections={[
               { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS },
+              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }
             ]}
             values={{ category: categoryFilter, status: statusFilter }}
             onChange={handleFilterChange}
@@ -277,54 +277,54 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Article
-            </AdminTableHead>
-            <AdminTableHead>Category</AdminTableHead>
-            <AdminTableHead>Status</AdminTableHead>
-            <AdminTableHead className="text-center">Featured</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead>Category</PortalTableHead>
+            <PortalTableHead>Status</PortalTableHead>
+            <PortalTableHead className="text-center">Featured</PortalTableHead>
+            <PortalTableHead
               className="text-center"
               sortable
               sortDirection={sort?.column === 'view_count' ? sort.direction : null}
               onClick={() => toggleSort('view_count')}
             >
               Views
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
               onClick={() => toggleSort('updated_at')}
             >
               Updated
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={7} message={error} onRetry={loadData} />
+            <PortalTableError colSpan={7} message={error} onRetry={loadData} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedArticles.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No articles match your filters' : 'No articles yet'}
             />
           ) : (
             paginatedArticles.map((article) => (
-              <AdminTableRow key={article.id} clickable>
-                <AdminTableCell className="primary-cell">
+              <PortalTableRow key={article.id} clickable>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <FileText className="cell-icon" />
                     <div className="cell-content">
@@ -334,37 +334,37 @@ export function ArticlesTable({ onNavigate, getAuthToken, showNotification, defa
                       )}
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <div className="cell-with-icon">
                     <Folder className="cell-icon-sm" />
                     <span>{article.category_name}</span>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="status-cell">
+                </PortalTableCell>
+                <PortalTableCell className="status-cell">
                   <StatusBadge status={getStatusVariant(article.is_published ? 'published' : 'draft')} size="sm">
                     {article.is_published ? 'Published' : 'Draft'}
                   </StatusBadge>
-                </AdminTableCell>
-                <AdminTableCell className="text-center">
+                </PortalTableCell>
+                <PortalTableCell className="text-center">
                   {article.is_featured && (
                     <CheckCircle className="cell-icon-sm status-completed" />
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="text-center">{article.view_count}</AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(article.updated_at)}</AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="text-center">{article.view_count}</PortalTableCell>
+                <PortalTableCell className="date-cell">{formatDate(article.updated_at)}</PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
                     <IconButton action="delete" title="Delete" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

@@ -44,38 +44,38 @@ function isRuleSatisfied(
   const ruleValue = rule.value;
 
   switch (rule.operator) {
-    case 'equals':
-      if (Array.isArray(answerValue)) {
-        return answerValue.includes(String(ruleValue));
-      }
-      return String(answerValue) === String(ruleValue);
+  case 'equals':
+    if (Array.isArray(answerValue)) {
+      return answerValue.includes(String(ruleValue));
+    }
+    return String(answerValue) === String(ruleValue);
 
-    case 'not_equals':
-      if (Array.isArray(answerValue)) {
-        return !answerValue.includes(String(ruleValue));
-      }
-      return String(answerValue) !== String(ruleValue);
+  case 'not_equals':
+    if (Array.isArray(answerValue)) {
+      return !answerValue.includes(String(ruleValue));
+    }
+    return String(answerValue) !== String(ruleValue);
 
-    case 'contains':
-      if (Array.isArray(answerValue)) {
-        return answerValue.some(v => String(v).includes(String(ruleValue)));
-      }
-      return String(answerValue).includes(String(ruleValue));
+  case 'contains':
+    if (Array.isArray(answerValue)) {
+      return answerValue.some(v => String(v).includes(String(ruleValue)));
+    }
+    return String(answerValue).includes(String(ruleValue));
 
-    case 'not_contains':
-      if (Array.isArray(answerValue)) {
-        return !answerValue.some(v => String(v).includes(String(ruleValue)));
-      }
-      return !String(answerValue).includes(String(ruleValue));
+  case 'not_contains':
+    if (Array.isArray(answerValue)) {
+      return !answerValue.some(v => String(v).includes(String(ruleValue)));
+    }
+    return !String(answerValue).includes(String(ruleValue));
 
-    case 'greater_than':
-      return Number(answerValue) > Number(ruleValue);
+  case 'greater_than':
+    return Number(answerValue) > Number(ruleValue);
 
-    case 'less_than':
-      return Number(answerValue) < Number(ruleValue);
+  case 'less_than':
+    return Number(answerValue) < Number(ruleValue);
 
-    default:
-      return false;
+  default:
+    return false;
   }
 }
 
@@ -186,7 +186,7 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
         disabled={disabled}
         className="tw-select qform-select-btn"
       >
-        <span className={!selectedOption ? 'tw-text-muted' : 'tw-text-primary'}>
+        <span className={!selectedOption ? 'text-muted' : 'tw-text-primary'}>
           {selectedOption?.label || question.placeholder || 'Select an option'}
         </span>
         <ChevronDown className={cn(
@@ -338,13 +338,13 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
   return (
     <div className="qform-file-upload">
       {fileMetadata ? (
-        <div className="tw-card qform-file-selected">
+        <div className="portal-card qform-file-selected">
           <div className="qform-file-info">
-            <Check className="tw-h-3.5 tw-w-3.5 qform-check-success" />
+            <Check className="icon-xs qform-check-success" />
             <span className="tw-text-primary qform-file-name">
               {fileMetadata.filename}
             </span>
-            <span className="tw-text-muted qform-file-size">
+            <span className="text-muted qform-file-size">
               ({formatFileSize(fileMetadata.fileSize)})
             </span>
           </div>
@@ -354,7 +354,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
               onClick={handleRemove}
               className="btn-icon"
             >
-              <X className="tw-h-3.5 tw-w-3.5" />
+              <X className="icon-xs" />
             </button>
           )}
         </div>
@@ -365,17 +365,17 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
           onDragLeave={() => setDragActive(false)}
           onClick={() => !disabled && fileInputRef.current?.click()}
           className={cn(
-            'tw-card qform-dropzone',
+            'portal-card qform-dropzone',
             dragActive && 'tw-table-row-selected',
             disabled && 'qform-dropzone-disabled'
           )}
         >
-          <Upload className="tw-h-5 tw-w-5" />
+          <Upload className="icon-sm" />
           <div className="qform-dropzone-text">
             <span className="tw-text-primary qform-dropzone-label">
               Drop file here or click to upload
             </span>
-            <div className="tw-text-muted qform-dropzone-hint">
+            <div className="text-muted qform-dropzone-hint">
               {question.acceptedFileTypes && `Accepted: ${question.acceptedFileTypes}`}
               {question.acceptedFileTypes && ' | '}
               Max size: {formatFileSize(maxSize)}
@@ -406,7 +406,7 @@ const QUESTION_COMPONENTS: Record<QuestionType, React.ComponentType<QuestionInpu
   select: SelectInput,
   multiselect: MultiselectInput,
   number: NumberInput,
-  file: FileInput,
+  file: FileInput
 };
 
 // ============================================================================
@@ -421,7 +421,7 @@ export function QuestionnaireForm({
   getAuthToken,
   showNotification,
   onSubmitSuccess,
-  onBack,
+  onBack
 }: QuestionnaireFormProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -470,7 +470,7 @@ export function QuestionnaireForm({
 
     try {
       const headers: HeadersInit = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       };
 
       const token = getAuthToken?.();
@@ -484,8 +484,8 @@ export function QuestionnaireForm({
         headers,
         body: JSON.stringify({
           answers,
-          progress,
-        }),
+          progress
+        })
       });
 
       if (!saveResponse.ok) {
@@ -561,7 +561,7 @@ export function QuestionnaireForm({
 
     try {
       const headers: HeadersInit = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       };
 
       const token = getAuthToken?.();
@@ -578,8 +578,8 @@ export function QuestionnaireForm({
         credentials: 'include',
         headers,
         body: JSON.stringify({
-          answers,
-        }),
+          answers
+        })
       });
 
       if (!submitResponse.ok) {
@@ -605,14 +605,14 @@ export function QuestionnaireForm({
             onClick={onBack}
             title="Back to questionnaires"
           >
-            <ArrowLeft className="tw-h-4 tw-w-4" />
+            <ArrowLeft className="icon-xs" />
           </button>
           <div>
-            <h2 className="tw-heading qform-heading">
+            <h2 className="heading qform-heading">
               {questionnaire.title}
             </h2>
             {questionnaire.description && (
-              <p className="tw-text-muted qform-description">
+              <p className="text-muted qform-description">
                 {questionnaire.description}
               </p>
             )}
@@ -622,14 +622,14 @@ export function QuestionnaireForm({
         {/* Save status */}
         <div className="qform-status">
           {isSaving && (
-            <div className="tw-text-muted qform-status-item">
-              <RefreshCw className="tw-h-3 tw-w-3 tw-animate-spin" />
+            <div className="text-muted qform-status-item">
+              <RefreshCw className="icon-xs loading-spin" />
               Saving...
             </div>
           )}
           {!isSaving && lastSaved && (
-            <div className="tw-text-muted qform-status-item">
-              <Check className="tw-h-3 tw-w-3 qform-check-success" />
+            <div className="text-muted qform-status-item">
+              <Check className="icon-xs qform-check-success" />
               Saved
             </div>
           )}
@@ -650,7 +650,7 @@ export function QuestionnaireForm({
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="tw-text-muted qform-progress-text">
+          <span className="text-muted qform-progress-text">
             {progress}%
           </span>
         </div>
@@ -665,22 +665,22 @@ export function QuestionnaireForm({
           return (
             <div
               key={question.id}
-              className="tw-card"
+              className="portal-card"
             >
               {/* Question label */}
               <div className="qform-question-label-row">
-                <span className="tw-text-muted qform-question-number">
+                <span className="text-muted qform-question-number">
                   {index + 1}.
                 </span>
                 <div className="qform-question-label-container">
-                  <label className="tw-label">
+                  <label className="label">
                     {question.text}
                     {question.required && (
                       <span className="form-required">*</span>
                     )}
                   </label>
                   {question.helpText && (
-                    <p className="tw-text-muted qform-question-help">
+                    <p className="text-muted qform-question-help">
                       {question.helpText}
                     </p>
                   )}
@@ -709,7 +709,7 @@ export function QuestionnaireForm({
             onClick={saveAnswers}
             disabled={isSaving || !hasUnsavedChanges}
           >
-            <Save className="tw-h-3.5 tw-w-3.5" />
+            <Save className="icon-xs" />
             Save Draft
           </button>
 
@@ -719,9 +719,9 @@ export function QuestionnaireForm({
             disabled={progress < 100 || isSubmitting}
           >
             {isSubmitting ? (
-              <RefreshCw className="tw-h-3.5 tw-w-3.5 tw-animate-spin" />
+              <RefreshCw className="icon-xs loading-spin" />
             ) : (
-              <Send className="tw-h-3.5 tw-w-3.5" />
+              <Send className="icon-xs" />
             )}
             Submit
           </button>
@@ -730,7 +730,7 @@ export function QuestionnaireForm({
 
       {/* Read-only notice */}
       {isReadOnly && (
-        <div className="tw-text-muted qform-readonly-notice">
+        <div className="text-muted qform-readonly-notice">
           This questionnaire has been submitted and cannot be edited.
         </div>
       )}

@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   FileUp,
   FileCheck,
-  Inbox,
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -13,19 +13,18 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
@@ -79,7 +78,7 @@ const DOCUMENT_REQUEST_STATUS_CONFIG: Record<string, { label: string }> = {
   approved: { label: 'Approved' },
   rejected: { label: 'Rejected' },
   expired: { label: 'Expired' },
-  viewed: { label: 'Viewed' },
+  viewed: { label: 'Viewed' }
 };
 
 // Capitalize status label (fallback for unknown statuses)
@@ -119,16 +118,16 @@ function sortDocumentRequests(a: DocumentRequest, b: DocumentRequest, sort: Sort
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'title':
-      return multiplier * a.title.localeCompare(b.title);
-    case 'client':
-      return multiplier * a.clientName.localeCompare(b.clientName);
-    case 'dueDate':
-      return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-    case 'createdAt':
-      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    default:
-      return 0;
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'client':
+    return multiplier * a.clientName.localeCompare(b.clientName);
+  case 'dueDate':
+    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
+  case 'createdAt':
+    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  default:
+    return 0;
   }
 }
 
@@ -154,7 +153,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     pending: 0,
     submitted: 0,
     approved: 0,
-    overdue: 0,
+    overdue: 0
   });
 
   // Filtering and sorting
@@ -168,7 +167,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     applyFilters,
     hasActiveFilters
   } = useTableFilters<DocumentRequest>({
-    storageKey: 'admin_document_requests',
+    storageKey: overviewMode ? undefined : 'admin_document_requests',
     filters: DOCUMENT_REQUESTS_FILTER_CONFIG,
     filterFn: filterDocumentRequest,
     sortFn: sortDocumentRequests,
@@ -214,7 +213,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         pending: 0,
         submitted: 0,
         approved: 0,
-        overdue: 0,
+        overdue: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load document requests');
@@ -234,7 +233,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update request');
@@ -263,7 +262,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete requests');
@@ -325,7 +324,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
             { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
             { value: stats.submitted, label: 'submitted', variant: 'active', hideIfZero: true },
             { value: stats.approved, label: 'approved', variant: 'completed', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.submitted} Submitted • ${stats.approved} Approved • ${stats.overdue} Overdue`}
         />
@@ -380,65 +379,65 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="name-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Request
-            </AdminTableHead>
-            <AdminTableHead className="client-col">Client</AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="client-col">Client</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
               onClick={() => toggleSort('dueDate')}
             >
               Due Date
-            </AdminTableHead>
-            <AdminTableHead className="docs-col">Docs</AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="docs-col">Docs</PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={7} message={error} onRetry={loadRequests} />
+            <PortalTableError colSpan={7} message={error} onRetry={loadRequests} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedRequests.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No requests match your filters' : 'No document requests yet'}
             />
           ) : (
             paginatedRequests.map((request) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={request.id}
                 clickable
                 selected={selection.isSelected(request)}
               >
-                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(request)}
                     onCheckedChange={() => selection.toggleSelection(request)}
                     aria-label={`Select ${request.title}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="primary-cell">
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <FileUp className="cell-icon" />
                     <div className="cell-content">
@@ -448,8 +447,8 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                       )}
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
@@ -459,24 +458,24 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                   >
                     {request.clientName}
                   </span>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <StatusBadge status={getStatusVariant(request.status)}>
                     {getStatusLabel(request.status)}
                   </StatusBadge>
-                </AdminTableCell>
-                <AdminTableCell className={cn(isOverdue(request.dueDate) && 'text-danger')}>
+                </PortalTableCell>
+                <PortalTableCell className={cn(isOverdue(request.dueDate) && 'text-danger')}>
                   {request.dueDate && formatDate(request.dueDate)}
-                </AdminTableCell>
-                <AdminTableCell className="text-right">
+                </PortalTableCell>
+                <PortalTableCell className="text-right">
                   {request.documents > 0 && (
                     <span className="cell-with-icon">
                       <FileCheck className="cell-icon-sm" />
                       {request.documents}
                     </span>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {request.status === 'pending' && (
@@ -487,12 +486,12 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                     )}
                     <IconButton action="delete" title="Delete" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Mail,
   Inbox,
-  Tag,
+  Tag
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -11,19 +11,18 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
@@ -66,10 +65,11 @@ interface EmailTemplatesManagerProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   /** Default page size for pagination (10 for overview, 25 for individual tabs) */
   defaultPageSize?: number;
+  overviewMode?: boolean;
 }
 
 
-export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25 }: EmailTemplatesManagerProps) {
+export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +77,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
   const [stats, setStats] = useState<EmailTemplateStats>({
     total: 0,
     active: 0,
-    categories: [],
+    categories: []
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -88,7 +88,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -102,7 +102,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
     try {
       const response = await fetch(API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load templates');
       const data = await response.json();
@@ -124,7 +124,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
   const categoryFilterOptions = useMemo(() => {
     return [
       { value: 'all', label: 'All Categories' },
-      ...stats.categories.map(cat => ({ value: cat.value, label: cat.label })),
+      ...stats.categories.map(cat => ({ value: cat.value, label: cat.label }))
     ];
   }, [stats.categories]);
 
@@ -150,8 +150,8 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
         let aVal: string | number = '';
         let bVal: string | number = '';
         switch (sort.column) {
-          case 'name': aVal = a.name; bVal = b.name; break;
-          case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
+        case 'name': aVal = a.name; bVal = b.name; break;
+        case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
         }
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
@@ -161,7 +161,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
     return result;
   }, [templates, searchQuery, categoryFilter, statusFilter, sort]);
 
-  const pagination = usePagination({ totalItems: filteredTemplates.length, defaultPageSize });
+  const pagination = usePagination({ storageKey: overviewMode ? undefined : 'admin_email_templates_pagination', totalItems: filteredTemplates.length, defaultPageSize });
   const paginatedTemplates = filteredTemplates.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -195,7 +195,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
           items={[
             { value: stats.total, label: 'total' },
             { value: stats.active, label: 'active', variant: 'completed', hideIfZero: true },
-            { value: stats.total - stats.active, label: 'inactive', variant: 'pending', hideIfZero: true },
+            { value: stats.total - stats.active, label: 'inactive', variant: 'pending', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.total - stats.active} Inactive`}
         />
@@ -210,7 +210,7 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
           <FilterDropdown
             sections={[
               { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
-              { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS },
+              { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS }
             ]}
             values={{ category: categoryFilter, status: statusFilter }}
             onChange={handleFilterChange}
@@ -237,46 +237,46 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
               Template
-            </AdminTableHead>
-            <AdminTableHead>Subject</AdminTableHead>
-            <AdminTableHead>Category</AdminTableHead>
-            <AdminTableHead>Status</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead>Subject</PortalTableHead>
+            <PortalTableHead className="category-col">Category</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'updated_at' ? sort.direction : null}
               onClick={() => toggleSort('updated_at')}
             >
               Updated
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={6} message={error} onRetry={loadTemplates} />
+            <PortalTableError colSpan={6} message={error} onRetry={loadTemplates} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={6} rows={5} />
+            <PortalTableLoading colSpan={6} rows={5} />
           ) : paginatedTemplates.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={6}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No templates match your filters' : 'No templates yet'}
             />
           ) : (
             paginatedTemplates.map((template) => (
-              <AdminTableRow key={template.id} clickable>
-                <AdminTableCell className="primary-cell">
+              <PortalTableRow key={template.id} clickable>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <Mail className="cell-icon" />
                     <div className="cell-content">
@@ -286,25 +286,31 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                           {template.variables.length} variables
                         </span>
                       )}
+                      <span className="category-stacked">{template.category}</span>
+                      <span className="status-stacked">
+                        <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
+                          {template.is_active ? 'Active' : 'Inactive'}
+                        </StatusBadge>
+                      </span>
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <span className="cell-truncate">{decodeHtmlEntities(template.subject)}</span>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell className="category-cell">
                   <div className="cell-with-icon">
                     <Tag className="cell-icon-sm" />
                     <span>{template.category}</span>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="status-cell">
+                </PortalTableCell>
+                <PortalTableCell className="status-cell">
                   <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
                     {template.is_active ? 'Active' : 'Inactive'}
                   </StatusBadge>
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(template.updated_at)}</AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">{formatDate(template.updated_at)}</PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="preview" title="Preview" />
                     <IconButton action="edit" title="Edit" />
@@ -312,12 +318,12 @@ export function EmailTemplatesManager({ onNavigate, getAuthToken, showNotificati
                     <IconButton action="duplicate" title="Duplicate" />
                     <IconButton action="delete" title="Delete" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/factories';
 
 // Lazy load child components
 const CategoriesTable = React.lazy(() => import('./CategoriesTable').then(m => ({ default: m.CategoriesTable })));
@@ -36,7 +37,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
   // Individual subtab views
   if (activeSubtab === 'categories') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading categories...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
         <CategoriesTable
           onNavigate={onNavigate}
           getAuthToken={getAuthToken}
@@ -48,7 +49,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
 
   if (activeSubtab === 'articles') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading articles...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
         <ArticlesTable
           onNavigate={onNavigate}
           getAuthToken={getAuthToken}
@@ -61,7 +62,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
   // Overview - show all tables stacked with default pagination of 10
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
-      <React.Suspense fallback={<div className="loading-state">Loading categories...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
         <section className="overview-table-section">
           <CategoriesTable
             onNavigate={onNavigate}
@@ -73,7 +74,7 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading articles...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
         <section className="overview-table-section">
           <ArticlesTable
             onNavigate={onNavigate}

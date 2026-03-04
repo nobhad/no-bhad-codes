@@ -15,13 +15,9 @@ import {
   Archive,
   FileText,
   Trash2,
-  RefreshCw,
   FolderKanban
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { IconButton, TabList, TabPanel } from '@react/factories';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -199,7 +195,7 @@ export function ProjectDetail({
   // Error state
   if (error && !project) {
     return (
-      <div className="tw-section tw-border tw-border-portal">
+      <div className="portal-card">
         <div className="error-state">
           <p>{error}</p>
           <button className="btn-secondary" onClick={refetch}>
@@ -213,7 +209,7 @@ export function ProjectDetail({
   // No project found
   if (!project) {
     return (
-      <div className="tw-section tw-border tw-border-portal">
+      <div className="portal-card">
         <div className="empty-state">
           <FolderKanban className="icon-xl" />
           <span>Project not found</span>
@@ -236,7 +232,7 @@ export function ProjectDetail({
           {/* Project Info */}
           <div className="tw-flex tw-flex-col tw-gap-0.5">
             <div className="tw-flex tw-items-center tw-gap-2">
-              <h1 className="tw-heading tw-text-lg tw-m-0">
+              <h1 className="heading tw-text-lg tw-m-0">
                 {project.project_name || 'Untitled Project'}
               </h1>
               <PortalDropdown>
@@ -262,7 +258,7 @@ export function ProjectDetail({
               </PortalDropdown>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-3 tw-text-muted tw-text-xs">
+            <div className="tw-flex tw-items-center tw-gap-3 text-muted tw-text-xs">
               {project.client_name && (
                 <span>
                   Client: <span className="tw-text-primary">{project.client_name}</span>

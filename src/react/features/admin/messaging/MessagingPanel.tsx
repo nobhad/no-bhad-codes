@@ -12,7 +12,7 @@ import {
   Users,
   Inbox,
   Archive,
-  Star,
+  Star
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
@@ -75,7 +75,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
   }, [getAuthToken]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -96,7 +96,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
         method: 'GET',
         headers: getHeaders(false),
         credentials: 'include',
-        signal,
+        signal
       });
       if (!response.ok) throw new Error('Failed to load conversations');
 
@@ -119,7 +119,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
         method: 'GET',
         headers: getHeaders(false),
         credentials: 'include',
-        signal,
+        signal
       });
       if (!response.ok) throw new Error('Failed to load messages');
 
@@ -132,7 +132,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
         method: 'POST',
         headers: getHeaders(false),
         credentials: 'include',
-        signal,
+        signal
       });
 
       setConversations((prev) =>
@@ -160,7 +160,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
           method: 'POST',
           headers: getHeaders(),
           credentials: 'include',
-          body: JSON.stringify({ content: messageContent }),
+          body: JSON.stringify({ content: messageContent })
         }
       );
 
@@ -241,14 +241,14 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
 
     // Status filter
     switch (filter) {
-      case 'unread':
-        return conv.unreadCount > 0;
-      case 'starred':
-        return conv.isStarred;
-      case 'archived':
-        return conv.isArchived;
-      default:
-        return !conv.isArchived;
+    case 'unread':
+      return conv.unreadCount > 0;
+    case 'starred':
+      return conv.isStarred;
+    case 'archived':
+      return conv.isArchived;
+    default:
+      return !conv.isArchived;
     }
   });
 
@@ -263,7 +263,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
       <div className="messaging-sidebar">
         {/* Header */}
         <div className="messaging-section-header">
-          <h2 className="tw-heading messaging-heading-with-badge">
+          <h2 className="heading messaging-heading-with-badge">
             Messages
             {totalUnread > 0 && (
               <span className="tw-badge tw-ml-2">
@@ -290,7 +290,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
               { id: 'all', label: 'All', icon: Inbox },
               { id: 'unread', label: 'Unread', icon: Clock },
               { id: 'starred', label: 'Starred', icon: Star },
-              { id: 'archived', label: 'Archived', icon: Archive },
+              { id: 'archived', label: 'Archived', icon: Archive }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -335,17 +335,17 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
                       <span className={cn('messaging-conv-name', conv.unreadCount > 0 && 'messaging-conv-name-unread')}>
                         {conv.clientName}
                       </span>
-                      <span className="tw-text-muted messaging-conv-time">
+                      <span className="text-muted messaging-conv-time">
                         {conv.lastMessageAt ? formatRelativeTime(conv.lastMessageAt) : ''}
                       </span>
                     </div>
                     {conv.projectName && (
-                      <span className="tw-text-muted messaging-conv-project">
+                      <span className="text-muted messaging-conv-project">
                         {conv.projectName}
                       </span>
                     )}
                     {conv.lastMessage && (
-                      <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'tw-text-primary' : 'tw-text-muted')}>
+                      <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'tw-text-primary' : 'text-muted')}>
                         {conv.lastMessage}
                       </p>
                     )}
@@ -367,7 +367,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
             {/* Conversation Header */}
             <div className="messaging-conv-header">
               <div>
-                <h3 className="tw-heading messaging-conv-heading">
+                <h3 className="heading messaging-conv-heading">
                   {selectedConversation.clientName}
                 </h3>
                 {selectedConversation.projectName && (
@@ -382,7 +382,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
               <div className="messaging-conv-actions">
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                  className={cn('btn-icon', selectedConversation.isStarred ? 'tw-text-primary' : 'tw-text-muted')}
+                  className={cn('btn-icon', selectedConversation.isStarred ? 'tw-text-primary' : 'text-muted')}
                 >
                   <Star
                     className="messaging-star-icon"
@@ -416,7 +416,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
                     >
                       {message.senderType === 'client' && (
                         <div className="messaging-avatar messaging-avatar-sm">
-                          <User className="messaging-avatar-icon-sm tw-text-muted" />
+                          <User className="messaging-avatar-icon-sm text-muted" />
                         </div>
                       )}
                       <div
@@ -488,7 +488,7 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
           <div className="empty-state messaging-empty-state-full">
             <Users className="messaging-icon-xl" />
             <p className="messaging-empty-state-message">Select a conversation</p>
-            <p className="tw-text-muted">Choose a conversation from the list to view messages</p>
+            <p className="text-muted">Choose a conversation from the list to view messages</p>
           </div>
         )}
       </div>
@@ -504,7 +504,7 @@ function formatTime(timestamp: string): string {
   return new Date(timestamp).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
+    hour12: true
   });
 }
 

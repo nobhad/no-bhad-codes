@@ -29,57 +29,57 @@ import { mountOnboardingWizard, unmountOnboardingWizard } from './features/porta
 // Register all portal components
 registerReactComponent('portalInvoices', {
   mount: mountPortalInvoices,
-  unmount: unmountPortalInvoices,
+  unmount: unmountPortalInvoices
 });
 
 registerReactComponent('portalFiles', {
   mount: mountPortalFiles,
-  unmount: unmountPortalFiles,
+  unmount: unmountPortalFiles
 });
 
 registerReactComponent('portalProjects', {
   mount: mountPortalProjects,
-  unmount: unmountPortalProjects,
+  unmount: unmountPortalProjects
 });
 
 registerReactComponent('portalMessages', {
   mount: mountPortalMessages,
-  unmount: unmountPortalMessages,
+  unmount: unmountPortalMessages
 });
 
 registerReactComponent('portalQuestionnaires', {
   mount: mountPortalQuestionnaires,
-  unmount: unmountPortalQuestionnaires,
+  unmount: unmountPortalQuestionnaires
 });
 
 registerReactComponent('portalDocumentRequests', {
   mount: mountPortalDocumentRequests,
-  unmount: unmountPortalDocumentRequests,
+  unmount: unmountPortalDocumentRequests
 });
 
 registerReactComponent('portalApprovals', {
   mount: mountPortalApprovals,
-  unmount: unmountPortalApprovals,
+  unmount: unmountPortalApprovals
 });
 
 registerReactComponent('portalSettings', {
   mount: mountPortalSettings,
-  unmount: unmountPortalSettings,
+  unmount: unmountPortalSettings
 });
 
 registerReactComponent('portalAdHocRequests', {
   mount: mountPortalAdHocRequests,
-  unmount: unmountPortalAdHocRequests,
+  unmount: unmountPortalAdHocRequests
 });
 
 registerReactComponent('portalNavigation', {
   mount: mountPortalNavigation,
-  unmount: unmountPortalNavigation,
+  unmount: unmountPortalNavigation
 });
 
 registerReactComponent('portalOnboarding', {
   mount: mountOnboardingWizard,
-  unmount: unmountOnboardingWizard,
+  unmount: unmountOnboardingWizard
 });
 
 // Log that React components are available

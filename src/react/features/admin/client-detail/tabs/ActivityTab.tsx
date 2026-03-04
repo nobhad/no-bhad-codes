@@ -87,7 +87,7 @@ function groupActivitiesByDate(
   const groups: Map<string, ClientActivity[]> = new Map();
 
   activities.forEach((activity) => {
-    const date = new Date(activity.created_at);
+    const date = new Date(activity.createdAt);
     const dateKey = date.toISOString().split('T')[0];
 
     if (!groups.has(dateKey)) {
@@ -141,10 +141,10 @@ export function ActivityTab({ activities }: ActivityTabProps) {
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading tw-text-lg">
+        <h2 className="heading tw-text-lg">
           Activity Log
         </h2>
-        <span className="tw-text-muted ">
+        <span className="text-muted ">
           {activities.length} {activities.length === 1 ? 'event' : 'events'}
         </span>
       </div>
@@ -155,7 +155,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
           <div key={group.date}>
             {/* Date Header */}
             <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-              <span className="tw-heading ">
+              <span className="heading ">
                 {group.label}
               </span>
               <div className="tw-flex-1 tw-h-px activity-divider-line" />
@@ -168,8 +168,8 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
               <div className="tw-flex tw-flex-col tw-gap-4">
                 {group.items.map((activity, index) => {
-                  const Icon = getActivityIcon(activity.type);
-                  const iconColor = getActivityColor(activity.type);
+                  const Icon = getActivityIcon(activity.activityType);
+                  const iconColor = getActivityColor(activity.activityType);
                   const isLast = index === group.items.length - 1;
 
                   return (
@@ -190,37 +190,37 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                       >
                         <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
                           <div className="tw-flex-1">
-                            <h4 className="tw-heading ">
+                            <h4 className="heading ">
                               {activity.title}
                             </h4>
                             {activity.description && (
-                              <p className="tw-text-muted tw-mt-1 tw-text-sm">
+                              <p className="text-muted tw-mt-1 tw-text-sm">
                                 {activity.description}
                               </p>
                             )}
                           </div>
 
                           <span
-                            className="tw-text-muted tw-whitespace-nowrap tw-text-sm"
-                            title={formatFullDate(activity.created_at)}
+                            className="text-muted tw-whitespace-nowrap tw-text-sm"
+                            title={formatFullDate(activity.createdAt)}
                           >
-                            {formatRelativeTime(activity.created_at)}
+                            {formatRelativeTime(activity.createdAt)}
                           </span>
                         </div>
 
                         {/* Activity metadata */}
-                        {(activity.created_by || activity.metadata) && (
+                        {(activity.createdBy || activity.metadata) && (
                           <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2 activity-border-top">
-                            {activity.created_by && (
-                              <span className="tw-text-muted tw-text-sm">
-                                by {activity.created_by}
+                            {activity.createdBy && (
+                              <span className="text-muted tw-text-sm">
+                                by {activity.createdBy}
                               </span>
                             )}
                             {activity.metadata &&
                               Object.entries(activity.metadata).map(([key, value]) => (
                                 <span
                                   key={key}
-                                  className="tw-text-muted tw-text-sm"
+                                  className="text-muted tw-text-sm"
                                 >
                                   {key}: {String(value)}
                                 </span>

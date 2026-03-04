@@ -9,7 +9,7 @@ import {
   FileVideo,
   FileAudio,
   Inbox,
-  FolderPlus,
+  FolderPlus
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { formatDateShort } from '@react/utils/formatDate';
@@ -18,16 +18,16 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { createLogger } from '../../../../utils/logger';
@@ -66,7 +66,7 @@ const FILE_ICONS: Record<string, React.ReactNode> = {
   video: <FileVideo className="cell-icon status-cancelled" />,
   audio: <FileAudio className="cell-icon status-qualified" />,
   document: <FileText className="cell-icon status-primary" />,
-  default: <File className="cell-icon" />,
+  default: <File className="cell-icon" />
 };
 
 const TYPE_FILTER_OPTIONS = [
@@ -75,7 +75,7 @@ const TYPE_FILTER_OPTIONS = [
   { value: 'image', label: 'Images' },
   { value: 'document', label: 'Documents' },
   { value: 'video', label: 'Videos' },
-  { value: 'audio', label: 'Audio' },
+  { value: 'audio', label: 'Audio' }
 ];
 
 interface FilesManagerProps {
@@ -94,12 +94,12 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
   const [stats, setStats] = useState<FileStats>({
     totalFiles: 0,
     totalFolders: 0,
-    totalSize: 0,
+    totalSize: 0
   });
 
   // View state
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
+  const [_currentPath, _setCurrentPath] = useState<string[]>([]);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,14 +108,14 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
   // Sorting
   const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>({
     column: 'name',
-    direction: 'asc',
+    direction: 'asc'
   });
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -134,7 +134,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
 
       const response = await fetch(`${API_ENDPOINTS.ADMIN.FILES}?${params}`, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load files');
 
@@ -144,7 +144,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       setStats(payload.stats || {
         totalFiles: 0,
         totalFolders: 0,
-        totalSize: 0,
+        totalSize: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load files');
@@ -177,12 +177,13 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       result = result.filter((file) => {
         if (typeFilter === 'folder') return file.type === 'folder';
         if (typeFilter === 'image') return file.mimeType?.startsWith('image/');
-        if (typeFilter === 'document')
+        if (typeFilter === 'document') {
           return (
             file.mimeType?.includes('pdf') ||
             file.mimeType?.includes('document') ||
             file.mimeType?.includes('text')
           );
+        }
         if (typeFilter === 'video') return file.mimeType?.startsWith('video/');
         if (typeFilter === 'audio') return file.mimeType?.startsWith('audio/');
         return true;
@@ -200,18 +201,18 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
         let bVal: string | number = '';
 
         switch (sort.column) {
-          case 'name':
-            aVal = a.name.toLowerCase();
-            bVal = b.name.toLowerCase();
-            break;
-          case 'size':
-            aVal = a.size || 0;
-            bVal = b.size || 0;
-            break;
-          case 'updatedAt':
-            aVal = a.updatedAt;
-            bVal = b.updatedAt;
-            break;
+        case 'name':
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+          break;
+        case 'size':
+          aVal = a.size || 0;
+          bVal = b.size || 0;
+          break;
+        case 'updatedAt':
+          aVal = a.updatedAt;
+          bVal = b.updatedAt;
+          break;
         }
 
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
@@ -223,7 +224,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     return result;
   }, [files, searchQuery, typeFilter, sort]);
 
-  const pagination = usePagination({ totalItems: filteredFiles.length });
+  const pagination = usePagination({ storageKey: 'admin_files_pagination', totalItems: filteredFiles.length });
   const paginatedFiles = filteredFiles.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -247,8 +248,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       file.mimeType?.includes('pdf') ||
       file.mimeType?.includes('document') ||
       file.mimeType?.includes('text')
-    )
-      return FILE_ICONS.document;
+    ) {return FILE_ICONS.document;}
     return FILE_ICONS.default;
   }
 
@@ -259,7 +259,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       const response = await fetch(buildEndpoint.adminFile(fileId), {
         method: 'DELETE',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to delete file');
@@ -280,7 +280,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       const response = await fetch(buildEndpoint.fileAction(file.id, action), {
         method: 'POST',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error(`Failed to ${action} file`);
@@ -290,10 +290,10 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
         prev.map((f) =>
           f.id === file.id
             ? {
-                ...f,
-                sharedWithClient: !isCurrentlyShared,
-                sharedAt: !isCurrentlyShared ? new Date().toISOString() : undefined,
-              }
+              ...f,
+              sharedWithClient: !isCurrentlyShared,
+              sharedAt: !isCurrentlyShared ? new Date().toISOString() : undefined
+            }
             : f
         )
       );
@@ -319,7 +319,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
           items={[
             { value: stats.totalFiles, label: 'files' },
             { value: stats.totalFolders, label: 'folders', hideIfZero: true },
-            { value: formatFileSize(stats.totalSize), label: 'total' },
+            { value: formatFileSize(stats.totalSize), label: 'total' }
           ]}
           tooltip={`${stats.totalFiles} Files • ${stats.totalFolders} Folders • ${formatFileSize(stats.totalSize)} Total`}
         />
@@ -333,7 +333,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
           />
           <FilterDropdown
             sections={[
-              { key: 'type', label: 'TYPE', options: TYPE_FILTER_OPTIONS },
+              { key: 'type', label: 'TYPE', options: TYPE_FILTER_OPTIONS }
             ]}
             values={{ type: typeFilter }}
             onChange={(key, value) => setTypeFilter(value)}
@@ -379,59 +379,59 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       }
     >
       {viewMode === 'list' ? (
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead
                 sortable
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
                 Name
-              </AdminTableHead>
-              <AdminTableHead>Project</AdminTableHead>
-              <AdminTableHead className="text-center">Shared</AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead>Project</PortalTableHead>
+              <PortalTableHead className="text-center">Shared</PortalTableHead>
+              <PortalTableHead
                 className="text-right"
                 sortable
                 sortDirection={sort?.column === 'size' ? sort.direction : null}
                 onClick={() => toggleSort('size')}
               >
                 Size
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
                 onClick={() => toggleSort('updatedAt')}
               >
                 Modified
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!isLoading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <AdminTableError colSpan={6} message={error} onRetry={loadFiles} />
+              <PortalTableError colSpan={6} message={error} onRetry={loadFiles} />
             ) : isLoading ? (
-              <AdminTableLoading colSpan={6} rows={5} />
+              <PortalTableLoading colSpan={6} rows={5} />
             ) : paginatedFiles.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={6}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No files match your filters' : 'No files yet'}
               />
             ) : (
               paginatedFiles.map((file) => (
-                <AdminTableRow key={file.id} clickable>
-                  <AdminTableCell className="primary-cell">
+                <PortalTableRow key={file.id} clickable>
+                  <PortalTableCell className="primary-cell">
                     <div className="cell-with-icon">
                       {getFileIcon(file)}
                       <span className="cell-title">{file.name}</span>
                     </div>
-                  </AdminTableCell>
-                  <AdminTableCell>
+                  </PortalTableCell>
+                  <PortalTableCell>
                     {file.projectName && (
                       <button
                         onClick={(e) => {
@@ -443,8 +443,8 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                         {file.projectName}
                       </button>
                     )}
-                  </AdminTableCell>
-                  <AdminTableCell className="text-center">
+                  </PortalTableCell>
+                  <PortalTableCell className="text-center">
                     {file.type !== 'folder' && file.projectId && (
                       <span
                         className={`status-badge ${file.sharedWithClient ? 'status-active' : 'status-muted'}`}
@@ -453,12 +453,12 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                         {file.sharedWithClient ? 'Yes' : 'No'}
                       </span>
                     )}
-                  </AdminTableCell>
-                  <AdminTableCell className="text-right">
+                  </PortalTableCell>
+                  <PortalTableCell className="text-right">
                     {file.type !== 'folder' && formatFileSize(file.size || 0)}
-                  </AdminTableCell>
-                  <AdminTableCell className="date-cell">{formatDateShort(file.updatedAt)}</AdminTableCell>
-                  <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  </PortalTableCell>
+                  <PortalTableCell className="date-cell">{formatDateShort(file.updatedAt)}</PortalTableCell>
+                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       {file.type !== 'folder' && (
                         <>
@@ -476,12 +476,12 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                       )}
                       <IconButton action="delete" onClick={() => handleDelete(file.id)} />
                     </div>
-                  </AdminTableCell>
-                </AdminTableRow>
+                  </PortalTableCell>
+                </PortalTableRow>
               ))
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       ) : (
         <FilesGrid
           files={paginatedFiles}
@@ -500,7 +500,7 @@ function FilesGrid({
   isLoading,
   getFileIcon,
   onDelete,
-  hasActiveFilters,
+  hasActiveFilters
 }: {
   files: FileItem[];
   isLoading: boolean;

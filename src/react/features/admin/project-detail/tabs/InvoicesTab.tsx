@@ -11,8 +11,6 @@ import {
   Inbox
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -194,12 +192,12 @@ export function InvoicesTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-6 invtab-stats">
           <div>
-            <span className="tw-text-muted ">Outstanding: </span>
+            <span className="text-muted ">Outstanding: </span>
             <span
               className={cn(
                 totalOutstanding > 0
                   ? 'tw-text-primary'
-                  : 'tw-text-muted',
+                  : 'text-muted',
                 'tw-font-semibold'
               )}
             >
@@ -207,7 +205,7 @@ export function InvoicesTab({
             </span>
           </div>
           <div>
-            <span className="tw-text-muted ">Paid: </span>
+            <span className="text-muted ">Paid: </span>
             <span className="tw-text-primary tw-font-semibold">
               {formatCurrency(totalPaid)}
             </span>
@@ -252,19 +250,19 @@ export function InvoicesTab({
           <table className="tw-w-full">
             <thead>
               <tr className="invtab-header-row">
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Invoice #
                 </th>
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Amount
                 </th>
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Status
                 </th>
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Due Date
                 </th>
-                <th className="tw-label tw-text-right tw-px-4 tw-py-3">
+                <th className="label tw-text-right tw-px-4 tw-py-3">
                   Actions
                 </th>
               </tr>
@@ -303,7 +301,7 @@ export function InvoicesTab({
                         className={cn(
                           isOverdue(invoice)
                             ? 'tw-text-primary'
-                            : 'tw-text-muted',
+                            : 'text-muted',
                           ''
                         )}
                       >

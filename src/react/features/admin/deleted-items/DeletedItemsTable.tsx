@@ -10,7 +10,7 @@ import {
   MessageSquare,
   Inbox,
   Clock,
-  RotateCcw,
+  RotateCcw
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -21,16 +21,16 @@ import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar'
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
@@ -69,6 +69,8 @@ interface DeletedItemsTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  defaultPageSize?: number;
+  overviewMode?: boolean;
 }
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
@@ -77,7 +79,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   invoice: <FileText className="cell-icon" />,
   file: <File className="cell-icon" />,
   message: <MessageSquare className="cell-icon" />,
-  contact: <User className="cell-icon" />,
+  contact: <User className="cell-icon" />
 };
 
 // Filter function for deleted items
@@ -110,20 +112,20 @@ function sortDeletedItems(a: DeletedItem, b: DeletedItem, sort: SortConfig): num
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'name':
-      return a.name.localeCompare(b.name) * multiplier;
-    case 'type':
-      return a.type.localeCompare(b.type) * multiplier;
-    case 'deletedAt':
-      return (new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime()) * multiplier;
-    case 'expiresAt':
-      return (new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()) * multiplier;
-    default:
-      return 0;
+  case 'name':
+    return a.name.localeCompare(b.name) * multiplier;
+  case 'type':
+    return a.type.localeCompare(b.type) * multiplier;
+  case 'deletedAt':
+    return (new Date(a.deletedAt).getTime() - new Date(b.deletedAt).getTime()) * multiplier;
+  case 'expiresAt':
+    return (new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()) * multiplier;
+  default:
+    return 0;
   }
 }
 
-export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }: DeletedItemsTableProps) {
+export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: DeletedItemsTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -146,7 +148,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
     projects: 0,
     invoices: 0,
     files: 0,
-    expiringIn7Days: 0,
+    expiringIn7Days: 0
   });
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -159,13 +161,13 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
     sort,
     toggleSort,
     applyFilters,
-    hasActiveFilters,
+    hasActiveFilters
   } = useTableFilters<DeletedItem>({
-    storageKey: 'admin_deleted_items',
+    storageKey: overviewMode ? undefined : 'admin_deleted_items',
     filters: DELETED_ITEMS_FILTER_CONFIG,
     filterFn: filterDeletedItem,
     sortFn: sortDeletedItems,
-    defaultSort: { column: 'deletedAt', direction: 'desc' },
+    defaultSort: { column: 'deletedAt', direction: 'desc' }
   });
 
   // Apply filters and sorting
@@ -173,9 +175,9 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_deleted_items_pagination',
+    storageKey: overviewMode ? undefined : 'admin_deleted_items_pagination',
     totalItems: filteredItems.length,
-    defaultPageSize: 25,
+    defaultPageSize
   });
 
   const paginatedItems = useMemo(
@@ -186,7 +188,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
   // Selection for bulk actions
   const selection = useSelection({
     getId: (item: DeletedItem) => item.id,
-    items: paginatedItems,
+    items: paginatedItems
   });
 
   // Filter change handler
@@ -214,7 +216,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
         projects: 0,
         invoices: 0,
         files: 0,
-        expiringIn7Days: 0,
+        expiringIn7Days: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load deleted items');
@@ -306,7 +308,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
       if (!response.ok) throw new Error('Failed to restore items');
       setItems((prev) => prev.filter((item) => !selection.selectedIds.has(item.id)));
@@ -339,7 +341,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
         method: 'DELETE',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
       if (!response.ok) throw new Error('Failed to delete items');
       setItems((prev) => prev.filter((item) => !selection.selectedIds.has(item.id)));
@@ -374,7 +376,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
   const filterSections = DELETED_ITEMS_FILTER_CONFIG.map((config) => ({
     key: config.key,
     label: config.label,
-    options: config.options,
+    options: config.options
   }));
 
   return (
@@ -393,8 +395,8 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
               value: stats.expiringIn7Days,
               label: 'expiring',
               variant: 'overdue',
-              hideIfZero: true,
-            },
+              hideIfZero: true
+            }
           ]}
           tooltip={`${stats.total} Total • ${stats.clients} Clients • ${stats.projects} Projects • ${stats.invoices} Invoices • ${stats.files} Files`}
         />
@@ -438,8 +440,8 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
                 label: 'Restore',
                 icon: <RotateCcw className="icon-sm" />,
                 onClick: handleBulkRestore,
-                loading: bulkLoading,
-              },
+                loading: bulkLoading
+              }
             ]}
             onDelete={handleBulkDelete}
             deleteLoading={bulkLoading}
@@ -472,122 +474,122 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate }
         ) : undefined
       }
     >
-      <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
-                  onCheckedChange={selection.toggleSelectAll}
-                  aria-label="Select all"
-                />
-              </AdminTableHead>
-              <AdminTableHead
-                className="name-col"
-                sortable
-                sortDirection={sort?.column === 'name' ? sort.direction : null}
-                onClick={() => toggleSort('name')}
-              >
-                Item
-              </AdminTableHead>
-              <AdminTableHead
-                className="type-col"
-                sortable
-                sortDirection={sort?.column === 'type' ? sort.direction : null}
-                onClick={() => toggleSort('type')}
-              >
-                Type
-              </AdminTableHead>
-              <AdminTableHead className="user-col">Deleted By</AdminTableHead>
-              <AdminTableHead
-                className="date-col"
-                sortable
-                sortDirection={sort?.column === 'deletedAt' ? sort.direction : null}
-                onClick={() => toggleSort('deletedAt')}
-              >
-                Deleted
-              </AdminTableHead>
-              <AdminTableHead
-                className="date-col"
-                sortable
-                sortDirection={sort?.column === 'expiresAt' ? sort.direction : null}
-                onClick={() => toggleSort('expiresAt')}
-              >
-                Expires In
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
-
-          <AdminTableBody animate={!isLoading && !error}>
-            {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={loadDeletedItems} />
-            ) : isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
-            ) : paginatedItems.length === 0 ? (
-              <AdminTableEmpty
-                colSpan={7}
-                icon={<Inbox />}
-                message={hasActiveFilters ? 'No items match your filters' : 'Trash is empty'}
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
+                onCheckedChange={selection.toggleSelectAll}
+                aria-label="Select all"
               />
-            ) : (
-              paginatedItems.map((item) => (
-                <AdminTableRow
-                  key={item.id}
-                  selected={selection.isSelected(item)}
+            </PortalTableHead>
+            <PortalTableHead
+              className="name-col"
+              sortable
+              sortDirection={sort?.column === 'name' ? sort.direction : null}
+              onClick={() => toggleSort('name')}
+            >
+                Item
+            </PortalTableHead>
+            <PortalTableHead
+              className="type-col"
+              sortable
+              sortDirection={sort?.column === 'type' ? sort.direction : null}
+              onClick={() => toggleSort('type')}
+            >
+                Type
+            </PortalTableHead>
+            <PortalTableHead className="user-col">Deleted By</PortalTableHead>
+            <PortalTableHead
+              className="date-col"
+              sortable
+              sortDirection={sort?.column === 'deletedAt' ? sort.direction : null}
+              onClick={() => toggleSort('deletedAt')}
+            >
+                Deleted
+            </PortalTableHead>
+            <PortalTableHead
+              className="date-col"
+              sortable
+              sortDirection={sort?.column === 'expiresAt' ? sort.direction : null}
+              onClick={() => toggleSort('expiresAt')}
+            >
+                Expires In
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
+
+        <PortalTableBody animate={!isLoading && !error}>
+          {error ? (
+            <PortalTableError colSpan={7} message={error} onRetry={loadDeletedItems} />
+          ) : isLoading ? (
+            <PortalTableLoading colSpan={7} rows={5} />
+          ) : paginatedItems.length === 0 ? (
+            <PortalTableEmpty
+              colSpan={7}
+              icon={<Inbox />}
+              message={hasActiveFilters ? 'No items match your filters' : 'Trash is empty'}
+            />
+          ) : (
+            paginatedItems.map((item) => (
+              <PortalTableRow
+                key={item.id}
+                selected={selection.isSelected(item)}
+              >
+                <PortalTableCell
+                  className="bulk-select-cell"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <AdminTableCell
-                    className="bulk-select-cell"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Checkbox
-                      checked={selection.isSelected(item)}
-                      onCheckedChange={() => selection.toggleSelection(item)}
-                      aria-label={`Select ${item.name}`}
-                    />
-                  </AdminTableCell>
-                  <AdminTableCell className="primary-cell">
-                    <div className="cell-with-icon">
-                      {TYPE_ICONS[item.type]}
-                      <div className="cell-content">
-                        <span className="cell-title">{item.name}</span>
-                        {item.description && (
-                          <span className="cell-subtitle">{item.description}</span>
-                        )}
-                      </div>
+                  <Checkbox
+                    checked={selection.isSelected(item)}
+                    onCheckedChange={() => selection.toggleSelection(item)}
+                    aria-label={`Select ${item.name}`}
+                  />
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell">
+                  <div className="cell-with-icon">
+                    {TYPE_ICONS[item.type]}
+                    <div className="cell-content">
+                      <span className="cell-title">{item.name}</span>
+                      {item.description && (
+                        <span className="cell-subtitle">{item.description}</span>
+                      )}
                     </div>
-                  </AdminTableCell>
-                  <AdminTableCell className="type-cell">{item.type}</AdminTableCell>
-                  <AdminTableCell className="user-cell">{item.deletedBy}</AdminTableCell>
-                  <AdminTableCell className="date-cell">
-                    {formatDate(item.deletedAt)}
-                  </AdminTableCell>
-                  <AdminTableCell className="date-cell">
-                    <span className={cn(isExpiringSoon(item.expiresAt) && 'text-danger')}>
-                      <span className="cell-with-icon">
-                        {isExpiringSoon(item.expiresAt) && <Clock className="cell-icon-sm" />}
-                        {getDaysUntilExpiry(item.expiresAt)}
-                      </span>
+                  </div>
+                </PortalTableCell>
+                <PortalTableCell className="type-cell">{item.type}</PortalTableCell>
+                <PortalTableCell className="user-cell">{item.deletedBy}</PortalTableCell>
+                <PortalTableCell className="date-cell">
+                  {formatDate(item.deletedAt)}
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">
+                  <span className={cn(isExpiringSoon(item.expiresAt) && 'text-danger')}>
+                    <span className="cell-with-icon">
+                      {isExpiringSoon(item.expiresAt) && <Clock className="cell-icon-sm" />}
+                      {getDaysUntilExpiry(item.expiresAt)}
                     </span>
-                  </AdminTableCell>
-                  <AdminTableCell className="actions-cell">
-                    <div className="table-actions">
-                      <IconButton
-                        action="restore"
-                        onClick={() => handleRestore(item.id)}
-                      />
-                      <IconButton
-                        action="delete"
-                        title="Delete Permanently"
-                        onClick={() => handlePermanentDelete(item.id)}
-                      />
-                    </div>
-                  </AdminTableCell>
-                </AdminTableRow>
-              ))
-            )}
-          </AdminTableBody>
-        </AdminTable>
+                  </span>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell">
+                  <div className="table-actions">
+                    <IconButton
+                      action="restore"
+                      onClick={() => handleRestore(item.id)}
+                    />
+                    <IconButton
+                      action="delete"
+                      title="Delete Permanently"
+                      onClick={() => handlePermanentDelete(item.id)}
+                    />
+                  </div>
+                </PortalTableCell>
+              </PortalTableRow>
+            ))
+          )}
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

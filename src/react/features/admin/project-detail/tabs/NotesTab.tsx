@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useCallback, useState, useEffect } from 'react';
 import { Save, StickyNote } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Project } from '../../types';
 
 interface NotesTabProps {
@@ -70,17 +68,17 @@ export function NotesTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-2">
           <StickyNote className="icon-lg" />
-          <h3 className="tw-heading ">
+          <h3 className="heading ">
             Internal Notes
           </h3>
-          <span className="tw-text-muted tw-text-sm">
+          <span className="text-muted tw-text-sm">
             (Only visible to admins)
           </span>
         </div>
 
         <div className="tw-flex tw-items-center tw-gap-2">
           {hasChanges && (
-            <span className="tw-text-muted tw-text-sm">Unsaved changes</span>
+            <span className="text-muted tw-text-sm">Unsaved changes</span>
           )}
           <button
             className="btn-primary"
@@ -106,7 +104,7 @@ export function NotesTab({
       </div>
 
       {/* Keyboard shortcut hint */}
-      <div className="tw-text-muted notes-hint">
+      <div className="text-muted notes-hint">
         Press <kbd className="tw-badge msgtab-kbd">Cmd+S</kbd> or{' '}
         <kbd className="tw-badge msgtab-kbd">Ctrl+S</kbd> to save
       </div>

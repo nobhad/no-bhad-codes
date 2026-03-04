@@ -17,7 +17,7 @@ export function StepIndicator({
   steps,
   currentStep,
   completedSteps,
-  onStepClick,
+  onStepClick
 }: StepIndicatorProps) {
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
@@ -62,19 +62,19 @@ export function StepIndicator({
                 isCompleted && [
                   'tw-bg-white',
                   'tw-text-black',
-                  isAccessible && 'tw-cursor-pointer hover:tw-opacity-80',
+                  isAccessible && 'tw-cursor-pointer hover:tw-opacity-80'
                 ],
                 isCurrent &&
                   !isCompleted && [
-                    'tw-bg-white',
-                    'tw-text-black',
-                  ],
+                  'tw-bg-white',
+                  'tw-text-black'
+                ],
                 !isCompleted &&
                   !isCurrent && [
-                    'tw-bg-transparent',
-                    'tw-text-[var(--portal-text-muted)]',
-                    'tw-border-[var(--portal-border-color)]',
-                  ],
+                  'tw-bg-transparent',
+                  'text-muted',
+                  'tw-border-[var(--portal-border-color)]'
+                ],
                 !isAccessible && 'tw-cursor-not-allowed tw-opacity-50'
               )}
               title={step.title}
@@ -82,7 +82,7 @@ export function StepIndicator({
               aria-current={isCurrent ? 'step' : undefined}
             >
               {isCompleted ? (
-                <Check className="tw-h-4 tw-w-4" strokeWidth={3} />
+                <Check className="icon-xs" strokeWidth={3} />
               ) : (
                 step.number
               )}
@@ -115,7 +115,7 @@ export function StepIndicatorDetailed({
   steps,
   currentStep,
   completedSteps,
-  onStepClick,
+  onStepClick
 }: StepIndicatorProps) {
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
@@ -164,26 +164,26 @@ export function StepIndicatorDetailed({
                     isCompleted && [
                       'tw-bg-white',
                       'tw-text-black',
-                      isAccessible && 'tw-cursor-pointer hover:tw-opacity-80',
+                      isAccessible && 'tw-cursor-pointer hover:tw-opacity-80'
                     ],
                     isCurrent &&
                       !isCompleted && [
-                        'tw-bg-white',
-                        'tw-text-black',
-                      ],
+                      'tw-bg-white',
+                      'tw-text-black'
+                    ],
                     !isCompleted &&
                       !isCurrent && [
-                        'tw-bg-transparent',
-                        'tw-text-[var(--portal-text-muted)]',
-                        'tw-border-[var(--portal-border-color)]',
-                      ],
+                      'tw-bg-transparent',
+                      'text-muted',
+                      'tw-border-[var(--portal-border-color)]'
+                    ],
                     !isAccessible && 'tw-cursor-not-allowed tw-opacity-50'
                   )}
                   aria-label={`Step ${step.number}: ${step.title}`}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
                   {isCompleted ? (
-                    <Check className="tw-h-4 tw-w-4" strokeWidth={3} />
+                    <Check className="icon-xs" strokeWidth={3} />
                   ) : (
                     step.number
                   )}
@@ -208,7 +208,7 @@ export function StepIndicatorDetailed({
                   'tw-mt-2 tw-text-[11px] tw-text-center tw-max-w-[80px] tw-leading-tight tw-font-mono',
                   isCurrent
                     ? 'tw-text-primary tw-font-bold'
-                    : 'tw-text-[var(--portal-text-muted)]'
+                    : 'text-muted'
                 )}
               >
                 {step.title}

@@ -9,13 +9,11 @@ import {
   Phone,
   Building2,
   User,
-  Calendar,
   Tag,
   X,
   Plus
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -57,30 +55,12 @@ function formatDate(date: string | undefined): string {
 }
 
 /**
- * Get health status class
- */
-function getHealthStatusClass(score: number): string {
-  if (score >= 70) return 'tw-text-[var(--status-completed)]';
-  if (score >= 40) return 'tw-text-[var(--status-warning)]';
-  return 'tw-text-[var(--status-cancelled)]';
-}
-
-/**
  * Get health status label
  */
 function getHealthStatusLabel(score: number): string {
   if (score >= 70) return 'Healthy';
   if (score >= 40) return 'At Risk';
   return 'Critical';
-}
-
-/**
- * Get factor bar color
- */
-function getFactorColor(value: number): string {
-  if (value >= 70) return 'tw-bg-[var(--status-completed)]';
-  if (value >= 40) return 'tw-bg-[var(--status-warning)]';
-  return 'tw-bg-[var(--status-cancelled)]';
 }
 
 /**
@@ -137,16 +117,16 @@ export function OverviewTab({
           <div className="tw-panel ">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-4">
               <div className="tw-flex tw-items-center tw-gap-2">
-                <Heart className="icon-lg tw-text-muted" />
-                <h3 className="tw-heading ">
+                <Heart className="icon-lg text-muted" />
+                <h3 className="heading ">
                   Health Score
                 </h3>
               </div>
               <div className="tw-flex tw-items-center tw-gap-2">
-                <span className="tw-stat-value">
+                <span className="stat-value">
                   {health.score}
                 </span>
-                <span className="tw-text-muted ">
+                <span className="text-muted ">
                   {getHealthStatusLabel(health.score)}
                 </span>
               </div>
@@ -154,66 +134,66 @@ export function OverviewTab({
 
             {/* Health Factors */}
             {health.factors && (
-            <div className="tw-grid tw-grid-cols-2 tw-gap-4">
-              {Object.entries(health.factors).map(([key, value]) => (
-                <div key={key} className="tw-flex tw-flex-col tw-gap-1">
-                  <div className="tw-flex tw-items-center tw-justify-between tw-text-sm">
-                    <span className="tw-text-muted tw-capitalize">
-                      {key.replace('_', ' ')}
-                    </span>
-                    <span className="tw-text-muted">{value}%</span>
+              <div className="tw-grid tw-grid-cols-2 tw-gap-4">
+                {Object.entries(health.factors).map(([key, value]) => (
+                  <div key={key} className="tw-flex tw-flex-col tw-gap-1">
+                    <div className="tw-flex tw-items-center tw-justify-between tw-text-sm">
+                      <span className="text-muted tw-capitalize">
+                        {key.replace('_', ' ')}
+                      </span>
+                      <span className="text-muted">{value}%</span>
+                    </div>
+                    <div className="tw-progress-track">
+                      <div
+                        className="tw-progress-bar"
+                        style={{ width: `${value}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="tw-progress-track">
-                    <div
-                      className="tw-progress-bar"
-                      style={{ width: `${value}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
             )}
           </div>
         )}
 
         {/* Stats Grid */}
         {stats && (
-          <div className="tw-grid-stats tw-grid tw-grid-cols-3 tw-gap-4">
+          <div className="stats-grid tw-grid tw-grid-cols-3 tw-gap-4">
             {/* Projects */}
-            <div className="tw-stat-card">
+            <div className="stat-card">
               <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
-                <FolderKanban className="icon-md tw-text-muted" />
-                <span className="tw-stat-label">Projects</span>
+                <FolderKanban className="icon-md text-muted" />
+                <span className="stat-label">Projects</span>
               </div>
-              <div className="tw-stat-value">
+              <div className="stat-value">
                 {stats.totalProjects || 0}
               </div>
-              <div className="tw-text-muted tw-mt-1 tw-text-sm">
+              <div className="text-muted tw-mt-1 tw-text-sm">
                 {stats.activeProjects || 0} active, {stats.completedProjects || 0} completed
               </div>
             </div>
 
             {/* Revenue */}
-            <div className="tw-stat-card">
+            <div className="stat-card">
               <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
-                <TrendingUp className="icon-md tw-text-muted" />
-                <span className="tw-stat-label">Revenue</span>
+                <TrendingUp className="icon-md text-muted" />
+                <span className="stat-label">Revenue</span>
               </div>
-              <div className="tw-stat-value">
+              <div className="stat-value">
                 {formatCurrency(stats.totalPaid)}
               </div>
-              <div className="tw-text-muted tw-mt-1 tw-text-sm">
+              <div className="text-muted tw-mt-1 tw-text-sm">
                 {formatCurrency(stats.totalInvoiced)} invoiced
               </div>
             </div>
 
             {/* Outstanding */}
-            <div className="tw-stat-card">
+            <div className="stat-card">
               <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
-                <DollarSign className="icon-md tw-text-muted" />
-                <span className="tw-stat-label">Outstanding</span>
+                <DollarSign className="icon-md text-muted" />
+                <span className="stat-label">Outstanding</span>
               </div>
-              <div className="tw-stat-value">
+              <div className="stat-value">
                 {formatCurrency(stats.totalOutstanding)}
               </div>
             </div>
@@ -224,8 +204,8 @@ export function OverviewTab({
         <div className="tw-panel">
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
             <div className="tw-flex tw-items-center tw-gap-2">
-              <Tag className="icon-md tw-text-muted" />
-              <span className="tw-heading ">
+              <Tag className="icon-md text-muted" />
+              <span className="heading ">
                 Tags
               </span>
             </div>
@@ -255,7 +235,7 @@ export function OverviewTab({
 
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             {tags.length === 0 ? (
-              <span className="tw-text-muted tw-italic">
+              <span className="text-muted tw-italic">
                 No tags assigned
               </span>
             ) : (
@@ -283,15 +263,15 @@ export function OverviewTab({
       <div className="tw-flex tw-flex-col tw-gap-6">
         {/* Contact Info */}
         <div className="tw-panel">
-          <h3 className="tw-section-title ">
+          <h3 className="section-title ">
             Contact Information
           </h3>
 
           <div className="tw-flex tw-flex-col tw-gap-3">
             {client.contact_name && (
               <div className="tw-flex tw-items-center tw-gap-3">
-                <User className="icon-md tw-text-muted" />
-                <span className="tw-text-muted ">
+                <User className="icon-md text-muted" />
+                <span className="text-muted ">
                   {client.contact_name}
                 </span>
               </div>
@@ -299,8 +279,8 @@ export function OverviewTab({
 
             {client.company_name && (
               <div className="tw-flex tw-items-center tw-gap-3">
-                <Building2 className="icon-md tw-text-muted" />
-                <span className="tw-text-muted ">
+                <Building2 className="icon-md text-muted" />
+                <span className="text-muted ">
                   {client.company_name}
                 </span>
               </div>
@@ -308,7 +288,7 @@ export function OverviewTab({
 
             {client.email && (
               <div className="tw-flex tw-items-center tw-gap-3">
-                <Mail className="icon-md tw-text-muted" />
+                <Mail className="icon-md text-muted" />
                 <a
                   href={`mailto:${client.email}`}
                   className="tw-text-primary "
@@ -320,10 +300,10 @@ export function OverviewTab({
 
             {client.phone && (
               <div className="tw-flex tw-items-center tw-gap-3">
-                <Phone className="icon-md tw-text-muted" />
+                <Phone className="icon-md text-muted" />
                 <a
                   href={`tel:${client.phone}`}
-                  className="tw-text-muted "
+                  className="text-muted "
                 >
                   {client.phone}
                 </a>
@@ -334,34 +314,34 @@ export function OverviewTab({
 
         {/* Account Details */}
         <div className="tw-panel">
-          <h3 className="tw-section-title ">
+          <h3 className="section-title ">
             Account Details
           </h3>
 
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between">
-              <span className="tw-label">Created</span>
-              <span className="tw-text-muted ">
+              <span className="label">Created</span>
+              <span className="text-muted ">
                 {formatDate(client.created_at)}
               </span>
             </div>
 
             {client.invitation_sent_at && (
               <div className="tw-flex tw-items-center tw-justify-between">
-                <span className="tw-label">Invited</span>
-                <span className="tw-text-muted ">
+                <span className="label">Invited</span>
+                <span className="text-muted ">
                   {formatDate(client.invitation_sent_at)}
                 </span>
               </div>
             )}
 
             <div className="tw-flex tw-items-center tw-justify-between">
-              <span className="tw-label">Portal Access</span>
+              <span className="label">Portal Access</span>
               <span
                 className={cn(
                   client.status === 'active'
                     ? 'tw-text-primary'
-                    : 'tw-text-muted',
+                    : 'text-muted',
                   ''
                 )}
               >

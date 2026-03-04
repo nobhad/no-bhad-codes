@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  MessageSquare,
   Inbox,
-  User,
+  User
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -11,16 +10,16 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
 import { formatDate } from '@react/utils/formatDate';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -48,13 +47,13 @@ interface MessagesTableProps {
   overviewMode?: boolean;
 }
 
-export function MessagesTable({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: MessagesTableProps) {
+export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, overviewMode = false }: MessagesTableProps) {
   const containerRef = useFadeIn();
 
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -76,7 +75,7 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
       const response = await fetch(API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS, {
         method: 'GET',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load conversations');
 
@@ -112,12 +111,12 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
         let aVal: string | number = '';
         let bVal: string | number = '';
         switch (sort.column) {
-          case 'client': aVal = a.clientName; bVal = b.clientName; break;
-          case 'unread': aVal = a.unreadCount; bVal = b.unreadCount; break;
-          case 'lastMessageAt':
-            aVal = a.lastMessageAt || '';
-            bVal = b.lastMessageAt || '';
-            break;
+        case 'client': aVal = a.clientName; bVal = b.clientName; break;
+        case 'unread': aVal = a.unreadCount; bVal = b.unreadCount; break;
+        case 'lastMessageAt':
+          aVal = a.lastMessageAt || '';
+          bVal = b.lastMessageAt || '';
+          break;
         }
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
@@ -131,7 +130,7 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
   const pagination = usePagination({
     totalItems: filteredConversations.length,
     storageKey: overviewMode ? undefined : 'admin_messages_table_pagination',
-    defaultPageSize,
+    defaultPageSize
   });
 
   const paginatedConversations = filteredConversations.slice(
@@ -159,7 +158,7 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
         <TableStats
           items={[
             { value: conversations.filter(c => !c.isArchived).length, label: 'conversations' },
-            { value: totalUnread, label: 'unread', variant: 'pending', hideIfZero: true },
+            { value: totalUnread, label: 'unread', variant: 'pending', hideIfZero: true }
           ]}
           tooltip={`${conversations.length} Conversations • ${totalUnread} Unread`}
         />
@@ -192,57 +191,57 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'client' ? sort.direction : null}
               onClick={() => toggleSort('client')}
             >
               Client
-            </AdminTableHead>
-            <AdminTableHead>Project</AdminTableHead>
-            <AdminTableHead>Last Message</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead>Project</PortalTableHead>
+            <PortalTableHead>Last Message</PortalTableHead>
+            <PortalTableHead
               className="text-center"
               sortable
               sortDirection={sort?.column === 'unread' ? sort.direction : null}
               onClick={() => toggleSort('unread')}
             >
               Unread
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'lastMessageAt' ? sort.direction : null}
               onClick={() => toggleSort('lastMessageAt')}
             >
               Last Updated
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={6} message={error} onRetry={loadConversations} />
+            <PortalTableError colSpan={6} message={error} onRetry={loadConversations} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={6} rows={5} />
+            <PortalTableLoading colSpan={6} rows={5} />
           ) : paginatedConversations.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={6}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No conversations match your search' : 'No conversations yet'}
             />
           ) : (
             paginatedConversations.map((conversation) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={conversation.id}
                 clickable
                 onClick={() => onNavigate?.('messages', String(conversation.id))}
               >
-                <AdminTableCell className="primary-cell">
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <User className="cell-icon" />
                     <div className="cell-content">
@@ -250,8 +249,8 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
                       <span className="cell-subtitle">{conversation.clientEmail}</span>
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   {conversation.projectName && (
                     <button
                       onClick={(e) => {
@@ -263,19 +262,25 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
                       {conversation.projectName}
                     </button>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="message-preview-cell">
-                  <span className="text-truncate">{conversation.lastMessage || '—'}</span>
-                </AdminTableCell>
-                <AdminTableCell className="text-center">
+                </PortalTableCell>
+                <PortalTableCell className="message-preview-cell">
+                  {conversation.lastMessage
+                    ? <span className="text-truncate">{conversation.lastMessage}</span>
+                    : <span className="cell-empty">—</span>
+                  }
+                </PortalTableCell>
+                <PortalTableCell className="text-center">
                   {conversation.unreadCount > 0 && (
                     <span className="badge badge-pending">{conversation.unreadCount}</span>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">
-                  {conversation.lastMessageAt ? formatDate(conversation.lastMessageAt) : '—'}
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">
+                  {conversation.lastMessageAt
+                    ? formatDate(conversation.lastMessageAt)
+                    : <span className="cell-empty">—</span>
+                  }
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton
                       action="view"
@@ -283,12 +288,12 @@ export function MessagesTable({ onNavigate, getAuthToken, showNotification, defa
                       onClick={() => onNavigate?.('messages', String(conversation.id))}
                     />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/factories';
 
 // Lazy load child components
 const LeadsTable = React.lazy(() => import('../leads/LeadsTable').then(m => ({ default: m.LeadsTable })));
@@ -39,7 +40,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
   // Render individual views for specific subtabs
   if (activeSubtab === 'leads') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading leads...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
         <LeadsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -47,7 +48,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   if (activeSubtab === 'contacts') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading contacts...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
         <ContactsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -55,7 +56,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   if (activeSubtab === 'messages') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading messages...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
         <MessagingPanel onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -63,7 +64,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
 
   if (activeSubtab === 'clients') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading clients...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
         <ClientsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -72,7 +73,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
   // Overview - show all tables stacked with default pagination of 10
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
-      <React.Suspense fallback={<div className="loading-state">Loading leads...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
         <section className="overview-table-section">
           <LeadsTable
             onNavigate={onNavigate}
@@ -84,7 +85,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading contacts...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
         <section className="overview-table-section">
           <ContactsTable
             onNavigate={onNavigate}
@@ -96,7 +97,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading clients...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
         <section className="overview-table-section">
           <ClientsTable
             onNavigate={onNavigate}
@@ -108,7 +109,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading messages...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
         <section className="overview-table-section">
           <MessagesTable
             onNavigate={onNavigate}

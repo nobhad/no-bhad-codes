@@ -4,10 +4,15 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { PORTAL_QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { QuestionnaireForm } from './QuestionnaireForm';
 import { QUESTIONNAIRE_STATUS_CONFIG } from './types';
@@ -26,7 +31,7 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
+    day: 'numeric'
   });
 }
 
@@ -34,19 +39,40 @@ function formatDate(dateString: string): string {
  * Get status icon based on questionnaire status
  */
 function getStatusIcon(status: QuestionnaireStatus): React.ReactNode {
-  const iconClass = 'tw-h-3.5 tw-w-3.5';
-
   switch (status) {
-    case 'submitted':
-    case 'approved':
-      return <CheckCircle className={cn(iconClass, 'tw-text-[var(--status-completed)]')} />;
-    case 'in_progress':
-      return <Clock className={cn(iconClass, 'tw-text-[var(--status-active)]')} />;
-    case 'rejected':
-      return <AlertCircle className={cn(iconClass, 'tw-text-[var(--status-cancelled)]')} />;
-    default:
-      return <FileText className={iconClass} />;
+  case 'submitted':
+  case 'approved':
+    return <CheckCircle className="icon-sm text-status-completed" />;
+  case 'in_progress':
+    return <Clock className="icon-sm text-status-active" />;
+  case 'rejected':
+    return <AlertCircle className="icon-sm text-status-cancelled" />;
+  default:
+    return <FileText className="icon-sm" />;
   }
+}
+
+/**
+ * Filter questionnaire by search and status
+ */
+function filterQuestionnaire(
+  response: PortalQuestionnaireResponse,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      response.questionnaire?.title?.toLowerCase().includes(s) ||
+      response.questionnaire?.description?.toLowerCase().includes(s);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (response.status !== filters.status) return false;
+  }
+
+  return true;
 }
 
 /**
@@ -54,7 +80,7 @@ function getStatusIcon(status: QuestionnaireStatus): React.ReactNode {
  */
 export function PortalQuestionnairesView({
   getAuthToken,
-  showNotification,
+  showNotification
 }: PortalQuestionnairesProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const cardsRef = useStaggerChildren<HTMLDivElement>(0.08, 0.1);
@@ -73,7 +99,7 @@ export function PortalQuestionnairesView({
 
     try {
       const headers: HeadersInit = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       };
 
       const token = getAuthToken?.();
@@ -83,14 +109,16 @@ export function PortalQuestionnairesView({
 
       const response = await fetch(API_ENDPOINTS.QUESTIONNAIRES_MY_RESPONSES, {
         credentials: 'include',
-        headers,
+        headers
       });
 
       if (!response.ok) {
         throw new Error('Failed to fetch questionnaires');
       }
 
-      const data = await response.json();
+      const raw = await response.json();
+      // Server uses sendSuccess() which wraps: { success, data: { responses } }
+      const data = raw.data ?? raw;
       setResponses(data.responses || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load questionnaires';
@@ -105,6 +133,21 @@ export function PortalQuestionnairesView({
   useEffect(() => {
     fetchResponses();
   }, [fetchResponses]);
+
+  // Table filters
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    applyFilters
+  } = useTableFilters<PortalQuestionnaireResponse>({
+    storageKey: 'portal_questionnaires',
+    filters: PORTAL_QUESTIONNAIRES_FILTER_CONFIG,
+    filterFn: filterQuestionnaire
+  });
+
+  const filteredResponses = useMemo(() => applyFilters(responses), [applyFilters, responses]);
 
   /**
    * Handle card click to open questionnaire
@@ -144,124 +187,109 @@ export function PortalQuestionnairesView({
     );
   }
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading questionnaires...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={fetchResponses}>Retry</button>
-      </div>
-    );
-  }
-
-  // Empty state
-  if (responses.length === 0) {
-    return (
-      <div ref={containerRef}>
-        <EmptyState
-          icon={<FileText className="tw-h-6 tw-w-6" />}
-          message="No questionnaires assigned yet"
-        />
-      </div>
-    );
-  }
-
   // Calculate summary stats
   const completedCount = responses.filter(r => r.status === 'submitted' || r.status === 'approved').length;
   const pendingCount = responses.filter(r => r.status === 'pending' || r.status === 'in_progress').length;
   const needsRevisionCount = responses.filter(r => r.status === 'rejected').length;
 
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Summary Cards */}
-      <div className="tw-grid-stats">
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Completed</span>
-          <span className="tw-stat-value qview-status-completed">{completedCount}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Pending</span>
-          <span className="tw-stat-value qview-status-active">{pendingCount}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Needs Revision</span>
-          <span className="tw-stat-value qview-status-cancelled">{needsRevisionCount}</span>
-        </div>
-      </div>
+    <TableLayout
+      containerRef={containerRef}
+      title="QUESTIONNAIRES"
+      stats={
+        <TableStats items={[
+          { value: responses.length, label: 'total' },
+          { value: completedCount, label: 'completed', variant: 'completed', hideIfZero: true },
+          { value: pendingCount, label: 'pending', variant: 'pending', hideIfZero: true },
+          { value: needsRevisionCount, label: 'needs revision', variant: 'overdue', hideIfZero: true }
+        ]} />
+      }
+      actions={
+        <>
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search questionnaires..." />
+          <FilterDropdown
+            sections={PORTAL_QUESTIONNAIRES_FILTER_CONFIG}
+            values={filterValues}
+            onChange={(key, value) => setFilter(key, value)}
+          />
+          <IconButton action="refresh" onClick={fetchResponses} title="Refresh" loading={isLoading} />
+        </>
+      }
+    >
+      {isLoading ? (
+        <LoadingState message="Loading questionnaires..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchResponses} />
+      ) : filteredResponses.length === 0 ? (
+        <EmptyState
+          icon={<FileText className="icon-lg" />}
+          message={responses.length === 0
+            ? 'No questionnaires assigned yet'
+            : 'No questionnaires match the current filters.'
+          }
+        />
+      ) : (
+        <div ref={cardsRef} className="portal-cards-list">
+          {filteredResponses.map((response) => {
+            const config = QUESTIONNAIRE_STATUS_CONFIG[response.status];
+            const isActionable = response.status !== 'submitted' && response.status !== 'approved';
 
-      {/* Questionnaire Cards */}
-      <div ref={cardsRef} className="tw-section qview-no-gap">
-        {responses.map((response) => {
-          const config = QUESTIONNAIRE_STATUS_CONFIG[response.status];
-          const isActionable = response.status !== 'submitted' && response.status !== 'approved';
-
-          return (
-            <div
-              key={response.id}
-              onClick={() => handleOpenQuestionnaire(response)}
-              className="tw-card-hover qview-card"
-            >
-              {/* Left side: Icon and info */}
-              <div className="qview-left">
-                <div className="qview-icon">
-                  {getStatusIcon(response.status)}
-                </div>
-                <div className="qview-info">
-                  <span className="tw-text-primary qview-title">
-                    {response.questionnaire.title}
-                  </span>
-                  {response.questionnaire.description && (
-                    <span className="tw-text-muted qview-text-xs">
-                      {response.questionnaire.description}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Middle: Progress bar (if in progress) */}
-              {response.status === 'in_progress' && response.progress > 0 && (
-                <div className="qview-progress-section">
-                  <div className="tw-progress-track qview-progress-track">
-                    <div
-                      className="tw-progress-bar"
-                      style={{ width: `${response.progress}%` }}
-                    />
+            return (
+              <div
+                key={response.id}
+                onClick={() => handleOpenQuestionnaire(response)}
+                className="portal-card card-clickable"
+              >
+                {/* Header: Icon, title, status */}
+                <div className="portal-card-header">
+                  <div className="portal-card-title-group">
+                    {getStatusIcon(response.status)}
+                    <div className="tw-flex tw-flex-col tw-gap-0.5">
+                      <span className="tw-text-primary">
+                        {response.questionnaire.title}
+                      </span>
+                      {response.questionnaire.description && (
+                        <span className="text-muted tw-text-xs">
+                          {response.questionnaire.description}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="tw-text-muted qview-text-xs">
-                    {response.progress}%
-                  </span>
+                  <div className="portal-card-status-group">
+                    <div className="tw-flex tw-flex-col tw-items-end tw-gap-0.5">
+                      <span className="tw-badge">{config.label}</span>
+                      <span className="text-muted tw-text-xs">
+                        {response.submitted_at
+                          ? `Submitted ${formatDate(response.submitted_at)}`
+                          : `Updated ${formatDate(response.updated_at || response.created_at)}`
+                        }
+                      </span>
+                    </div>
+                    {isActionable && (
+                      <ChevronRight className="icon-xs" />
+                    )}
+                  </div>
                 </div>
-              )}
 
-              {/* Right side: Status and action */}
-              <div className="qview-right">
-                <div className="qview-status-col">
-                  <span className="tw-badge">{config.label}</span>
-                  <span className="tw-text-muted qview-text-xs">
-                    {response.submitted_at
-                      ? `Submitted ${formatDate(response.submitted_at)}`
-                      : `Updated ${formatDate(response.updated_at || response.created_at)}`
-                    }
-                  </span>
-                </div>
-                {isActionable && (
-                  <ChevronRight className="tw-h-3.5 tw-w-3.5" />
+                {/* Progress bar (if in progress) */}
+                {response.status === 'in_progress' && response.progress > 0 && (
+                  <div className="portal-card-progress">
+                    <div className="tw-progress-track">
+                      <div
+                        className="tw-progress-bar"
+                        style={{ width: `${response.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-muted tw-text-xs">
+                      {response.progress}%
+                    </span>
+                  </div>
                 )}
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+            );
+          })}
+        </div>
+      )}
+    </TableLayout>
   );
 }

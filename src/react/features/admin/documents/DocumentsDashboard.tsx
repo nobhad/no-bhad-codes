@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/factories';
 
 // Lazy load child components
 const InvoicesTable = React.lazy(() => import('../invoices/InvoicesTable').then(m => ({ default: m.InvoicesTable })));
@@ -38,7 +39,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
   // Render individual views for specific subtabs
   if (activeSubtab === 'invoices') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading invoices...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
         <InvoicesTable
           onNavigate={onNavigate}
           getAuthToken={getAuthToken}
@@ -50,7 +51,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   if (activeSubtab === 'contracts') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading contracts...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
         <ContractsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -58,7 +59,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   if (activeSubtab === 'document-requests') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading document requests...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
         <DocumentRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -66,7 +67,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
 
   if (activeSubtab === 'questionnaires') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading questionnaires...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
         <QuestionnairesTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -75,7 +76,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
   // Overview - show all tables stacked with default pagination of 10
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
-      <React.Suspense fallback={<div className="loading-state">Loading invoices...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
         <section className="overview-table-section">
           <InvoicesTable
             onNavigate={onNavigate}
@@ -87,7 +88,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading contracts...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
         <section className="overview-table-section">
           <ContractsTable
             onNavigate={onNavigate}
@@ -99,7 +100,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading document requests...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
         <section className="overview-table-section">
           <DocumentRequestsTable
             onNavigate={onNavigate}
@@ -111,7 +112,7 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading questionnaires...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
         <section className="overview-table-section">
           <QuestionnairesTable
             onNavigate={onNavigate}

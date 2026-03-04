@@ -4,19 +4,46 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, Inbox, RefreshCw } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Inbox } from 'lucide-react';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { PortalModal } from '@react/components/portal/PortalModal';
 import { IconButton } from '@react/factories';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { PORTAL_ADHOC_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { AdHocRequestCard } from './AdHocRequestCard';
 import { NewRequestForm } from './NewRequestForm';
 import type { AdHocRequest, NewAdHocRequestPayload } from './types';
 import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalAdHocRequests');
+
+/**
+ * Filter ad-hoc request by search and status
+ */
+function filterAdHocRequest(
+  request: AdHocRequest,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      request.title?.toLowerCase().includes(s) ||
+      request.description?.toLowerCase().includes(s);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (request.status !== filters.status) return false;
+  }
+
+  return true;
+}
 
 export interface PortalAdHocRequestsProps {
   /** Auth token getter for API calls */
@@ -25,14 +52,12 @@ export interface PortalAdHocRequestsProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-const API_BASE = '/api/ad-hoc-requests/my-requests';
-
 /**
  * PortalAdHocRequests Component
  */
 export function PortalAdHocRequests({
   getAuthToken,
-  showNotification,
+  showNotification
 }: PortalAdHocRequestsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(0.05, 0.1);
@@ -44,12 +69,27 @@ export function PortalAdHocRequests({
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Table filters
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    applyFilters
+  } = useTableFilters<AdHocRequest>({
+    storageKey: 'portal_adhoc_requests',
+    filters: PORTAL_ADHOC_FILTER_CONFIG,
+    filterFn: filterAdHocRequest
+  });
+
+  const filteredRequests = useMemo(() => applyFilters(requests), [applyFilters, requests]);
+
   /**
    * Get auth headers for API requests
    */
   const getHeaders = useCallback(() => {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
 
     const token = getAuthToken?.();
@@ -68,17 +108,19 @@ export function PortalAdHocRequests({
     setError(null);
 
     try {
-      const response = await fetch(API_BASE, {
+      const response = await fetch(API_ENDPOINTS.AD_HOC_REQUESTS_MY, {
         method: 'GET',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) {
         throw new Error('Failed to load requests');
       }
 
-      const data = await response.json();
+      const raw = await response.json();
+      // Server uses sendSuccess() which wraps: { success, data: { requests } }
+      const data = raw.data ?? raw;
       setRequests(data.requests || []);
     } catch (err) {
       logger.error('Error fetching requests:', err);
@@ -96,7 +138,7 @@ export function PortalAdHocRequests({
       const response = await fetch(API_ENDPOINTS.PORTAL.PROJECTS, {
         method: 'GET',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -144,16 +186,16 @@ export function PortalAdHocRequests({
           title: payload.title,
           description: payload.description,
           priority: payload.priority,
-          project_id: payload.project_id,
+          project_id: payload.project_id
         });
         requestHeaders = getHeaders();
       }
 
-      const response = await fetch(API_BASE, {
+      const response = await fetch(API_ENDPOINTS.AD_HOC_REQUESTS_MY, {
         method: 'POST',
         headers: requestHeaders,
         credentials: 'include',
-        body,
+        body
       });
 
       if (!response.ok) {
@@ -182,10 +224,10 @@ export function PortalAdHocRequests({
    */
   const handleApprove = async (requestId: number) => {
     try {
-      const response = await fetch(`${API_BASE}/${requestId}/approve`, {
+      const response = await fetch(buildEndpoint.adHocRequestApprove(requestId), {
         method: 'POST',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -212,10 +254,10 @@ export function PortalAdHocRequests({
    */
   const handleDecline = async (requestId: number) => {
     try {
-      const response = await fetch(`${API_BASE}/${requestId}/decline`, {
+      const response = await fetch(buildEndpoint.adHocRequestDecline(requestId), {
         method: 'POST',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -243,91 +285,66 @@ export function PortalAdHocRequests({
     fetchProjects();
   }, [fetchRequests, fetchProjects]);
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading requests...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={fetchRequests}>Retry</button>
-      </div>
-    );
-  }
-
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Header */}
-      <div className="adhoc-header">
-        <div>
-          <h2 className="tw-heading">Ad-Hoc Requests</h2>
-          <p className="tw-text-muted adhoc-desc">
-            Submit requests for additional work outside your current project scope
-          </p>
-        </div>
-        <button
-          className="btn-primary adhoc-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <Plus className="tw-h-3.5 tw-w-3.5" />
-          New Request
-        </button>
-      </div>
-
-      {/* Request List */}
-      {requests.length === 0 ? (
-        <EmptyState
-          icon={<Inbox className="tw-h-6 tw-w-6" />}
-          message="No requests yet. Click 'New Request' to submit your first ad-hoc request."
-        />
-      ) : (
-        <div ref={listRef} className="tw-section">
-          {requests.map((request) => (
-            <AdHocRequestCard
-              key={request.id}
-              request={request}
-              onApprove={handleApprove}
-              onDecline={handleDecline}
+    <>
+      <TableLayout
+        containerRef={containerRef}
+        title="AD-HOC REQUESTS"
+        stats={<TableStats items={[{ value: requests.length, label: 'total' }]} />}
+        actions={
+          <>
+            <SearchFilter value={search} onChange={setSearch} placeholder="Search requests..." />
+            <FilterDropdown
+              sections={PORTAL_ADHOC_FILTER_CONFIG}
+              values={filterValues}
+              onChange={(key, value) => setFilter(key, value)}
             />
-          ))}
-        </div>
-      )}
+            <IconButton action="add" onClick={() => setIsModalOpen(true)} title="New Request" />
+            <IconButton action="refresh" onClick={fetchRequests} title="Refresh" loading={isLoading} />
+          </>
+        }
+      >
+        {isLoading ? (
+          <LoadingState message="Loading requests..." />
+        ) : error ? (
+          <ErrorState message={error} onRetry={fetchRequests} />
+        ) : filteredRequests.length === 0 ? (
+          <EmptyState
+            icon={<Inbox className="icon-lg" />}
+            message={requests.length === 0
+              ? 'No requests yet. Click \'+\' to submit your first ad-hoc request.'
+              : 'No requests match the current filters.'
+            }
+          />
+        ) : (
+          <div ref={listRef} className="portal-cards-list">
+            {filteredRequests.map((request) => (
+              <AdHocRequestCard
+                key={request.id}
+                request={request}
+                onApprove={handleApprove}
+                onDecline={handleDecline}
+              />
+            ))}
+          </div>
+        )}
+      </TableLayout>
 
       {/* New Request Modal */}
-      {isModalOpen && (
-        <div
-          className="adhoc-modal-backdrop"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsModalOpen(false);
-          }}
-        >
-          <div className="tw-panel adhoc-modal-content">
-            <div className="tw-panel adhoc-modal-header">
-              <div>
-                <h3 className="tw-heading">New Ad-Hoc Request</h3>
-                <p className="tw-text-muted adhoc-desc">
-                  Describe what you need and we'll provide a quote
-                </p>
-              </div>
-              <IconButton action="close" onClick={() => setIsModalOpen(false)} />
-            </div>
-            <NewRequestForm
-              onSubmit={handleSubmit}
-              onCancel={() => setIsModalOpen(false)}
-              loading={isSubmitting}
-              projects={projects}
-            />
-          </div>
-        </div>
-      )}
-    </div>
+      <PortalModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        title="New Ad-Hoc Request"
+        description="Describe what you need and we'll provide a quote"
+        size="lg"
+      >
+        <NewRequestForm
+          onSubmit={handleSubmit}
+          onCancel={() => setIsModalOpen(false)}
+          loading={isSubmitting}
+          projects={projects}
+        />
+      </PortalModal>
+    </>
   );
 }

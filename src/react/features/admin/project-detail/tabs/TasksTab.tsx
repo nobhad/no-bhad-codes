@@ -11,7 +11,6 @@ import {
   GripVertical
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { ProjectMilestone } from '../../types';
 
@@ -45,7 +44,7 @@ export function TasksTab({
   milestones,
   progress,
   onAddMilestone,
-  onUpdateMilestone,
+  onUpdateMilestone: _onUpdateMilestone,
   onDeleteMilestone,
   onToggleMilestone,
   showNotification
@@ -142,13 +141,13 @@ export function TasksTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div>
-            <span className="tw-text-muted ">Progress: </span>
+            <span className="text-muted ">Progress: </span>
             <span className="tw-text-primary tw-font-semibold">
               {progress}%
             </span>
           </div>
           <div>
-            <span className="tw-text-muted ">Completed: </span>
+            <span className="text-muted ">Completed: </span>
             <span className="tw-text-primary tw-font-semibold">
               {completedCount}/{totalCount}
             </span>
@@ -172,7 +171,7 @@ export function TasksTab({
       {/* Add Milestone Form */}
       {showAddForm && (
         <div className="tw-panel">
-          <h4 className="tw-heading tasks-form-heading">
+          <h4 className="heading tasks-form-heading">
             New Milestone
           </h4>
 
@@ -280,7 +279,7 @@ export function TasksTab({
                       <span
                         className={cn(
                           milestone.is_completed
-                            ? 'tw-text-muted tw-line-through'
+                            ? 'text-muted tw-line-through'
                             : 'tw-text-primary',
                           ''
                         )}
@@ -289,7 +288,7 @@ export function TasksTab({
                       </span>
 
                       {milestone.task_count !== undefined && milestone.task_count > 0 && (
-                        <span className="tw-text-muted tw-text-xs">
+                        <span className="text-muted tw-text-xs">
                           ({milestone.completed_task_count || 0}/{milestone.task_count} tasks)
                         </span>
                       )}
@@ -308,14 +307,14 @@ export function TasksTab({
 
                   {/* Due Date */}
                   {milestone.due_date && (
-                    <span className="tw-text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
+                    <span className="text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
                       <Calendar className="icon-xs" />
                       {formatDate(milestone.due_date)}
                     </span>
                   )}
 
                   {/* Order indicator */}
-                  <span className="tw-text-muted tw-w-6 tw-text-center tw-text-xs">
+                  <span className="text-muted tw-w-6 tw-text-center tw-text-xs">
                     #{index + 1}
                   </span>
 
@@ -332,7 +331,7 @@ export function TasksTab({
                   <div className="tw-px-4 tw-pb-4 tw-pt-0 tasks-expanded-content">
                     {/* Description */}
                     {milestone.description && (
-                      <p className="tw-text-muted tw-mt-3 tasks-description">
+                      <p className="text-muted tw-mt-3 tasks-description">
                         {milestone.description}
                       </p>
                     )}
@@ -340,14 +339,14 @@ export function TasksTab({
                     {/* Deliverables */}
                     {milestone.deliverables && milestone.deliverables.length > 0 && (
                       <div className="tw-mt-3">
-                        <span className="tw-label">
+                        <span className="label">
                           Deliverables
                         </span>
                         <ul className="tw-mt-2 tw-space-y-1">
                           {milestone.deliverables.map((deliverable, idx) => (
                             <li
                               key={idx}
-                              className="tw-text-muted tw-flex tw-items-start tw-gap-2 "
+                              className="text-muted tw-flex tw-items-start tw-gap-2 "
                             >
                               <span>•</span>
                               {deliverable}

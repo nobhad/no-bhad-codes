@@ -15,7 +15,7 @@ import {
   FileText,
   HelpCircle,
   Settings,
-  LogOut,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
@@ -49,7 +49,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   { id: 'preview', label: 'Review', icon: Eye },
   { id: 'files', label: 'Files', icon: FileText, badgeKey: 'documents' },
   { id: 'help', label: 'Help', icon: HelpCircle },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'settings', label: 'Settings', icon: Settings }
 ];
 
 export interface PortalNavigationProps {
@@ -91,7 +91,7 @@ const HASH_TO_TAB: Record<string, string> = {
   '/review': 'preview',
   '/files': 'files',
   '/help': 'help',
-  '/settings': 'settings',
+  '/settings': 'settings'
 };
 
 /**
@@ -114,7 +114,7 @@ export function PortalSidebar({
   onLogout,
   defaultCollapsed = false,
   collapsed: controlledCollapsed,
-  onCollapsedChange,
+  onCollapsedChange
 }: PortalNavigationProps) {
   // Use controlled or uncontrolled collapsed state
   const [uncontrolledCollapsed, setUncontrolledCollapsed] = useState(defaultCollapsed);

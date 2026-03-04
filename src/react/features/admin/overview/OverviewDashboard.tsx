@@ -21,8 +21,10 @@ import {
   Plus,
   FileUp,
   Send,
-  Inbox,
+  Inbox
 } from 'lucide-react';
+import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/factories';
 import { cn } from '@react/lib/utils';
 import { formatTimeAgo } from '../../../../utils/time-utils';
 import { formatCurrency } from '../../../../utils/format-utils';
@@ -56,7 +58,8 @@ interface TaskItem {
   dueDate?: string;
 }
 
-export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }: OverviewDashboardProps) {
+export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboardProps) {
+  const containerRef = useFadeIn<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tasksView, setTasksView] = useState<'list' | 'kanban'>('list');
@@ -71,7 +74,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -85,7 +88,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
     try {
       const response = await fetch(API_ENDPOINTS.ADMIN.DASHBOARD, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load dashboard data');
       const data = await response.json();
@@ -109,18 +112,18 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
   const attentionItems = [
     { type: 'overdue_invoice', count: attention.overdueInvoices, label: 'Overdue Invoices', icon: <AlertTriangle />, action: () => onNavigate?.('invoices') },
     { type: 'pending_contract', count: attention.pendingContracts, label: 'Pending Contracts', icon: <FileText />, action: () => onNavigate?.('contracts') },
-    { type: 'unread_message', count: attention.unreadMessages, label: 'Unread Messages', icon: <Mail />, action: () => onNavigate?.('messages') },
+    { type: 'unread_message', count: attention.unreadMessages, label: 'Unread Messages', icon: <Mail />, action: () => onNavigate?.('messages') }
   ].filter(item => item.count > 0);
 
   const snapshotMetrics = [
     { label: 'Active Projects', value: snapshot.activeProjects, icon: <Briefcase /> },
     { label: 'Total Clients', value: snapshot.totalClients, icon: <Users /> },
     { label: 'Revenue MTD', value: formatCurrency(snapshot.revenueMTD), icon: <DollarSign /> },
-    { label: 'Conversion Rate', value: `${snapshot.conversionRate}%`, icon: <TrendingUp /> },
+    { label: 'Conversion Rate', value: `${snapshot.conversionRate}%`, icon: <TrendingUp /> }
   ];
 
   if (isLoading) {
-    return <div className="loading-state"><div className="loading-spinner" /></div>;
+    return <LoadingState message="Loading dashboard..." />;
   }
 
   if (error) {
@@ -135,7 +138,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken, showNotification }
   }
 
   return (
-    <div className="overview-linear">
+    <div ref={containerRef} className="overview-linear">
       {/* Stats Strip */}
       <div className="overview-stats-strip">
         {snapshotMetrics.map((metric) => (
@@ -311,7 +314,7 @@ function TasksKanban({ tasks }: { tasks: TaskItem[] }) {
   const columns = [
     { id: 'pending', label: 'TO DO' },
     { id: 'in_progress', label: 'IN PROGRESS' },
-    { id: 'completed', label: 'DONE' },
+    { id: 'completed', label: 'DONE' }
   ];
 
   return (
@@ -345,10 +348,10 @@ function formatDate(dateStr: string): string {
 
 function getPriorityColor(priority: string): string {
   switch (priority) {
-    case 'urgent': return 'var(--status-cancelled)';
-    case 'high': return 'var(--status-pending)';
-    case 'medium': return 'var(--portal-text-light)';
-    default: return 'var(--portal-text-muted)';
+  case 'urgent': return 'var(--status-cancelled)';
+  case 'high': return 'var(--status-pending)';
+  case 'medium': return 'var(--portal-text-light)';
+  default: return 'var(--portal-text-muted)';
   }
 }
 

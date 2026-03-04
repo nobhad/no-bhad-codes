@@ -10,13 +10,9 @@ import {
   Pencil,
   Mail,
   Archive,
-  Trash2,
-  RefreshCw
+  Trash2
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { IconButton, TabList, TabPanel } from '@react/factories';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -105,7 +101,7 @@ export function ClientDetail({
     addNote,
     updateNote,
     deleteNote,
-    toggleNotePin,
+    toggleNotePin: _toggleNotePin,
     addTag,
     removeTag,
     sendInvitation
@@ -199,11 +195,13 @@ export function ClientDetail({
   // Error state
   if (error && !client) {
     return (
-      <div className="error-state">
-        <p>{error}</p>
-        <button className="btn-secondary" onClick={refetch}>
-          Retry
-        </button>
+      <div className="portal-card">
+        <div className="error-state">
+          <p>{error}</p>
+          <button className="btn-secondary" onClick={refetch}>
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -211,12 +209,14 @@ export function ClientDetail({
   // No client found
   if (!client) {
     return (
-      <div className="empty-state">
-        <Users className="icon-xl" />
-        <span>Client not found</span>
-        <button className="btn-secondary" onClick={onBack}>
-          Go Back
-        </button>
+      <div className="portal-card">
+        <div className="empty-state">
+          <Users className="icon-xl" />
+          <span>Client not found</span>
+          <button className="btn-secondary" onClick={onBack}>
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -232,7 +232,7 @@ export function ClientDetail({
           {/* Client Info */}
           <div className="tw-flex tw-flex-col tw-gap-0.5">
             <div className="tw-flex tw-items-center tw-gap-2">
-              <h1 className="tw-heading tw-text-lg tw-m-0">
+              <h1 className="heading tw-text-lg tw-m-0">
                 {getDisplayName()}
               </h1>
               <PortalDropdown>
@@ -258,7 +258,7 @@ export function ClientDetail({
               </PortalDropdown>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-3 tw-text-muted tw-text-xs">
+            <div className="tw-flex tw-items-center tw-gap-3 text-muted tw-text-xs">
               {client.email && (
                 <span className="tw-text-primary">{client.email}</span>
               )}

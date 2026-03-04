@@ -32,7 +32,7 @@ export function NavItem({
   isActive,
   badge,
   isCollapsed = false,
-  onClick,
+  onClick
 }: NavItemProps) {
   return (
     <button

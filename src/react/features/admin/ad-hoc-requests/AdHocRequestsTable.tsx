@@ -4,7 +4,7 @@ import {
   Zap,
   Inbox,
   User,
-  ChevronDown,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -14,24 +14,23 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '../../../../utils/format-utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -92,7 +91,7 @@ const AD_HOC_STATUS_CONFIG: Record<string, { label: string }> = {
   'in-progress': { label: 'In Progress' },
   completed: { label: 'Completed' },
   'on-hold': { label: 'On Hold' },
-  cancelled: { label: 'Cancelled' },
+  cancelled: { label: 'Cancelled' }
 };
 
 // Filter function
@@ -127,18 +126,18 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'title':
-      return multiplier * a.title.localeCompare(b.title);
-    case 'priority': {
-      const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-      return multiplier * (order[a.priority] - order[b.priority]);
-    }
-    case 'dueDate':
-      return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-    case 'createdAt':
-      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    default:
-      return 0;
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'priority': {
+    const order = { urgent: 0, high: 1, medium: 2, low: 3 };
+    return multiplier * (order[a.priority] - order[b.priority]);
+  }
+  case 'dueDate':
+    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
+  case 'createdAt':
+    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  default:
+    return 0;
   }
 }
 
@@ -165,7 +164,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     inProgress: 0,
     completed: 0,
     totalRevenue: 0,
-    totalHours: 0,
+    totalHours: 0
   });
 
   // Filtering and sorting
@@ -179,7 +178,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     applyFilters,
     hasActiveFilters
   } = useTableFilters<AdHocRequest>({
-    storageKey: 'admin_ad_hoc_requests',
+    storageKey: overviewMode ? undefined : 'admin_ad_hoc_requests',
     filters: AD_HOC_REQUESTS_FILTER_CONFIG,
     filterFn: filterAdHocRequest,
     sortFn: sortAdHocRequests,
@@ -229,7 +228,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         inProgress: 0,
         completed: 0,
         totalRevenue: 0,
-        totalHours: 0,
+        totalHours: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load ad-hoc requests');
@@ -249,7 +248,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update request');
@@ -278,7 +277,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete requests');
@@ -326,11 +325,11 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
   function getPriorityColor(priority: string): string {
     switch (priority) {
-      case 'urgent': return 'var(--status-cancelled)';
-      case 'high': return 'var(--status-pending)';
-      case 'medium': return 'var(--status-active)';
-      case 'low': return 'var(--portal-text-muted)';
-      default: return 'var(--portal-text-muted)';
+    case 'urgent': return 'var(--status-cancelled)';
+    case 'high': return 'var(--status-pending)';
+    case 'medium': return 'var(--status-active)';
+    case 'low': return 'var(--portal-text-muted)';
+    default: return 'var(--portal-text-muted)';
     }
   }
 
@@ -344,7 +343,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
             { value: stats.total, label: 'total' },
             { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
             { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true },
+            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inProgress} In Progress • ${stats.completed} Completed • ${stats.totalHours}h Total Hours • ${formatCurrency(stats.totalRevenue)} Revenue`}
         />
@@ -399,73 +398,73 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="name-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Request
-            </AdminTableHead>
-            <AdminTableHead className="client-col">Client</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="client-col">Client</PortalTableHead>
+            <PortalTableHead
               className="priority-col"
               sortable
               sortDirection={sort?.column === 'priority' ? sort.direction : null}
               onClick={() => toggleSort('priority')}
             >
               Priority
-            </AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead className="hours-col">Hours</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead className="hours-col">Hours</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
               onClick={() => toggleSort('dueDate')}
             >
               Due
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={8} message={error} onRetry={loadRequests} />
+            <PortalTableError colSpan={8} message={error} onRetry={loadRequests} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={8} rows={5} />
+            <PortalTableLoading colSpan={8} rows={5} />
           ) : paginatedRequests.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={8}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No requests match your filters' : 'No ad-hoc requests yet'}
             />
           ) : (
             paginatedRequests.map((request) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={request.id}
                 clickable
                 selected={selection.isSelected(request)}
               >
-                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(request)}
                     onCheckedChange={() => selection.toggleSelection(request)}
                     aria-label={`Select ${request.title}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="primary-cell">
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <Zap className="cell-icon" />
                     <div className="cell-content">
@@ -478,8 +477,8 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                       )}
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -489,19 +488,19 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   >
                     {request.clientName}
                   </button>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <span
                     className="priority-badge"
                     style={{
                       color: getPriorityColor(request.priority),
-                      backgroundColor: `color-mix(in srgb, ${getPriorityColor(request.priority)} 15%, transparent)`,
+                      backgroundColor: `color-mix(in srgb, ${getPriorityColor(request.priority)} 15%, transparent)`
                     }}
                   >
                     {request.priority}
                   </span>
-                </AdminTableCell>
-                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
                       <button className="status-dropdown-trigger">
@@ -526,8 +525,8 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                         ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
-                </AdminTableCell>
-                <AdminTableCell className="text-right">
+                </PortalTableCell>
+                <PortalTableCell className="text-right">
                   {request.actualHours !== undefined ? (
                     <span>
                       {request.actualHours}
@@ -538,11 +537,11 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   ) : request.estimatedHours ? (
                     <span className="text-muted">{request.estimatedHours}h est</span>
                   ) : null}
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">
                   {request.dueDate && formatDate(request.dueDate)}
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
@@ -554,12 +553,12 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                     )}
                     <IconButton action="delete" title="Delete" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

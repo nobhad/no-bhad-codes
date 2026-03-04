@@ -7,14 +7,11 @@ import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Send,
-  X,
   Pencil,
   Trash2,
   Check,
-  MoreVertical,
   File,
-  RefreshCw,
-  MessageSquare,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
@@ -37,7 +34,7 @@ const ALLOWED_FILE_TYPES = [
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
+  'text/plain'
 ];
 
 // ============================================================================
@@ -55,9 +52,9 @@ function formatMessageTime(dateString: string): string {
     return 'Yesterday';
   } else if (diffDays < 7) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
-  } else {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
 }
 
 function formatFileSize(bytes: number): string {
@@ -465,7 +462,7 @@ export function MessageThread({
   onSendMessage,
   onEditMessage,
   onDeleteMessage,
-  showNotification,
+  showNotification
 }: MessageThreadProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const messagesRef = useStaggerChildren<HTMLDivElement>(0.05);
@@ -479,62 +476,66 @@ export function MessageThread({
   }, [messages]);
 
   return (
-    <div ref={containerRef} className="message-thread-container">
-      {/* Header */}
-      <div className="message-thread-header">
-        <IconButton action="back" onClick={onBack} title="Back to threads" />
+    <div ref={containerRef} className="tw-section">
+      <div className="table-layout">
+        <div className="data-table-card">
+          <div className="message-thread-container">
+            {/* Header */}
+            <div className="data-table-header">
+              <IconButton action="back" onClick={onBack} title="Back to threads" />
 
-        <div className="tw-flex-1 card-content-truncate">
-          <h3 className="tw-text-primary tw-text-sm">{decodeHtmlEntities(thread.subject)}</h3>
-          {thread.project_name && (
-            <span className="tw-text-muted tw-text-sm">{decodeHtmlEntities(thread.project_name)}</span>
-          )}
+              <div className="tw-flex-1 card-content-truncate">
+                <h3 className="tw-text-primary tw-text-sm">{decodeHtmlEntities(thread.subject)}</h3>
+                {thread.project_name && (
+                  <span className="text-muted tw-text-sm">{decodeHtmlEntities(thread.project_name)}</span>
+                )}
+              </div>
+
+              <IconButton action="refresh" onClick={onRefresh} title="Refresh" className={loading ? 'loading-spin' : ''} />
+            </div>
+
+            {/* Messages area */}
+            <div className="messages-area tw-scroll-container">
+              {loading && messages.length === 0 ? (
+                <div className="loading-state tw-h-full">
+                  <span className="loading-spinner" />
+                  <span>Loading messages...</span>
+                </div>
+              ) : error ? (
+                <div className="error-state tw-h-full">
+                  <div className="error-state-message">{error}</div>
+                  <button className="btn-secondary" onClick={onRefresh}>Retry</button>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="empty-state tw-h-full">
+                  <MessageSquare className="icon-lg" />
+                  <span>No messages yet. Start the conversation!</span>
+                </div>
+              ) : (
+                <div ref={messagesRef} className="tw-section">
+                  {messages.map((message) => (
+                    <MessageBubble
+                      key={message.id}
+                      message={message}
+                      isOwn={message.sender_type === 'client'}
+                      onEdit={onEditMessage}
+                      onDelete={onDeleteMessage}
+                      showNotification={showNotification}
+                    />
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+
+            {/* Composer */}
+            <MessageComposer
+              onSend={onSendMessage}
+              disabled={loading || !!error}
+              showNotification={showNotification}
+            />
+          </div>
         </div>
-
-        <IconButton action="refresh" onClick={onRefresh} title="Refresh" className={loading ? 'tw-animate-spin' : ''} />
-      </div>
-
-      {/* Messages area */}
-      <div className="messages-area tw-scroll-container">
-        {loading && messages.length === 0 ? (
-          <div className="loading-state tw-h-full">
-            <RefreshCw className="icon-md tw-animate-spin" />
-            <span>Loading messages...</span>
-          </div>
-        ) : error ? (
-          <div className="error-state tw-h-full">
-            <div className="error-state-message">{error}</div>
-            <button className="btn-secondary" onClick={onRefresh}>Retry</button>
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="empty-state tw-h-full">
-            <MessageSquare className="icon-lg" />
-            <span>No messages yet. Start the conversation!</span>
-          </div>
-        ) : (
-          <div ref={messagesRef} className="tw-section">
-            {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isOwn={message.sender_type === 'client'}
-                onEdit={onEditMessage}
-                onDelete={onDeleteMessage}
-                showNotification={showNotification}
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Composer */}
-      <div className="message-composer">
-        <MessageComposer
-          onSend={onSendMessage}
-          disabled={loading || !!error}
-          showNotification={showNotification}
-        />
       </div>
     </div>
   );

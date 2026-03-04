@@ -24,15 +24,15 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
     companyName: '',
     companyWebsite: '',
     timezone: 'America/New_York',
-    preferredContactMethod: 'email' as const,
+    preferredContactMethod: 'email' as const
   };
 
   const handleChange = (field: keyof BasicInfoData, value: string) => {
     onUpdate({
       basicInfo: {
         ...basicInfo,
-        [field]: value,
-      },
+        [field]: value
+      }
     });
   };
 
@@ -44,10 +44,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef} className="tw-section">
       {/* Section Header */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Contact Information
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Tell us how to reach you during the project.
         </p>
       </div>
@@ -56,12 +56,12 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
       <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
         {/* Contact Name */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">
+          <label className="field-label">
             Contact Name <span className="tw-text-primary">*</span>
           </label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <User className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <User className="icon-xs" />
             </div>
             <input
               type="text"
@@ -78,12 +78,12 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Contact Email */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">
+          <label className="field-label">
             Email Address <span className="tw-text-primary">*</span>
           </label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <Mail className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <Mail className="icon-xs" />
             </div>
             <input
               type="email"
@@ -100,10 +100,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Contact Phone */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">Phone Number</label>
+          <label className="field-label">Phone Number</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <Phone className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <Phone className="icon-xs" />
             </div>
             <input
               type="tel"
@@ -120,10 +120,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Timezone */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">Timezone</label>
+          <label className="field-label">Timezone</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <Clock className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <Clock className="icon-xs" />
             </div>
             <select
               value={basicInfo.timezone}
@@ -144,10 +144,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Company Section */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Company Details
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Help us understand your business.
         </p>
       </div>
@@ -155,10 +155,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
       <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
         {/* Company Name */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">Company Name</label>
+          <label className="field-label">Company Name</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <Building2 className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <Building2 className="icon-xs" />
             </div>
             <input
               type="text"
@@ -172,10 +172,10 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Company Website */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">Current Website</label>
+          <label className="field-label">Current Website</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <Globe className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <Globe className="icon-xs" />
             </div>
             <input
               type="url"
@@ -185,7 +185,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               className="tw-input tw-pl-10"
             />
           </div>
-          <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
+          <span className="tw-text-[12px] text-muted">
             Leave blank if this is a new business
           </span>
         </div>
@@ -193,7 +193,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Preferred Contact Method */}
       <div className="tw-mt-6">
-        <label className="tw-field-label">
+        <label className="field-label">
           Preferred Contact Method
         </label>
         <div className="tw-flex tw-gap-4 tw-mt-2">

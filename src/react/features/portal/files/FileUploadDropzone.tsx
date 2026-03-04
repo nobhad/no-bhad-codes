@@ -5,9 +5,8 @@
 
 import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, X, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { Upload, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 
 // Allowed file types (matches server validation)
 const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
@@ -22,7 +21,7 @@ const ALLOWED_MIME_TYPES = [
   'text/plain',
   'application/zip',
   'application/x-rar-compressed',
-  'application/vnd.rar',
+  'application/vnd.rar'
 ];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -97,7 +96,7 @@ export function FileUploadDropzone({
   isUploading = false,
   uploadProgress = 0,
   disabled = false,
-  className,
+  className
 }: FileUploadDropzoneProps) {
   const [state, setState] = useState<DropzoneState>('idle');
   const [error, setError] = useState<UploadError | null>(null);
@@ -157,7 +156,7 @@ export function FileUploadDropzone({
       } catch (err) {
         setError({
           message: err instanceof Error ? err.message : 'Upload failed',
-          files: valid,
+          files: valid
         });
         setState('error');
       }
@@ -249,7 +248,7 @@ export function FileUploadDropzone({
         role="alert"
       >
         <div className="tw-dropzone-content">
-          <AlertCircle className="tw-h-6 tw-w-6" />
+          <AlertCircle className="icon-lg" />
           <p className="tw-dropzone-text">{error.message}</p>
           <div className="tw-dropzone-actions">
             {error.files && error.files.length > 0 && (
@@ -267,8 +266,8 @@ export function FileUploadDropzone({
     return (
       <div className={cn('tw-dropzone', className)}>
         <div className="tw-dropzone-content">
-          <RefreshCw className="tw-h-6 tw-w-6 tw-animate-spin" />
-          <p className="tw-dropzone-text tw-text-muted">Uploading files...</p>
+          <RefreshCw className="icon-lg loading-spin" />
+          <p className="tw-dropzone-text text-muted">Uploading files...</p>
           <div className="tw-progress-track">
             <div className="tw-progress-bar" style={{ width: `${uploadProgress}%` }} />
           </div>
@@ -282,7 +281,7 @@ export function FileUploadDropzone({
     return (
       <div className={cn('tw-dropzone is-success', className)}>
         <div className="tw-dropzone-content">
-          <CheckCircle className="tw-h-6 tw-w-6" />
+          <CheckCircle className="icon-lg" />
           <p className="tw-dropzone-text">{successCount} file(s) uploaded successfully</p>
         </div>
       </div>

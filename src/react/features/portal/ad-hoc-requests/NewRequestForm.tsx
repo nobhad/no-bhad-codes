@@ -47,7 +47,7 @@ export function NewRequestForm({
   loading = false,
   projects = [],
   maxFileSize = DEFAULT_MAX_FILE_SIZE,
-  maxFiles = DEFAULT_MAX_FILES,
+  maxFiles = DEFAULT_MAX_FILES
 }: NewRequestFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -88,7 +88,7 @@ export function NewRequestForm({
       description: description.trim(),
       priority,
       project_id: projectId,
-      attachments: files.length > 0 ? files : undefined,
+      attachments: files.length > 0 ? files : undefined
     };
 
     await onSubmit(payload);
@@ -174,7 +174,7 @@ export function NewRequestForm({
     <form onSubmit={handleSubmit} className="tw-section">
       {/* Title */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="tw-label">
+        <label className="label">
           Title
           <span className="form-required">*</span>
         </label>
@@ -198,7 +198,7 @@ export function NewRequestForm({
 
       {/* Description */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="tw-label">
+        <label className="label">
           Description
           <span className="form-required">*</span>
         </label>
@@ -222,7 +222,7 @@ export function NewRequestForm({
 
       {/* Priority */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="tw-label">Priority</label>
+        <label className="label">Priority</label>
         <div className="tw-flex tw-gap-2">
           {PRIORITY_OPTIONS.map((p) => (
             <button
@@ -246,7 +246,7 @@ export function NewRequestForm({
       {/* Project (Optional) */}
       {projects.length > 0 && (
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-label">Related Project (Optional)</label>
+          <label className="label">Related Project (Optional)</label>
           <select
             value={projectId || ''}
             onChange={(e) => setProjectId(e.target.value ? Number(e.target.value) : undefined)}
@@ -265,14 +265,14 @@ export function NewRequestForm({
 
       {/* File Upload */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="tw-label">Attachments (Optional)</label>
+        <label className="label">Attachments (Optional)</label>
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           className={cn('tw-dropzone', loading && 'tw-cursor-not-allowed')}
           style={{ opacity: loading ? 0.5 : 1 }}
         >
-          <Upload className="tw-h-5 tw-w-5" />
+          <Upload className="icon-sm" />
           <div className="tw-text-center">
             <p className="tw-text-secondary tw-text-xs">
               Drop files here or{' '}
@@ -284,7 +284,7 @@ export function NewRequestForm({
                 browse
               </button>
             </p>
-            <p className="tw-text-muted tw-text-xs tw-mt-0.5">
+            <p className="text-muted tw-text-xs tw-mt-0.5">
               Max {maxFiles} files, {formatFileSize(maxFileSize)} each
             </p>
           </div>
@@ -300,7 +300,7 @@ export function NewRequestForm({
         {/* File Error */}
         {fileError && (
           <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs form-error-text">
-            <AlertCircle className="tw-h-3 tw-w-3" />
+            <AlertCircle className="icon-xs" />
             {fileError}
           </div>
         )}
@@ -314,11 +314,11 @@ export function NewRequestForm({
                 className="tw-list-item tw-justify-between"
               >
                 <div className="tw-flex tw-items-center tw-gap-2 card-content-truncate">
-                  <Paperclip className="tw-h-3 tw-w-3 tw-shrink-0" />
+                  <Paperclip className="icon-xs flex-shrink-0" />
                   <span className="tw-text-primary tw-text-xs">
                     {file.name}
                   </span>
-                  <span className="tw-text-muted tw-text-xs">
+                  <span className="text-muted tw-text-xs">
                     ({formatFileSize(file.size)})
                   </span>
                 </div>
@@ -326,9 +326,9 @@ export function NewRequestForm({
                   type="button"
                   onClick={() => handleRemoveFile(index)}
                   disabled={loading}
-                  className="btn-icon"
+                  className="icon-btn"
                 >
-                  <X className="tw-h-3 tw-w-3" />
+                  <X className="icon-xs" />
                 </button>
               </div>
             ))}
@@ -353,7 +353,7 @@ export function NewRequestForm({
           className="btn-primary tw-flex tw-items-center tw-gap-1.5"
           disabled={loading}
         >
-          {loading && <RefreshCw className="tw-h-3.5 tw-w-3.5 tw-animate-spin" />}
+          {loading && <RefreshCw className="icon-xs loading-spin" />}
           Submit Request
         </button>
       </div>

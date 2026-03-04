@@ -1,24 +1,23 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye, Send, Phone, ChevronDown } from 'lucide-react';
+import { Inbox, ChevronDown } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -90,26 +89,27 @@ function sortClients(a: Client, b: Client, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'name':
-      // Sort by display name (company for business, contact for personal)
-      const aName = a.client_type === 'business' ? (a.company_name || a.contact_name || '') : (a.contact_name || a.company_name || '');
-      const bName = b.client_type === 'business' ? (b.company_name || b.contact_name || '') : (b.contact_name || b.company_name || '');
-      return multiplier * aName.localeCompare(bName);
-    case 'email':
-      return multiplier * a.email.localeCompare(b.email);
-    case 'type':
-      return multiplier * a.client_type.localeCompare(b.client_type);
-    case 'status':
-      return multiplier * a.status.localeCompare(b.status);
-    case 'projects':
-      return multiplier * ((a.project_count || 0) - (b.project_count || 0));
-    case 'created_at':
-      return (
-        multiplier *
+  case 'name': {
+    // Sort by display name (company for business, contact for personal)
+    const aName = a.client_type === 'business' ? (a.company_name || a.contact_name || '') : (a.contact_name || a.company_name || '');
+    const bName = b.client_type === 'business' ? (b.company_name || b.contact_name || '') : (b.contact_name || b.company_name || '');
+    return multiplier * aName.localeCompare(bName);
+  }
+  case 'email':
+    return multiplier * a.email.localeCompare(b.email);
+  case 'type':
+    return multiplier * a.client_type.localeCompare(b.client_type);
+  case 'status':
+    return multiplier * a.status.localeCompare(b.status);
+  case 'projects':
+    return multiplier * ((a.project_count || 0) - (b.project_count || 0));
+  case 'created_at':
+    return (
+      multiplier *
         (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
-      );
-    default:
-      return 0;
+    );
+  default:
+    return 0;
   }
 }
 
@@ -143,7 +143,7 @@ export function ClientsTable({
   onNavigate,
   showNotification,
   defaultPageSize = 25,
-  overviewMode = false,
+  overviewMode = false
 }: ClientsTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -164,11 +164,10 @@ export function ClientsTable({
     setSearch,
     sort,
     toggleSort,
-    clearFilters,
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Client>({
-    storageKey: 'admin_clients',
+    storageKey: overviewMode ? undefined : 'admin_clients',
     filters: CLIENTS_FILTER_CONFIG,
     filterFn: filterClient,
     sortFn: sortClients,
@@ -207,7 +206,7 @@ export function ClientsTable({
   });
 
   // Bulk action loading state
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [_bulkActionLoading, setBulkActionLoading] = useState(false);
   const [inviteLoading, setInviteLoading] = useState<number | null>(null);
 
   // Handle bulk archive
@@ -451,67 +450,67 @@ export function ClientsTable({
       }
     >
       <div className="data-table-scroll-wrapper">
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
                   aria-label="Select all"
                 />
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="contact-col"
                 sortable
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
                 Client
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="type-col"
                 sortable
                 sortDirection={sort?.column === 'type' ? sort.direction : null}
                 onClick={() => toggleSort('type')}
               >
                 Type
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="status-col"
                 sortable
                 sortDirection={sort?.column === 'status' ? sort.direction : null}
                 onClick={() => toggleSort('status')}
               >
                 Status
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="projects-col"
                 sortable
                 sortDirection={sort?.column === 'projects' ? sort.direction : null}
                 onClick={() => toggleSort('projects')}
               >
                 Projects
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sort?.column === 'created_at' ? sort.direction : null}
                 onClick={() => toggleSort('created_at')}
               >
                 Created
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!isLoading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
             ) : isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedClients.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No clients match your filters' : 'No clients yet'}
@@ -522,7 +521,7 @@ export function ClientsTable({
                 const inviteStatus = getInvitationStatus(client);
 
                 return (
-                  <AdminTableRow
+                  <PortalTableRow
                     key={client.id}
                     clickable
                     selected={selection.isSelected(client)}
@@ -530,16 +529,16 @@ export function ClientsTable({
                     data-client-id={client.id}
                   >
                     {/* Checkbox */}
-                    <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selection.isSelected(client)}
                         onCheckedChange={() => selection.toggleSelection(client)}
                         aria-label={`Select ${displayName.primary}`}
                       />
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Client Name & Email */}
-                    <AdminTableCell className="primary-cell contact-cell">
+                    <PortalTableCell className="primary-cell contact-cell">
                       <div className="cell-content">
                         <span className="cell-title">{displayName.primary}</span>
                         <span className="cell-subtitle">{client.email}</span>
@@ -552,22 +551,22 @@ export function ClientsTable({
                           <span className="count-stacked">{client.project_count} project{client.project_count !== 1 ? 's' : ''}</span>
                         )}
                       </div>
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Type */}
-                    <AdminTableCell className="type-cell">
+                    <PortalTableCell className="type-cell">
                       {CLIENT_TYPE_LABELS[client.client_type]}
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Status */}
-                    <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                       <PortalDropdown>
                         <PortalDropdownTrigger asChild>
                           <button className="status-dropdown-trigger">
                             <StatusBadge status={inviteStatus === 'not-invited' ? 'not-invited' : getStatusVariant(client.status)}>
                               {inviteStatus === 'not-invited' ? 'Not Invited' :
-                               inviteStatus === 'invited' ? 'Invited' :
-                               CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
+                                inviteStatus === 'invited' ? 'Invited' :
+                                  CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
                             </StatusBadge>
                             <ChevronDown className="status-dropdown-caret" />
                           </button>
@@ -587,20 +586,20 @@ export function ClientsTable({
                             ))}
                         </PortalDropdownContent>
                       </PortalDropdown>
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Project Count */}
-                    <AdminTableCell className="projects-cell">
+                    <PortalTableCell className="projects-cell">
                       {client.project_count || 0}
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Created Date */}
-                    <AdminTableCell className="date-cell">
+                    <PortalTableCell className="date-cell">
                       {formatDate(client.created_at)}
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Actions */}
-                    <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                       <div className="table-actions">
                         <IconButton
                           action="view"
@@ -623,13 +622,13 @@ export function ClientsTable({
                           />
                         )}
                       </div>
-                    </AdminTableCell>
-                  </AdminTableRow>
+                    </PortalTableCell>
+                  </PortalTableRow>
                 );
               })
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       </div>
 
       {/* Delete Confirmation Dialog */}

@@ -4,16 +4,27 @@
  */
 
 import * as React from 'react';
-import { useCallback } from 'react';
-import { FileText, Inbox, RefreshCw, Eye, Download } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { useCallback, useMemo } from 'react';
+import { Inbox } from 'lucide-react';
+import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { IconButton } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
-import { usePortalInvoices } from '@react/hooks/usePortalInvoices';
+import {
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { usePortalInvoices } from '@react/hooks/usePortalInvoices';
 import { PORTAL_INVOICE_STATUS_CONFIG } from '../types';
+import { PORTAL_INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalInvoice } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
@@ -33,7 +44,7 @@ interface PortalInvoicesTableProps {
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'USD'
   }).format(amount);
 }
 
@@ -45,8 +56,57 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
+    day: 'numeric'
   });
+}
+
+/**
+ * Filter invoice by search and status
+ */
+function filterInvoice(
+  invoice: PortalInvoice,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      invoice.invoice_number?.toLowerCase().includes(s) ||
+      invoice.project_name?.toLowerCase().includes(s) ||
+      String(invoice.amount_total).includes(s);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (invoice.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Sort invoices by column
+ */
+function sortInvoices(
+  a: PortalInvoice,
+  b: PortalInvoice,
+  sort: { column: string; direction: 'asc' | 'desc' }
+): number {
+  const m = sort.direction === 'asc' ? 1 : -1;
+  switch (sort.column) {
+  case 'invoice_number':
+    return m * (a.invoice_number || '').localeCompare(b.invoice_number || '');
+  case 'project':
+    return m * (a.project_name || '').localeCompare(b.project_name || '');
+  case 'date':
+    return m * (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+  case 'amount':
+    return m * ((a.amount_total || 0) - (b.amount_total || 0));
+  case 'status':
+    return m * (a.status || '').localeCompare(b.status || '');
+  default:
+    return 0;
+  }
 }
 
 /**
@@ -54,13 +114,31 @@ function formatDate(dateString: string): string {
  */
 export function PortalInvoicesTable({
   getAuthToken,
-  showNotification,
+  showNotification
 }: PortalInvoicesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-
   const { invoices, summary, isLoading, error, refetch } = usePortalInvoices({
-    getAuthToken,
+    getAuthToken
   });
+
+  // Table filters
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters
+  } = useTableFilters<PortalInvoice>({
+    storageKey: 'portal_invoices',
+    filters: PORTAL_INVOICES_FILTER_CONFIG,
+    filterFn: filterInvoice,
+    sortFn: sortInvoices,
+    defaultSort: { column: 'date', direction: 'desc' }
+  });
+
+  const filteredInvoices = useMemo(() => applyFilters(invoices), [applyFilters, invoices]);
 
   // Auth headers helper for downloads
   const getHeaders = useCallback(() => {
@@ -82,7 +160,7 @@ export function PortalInvoicesTable({
     try {
       const response = await fetch(buildEndpoint.invoicePdf(invoice.id), {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -109,7 +187,7 @@ export function PortalInvoicesTable({
     try {
       const receiptsResponse = await fetch(buildEndpoint.receiptsByInvoice(invoice.id), {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!receiptsResponse.ok) {
@@ -127,7 +205,7 @@ export function PortalInvoicesTable({
       const latestReceipt = receipts[0];
       const pdfResponse = await fetch(buildEndpoint.receiptPdf(latestReceipt.id), {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!pdfResponse.ok) {
@@ -151,110 +229,112 @@ export function PortalInvoicesTable({
     }
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading invoices...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={refetch}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Summary Cards */}
-      <div className="tw-grid-stats">
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Outstanding</span>
-          <span className="tw-stat-value">{formatCurrency(summary.totalOutstanding)}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Total Paid</span>
-          <span className="tw-stat-value">{formatCurrency(summary.totalPaid)}</span>
-        </div>
-      </div>
-
-      {/* Invoices Table */}
-      {invoices.length === 0 ? (
-        <EmptyState
-          icon={<Inbox className="tw-h-6 tw-w-6" />}
-          message="No invoices yet. Your first invoice will appear here once your project begins."
-        />
+    <TableLayout
+      containerRef={containerRef}
+      title="INVOICES"
+      stats={
+        <TableStats items={[
+          { value: invoices.length, label: 'total' },
+          { value: formatCurrency(summary.totalOutstanding), label: 'outstanding', variant: 'pending' },
+          { value: formatCurrency(summary.totalPaid), label: 'paid', variant: 'completed' }
+        ]} />
+      }
+      actions={
+        <>
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search invoices..." />
+          <FilterDropdown
+            sections={PORTAL_INVOICES_FILTER_CONFIG}
+            values={filterValues}
+            onChange={(key, value) => setFilter(key, value)}
+          />
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
+        </>
+      }
+    >
+      {isLoading ? (
+        <LoadingState message="Loading invoices..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={refetch} />
       ) : (
-        <table className="tw-table">
-          <thead>
-            <tr>
-              <th className="tw-table-header">Invoice</th>
-              <th className="tw-table-header">Project</th>
-              <th className="tw-table-header">Date</th>
-              <th className="tw-table-header tw-text-right">Amount</th>
-              <th className="tw-table-header">Status</th>
-              <th className="tw-table-header tw-text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map((invoice) => {
-              const showReceipt = invoice.status === 'paid' || invoice.status === 'partial';
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="invoice-col" sortable sortDirection={sort?.column === 'invoice_number' ? sort.direction : null} onClick={() => toggleSort('invoice_number')}>Invoice</PortalTableHead>
+              <PortalTableHead className="project-col" sortable sortDirection={sort?.column === 'project' ? sort.direction : null} onClick={() => toggleSort('project')}>Project</PortalTableHead>
+              <PortalTableHead className="date-col" sortable sortDirection={sort?.column === 'date' ? sort.direction : null} onClick={() => toggleSort('date')}>Date</PortalTableHead>
+              <PortalTableHead className="amount-col" sortable sortDirection={sort?.column === 'amount' ? sort.direction : null} onClick={() => toggleSort('amount')}>Amount</PortalTableHead>
+              <PortalTableHead className="status-col" sortable sortDirection={sort?.column === 'status' ? sort.direction : null} onClick={() => toggleSort('status')}>Status</PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
+          <PortalTableBody animate>
+            {filteredInvoices.length === 0 ? (
+              <PortalTableEmpty
+                colSpan={6}
+                icon={<Inbox className="icon-lg" />}
+                message={invoices.length === 0
+                  ? 'No invoices yet. Your first invoice will appear here once your project begins.'
+                  : 'No invoices match the current filters.'
+                }
+              />
+            ) : (
+              filteredInvoices.map((invoice) => {
+                const showReceipt = invoice.status === 'paid' || invoice.status === 'partial';
 
-              return (
-                <tr key={invoice.id} className="tw-table-row">
-                  <td className="tw-table-cell">{invoice.invoice_number}</td>
-                  <td className="tw-table-cell tw-text-muted">{invoice.project_name || 'Project'}</td>
-                  <td className="tw-table-cell tw-text-muted">{formatDate(invoice.created_at)}</td>
-                  <td className="tw-table-cell tw-text-right">
-                    {formatCurrency(invoice.amount_total)}
-                  </td>
-                  <td className="tw-table-cell">
-                    <span className="tw-badge">
-                      {PORTAL_INVOICE_STATUS_CONFIG[invoice.status]?.label || invoice.status}
-                    </span>
-                  </td>
-                  <td className="tw-table-cell tw-text-right">
-                    <div className="tw-flex tw-justify-end tw-gap-1">
-                      <button
-                        className="btn-icon"
-                        onClick={() => handlePreview(invoice)}
-                        title="Preview"
-                      >
-                        <Eye className="tw-h-4 tw-w-4" />
-                      </button>
-                      <button
-                        className="btn-icon"
-                        onClick={() => handleDownload(invoice)}
-                        title="Download Invoice"
-                      >
-                        <Download className="tw-h-4 tw-w-4" />
-                      </button>
-                      {showReceipt && (
-                        <button
-                          className="btn-icon"
-                          onClick={() => handleDownloadReceipt(invoice)}
-                          title="Download Receipt"
-                        >
-                          <FileText className="tw-h-4 tw-w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                return (
+                  <PortalTableRow key={invoice.id}>
+                    <PortalTableCell className="invoice-cell" label="Invoice">
+                      <span className="mono-text">{invoice.invoice_number}</span>
+                    </PortalTableCell>
+                    <PortalTableCell className="project-cell" label="Project">
+                      <div className="cell-content">
+                        <span className="cell-title">{invoice.project_name || 'Project'}</span>
+                        {/* Stacked content for responsive */}
+                        <span className="invoice-stacked">{invoice.invoice_number}</span>
+                        <span className="amount-stacked">{formatCurrency(invoice.amount_total)}</span>
+                        <span className="date-stacked">{formatDate(invoice.created_at)}</span>
+                      </div>
+                    </PortalTableCell>
+                    <PortalTableCell className="date-cell" label="Date">
+                      {formatDate(invoice.created_at)}
+                    </PortalTableCell>
+                    <PortalTableCell className="amount-cell" label="Amount">
+                      {formatCurrency(invoice.amount_total)}
+                    </PortalTableCell>
+                    <PortalTableCell className="status-cell" label="Status">
+                      <StatusBadge status={getStatusVariant(invoice.status)}>
+                        {PORTAL_INVOICE_STATUS_CONFIG[invoice.status]?.label || invoice.status}
+                      </StatusBadge>
+                    </PortalTableCell>
+                    <PortalTableCell className="actions-cell">
+                      <div className="table-actions">
+                        <IconButton
+                          action="view"
+                          onClick={() => handlePreview(invoice)}
+                          title="Preview"
+                        />
+                        <IconButton
+                          action="download"
+                          onClick={() => handleDownload(invoice)}
+                          title="Download Invoice"
+                        />
+                        {showReceipt && (
+                          <IconButton
+                            action="download"
+                            onClick={() => handleDownloadReceipt(invoice)}
+                            title="Download Receipt"
+                          />
+                        )}
+                      </div>
+                    </PortalTableCell>
+                  </PortalTableRow>
+                );
+              })
+            )}
+          </PortalTableBody>
+        </PortalTable>
       )}
-    </div>
+    </TableLayout>
   );
 }

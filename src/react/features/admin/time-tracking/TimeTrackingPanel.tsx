@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   Play,
   Square,
-  Inbox,
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -14,16 +13,16 @@ import { formatDateShort } from '@react/utils/formatDate';
 import { formatCurrency } from '../../../../utils/format-utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { createLogger } from '../../../../utils/logger';
@@ -68,13 +67,13 @@ const DATE_RANGE_OPTIONS = [
   { value: 'today', label: 'Today' },
   { value: 'week', label: 'This Week' },
   { value: 'month', label: 'This Month' },
-  { value: 'all', label: 'All Time' },
+  { value: 'all', label: 'All Time' }
 ];
 
 const BILLABLE_FILTER_OPTIONS = [
   { value: 'all', label: 'All Entries' },
   { value: 'billable', label: 'Billable' },
-  { value: 'non-billable', label: 'Non-Billable' },
+  { value: 'non-billable', label: 'Non-Billable' }
 ];
 
 export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingPanelProps) {
@@ -87,7 +86,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
     billableHours: 0,
     billedHours: 0,
     unbilledHours: 0,
-    totalValue: 0,
+    totalValue: 0
   });
 
   // Active timer
@@ -107,14 +106,14 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
   // Sorting
   const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>({
     column: 'date',
-    direction: 'desc',
+    direction: 'desc'
   });
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -149,7 +148,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
 
       const response = await fetch(`${API_ENDPOINTS.ADMIN.TIME_ENTRIES}?${params}`, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load time entries');
 
@@ -161,7 +160,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         billableHours: 0,
         billedHours: 0,
         unbilledHours: 0,
-        totalValue: 0,
+        totalValue: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load time entries');
@@ -180,7 +179,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ projectId }),
+        body: JSON.stringify({ projectId })
       });
 
       if (!response.ok) throw new Error('Failed to start timer');
@@ -191,7 +190,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         entryId: payload.entryId,
         startedAt: new Date(),
         description: '',
-        projectName: payload.projectName,
+        projectName: payload.projectName
       });
     } catch (err) {
       logger.error('Failed to start timer:', err);
@@ -206,7 +205,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
       const response = await fetch(buildEndpoint.adminTimeEntryStop(activeTimer.entryId), {
         method: 'POST',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to stop timer');
@@ -247,18 +246,18 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         let bVal: string | number = '';
 
         switch (sort.column) {
-          case 'date':
-            aVal = a.date + a.startTime;
-            bVal = b.date + b.startTime;
-            break;
-          case 'duration':
-            aVal = a.duration;
-            bVal = b.duration;
-            break;
-          case 'project':
-            aVal = a.projectName || '';
-            bVal = b.projectName || '';
-            break;
+        case 'date':
+          aVal = a.date + a.startTime;
+          bVal = b.date + b.startTime;
+          break;
+        case 'duration':
+          aVal = a.duration;
+          bVal = b.duration;
+          break;
+        case 'project':
+          aVal = a.projectName || '';
+          bVal = b.projectName || '';
+          break;
         }
 
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
@@ -270,7 +269,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
     return result;
   }, [entries, searchQuery, billableFilter, sort]);
 
-  const pagination = usePagination({ totalItems: filteredEntries.length });
+  const pagination = usePagination({ storageKey: 'admin_time_tracking_pagination', totalItems: filteredEntries.length });
   const paginatedEntries = filteredEntries.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -297,7 +296,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
             { value: formatDuration(stats.totalHours * 60), label: 'total' },
             { value: formatDuration(stats.billableHours * 60), label: 'billable', variant: 'completed', hideIfZero: true },
             { value: formatDuration(stats.unbilledHours * 60), label: 'unbilled', variant: 'pending', hideIfZero: true },
-            { value: formatCurrency(stats.totalValue), label: 'value' },
+            { value: formatCurrency(stats.totalValue), label: 'value' }
           ]}
           tooltip={`${formatDuration(stats.totalHours * 60)} Total • ${formatDuration(stats.billableHours * 60)} Billable • ${formatDuration(stats.unbilledHours * 60)} Unbilled • ${formatCurrency(stats.totalValue)} Value`}
         />
@@ -312,7 +311,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
           <FilterDropdown
             sections={[
               { key: 'dateRange', label: 'DATE RANGE', options: DATE_RANGE_OPTIONS },
-              { key: 'billable', label: 'BILLABLE', options: BILLABLE_FILTER_OPTIONS },
+              { key: 'billable', label: 'BILLABLE', options: BILLABLE_FILTER_OPTIONS }
             ]}
             values={{ dateRange, billable: billableFilter }}
             onChange={(key, value) => {
@@ -364,60 +363,60 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead>Description</AdminTableHead>
-            <AdminTableHead
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead>Description</PortalTableHead>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'project' ? sort.direction : null}
               onClick={() => toggleSort('project')}
             >
               Project
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'date' ? sort.direction : null}
               onClick={() => toggleSort('date')}
             >
               Date
-            </AdminTableHead>
-            <AdminTableHead>Time</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead>Time</PortalTableHead>
+            <PortalTableHead
               className="text-right"
               sortable
               sortDirection={sort?.column === 'duration' ? sort.direction : null}
               onClick={() => toggleSort('duration')}
             >
               Duration
-            </AdminTableHead>
-            <AdminTableHead className="text-center">Billable</AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="text-center">Billable</PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={7} message={error} onRetry={loadTimeEntries} />
+            <PortalTableError colSpan={7} message={error} onRetry={loadTimeEntries} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedEntries.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No entries match your filters' : 'No time entries yet'}
             />
           ) : (
             paginatedEntries.map((entry) => (
-              <AdminTableRow key={entry.id} clickable>
-                <AdminTableCell className="primary-cell">
+              <PortalTableRow key={entry.id} clickable>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-content">
                     <span className="cell-title">{entry.description || 'No description'}</span>
                     {entry.taskName && <span className="cell-subtitle">{entry.taskName}</span>}
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   {entry.projectName && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onNavigate?.('projects', entry.projectId != null ? String(entry.projectId) : undefined); }}
@@ -426,25 +425,25 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
                       {entry.projectName}
                     </button>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDateShort(entry.date)}</AdminTableCell>
-                <AdminTableCell className="mono-text">
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">{formatDateShort(entry.date)}</PortalTableCell>
+                <PortalTableCell className="mono-text">
                   {entry.startTime} - {entry.endTime || 'ongoing'}
-                </AdminTableCell>
-                <AdminTableCell className="text-right mono-text">{formatDuration(entry.duration)}</AdminTableCell>
-                <AdminTableCell className="text-center">
+                </PortalTableCell>
+                <PortalTableCell className="text-right mono-text">{formatDuration(entry.duration)}</PortalTableCell>
+                <PortalTableCell className="text-center">
                   <span className={entry.billable ? 'status-dot status-completed' : 'status-dot status-muted'} />
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="edit" title="Edit entry" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

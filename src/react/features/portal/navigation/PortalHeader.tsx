@@ -38,7 +38,7 @@ export function PortalHeader({
   user,
   isCollapsed = false,
   onToggleCollapse,
-  onLogout,
+  onLogout
 }: PortalHeaderProps) {
   const initials = user?.name ? getInitials(user.name) : '?';
 
@@ -106,9 +106,9 @@ export function PortalHeader({
             className="btn-icon"
           >
             {isCollapsed ? (
-              <ChevronRight className="tw-h-4 tw-w-4" />
+              <ChevronRight className="icon-xs" />
             ) : (
-              <ChevronLeft className="tw-h-4 tw-w-4" />
+              <ChevronLeft className="icon-xs" />
             )}
           </button>
         )}
@@ -120,7 +120,7 @@ export function PortalHeader({
             title="Sign out"
             className="btn-icon"
           >
-            <LogOut className="tw-h-4 tw-w-4" />
+            <LogOut className="icon-xs" />
           </button>
         )}
       </div>
