@@ -389,12 +389,14 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                 Status
               </PortalTableHead>
               <PortalTableHead
+                className="priority-col"
                 sortable
                 sortDirection={sort?.column === 'priority' ? sort.direction : null}
                 onClick={() => toggleSort('priority')}
               >
-                Project / Priority
+                Priority
               </PortalTableHead>
+              <PortalTableHead className="project-col">Project</PortalTableHead>
               <PortalTableHead
                 className="date-col"
                 sortable
@@ -410,12 +412,12 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
 
           <PortalTableBody animate={!loading && !error}>
             {error ? (
-              <PortalTableError colSpan={6} message={error} onRetry={fetchTasks} />
+              <PortalTableError colSpan={7} message={error} onRetry={fetchTasks} />
             ) : loading ? (
-              <PortalTableLoading colSpan={6} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <PortalTableEmpty
-                colSpan={6}
+                colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
@@ -449,15 +451,20 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                       {getStatusLabel(task.status)}
                     </StatusBadge>
                   </PortalTableCell>
-                  <PortalTableCell>
+                  <PortalTableCell className="priority-cell">
+                    <span
+                      className="priority-label"
+                      style={{ color: PRIORITY_COLORS[task.priority] }}
+                    >
+                      {getPriorityLabel(task.priority)}
+                    </span>
+                  </PortalTableCell>
+                  <PortalTableCell className="project-cell">
                     <div className="cell-content">
+                      {task.client_name && (
+                        <span className="cell-subtitle">{task.client_name}</span>
+                      )}
                       {task.project_name && <span className="cell-title">{task.project_name}</span>}
-                      <span
-                        className="priority-label"
-                        style={{ color: PRIORITY_COLORS[task.priority] }}
-                      >
-                        {getPriorityLabel(task.priority)}
-                      </span>
                     </div>
                   </PortalTableCell>
                   <PortalTableCell className="date-cell">

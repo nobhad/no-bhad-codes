@@ -579,6 +579,44 @@ router.delete(
 );
 
 // ===================================
+// CLIENT-FACING CONTRACTS
+// ===================================
+
+/**
+ * GET /api/contracts/my - Get contracts for the authenticated client
+ */
+router.get(
+  '/my',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const db = getDatabase();
+    const clientId = req.user?.id;
+
+    if (!clientId || req.user?.type === 'admin') {
+      return sendSuccess(res, { contracts: [] });
+    }
+
+    const contracts = await db.all(`
+      SELECT
+        c.id,
+        c.project_id as projectId,
+        p.project_name as projectName,
+        c.status,
+        c.signed_at as signedAt,
+        c.created_at as createdAt,
+        c.expires_at as expiresAt
+      FROM contracts c
+      LEFT JOIN projects p ON c.project_id = p.id
+      WHERE c.client_id = ?
+        AND c.status != 'cancelled'
+      ORDER BY c.created_at DESC
+    `, [clientId]);
+
+    sendSuccess(res, { contracts });
+  })
+);
+
+// ===================================
 // TEMPLATE ENDPOINTS
 // ===================================
 

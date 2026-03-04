@@ -31,7 +31,7 @@ export { DEFAULT_MILESTONES } from './default-milestones.js';
 export { DEFAULT_TASKS } from './default-tasks.js';
 
 // Navigation configuration
-export { getPortalConfig, PORTAL_CONFIGS, ICONS, ADMIN_TAB_IDS } from './navigation.js';
+export { getPortalConfig, PORTAL_CONFIGS, ICONS, ADMIN_TAB_IDS, CLIENT_TAB_IDS } from './navigation.js';
 export type { NavItem, SubtabGroup, PortalConfig } from './navigation.js';
 
 // Swagger/API documentation configuration

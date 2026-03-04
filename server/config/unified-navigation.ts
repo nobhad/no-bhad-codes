@@ -322,6 +322,30 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
 
   // ========== CLIENT-ONLY TABS ==========
   {
+    id: 'proposals',
+    label: 'Proposals',
+    icon: 'fileText',
+    roles: ['client'],
+    group: 'documents',
+    order: 16
+  },
+  {
+    id: 'contracts',
+    label: 'Contracts',
+    icon: 'fileText',
+    roles: ['client'],
+    group: 'documents',
+    order: 17
+  },
+  {
+    id: 'deliverables',
+    label: 'Deliverables',
+    icon: 'package',
+    roles: ['client'],
+    group: 'documents',
+    order: 17.5
+  },
+  {
     id: 'approvals',
     label: 'Approvals',
     icon: 'checkCircle',
@@ -439,24 +463,11 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'billing', label: 'Billing', roles: ['client'] },
       { id: 'notifications', label: 'Notifications', roles: ['client'] }
     ]
-  },
-  // Client: Project detail subtabs
-  {
-    id: 'portal-project-detail-subtabs',
-    forTab: 'project-detail',
-    roles: ['client'],
-    subtabs: [
-      { id: 'overview', label: 'Overview', roles: ['client'], active: true, dataAttr: 'pd-tab' },
-      { id: 'milestones', label: 'Milestones', roles: ['client'], dataAttr: 'pd-tab' },
-      { id: 'updates', label: 'Updates', roles: ['client'], dataAttr: 'pd-tab' },
-      { id: 'files', label: 'Files', roles: ['client'], dataAttr: 'pd-tab' },
-      { id: 'messages', label: 'Messages', roles: ['client'], dataAttr: 'pd-tab' },
-      { id: 'invoices', label: 'Invoices', roles: ['client'], dataAttr: 'pd-tab' }
-    ]
   }
+  // NOTE: project-detail and client-detail subtabs are managed by their React components
+  // (PortalProjectDetail.tsx, ClientDetail.tsx) and must NOT be defined here —
+  // doing so creates duplicate tab bars that don't connect to React state.
 ];
-// NOTE: project-detail and client-detail subtabs are managed by their React components (ProjectDetail.tsx, ClientDetail.tsx)
-// and must NOT be defined here — doing so creates duplicate tab bars.
 
 // ============================================
 // TAB TITLES MAPPING (for page headers)
@@ -492,6 +503,8 @@ export const UNIFIED_TAB_TITLES: Record<string, string> = {
   'project-detail': 'Project Details',
 
   // Client-only
+  proposals: 'Proposals',
+  deliverables: 'Deliverables',
   approvals: 'Approvals',
   preview: 'Project Preview',
   review: 'Project Preview',

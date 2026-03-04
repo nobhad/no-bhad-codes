@@ -52,6 +52,43 @@ router.get(
   })
 );
 
+// Get time summary for a project (aggregate data)
+router.get(
+  '/:id/time-summary',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const projectId = parseInt(req.params.id);
+    const db = getDatabase();
+
+    const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
+    if (!project) {
+      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    if (!(await canAccessProject(req, projectId))) {
+      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    const summary = await db.get(
+      `SELECT
+        COALESCE(SUM(hours), 0) AS total_hours,
+        COUNT(*) AS entry_count,
+        MIN(date) AS first_entry,
+        MAX(date) AS last_entry
+       FROM time_entries
+       WHERE project_id = ?`,
+      [projectId]
+    );
+
+    sendSuccess(res, {
+      totalHours: Number(summary?.total_hours ?? 0),
+      entryCount: Number(summary?.entry_count ?? 0),
+      firstEntry: summary?.first_entry || null,
+      lastEntry: summary?.last_entry || null
+    });
+  })
+);
+
 // Log time entry
 router.post(
   '/:id/time-entries',

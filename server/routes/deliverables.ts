@@ -36,6 +36,45 @@ async function canAccessDeliverable(
   return !!row;
 }
 
+// ===== CLIENT-SCOPED ROUTES =====
+
+/**
+ * GET /api/v1/deliverables/my
+ * Get all deliverables for the authenticated client across all their projects
+ */
+router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (await isUserAdmin(req)) {
+      return errorResponse(res, 'Admin users should use /api/admin/deliverables', 403, 'FORBIDDEN');
+    }
+
+    const clientId = req.user?.id;
+    if (!clientId) {
+      return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
+    }
+
+    const db = getDatabase();
+    const deliverables = await db.all(
+      `SELECT d.id, d.title, d.type, d.status, d.approval_status,
+              d.review_deadline, d.round_number, d.created_at,
+              p.name AS project_name
+       FROM deliverables d
+       JOIN projects p ON d.project_id = p.id
+       WHERE p.client_id = ? AND d.deleted_at IS NULL
+       ORDER BY d.created_at DESC`,
+      [clientId]
+    );
+
+    sendSuccess(res, { deliverables });
+  } catch (err) {
+    logger.error('[Deliverables] Failed to fetch client deliverables', {
+      error: err instanceof Error ? err : new Error(String(err)),
+      category: 'DELIVERABLE'
+    });
+    errorResponse(res, 'Failed to fetch deliverables');
+  }
+});
+
 // ===== DELIVERABLE CRUD =====
 
 /**

@@ -2275,4 +2275,45 @@ router.post(
   })
 );
 
+// ===================================
+// CLIENT-FACING PROPOSALS
+// ===================================
+
+/**
+ * GET /api/proposals/my - Get proposals for the authenticated client
+ */
+router.get(
+  '/my',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const db = getDatabase();
+    const clientId = req.user?.id;
+
+    if (!clientId || req.user?.type === 'admin') {
+      return sendSuccess(res, { proposals: [] });
+    }
+
+    const proposals = await db.all(`
+      SELECT
+        pr.id,
+        COALESCE(p.project_name, 'Proposal #' || pr.id) as title,
+        pr.status,
+        pr.final_price as amount,
+        pr.project_type as projectType,
+        pr.selected_tier as selectedTier,
+        pr.sent_at as sentAt,
+        pr.valid_until as validUntil,
+        pr.created_at as createdAt
+      FROM proposal_requests pr
+      LEFT JOIN projects p ON pr.project_id = p.id
+      WHERE pr.client_id = ?
+        AND pr.deleted_at IS NULL
+        AND pr.status != 'pending'
+      ORDER BY pr.created_at DESC
+    `, [clientId]);
+
+    sendSuccess(res, { proposals });
+  })
+);
+
 export default router;

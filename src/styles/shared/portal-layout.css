@@ -34,19 +34,19 @@ body:has(.portal) {
   right: 0;
   width: 100%;
   height: var(--portal-header-height, 56px);
-  background: var(--portal-bg-darker);
+  background: var(--portal-bg-pitch);
   border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   box-sizing: border-box;
-  z-index: var(--z-index-portal-header, 9100);
+  z-index: var(--z-index-nav);
   box-shadow: none;
 }
 
-/* NOTE: Header background is consistent across all portals
-   Both admin and client use --portal-bg-darker */
+/* NOTE: Header background uses --portal-bg-pitch for consistency
+   with sidebar and content areas across all portals */
 
 .portal-global-header-left {
   display: flex;
@@ -271,6 +271,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   width: 100%;
   height: calc(100vh - var(--portal-header-height, 56px));
   margin-top: var(--portal-header-height, 56px);
+  background: var(--portal-bg-pitch);
 }
 
 /* =====================================================
@@ -292,6 +293,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   flex-direction: column;
   padding: var(--portal-header-top, 20px) 24px var(--space-3) 24px;
   gap: 0;
+  background: var(--portal-bg-pitch);
 }
 
 /* Page header - no extra spacing */
@@ -340,22 +342,21 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: none;
 }
 
-/* Show header subtab groups based on active group - UNIVERSAL styling
+/* Show header subtab groups based on active group/tab
    IMPORTANT: Selectors include full path to exceed hide rule specificity (0,4,0)
    Show rules have specificity (0,7,0): 3 attrs + 4 classes */
+/* Admin group subtabs */
 [data-page="admin"][data-active-group="work"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="work"],
 [data-page="admin"][data-active-group="crm"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="crm"],
 [data-page="admin"][data-active-group="documents"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="documents"],
 [data-page="admin"][data-active-group="support"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="support"],
 [data-page="admin"][data-active-group="analytics"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="analytics"],
 [data-page="admin"][data-active-group="workflows"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="workflows"],
-[data-page="client-portal"][data-active-group="work"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="work"],
-[data-page="client-portal"][data-active-group="docs"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="docs"],
-[data-page="client-portal"][data-active-group="support"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="support"],
-[data-page="client-portal"][data-active-tab="settings"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="settings"],
+/* Admin detail subtabs */
 [data-page="admin"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
-[data-page="client-portal"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
-[data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"] {
+[data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"],
+/* Client subtabs (settings only — project-detail uses React TabList) */
+[data-page="client-portal"][data-active-tab="settings"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="settings"] {
   display: flex;
   gap: var(--space-1);
   align-items: center;
@@ -459,6 +460,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .tab-content.active {
   display: block;
   margin-top: var(--portal-section-gap);
+  padding-bottom: var(--space-8);
 }
 
 /* Adjust dashboard container when using new layout */
@@ -1000,54 +1002,39 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    ===================================================== */
 
 @media (--mobile) {
-  /* Higher specificity than portal-sidebar.css (.portal .sidebar) to ensure
-     position: fixed wins on mobile regardless of import order */
+  /* Mobile: sidebar is 56px icon strip by default, hidden when collapsed */
   .portal .portal-body .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: var(--z-nav, 100);
-    transform: translateX(-100%);
-    transition: transform var(--transition-medium);
-    width: 240px;
-    min-width: 240px;
-  }
-
-  .portal .portal-body .sidebar.mobile-open {
-    transform: translateX(0);
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
   }
 
   .portal .portal-body .sidebar.collapsed {
-    width: 240px;
-    min-width: 240px;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    overflow: hidden;
+    padding: 0;
   }
 
-  .portal .portal-body .sidebar.collapsed .sidebar-buttons .btn {
-    justify-content: flex-start;
-    padding: var(--space-1-5) var(--space-3);
+  .portal .portal-body .sidebar .sidebar-buttons .btn {
+    justify-content: center;
   }
 
-  .portal .portal-body .sidebar.collapsed .sidebar-buttons .btn .btn-text {
-    display: inline;
-  }
-
-  .portal .portal-body .sidebar.collapsed .sidebar-shortcut {
-    display: inline-flex;
-  }
-
-  /* #sidebar-overlay is rendered outside .portal in the EJS template,
-     so we match by ID rather than .portal .sidebar-overlay */
-  #sidebar-overlay {
+  .portal .portal-body .sidebar .sidebar-buttons .btn .btn-text {
     display: none;
-    position: fixed;
-    inset: 0;
-    background: var(--portal-alpha-black-60);
-    z-index: calc(var(--z-nav, 100) - 1);
   }
 
-  #sidebar-overlay.open {
-    display: block;
+  .portal .portal-body .sidebar .sidebar-shortcut {
+    display: none;
+  }
+
+  .portal .portal-body .sidebar .sidebar-logo {
+    display: none;
+  }
+
+  .portal .portal-body .sidebar .sidebar-collapsed-logo {
+    display: flex;
   }
 
   .portal .dashboard-container {
@@ -1060,28 +1047,29 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 @media (--tablet-to-laptop) {
-  .portal .sidebar:not(.collapsed) {
+  .portal .portal-body .sidebar {
     width: 56px;
     min-width: 56px;
+    max-width: 56px;
   }
 
-  .portal .sidebar:not(.collapsed) .sidebar-buttons .btn {
+  .portal .portal-body .sidebar .sidebar-buttons .btn {
     justify-content: center;
   }
 
-  .portal .sidebar:not(.collapsed) .sidebar-buttons .btn .btn-text {
+  .portal .portal-body .sidebar .sidebar-buttons .btn .btn-text {
     display: none;
   }
 
-  .portal .sidebar:not(.collapsed) .sidebar-shortcut {
+  .portal .portal-body .sidebar .sidebar-shortcut {
     display: none;
   }
 
-  .portal .sidebar:not(.collapsed) .sidebar-logo {
+  .portal .portal-body .sidebar .sidebar-logo {
     display: none;
   }
 
-  .portal .sidebar:not(.collapsed) .sidebar-collapsed-logo {
+  .portal .portal-body .sidebar .sidebar-collapsed-logo {
     display: flex;
   }
 }
@@ -1190,7 +1178,7 @@ td {
 /* Dashboard Content Area (right side) */
 .dashboard-content {
   flex: 1;
-  padding: 0 clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
+  padding: 0 clamp(0.75rem, 2vw, 1.5rem) var(--space-10) clamp(0.75rem, 2vw, 1.5rem);
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;

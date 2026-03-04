@@ -425,12 +425,14 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
               >
                 Task
               </PortalTableHead>
+              <PortalTableHead className="project-col">Project</PortalTableHead>
               <PortalTableHead
+                className="priority-col"
                 sortable
                 sortDirection={sort?.column === 'priority' ? sort.direction : null}
                 onClick={() => toggleSort('priority')}
               >
-                Project / Priority
+                Priority
               </PortalTableHead>
               <PortalTableHead
                 className="status-col"
@@ -454,12 +456,12 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
 
           <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <PortalTableError colSpan={6} message={error} onRetry={loadTasks} />
+              <PortalTableError colSpan={7} message={error} onRetry={loadTasks} />
             ) : isLoading ? (
-              <PortalTableLoading colSpan={6} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <PortalTableEmpty
-                colSpan={6}
+                colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
@@ -498,23 +500,23 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                       )}
                     </div>
                   </PortalTableCell>
-                  <PortalTableCell>
-                    <div className="cell-content">
-                      {task.projectName && (
-                        <span
-                          onClick={() => onNavigate?.('projects', task.projectId != null ? String(task.projectId) : undefined)}
-                          className="table-link cell-title"
-                        >
-                          {task.projectName}
-                        </span>
-                      )}
-                      <div className="cell-with-icon">
-                        <span
-                          className="priority-indicator"
-                          style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
-                        />
-                        <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
-                      </div>
+                  <PortalTableCell className="project-cell">
+                    {task.projectName && (
+                      <span
+                        onClick={() => onNavigate?.('projects', task.projectId != null ? String(task.projectId) : undefined)}
+                        className="table-link"
+                      >
+                        {task.projectName}
+                      </span>
+                    )}
+                  </PortalTableCell>
+                  <PortalTableCell className="priority-cell">
+                    <div className="cell-with-icon">
+                      <span
+                        className="priority-indicator"
+                        style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
+                      />
+                      <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
                     </div>
                   </PortalTableCell>
                   <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>

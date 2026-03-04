@@ -619,7 +619,7 @@ button.dropdown-trigger > svg.dropdown-caret,
  * RESPONSIVE: Sidebar auto-collapses
  * ============================================ */
 
-@media (--wide-down) {
+@media (--laptop) {
   .portal .sidebar .sidebar-buttons {
     gap: 0.5rem;
   }

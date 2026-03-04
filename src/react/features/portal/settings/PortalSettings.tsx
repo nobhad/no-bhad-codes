@@ -12,6 +12,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { ProfileForm } from './ProfileForm';
 import { BillingForm } from './BillingForm';
 import { NotificationsForm } from './NotificationsForm';
+import { ContactsSection } from './ContactsSection';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -242,6 +243,14 @@ export function PortalSettings({
                 onUpdate={handleProfileUpdate}
               />
             )}
+
+            {/* Contacts sub-section under profile */}
+            <div className="tw-mt-6 tw-pt-6 tw-border-t tw-border-[var(--portal-border)]">
+              <ContactsSection
+                buildHeaders={buildHeaders}
+                showNotification={showNotification}
+              />
+            </div>
           </TabPanel>
 
           <TabPanel tabId="billing" isActive={activeTab === 'billing'}>

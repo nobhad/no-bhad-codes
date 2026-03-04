@@ -68,6 +68,7 @@ router.get(
                COUNT(*) as message_count,
                SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread_count
         FROM messages
+        WHERE deleted_at IS NULL
         GROUP BY project_id
       ) m_stats ON p.id = m_stats.project_id
       WHERE ${notDeleted('p')}
@@ -93,6 +94,7 @@ router.get(
                COUNT(*) as message_count,
                SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread_count
         FROM messages
+        WHERE deleted_at IS NULL
         GROUP BY project_id
       ) m_stats ON p.id = m_stats.project_id
       WHERE p.client_id = ? AND ${notDeleted('p')}
@@ -173,7 +175,7 @@ router.get(
     const messages = await db.all(
       `
     SELECT id, sender_type, sender_name, message as content, read_at, created_at
-    FROM messages
+    FROM active_messages
     WHERE project_id = ? AND context_type = 'project'
     ORDER BY created_at ASC
   `,

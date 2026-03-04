@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PortalInvoice, PortalInvoiceSummary } from '../features/portal/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('usePortalInvoices');
@@ -26,12 +27,6 @@ interface UsePortalInvoicesReturn {
 interface ApiResponsePayload {
   invoices?: PortalInvoice[];
   summary?: PortalInvoiceSummary;
-}
-
-interface ApiResponse {
-  success?: boolean;
-  data?: ApiResponsePayload;
-  error?: string;
 }
 
 export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePortalInvoicesReturn {
@@ -68,8 +63,7 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
         throw new Error('Failed to fetch invoices');
       }
 
-      const data: ApiResponse = await response.json();
-      const payload = data.data;
+      const payload = unwrapApiData<ApiResponsePayload>(await response.json());
 
       if (payload?.invoices) {
         setInvoices(payload.invoices);

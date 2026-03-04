@@ -18,12 +18,15 @@ export const API_ENDPOINTS = {
   CLIENTS: '/api/clients',
   CLIENTS_ME: '/api/clients/me',
   CLIENTS_ME_BILLING: '/api/clients/me/billing',
+  CLIENTS_ME_CONTACTS: '/api/clients/me/contacts',
   PROJECTS: '/api/projects',
   INVOICES: '/api/invoices',
   MESSAGES: '/api/messages',
   CONTRACTS: '/api/contracts',
+  CONTRACTS_MY: '/api/contracts/my',
   CONTRACTS_BULK_DELETE: '/api/contracts/bulk-delete',
   PROPOSALS: '/api/proposals',
+  PROPOSALS_MY: '/api/proposals/my',
   QUESTIONNAIRES: '/api/questionnaires',
   QUESTIONNAIRES_BULK_DELETE: '/api/questionnaires/bulk-delete',
   QUESTIONNAIRES_MY_RESPONSES: '/api/questionnaires/my-responses',
@@ -40,6 +43,7 @@ export const API_ENDPOINTS = {
   KNOWLEDGE_BASE: '/api/kb',
   ANALYTICS: '/api/analytics',
   DELIVERABLES: '/api/v1/deliverables',
+  DELIVERABLES_MY: '/api/v1/deliverables/my',
   FILES: '/api/uploads',
   FILES_CLIENT: '/api/uploads/client',
   FILES_MULTIPLE: '/api/uploads/multiple',
@@ -146,9 +150,14 @@ export const buildEndpoint = {
   projectMilestones: (id: number | string) => `${API_ENDPOINTS.PROJECTS}/${id}/milestones`,
   projectUpdates: (id: number | string) => `${API_ENDPOINTS.PROJECTS}/${id}/updates`,
   projectUpload: (id: number | string) => `${API_ENDPOINTS.FILES}/project/${id}`,
+  projectTimeSummary: (id: number | string) => `${API_ENDPOINTS.PROJECTS}/${id}/time-summary`,
+  projectFiles: (id: number | string) => `${API_ENDPOINTS.FILES}?projectId=${id}`,
+  projectMessages: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads?projectId=${id}`,
+  projectInvoices: (id: number | string) => `${API_ENDPOINTS.INVOICES}?projectId=${id}`,
 
   // Clients
   client: (id: number | string) => `${API_ENDPOINTS.CLIENTS}/${id}`,
+  clientMeContact: (id: number | string) => `${API_ENDPOINTS.CLIENTS_ME_CONTACTS}/${id}`,
 
   // Invoices
   invoice: (id: number | string) => `${API_ENDPOINTS.INVOICES}/${id}`,

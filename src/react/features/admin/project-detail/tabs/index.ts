@@ -11,3 +11,4 @@ export { InvoicesTab } from './InvoicesTab';
 export { TasksTab } from './TasksTab';
 export { ContractTab } from './ContractTab';
 export { NotesTab } from './NotesTab';
+export { IntakeTab } from './IntakeTab';

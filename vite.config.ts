@@ -89,17 +89,32 @@ export default defineConfig({
       '/portal': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite-proxy] /portal error:', (err as Error).message);
+          });
+        }
       },
       '/dashboard': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite-proxy] /dashboard error:', (err as Error).message);
+          });
+        }
       },
       '/admin': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite-proxy] /admin error:', (err as Error).message);
+          });
+        }
       },
       '/client': {
         target: 'http://localhost:4001',
@@ -113,6 +128,11 @@ export default defineConfig({
             return url;
           }
           return null; // Proxy to Express for EJS rendering
+        },
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite-proxy] /client error:', (err as Error).message);
+          });
         }
       },
       // API routes
@@ -126,12 +146,7 @@ export default defineConfig({
         // Suppress proxy errors when backend isn't ready yet (race condition on startup)
         configure: (proxy) => {
           proxy.on('error', (err, _req, res) => {
-            // Log the proxy error and return a friendly 503 when possible
-
-            console.warn(
-              '[vite-proxy] proxy error:',
-              err && (err as Error).message ? (err as Error).message : err
-            );
+            console.warn('[vite-proxy] /api error:', (err as Error).message);
             if (res && 'writeHead' in res && typeof res.writeHead === 'function') {
               const response = res as import('http').ServerResponse;
               if (!response.headersSent) {
@@ -145,7 +160,12 @@ export default defineConfig({
       '/uploads': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite-proxy] /uploads error:', (err as Error).message);
+          });
+        }
       }
     }
   },
