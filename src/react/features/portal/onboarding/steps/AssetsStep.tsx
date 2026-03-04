@@ -233,7 +233,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
                   <button
                     type="button"
                     onClick={() => handleRemoveFile(file.id)}
-                    className="btn-icon"
+                    className="icon-btn"
                     title="Remove file"
                   >
                     <X className="icon-xs" />
