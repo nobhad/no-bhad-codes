@@ -176,6 +176,20 @@
   }
 }
 
+/* XS Mobile — must come AFTER small-mobile to override at 375px */
+@media (--xs-mobile) {
+  .header .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Reduce nav-row vertical padding: 20px → 10px saves 20px of header height */
+  .nav-row {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+}
+
 /* Large Screens */
 @media (--wide) {
   :root {

@@ -81,11 +81,11 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--portal-text-light);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .modal-header h2 .heading-icon {
@@ -393,7 +393,7 @@
 
 .md-preview .md-h1 {
   font-size: var(--font-size-2xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3);
   padding-bottom: var(--space-2);
@@ -401,19 +401,19 @@
 }
 .md-preview .md-h2 {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: var(--space-4) 0 var(--space-2);
 }
 .md-preview .md-h3 {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: var(--space-3) 0 var(--space-2);
 }
 .md-preview .md-h4 {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-secondary);
   margin: var(--space-2) 0 var(--space-1);
 }
@@ -422,7 +422,7 @@
   color: var(--portal-text-secondary);
 }
 .md-preview strong {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 .md-preview em {
@@ -475,7 +475,7 @@
 }
 .md-preview .md-table th {
   background: var(--portal-bg-medium);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 .md-preview .md-table td {
@@ -780,7 +780,7 @@
 #kb-article-modal .modal-header h2#kb-article-modal-title {
   margin: 0;
   font-size: var(--font-size-xl, 1.25rem);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
   text-transform: none;
   letter-spacing: normal;
@@ -795,7 +795,7 @@
 
 .kb-article-modal-content .form-group-inline label {
   margin: 0;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 /* ==============================================
@@ -820,7 +820,7 @@
   cursor: pointer;
   padding: var(--space-1) var(--space-2);
   transition: background-color var(--transition-faster);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   margin-bottom: 0;
 }
 
@@ -833,7 +833,7 @@
 .dr-templates-checkboxes label.dr-template-option .dr-template-label {
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 #dr-create-modal .admin-modal {
@@ -909,7 +909,7 @@
 .keyboard-help-title {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: 0;
 }
@@ -936,9 +936,9 @@
 .keyboard-help-section-title {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
   margin: 0 0 var(--space-2) 0;
 }
@@ -979,9 +979,9 @@
   padding: 0 var(--space-1-5);
   background: var(--portal-bg-medium);
   border: var(--border-width) solid var(--portal-bg-light);
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
 }
 

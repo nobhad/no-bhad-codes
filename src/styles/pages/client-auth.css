@@ -42,7 +42,7 @@
   font-size: var(--font-size-xl);
   text-transform: uppercase;
   color: var(--color-dark);
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 [data-theme="dark"] .auth-container {
@@ -78,7 +78,7 @@
   text-transform: uppercase;
   color: var(--color-dark);
   text-align: center;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 /* Auth Method Toggle - uses shared .toggle-group and .toggle-btn from portal-buttons.css */
@@ -507,7 +507,7 @@ br.desktop-only {
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     text-align: center;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-label);
   }
 
   /* Mobile login box with border */

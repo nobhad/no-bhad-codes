@@ -35,7 +35,7 @@
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .cp-questionnaires-grid {
@@ -117,7 +117,7 @@
   width: 64px;
   height: 64px;
   margin: 0 auto var(--space-4);
-  color: var(--portal-text-muted);
+  color: inherit;
 }
 
 .cp-empty-icon svg {
@@ -131,8 +131,8 @@
 }
 
 .cp-questionnaires-empty p {
-  font-size: var(--font-size-base);
-  color: var(--portal-text-muted);
+  font-size: inherit;
+  color: inherit;
   margin: 0;
 }
 
@@ -161,7 +161,7 @@
 /* spin keyframe defined in loading.css (shared bundle) */
 
 .cp-loading p {
-  color: var(--portal-text-muted);
+  color: inherit;
   margin: 0;
 }
 

@@ -26,7 +26,7 @@
   box-shadow: none;
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   pointer-events: auto;
   opacity: 0;
   transform: translateX(100%);
@@ -68,7 +68,7 @@
 
 .toast-action {
   color: var(--portal-text-light);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
   border-bottom: var(--border-width) solid transparent;
   transition:

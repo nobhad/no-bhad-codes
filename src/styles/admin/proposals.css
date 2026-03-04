@@ -29,7 +29,7 @@
 .templates-header h2 {
   margin: 0;
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -61,7 +61,7 @@
 .template-card-header h4 {
   margin: 0;
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -71,7 +71,7 @@
   background-color: var(--color-primary);
   color: var(--color-white);
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
 }
 
@@ -122,7 +122,7 @@
 .template-editor-modal {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: var(--z-index-max);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,7 +321,7 @@
 
 .preview-value {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -385,7 +385,7 @@
 }
 
 .version-number {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   font-size: var(--font-size-sm);
 }
@@ -442,7 +442,7 @@
   align-items: center;
   padding: var(--space-0-5) var(--space-1-5);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   width: fit-content;
 }
 
@@ -542,7 +542,7 @@
 }
 
 .custom-item-row .item-total {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -556,7 +556,7 @@
 
 .items-total {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -584,7 +584,7 @@
 
 .discount-badge {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-success);
 }
 
@@ -626,7 +626,7 @@
 
 .comment-author {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 

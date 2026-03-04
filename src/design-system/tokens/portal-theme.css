@@ -27,8 +27,9 @@
   --portal-text-light: #ffffff;
   --portal-text-primary: #ffffff;
   --portal-text-secondary: #ffffff;
-  --portal-text-muted: #999999;
+  --portal-text-muted: #ffffff;   /* No grey - differentiate by weight only */
   --portal-text-dark: #000000;
+  --portal-placeholder-color: rgba(255, 255, 255, 0.45);  /* Placeholder only */
 
   /* ----------------------------------------
    * BACKGROUND COLORS
@@ -147,6 +148,20 @@
   --field-group-gap: 0.75rem;
 
   /* ----------------------------------------
+   * FONT SIZE MINIMUMS - Portal enforces 15px floor
+   * ---------------------------------------- */
+  --font-size-2xs: 0.9375rem;  /* 15px minimum (global token is 10px) */
+  --font-size-xs: 0.9375rem;   /* 15px minimum (global token is 12px) */
+  --font-size-sm: 0.9375rem;   /* 15px minimum (global token is 14px) */
+
+  /* ----------------------------------------
+   * FONT WEIGHT - Primary text uses medium weight for readability
+   * Muted/secondary text uses normal weight for visual distinction
+   * ---------------------------------------- */
+  --font-weight-base: 500;   /* Portal default: medium weight for primary text */
+  --font-weight-muted: 400;  /* Muted/secondary/label text */
+
+  /* ----------------------------------------
    * LABEL STYLING
    * ---------------------------------------- */
   --label-font-size: 0.75rem;
@@ -223,8 +238,9 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --portal-text-light: #000000;
   --portal-text-primary: #000000;
   --portal-text-secondary: #000000;
-  --portal-text-muted: #000000;
+  --portal-text-muted: #000000;   /* No grey - same as primary, differentiate by weight */
   --portal-text-dark: #ffffff;
+  --portal-placeholder-color: rgba(0, 0, 0, 0.45);  /* Placeholder only */
 
   /* ----------------------------------------
    * BACKGROUND COLORS - WHITE BASE
@@ -244,6 +260,20 @@ html[data-theme="light"] body[data-page="client-portal"] {
    * ---------------------------------------- */
   --portal-border-color: #000000;
   --portal-border-subtle: rgba(0, 0, 0, 0.08);
+
+  /* ----------------------------------------
+   * FONT SIZE MINIMUMS - Portal enforces 15px floor
+   * ---------------------------------------- */
+  --font-size-2xs: 0.9375rem;  /* 15px minimum */
+  --font-size-xs: 0.9375rem;   /* 15px minimum */
+  --font-size-sm: 0.9375rem;   /* 15px minimum */
+
+  /* ----------------------------------------
+   * FONT WEIGHT - Primary text uses medium weight for readability
+   * Muted/secondary text uses normal weight for visual distinction
+   * ---------------------------------------- */
+  --font-weight-base: 500;   /* Portal default: medium weight for primary text */
+  --font-weight-muted: 400;  /* Muted/secondary/label text */
 
   /* ----------------------------------------
    * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)

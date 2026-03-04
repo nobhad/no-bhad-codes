@@ -70,7 +70,7 @@
 }
 
 .table-stats-bar strong {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Status text colors - REMOVED: all table text should inherit from root */
@@ -220,7 +220,7 @@
 }
 
 .bulk-actions-count {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
@@ -434,7 +434,7 @@
   border: var(--border-width) solid var(--table-border-color);
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 [data-page="admin"] .table-keyboard-hint kbd {

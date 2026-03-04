@@ -21,6 +21,168 @@
    PROJECT DETAIL VIEW STYLES
    ===================================================== */
 
+/* =====================================================
+   OVERVIEW TAB LAYOUT
+   Two-column responsive grid: main content + sidebar
+   ===================================================== */
+
+.project-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--portal-section-gap);
+}
+
+@media (min-width: 1024px) {
+  .project-overview-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.project-overview-main,
+.project-overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
+
+/* 2-column grid for project info fields (type, timeline, dates, budget) */
+.project-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+/* Label + value field (stacked) */
+.project-info-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Field value with leading icon */
+.project-info-field-value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--portal-text-light);
+}
+
+/* Panel card header: title on left, action on right */
+.panel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+/* Description divider within a panel card */
+.panel-description {
+  border-top: var(--border-width) solid var(--portal-border-color);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+/* Inline link list (preview/repo/production URLs) */
+.link-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.link-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--portal-text-light);
+  text-decoration: none;
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+  transition: color var(--transition-fast);
+}
+
+.link-list-item:hover {
+  color: var(--portal-text-secondary);
+}
+
+/* Milestone list container */
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Wrapper: groups the milestone row + expanded content */
+.milestone-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Button-based checkbox — completed state (used when no native input) */
+.milestone-checkbox.is-completed {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Milestone add form */
+.milestone-add-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--portal-border-color);
+  margin-bottom: var(--space-3);
+}
+
+/* Milestone expanded detail area */
+.milestone-expanded-content {
+  padding: var(--space-3);
+  padding-top: 0;
+  margin-left: calc(var(--icon-size-lg) + var(--space-2));
+}
+
+/* Financial summary row: label left, value right */
+.financial-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+  font-size: var(--font-size-base);
+}
+
+.financial-row:last-child {
+  border-bottom: none;
+}
+
+.financial-row-label {
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.financial-row-value {
+  color: var(--portal-text-light);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Quick stats 2-col grid inside sidebar panel */
+.quick-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+/* Progress field: label row + track */
+.progress-field {
+  padding: var(--space-2) 0;
+}
+
+.progress-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
 /* .btn-back: portal-buttons.css - only layout overrides here */
 .project-detail .btn-back {
   margin-right: var(--space-4);
@@ -47,7 +209,7 @@
 #tab-project-detail .page-title h2,
 #tab-client-detail .page-title h1,
 #tab-client-detail .page-title h2 {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -158,8 +320,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Summary card values - match overview stat numbers */
 [data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value {
   color: var(--portal-text-light);
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
 }
 
 [data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value.outstanding {
@@ -209,10 +371,10 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: transparent;
   padding: var(--space-1-5) 0;
   margin-top: var(--space-1-5);
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   text-align: left;
 }
 
@@ -236,8 +398,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   width: 100%;
   padding: 1.75rem var(--space-3) var(--space-1) var(--space-3);
   border: none;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   text-transform: capitalize;
   appearance: none;
@@ -247,7 +409,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--portal-text-light);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 16px center;
+  background-position: right var(--space-4) center;
   min-height: 60px;
 }
 
@@ -307,12 +469,12 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   padding: var(--space-2) var(--space-4);
   min-height: auto;
   font-size: var(--font-size-sm);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 /* Settings form placeholder - not bold */
 #pd-tab-settings input::placeholder {
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 /* Form row for Account Status and Last Login - overrides from portal-forms.css */
@@ -328,8 +490,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Readonly form values - match meta-value styling */
 #pd-tab-settings .form-value-readonly {
   color: var(--color-white);
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
 }
 
 /* Client account actions buttons */
@@ -345,7 +507,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   padding: var(--space-1) var(--space-1-5);
   padding-left: var(--space-2);
   font-size: var(--font-size-sm);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   min-height: auto;
 }
 
@@ -409,7 +571,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Sans-serif font for main name heading in each detail view */
 #tab-project-detail #pd-project-name,
 #tab-client-detail #cd-client-name {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
 }
 
 /* Secondary/muted text in detail views */
@@ -435,15 +597,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 .progress-percentage {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-primary);
   min-width: 60px;
 }
 
 .project-progress-display .progress-bar {
   flex: 1;
-  height: 12px;
+  height: var(--space-3);
   background: var(--portal-bg-light);
   overflow: hidden;
   box-shadow: var(--shadow-inset);
@@ -471,8 +633,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Custom checkbox - wrapper div */
 .milestone-checkbox {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   cursor: pointer;
   background: var(--color-black);
   position: relative;
@@ -520,7 +682,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] .milestone-title {
   color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
 }
 
 /* .milestone-item.completed styling consolidated in shared/portal-cards.css */
@@ -657,7 +819,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 #pd-files-list .file-name {
   display: block;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
@@ -759,18 +921,18 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .milestone-task-count {
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .milestone-progress-text {
   font-size: var(--font-size-sm);
   color: var(--app-color-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .milestone-progress-bar {
   width: 100%;
-  height: 6px;
+  height: var(--space-1-5);
   background: var(--portal-bg-medium);
   overflow: hidden;
   margin-top: var(--space-2);
@@ -827,8 +989,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* .milestone-task-item.completed styling consolidated in shared/portal-cards.css */
 
 .milestone-task-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   cursor: pointer;
 }
 
@@ -1187,7 +1349,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin: var(--space-1) 0 0;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
 }
 
 /* Header URLs */
@@ -1245,7 +1407,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin: var(--space-1) 0 0;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
 }
 
 .pd-detail-row {
@@ -1344,10 +1506,10 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .pd-progress-percent {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--portal-text-light);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
 }
 
 .pd-progress-card .progress-bar {
@@ -1374,7 +1536,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-stat-value {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
@@ -1453,7 +1615,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   }
 
   .pd-progress-percent {
-    font-size: 1.25rem;
+    font-size: var(--font-size-lg);
   }
 }
 
@@ -1520,7 +1682,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .notes-display .notes-content {
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -1557,8 +1719,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .document-icon {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: calc(var(--icon-size-xl) * 2);
+  height: calc(var(--icon-size-xl) * 2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1567,8 +1729,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .document-icon svg {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
 }
 
 .document-info {
@@ -1579,7 +1741,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .document-info h4 {
   margin: 0 0 var(--space-1) 0;
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
@@ -1587,7 +1749,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 .document-actions {
@@ -1597,8 +1759,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .document-actions .btn svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
 }
 
 .document-generation-content .modal-note {
@@ -1610,7 +1772,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 .document-generation-content .modal-note svg {

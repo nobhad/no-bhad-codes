@@ -29,9 +29,6 @@
 /* Portal layout and sidebar (shared) */
 @import "../shared/portal-sidebar.css";
 
-/* Secondary sidebar (vertical tab nav for detail pages) */
-@import "./secondary-sidebar.css";
-
 /* Admin-specific modules */
 @import "./auth.css";
 @import "./modals.css";
@@ -48,7 +45,7 @@
 @import "./proposals.css";
 @import "./table-features.css";
 /* contracts consolidated into table-features.css */
-@import "./table-filters.css";
+@import "../shared/table-filters.css";
 @import "./ad-hoc-requests.css";
 /* sidebar-badges consolidated into shared/portal-sidebar.css */
 /* tooltips consolidated into shared/portal-components.css */

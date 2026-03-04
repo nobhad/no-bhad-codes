@@ -60,7 +60,7 @@
 
 .ad-hoc-time-total {
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--color-brand-primary);
   background: rgba(var(--color-primary-rgb), 0.15);
   padding: var(--space-0-5) var(--space-1);
@@ -94,7 +94,7 @@
 }
 
 .ad-hoc-time-entry-user {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   font-size: var(--font-size-xs);
 }
@@ -103,7 +103,7 @@
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .ad-hoc-time-entry-details {
@@ -115,7 +115,7 @@
 }
 
 .ad-hoc-time-entry-hours {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-brand-primary);
   min-width: 40px;
 }
@@ -131,9 +131,9 @@
   color: var(--color-danger-dark);
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .ad-hoc-time-entry-form {
@@ -175,7 +175,7 @@
 .ad-hoc-metric-value {
   display: block;
   font-size: var(--font-size-3xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-brand-primary);
   margin-bottom: var(--space-0-5);
   line-height: 1.2;
@@ -185,16 +185,16 @@
   display: block;
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
   margin-bottom: var(--space-1);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .ad-hoc-metric-change {
   display: inline-block;
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   padding: var(--space-0-5) var(--space-1);
 }
 
@@ -221,7 +221,7 @@
 .ad-hoc-clients-section h4 {
   margin: 0 0 var(--space-2) 0;
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
@@ -246,14 +246,14 @@
 
 .ad-hoc-monthly-label {
   color: var(--portal-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   font-size: var(--font-size-xs);
 }
 
 .ad-hoc-monthly-value {
   color: var(--color-brand-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: right;
 }
 
@@ -277,7 +277,7 @@
 
 .ad-hoc-client-name {
   color: var(--portal-text-light);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -285,7 +285,7 @@
 
 .ad-hoc-client-revenue {
   color: var(--color-brand-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   min-width: 80px;
   text-align: right;
 }

@@ -217,7 +217,7 @@
   font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
 }
 
@@ -368,7 +368,7 @@
   font-weight: 600;
   text-transform: uppercase;
   font-size: var(--font-size-xs);
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--proposal-text-muted);
 }
 
@@ -549,7 +549,7 @@
   font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
 }
 
@@ -659,7 +659,7 @@
   margin: 0 0 var(--proposal-spacing-md);
   color: var(--proposal-text);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .summary-feature-list {

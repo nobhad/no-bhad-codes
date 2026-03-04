@@ -83,7 +83,7 @@
 }
 
 .portal .thread-item-title {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -100,7 +100,7 @@
 }
 
 .portal .thread-item.unread .thread-item-title {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .portal .thread-unread-badge {
@@ -113,7 +113,7 @@
   background: var(--color-primary);
   color: var(--portal-bg-dark);
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* ===========================================
@@ -176,7 +176,7 @@
 }
 
 .portal .message-sender {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .portal .message-time {
@@ -216,7 +216,7 @@
   background: var(--portal-text-light);
   color: var(--portal-bg-pitch);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Message status (read/sent indicator) */
@@ -465,7 +465,7 @@
 }
 
 .portal .messages-thread-header .thread-title {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* ===========================================
@@ -645,7 +645,7 @@
 }
 
 .messaging-conv-name-unread {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .messaging-conv-time {
@@ -845,13 +845,13 @@
   height: 100%;
 }
 
-/* Message thread header */
+/* Message thread header - uses data-table-header pattern now */
 .message-thread-header {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
   padding: var(--space-1) var(--space-1-5);
-  border: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Message bubble container */
@@ -1008,13 +1008,13 @@
   color: var(--portal-text-muted);
 }
 
-/* Composer container */
+/* Composer container - border-top only (sits at bottom of card) */
 .message-composer {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-1-5);
-  border: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Composer attachments preview */
@@ -1054,38 +1054,7 @@
   overscroll-behavior: contain;
 }
 
-/* Loading state */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  color: var(--portal-text-muted);
-}
-
-/* Error state */
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.error-state-message {
-  text-align: center;
-  margin-bottom: var(--space-2);
-}
-
-/* Empty state */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  color: var(--portal-text-muted);
-}
+/* Loading/error/empty states: canonical styles in components/loading.css */
 
 /* Icon sizes */
 .icon-xs {

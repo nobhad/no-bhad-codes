@@ -57,12 +57,12 @@
  * Applied to: field-label, meta-label, stat-label, kpi-card-label, etc.
  */
 .portal-label {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--label-font-size);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 /* ============================================

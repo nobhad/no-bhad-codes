@@ -99,7 +99,7 @@ button.dropdown-trigger > svg.dropdown-caret,
   text-decoration: none;
   text-transform: none;
   letter-spacing: normal;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   box-shadow: none;
 }
 .btn-link:hover {
@@ -178,7 +178,8 @@ button.dropdown-trigger > svg.dropdown-caret,
   border: none;
 }
 .btn-filled:disabled {
-  opacity: 0.6;
+  background: var(--portal-bg-lighter);
+  color: var(--portal-text-muted);
   cursor: not-allowed;
 }
 
@@ -212,9 +213,9 @@ button.dropdown-trigger > svg.dropdown-caret,
   padding: var(--space-1-5) var(--space-3);
   border: var(--border-width) solid var(--portal-border-light);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   letter-spacing: 1px;
   transition: all var(--transition-fast);
   text-transform: uppercase;
@@ -230,7 +231,8 @@ button.dropdown-trigger > svg.dropdown-caret,
 }
 
 .btn-auth:disabled {
-  opacity: 0.5;
+  color: var(--portal-text-muted);
+  border-color: var(--portal-border-color);
   cursor: not-allowed;
 }
 .btn-sm .btn-icon {
@@ -250,9 +252,9 @@ button.dropdown-trigger > svg.dropdown-caret,
   width: 100%;
   padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem)
     var(--sidebar-icon-indent, 18px);
-  font-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
+  font-family: var(--font-family-mono);
   font-size: clamp(0.9rem, 1.6vw, 1.05rem);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: left;
   justify-content: flex-start;
   background: transparent;
@@ -439,8 +441,9 @@ button.dropdown-trigger > svg.dropdown-caret,
     .data-table td .icon-btn svg,
     .table-actions .icon-btn svg,
     .actions-cell .icon-btn svg {
-      width: var(--icon-size-md);
-      height: var(--icon-size-md);
+      /* Use unified table icon size from portal-tables.css */
+      width: var(--table-action-icon-size, var(--icon-size-md));
+      height: var(--table-action-icon-size, var(--icon-size-md));
     }
   }
 }
@@ -455,7 +458,7 @@ button.dropdown-trigger > svg.dropdown-caret,
  * MUST CATCH ALL POSSIBLE SCENARIOS:
  * - Vanilla JS tables with renderActionsCell()
  * - Vanilla JS tables with manual buttons
- * - React tables with AdminTableCell
+ * - React tables with PortalTableCell
  * - Tables with .table-actions wrapper
  * - Tables without .table-actions wrapper
  */
@@ -526,7 +529,9 @@ button.dropdown-trigger > svg.dropdown-caret,
     box-shadow: none;
   }
 
-  /* MASTER SELECTOR: Every SVG in table icon buttons - matches text size */
+  /* MASTER SELECTOR: Every SVG in table icon buttons
+     Uses --table-action-icon-size from portal-tables.css for uniform sizing
+     with ALL other table icons (cell-icon, cell-icon-sm, etc.) */
   td .icon-btn svg,
   td > .icon-btn svg,
   td button.icon-btn svg,
@@ -545,12 +550,13 @@ button.dropdown-trigger > svg.dropdown-caret,
   .portal td .icon-btn svg,
   .portal .actions-cell .icon-btn svg,
   .portal .table-actions .icon-btn svg {
-    width: var(--btn-portal-icon-inner-size) !important;
-    height: var(--btn-portal-icon-inner-size) !important;
-    min-width: var(--btn-portal-icon-inner-size);
-    min-height: var(--btn-portal-icon-inner-size);
-    max-width: var(--btn-portal-icon-inner-size);
-    max-height: var(--btn-portal-icon-inner-size);
+    /* Use unified table icon size - NO !important, cascade handles specificity */
+    width: var(--table-action-icon-size, var(--icon-size-md));
+    height: var(--table-action-icon-size, var(--icon-size-md));
+    min-width: var(--table-action-icon-size, var(--icon-size-md));
+    min-height: var(--table-action-icon-size, var(--icon-size-md));
+    max-width: var(--table-action-icon-size, var(--icon-size-md));
+    max-height: var(--table-action-icon-size, var(--icon-size-md));
     flex-shrink: 0;
   }
 }
@@ -682,8 +688,8 @@ button.dropdown-trigger > svg.dropdown-caret,
   color: var(--color-white);
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color var(--transition-mouse) ease,
+    color var(--transition-mouse) ease;
 }
 .toggle-btn:not(:last-child) {
   border-right: var(--border-width) solid var(--btn-portal-border-color);
@@ -697,12 +703,11 @@ button.dropdown-trigger > svg.dropdown-caret,
 }
 
 /* ============================================
- * TW-BTN-* CLASSES - React Component Button Styles
- * These classes are used by React components via PortalButton
- * They use CSS variables for theming support (dark/light mode)
+ * BASE BUTTON - shared base for all portal buttons
  * ============================================ */
 
-/* Base button */
+/* Base button — .btn is canonical; .tw-btn kept as alias */
+.btn,
 .tw-btn {
   display: inline-flex;
   align-items: center;
@@ -710,175 +715,29 @@ button.dropdown-trigger > svg.dropdown-caret,
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   font-size: var(--btn-portal-font-size, 16px);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   font-family: var(--font-family-mono, monospace);
   background: transparent;
   color: var(--portal-text-light);
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
-}
-
-.tw-btn:hover {
-  opacity: 0.6;
-}
-
-.tw-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Primary button - solid border, inverts on hover */
-.tw-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: var(--btn-portal-font-size, 16px);
-  font-weight: 400;
-  font-family: var(--font-family-mono, monospace);
-  background: transparent;
-  color: var(--btn-portal-color, var(--portal-text-light));
-  border: var(--btn-portal-border-width, 2px) solid var(--btn-portal-border-color, var(--portal-border-color));
-  border-radius: 0;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.tw-btn-primary:hover {
-  background: var(--btn-portal-hover-bg, var(--portal-text-light));
-  color: var(--btn-portal-hover-color, var(--portal-bg-pitch));
-}
-
-.tw-btn-primary:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Secondary button - solid border, subtle hover */
-.tw-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: var(--btn-portal-font-size, 16px);
-  font-weight: 400;
-  font-family: var(--font-family-mono, monospace);
-  background: transparent;
-  color: var(--btn-portal-color, var(--portal-text-light));
-  border: var(--btn-portal-border-width, 2px) solid var(--btn-portal-border-color, var(--portal-border-color));
-  border-radius: 0;
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
-}
-
-.tw-btn-secondary:hover {
-  border-color: var(--btn-portal-hover-border, var(--portal-text-light));
-}
-
-.tw-btn-secondary:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Ghost button - no border, underline on hover */
-.tw-btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: var(--font-size-sm, 14px);
-  font-weight: 400;
-  font-family: var(--font-family-mono, monospace);
-  background: transparent;
-  color: var(--btn-portal-color, var(--portal-text-light));
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-}
-
-.tw-btn-ghost:hover {
-  text-decoration: underline;
-}
-
-.tw-btn-ghost:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Danger button - error/destructive actions */
-.tw-btn-danger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: var(--btn-portal-font-size, 16px);
-  font-weight: 400;
-  font-family: var(--font-family-mono, monospace);
-  background: transparent;
-  color: var(--btn-portal-danger-color, var(--color-error-500));
-  border: var(--btn-portal-border-width, 2px) solid var(--btn-portal-danger-border, var(--color-error-500));
-  border-radius: 0;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.tw-btn-danger:hover {
-  background: var(--btn-portal-danger-hover-bg, var(--color-error-500));
-  color: var(--btn-portal-danger-hover-color, var(--portal-bg-pitch));
-}
-
-.tw-btn-danger:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Icon button - compact, icon-only */
-.tw-btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  background: transparent;
-  color: var(--portal-text-secondary);
   border: none;
   border-radius: 0;
   cursor: pointer;
   transition: color var(--transition-fast);
 }
 
-.tw-btn-icon:hover {
-  color: var(--btn-portal-color, var(--portal-text-light));
+.btn:hover,
+.tw-btn:hover {
+  color: var(--color-primary);
 }
 
-.tw-btn-icon:disabled {
-  opacity: 0.3;
+.btn:disabled,
+.tw-btn:disabled {
+  color: var(--portal-text-muted);
   cursor: not-allowed;
 }
 
-/* Close button - for modals/dialogs */
-.tw-btn-close {
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border-radius: var(--portal-radius-full);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-base);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-}
-
-.tw-btn-close:hover {
-  opacity: 0.6;
-}
+/* tw-btn-primary/secondary/ghost/danger/icon/close removed — use .btn-primary,
+   .btn-secondary, .btn-ghost, .btn-danger, .icon-btn, .btn-close instead */
 
 /* ============================================
  * ACTION BAR - Unified height for buttons and dropdowns in same row

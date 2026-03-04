@@ -92,9 +92,9 @@
 
 .secondary-sidebar-title {
   flex: 1;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -175,9 +175,9 @@
   border: none;
   cursor: pointer;
   color: var(--portal-text-secondary);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   text-align: left;
@@ -254,7 +254,7 @@
   background: var(--color-danger);
   color: var(--color-white);
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,7 +274,7 @@
   width: var(--space-2);
   height: var(--space-2);
   font-size: var(--font-size-2xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   padding: 0;
   box-shadow: 0 0 0 2px var(--portal-bg-dark);
 }
@@ -293,7 +293,7 @@
   color: var(--portal-text-light);
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -353,9 +353,9 @@
   border-bottom: var(--border-width) solid transparent;
   cursor: pointer;
   color: var(--portal-text-secondary);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;

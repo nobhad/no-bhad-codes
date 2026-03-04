@@ -8,6 +8,13 @@
   overflow-x: hidden;
 }
 
+/* Client portal body defaults - match admin portal */
+body[data-page="client-portal"] {
+  background: var(--portal-bg-pitch);
+  font-weight: var(--font-weight-base, 500);
+  color: var(--portal-text-primary);
+}
+
 /* Footer is hidden via footer.css [data-page="client-portal"] selector */
 
 /* Client Portal Main Container */
@@ -258,21 +265,36 @@
 
 /* .tab-content base display:none in shared/portal-tabs.css */
 
+/* NOTE: .portal-view-content and #portal-view-content removed — client portal
+   now uses EJS-rendered .tab-content containers (identical to admin architecture).
+   See shared/portal-tabs.css for .tab-content base styles. */
+
 /* ============================================
-   Portal View Content Container
-   Base structure for all dynamic views
-   NOTE: Gap applied at .dashboard-content level (base)
+   PORTAL MAIN CONTAINER
+   Required wrapper for all portal page content.
+   Provides consistent padding and max-width.
    ============================================ */
-.portal .portal-view-content,
-.portal #portal-view-content {
-  display: flex;
-  flex-direction: column;
-  /* Gap inherited from .dashboard-content base level */
+.portal-main-container {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  max-width: 1400px;
+  border: var(--portal-border);
 }
 
-/* All direct children of view content get consistent card structure */
-.portal .portal-view-content > *,
-.portal #portal-view-content > * {
+@media (--mobile) {
+  .portal-main-container {
+    padding: var(--space-3) var(--space-3);
+  }
+}
+
+@media (--small-mobile) {
+  .portal-main-container {
+    padding: var(--space-2) var(--space-2);
+  }
+}
+
+/* All direct children of tab content get consistent card structure */
+.portal .tab-content > * {
   /* Reset any inherited margins - gap handles spacing */
   margin-top: 0;
   margin-bottom: 0;
@@ -290,7 +312,7 @@
 
 /* Page title in unified global header */
 .portal .portal-global-header .header-page-title {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: clamp(1rem, 3vw, 1.25rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -390,7 +412,7 @@
 
 .page-title h1,
 .page-title h2 {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -400,7 +422,7 @@
 /* Legacy: page-header with h2 only (when not primary row) */
 .page-header:not(.primary-header-row) h1,
 .page-header:not(.primary-header-row) h2 {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: clamp(1.5rem, 4vw, 2rem);
   color: var(--portal-text-light);
   margin: 0;
@@ -523,3 +545,20 @@
 }
 
 /* .btn-loader: components/loading.css */
+
+/* ============================================
+   FILES VIEW - FOLDER SIDEBAR
+   Hidden on mobile, shown on tablet+ via CSS
+   (Moved from inline style in PortalFilesManager.tsx)
+   ============================================ */
+@media (--tablet) {
+  #folder-sidebar {
+    display: block;
+  }
+}
+
+@media (--mobile) {
+  #folder-sidebar {
+    display: none;
+  }
+}

@@ -22,8 +22,8 @@
   /* Symmetric horizontal padding - same on both sides */
   --dropdown-padding-x: var(--space-1-5);  /* 12px */
   --dropdown-padding-y: var(--space-1);    /* 8px */
-  /* Status dropdown width - fits longest status like "In Progress" */
-  --status-dropdown-width: 130px;
+  /* Status dropdown width - fits longest status labels */
+  --status-dropdown-width: 160px;
 }
 
 /* ================================================
@@ -367,10 +367,10 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal-dropdown-label {
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .portal-dropdown-label.inset {
@@ -421,7 +421,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   border: var(--dropdown-border-width) solid var(--dropdown-border-color);
   border-radius: var(--dropdown-radius);
   font-size: var(--font-size-base);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-light);
   cursor: pointer;
   text-align: left;
@@ -646,11 +646,11 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* ================================================
-   INLINE TABLE DROPDOWNS (Admin-specific)
+   INLINE TABLE DROPDOWNS
    ================================================ */
 
 /* Allow dropdown to escape table containers */
-[data-page="admin"]
+.portal
   :is(
     .admin-table-card,
     .admin-table-scroll-wrapper,
@@ -661,7 +661,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   overflow: visible;
 }
 
-[data-page="admin"] .table-dropdown {
+.portal .table-dropdown {
   position: relative;
   display: inline-flex;
   min-width: auto;
@@ -671,7 +671,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Base trigger styles - symmetric padding, inherit text styles */
-[data-page="admin"] .table-dropdown .custom-dropdown-trigger {
+.portal .table-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -694,12 +694,12 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Hover state - show border (only when closed) */
-[data-page="admin"] .table-dropdown:not(.open) .custom-dropdown-trigger:hover {
+.portal .table-dropdown:not(.open) .custom-dropdown-trigger:hover {
   border-color: var(--table-border-color);
 }
 
 /* Focus state - only show border when closed */
-[data-page="admin"] .table-dropdown:not(.open) .custom-dropdown-trigger:is(:focus, :focus-visible) {
+.portal .table-dropdown:not(.open) .custom-dropdown-trigger:is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
   border-color: var(--table-border-color);
@@ -707,8 +707,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Open state - trigger has top + sides, no bottom */
-[data-page="admin"] .table-dropdown.open .custom-dropdown-trigger,
-[data-page="admin"]
+.portal .table-dropdown.open .custom-dropdown-trigger,
+.portal
   .table-dropdown.open
   .custom-dropdown-trigger:is(:hover, :focus, :focus-visible) {
   outline: none;
@@ -752,7 +752,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Status dot and text - inherit from parent */
-[data-page="admin"] .table-dropdown .custom-dropdown-text {
+.portal .table-dropdown .custom-dropdown-text {
   flex: 1;
   min-width: 0;
   font-size: inherit;
@@ -763,7 +763,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   align-self: center;
 }
 
-[data-page="admin"] .table-dropdown .custom-dropdown-caret {
+.portal .table-dropdown .custom-dropdown-caret {
   width: var(--dropdown-caret-size);
   height: var(--dropdown-caret-size);
   flex-shrink: 0;
@@ -771,7 +771,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 /* Dropdown menu - sides + bottom, no top */
 /* Explicit font settings since this may not inherit from .portal */
-[data-page="admin"] .table-dropdown.custom-dropdown .custom-dropdown-menu {
+.portal .table-dropdown.custom-dropdown .custom-dropdown-menu {
   position: absolute;
   top: 100%;
   left: 0;
@@ -797,25 +797,25 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Details panel dropdown override */
-[data-page="admin"] .details-panel .table-dropdown .custom-dropdown-trigger {
+.portal .details-panel .table-dropdown .custom-dropdown-trigger {
   background-color: transparent;
 }
 
-[data-page="admin"] .details-panel .table-dropdown .custom-dropdown-menu {
+.portal .details-panel .table-dropdown .custom-dropdown-menu {
   background-color: var(--portal-bg-pitch);
   left: 0;
   right: auto;
   min-width: 100%;
 }
 
-[data-page="admin"] .table-dropdown.custom-dropdown.open .custom-dropdown-menu {
+.portal .table-dropdown.custom-dropdown.open .custom-dropdown-menu {
   display: block;
   margin-top: -1px;
 }
 
 /* Open upward when near bottom */
-[data-page="admin"] .table-dropdown.dropdown-open-up.open .custom-dropdown-trigger,
-[data-page="admin"]
+.portal .table-dropdown.dropdown-open-up.open .custom-dropdown-trigger,
+.portal
   .table-dropdown.dropdown-open-up.open
   .custom-dropdown-trigger:is(:hover, :focus, :focus-visible) {
   outline: none;
@@ -825,7 +825,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   box-shadow: none;
 }
 
-[data-page="admin"] .table-dropdown.dropdown-open-up.open .custom-dropdown-menu {
+.portal .table-dropdown.dropdown-open-up.open .custom-dropdown-menu {
   top: auto;
   bottom: 100%;
   margin-top: 0;
@@ -840,10 +840,9 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
    No extra padding, margins, or spacing
    ================================================ */
 
-[data-page="admin"] .table-dropdown .custom-dropdown-item,
 /* Dropdown items - symmetric padding, inherit text styles */
-[data-page="admin"] .table-dropdown .custom-dropdown-menu .custom-dropdown-item,
-.portal[data-page="admin"] .table-dropdown .custom-dropdown-item {
+.portal .table-dropdown .custom-dropdown-item,
+.portal .table-dropdown .custom-dropdown-menu .custom-dropdown-item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -865,27 +864,27 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Table dropdown item hover - subtle highlight, NO primary color */
-[data-page="admin"] .table-dropdown .custom-dropdown-item:hover {
+.portal .table-dropdown .custom-dropdown-item:hover {
   background-color: var(--portal-bg-hover);
 }
 
 /* Filter dropdown with checkmarks */
-[data-page="admin"] .table-dropdown.filter-dropdown-with-check {
+.portal .table-dropdown.filter-dropdown-with-check {
   min-width: 12rem;
 }
 
-[data-page="admin"] .table-dropdown.filter-dropdown-with-check .filter-dropdown-check {
+.portal .table-dropdown.filter-dropdown-with-check .filter-dropdown-check {
   width: 1rem;
   flex-shrink: 0;
   text-align: center;
   margin-right: calc(var(--space-0-5) / 2);
 }
 
-[data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-item {
+.portal .table-dropdown.filter-dropdown-with-check .custom-dropdown-item {
   padding-left: calc(var(--space-3) / 2);
 }
 
-[data-page="admin"]
+.portal
   .table-dropdown.filter-dropdown-with-check
   .custom-dropdown-item
   .custom-dropdown-text {
@@ -896,39 +895,88 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   overflow: visible;
 }
 
-[data-page="admin"]
+.portal
   .table-dropdown.filter-dropdown-with-check
   .custom-dropdown-trigger
   .custom-dropdown-text {
   text-align: left;
 }
 
-[data-page="admin"] .table-dropdown.filter-dropdown-with-check .custom-dropdown-trigger {
+.portal .table-dropdown.filter-dropdown-with-check .custom-dropdown-trigger {
   padding-left: calc(var(--space-3) / 2 + 1rem + var(--space-0-5) / 2);
 }
 
 /* ================================================
    Pagination Page Size Dropdown
-   - 28px height to match pagination buttons
+   - Height matches pagination buttons (--table-pagination-btn-size)
    - No rounded corners (border-radius: 0)
    - No blue/primary color on hover
    - No gap between trigger and menu
    ================================================ */
 
-/* Container - match button height */
-[data-page="admin"] .pagination-page-size-dropdown .table-dropdown.custom-dropdown {
-  height: 28px;
+/* Portal: Container */
+.portal .pagination-page-size-dropdown .table-dropdown.custom-dropdown {
+  height: var(--table-pagination-btn-size);
+  min-width: 60px;
+}
+
+/* Portal: Trigger */
+.portal
+  .pagination-page-size-dropdown
+  .table-dropdown.custom-dropdown
+  .custom-dropdown-trigger {
+  height: var(--table-pagination-btn-size);
+  min-height: var(--table-pagination-btn-size);
+  max-height: var(--table-pagination-btn-size);
+  padding: 0 var(--dropdown-padding-x);
+  border: var(--portal-border);
+  background-color: transparent;
+  color: var(--portal-text-secondary);
+  font-size: inherit;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* Portal: Menu items */
+.portal
+  .pagination-page-size-dropdown
+  .table-dropdown.custom-dropdown
+  .custom-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--portal-text-secondary);
+  font-size: inherit;
+  font-family: inherit;
+  height: var(--table-pagination-btn-size);
+  padding: 0 var(--dropdown-padding-x);
+  cursor: pointer;
+}
+
+/* Portal: Menu item hover */
+.portal
+  .pagination-page-size-dropdown
+  .table-dropdown.custom-dropdown
+  .custom-dropdown-item:hover {
+  background-color: var(--portal-bg-hover);
+  color: var(--portal-text-light);
+}
+
+/* Admin: Container - match button height */
+.portal .pagination-page-size-dropdown .table-dropdown.custom-dropdown {
+  height: var(--table-pagination-btn-size);
   min-width: 60px;
 }
 
 /* Trigger - base state */
-[data-page="admin"]
+.portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown
   .custom-dropdown-trigger {
-  height: 28px;
-  min-height: 28px;
-  max-height: 28px;
+  height: var(--table-pagination-btn-size);
+  min-height: var(--table-pagination-btn-size);
+  max-height: var(--table-pagination-btn-size);
   padding: 0 var(--dropdown-padding-x);
   border: var(--portal-border);
   background-color: var(--portal-bg-pitch);
@@ -939,7 +987,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Trigger - hover (no color change) */
-[data-page="admin"]
+.portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown
   .custom-dropdown-trigger:hover {
@@ -947,7 +995,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Trigger - open state (dropdown opens UPWARD) */
-[data-page="admin"]
+.portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown.open
   .custom-dropdown-trigger {
@@ -959,7 +1007,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Menu - opens UPWARD, flush with trigger */
-[data-page="admin"]
+.portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown
   .custom-dropdown-menu {
@@ -979,7 +1027,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Menu items */
-[data-page="admin"]
+.portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown
   .custom-dropdown-item {
@@ -990,13 +1038,13 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   color: var(--portal-text-secondary);
   font-size: inherit;
   font-family: inherit;
-  height: 28px;
+  height: var(--table-pagination-btn-size);
   padding: 0 var(--dropdown-padding-x);
   cursor: pointer;
 }
 
 /* Menu item hover - NO blue, use subtle highlight */
-[data-page="admin"]
+.portal
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown
   .custom-dropdown-item:hover {
@@ -1008,21 +1056,21 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
    Status Dot Colors - Trigger
    ================================================ */
 
-[data-page="admin"] .table-dropdown[data-status="new"] .status-dot {
+.portal .table-dropdown[data-status="new"] .status-dot {
   background-color: var(--color-status-new);
 }
 
-[data-page="admin"] .table-dropdown[data-status="pending"] .status-dot {
+.portal .table-dropdown[data-status="pending"] .status-dot {
   background-color: var(--color-status-pending);
 }
 
-[data-page="admin"] .table-dropdown[data-status="read"] .status-dot,
-[data-page="admin"] .table-dropdown[data-status="qualified"] .status-dot,
-[data-page="admin"] .table-dropdown[data-status="contacted"] .status-dot {
+.portal .table-dropdown[data-status="read"] .status-dot,
+.portal .table-dropdown[data-status="qualified"] .status-dot,
+.portal .table-dropdown[data-status="contacted"] .status-dot {
   background-color: var(--color-status-read);
 }
 
-[data-page="admin"]
+.portal
   .table-dropdown:is(
     [data-status="responded"],
     [data-status="converted"],
@@ -1034,17 +1082,17 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-status-responded);
 }
 
-[data-page="admin"] .table-dropdown[data-status="completed"] .status-dot {
+.portal .table-dropdown[data-status="completed"] .status-dot {
   background-color: var(--color-status-completed);
 }
 
-[data-page="admin"]
+.portal
   .table-dropdown:is([data-status="on-hold"], [data-status="on_hold"])
   .status-dot {
   background-color: var(--color-status-pending);
 }
 
-[data-page="admin"]
+.portal
   .table-dropdown:is(
     [data-status="archived"],
     [data-status="lost"],
@@ -1057,23 +1105,23 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-status-archived);
 }
 
-[data-page="admin"] .table-dropdown[data-status="overdue"] .status-dot {
+.portal .table-dropdown[data-status="overdue"] .status-dot {
   background-color: var(--color-status-overdue);
 }
 
-[data-page="admin"] .table-dropdown[data-status="partial"] .status-dot {
+.portal .table-dropdown[data-status="partial"] .status-dot {
   background-color: var(--color-status-pending);
 }
 
-[data-page="admin"] .table-dropdown:is([data-status="sent"], [data-status="viewed"]) .status-dot {
+.portal .table-dropdown:is([data-status="sent"], [data-status="viewed"]) .status-dot {
   background-color: var(--color-status-new);
 }
 
-[data-page="admin"] .table-dropdown[data-status="in-review"] .status-dot {
+.portal .table-dropdown[data-status="in-review"] .status-dot {
   background-color: var(--color-status-read);
 }
 
-[data-page="admin"] .table-dropdown[data-status="paid"] .status-dot {
+.portal .table-dropdown[data-status="paid"] .status-dot {
   background-color: var(--color-status-responded);
 }
 
@@ -1081,15 +1129,15 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
    Status Dot Colors - Menu Items
    ================================================ */
 
-[data-page="admin"] .custom-dropdown-item[data-status="new"] .status-dot {
+.portal .custom-dropdown-item[data-status="new"] .status-dot {
   background-color: var(--color-status-new);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="pending"] .status-dot {
+.portal .custom-dropdown-item[data-status="pending"] .status-dot {
   background-color: var(--color-status-pending);
 }
 
-[data-page="admin"]
+.portal
   .custom-dropdown-item:is(
     [data-status="read"],
     [data-status="qualified"],
@@ -1099,7 +1147,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-status-read);
 }
 
-[data-page="admin"]
+.portal
   .custom-dropdown-item:is(
     [data-status="responded"],
     [data-status="converted"],
@@ -1111,17 +1159,17 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-status-responded);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="completed"] .status-dot {
+.portal .custom-dropdown-item[data-status="completed"] .status-dot {
   background-color: var(--color-status-completed);
 }
 
-[data-page="admin"]
+.portal
   .custom-dropdown-item:is([data-status="on-hold"], [data-status="on_hold"])
   .status-dot {
   background-color: var(--color-status-pending);
 }
 
-[data-page="admin"]
+.portal
   .custom-dropdown-item:is(
     [data-status="archived"],
     [data-status="lost"],
@@ -1134,25 +1182,25 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-status-archived);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="overdue"] .status-dot {
+.portal .custom-dropdown-item[data-status="overdue"] .status-dot {
   background-color: var(--color-status-overdue);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="partial"] .status-dot {
+.portal .custom-dropdown-item[data-status="partial"] .status-dot {
   background-color: var(--color-status-pending);
 }
 
-[data-page="admin"]
+.portal
   .custom-dropdown-item:is([data-status="sent"], [data-status="viewed"])
   .status-dot {
   background-color: var(--color-status-new);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="in-review"] .status-dot {
+.portal .custom-dropdown-item[data-status="in-review"] .status-dot {
   background-color: var(--color-status-read);
 }
 
-[data-page="admin"] .custom-dropdown-item[data-status="paid"] .status-dot {
+.portal .custom-dropdown-item[data-status="paid"] .status-dot {
   background-color: var(--color-status-responded);
 }
 
@@ -1183,14 +1231,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   border: var(--border-width) solid transparent;
   color: var(--portal-text-light);
   font-size: var(--font-size-base);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  font-weight: 400;
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-regular);
   line-height: 1;
   cursor: pointer;
   box-sizing: border-box;
@@ -1285,7 +1327,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   padding: 0 var(--space-4);
   height: 44px;
   font-size: var(--font-size-base);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-light);
   cursor: pointer;
   transition: background-color var(--transition-faster);
@@ -1308,4 +1350,53 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .confirm-dialog .modal-dropdown .custom-dropdown-item.selected:hover,
 .admin-modal .modal-dropdown .custom-dropdown-item.selected:hover {
   background-color: var(--color-primary);
+}
+
+/* ================================================
+   MODAL DROPDOWN COMPONENT (ModalDropdown.tsx)
+   Container/Trigger/Overlay pattern
+   ================================================ */
+
+/* Container - wraps trigger and dropdown content */
+.modal-dropdown-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Trigger button - opens the dropdown */
+.modal-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  background: transparent;
+  border: var(--border-width) solid var(--portal-border-color);
+  color: var(--portal-text-light);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition-fast);
+}
+
+.modal-dropdown-trigger:hover {
+  border-color: var(--portal-text-light);
+}
+
+.modal-dropdown-trigger:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Overlay - covers screen when dropdown is open */
+.modal-dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-50, 50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--portal-alpha-black-50, rgba(0, 0, 0, 0.5));
 }

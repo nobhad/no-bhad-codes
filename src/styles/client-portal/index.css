@@ -26,11 +26,17 @@
 @import "../shared/portal-tabs.css";
 @import "../shared/confirm-dialog.css";
 
+/* Table filters (search dropdown, filter dropdown - shared with admin) */
+@import "../shared/table-filters.css";
+
 /* Inline editing component */
 @import "../components/inline-edit.css";
 
 /* Portal sidebar (shared with admin) */
 @import "../shared/portal-sidebar.css";
+
+/* Client portal layout (portal-main-container, mobile menu, etc.) */
+@import "./layout.css";
 
 /* Authentication */
 @import "./login.css";

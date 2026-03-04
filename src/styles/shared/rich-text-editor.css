@@ -118,7 +118,7 @@
   color: var(--portal-text-light);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   caret-color: var(--portal-text-light);
 }
 
@@ -130,21 +130,21 @@
 /* Content styling */
 .rich-text-content .ql-editor h1 {
   font-size: var(--font-size-2xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-2);
   color: var(--portal-text-light);
 }
 
 .rich-text-content .ql-editor h2 {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-1-5);
   color: var(--portal-text-light);
 }
 
 .rich-text-content .ql-editor h3 {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-1);
   color: var(--portal-text-light);
 }

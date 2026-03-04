@@ -54,6 +54,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
  * @media (--desktop) { }      - min-width: 992px
  * @media (--desktop-down) { } - max-width: 1023px
  * @media (--tablet-to-desktop) { } - 600px to 1100px (medium viewport range)
+ * @media (--desktop-l) { }    - min-width: 1100px
  * @media (--wide) { }         - min-width: 1200px
  * @media (--ultra-wide) { }   - min-width: 1400px
  * @media (--ultra-wide-down) { } - max-width: 1399px
@@ -83,6 +84,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
 @custom-media --laptop-up (min-width: 1025px); /* Above laptop threshold */
 @custom-media --laptop-wide (max-width: 1100px); /* Wider laptop threshold */
 @custom-media --tablet-to-desktop (min-width: 600px) and (max-width: 1100px); /* Medium viewport range */
+@custom-media --desktop-l (min-width: 1100px); /* Large desktop / above laptop-wide */
 @custom-media --laptop-to-wide (min-width: 1100px) and (max-width: 1300px); /* Laptop to wide range */
 @custom-media --desktop-wide (max-width: 1200px); /* Desktop to wide threshold */
 @custom-media --wide (min-width: 1200px);
@@ -316,7 +318,7 @@ body {
 
 /* Portal pages use Inconsolata monospace font */
 body:is([data-page="admin"], [data-page="client-portal"]) {
-  font-family: var(--font-family-mono, "Inconsolata", monospace);
+  font-family: var(--font-family-mono);
 }
 
 /* Theme transition for main structural elements */

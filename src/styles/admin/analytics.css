@@ -114,10 +114,10 @@
   margin: 0;
   font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .analytics-card-header {
@@ -157,7 +157,13 @@
    Charts
    ============================================ */
 
-.chart-canvas-wrapper,
+/* Canvas-based charts: position relative required by Chart.js */
+.chart-canvas-wrapper {
+  position: relative;
+  height: 320px;
+}
+
+/* Non-canvas charts and placeholders */
 .chart,
 .timeline-chart {
   height: 320px;
@@ -174,11 +180,6 @@
 
 .timeline-chart {
   height: 200px;
-}
-
-.chart-canvas-wrapper canvas,
-.chart canvas {
-  padding: var(--space-1);
 }
 
 .chart-container {
@@ -296,23 +297,23 @@
 }
 
 .kpi-card-icon svg {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
 }
 
 .kpi-card-label {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .kpi-card-value {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
@@ -326,7 +327,7 @@
 }
 
 .kpi-card-change .change-value {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-secondary);
 }
 
@@ -372,7 +373,7 @@
   font-weight: var(--font-weight-medium);
   padding: var(--space-1) var(--space-2);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .vital-status.good {
@@ -459,7 +460,7 @@
 .funnel-stage-value {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--portal-text-primary);
 }
 
@@ -495,8 +496,8 @@
 }
 
 .funnel-arrow svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   /* Ensure arrow points right (horizontal) */
   transform: rotate(0deg);
 }
@@ -534,7 +535,7 @@
 
 .data-value {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
 }
 
@@ -542,7 +543,7 @@
 
 .report-name {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-primary);
 }
 

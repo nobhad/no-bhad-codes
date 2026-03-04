@@ -136,11 +136,11 @@
 }
 
 .portal .folder-panel-header h4 {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-light);
   margin: 0;
 }
@@ -376,7 +376,7 @@
 
 .portal .file-name {
   flex: 1;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
@@ -425,7 +425,7 @@
 .portal .file-download {
   color: var(--color-primary);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding: var(--space-1) var(--space-2);
   border: var(--border-width) solid var(--color-primary);
   transition: all var(--transition-fast);
@@ -624,20 +624,92 @@
    Used by PortalFilesManager.tsx
    ===================================================== */
 
-/* Folder sidebar */
-.files-folder-sidebar {
+/* Files browser — flex layout: sidebar + content */
+.files-browser-layout {
+  display: flex;
+  min-height: 300px;
+}
+
+/* Folder sidebar — hidden on mobile, shown on desktop */
+.portal-files-sidebar {
   width: 200px;
   flex-shrink: 0;
   display: none;
+  border-right: var(--portal-border);
 }
 
 @media (min-width: 768px) {
-  .files-folder-sidebar {
+  .portal-files-sidebar {
     display: block;
   }
 }
 
-/* Folder list item without bottom border */
+/* Folder list */
+.portal-files-sidebar .folder-tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--space-2);
+}
+
+/* Files content area — right side */
+.files-content-area {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile folder selector — visible on mobile, hidden on desktop */
+.files-mobile-select {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .files-mobile-select {
+    display: none;
+  }
+}
+
+/* Breadcrumb path */
+.files-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+/* File name cell — icon + truncated name */
+.file-cell-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Pagination row */
+.files-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.files-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.files-pagination-page {
+  padding: 0 var(--space-2);
+}
+
+/* Folder list item */
 .folder-item {
   border-bottom: none;
 }

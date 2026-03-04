@@ -19,13 +19,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
-  padding-bottom: 24px;
+  padding-bottom: var(--space-6);
   max-width: 100%;
 }
 
 /* Overview greeting - matches subtabs spacing exactly */
 [data-page="admin"] .overview-greeting {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
   color: var(--portal-text-light);
   letter-spacing: 0.01em;
@@ -38,10 +38,10 @@
   font-style: normal;
   font-weight: inherit;
   color: var(--color-primary);
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-lg);
-  letter-spacing: -0.5px;
-  margin-left: 8px;
+  letter-spacing: var(--letter-spacing-tight);
+  margin-left: var(--space-2);
 }
 
 /* =====================================================
@@ -68,18 +68,18 @@
 
 /* Smaller, subtle greeting that complements the page title */
 .overview-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
-  letter-spacing: 0;
+  letter-spacing: var(--letter-spacing-normal);
   margin: 0;
 }
 
 .overview-date {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-muted);
 }
 
@@ -119,8 +119,8 @@
 
 /* Stat card SVG sizing for overview - color from portal-stat-cards.css */
 .portal .overview-stat-card .stat-card-top svg {
-  width: 18px;
-  height: 18px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   flex-shrink: 0;
 }
 
@@ -128,9 +128,9 @@
 .overview-linear .field-label {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-secondary);
 }
 
@@ -138,10 +138,10 @@
 .stat-card-value {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-3xl, 30px);
-  font-weight: 300;
+  font-weight: var(--font-weight-bold);
   color: var(--portal-text-light);
-  line-height: 1;
-  letter-spacing: -0.02em;
+  line-height: var(--line-height-none);
+  letter-spacing: var(--letter-spacing-title);
 }
 
 /* Alert values - red text only, no border changes */
@@ -182,7 +182,8 @@
 
 .overview-panel {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  /* Explicit fallback: 2px border if variables fail */
+  border: var(--border-width, 2px) solid var(--table-border-color, var(--portal-border-color, currentColor));
   overflow: hidden;
 }
 
@@ -230,8 +231,8 @@
 /* Remove margin from panel-icon in action buttons (gap handles spacing) */
 .overview-panel-action > .panel-icon {
   margin-right: 0;
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
 
 .panel-badge {
@@ -269,6 +270,18 @@
   scrollbar-width: thin;
 }
 
+/* Activity panel variant - used by Panel component with variant="activity" */
+.activity-panel {
+  /* Inherits from .overview-panel */
+}
+
+.activity-panel .overview-panel-body {
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
 /* =====================================================
    PROJECTS TABLE
    Base table styles (row hover, cursor) in shared/portal-tables.css
@@ -278,12 +291,12 @@
 #overview-projects-table td.project-cell {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--space-px);
   min-width: 0;
 }
 
 .project-name {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
@@ -294,7 +307,7 @@
 .project-client {
   font-size: var(--font-size-xs);
   color: var(--portal-text-muted);
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
 }
 
 /* Status Pills */
@@ -302,10 +315,10 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-xs);
-  height: 19px;
+  height: var(--icon-size-lg);
   padding: 0 var(--space-1);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 
@@ -344,7 +357,7 @@
 
 .progress-bar {
   flex: 1;
-  height: 2px;
+  height: var(--border-width);
   background: var(--portal-border-subtle, var(--portal-alpha-white-08));
   overflow: hidden;
 }
@@ -425,15 +438,15 @@
 /* Layout only - typography from unified .field-label rule */
 .revenue-kpi .field-label {
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: var(--space-0-5);
 }
 
 .revenue-kpi-value {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-base);
-  font-weight: 300;
+  font-weight: var(--font-weight-light);
   color: var(--portal-text-light);
-  letter-spacing: -0.5px;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .revenue-kpi-value--warning {
@@ -469,10 +482,10 @@
 }
 
 .activity-dot {
-  width: 6px;
-  height: 6px;
+  width: var(--space-1-5);
+  height: var(--space-1-5);
   border: 1.5px solid;
-  margin-top: 4px;
+  margin-top: var(--space-1);
   flex-shrink: 0;
 }
 
@@ -505,20 +518,20 @@
 .activity-text {
   font-size: inherit;
   color: var(--portal-text-light);
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
   display: block;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 .activity-text strong {
   color: var(--portal-text-light);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .activity-time {
   font-size: var(--font-size-2xs, 10px);
   color: var(--portal-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-0-5);
   display: block;
 }
 
@@ -563,8 +576,8 @@
 }
 
 .empty-state-small {
-  font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  font-size: var(--font-size-base);
+  color: var(--portal-text-primary);
   text-align: center;
   padding: var(--space-3) 0;
 }
@@ -598,13 +611,13 @@
 }
 
 .leads-avatar {
-  width: 28px;
-  height: 28px;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-2xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   flex-shrink: 0;
   color: var(--portal-text-light);
 }
@@ -616,7 +629,7 @@
 
 .leads-name {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   display: block;
 }
@@ -707,8 +720,8 @@
 }
 
 .health-legend-dot {
-  width: 6px;
-  height: 6px;
+  width: var(--space-1-5);
+  height: var(--space-1-5);
   flex-shrink: 0;
 }
 
@@ -726,7 +739,7 @@
 .health-placeholder,
 .health-error {
   width: 100%;
-  padding: 20px;
+  padding: var(--space-6);
   text-align: center;
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs);
@@ -771,16 +784,16 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
 }
 
 .overview-stat-panel .stat-value {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xl);
-  font-weight: 300;
+  font-weight: var(--font-weight-light);
   color: var(--portal-text-light);
-  letter-spacing: -0.5px;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 /* Attention banner - matches .overview-panel */
@@ -814,7 +827,7 @@
 .attention-item .count {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xl);
-  font-weight: 300;
+  font-weight: var(--font-weight-light);
   color: var(--portal-text-light);
 }
 
@@ -822,7 +835,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
 }
 
@@ -896,7 +909,7 @@
 @media (--compact-mobile) {
   .overview-linear,
   .overview-dashboard {
-    padding-bottom: 20px;
+    padding-bottom: var(--space-6);
     gap: var(--space-4);
   }
 

@@ -125,11 +125,11 @@
 
 .portal .settings-form-section .section-title {
   margin: 0;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-secondary);
 }
 

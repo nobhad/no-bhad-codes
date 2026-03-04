@@ -76,7 +76,7 @@
 }
 
 .auth-gate-header h1 {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
   color: var(--portal-text-light);
@@ -193,7 +193,7 @@
   padding: 0.75rem;
   background-color: transparent;
   border: var(--border-width) solid var(--color-danger);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: center;
 }
 
@@ -210,7 +210,7 @@
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   margin-top: 0.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .auth-gate-form .error-message:not(:empty) {
@@ -228,9 +228,9 @@
   padding: var(--space-1-5) var(--space-3);
   border: var(--border-width) solid var(--portal-border-color);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   letter-spacing: 1px;
   transition: all var(--transition-fast);
   text-transform: uppercase;

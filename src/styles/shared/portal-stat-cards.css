@@ -24,7 +24,7 @@
   padding: var(--portal-card-padding);
   background: transparent;
   border: var(--portal-border);
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
   position: relative;
   overflow: hidden;
 }
@@ -93,11 +93,12 @@
    Aliases: .stat-value, .stat-card-value, .kpi-card-value, .kpi-value
    ===================================================== */
 
+/* stat-value is the canonical name; all others are legacy aliases */
 .portal :is(.stat-number, .stat-value, .stat-card-value, .kpi-card-value, .kpi-value) {
   display: block;
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-xl, 1.25rem);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1;
   color: var(--portal-text-light);
   letter-spacing: -0.02em;
@@ -107,7 +108,7 @@
 /* Layout-only styling for stat labels (typography from unified label system) */
 .portal :is(.stat-label, .stat-card .field-label, .tw-stat-card .field-label) {
   display: block;
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
   margin: 0;
 }
 
@@ -137,12 +138,19 @@
   text-decoration: none;
 }
 
+/* Reset button defaults when stat-card is rendered as <button> */
+.portal button.stat-card-clickable {
+  font: inherit;
+  text-align: inherit;
+  appearance: none;
+}
+
 .portal .stat-card-clickable:hover,
 .portal a:is(.stat-card, .tw-stat-card):hover {
   border-color: var(--portal-border-color);
 }
 
-.portal .stat-card-clickable:hover .stat-number {
+.portal .stat-card-clickable:hover :is(.stat-number, .stat-value) {
   color: var(--color-primary);
 }
 
@@ -152,8 +160,8 @@
   border-color: var(--color-primary);
 }
 
-.portal .stat-card-clickable.active .stat-number,
-.portal :is(.stat-card, .tw-stat-card).active .stat-number {
+.portal .stat-card-clickable.active :is(.stat-number, .stat-value),
+.portal :is(.stat-card, .tw-stat-card).active :is(.stat-number, .stat-value) {
   color: var(--color-primary);
 }
 
@@ -166,7 +174,7 @@
   color: var(--portal-text-muted);
   letter-spacing: 0.02em;
   margin: 0;
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
 }
 
 .portal :is(.stat-card, .tw-stat-card) .stat-change.positive {
@@ -238,30 +246,5 @@
   }
 }
 
-/* =====================================================
-   TW-* STAT CARD CLASSES - React Component Styles
-   ===================================================== */
-
-.tw-stat-card {
-  background: transparent;
-  border: var(--border-width) solid var(--portal-alpha-white-20);
-  padding: var(--space-2, 1rem);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.tw-stat-value {
-  font-size: var(--font-size-2xl, 24px);
-  font-weight: 400;
-  font-family: var(--font-family-mono, monospace);
-  color: var(--portal-text-light);
-}
-
-.tw-stat-label {
-  font-size: var(--font-size-2xs, 11px);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--portal-text-muted);
-}
+/* Standalone tw-* aliases removed — .stat-card, .stat-value, .stat-label
+   are now the canonical class names and covered by the :is() groups above. */

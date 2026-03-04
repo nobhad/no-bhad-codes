@@ -31,6 +31,8 @@
 /* Page background - pitch black as base canvas */
 body[data-page="admin"] {
   background: var(--portal-bg-pitch);
+  font-weight: var(--font-weight-base, 500);  /* Medium weight as portal default */
+  color: var(--portal-text-primary);
 }
 
 /* Dashboard content area - same as body */
@@ -135,7 +137,7 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer {
   font-size: var(--font-size-sm);
   color: var(--color-nav-text);
   text-align: center;
-  z-index: 50;
+  z-index: var(--z-index-50);
   align-items: center;
   justify-content: center;
   transition:
@@ -276,7 +278,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
    SUMMARY CARD GRID RESPONSIVE BEHAVIOR
    ================================================ */
 
-@media (min-width: 1025px) {
+@media (--laptop-up) {
   [data-page="admin"] #tab-overview .dashboard-stats-grid,
   [data-page="admin"] #tab-leads .quick-stats,
   [data-page="admin"] #tab-projects .quick-stats,
@@ -313,7 +315,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   }
 }
 
-@media (max-width: 600px) {
+@media (--compact-mobile) {
   [data-page="admin"] #tab-contracts .quick-stats {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -322,7 +324,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
   }
 }
 
-@media (max-width: 400px) {
+@media (--xs-mobile) {
   [data-page="admin"] #tab-contracts .quick-stats {
     grid-template-columns: 1fr;
   }
@@ -637,7 +639,7 @@ body.modal-open .dashboard-content {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 [data-page="admin"] #admin-page-title {
@@ -683,8 +685,9 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .icon-btn-invite svg {
-  width: 18px;
-  height: 18px;
+  /* Use icon-lg for standalone buttons, tables will override with --table-action-icon-size */
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   /* stroke-width inherited from global SVG rule */
 }
 
@@ -1337,7 +1340,7 @@ body.modal-open .dashboard-content {
   color: var(--portal-text-light);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal, 1.4);
   text-transform: none;
   letter-spacing: normal;
@@ -1487,8 +1490,9 @@ body.modal-open .dashboard-content {
 
   .admin-table-actions .icon-btn svg,
   .data-table-actions .icon-btn svg {
-    width: 16px;
-    height: 16px;
+    /* Use unified table icon size from portal-tables.css */
+    width: var(--table-action-icon-size, var(--icon-size-md));
+    height: var(--table-action-icon-size, var(--icon-size-md));
     display: block;
     margin: 0;
   }
@@ -1580,11 +1584,11 @@ body.modal-open .dashboard-content {
   [data-page="admin"] .admin-modal-overlay,
   [data-page="admin"] #lead-details-panel,
   [data-page="admin"] #contact-details-panel {
-    z-index: 9200;
+    z-index: var(--z-index-portal-sidebar);
   }
 
   [data-page="admin"] .details-overlay {
-    z-index: 9150;
+    z-index: var(--z-index-portal-header);
   }
 }
 
@@ -1628,9 +1632,17 @@ body.modal-open .dashboard-content {
   min-height: auto;
 }
 
-/* Empty/loading states in overview - compact height */
+/* Empty/loading states in overview - compact height, no percentage stretch */
 [data-page="admin"] .overview-table-section .empty-state,
-[data-page="admin"] .overview-table-section .loading-state {
+[data-page="admin"] .overview-table-section .loading-state,
+[data-page="admin"] .overview-tables > .loading-state,
+[data-page="admin"] .analytics-view > .loading-state,
+[data-page="admin"] .overview-linear > .loading-state,
+[data-page="admin"] .tw-section > .loading-state,
+[data-page="admin"] .stats-grid > .loading-state,
+[data-page="admin"] .tw-scroll-container > .loading-state,
+[data-page="admin"] .tw-scroll-container > .empty-state {
+  height: auto;
   min-height: 120px;
   display: flex;
   align-items: center;

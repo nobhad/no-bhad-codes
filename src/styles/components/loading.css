@@ -91,9 +91,11 @@ button[aria-busy="true"] .loading-spinner {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: clamp(var(--space-2), 3vw, var(--space-4));
   min-height: 150px;
-  gap: var(--icon-gap-sm, 6px); /* Gap between spinner/icon and text */
+  gap: clamp(12px, 2vw, 20px);
+  color: inherit;
+  font-size: inherit;
 }
 
 /* Ensure spinner inside loading-state has no extra spacing */
@@ -215,6 +217,7 @@ button[aria-busy="true"] .loading-spinner {
 
 /* Error/Loading/Empty row in tables - spans full width, content centered */
 /* Use high specificity to override any table cell styles */
+/* IMPORTANT: Uses inherit for color so SVG icons display correctly */
 tr.error-row td,
 tr.loading-row td,
 tr.empty-row td,
@@ -236,10 +239,10 @@ div.error-row,
 .portal .data-table tr.empty-row td,
 .portal .data-table tbody td[colspan],
 .portal table td[colspan] {
-  text-align: center !important;
-  color: var(--portal-text-muted);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-xs);
+  text-align: center;
+  color: inherit;
+  padding: clamp(var(--space-2), 3vw, var(--space-3));
+  font-size: inherit;
   background: transparent;
 }
 
@@ -267,8 +270,7 @@ td.empty-row {
 }
 
 /* Error/Loading/Empty state container - UNIVERSAL centering for ALL contexts
-   USE .empty-state for all empty states - this is the canonical class
-   IMPORTANT: Uses inherit for color/font so SVG icons use currentColor correctly */
+   USE .empty-state for all empty states - this is the canonical class */
 .error-state,
 .loading-state,
 .empty-state {
@@ -284,8 +286,9 @@ td.empty-row {
   box-sizing: border-box;
   text-align: center;
   margin: 0 auto;
-  color: inherit;
-  font-size: inherit;
+  color: var(--portal-text-primary, inherit);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Cards need position relative for loading state positioning */
@@ -311,25 +314,29 @@ td.empty-row {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--icon-gap-xs, 6px);
-  padding: var(--space-2); /* Uniform padding on all sides */
+  gap: clamp(6px, 1vw, 10px);
+  padding: var(--space-2);
   min-height: 32px;
-  color: var(--portal-text-muted, var(--color-text-muted));
-  font-size: var(--font-size-xs);
+  color: inherit;
+  font-size: inherit;
   text-align: center;
 }
 
-/* Small variant icon - 16px */
+/* Small variant icon - 16px - uses mask-image so color inherits */
 .empty-state-small::before {
   content: "";
   display: block;
   width: 16px;
   height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  opacity: 0.6;
+  background-color: currentColor;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
   flex-shrink: 0;
 }
 
@@ -359,8 +366,11 @@ td[colspan] .empty-state {
   margin: 0;
   padding: 0;
   text-align: center;
-  line-height: 1.2;
-  font-style: italic;
+  line-height: 1.4;
+  font-style: normal;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-primary, inherit);
 }
 
 /* Handle loading-state directly on td (initial HTML pattern) */
@@ -407,7 +417,7 @@ p.empty-state {
   display: block;
   width: 24px;
   height: 24px;
-  border: var(--border-width-thick) solid var(--portal-border-dark, var(--portal-alpha-white-20));
+  border: var(--border-width-thick) solid var(--color-border);
   border-top-color: var(--color-primary);
   border-radius: var(--portal-radius-full);
   animation: spin 0.8s linear infinite;
@@ -422,16 +432,21 @@ p.empty-state {
 
 /* spin keyframe defined at line 33 */
 
-/* Error state with automatic icon */
+/* Error state with automatic icon - uses mask-image so color inherits from var(--color-danger) */
 .error-state::before {
   content: "";
   display: block;
   width: 24px;
   height: 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background-color: var(--color-danger);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/%3E%3Cline x1='12' y1='9' x2='12' y2='13'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
   flex-shrink: 0;
 }
 
@@ -458,13 +473,13 @@ p.empty-state {
 }
 
 /* Empty state with automatic icon (Lucide inbox icon) */
-/* Uses mask-image so color can be controlled via background-color variable */
+/* Uses mask-image so color inherits from currentColor */
 .empty-state::before {
   content: "";
   display: block;
   width: 24px;
   height: 24px;
-  background-color: var(--color-text-primary);
+  background-color: currentColor;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 16 12 14 15 10 15 8 12 2 12'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
   mask-size: contain;
   mask-repeat: no-repeat;
@@ -473,7 +488,6 @@ p.empty-state {
   -webkit-mask-size: contain;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
-  opacity: 0.6;
   flex-shrink: 0;
 }
 
@@ -484,24 +498,29 @@ p.empty-state {
 }
 
 /* Empty state icon - for manual icon insertion (legacy support) */
+/* IMPORTANT: Uses inherit so Lucide SVGs get text color from parent */
 .empty-state-icon,
 .loading-state-icon {
   width: 24px;
   height: 24px;
-  color: var(--portal-text-muted, var(--color-text-muted));
-  opacity: 0.6;
+  color: inherit;
   flex-shrink: 0;
 }
 
-/* SVG icons inside state containers - standardized size */
+/* SVG icons inside state containers - standardized size and inherit color */
+/* Use stroke: currentColor to ensure Lucide icons use inherited text color */
 .empty-state > svg,
 .loading-state > svg,
 .error-state > svg,
 .empty-state-icon > svg,
-.error-state-icon > svg {
+.loading-state-icon > svg,
+.error-state-icon > svg,
+.empty-state-content > svg {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  color: inherit;
+  stroke: currentColor;
 }
 
 /* Backwards compatibility for empty-state-content wrapper */
@@ -510,40 +529,45 @@ p.empty-state {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--icon-gap-lg, 16px);
-  padding: var(--space-4); /* Uniform padding on all sides */
+  gap: clamp(12px, 2vw, 20px);
+  padding: clamp(var(--space-2), 3vw, var(--space-4));
   width: 100%;
   height: 100%;
   min-height: 60px;
   box-sizing: border-box;
   text-align: center;
   margin: 0 auto;
-  color: var(--portal-text-muted, var(--color-text-muted));
-  font-size: var(--font-size-xs);
-}
-
-.empty-state-content > svg {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  opacity: 0.6;
+  color: inherit;
+  font-size: inherit;
 }
 
 /* Portal-specific adjustments for content wrapper */
 .portal .empty-state-content {
   min-height: 48px;
-  padding: var(--space-3); /* Uniform padding on all sides */
+  padding: clamp(var(--space-2), 3vw, var(--space-3));
 }
 
-/* State messages - inherit font-size from parent state container */
+/* Portal-specific: Ensure SVG icons inherit text color (not muted gray) */
+/* Higher specificity to override any other rules */
+.portal .empty-state svg,
+.portal .loading-state svg,
+.portal .error-state svg,
+.portal .empty-state-icon svg,
+.portal .loading-state-icon svg {
+  color: inherit;
+  stroke: currentColor;
+}
+
+/* State messages - explicit size and weight, no overrides */
 .error-message,
 .error-state-message,
 .empty-state-message,
 .loading-message {
-  color: var(--portal-text-muted, var(--color-text-muted));
-  font-size: inherit;
+  color: var(--portal-text-primary, inherit);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-style: normal;
   margin: 0;
-  font-style: italic;
 }
 
 /* Error container for non-table content */
@@ -552,10 +576,12 @@ p.empty-state {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4, 2rem);
+  padding: clamp(var(--space-2), 3vw, var(--space-4));
   min-height: 150px;
-  gap: var(--icon-gap-sm, 6px); /* Gap between spinner/icon and text */
+  gap: clamp(12px, 2vw, 20px);
   text-align: center;
+  color: inherit;
+  font-size: inherit;
 }
 
 /* Retry button - universal for all error states */
@@ -563,7 +589,7 @@ p.empty-state {
 .error-state-retry {
   margin-top: var(--space-1, 0.5rem);
   padding: var(--space-0-5, 0.375rem) var(--space-1-5, 0.75rem);
-  font-size: var(--font-size-xs, 0.75rem);
+  font-size: var(--font-size-base);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -591,7 +617,7 @@ p.empty-state {
 /* Inline error */
 .error-inline {
   color: var(--color-danger);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-base);
   display: block;
   margin-top: 0.25rem;
 }
@@ -652,13 +678,135 @@ p.empty-state {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  gap: var(--icon-gap-sm, 6px); /* Gap between spinner/icon and text */
+  padding: clamp(var(--space-2), 3vw, var(--space-4));
+  gap: clamp(12px, 2vw, 20px);
   text-align: center;
+  color: inherit;
+  font-size: inherit;
 }
 
 .dropzone-error-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ========================================
+   STATE DISPLAY FACTORY CLASSES
+   Used by StateDisplay.tsx factory components
+   ======================================== */
+
+/* Empty state CTA button */
+.empty-state-cta {
+  margin-top: var(--space-1);
+}
+
+/* Error state action buttons container */
+.error-state-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* Error state secondary action */
+.error-state-secondary {
+  padding: var(--space-0-5, 0.375rem) var(--space-1-5, 0.75rem);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: transparent;
+  color: var(--portal-text-primary, var(--color-text));
+  border: var(--border-width) solid var(--portal-border, var(--color-border));
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.error-state-secondary:hover {
+  background: var(--portal-bg-hover, var(--portal-alpha-white-10));
+  border-color: var(--portal-text-light);
+  color: var(--portal-text-light);
+}
+
+/* Skeleton container wrapper */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-2);
+}
+
+/* Skeleton type variants */
+.skeleton-list {
+  /* Default column layout */
+}
+
+.skeleton-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+}
+
+.skeleton-table .skeleton-item {
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Loading state skeleton modifier - hide default spinner */
+.loading-state--skeleton::before {
+  display: none;
+}
+
+/* Full-width skeleton line */
+.skeleton-line--full {
+  width: 100%;
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--portal-radius-sm);
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Error state type variants — all use same layout, different icon via JSX */
+.error-state--general,
+.error-state--network,
+.error-state--permission,
+.error-state--notfound {
+  /* Layout inherited from .error-state */
+}
+
+/* Skeleton row (used in portal components) */
+.skeleton-row {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+}
+
+.skeleton-row .skeleton-line {
+  flex: 1;
+}
+
+/* Spinning animation class - applied to SVG icons (e.g., IconButton loading) */
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Reduced motion for new skeleton elements */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line--full {
+    animation: none;
+    background: var(--color-skeleton-base);
+  }
+
+  .spinning {
+    animation: none;
+    opacity: 0.7;
+  }
 }

@@ -4,81 +4,271 @@
  * ===============================================
  * @file src/styles/admin/system-status.css
  *
- * Styles for the system status list component
- * used in the admin system status tab.
- *
- * Base styles for health-check, quick-actions, and
- * system-details are in shared/portal-cards.css.
+ * Styles for the system status panel used in
+ * the admin system status tab. Uses TableLayout
+ * for consistent layout with other admin tabs.
  */
 
 /* ================================================
-   System Status List (Legacy)
+   Content wrapper
    ================================================ */
-.status-list {
+.status-content {
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--portal-section-gap);
+  gap: var(--space-4);
 }
 
-.status-list .loading-text {
+/* ================================================
+   Section (Services / Metrics / Incidents)
+   ================================================ */
+.status-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-secondary);
-  font-style: italic;
+  margin: 0 0 var(--space-2) 0;
 }
 
-/* Status item - uses same pattern as health-item */
-.status-item {
+/* ================================================
+   Services Grid
+   ================================================ */
+.status-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-2);
+}
+
+.status-service-card {
+  border: var(--border-width) solid var(--portal-border-color);
+  padding: var(--space-3);
+}
+
+.status-service-header {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-lg);
-  padding: var(--space-2) var(--space-3);
-  background: transparent;
-  border: var(--portal-border);
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
 }
 
-.status-item .status-icon {
-  width: 20px;
+.status-service-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.status-service-icon {
   flex-shrink: 0;
-  text-align: center;
-  color: var(--portal-text-secondary);
 }
 
-.status-item .status-name {
-  flex: 1;
-  color: var(--portal-text-light);
+.status-service-name {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-primary);
 }
 
-.status-item .status-message {
-  color: var(--portal-text-secondary);
+.status-service-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.status-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: var(--font-size-xs);
 }
 
-/* Status item icons - color matches badge */
-.status-item.status-healthy .status-icon {
-  color: var(--status-active);
+.status-detail-label {
+  color: var(--portal-text-secondary);
 }
 
-.status-item.status-warning .status-icon {
-  color: var(--color-warning);
+/* ================================================
+   Metrics Grid
+   ================================================ */
+.status-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
 }
 
-.status-item.status-error .status-icon {
-  color: var(--status-cancelled);
-}
-
-.status-item.status-unknown .status-icon {
-  color: var(--portal-text-muted);
-}
-
-/* Empty states */
-.no-status {
-  color: var(--portal-text-muted);
-  font-style: italic;
-  text-align: center;
+.status-metric-card {
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-3);
 }
 
-.status-error {
-  color: var(--status-cancelled);
-  text-align: center;
+.status-metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.status-metric-name {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+}
+
+.status-metric-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+  margin-bottom: var(--space-1-5);
+}
+
+.status-progress-track {
+  height: 4px;
+  background: var(--portal-bg-medium);
+  overflow: hidden;
+  margin-bottom: var(--space-1);
+}
+
+.status-progress-bar {
+  height: 100%;
+  transition: width var(--transition-base);
+}
+
+.status-metric-threshold {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+/* ================================================
+   Incidents List
+   ================================================ */
+.status-incidents-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.status-incident-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-3);
+}
+
+.status-incident-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-incident-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.status-incident-severity {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  padding: var(--space-0-5) var(--space-1-5);
+  border: var(--border-width) solid var(--portal-border-color);
+}
+
+.status-incident-severity.severity-critical {
+  color: var(--status-cancelled);
+  border-color: var(--status-cancelled);
+}
+
+.status-incident-severity.severity-major {
+  color: var(--status-pending);
+  border-color: var(--status-pending);
+}
+
+.status-incident-severity.severity-minor {
+  color: var(--portal-text-secondary);
+}
+
+.status-incident-title {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-primary);
+}
+
+.status-incident-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.status-incident-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+/* ================================================
+   Auto-refresh label in header actions
+   ================================================ */
+.status-auto-refresh-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  white-space: nowrap;
+}
+
+.status-auto-refresh-text {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .status-auto-refresh-text {
+    display: inline;
+  }
+}
+
+/* ================================================
+   Empty state
+   ================================================ */
+.status-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-3);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* ================================================
+   Shared utility
+   ================================================ */
+.status-text-capitalize {
+  text-transform: capitalize;
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+@media (--mobile) {
+  .status-services-grid,
+  .status-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-incident-card {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
 }

@@ -16,7 +16,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   border: none;
   background: transparent;
   min-width: fit-content;
@@ -271,7 +271,7 @@
   height: var(--icon-size-lg);
   padding: 0 var(--space-1);
   font-size: var(--font-size-2xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: var(--icon-size-lg);
   text-align: center;
   background: transparent;
