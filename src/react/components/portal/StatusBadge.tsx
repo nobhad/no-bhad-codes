@@ -33,7 +33,7 @@ const STATUS_CLASSES: Record<StatusVariant, string> = {
   inactive: 'status-inactive',
   new: 'status-new',
   'on-hold': 'status-on-hold',
-  'not-invited': 'status-not-invited',
+  'not-invited': 'status-not-invited'
 };
 
 export interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -128,7 +128,7 @@ export function getStatusVariant(status: string): StatusVariant {
     'on-hold': 'on-hold',
     'on_hold': 'on-hold',
     blocked: 'on-hold',
-    'high-priority': 'on-hold',
+    'high-priority': 'on-hold'
   };
 
   if (!status) return 'inactive';

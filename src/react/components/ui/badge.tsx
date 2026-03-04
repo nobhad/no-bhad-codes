@@ -1,24 +1,24 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from "@react/lib/utils"
+import { cn } from '@react/lib/utils';
 
 const badgeVariants = cva(
-  "tw-badge",
+  'tw-badge',
   {
     variants: {
       variant: {
-        default: "",
-        secondary: "tw-:opacity-70",
-        destructive: "",
-        outline: "",
-      },
+        default: '',
+        secondary: 'tw-:opacity-70',
+        destructive: '',
+        outline: ''
+      }
     },
     defaultVariants: {
-      variant: "default",
-    },
+      variant: 'default'
+    }
   }
-)
+);
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -27,7 +27,7 @@ export interface BadgeProps
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+  );
 }
 
-export { Badge, badgeVariants }
+export { Badge, badgeVariants };

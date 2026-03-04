@@ -9,7 +9,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from '@react/components/ui/alert-dialog';
 import { cn } from '@react/lib/utils';
 
@@ -100,7 +100,7 @@ export function ConfirmDialog({
               <AlertDialogTitle className="tw-modal-title">
                 {title}
               </AlertDialogTitle>
-              <AlertDialogDescription className="tw-text-sm tw-text-muted tw-mt-1">
+              <AlertDialogDescription className="tw-text-sm text-muted tw-mt-1">
                 {description}
               </AlertDialogDescription>
             </div>

@@ -30,7 +30,7 @@ export function TablePagination({
   onFirstPage,
   onPrevPage,
   onNextPage,
-  onLastPage,
+  onLastPage
 }: TablePaginationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -160,6 +160,6 @@ export function paginationToProps(pagination: {
     onFirstPage: pagination.firstPage,
     onPrevPage: pagination.prevPage,
     onNextPage: pagination.nextPage,
-    onLastPage: pagination.lastPage,
+    onLastPage: pagination.lastPage
   };
 }

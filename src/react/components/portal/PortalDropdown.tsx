@@ -177,5 +177,5 @@ export {
   PortalDropdownSub,
   PortalDropdownSubContent,
   PortalDropdownSubTrigger,
-  PortalDropdownRadioGroup,
+  PortalDropdownRadioGroup
 };

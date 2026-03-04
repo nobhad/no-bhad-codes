@@ -1,8 +1,8 @@
-import * as React from "react"
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
+import * as React from 'react';
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import { Check } from 'lucide-react';
 
-import { cn } from "@react/lib/utils"
+import { cn } from '@react/lib/utils';
 
 /**
  * Checkbox component using Radix primitives with vanilla CSS
@@ -14,14 +14,14 @@ const Checkbox = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
-    className={cn("table-checkbox", className)}
+    className={cn('table-checkbox', className)}
     {...props}
   >
     <CheckboxPrimitive.Indicator className="table-checkbox-indicator">
       <Check className="table-checkbox-icon" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
-))
-Checkbox.displayName = CheckboxPrimitive.Root.displayName
+));
+Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
-export { Checkbox }
+export { Checkbox };

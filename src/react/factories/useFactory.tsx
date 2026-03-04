@@ -9,9 +9,8 @@
 
 import * as React from 'react';
 import { useCallback, useMemo } from 'react';
-import { IconButton, ActionButton, TableActions, getLucideIcon } from './IconButton';
+import { IconButton, TableActions, getLucideIcon } from './IconButton';
 import { ICON_SIZES, CONTEXT_DEFAULTS } from '../../factories/constants';
-import { BUTTON_ACTIONS } from '../../factories/buttons/button-actions';
 import { BUTTON_SETS } from '../../factories/buttons/button-sets';
 import type { UIContext, ButtonConfig, IconSizeKey } from '../../factories/types';
 import { createLogger } from '../../utils/logger';

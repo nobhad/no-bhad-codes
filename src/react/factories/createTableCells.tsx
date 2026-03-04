@@ -8,7 +8,7 @@
  * Provides consistent formatting and styling across tables.
  */
 
-import * as React from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ExternalLink, Mail, Phone, Copy, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import {
@@ -66,11 +66,19 @@ export function DateCell({
   fallback = '—',
   className
 }: DateCellProps) {
+  if (!value) {
+    return (
+      <TableCellWrapper className={cn('date-cell', className)}>
+        <span className="cell-empty">{fallback}</span>
+      </TableCellWrapper>
+    );
+  }
+
   const formatted = formatDate(value, { includeTime, relative, fallback });
 
   return (
     <TableCellWrapper className={cn('date-cell', className)}>
-      <span title={value ? new Date(value).toLocaleString() : undefined}>
+      <span title={new Date(value).toLocaleString()}>
         {formatted}
       </span>
     </TableCellWrapper>
@@ -108,6 +116,14 @@ export function CurrencyCell({
   fallback = '—',
   className
 }: CurrencyCellProps) {
+  if (value === null || value === undefined) {
+    return (
+      <TableCellWrapper className={cn('currency-cell', className)}>
+        <span className="cell-empty">{fallback}</span>
+      </TableCellWrapper>
+    );
+  }
+
   const formatted = formatCurrency(value, { currency, compact, fallback });
 
   return (
@@ -141,6 +157,14 @@ export function FileSizeCell({
   fallback = '—',
   className
 }: FileSizeCellProps) {
+  if (value === null || value === undefined) {
+    return (
+      <TableCellWrapper className={cn('file-size-cell', className)}>
+        <span className="cell-empty">{fallback}</span>
+      </TableCellWrapper>
+    );
+  }
+
   const formatted = formatFileSize(value, fallback);
 
   return (
@@ -242,11 +266,19 @@ export function PhoneCell({
   fallback = '—',
   className
 }: PhoneCellProps) {
+  if (!value) {
+    return (
+      <TableCellWrapper className={cn('phone-cell', className)}>
+        <span className="cell-empty">{fallback}</span>
+      </TableCellWrapper>
+    );
+  }
+
   const formatted = formatPhone(value, fallback);
 
   return (
     <TableCellWrapper className={cn('phone-cell', className)}>
-      {callLink && value ? (
+      {callLink ? (
         <a
           href={`tel:${value.replace(/\D/g, '')}`}
           className="cell-link"
@@ -295,7 +327,7 @@ export function EmailCell({
   if (!value) {
     return (
       <TableCellWrapper className={cn('email-cell', className)}>
-        {fallback}
+        <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
   }
@@ -357,7 +389,7 @@ export function LinkCell({
   if (!href) {
     return (
       <TableCellWrapper className={cn('link-cell', className)}>
-        {fallback}
+        <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
   }
@@ -414,7 +446,7 @@ export function CountCell({
   if (value === null || value === undefined) {
     return (
       <TableCellWrapper className={cn('count-cell', className)}>
-        {fallback}
+        <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
   }
@@ -422,7 +454,7 @@ export function CountCell({
   if (value === 0 && !showZero) {
     return (
       <TableCellWrapper className={cn('count-cell', className)}>
-        {fallback}
+        <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
   }
@@ -458,6 +490,8 @@ export interface CopyCellProps {
  * @example
  * <CopyCell value={apiKey} maxLength={20} />
  */
+const COPY_FEEDBACK_DELAY_MS = 2000;
+
 export function CopyCell({
   value,
   displayValue,
@@ -465,15 +499,23 @@ export function CopyCell({
   fallback = '—',
   className
 }: CopyCellProps) {
-  const [copied, setCopied] = React.useState(false);
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const handleCopy = React.useCallback(
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handleCopy = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
       if (value) {
         navigator.clipboard.writeText(value);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_DELAY_MS);
       }
     },
     [value]
@@ -482,7 +524,7 @@ export function CopyCell({
   if (!value) {
     return (
       <TableCellWrapper className={cn('copy-cell', className)}>
-        {fallback}
+        <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
   }
@@ -545,7 +587,7 @@ export function TextCell({
   if (!value) {
     return (
       <TableCellWrapper className={cn('text-cell', className)}>
-        {fallback}
+        <span className="cell-empty">{fallback}</span>
       </TableCellWrapper>
     );
   }

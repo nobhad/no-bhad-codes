@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { Search, FolderOpen, Inbox, AlertCircle } from 'lucide-react';
+import { Search, FolderOpen, Inbox } from 'lucide-react';
 import {
   EmptyState as FactoryEmptyState,
   ErrorState as FactoryErrorState,
@@ -40,7 +40,7 @@ export interface EmptyStateProps {
 export function EmptyStateNoResults({
   searchQuery,
   onClear,
-  className,
+  className
 }: {
   searchQuery?: string;
   onClear?: () => void;
@@ -63,7 +63,7 @@ export function EmptyStateNoResults({
 
 export function EmptyStateNoFiles({
   onUpload,
-  className,
+  className
 }: {
   onUpload?: () => void;
   className?: string;
@@ -81,7 +81,7 @@ export function EmptyStateNoFiles({
 
 export function EmptyStateNoData({
   entityName = 'items',
-  className,
+  className
 }: {
   entityName?: string;
   className?: string;
@@ -98,7 +98,7 @@ export function EmptyStateNoData({
 export function EmptyStateError({
   error,
   onRetry,
-  className,
+  className
 }: {
   error?: string;
   onRetry?: () => void;

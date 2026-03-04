@@ -38,18 +38,18 @@ export {
 
 // Table
 export {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableFooter,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableCaption,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError
-} from './AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableFooter,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableCaption,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from './PortalTable';
 
 // Inline Edit
 export {
@@ -106,6 +106,12 @@ export {
   type ModalDropdownOption,
   type ModalDropdownProps
 } from './ModalDropdown';
+
+// Stat Card
+export { StatCard, StatsRow, type StatCardProps, type StatsRowProps } from './StatCard';
+
+// View Layout
+export { PortalViewLayout, type PortalViewLayoutProps } from './PortalViewLayout';
 
 // Empty State (re-exports from factories)
 export {

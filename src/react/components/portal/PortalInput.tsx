@@ -22,7 +22,7 @@ export const PortalInput = React.forwardRef<HTMLInputElement, PortalInputProps>(
     return (
       <div className="tw-flex tw-flex-col tw-gap-1">
         {label && (
-          <label htmlFor={inputId} className="tw-field-label">
+          <label htmlFor={inputId} className="field-label">
             {label}
             {required && <span className="tw-text-primary tw-ml-1">*</span>}
           </label>
@@ -35,7 +35,7 @@ export const PortalInput = React.forwardRef<HTMLInputElement, PortalInputProps>(
         />
         {error && <span className="tw-text-xs tw-text-primary">{error}</span>}
         {helperText && !error && (
-          <span className="tw-text-xs tw-text-muted">{helperText}</span>
+          <span className="tw-text-xs text-muted">{helperText}</span>
         )}
       </div>
     );

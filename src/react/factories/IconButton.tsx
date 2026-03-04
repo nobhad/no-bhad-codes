@@ -294,12 +294,10 @@ interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElem
 export function IconButton({
   action,
   icon,
-  context = 'table',
   title,
   ariaLabel,
   dataId,
   variant,
-  iconSize,
   loading = false,
   disabled,
   className,
@@ -311,7 +309,7 @@ export function IconButton({
   // Determine icon name
   const iconName = icon ?? actionDef?.icon;
   if (!iconName) {
-    logger.warn(`No icon specified. Provide 'action' or 'icon' prop.`);
+    logger.warn('No icon specified. Provide \'action\' or \'icon\' prop.');
     return null;
   }
 

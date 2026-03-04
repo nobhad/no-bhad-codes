@@ -12,7 +12,7 @@ const modalSizes = {
   md: 'tw-max-w-lg',
   lg: 'tw-max-w-2xl',
   xl: 'tw-max-w-4xl',
-  full: 'tw-max-w-full tw-m-4',
+  full: 'tw-max-w-full tw-m-4'
 } as const;
 
 type ModalSize = keyof typeof modalSizes;
@@ -52,7 +52,7 @@ export function PortalModal({
   size = 'md',
   showCloseButton = true,
   footer,
-  className,
+  className
 }: PortalModalProps) {
   const contentRef = useScaleIn<HTMLDivElement>();
 
@@ -74,7 +74,7 @@ export function PortalModal({
                 {title}
               </DialogPrimitive.Title>
               {description && (
-                <DialogPrimitive.Description className="tw-text-sm tw-text-muted tw-mt-1">
+                <DialogPrimitive.Description className="tw-text-sm text-muted tw-mt-1">
                   {description}
                 </DialogPrimitive.Description>
               )}
@@ -114,7 +114,7 @@ export function useModal(initialOpen = false) {
     setIsOpen,
     open,
     close,
-    toggle,
+    toggle
   };
 }
 

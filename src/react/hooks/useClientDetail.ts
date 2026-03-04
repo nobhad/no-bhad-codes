@@ -64,7 +64,7 @@ interface UseClientDetailReturn {
   /** Update client */
   updateClient: (updates: Partial<Client>) => Promise<boolean>;
   /** Add contact */
-  addContact: (contact: Omit<ClientContact, 'id' | 'client_id' | 'created_at'>) => Promise<boolean>;
+  addContact: (contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
   /** Update contact */
   updateContact: (id: number, updates: Partial<ClientContact>) => Promise<boolean>;
   /** Delete contact */
@@ -421,7 +421,7 @@ export function useClientDetail({
 
   // Add contact
   const addContact = useCallback(
-    async (contact: Omit<ClientContact, 'id' | 'client_id' | 'created_at'>): Promise<boolean> => {
+    async (contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
       try {
         const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, {
           method: 'POST',

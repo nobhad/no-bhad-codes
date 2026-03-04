@@ -59,7 +59,7 @@ export function ModalDropdown({
   label,
   error,
   className,
-  triggerClassName,
+  triggerClassName
 }: ModalDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,11 +74,11 @@ export function ModalDropdown({
   // Filter options based on search
   const filteredOptions = searchable
     ? options.filter(
-        (opt) =>
-          opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (opt) =>
+        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
           opt.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
           opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    )
     : options;
 
   // Get display text for trigger
@@ -142,35 +142,35 @@ export function ModalDropdown({
       }
 
       switch (e.key) {
-        case 'Escape':
-          e.preventDefault();
-          handleClose();
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          setFocusedIndex((prev) =>
-            prev < filteredOptions.length - 1 ? prev + 1 : prev
-          );
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-          break;
-        case 'Enter':
-        case ' ':
-          e.preventDefault();
-          if (filteredOptions[focusedIndex]) {
-            handleSelect(filteredOptions[focusedIndex].value);
-          }
-          break;
-        case 'Home':
-          e.preventDefault();
-          setFocusedIndex(0);
-          break;
-        case 'End':
-          e.preventDefault();
-          setFocusedIndex(filteredOptions.length - 1);
-          break;
+      case 'Escape':
+        e.preventDefault();
+        handleClose();
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex((prev) =>
+          prev < filteredOptions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (filteredOptions[focusedIndex]) {
+          handleSelect(filteredOptions[focusedIndex].value);
+        }
+        break;
+      case 'Home':
+        e.preventDefault();
+        setFocusedIndex(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        setFocusedIndex(filteredOptions.length - 1);
+        break;
       }
     },
     [isOpen, filteredOptions, focusedIndex, handleOpen, handleClose, handleSelect]
@@ -228,7 +228,7 @@ export function ModalDropdown({
         <span
           className={cn(
             'tw-truncate',
-            selectedValues.length === 0 && 'tw-text-muted'
+            selectedValues.length === 0 && 'text-muted'
           )}
         >
           {displayText}
@@ -258,7 +258,7 @@ export function ModalDropdown({
               <button
                 type="button"
                 onClick={handleClose}
-                className="tw-p-1 tw-text-muted hover:tw-text-primary tw-transition-colors"
+                className="tw-p-1 text-muted hover:tw-text-primary tw-transition-colors"
                 aria-label="Close"
               >
                 <X className="tw-h-5 tw-w-5" />
@@ -269,7 +269,7 @@ export function ModalDropdown({
             {searchable && (
               <div className="tw-p-3 tw-border-b tw-border-primary/20">
                 <div className="tw-relative">
-                  <Search className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 tw-h-4 tw-w-4 tw-text-muted" />
+                  <Search className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 tw-h-4 tw-w-4 text-muted" />
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -293,7 +293,7 @@ export function ModalDropdown({
               onKeyDown={handleKeyDown}
             >
               {filteredOptions.length === 0 ? (
-                <div className="tw-p-4 tw-text-center tw-text-muted">
+                <div className="tw-p-4 tw-text-center text-muted">
                   No options found
                 </div>
               ) : (
@@ -332,7 +332,7 @@ export function ModalDropdown({
                       <div className="tw-flex-1 tw-min-w-0">
                         <div className="tw-truncate">{option.label}</div>
                         {option.description && (
-                          <div className="tw-text-sm tw-text-muted tw-truncate">
+                          <div className="tw-text-sm text-muted tw-truncate">
                             {option.description}
                           </div>
                         )}
@@ -392,6 +392,6 @@ export function useModalDropdown<T extends string>(
     value,
     setValue,
     onChange: handleChange,
-    reset,
+    reset
   };
 }
