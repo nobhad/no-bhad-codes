@@ -37,6 +37,7 @@ import {
 } from './modules';
 import { authStore } from '../../auth/auth-store';
 import { decodeJwtPayload, isAdminPayload } from '../../utils/jwt-utils';
+import { ROUTES } from '../../constants/api-endpoints';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';
 import { createDOMCache } from '../../utils/dom-cache';
 import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
@@ -141,7 +142,7 @@ export class ClientPortalModule extends BaseModule {
   /** Create module context for passing to child modules */
   private createModuleContext(): ClientPortalContext {
     return {
-      getAuthToken: () => sessionStorage.getItem('client_auth_mode'),
+      getAuthToken: () => sessionStorage.getItem('client_auth_token'),
       showNotification: (
         message: string,
         type: 'success' | 'error' | 'info' | 'warning' = 'success'
@@ -154,7 +155,17 @@ export class ClientPortalModule extends BaseModule {
         }
       },
       formatDate: (dateString: string) => formatDate(dateString),
-      escapeHtml: (text: string) => this.escapeHtml(text)
+      escapeHtml: (text: string) => this.escapeHtml(text),
+      onSelectProject: async (projectId: string) => {
+        // Store the project ID for the detail component to pick up
+        sessionStorage.setItem('portal_active_project_id', projectId);
+
+        // Navigate to project-detail tab using the tab-content architecture
+        const navModule = await loadNavigationModule();
+        // Force re-mount so the detail component picks up the new project ID
+        navModule.remountTab('project-detail');
+        navModule.navigateTo('project-detail');
+      }
     };
   }
 
@@ -259,7 +270,7 @@ export class ClientPortalModule extends BaseModule {
               await this.loadRealUserProjects(user);
               const isOnPortalPage = document.body.getAttribute('data-page') === 'client-portal';
               if (!isOnPortalPage) {
-                window.location.href = '/client/';
+                window.location.href = ROUTES.PORTAL.DASHBOARD;
                 return;
               }
               this.showDashboard();
@@ -425,7 +436,7 @@ export class ClientPortalModule extends BaseModule {
       this.log('Session expired - redirecting to login');
       this.clearPortalData();
       // Redirect to login page - prevents seeing any portal content
-      window.location.href = '/client/?session=expired';
+      window.location.href = `${ROUTES.CLIENT.LOGIN}?session=expired`;
     });
 
     // Listen for logout to ensure data is cleared
@@ -444,6 +455,11 @@ export class ClientPortalModule extends BaseModule {
     this.isLoggedIn = false;
     this.currentUser = null;
     this.currentUserData = null;
+
+    // Clear URL hash so stale tab hash doesn't persist on the login page
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
 
     // Clear milestones list
     const milestonesList = document.getElementById('milestones-list');
@@ -704,7 +720,7 @@ export class ClientPortalModule extends BaseModule {
       });
     }
 
-    // NOTE: Password form is now part of the settings view template (portal-views.ts)
+    // NOTE: Password form is now part of the React PortalSettings component
     // and is initialized via initializePasswordForm() when settings tab is loaded.
     // This prevents browser password save prompts on dashboard load since the form
     // doesn't exist in the DOM until the user navigates to settings.
@@ -894,7 +910,7 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /**
-   * Initialize password form event handlers (form HTML is now in portal-views.ts template)
+   * Initialize password form event handlers (form HTML is now in React PortalSettings)
    * Sets up password toggle buttons and form submission
    */
   private initializePasswordForm(): void {
@@ -1488,7 +1504,8 @@ export class ClientPortalModule extends BaseModule {
   }
 
   /**
-   * Update sidebar notification badges
+   * Update sidebar notification badges.
+   * Badges only show when count > 0; hidden otherwise.
    */
   private updateSidebarBadges(
     unreadMessages: number,
@@ -1496,33 +1513,29 @@ export class ClientPortalModule extends BaseModule {
     pendingDocRequests: number = 0,
     pendingContracts: number = 0
   ): void {
-    const supportBadge = document.getElementById('badge-support');
-    if (supportBadge) {
-      if (unreadMessages > 0) {
-        supportBadge.textContent = unreadMessages > 99 ? '99+' : String(unreadMessages);
-        supportBadge.classList.add('has-count');
-        supportBadge.setAttribute('aria-label', `${unreadMessages} unread messages`);
+    const setBadge = (id: string, count: number, label: string): void => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (count > 0) {
+        el.textContent = count > 99 ? '99+' : String(count);
+        el.classList.add('has-count');
+        el.setAttribute('aria-label', `${count} ${label}`);
       } else {
-        supportBadge.textContent = '';
-        supportBadge.classList.remove('has-count');
-        supportBadge.setAttribute('aria-label', 'unread messages');
+        el.textContent = '';
+        el.classList.remove('has-count');
+        el.setAttribute('aria-label', label);
       }
-    }
+    };
 
-    // Combine invoices and document requests for documents badge
-    const totalDocumentItems = pendingInvoices + pendingDocRequests + pendingContracts;
-    const documentsBadge = document.getElementById('badge-documents');
-    if (documentsBadge) {
-      if (totalDocumentItems > 0) {
-        documentsBadge.textContent = totalDocumentItems > 99 ? '99+' : String(totalDocumentItems);
-        documentsBadge.classList.add('has-count');
-        documentsBadge.setAttribute('aria-label', `${totalDocumentItems} pending items`);
-      } else {
-        documentsBadge.textContent = '';
-        documentsBadge.classList.remove('has-count');
-        documentsBadge.setAttribute('aria-label', 'pending items');
-      }
-    }
+    setBadge('badge-messages', unreadMessages, 'unread messages');
+    setBadge('badge-invoices', pendingInvoices, 'pending invoices');
+    setBadge('badge-documents', pendingDocRequests + pendingContracts, 'pending document requests');
+
+    // No server counts for these yet — ensure they stay hidden
+    setBadge('badge-projects', 0, 'projects');
+    setBadge('badge-requests', 0, 'requests');
+    setBadge('badge-questionnaires', 0, 'questionnaires');
+    setBadge('badge-approvals', 0, 'approvals');
   }
 
   private populateProjectsList(projects: ClientProject[]): void {
@@ -1825,22 +1838,16 @@ export class ClientPortalModule extends BaseModule {
   }
 
   private showDashboard(): void {
-    if (!this.loginSection || !this.dashboardSection) return;
+    if (!this.dashboardSection) return;
 
-    // Hide auth gate (login form) and header/footer
-    // Note: We don't clear the form here - browsers need to see the credentials to offer to save them
+    // Hide auth gate if present (legacy — auth gate removed from dashboard template)
     if (this.loginSection) {
       this.loginSection.classList.add('hidden');
-      this.loginSection.style.display = 'none';
     }
 
-    // Hide login page header, nav overlay, and footer
-    const portalHeader = document.querySelector('.portal-header');
-    const portalNav = document.querySelector('.portal-nav');
-    const portalFooter = document.querySelector('.portal-footer');
-    if (portalHeader) (portalHeader as HTMLElement).style.display = 'none';
-    if (portalNav) (portalNav as HTMLElement).style.display = 'none';
-    if (portalFooter) (portalFooter as HTMLElement).style.display = 'none';
+    // Add logged-in class to body — CSS handles hiding header, footer, and nav overlay
+    // See: src/styles/client-portal/login.css — body.portal-logged-in rules
+    document.body.classList.add('portal-logged-in');
 
     // Check if this is first login - show onboarding wizard
     const { isFirstLogin } = authStore.getState();
@@ -1904,8 +1911,8 @@ export class ClientPortalModule extends BaseModule {
   private showDashboardContent(): void {
     if (!this.dashboardSection) return;
 
+    // Remove hidden class — CSS restores display:flex via .dashboard-container rule
     this.dashboardSection.classList.remove('hidden');
-    this.dashboardSection.style.display = 'flex';
 
     // Mount React navigation sidebar
     this.mountReactNavigation();
@@ -1915,8 +1922,7 @@ export class ClientPortalModule extends BaseModule {
       navModule.updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
     });
 
-    // Load dashboard stats from API
-    this.loadDashboardStats();
+    // Dashboard stats now loaded by React PortalDashboard component
 
     // Setup dashboard event listeners if not already done, then initialize hash router
     if (!this.dashboardListenersSetup) {
@@ -1978,18 +1984,7 @@ export class ClientPortalModule extends BaseModule {
         activeTab,
         onNavigate: (tab: string) => {
           loadNavigationModule().then((navModule) => {
-            navModule.navigateTo(tab, {
-              loadFiles: () => this.loadFiles(),
-              loadInvoices: () => this.loadInvoices(),
-              loadProjectPreview: () => this.loadProjectPreview(),
-              loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
-              loadHelp: () => this.loadHelp(),
-              loadDocumentRequests: () => this.loadDocumentRequests(),
-              loadAdHocRequests: () => this.loadAdHocRequests(),
-              loadQuestionnaires: () => this.loadQuestionnaires(),
-              loadSettings: () => this.loadUserSettings(),
-              loadDashboard: () => this.loadDashboardStats()
-            });
+            navModule.navigateTo(tab);
           });
         },
         user,
@@ -2082,18 +2077,14 @@ export class ClientPortalModule extends BaseModule {
     this.hashRouterInitialized = true;
 
     loadNavigationModule().then((navModule) => {
-      navModule.initHashRouter({
-        loadFiles: () => this.loadFiles(),
-        loadInvoices: () => this.loadInvoices(),
-        loadProjectPreview: () => this.loadProjectPreview(),
-        loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
-        loadHelp: () => this.loadHelp(),
-        loadDocumentRequests: () => this.loadDocumentRequests(),
-        loadAdHocRequests: () => this.loadAdHocRequests(),
-        loadQuestionnaires: () => this.loadQuestionnaires(),
-        loadSettings: () => this.loadUserSettings(),
-        loadDashboard: () => this.loadDashboardStats()
-      });
+      // Set module context for React component mounting
+      navModule.setModuleContext(this.moduleContext);
+
+      // Set up EJS subtab click handlers (e.g. Settings subtabs, project-detail subtabs)
+      navModule.setupClientSubtabHandlers();
+
+      // Initialize hash router — no callbacks needed, all views are React
+      navModule.initHashRouter();
     });
   }
 
@@ -2162,9 +2153,8 @@ export class ClientPortalModule extends BaseModule {
     }
     authModule.clearErrors();
 
-    // Simple transition without animations
-    if (this.dashboardSection) this.dashboardSection.style.display = 'none';
-    if (this.loginSection) this.loginSection.style.display = 'block';
+    // Redirect to login page — auth gate is no longer embedded in the dashboard
+    window.location.href = ROUTES.CLIENT.LOGIN;
   }
 
   // =====================================================
@@ -2294,21 +2284,7 @@ export class ClientPortalModule extends BaseModule {
    */
   private async switchTab(tabName: string): Promise<void> {
     const navModule = await loadNavigationModule();
-    // Use navigateTo to update URL hash and switch tab
-    navModule.navigateTo(tabName, {
-      loadFiles: () => this.loadFiles(),
-      loadInvoices: () => this.loadInvoices(),
-      loadProjectPreview: () => this.loadProjectPreview(),
-      loadMessagesFromAPI: () => this.loadMessagesFromAPI(),
-      loadHelp: () => this.loadHelp(),
-      loadDocumentRequests: () => this.loadDocumentRequests(),
-      loadAdHocRequests: () => this.loadAdHocRequests(),
-      loadQuestionnaires: () => this.loadQuestionnaires(),
-      loadSettings: () => this.loadUserSettings(),
-      loadDashboard: () => this.loadDashboardStats(),
-      loadProjects: () => this.loadProjects(),
-      loadApprovals: () => this.loadApprovals()
-    });
+    navModule.navigateTo(tabName);
   }
 
   /**

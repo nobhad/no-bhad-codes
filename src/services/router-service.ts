@@ -130,6 +130,12 @@ export class RouterService extends BaseService {
       title: 'Admin Login - No Bhad Codes'
     });
 
+    this.routes.set('#/portal', {
+      path: '#/portal',
+      section: 'portal-login',
+      title: 'Portal - No Bhad Codes'
+    });
+
     // Legacy hash routes (without /) for backwards compatibility
     this.routes.set('#intro', {
       path: '#intro',

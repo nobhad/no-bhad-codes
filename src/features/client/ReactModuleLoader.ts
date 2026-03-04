@@ -100,6 +100,26 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
     mountFn: 'mountOnboardingWizard',
     unmountFn: 'unmountOnboardingWizard'
   },
+  dashboard: {
+    import: () => import('../../react/features/portal/dashboard/mount'),
+    mountFn: 'mountPortalDashboard',
+    unmountFn: 'unmountPortalDashboard'
+  },
+  help: {
+    import: () => import('../../react/features/portal/help/mount'),
+    mountFn: 'mountPortalHelp',
+    unmountFn: 'unmountPortalHelp'
+  },
+  review: {
+    import: () => import('../../react/features/portal/preview/mount'),
+    mountFn: 'mountPortalPreview',
+    unmountFn: 'unmountPortalPreview'
+  },
+  'new-project': {
+    import: () => import('../../react/features/portal/onboarding/mount'),
+    mountFn: 'mountOnboardingWizard',
+    unmountFn: 'unmountOnboardingWizard'
+  },
 
   // Navigation (sidebar, header)
   navigation: {
@@ -171,7 +191,8 @@ export async function mountReactModule(
       getAuthToken: context.getAuthToken,
       showNotification: context.showNotification,
       onNavigate: context.switchView,
-      refreshData: context.refreshData
+      refreshData: context.refreshData,
+      onSelectProject: context.onSelectProject
     };
 
     // Mount the React component

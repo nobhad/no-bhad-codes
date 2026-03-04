@@ -739,9 +739,13 @@ export class ProjectsModule extends BaseModule {
     );
 
     animatedElements.forEach((el) => {
-      // Force reflow to restart animations
-      el.classList.remove('leaving');
-      void (el as HTMLElement).offsetWidth;
+      const htmlEl = el as HTMLElement;
+      htmlEl.classList.remove('leaving');
+      // Remove animation, force reflow, then restore — this is the only reliable
+      // way to restart a CSS animation that has already completed.
+      htmlEl.style.animation = 'none';
+      void htmlEl.offsetWidth;
+      htmlEl.style.animation = '';
     });
   }
 

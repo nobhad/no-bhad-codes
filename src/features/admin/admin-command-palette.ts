@@ -588,7 +588,7 @@ export function addRecentAdminItem(item: Omit<CommandItem, 'section'>): void {
 /**
  * Initialize keyboard navigation for an admin table
  */
-export function initAdminTableNav(
+export function initPortalTableNav(
   config: Omit<TableKeyboardNavConfig, 'focusClass' | 'selectedClass'>
 ): ReturnType<typeof initTableKeyboardNav> {
   return initTableKeyboardNav({

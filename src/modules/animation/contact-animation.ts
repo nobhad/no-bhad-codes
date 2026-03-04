@@ -5,31 +5,18 @@
  * @file src/modules/contact-animation.ts
  * @extends BaseModule
  *
- * THREE-TIER ANIMATION STRATEGY:
- * Breakpoints match CSS layout breakpoints for consistency.
- *
- * DESKTOP (>1100px):
- * - Full blur-in animation with form field cascade
- * - Submit button scales up with blur clear
- * - Avatar blurb animates in
- *
- * TABLET (600-1100px):
- * - Simple fade-in animation only (no transforms)
- * - CSS handles all positioning (grid layout)
- * - No button roll or position transforms
- *
- * MOBILE (<600px):
- * - No GSAP animation - PageTransitionModule handles page transitions
- * - CSS handles stacked layout
- * - Elements shown immediately
- *
- * ANIMATION SEQUENCE (Desktop):
+ * ANIMATION SEQUENCE (all screen sizes):
  * 1. Navigate to contact page (hash #/contact)
  * 2. h2 "contact" blur in
- * 3. Contact options text shows immediately
- * 4. Card column blur in
- * 5. Form fields + Submit button + Avatar blurb all animate together (synced)
- * 6. Labels and placeholders fade in
+ * 3. Contact options text + HR fade in
+ * 4. Card column blur in (hidden on mobile via CSS — no visual effect)
+ * 5. Form fields cascade: appear staggered, expand height, expand width
+ * 6. Submit button scales up with blur clear
+ * 7. Labels and placeholders fade in
+ *
+ * Width reads are lazy (getInputWidth called at tween time, not setup time)
+ * to handle SPA — section is hidden when init() runs, offsetWidth would
+ * return 0. The lazy getter reads the correct width when the section is visible.
  */
 
 import { BaseModule } from '../core/base';
@@ -50,6 +37,7 @@ export class ContactAnimationModule extends BaseModule {
   private container: HTMLElement | null = null;
   private timeline: gsap.core.Timeline | null = null;
   private blurAnimationComplete = false; // Track if blur animation has completed
+  private starGlowAnimation: gsap.core.Tween | null = null; // Independent star glow pulse
 
   /** DOM element cache */
   private domCache = createDOMCache<ContactAnimationDOMKeys>();
@@ -78,35 +66,14 @@ export class ContactAnimationModule extends BaseModule {
       return;
     }
 
-    // ========================================================================
-    // THREE-TIER ANIMATION: Match CSS layout breakpoints
-    // Desktop (>1100px): Full animation
-    // Tablet (600-1100px): Simple fade-in only
-    // Mobile (<600px): No animation - PageTransitionModule handles it
-    // ========================================================================
-    const viewportWidth = window.innerWidth;
-    const isDesktop = viewportWidth >= 1100;
-    const isTablet = viewportWidth >= 600 && viewportWidth < 1100;
-    const isMobile = viewportWidth < 600;
-
-    this.log(
-      `Viewport: ${viewportWidth}px | Desktop: ${isDesktop}, Tablet: ${isTablet}, Mobile: ${isMobile}`
-    );
-
-    if (isDesktop) {
-      this.setupAnimation();
-    } else if (isTablet) {
-      this.setupTabletAnimation();
-    } else {
-      this.setupMobileAnimation();
-    }
+    this.setupAnimation();
   }
 
   /**
    * Set up the contact section animation
    */
   private setupAnimation(): void {
-    this.log('Setting up DESKTOP contact form animation...');
+    this.log('Setting up contact form animation...');
 
     // Kill any existing timeline to prevent state accumulation
     if (this.timeline) {
@@ -160,12 +127,9 @@ export class ContactAnimationModule extends BaseModule {
     if (hr) {
       gsap.set(hr, { opacity: 0 });
     }
-    // Contact options (nav links) show immediately - no animation delay
+    // Contact options start hidden - animate in after hr
     if (contactOptions) {
-      gsap.set(contactOptions, {
-        opacity: 1,
-        filter: 'blur(0px)'
-      });
+      gsap.set(contactOptions, { opacity: 0 });
     }
     if (cardColumn) {
       gsap.set(cardColumn, {
@@ -174,13 +138,12 @@ export class ContactAnimationModule extends BaseModule {
         willChange: 'filter, opacity'
       });
     }
-    // Avatar blurb starts scaled down, blurred, and invisible
+    // Avatar blurb — visible immediately (CSS controls opacity: 0.09 on parent)
     if (avatarBlurb) {
       gsap.set(avatarBlurb, {
-        opacity: 0,
-        scale: 0.8,
-        filter: `blur(${blurAmount}px)`,
-        transformOrigin: 'center center'
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)'
       });
     }
 
@@ -196,7 +159,7 @@ export class ContactAnimationModule extends BaseModule {
         0
       );
     }
-    // contactOptions already visible - no animation needed
+    // contactOptions animates in later with hr - skip in this phase
     if (cardColumn) {
       this.timeline.to(
         cardColumn,
@@ -223,7 +186,7 @@ export class ContactAnimationModule extends BaseModule {
         '>'
       );
     }
-    // contactOptions already visible - no blur animation
+    // contactOptions animates in later - skip blur animation here
     if (cardColumn) {
       this.timeline.to(
         cardColumn,
@@ -254,6 +217,19 @@ export class ContactAnimationModule extends BaseModule {
       );
     }
 
+    // Contact options fade in with hr
+    if (contactOptions) {
+      this.timeline.to(
+        contactOptions,
+        {
+          opacity: 1,
+          duration: blurClearDuration,
+          ease: 'power2.out'
+        },
+        '<'
+      );
+    }
+
     // ========================================================================
     // PHASE 3: Form fields cascade animation
     // PERFORMANCE: Batch all DOM reads before writes to prevent layout thrashing
@@ -272,6 +248,7 @@ export class ContactAnimationModule extends BaseModule {
     const _formContainer =
       this.container.querySelector('.contact-form') ||
       this.container.querySelector('.contact-form-column');
+    const formColumn = this.container.querySelector('.contact-form-column') as HTMLElement | null;
     const textarea = messageField?.querySelector('textarea') as HTMLTextAreaElement | null;
     const wrapper = messageField?.querySelector('.input-wrapper') || messageField;
     const nameLabel = nameField?.querySelector('label');
@@ -286,11 +263,28 @@ export class ContactAnimationModule extends BaseModule {
     const finalSectionHeight = this.container.offsetHeight;
     const rootStyles = window.getComputedStyle(document.documentElement);
     const textareaHeightVar = rootStyles.getPropertyValue('--contact-textarea-height').trim();
+    const inputHeightVar = rootStyles.getPropertyValue('--contact-input-height').trim();
+
+    // Resolve CSS height values to pixels via a sentinel element.
+    // This handles any valid CSS value: px, rem, clamp(), calc(), etc.
+    // Appended to documentElement so it inherits :root custom properties.
+    const resolveCSSHeight = (cssValue: string, fallback: number): number => {
+      if (!cssValue) return fallback;
+      const sentinel = document.createElement('div');
+      sentinel.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;height:${cssValue}`;
+      document.documentElement.appendChild(sentinel);
+      const resolved = sentinel.offsetHeight;
+      sentinel.remove();
+      return resolved > 0 ? resolved : fallback;
+    };
 
     // === BATCH 3: CALCULATIONS (no DOM access) ===
-    const inputFieldHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_HEIGHT;
+    const inputFieldHeight = resolveCSSHeight(
+      inputHeightVar,
+      ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_HEIGHT
+    );
     const compressedHeight = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_COMPRESSED;
-    const finalTextareaHeight = parseInt(textareaHeightVar, 10) || 155;
+    const finalTextareaHeight = resolveCSSHeight(textareaHeightVar, 155);
     const finalMessageFieldHeight = finalTextareaHeight + 20; // Add padding
 
     this.log(`Message field target height: ${finalTextareaHeight}px`);
@@ -318,7 +312,15 @@ export class ContactAnimationModule extends BaseModule {
     // Shared border-radius for all fields during cascade
     const fieldBorderRadius = '0 50px 50px 50px';
     const startWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_START;
-    const inputFullWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_FULL;
+    const inputWidthMax = ANIMATION_CONSTANTS.DIMENSIONS.FORM_FIELD_WIDTH_FULL; // 520px cap
+    // Lazy width getter — called when the tween runs (page is visible), not at setup time
+    // Prevents reading offsetWidth=0 when the section is hidden during SPA init.
+    // Falls back to inputWidthMax when offsetWidth=0 (section still display:none during intro).
+    const getInputWidth = () => {
+      if (!formColumn) return inputWidthMax;
+      const w = formColumn.offsetWidth;
+      return w > 0 ? Math.min(w, inputWidthMax) : inputWidthMax;
+    };
 
     // All fields start at height 0 and narrow width
     // Each field will dynamically match the width of the field above when it appears
@@ -394,56 +396,30 @@ export class ContactAnimationModule extends BaseModule {
     const stagger = ANIMATION_CONSTANTS.SEQUENCES.CONTACT_FORM.FIELD_STAGGER;
     const formStartTime = dropDuration; // Form starts AFTER h2/card drop completes
 
-    // Avatar blurb scales up and clears blur in sync with form fields cascade
+    // Avatar blurb is always visible — CSS controls opacity via parent .contact-bg-avatar
+    // Star glow pulses independently — not tied to main timeline so it always shows
     if (avatarBlurb) {
-      this.timeline.to(
-        avatarBlurb,
-        {
-          opacity: 1,
-          scale: 1,
-          filter: 'blur(0px)',
-          duration: 0.5,
-          ease: 'back.out(1.4)'
-        },
-        formStartTime
-      );
-
-      // Star glow animation - starts after avatar blurb appears
       const starGlow = avatarBlurb.querySelector('#STAR_GLOW') as SVGPathElement | null;
 
       if (starGlow) {
-        // Glow starts invisible
-        gsap.set(starGlow, {
-          opacity: 0
-        });
+        // Kill any previous glow animation before creating a new one
+        if (this.starGlowAnimation) {
+          this.starGlowAnimation.kill();
+        }
 
-        // Fade in star glow
-        this.timeline.to(
+        // Independent pulsing — starts immediately, not dependent on main timeline
+        this.starGlowAnimation = gsap.fromTo(
           starGlow,
+          { opacity: 0.6 },
           {
             opacity: 1,
-            duration: 0.8,
-            ease: 'power2.out'
-          },
-          formStartTime + 0.5
+            duration: 1.5,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            repeatDelay: 0
+          }
         );
-
-        // Continuous pulsing glow animation (glow overflows beyond star shape)
-        const glowTimeline = gsap.timeline({ repeat: -1, repeatDelay: 0 });
-        glowTimeline
-          .to(starGlow, {
-            opacity: 0.7,
-            duration: 1.5,
-            ease: 'sine.inOut'
-          })
-          .to(starGlow, {
-            opacity: 1,
-            duration: 1.5,
-            ease: 'sine.inOut'
-          });
-
-        // Start glow pulse animation after fade-in
-        this.timeline.add(glowTimeline, formStartTime + 1.3);
       }
     }
 
@@ -579,24 +555,22 @@ export class ContactAnimationModule extends BaseModule {
     }
 
     // WIDTH: One continuous expansion for ALL fields together (runs throughout form phase)
-    // Input fields expand to 460px
+    // getInputWidth() is called lazily at tween time when the section is visible
     this.timeline.to(
       [nameField, companyField, emailField].filter(Boolean),
       {
-        width: inputFullWidth,
+        width: getInputWidth,
         duration: totalDuration * 0.8,
         ease: 'sine.inOut'
       },
       formStartTime
     );
 
-    // Message field expands to full width (640px)
-    const messageFullWidth = ANIMATION_CONSTANTS.DIMENSIONS.FORM_MESSAGE_WIDTH_FULL;
     if (messageField) {
       this.timeline.to(
         messageField,
         {
-          width: messageFullWidth,
+          width: getInputWidth, // Same lazy-read — all fields same width
           duration: totalDuration * 0.8,
           ease: 'sine.inOut'
         },
@@ -673,7 +647,7 @@ export class ContactAnimationModule extends BaseModule {
             this.blurAnimationComplete = true;
             this.playFormAnimation();
           }
-        }, 3000);
+        }, 600);
       }
     }) as EventListener);
 
@@ -699,10 +673,10 @@ export class ContactAnimationModule extends BaseModule {
           this.blurAnimationComplete = true;
           this.playFormAnimation();
         }
-      }, 10000);
+      }, 300);
     }
 
-    this.log('Contact animation initialized');
+    this.log('Contact animation initialized (cascade — all screen sizes)');
   }
 
   /**
@@ -761,8 +735,8 @@ export class ContactAnimationModule extends BaseModule {
     }
     // Hide hr so it doesn't appear before h2 - hr should appear after h2 or not animate
     if (hr) gsap.set(hr, { opacity: 0 });
-    // Contact options (nav links) show immediately - no animation
-    if (contactOptions) gsap.set(contactOptions, { opacity: 1, filter: 'blur(0px)' });
+    // Contact options start hidden - animate in with hr
+    if (contactOptions) gsap.set(contactOptions, { opacity: 0 });
     if (cardColumn) {
       gsap.set(cardColumn, {
         opacity: 0,
@@ -771,15 +745,10 @@ export class ContactAnimationModule extends BaseModule {
       });
     }
 
-    // Reset avatar blurb to initial scaled-down, blurred state
+    // Avatar blurb stays visible — CSS controls opacity via parent .contact-bg-avatar
     const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
     if (avatarBlurb) {
-      gsap.set(avatarBlurb, {
-        opacity: 0,
-        scale: 0.8,
-        filter: `blur(${blurAmount}px)`,
-        transformOrigin: 'center center'
-      });
+      gsap.set(avatarBlurb, { opacity: 1, scale: 1, filter: 'blur(0px)' });
     }
 
     // Get form container reference (no overflow changes - causes button clipping)
@@ -837,216 +806,6 @@ export class ContactAnimationModule extends BaseModule {
   }
 
   /**
-   * Set up tablet-specific contact animation (600-1100px)
-   * Simple fade-in with avatar blurb animation - no transforms on button
-   * CSS handles grid layout positioning
-   */
-  private setupTabletAnimation(): void {
-    this.log('Setting up TABLET contact form animation...');
-
-    // Kill any existing timeline to prevent state accumulation
-    if (this.timeline) {
-      this.timeline.kill();
-      this.timeline = null;
-    }
-
-    this.container = this.domCache.get('contactSection');
-    if (!this.container) {
-      this.log('Contact section not found');
-      return;
-    }
-
-    // Get animatable elements
-    const heading = this.container.querySelector('h2');
-    const contactOptions = this.container.querySelector('.contact-options');
-    const cardColumn = this.container.querySelector('.contact-card-column');
-    const avatarBlurb = this.container.querySelector('.avatar-blurb-container');
-    const submitButton = this.container.querySelector('.submit-button') as HTMLElement;
-    const formFields = this.container.querySelectorAll('.input-item');
-    const labels = this.container.querySelectorAll('.input-item label');
-
-    this.timeline = gsap.timeline({
-      onComplete: () => {
-        this.log('Tablet contact form animation complete');
-      }
-    });
-
-    const blurAmount = 4;
-    const fadeDuration = 0.3;
-
-    // Set initial states - opacity/blur only, NO transforms on positioned elements
-    if (heading) gsap.set(heading, { opacity: 0, filter: `blur(${blurAmount}px)` });
-    if (contactOptions) gsap.set(contactOptions, { opacity: 1 }); // Show immediately
-    if (cardColumn) gsap.set(cardColumn, { opacity: 0, filter: `blur(${blurAmount}px)` });
-
-    // Avatar blurb - scale animation is OK here since it's not grid-positioned
-    if (avatarBlurb) {
-      gsap.set(avatarBlurb, {
-        opacity: 0,
-        scale: 0.8,
-        filter: `blur(${blurAmount}px)`,
-        transformOrigin: 'center center'
-      });
-    }
-
-    // Form fields - just opacity, no height/width transforms
-    formFields.forEach((field) => {
-      gsap.set(field, { opacity: 0 });
-    });
-    labels.forEach((label) => {
-      gsap.set(label, { opacity: 0 });
-    });
-
-    // Submit button - opacity only, NO x/rotation transforms (CSS handles position)
-    if (submitButton) {
-      gsap.set(submitButton, { opacity: 0, filter: `blur(${blurAmount}px)` });
-    }
-
-    // PHASE 1: Heading and card column fade in
-    if (heading) {
-      this.timeline.to(
-        heading,
-        { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' },
-        0
-      );
-    }
-    if (cardColumn) {
-      this.timeline.to(
-        cardColumn,
-        { opacity: 1, filter: 'blur(0px)', duration: fadeDuration, ease: 'power2.out' },
-        0
-      );
-    }
-
-    // PHASE 2: Avatar blurb scales up (the key animation user wants)
-    if (avatarBlurb) {
-      this.timeline.to(
-        avatarBlurb,
-        {
-          opacity: 1,
-          scale: 1,
-          filter: 'blur(0px)',
-          duration: 0.5,
-          ease: 'back.out(1.4)'
-        },
-        0.1
-      );
-    }
-
-    // PHASE 3: Form fields and button fade in
-    this.timeline.to(
-      formFields,
-      {
-        opacity: 1,
-        duration: fadeDuration,
-        stagger: 0.05,
-        ease: 'power2.out'
-      },
-      0.15
-    );
-
-    this.timeline.to(
-      labels,
-      {
-        opacity: 1,
-        duration: fadeDuration,
-        ease: 'power2.out'
-      },
-      0.2
-    );
-
-    if (submitButton) {
-      this.timeline.to(
-        submitButton,
-        {
-          opacity: 1,
-          filter: 'blur(0px)',
-          duration: 0.4,
-          ease: 'power2.out'
-        },
-        0.2
-      );
-    }
-
-    // Pause timeline - wait for page transition
-    this.timeline.pause();
-
-    // Listen for page transition events
-    this.on('PageTransitionModule:contact-page-ready', (() => {
-      this.blurAnimationComplete = true;
-      this.timeline?.restart();
-    }) as EventListener);
-
-    this.on('PageTransitionModule:page-changed', ((event: CustomEvent) => {
-      const { to, from } = event.detail || {};
-      if (from === 'contact') {
-        this.timeline?.pause();
-        this.timeline?.progress(0);
-        this.blurAnimationComplete = false;
-      }
-      if (to === 'contact' && !this.blurAnimationComplete) {
-        setTimeout(() => {
-          if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
-            this.blurAnimationComplete = true;
-            this.timeline?.restart();
-          }
-        }, 3000);
-      }
-    }) as EventListener);
-
-    // Check if already on contact page
-    const currentHash = window.location.hash;
-    if (currentHash === '#/contact' || currentHash === '#contact') {
-      setTimeout(() => {
-        if (!this.blurAnimationComplete && !this.timeline?.isActive()) {
-          this.blurAnimationComplete = true;
-          this.timeline?.restart();
-        }
-      }, 500);
-    }
-
-    this.log('Contact animation initialized (tablet - fade-in with avatar blurb)');
-  }
-
-  /**
-   * Set up mobile-specific contact animation (<600px)
-   * No GSAP animation - PageTransitionModule handles page transitions
-   * Just ensure elements are visible
-   */
-  private setupMobileAnimation(): void {
-    this.log('Setting up MOBILE contact - no GSAP animation');
-
-    // Kill any existing timeline
-    if (this.timeline) {
-      this.timeline.kill();
-      this.timeline = null;
-    }
-
-    this.container = this.domCache.get('contactSection');
-    if (!this.container) {
-      this.log('Contact section not found');
-      return;
-    }
-
-    // Mobile: Ensure all elements are visible - no animation
-    // PageTransitionModule handles page transitions
-    const allElements = this.container.querySelectorAll(
-      'h2, .contact-options, .contact-card-column, .avatar-blurb-container, ' +
-        '.input-item, .input-wrapper, .submit-button, label'
-    );
-
-    gsap.set(allElements, {
-      opacity: 1,
-      visibility: 'visible',
-      filter: 'blur(0px)',
-      transform: 'none',
-      clearProps: 'scale,x,y,rotation'
-    });
-
-    this.log('Contact animation initialized (mobile - elements visible, no animation)');
-  }
-
-  /**
    * Get module status
    */
   override getStatus() {
@@ -1064,6 +823,11 @@ export class ContactAnimationModule extends BaseModule {
     if (this.timeline) {
       this.timeline.kill();
       this.timeline = null;
+    }
+
+    if (this.starGlowAnimation) {
+      this.starGlowAnimation.kill();
+      this.starGlowAnimation = null;
     }
 
     this.container = null;

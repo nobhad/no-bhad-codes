@@ -20,6 +20,7 @@
 import { AdminSecurity } from './admin-security';
 import { authStore } from '../../auth';
 import { createLogger } from '../../utils/logger';
+import { ROUTES } from '../../constants/api-endpoints';
 
 const logger = createLogger('AdminAuth');
 
@@ -225,8 +226,8 @@ export class AdminAuth {
     } catch (error) {
       logger.error('authStore.logout() failed:', error);
     } finally {
-      // Always navigate to /admin to ensure fresh state, even if logout API fails
-      window.location.href = '/admin';
+      // Always redirect to login page even if logout API fails
+      window.location.href = ROUTES.ADMIN.LOGIN;
     }
   }
 

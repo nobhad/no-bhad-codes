@@ -277,6 +277,19 @@ export async function mountReactModule(
       refreshData: context.refreshData
     };
 
+    // For detail views, inject the entity ID and back navigation
+    if (tabId === 'project-detail') {
+      if (context.currentEntityId) {
+        mountOptions.projectId = parseInt(context.currentEntityId, 10);
+      }
+      mountOptions.onBack = () => context.switchTab('projects');
+    } else if (tabId === 'client-detail') {
+      if (context.currentEntityId) {
+        mountOptions.clientId = parseInt(context.currentEntityId, 10);
+      }
+      mountOptions.onBack = () => context.switchTab('clients');
+    }
+
     // Mount the React component
     const _cleanup = mountFn(container, mountOptions);
 

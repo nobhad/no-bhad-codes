@@ -105,8 +105,8 @@ export class PortalShell extends BaseModule {
   protected async onInit(): Promise<void> {
     this.log('Initializing with role:', this.role);
 
-    // Get container element
-    const container = document.getElementById('portal-view-content');
+    // Get container element (tab-content containers rendered by EJS)
+    const container = document.getElementById('tab-dashboard') || document.getElementById('dashboard-content');
     if (container) {
       this.moduleLoader.setContainer(container);
     }

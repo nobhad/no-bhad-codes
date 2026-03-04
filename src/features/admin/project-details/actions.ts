@@ -315,7 +315,6 @@ export async function handleContractCountersign(
   let isDrawing = false;
   let hasSignature = false;
 
-  // eslint-disable-next-line no-undef
   const strokeColor = getComputedStyle(document.documentElement)
     .getPropertyValue('--portal-text-light')
     .trim();

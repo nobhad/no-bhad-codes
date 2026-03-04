@@ -10,7 +10,9 @@
 
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../../components/breadcrumbs';
 import { authStore } from '../../../auth/auth-store';
-import { renderView } from './portal-views';
+import { mountReactModule, hasReactModule } from '../ReactModuleLoader';
+import { loadEjsTable, hasEjsTable } from '../../shared/table-manager/loadEjsTable';
+import type { ClientPortalContext } from '../portal-types';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('PortalNavigation');
@@ -19,6 +21,7 @@ const logger = createLogger('PortalNavigation');
 const TAB_TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
   projects: 'Projects',
+  'project-detail': 'Project Details',
   files: 'Files',
   messages: 'Messages',
   invoices: 'Invoices',
@@ -29,11 +32,48 @@ const TAB_TITLES: Record<string, string> = {
   help: 'Help',
   documents: 'Document Requests',
   questionnaires: 'Questionnaires',
-  preview: 'Project Preview',
+  review: 'Project Preview',
+  onboarding: 'Onboarding',
   work: 'Work',
   docs: 'Documents',
   support: 'Support'
 };
+
+/**
+ * Map tab names to React module IDs in ReactModuleLoader.
+ * ALL client tabs must have a React module — no vanilla fallback.
+ */
+const TAB_TO_REACT_MODULE: Record<string, string> = {
+  dashboard: 'dashboard',
+  projects: 'projects',
+  'project-detail': 'project-detail',
+  files: 'files',
+  messages: 'messages',
+  invoices: 'invoices',
+  approvals: 'approvals',
+  settings: 'settings',
+  questionnaires: 'questionnaires',
+  documents: 'document-requests',
+  requests: 'ad-hoc-requests',
+  onboarding: 'onboarding',
+  help: 'help',
+  review: 'review',
+  'new-project': 'new-project'
+};
+
+/** Track which tab containers have been mounted with React */
+const mountedTabs = new Set<string>();
+
+/** Stored module context for React mounting */
+let moduleContext: ClientPortalContext | null = null;
+
+/**
+ * Set the module context for React component mounting.
+ * Must be called during portal initialization.
+ */
+export function setModuleContext(ctx: ClientPortalContext): void {
+  moduleContext = ctx;
+}
 
 // ============================================================================
 // HASH-BASED ROUTING
@@ -43,14 +83,16 @@ const TAB_TITLES: Record<string, string> = {
 const PORTAL_ROUTES: Record<string, string> = {
   dashboard: '/dashboard',
   projects: '/projects',
+  'project-detail': '/project-detail',
   files: '/files',
   invoices: '/invoices',
   approvals: '/approvals',
   documents: '/documents',
   questionnaires: '/questionnaires',
   requests: '/requests',
-  preview: '/review',
+  review: '/review',
   'new-project': '/new-project',
+  onboarding: '/onboarding',
   messages: '/messages',
   help: '/help',
   settings: '/settings'
@@ -110,56 +152,32 @@ function updateHash(tabName: string): void {
 }
 
 /**
- * Navigate to a tab and update URL hash
+ * Navigate to a tab and update URL hash.
+ * Callbacks parameter kept for backward compatibility but no longer used.
  */
 export function navigateTo(
   tabName: string,
-  callbacks: {
-    loadFiles: () => Promise<void>;
-    loadInvoices: () => Promise<void>;
-    loadProjectPreview: () => Promise<void>;
-    loadMessagesFromAPI: () => Promise<void>;
-    loadHelp?: () => Promise<void>;
-    loadDocumentRequests?: () => Promise<void>;
-    loadAdHocRequests?: () => Promise<void>;
-    loadQuestionnaires?: () => Promise<void>;
-    loadSettings?: () => Promise<void>;
-    loadDashboard?: () => Promise<void>;
-    loadProjects?: () => Promise<void>;
-    loadApprovals?: () => Promise<void>;
-  }
+  _callbacks?: Record<string, unknown>
 ): void {
   // Update hash first
   updateHash(tabName);
   // Then switch tab (without updating hash again)
-  switchTab(tabName, callbacks, false);
+  switchTab(tabName, {}, false);
 }
 
 /**
  * Initialize hash-based router
- * Sets up hashchange listener and navigates to initial tab from URL
+ * Sets up hashchange listener and navigates to initial tab from URL.
+ * Callbacks parameter kept for backward compatibility but no longer used.
  */
-export function initHashRouter(callbacks: {
-  loadFiles: () => Promise<void>;
-  loadInvoices: () => Promise<void>;
-  loadProjectPreview: () => Promise<void>;
-  loadMessagesFromAPI: () => Promise<void>;
-  loadHelp?: () => Promise<void>;
-  loadDocumentRequests?: () => Promise<void>;
-  loadAdHocRequests?: () => Promise<void>;
-  loadQuestionnaires?: () => Promise<void>;
-  loadSettings?: () => Promise<void>;
-  loadDashboard?: () => Promise<void>;
-  loadProjects?: () => Promise<void>;
-  loadApprovals?: () => Promise<void>;
-}): void {
+export function initHashRouter(_callbacks?: Record<string, unknown>): void {
   // Handle browser back/forward navigation
   window.addEventListener('hashchange', () => {
     // Skip if we triggered this change ourselves
     if (isNavigating) return;
 
     const tabName = getTabFromHash();
-    switchTab(tabName, callbacks, false);
+    switchTab(tabName, {}, false);
   });
 
   // Navigate to initial tab from URL hash
@@ -171,7 +189,7 @@ export function initHashRouter(callbacks: {
   }
 
   // Switch to the initial tab
-  switchTab(initialTab, callbacks, false);
+  switchTab(initialTab, {}, false);
 }
 
 const PORTAL_TAB_GROUPS = {
@@ -212,6 +230,69 @@ function resolvePortalTab(tabName: string): { group: PortalTabGroup | null; tab:
   }
 
   return { group: getPortalGroupForTab(tabName), tab: tabName };
+}
+
+// ============================================================================
+// SUBTAB HANDLING (mirrors admin pattern)
+// ============================================================================
+
+/**
+ * Set up event delegation for client portal subtab clicks.
+ * Handles both `data-subtab` (settings) and `data-pd-tab` (project-detail) clicks.
+ * Dispatches CustomEvents like `settingsSubtabChange` and `projectDetailTabChange`
+ * so React views can listen without coupling to EJS DOM.
+ */
+export function setupClientSubtabHandlers(): void {
+  const subtabContainer = document.querySelector('.portal-header-subtabs');
+  if (!subtabContainer) return;
+
+  subtabContainer.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.portal-subtab') as HTMLElement | null;
+    if (!btn) return;
+
+    // Check both subtab types: data-subtab (settings) and data-pd-tab (project-detail)
+    const subtabId = btn.dataset.subtab || btn.dataset.pdTab;
+    if (!subtabId) return;
+
+    // Find which group this subtab belongs to
+    const group = btn.closest('.header-subtab-group') as HTMLElement | null;
+    const forTab = group?.dataset.forTab;
+    if (!forTab) return;
+
+    // Update active state within this group
+    group.querySelectorAll('.portal-subtab').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Dispatch event for React to listen to
+    // project-detail → "projectDetailTabChange", settings → "settingsSubtabChange"
+    const eventName = forTab === 'project-detail'
+      ? 'projectDetailTabChange'
+      : `${forTab}SubtabChange`;
+    window.dispatchEvent(
+      new CustomEvent(eventName, { detail: { subtab: subtabId } })
+    );
+  });
+}
+
+/**
+ * Show/hide subtab groups based on active tab.
+ * Visibility is primarily driven by CSS data-active-tab / data-active-group
+ * selectors on <body>. This JS method handles edge cases where CSS can't
+ * cover (e.g., inline style overrides) and also resets the subtab-group
+ * default active subtab when returning to a tab.
+ */
+function updateSubtabGroupVisibility(activeTab: string): void {
+  // CSS handles visibility via body[data-active-tab] selectors.
+  // Reset active subtab state when entering a group tab (e.g., settings).
+  const activeGroup = document.querySelector(`.header-subtab-group[data-for-tab="${activeTab}"]`);
+  if (activeGroup) {
+    const hasActive = activeGroup.querySelector('.portal-subtab.active');
+    if (!hasActive) {
+      // Activate the first subtab as default
+      const firstBtn = activeGroup.querySelector('.portal-subtab') as HTMLElement | null;
+      firstBtn?.classList.add('active');
+    }
+  }
 }
 
 /** All portal view IDs */
@@ -359,27 +440,18 @@ export function updatePortalPageTitle(tabName: string): void {
 }
 
 /**
- * Switch to a specific tab in the dashboard
+ * Switch to a specific tab in the dashboard.
+ * Uses the same CSS class toggle pattern as admin:
+ * 1. Toggle `.tab-content.active` on EJS-rendered containers
+ * 2. Lazy-mount React component on first visit
+ *
  * @param tabName - The tab to switch to
- * @param callbacks - Data loading callbacks for each tab
+ * @param _callbacks - Legacy callbacks (no longer used — all views are React)
  * @param shouldUpdateHash - Whether to update the URL hash (default: true)
  */
 export function switchTab(
   tabName: string,
-  callbacks: {
-    loadFiles: () => Promise<void>;
-    loadInvoices: () => Promise<void>;
-    loadProjectPreview: () => Promise<void>;
-    loadMessagesFromAPI: () => Promise<void>;
-    loadHelp?: () => Promise<void>;
-    loadDocumentRequests?: () => Promise<void>;
-    loadAdHocRequests?: () => Promise<void>;
-    loadQuestionnaires?: () => Promise<void>;
-    loadSettings?: () => Promise<void>;
-    loadDashboard?: () => Promise<void>;
-    loadProjects?: () => Promise<void>;
-    loadApprovals?: () => Promise<void>;
-  },
+  _callbacks: Record<string, unknown> = {},
   shouldUpdateHash = true
 ): void {
   // Update URL hash if requested (default behavior)
@@ -389,9 +461,6 @@ export function switchTab(
   const resolved = resolvePortalTab(tabName);
   const activeTab = resolved.tab;
   const activeGroup = resolved.group || activeTab;
-
-  // Render the view dynamically
-  renderView(activeTab);
 
   // Update nav button active states
   const navButtons = document.querySelectorAll(
@@ -419,6 +488,9 @@ export function switchTab(
     document.body.classList.add('help-tab-active');
   }
 
+  // Show/hide subtab groups based on the active tab
+  updateSubtabGroupVisibility(activeTab);
+
   const headerGroup = document.querySelector(`.header-subtab-group[data-for-tab="${activeGroup}"]`);
   if (headerGroup && (headerGroup as HTMLElement).dataset.mode === 'primary') {
     headerGroup.querySelectorAll('.portal-subtab').forEach((btn) => {
@@ -438,36 +510,69 @@ export function switchTab(
     updateBreadcrumbs([{ label: 'Dashboard', href: false }]);
   } else {
     updateBreadcrumbs([
-      { label: 'Dashboard', href: true, onClick: () => switchTab('dashboard', callbacks) },
+      { label: 'Dashboard', href: true, onClick: () => switchTab('dashboard') },
       { label: tabTitle, href: false }
     ]);
   }
 
-  // Load tab-specific data
-  if (activeTab === 'dashboard' && callbacks.loadDashboard) {
-    callbacks.loadDashboard();
-  } else if (activeTab === 'files') {
-    callbacks.loadFiles();
-  } else if (activeTab === 'invoices') {
-    callbacks.loadInvoices();
-  } else if (activeTab === 'preview') {
-    callbacks.loadProjectPreview();
-  } else if (activeTab === 'messages') {
-    callbacks.loadMessagesFromAPI();
-  } else if (activeTab === 'help' && callbacks.loadHelp) {
-    callbacks.loadHelp();
-  } else if (activeTab === 'documents' && callbacks.loadDocumentRequests) {
-    callbacks.loadDocumentRequests();
-  } else if (activeTab === 'requests' && callbacks.loadAdHocRequests) {
-    callbacks.loadAdHocRequests();
-  } else if (activeTab === 'questionnaires' && callbacks.loadQuestionnaires) {
-    callbacks.loadQuestionnaires();
-  } else if (activeTab === 'settings' && callbacks.loadSettings) {
-    callbacks.loadSettings();
-  } else if (activeTab === 'projects' && callbacks.loadProjects) {
-    callbacks.loadProjects();
-  } else if (activeTab === 'approvals' && callbacks.loadApprovals) {
-    callbacks.loadApprovals();
+  // Toggle .tab-content.active (identical to admin pattern)
+  switchTabContent(activeTab);
+}
+
+/**
+ * Toggle `.tab-content.active` and lazy-mount React on first visit.
+ * This is the same pattern as the admin portal's tab switching.
+ */
+function switchTabContent(activeTab: string): void {
+  // 1. Toggle .tab-content.active (like admin)
+  document.querySelectorAll('.tab-content').forEach((el) => {
+    el.classList.remove('active');
+  });
+  const container = document.getElementById(`tab-${activeTab}`);
+  container?.classList.add('active');
+
+  // 2. Lazy-mount on first visit: try EJS table first, then React
+  if (container && !mountedTabs.has(activeTab)) {
+    const ejsTableId = `portal-${activeTab}`;
+
+    if (hasEjsTable(ejsTableId)) {
+      mountedTabs.add(activeTab);
+      logger.log(`Loading EJS table for: ${activeTab} (table: ${ejsTableId})`);
+      loadEjsTable(ejsTableId, container).catch((error) => {
+        logger.error(`Failed to load EJS table ${ejsTableId}:`, error);
+        mountedTabs.delete(activeTab);
+      });
+    } else {
+      const reactModuleId = TAB_TO_REACT_MODULE[activeTab];
+      if (reactModuleId && hasReactModule(reactModuleId) && moduleContext) {
+        mountedTabs.add(activeTab);
+        logger.log(`Mounting React component for: ${activeTab} (module: ${reactModuleId})`);
+        mountReactModule(reactModuleId, container, moduleContext).catch((error) => {
+          logger.error(`Failed to mount React module ${reactModuleId}:`, error);
+          mountedTabs.delete(activeTab);
+          container.innerHTML = `
+            <div class="portal-main-container">
+              <div class="error-state">
+                <p>Failed to load ${TAB_TITLES[activeTab] || activeTab}</p>
+                <button class="btn btn-secondary" onclick="window.location.reload()">Refresh Page</button>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Force re-mount a tab's React component (e.g., after project selection).
+ * Clears the mounted state so the next switchTab will re-mount.
+ */
+export function remountTab(tabName: string): void {
+  mountedTabs.delete(tabName);
+  const container = document.getElementById(`tab-${tabName}`);
+  if (container) {
+    container.innerHTML = '';
   }
 }
 

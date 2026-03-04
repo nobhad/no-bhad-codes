@@ -53,6 +53,7 @@ const logger = createLogger('AdminDashboard');
 
 // React module loader - direct React mounting without vanilla JS fallback
 import { mountReactModule, hasReactModule } from './ReactModuleLoader';
+import { loadEjsTable, hasEjsTable } from '../shared/table-manager/loadEjsTable';
 
 // Deliverables module initialization (event delegation for deliverables modal)
 import { initializeDeliverablesModule } from './modules/admin-deliverables';
@@ -278,10 +279,8 @@ class AdminDashboard {
       performanceDashboardContainer: '#performance-dashboard-container',
       performanceTab: '#performance-tab',
       performanceAlerts: '#performance-alerts',
-      leadsTableBody: '#leads-table-body',
-      projectsTableBody: '#projects-table-body',
-      clientsTableBody: '#clients-table-body',
-      invoicesTableBody: '#invoices-table-body',
+      // NOTE: leads/projects/clients/invoices table bodies are React-rendered
+      // and do not exist as DOM elements — filtering is handled internally by each React component
       crmBadge: '#crm-badge'
     });
 
@@ -291,7 +290,11 @@ class AdminDashboard {
       showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') =>
         this.showNotification(message, type),
       refreshData: () => this.loadDashboardData(),
-      switchTab: (tab: string) => this.switchTab(tab)
+      switchTab: (tab: string, entityId?: string) => {
+        if (entityId !== undefined) this.moduleContext.currentEntityId = entityId;
+        this.switchTab(tab);
+      },
+      currentEntityId: null
     };
 
     // Configure API client for token expiration handling
@@ -320,9 +323,9 @@ class AdminDashboard {
     const isAuthenticated = await this.checkAuthentication();
 
     if (!isAuthenticated) {
-      logger.log('Not authenticated, showing auth gate');
+      logger.log('Not authenticated, redirecting to login');
       AdminAuth.setApiAuthenticated(false);
-      this.setupAuthGate();
+      window.location.href = '/#/portal';
       return;
     }
 
@@ -1629,7 +1632,7 @@ class AdminDashboard {
     logger.log('Attaching subtab handlers');
 
     // Store reference to this dashboard instance for the click handler
-    const dashboard = this;
+    const _dashboard = this;
 
     /**
      * UNIVERSAL: Update active state for any subtab group
@@ -1659,7 +1662,7 @@ class AdminDashboard {
 
       const forTab = group.dataset.forTab;
       // Strip any quotes from mode value (handles malformed HTML attributes)
-      const mode = group.dataset.mode?.replace(/["']/g, '');
+      const _mode = group.dataset.mode?.replace(/["']/g, '');
 
       // ============================================
       // SUBTAB HANDLING - UNIFIED PATTERN
@@ -1957,37 +1960,6 @@ class AdminDashboard {
           '.stat-card-clickable[data-filter="overdue"][data-table="invoices"]'
         );
         overdueCard?.classList.add('active');
-      } else if (tabName === 'projects' && filter === 'pending_contract') {
-        // Filter projects to show only those with unsigned contracts
-        const tableBody = this.domCache.get('projectsTableBody');
-        if (tableBody) {
-          const rows = tableBody.querySelectorAll('tr');
-          rows.forEach((row) => {
-            // Check for contract badge or contract column
-            const contractBadge = row.querySelector('.contract-badge, [data-contract]');
-            const hasContract =
-              contractBadge?.textContent?.toLowerCase().includes('signed') ||
-              contractBadge?.classList.contains('signed');
-            row.style.display = hasContract ? 'none' : '';
-          });
-        }
-      } else if (tabName === 'leads' && filter === 'new_this_week') {
-        // Filter leads to show only those from this week
-        const tableBody = this.domCache.get('leadsTableBody');
-        if (tableBody) {
-          const oneWeekAgo = new Date();
-          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-          const rows = tableBody.querySelectorAll('tr');
-          rows.forEach((row) => {
-            // Date is typically in the 6th column (index 5)
-            const dateCell = row.querySelectorAll('td')[5];
-            if (dateCell) {
-              const dateText = dateCell.textContent?.trim() || '';
-              const rowDate = new Date(dateText);
-              row.style.display = rowDate >= oneWeekAgo ? '' : 'none';
-            }
-          });
-        }
       } else if (tabName === 'messages' && filter === 'unread') {
         // Filter messages to show unread threads
         const threadList = document.querySelector('.thread-list');
@@ -2005,21 +1977,16 @@ class AdminDashboard {
   }
 
   private filterTable(tableName: string, filter: string): void {
+    // NOTE: leads, projects, clients, invoices are all React-rendered tables.
+    // They manage their own filter state internally — DOM manipulation here does nothing.
+    // Only invoices uses this path (via applyAttentionFilter → filterTable('invoices', ...))
+    // but the invoices table is also React, so this is effectively a no-op for all cases.
     let tableBody: HTMLElement | null = null;
     let statusColumnIndex = -1;
 
-    if (tableName === 'leads') {
-      tableBody = this.domCache.get('leadsTableBody');
-      statusColumnIndex = 6; // Status column is 7th (0-indexed: 6)
-    } else if (tableName === 'projects') {
-      tableBody = this.domCache.get('projectsTableBody');
-      statusColumnIndex = 4; // Status column is 5th (0-indexed: 4)
-    } else if (tableName === 'clients') {
-      tableBody = this.domCache.get('clientsTableBody');
-      statusColumnIndex = 2; // Status column is 3rd (0-indexed: 2)
-    } else if (tableName === 'invoices') {
-      tableBody = this.domCache.get('invoicesTableBody');
-      statusColumnIndex = 4; // Status column is 5th (0-indexed: 4)
+    if (tableName === 'invoices') {
+      tableBody = document.querySelector<HTMLElement>('[data-table-body="invoices"]');
+      statusColumnIndex = 4;
     }
 
     if (!tableBody) return;
@@ -2070,6 +2037,32 @@ class AdminDashboard {
       // Get the tab container - try both ID formats (tab-{name} and {name}-tab)
       const tabContainer = document.getElementById(`tab-${tabName}`)
         || document.getElementById(`${tabName}-tab`);
+
+      // Check if there's an EJS hybrid table for this tab
+      const ejsTableId = `admin-${tabName}`;
+      if (hasEjsTable(ejsTableId) && tabContainer) {
+        const navigateToEntity = (rowId: string | number) => {
+          const tableRoot = tabContainer.querySelector<HTMLElement>('[data-table-id]');
+          const config = tableRoot?.getAttribute('data-table-config');
+          if (config) {
+            try {
+              const def = JSON.parse(config);
+              if (def.rowClickTarget) {
+                this.moduleContext.currentEntityId = String(rowId);
+                this.switchTab(def.rowClickTarget);
+              }
+            } catch { /* ignore parse error */ }
+          }
+        };
+
+        await loadEjsTable(ejsTableId, tabContainer, {
+          onRowClick: (rowId) => navigateToEntity(rowId),
+          onAction: (action, rowId) => {
+            if (action === 'view') navigateToEntity(rowId);
+          }
+        });
+        return;
+      }
 
       // Check if there's a React module for this tab
       if (hasReactModule(tabName) && tabContainer) {
