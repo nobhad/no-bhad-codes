@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — No Bhad Codes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── tokens — match your site exactly ── */
+    :root {
+      --bg:       #e4e0d8;
+      --ink:      #111110;
+      --red:      #d42b2b;
+      --red-dark: #b02020;
+      --white:    #f5f2ec;
+      --field-bg: #111110;
+      --field-fg: #f5f2ec;
+      --radius:   9999px;          /* your pill shape */
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'Barlow', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── minimal nav chrome (matches your site) ── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .nav__menu { font-size: 0.85rem; letter-spacing: 0.12em; cursor: pointer; }
+
+    /* ── page ── */
+    .page-contact {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 2rem 4rem;
+    }
+
+    /* ── contact grid ── */
+    .contact {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 3rem;
+      align-items: start;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    /* ── LEFT: form side ── */
+    .contact__form-side {}
+
+    /* heading */
+    .contact__heading {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 7vw, 5.5rem);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+    .contact__rule {
+      width: 100%;
+      height: 3px;
+      background: var(--ink);
+      margin-bottom: 2rem;
+      border: none;
+    }
+
+    /* ── form ── */
+    .contact__form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    /* every field — full width, pill, consistent height */
+    .contact__field {
+      width: 100%;
+      background: var(--field-bg);
+      color: var(--field-fg);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 400;
+      padding: 0.9rem 1.4rem;
+      outline: none;
+      transition: box-shadow 0.18s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .contact__field::placeholder {
+      color: rgba(245, 242, 236, 0.45);
+      font-weight: 400;
+    }
+    .contact__field:focus {
+      box-shadow: 0 0 0 2.5px var(--red);
+    }
+
+    /* textarea gets a bigger height but same border-radius pill treatment */
+    textarea.contact__field {
+      border-radius: 1.4rem;   /* slightly less round for taller field */
+      resize: none;
+      min-height: 130px;
+      line-height: 1.5;
+      padding-top: 1rem;
+    }
+
+    /* two-col row for name + company */
+    .contact__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    /* ── submit row ── */
+    .contact__submit-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    /* red pill send button — matches your existing send button style */
+    .btn-send {
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 50%;
+      background: var(--red);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.18s, transform 0.15s;
+    }
+    .btn-send:hover { background: var(--red-dark); transform: scale(1.07); }
+    .btn-send:active { transform: scale(0.96); }
+    .btn-send svg { width: 1.2rem; height: 1.2rem; }
+
+    .contact__submit-label {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      color: rgba(17,17,16,0.55);
+      line-height: 1.4;
+    }
+    .contact__submit-label a {
+      color: var(--red);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── RIGHT: mascot + speech bubble ── */
+    .contact__mascot-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      padding-top: 1rem;
+      user-select: none;
+    }
+
+    /* speech bubble */
+    .speech-bubble {
+      background: var(--white);
+      border: 2.5px solid var(--ink);
+      border-radius: 1.5rem;
+      padding: 1.25rem 1.4rem;
+      max-width: 260px;
+      text-align: center;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.5;
+      position: relative;
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+    .speech-bubble a {
+      color: var(--red);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    /* tail pointing down toward dog */
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 18px solid var(--ink);
+    }
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 16px solid var(--white);
+      z-index: 1;
+    }
+
+    /* dog SVG — inline recreation matching the silhouette from the screenshot */
+    .dog-mascot {
+      margin-top: 1.25rem;
+      width: 190px;
+      height: auto;
+    }
+
+    /* ── success state ── */
+    .contact__success {
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1.5rem 0;
+    }
+    .contact__success.show { display: flex; }
+    .contact__success__title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      letter-spacing: 0.03em;
+    }
+    .contact__success__sub {
+      font-size: 0.9rem;
+      color: rgba(17,17,16,0.6);
+    }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: rgba(17,17,16,0.5);
+      border-top: 1px solid rgba(17,17,16,0.12);
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 640px) {
+      .contact {
+        grid-template-columns: 1fr;
+      }
+      .contact__mascot-side {
+        order: -1;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 1.5rem;
+      }
+      .speech-bubble {
+        max-width: 200px;
+        font-size: 0.85rem;
+      }
+      .speech-bubble::after, .speech-bubble::before { display: none; }
+      .dog-mascot { width: 110px; margin-top: 0; }
+      .contact__row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <span>NO BHAD CODES</span>
+    <span class="nav__menu">+ MENU</span>
+  </nav>
+
+  <main class="page-contact">
+    <div class="contact">
+
+      <!-- ── LEFT: heading + form ── -->
+      <div class="contact__form-side">
+        <h1 class="contact__heading">CONTACT</h1>
+        <hr class="contact__rule" />
+
+        <!-- success state (hidden) -->
+        <div class="contact__success" id="successMsg">
+          <p class="contact__success__title">MESSAGE SENT.</p>
+          <p class="contact__success__sub">I'll get back to you shortly — usually within 24 hrs.</p>
+        </div>
+
+        <form class="contact__form" id="contactForm" novalidate>
+
+          <!-- name + company same width side by side -->
+          <div class="contact__row">
+            <input class="contact__field" type="text" name="name"
+                   placeholder="Name" autocomplete="name" required />
+            <input class="contact__field" type="text" name="company"
+                   placeholder="Company (optional)" autocomplete="organization" />
+          </div>
+
+          <!-- email full width -->
+          <input class="contact__field" type="email" name="email"
+                 placeholder="Email" autocomplete="email" required />
+
+          <!-- message full width -->
+          <textarea class="contact__field" name="message"
+                    placeholder="Message" rows="5" required></textarea>
+
+          <!-- submit -->
+          <div class="contact__submit-row">
+            <button class="btn-send" type="submit" aria-label="Send message">
+              <!-- paper-plane / send icon matching your existing button -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f5f2ec" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+            <p class="contact__submit-label">
+              Or fill out an <a href="#">intake form</a><br />
+              or email <a href="mailto:nobhaduri@gmail.com">nobhaduri@gmail.com</a>
+            </p>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- ── RIGHT: mascot ── -->
+      <div class="contact__mascot-side">
+        <div class="speech-bubble">
+          Message me here,<br />
+          fill out an <a href="#">intake form</a>,<br />
+          or email me at<br />
+          <a href="mailto:nobhaduri@gmail.com">nobhaduri@gmail.com</a>
+        </div>
+
+        <!-- Dog mascot SVG — stylized silhouette matching your illustrated dog -->
+        <svg class="dog-mascot" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- body -->
+          <ellipse cx="100" cy="170" rx="62" ry="52" fill="#111110"/>
+          <!-- neck -->
+          <rect x="80" y="118" width="40" height="30" rx="8" fill="#111110"/>
+          <!-- head -->
+          <ellipse cx="100" cy="105" rx="44" ry="40" fill="#111110"/>
+          <!-- pointed left ear -->
+          <polygon points="62,85 52,42 82,75" fill="#111110"/>
+          <!-- pointed right ear -->
+          <polygon points="138,85 148,42 118,75" fill="#111110"/>
+          <!-- snout -->
+          <ellipse cx="100" cy="118" rx="22" ry="14" fill="#2a2a28"/>
+          <!-- nose -->
+          <ellipse cx="100" cy="111" rx="8" ry="5" fill="#111110"/>
+          <!-- left eye — white with dot (your dog has a star/circle eye) -->
+          <circle cx="84" cy="98" r="9" fill="white"/>
+          <circle cx="84" cy="98" r="4" fill="#111110"/>
+          <circle cx="86" cy="96" r="1.5" fill="white"/>
+          <!-- right eye -->
+          <circle cx="116" cy="98" r="9" fill="white"/>
+          <circle cx="116" cy="98" r="4" fill="#111110"/>
+          <circle cx="118" cy="96" r="1.5" fill="white"/>
+          <!-- front left leg -->
+          <rect x="62" y="200" width="22" height="36" rx="11" fill="#111110"/>
+          <!-- front right leg -->
+          <rect x="116" y="200" width="22" height="36" rx="11" fill="#111110"/>
+          <!-- tail -->
+          <path d="M158 165 Q185 140 175 120 Q168 108 158 118" stroke="#111110" stroke-width="14" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>© 2026 No Bhad Codes. All rights reserved.</footer>
+
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('.btn-send');
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      await new Promise(r => setTimeout(r, 700));
+      document.getElementById('contactForm').style.display = 'none';
+      document.getElementById('successMsg').classList.add('show');
+    });
+  </script>
+</body>
+</html>

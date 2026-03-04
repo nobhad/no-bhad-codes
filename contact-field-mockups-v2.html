@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — 2 Field Variations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:    #e4e0d8;
+      --ink:   #111110;
+      --red:   #d42b2b;
+      --white: #f5f2ec;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'Barlow', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: var(--font-body);
+      padding: 2.5rem 2rem 5rem;
+    }
+
+    .variations {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .variations > div {
+      padding: 5rem 2rem;
+      border-bottom: 1px solid rgba(17,17,16,0.12);
+    }
+    .variations > div:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      color: rgba(17,17,16,0.38);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(17,17,16,0.15);
+    }
+
+    /* ── shared structure ── */
+    .contact__heading {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+    .contact__rule {
+      width: 100%;
+      height: 3px;
+      background: var(--ink);
+      border: none;
+      margin-bottom: 2rem;
+    }
+    .contact__inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.75rem;
+      align-items: start;
+    }
+    .form-col { width: 100%; }
+
+    /* ── shared mascot ── */
+    .mascot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .speech-bubble {
+      background: var(--white);
+      border: 2.5px solid var(--ink);
+      border-radius: 1.2rem;
+      padding: 0.9rem 1rem;
+      width: 165px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 500;
+      line-height: 1.55;
+      position: relative;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+    .speech-bubble a { color: var(--red); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -17px; left: 50%;
+      transform: translateX(-50%);
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 17px solid var(--ink);
+    }
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -12px; left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 13px solid var(--white);
+      z-index: 1;
+    }
+    .dog-mascot { margin-top: 1rem; width: 130px; }
+
+    /* ── shared submit row ── */
+    .submit-row {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-top: 1.25rem;
+    }
+    .btn-send {
+      width: 3rem; height: 3rem;
+      border-radius: 50%;
+      background: var(--red);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.18s, transform 0.15s;
+    }
+    .btn-send:hover { background: #b02020; transform: scale(1.07); }
+    .btn-send svg { width: 1.1rem; height: 1.1rem; }
+    .submit-hint {
+      font-size: 0.75rem;
+      color: rgba(17,17,16,0.5);
+      line-height: 1.5;
+    }
+    .submit-hint a { color: var(--red); text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ══════════════════════════════════════
+       VARIATION A — IRINI FOLEROU style
+       Bottom border only, no bg, no radius,
+       transparent fields, ink-colored text
+    ══════════════════════════════════════ */
+    .v-underline .form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .v-underline .field-wrap {
+      border-bottom: 1.5px solid var(--ink);
+      padding: 0.85rem 0;
+      transition: border-color 0.2s;
+    }
+    .v-underline .field-wrap:focus-within {
+      border-color: var(--red);
+    }
+    .v-underline .field {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 400;
+      padding: 0;
+      line-height: 1.4;
+      caret-color: var(--red);
+    }
+    .v-underline .field::placeholder {
+      color: rgba(17,17,16,0.38);
+    }
+    .v-underline textarea.field {
+      resize: none;
+      min-height: 72px;
+    }
+
+    /* ══════════════════════════════════════
+       VARIATION B — YIMING ZHU style
+       Full 1px rectangle border, no bg fill,
+       no radius, all same width stacked
+    ══════════════════════════════════════ */
+    .v-outline .form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;               /* fields share borders — collapse them */
+    }
+    .v-outline .field {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(17,17,16,0.3);
+      border-radius: 0;
+      outline: none;
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 400;
+      padding: 0.75rem 0.85rem;
+      line-height: 1.4;
+      margin-top: -1px;     /* collapse shared borders like Yiming's */
+      caret-color: var(--red);
+      transition: border-color 0.2s, z-index 0s;
+      position: relative;
+      z-index: 0;
+    }
+    .v-outline .field:focus {
+      border-color: var(--red);
+      z-index: 1;
+    }
+    .v-outline .field::placeholder {
+      color: rgba(17,17,16,0.38);
+    }
+    .v-outline textarea.field {
+      resize: none;
+      min-height: 130px;
+    }
+
+    @media (max-width: 720px) {
+      .variations { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="variations">
+
+    <!-- ══ A: IRINI FOLEROU — underline only ══ -->
+    <div>
+      <p class="label">A — Underline only &nbsp;(irinifolerou.com)</p>
+      <div class="v-underline">
+        <h2 class="contact__heading">CONTACT</h2>
+        <hr class="contact__rule" />
+        <div class="contact__inner">
+          <div class="form-col">
+            <form class="form" novalidate>
+              <div class="field-wrap">
+                <input class="field" type="text" placeholder="Name" />
+              </div>
+              <div class="field-wrap">
+                <input class="field" type="text" placeholder="Company (optional)" />
+              </div>
+              <div class="field-wrap">
+                <input class="field" type="email" placeholder="Email" />
+              </div>
+              <div class="field-wrap">
+                <textarea class="field" placeholder="Message" rows="4"></textarea>
+              </div>
+              <div class="submit-row">
+                <button class="btn-send" type="submit" aria-label="Send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#f5f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+                <p class="submit-hint">Or <a href="#">intake form</a> / <a href="#">email me</a></p>
+              </div>
+            </form>
+          </div>
+          <div class="mascot-col">
+            <div class="speech-bubble">Message me here, fill out an <a href="#">intake form</a>, or <a href="#">email me</a></div>
+            <svg class="dog-mascot" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <ellipse cx="100" cy="170" rx="62" ry="52" fill="#111110"/>
+              <rect x="80" y="118" width="40" height="30" rx="8" fill="#111110"/>
+              <ellipse cx="100" cy="105" rx="44" ry="40" fill="#111110"/>
+              <polygon points="62,85 52,42 82,75" fill="#111110"/>
+              <polygon points="138,85 148,42 118,75" fill="#111110"/>
+              <ellipse cx="100" cy="118" rx="22" ry="14" fill="#2a2a28"/>
+              <ellipse cx="100" cy="111" rx="8" ry="5" fill="#111110"/>
+              <circle cx="84" cy="98" r="9" fill="white"/><circle cx="84" cy="98" r="4" fill="#111110"/><circle cx="86" cy="96" r="1.5" fill="white"/>
+              <circle cx="116" cy="98" r="9" fill="white"/><circle cx="116" cy="98" r="4" fill="#111110"/><circle cx="118" cy="96" r="1.5" fill="white"/>
+              <rect x="62" y="200" width="22" height="36" rx="11" fill="#111110"/>
+              <rect x="116" y="200" width="22" height="36" rx="11" fill="#111110"/>
+              <path d="M158 165 Q185 140 175 120 Q168 108 158 118" stroke="#111110" stroke-width="14" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ B: YIMING ZHU — full outline rectangle ══ -->
+    <div>
+      <p class="label">B — Full outline &nbsp;(yimingzhu.net)</p>
+      <div class="v-outline">
+        <h2 class="contact__heading">CONTACT</h2>
+        <hr class="contact__rule" />
+        <div class="contact__inner">
+          <div class="form-col">
+            <form class="form" novalidate>
+              <input class="field" type="text" placeholder="Name" />
+              <input class="field" type="text" placeholder="Company (optional)" />
+              <input class="field" type="email" placeholder="Email" />
+              <textarea class="field" placeholder="Message" rows="6"></textarea>
+              <div class="submit-row">
+                <button class="btn-send" type="submit" aria-label="Send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#f5f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+                <p class="submit-hint">Or <a href="#">intake form</a> / <a href="#">email me</a></p>
+              </div>
+            </form>
+          </div>
+          <div class="mascot-col">
+            <div class="speech-bubble">Message me here, fill out an <a href="#">intake form</a>, or <a href="#">email me</a></div>
+            <svg class="dog-mascot" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <ellipse cx="100" cy="170" rx="62" ry="52" fill="#111110"/>
+              <rect x="80" y="118" width="40" height="30" rx="8" fill="#111110"/>
+              <ellipse cx="100" cy="105" rx="44" ry="40" fill="#111110"/>
+              <polygon points="62,85 52,42 82,75" fill="#111110"/>
+              <polygon points="138,85 148,42 118,75" fill="#111110"/>
+              <ellipse cx="100" cy="118" rx="22" ry="14" fill="#2a2a28"/>
+              <ellipse cx="100" cy="111" rx="8" ry="5" fill="#111110"/>
+              <circle cx="84" cy="98" r="9" fill="white"/><circle cx="84" cy="98" r="4" fill="#111110"/><circle cx="86" cy="96" r="1.5" fill="white"/>
+              <circle cx="116" cy="98" r="9" fill="white"/><circle cx="116" cy="98" r="4" fill="#111110"/><circle cx="118" cy="96" r="1.5" fill="white"/>
+              <rect x="62" y="200" width="22" height="36" rx="11" fill="#111110"/>
+              <rect x="116" y="200" width="22" height="36" rx="11" fill="#111110"/>
+              <path d="M158 165 Q185 140 175 120 Q168 108 158 118" stroke="#111110" stroke-width="14" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
