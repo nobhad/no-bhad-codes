@@ -21,7 +21,9 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
 import { usePagination } from '@react/hooks/usePagination';
-import { TASK_STATUS_OPTIONS, TASK_PRIORITY_OPTIONS } from '../shared/filterConfigs';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface Task {
@@ -51,10 +53,14 @@ interface TasksManagerProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-type SortField = 'title' | 'status' | 'priority' | 'assignee_name' | 'due_date' | 'created_at';
-type SortDirection = 'asc' | 'desc';
 type ViewMode = 'list' | 'board';
 
+const PRIORITY_ORDER: Record<Task['priority'], number> = {
+  urgent: 0,
+  high: 1,
+  medium: 2,
+  low: 3
+};
 
 const PRIORITY_COLORS: Record<Task['priority'], string> = {
   low: 'var(--portal-text-muted)',
@@ -63,10 +69,61 @@ const PRIORITY_COLORS: Record<Task['priority'], string> = {
   urgent: 'var(--status-danger)'
 };
 
+function filterTask(
+  task: Task,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !task.title.toLowerCase().includes(query) &&
+      !(task.description && task.description.toLowerCase().includes(query)) &&
+      !(task.assignee_name && task.assignee_name.toLowerCase().includes(query)) &&
+      !task.tags.some((tag) => tag.toLowerCase().includes(query))
+    ) {
+      return false;
+    }
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (task.status !== filters.status) return false;
+  }
+
+  if (filters.priority && filters.priority !== 'all') {
+    if (task.priority !== filters.priority) return false;
+  }
+
+  return true;
+}
+
+function sortTasks(a: Task, b: Task, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'title':
+    return multiplier * a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+  case 'status':
+    return multiplier * a.status.localeCompare(b.status);
+  case 'priority':
+    return multiplier * (PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+  case 'assignee_name':
+    return multiplier * (a.assignee_name || '').toLowerCase().localeCompare((b.assignee_name || '').toLowerCase());
+  case 'due_date':
+    return multiplier * (a.due_date || '').localeCompare(b.due_date || '');
+  case 'created_at':
+    return multiplier * a.created_at.localeCompare(b.created_at);
+  default:
+    return 0;
+  }
+}
+
 export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getAuthToken, showNotification: _showNotification }: TasksManagerProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
@@ -79,20 +136,27 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
     }
     return headers;
   }, [getAuthToken]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
-  const [sortField, setSortField] = useState<SortField>('created_at');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   const containerRef = useFadeIn<HTMLDivElement>();
 
-  useEffect(() => {
-    fetchTasks();
-  }, [clientId, projectId, assigneeId]);
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Task>({
+    storageKey: 'admin_tasks',
+    filters: TASKS_FILTER_CONFIG,
+    filterFn: filterTask,
+    sortFn: sortTasks,
+    defaultSort: { column: 'created_at', direction: 'desc' }
+  });
 
-  async function fetchTasks() {
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -109,77 +173,19 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       if (!response.ok) throw new Error('Failed to fetch tasks');
 
       const data = await response.json();
-      // API wraps response in { success, data: { tasks } }
       setTasks(data.data?.tasks || data.tasks || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  }
+  }, [clientId, projectId, assigneeId, getHeaders]);
 
-  const filteredTasks = useMemo(() => {
-    let filtered = [...tasks];
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (t) =>
-          t.title.toLowerCase().includes(query) ||
-          (t.description && t.description.toLowerCase().includes(query)) ||
-          (t.assignee_name && t.assignee_name.toLowerCase().includes(query)) ||
-          t.tags.some((tag) => tag.toLowerCase().includes(query))
-      );
-    }
-
-    if (statusFilter && statusFilter !== 'all') {
-      filtered = filtered.filter((t) => t.status === statusFilter);
-    }
-
-    if (priorityFilter && priorityFilter !== 'all') {
-      filtered = filtered.filter((t) => t.priority === priorityFilter);
-    }
-
-    filtered.sort((a, b) => {
-      let aVal: string | number = '';
-      let bVal: string | number = '';
-
-      switch (sortField) {
-      case 'title':
-        aVal = a.title.toLowerCase();
-        bVal = b.title.toLowerCase();
-        break;
-      case 'status':
-        aVal = a.status;
-        bVal = b.status;
-        break;
-      case 'priority': {
-        const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-        aVal = priorityOrder[a.priority];
-        bVal = priorityOrder[b.priority];
-        break;
-      }
-      case 'assignee_name':
-        aVal = (a.assignee_name || '').toLowerCase();
-        bVal = (b.assignee_name || '').toLowerCase();
-        break;
-      case 'due_date':
-        aVal = a.due_date || '';
-        bVal = b.due_date || '';
-        break;
-      case 'created_at':
-        aVal = a.created_at;
-        bVal = b.created_at;
-        break;
-      }
-
-      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    return filtered;
-  }, [tasks, searchQuery, statusFilter, priorityFilter, sortField, sortDirection]);
+  const filteredTasks = useMemo(() => applyFilters(tasks), [applyFilters, tasks]);
 
   const pagination = usePagination({ storageKey: 'admin_tasks_pagination', totalItems: filteredTasks.length });
   const paginatedTasks = filteredTasks.slice(
@@ -202,15 +208,6 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
 
     return grouped;
   }, [filteredTasks]);
-
-  function handleSort(field: SortField) {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  }
 
   function getStatusLabel(status: Task['status']): string {
     const labels: Record<Task['status'], string> = {
@@ -248,16 +245,6 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
 
     return { total, todo, inProgress, completed, blocked, overdue };
   }, [tasks]);
-
-  const hasActiveFilters = searchQuery || statusFilter !== 'all' || priorityFilter !== 'all';
-
-  function handleFilterChange(key: string, value: string) {
-    if (key === 'status') {
-      setStatusFilter(value);
-    } else if (key === 'priority') {
-      setPriorityFilter(value);
-    }
-  }
 
   function renderBoardView() {
     const statusColumns: Task['status'][] = ['todo', 'in_progress', 'review', 'completed', 'blocked'];
@@ -335,17 +322,14 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search tasks..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'status', label: 'STATUS', options: TASK_STATUS_OPTIONS },
-              { key: 'priority', label: 'PRIORITY', options: TASK_PRIORITY_OPTIONS }
-            ]}
-            values={{ status: statusFilter, priority: priorityFilter }}
-            onChange={handleFilterChange}
+            sections={TASKS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={setFilter}
           />
           <div className="view-toggle">
             <IconButton
@@ -391,22 +375,22 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
             <PortalTableRow>
               <PortalTableHead
                 sortable
-                sortDirection={sortField === 'title' ? sortDirection : null}
-                onClick={() => handleSort('title')}
+                sortDirection={sort?.column === 'title' ? sort.direction : null}
+                onClick={() => toggleSort('title')}
               >
                 Task
               </PortalTableHead>
               <PortalTableHead
                 sortable
-                sortDirection={sortField === 'status' ? sortDirection : null}
-                onClick={() => handleSort('status')}
+                sortDirection={sort?.column === 'status' ? sort.direction : null}
+                onClick={() => toggleSort('status')}
               >
                 Status
               </PortalTableHead>
               <PortalTableHead
                 sortable
-                sortDirection={sortField === 'priority' ? sortDirection : null}
-                onClick={() => handleSort('priority')}
+                sortDirection={sort?.column === 'priority' ? sort.direction : null}
+                onClick={() => toggleSort('priority')}
               >
                 Priority
               </PortalTableHead>
@@ -414,8 +398,8 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
               <PortalTableHead
                 className="date-col"
                 sortable
-                sortDirection={sortField === 'due_date' ? sortDirection : null}
-                onClick={() => handleSort('due_date')}
+                sortDirection={sort?.column === 'due_date' ? sort.direction : null}
+                onClick={() => toggleSort('due_date')}
               >
                 Due Date
               </PortalTableHead>

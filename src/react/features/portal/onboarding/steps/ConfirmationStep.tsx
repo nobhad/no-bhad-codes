@@ -109,7 +109,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
       {/* Validation Errors Banner */}
       {hasErrors && (
         <div className="error-state tw-flex tw-items-start tw-gap-3">
-          <AlertCircle className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-mt-0.5" />
+          <AlertCircle className="icon-sm tw-flex-shrink-0 tw-mt-0.5" />
           <div>
             <p className="tw-text-[14px] tw-font-bold tw-font-mono">
               Please fix the following issues:
@@ -261,7 +261,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
 
       {/* Submission Notice */}
       <div className="portal-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-primary">
-        <Check className="tw-h-4 tw-w-4 tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
+        <Check className="icon-sm tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
         <div>
           <p className="tw-text-[14px] tw-font-bold tw-font-mono tw-text-primary">
             Ready to submit

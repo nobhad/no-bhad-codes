@@ -103,7 +103,7 @@ export function PortalHeader({
           <button
             onClick={onToggleCollapse}
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="btn-icon"
+            className="icon-btn"
           >
             {isCollapsed ? (
               <ChevronRight className="icon-xs" />
@@ -118,7 +118,7 @@ export function PortalHeader({
           <button
             onClick={onLogout}
             title="Sign out"
-            className="btn-icon"
+            className="icon-btn"
           >
             <LogOut className="icon-xs" />
           </button>
