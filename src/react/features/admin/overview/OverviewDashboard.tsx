@@ -47,6 +47,7 @@ interface ProjectItem {
   id: number;
   name: string;
   client: string;
+  client_id?: number;
   progress: number;
 }
 
@@ -194,7 +195,19 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
                     <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('projects', String(project.id))}>
                       <div className="activity-body ovdash-flex-1">
                         <span className="activity-text">{project.name}</span>
-                        <span className="activity-time">{project.client}</span>
+                        {project.client_id ? (
+                          <button
+                            className="client-nav-link activity-time"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onNavigate?.('client-detail', String(project.client_id));
+                            }}
+                          >
+                            {project.client}
+                          </button>
+                        ) : (
+                          <span className="activity-time">{project.client}</span>
+                        )}
                       </div>
                       <div className="progress-cell">
                         <div className="progress-bar ovdash-progress-width">
@@ -235,7 +248,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
                 <ul className="activity-feed">
                   {upcomingTasks.slice(0, 5).map((task) => (
                     <li key={task.id} className="activity-feed-item">
-                      <span className="activity-dot" style={{ background: getPriorityColor(task.priority) }} />
+                      <span className="activity-dot" style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
                       <div className="activity-body ovdash-flex-1">
                         <span className="activity-text">{task.title}</span>
                         <span className="activity-time">{task.projectName}</span>
@@ -325,7 +338,7 @@ function TasksKanban({ tasks }: { tasks: TaskItem[] }) {
           <div className="kanban-items">
             {tasks.filter((task) => task.status === column.id).map((task) => (
               <div key={task.id} className="kanban-card">
-                <span className="activity-dot" style={{ background: getPriorityColor(task.priority) }} />
+                <span className="activity-dot" style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
                 <div>
                   <div className="activity-text">{task.title}</div>
                   <div className="activity-time">{task.projectName}</div>

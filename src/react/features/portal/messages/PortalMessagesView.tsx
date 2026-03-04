@@ -62,7 +62,7 @@ interface ThreadListItemProps {
   onClick: () => void;
 }
 
-function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
+const ThreadListItem = React.memo(({ thread, isSelected, onClick }: ThreadListItemProps) => {
   const hasUnread = thread.unread_count > 0;
 
   return (
@@ -105,7 +105,7 @@ function ThreadListItem({ thread, isSelected, onClick }: ThreadListItemProps) {
       <ChevronRight className="icon-xs" />
     </button>
   );
-}
+});
 
 interface ThreadListProps {
   threads: MessageThreadType[];

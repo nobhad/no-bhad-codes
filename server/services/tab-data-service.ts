@@ -9,7 +9,21 @@
  */
 
 import { getDatabase } from '../database/init.js';
+import { cacheService } from './cache-service.js';
 import { logger } from './logger.js';
+
+// ============================================
+// CACHE CONFIGURATION
+// ============================================
+
+/** TTL in seconds for admin tab data (shared across all admins) */
+const ADMIN_CACHE_TTL_SECONDS = 300; // 5 minutes
+
+/** TTL in seconds for client/portal tab data (user-scoped) */
+const CLIENT_CACHE_TTL_SECONDS = 120; // 2 minutes
+
+/** Cache tag used for all tab data entries */
+const TAB_DATA_CACHE_TAG = 'tab-data';
 
 // ============================================
 // TYPES
@@ -45,10 +59,13 @@ async function fetchAdminClients(): Promise<TabDataResult> {
       c.client_type,
       c.created_at,
       c.updated_at,
-      (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND deleted_at IS NULL) as projectCount,
-      (SELECT COUNT(*) FROM invoices WHERE client_id = c.id AND deleted_at IS NULL) as invoiceCount
+      COUNT(DISTINCT p.id) as projectCount,
+      COUNT(DISTINCT i.id) as invoiceCount
     FROM clients c
+    LEFT JOIN projects p ON p.client_id = c.id AND p.deleted_at IS NULL
+    LEFT JOIN invoices i ON i.client_id = c.id AND i.deleted_at IS NULL
     WHERE c.deleted_at IS NULL
+    GROUP BY c.id
     ORDER BY c.created_at DESC
   `);
 
@@ -308,14 +325,24 @@ async function fetchAdminLeads(): Promise<TabDataResult> {
 // DISPATCHER
 // ============================================
 
+/**
+ * Guard that throws if a non-admin user calls an admin fetcher.
+ * Belt-and-suspenders alongside the route-level check.
+ */
+function requireAdminCtx(ctx: FetchContext): void {
+  if (ctx.role !== 'admin') {
+    throw new Error('Forbidden: admin-only data');
+  }
+}
+
 /** Map of table IDs to their data fetch functions */
 const FETCHERS: Record<string, (ctx: FetchContext) => Promise<TabDataResult>> = {
-  'admin-clients': () => fetchAdminClients(),
-  'admin-contacts': () => fetchAdminContacts(),
+  'admin-clients': (ctx) => { requireAdminCtx(ctx); return fetchAdminClients(); },
+  'admin-contacts': (ctx) => { requireAdminCtx(ctx); return fetchAdminContacts(); },
   'portal-invoices': (ctx) => fetchPortalInvoices(ctx),
-  'admin-invoices': () => fetchAdminInvoices(),
-  'admin-projects': () => fetchAdminProjects(),
-  'admin-leads': () => fetchAdminLeads()
+  'admin-invoices': (ctx) => { requireAdminCtx(ctx); return fetchAdminInvoices(); },
+  'admin-projects': (ctx) => { requireAdminCtx(ctx); return fetchAdminProjects(); },
+  'admin-leads': (ctx) => { requireAdminCtx(ctx); return fetchAdminLeads(); }
 };
 
 /**
@@ -338,8 +365,32 @@ export async function fetchTabData(
     return null;
   }
 
+  const isAdmin = role === 'admin';
+  const cacheKey = isAdmin
+    ? `tab-data:${tabId}`
+    : `tab-data:${tabId}:${userId}`;
+  const cacheTtl = isAdmin ? ADMIN_CACHE_TTL_SECONDS : CLIENT_CACHE_TTL_SECONDS;
+
+  // Attempt cache read
+  const cached = await cacheService.get<TabDataResult>(cacheKey);
+  if (cached !== null) {
+    logger.debug(`[TabData] Cache hit for ${cacheKey}`);
+    return cached;
+  }
+
   try {
-    return await fetcher({ role, userId });
+    const result = await fetcher({ role, userId });
+
+    // Write-through to cache (fire-and-forget)
+    cacheService
+      .set(cacheKey, result, { ttl: cacheTtl, tags: [TAB_DATA_CACHE_TAG, `tab-data:${tabId}`] })
+      .catch((err: unknown) => {
+        logger.warn(`[TabData] Failed to cache ${cacheKey}:`, {
+          error: err instanceof Error ? err : new Error(String(err))
+        });
+      });
+
+    return result;
   } catch (error) {
     logger.error(`Error fetching tab data for ${tabId}:`, {
       error: error instanceof Error ? error : new Error(String(error))
@@ -576,6 +627,41 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
     ]
   }
 };
+
+// ============================================
+// CACHE INVALIDATION
+// ============================================
+
+/**
+ * Invalidate cached tab data for a specific tab.
+ * Clears all user-scoped variants for that tab via pattern matching.
+ *
+ * @param tabId - The tab ID to invalidate (e.g., 'admin-clients', 'portal-invoices')
+ */
+export async function invalidateTabDataCache(tabId: string): Promise<void> {
+  const count = await cacheService.invalidateByPattern(`*tab-data:${tabId}*`);
+  logger.info(`[TabData] Invalidated ${count} cache entries for tab: ${tabId}`);
+}
+
+/**
+ * Invalidate ALL cached tab data across every tab and user.
+ * Useful after bulk operations or schema migrations.
+ */
+export async function invalidateAllTabDataCache(): Promise<void> {
+  const count = await cacheService.invalidateByTag(TAB_DATA_CACHE_TAG);
+  logger.info(`[TabData] Invalidated ${count} total tab data cache entries`);
+}
+
+/**
+ * Invalidate cached portal tab data for a specific user.
+ * Useful when a single user's data changes (e.g., new invoice created for a client).
+ *
+ * @param userId - The user whose cached portal data should be cleared
+ */
+export async function invalidateUserTabDataCache(userId: number): Promise<void> {
+  const count = await cacheService.invalidateByPattern(`*tab-data:*:${userId}`);
+  logger.info(`[TabData] Invalidated ${count} cache entries for user: ${userId}`);
+}
 
 /** Get server-side table definition by ID */
 export function getServerTableDef(tabId: string): ServerTableDef | undefined {

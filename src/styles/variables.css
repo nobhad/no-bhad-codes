@@ -171,6 +171,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Transition tokens - use for consistent animations */
   --transition-faster: 0.15s ease;
   --transition-fast: 0.2s ease;
+  --transition-mouse: 0.2s; /* Hover/interaction transitions (no easing — callers supply their own) */
   --transition-medium: 0.3s ease;
   --transition-slow: 0.4s ease;
   --transition-slower: 0.5s ease;

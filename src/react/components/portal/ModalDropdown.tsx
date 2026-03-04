@@ -1,8 +1,11 @@
 import * as React from 'react';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useId } from 'react';
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useScaleIn } from '@react/hooks/useGsap';
+
+/** Delay before focusing search input, allows open animation to start */
+const SEARCH_FOCUS_DELAY_MS = 100;
 
 export interface ModalDropdownOption {
   /** Option value */
@@ -61,6 +64,7 @@ export function ModalDropdown({
   className,
   triggerClassName
 }: ModalDropdownProps) {
+  const triggerId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -125,7 +129,7 @@ export function ModalDropdown({
       // Small delay to allow animation
       const timer = setTimeout(() => {
         searchInputRef.current?.focus();
-      }, 100);
+      }, SEARCH_FOCUS_DELAY_MS);
       return () => clearTimeout(timer);
     }
   }, [isOpen, searchable]);
@@ -202,11 +206,12 @@ export function ModalDropdown({
   return (
     <div className={cn('modal-dropdown-container', className)}>
       {label && (
-        <label className="tw-block tw-text-sm tw-font-medium tw-mb-1">{label}</label>
+        <label htmlFor={triggerId} className="tw-block tw-text-sm tw-font-medium tw-mb-1">{label}</label>
       )}
 
       {/* Trigger Button */}
       <button
+        id={triggerId}
         type="button"
         onClick={handleOpen}
         onKeyDown={handleKeyDown}

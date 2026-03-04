@@ -4,6 +4,13 @@ import { Check, X, Pencil } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** Delay before saving on blur, allows button click events to register first */
+const BLUR_SAVE_DELAY_MS = 150;
+
+// ============================================================================
 // Shared Hook — DRY state management for all inline-edit variants
 // ============================================================================
 
@@ -173,7 +180,7 @@ export function InlineEdit({
       if (isEditing && !isSaving) {
         saveValue();
       }
-    }, 150);
+    }, BLUR_SAVE_DELAY_MS);
   }, [isEditing, isSaving, saveValue]);
 
   // Format input value based on type
@@ -554,7 +561,7 @@ export function InlineTextarea({
       if (isEditing && !isSaving) {
         saveValue();
       }
-    }, 150);
+    }, BLUR_SAVE_DELAY_MS);
   }, [isEditing, isSaving, saveValue]);
 
   if (isEditing) {

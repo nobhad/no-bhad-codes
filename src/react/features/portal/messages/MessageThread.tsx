@@ -16,6 +16,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
@@ -497,20 +498,14 @@ export function MessageThread({
             {/* Messages area */}
             <div className="messages-area tw-scroll-container">
               {loading && messages.length === 0 ? (
-                <div className="loading-state tw-h-full">
-                  <span className="loading-spinner" />
-                  <span>Loading messages...</span>
-                </div>
+                <LoadingState message="Loading messages..." />
               ) : error ? (
-                <div className="error-state tw-h-full">
-                  <div className="error-state-message">{error}</div>
-                  <button className="btn-secondary" onClick={onRefresh}>Retry</button>
-                </div>
+                <ErrorState message={error} onRetry={onRefresh} />
               ) : messages.length === 0 ? (
-                <div className="empty-state tw-h-full">
-                  <MessageSquare className="icon-lg" />
-                  <span>No messages yet. Start the conversation!</span>
-                </div>
+                <EmptyState
+                  icon={<MessageSquare className="icon-lg" />}
+                  message="No messages yet. Start the conversation!"
+                />
               ) : (
                 <div ref={messagesRef} className="tw-section">
                   {messages.map((message) => (

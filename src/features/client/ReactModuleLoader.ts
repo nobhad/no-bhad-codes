@@ -153,7 +153,7 @@ const mountedModules: Map<string, MountState> = new Map();
 /**
  * Unmount a previously mounted module
  */
-function unmountModule(viewId: string): void {
+export function unmountModule(viewId: string): void {
   const state = mountedModules.get(viewId);
   if (state?.unmountFn) {
     try {

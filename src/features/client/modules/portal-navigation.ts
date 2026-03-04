@@ -10,7 +10,7 @@
 
 import { renderBreadcrumbs, type BreadcrumbItem } from '../../../components/breadcrumbs';
 import { authStore } from '../../../auth/auth-store';
-import { mountReactModule, hasReactModule } from '../ReactModuleLoader';
+import { mountReactModule, hasReactModule, unmountModule } from '../ReactModuleLoader';
 import { loadEjsTable, hasEjsTable } from '../../shared/table-manager/loadEjsTable';
 import type { ClientPortalContext } from '../portal-types';
 import { createLogger } from '../../../utils/logger';
@@ -473,19 +473,34 @@ export function switchTab(
   switchTabContent(activeTab);
 }
 
+/** Track the previously active tab for unmounting */
+let previousActiveTab: string | null = null;
+
 /**
  * Toggle `.tab-content.active` and lazy-mount React on first visit.
+ * Unmounts the previous tab's React module to free memory.
  * This is the same pattern as the admin portal's tab switching.
  */
 function switchTabContent(activeTab: string): void {
-  // 1. Toggle .tab-content.active (like admin)
+  // 1. Unmount the previous tab's React module (if any) before switching
+  if (previousActiveTab && previousActiveTab !== activeTab && mountedTabs.has(previousActiveTab)) {
+    const prevReactModuleId = TAB_TO_REACT_MODULE[previousActiveTab];
+    if (prevReactModuleId) {
+      unmountModule(prevReactModuleId);
+      mountedTabs.delete(previousActiveTab);
+      logger.log(`Unmounted module for tab: ${previousActiveTab} (module: ${prevReactModuleId})`);
+    }
+  }
+  previousActiveTab = activeTab;
+
+  // 2. Toggle .tab-content.active (like admin)
   document.querySelectorAll('.tab-content').forEach((el) => {
     el.classList.remove('active');
   });
   const container = document.getElementById(`tab-${activeTab}`);
   container?.classList.add('active');
 
-  // 2. Lazy-mount on first visit: try EJS table first, then React
+  // 3. Lazy-mount on first visit: try EJS table first, then React
   if (container && !mountedTabs.has(activeTab)) {
     const ejsTableId = `portal-${activeTab}`;
 

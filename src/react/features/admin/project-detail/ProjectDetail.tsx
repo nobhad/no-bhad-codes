@@ -51,6 +51,8 @@ interface ProjectDetailProps {
   onBack?: () => void;
   /** Callback to edit project */
   onEdit?: (projectId: number) => void;
+  /** Callback to navigate to related entities */
+  onNavigate?: (tab: string, entityId?: string) => void;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
@@ -90,6 +92,7 @@ export function ProjectDetail({
   getAuthToken,
   onBack,
   onEdit,
+  onNavigate,
   showNotification
 }: ProjectDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
@@ -346,6 +349,7 @@ export function ProjectDetail({
           onAddMilestone={addMilestone}
           onToggleMilestone={toggleMilestoneComplete}
           onDeleteMilestone={deleteMilestone}
+          onNavigate={onNavigate}
           showNotification={showNotification}
         />
       </TabPanel>

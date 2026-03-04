@@ -506,7 +506,8 @@
 .activity-dot {
   width: var(--space-1-5);
   height: var(--space-1-5);
-  border: 1.5px solid;
+  border: 1.5px solid currentColor;
+  border-color: inherit;
   margin-top: var(--space-1);
   flex-shrink: 0;
 }
