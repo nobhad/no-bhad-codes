@@ -25,7 +25,7 @@
  * ============================================ */
 
 html {
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   -webkit-text-size-adjust: 100%;
   -moz-tab-size: 4;
   tab-size: 4;
@@ -58,8 +58,8 @@ html {
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  font-weight: 500;
-  line-height: 1.4;
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -86,13 +86,13 @@ h5,
 h6 {
   font-size: inherit;
   font-weight: inherit;
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   margin: 0;
 }
 
 p {
   margin: 0;
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
 }
 
 /* ============================================
@@ -423,7 +423,7 @@ details > summary:focus-visible {
 
   body {
     font-size: 12pt;
-    line-height: 1.5;
+    line-height: var(--line-height-normal);
   }
 
   .no-print {

@@ -268,7 +268,7 @@
   .tech-stack-desktop h3 {
     font-size: clamp(1.25rem, 5vw, 1.75rem);
     font-family: var(--font-family-acme);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
     margin: 0;
     letter-spacing: 0.08em;
@@ -347,7 +347,7 @@
     height: auto;
     padding: 0;
     font-family: var(--font-family-acme), "Acme", sans-serif;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     display: block;
     transform: scale(1.8);
     transform-origin: center center;

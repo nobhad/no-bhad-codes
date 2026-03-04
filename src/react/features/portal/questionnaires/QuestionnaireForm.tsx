@@ -190,7 +190,7 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
           {selectedOption?.label || question.placeholder || 'Select an option'}
         </span>
         <ChevronDown className={cn(
-          'tw-h-3.5 tw-w-3.5 qform-chevron-icon',
+          'icon-sm qform-chevron-icon',
           isOpen && 'tw-rotate-180'
         )} />
       </button>
@@ -352,7 +352,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
             <button
               type="button"
               onClick={handleRemove}
-              className="btn-icon"
+              className="icon-btn"
             >
               <X className="icon-xs" />
             </button>
@@ -366,7 +366,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
           onClick={() => !disabled && fileInputRef.current?.click()}
           className={cn(
             'portal-card qform-dropzone',
-            dragActive && 'tw-table-row-selected',
+            dragActive && 'card-drag-highlight',
             disabled && 'qform-dropzone-disabled'
           )}
         >
@@ -601,7 +601,7 @@ export function QuestionnaireForm({
       <div className="qform-header">
         <div className="qform-header-left">
           <button
-            className="btn-icon"
+            className="icon-btn"
             onClick={onBack}
             title="Back to questionnaires"
           >

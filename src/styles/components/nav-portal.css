@@ -356,7 +356,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   color: var(--color-text-primary);
   margin-bottom: 1rem;
   text-align: left;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 /* Reset sent confirmation */
@@ -371,7 +371,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   text-align: center;
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   margin-bottom: 1rem;
 }
 

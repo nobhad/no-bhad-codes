@@ -30,6 +30,9 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { FILES_FILTER_CONFIG } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
@@ -69,21 +72,64 @@ const FILE_ICONS: Record<string, React.ReactNode> = {
   default: <File className="cell-icon" />
 };
 
-const TYPE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Types' },
-  { value: 'folder', label: 'Folders' },
-  { value: 'image', label: 'Images' },
-  { value: 'document', label: 'Documents' },
-  { value: 'video', label: 'Videos' },
-  { value: 'audio', label: 'Audio' }
-];
-
 interface FilesManagerProps {
   projectId?: string;
   clientId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+}
+
+function filterFile(
+  file: FileItem,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !file.name.toLowerCase().includes(query) &&
+      !file.projectName?.toLowerCase().includes(query) &&
+      !file.clientName?.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
+
+  if (filters.type && filters.type !== 'all') {
+    const typeFilter = filters.type;
+    if (typeFilter === 'folder' && file.type !== 'folder') return false;
+    if (typeFilter === 'image' && !file.mimeType?.startsWith('image/')) return false;
+    if (typeFilter === 'document' && !(
+      file.mimeType?.includes('pdf') ||
+      file.mimeType?.includes('document') ||
+      file.mimeType?.includes('text')
+    )) return false;
+    if (typeFilter === 'video' && !file.mimeType?.startsWith('video/')) return false;
+    if (typeFilter === 'audio' && !file.mimeType?.startsWith('audio/')) return false;
+  }
+
+  return true;
+}
+
+function sortFiles(a: FileItem, b: FileItem, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  // Folders always first
+  if (a.type === 'folder' && b.type !== 'folder') return -1;
+  if (a.type !== 'folder' && b.type === 'folder') return 1;
+
+  switch (column) {
+  case 'name':
+    return multiplier * a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+  case 'size':
+    return multiplier * ((a.size || 0) - (b.size || 0));
+  case 'updatedAt':
+    return multiplier * a.updatedAt.localeCompare(b.updatedAt);
+  default:
+    return 0;
+  }
 }
 
 export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, showNotification }: FilesManagerProps) {
@@ -101,16 +147,6 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [_currentPath, _setCurrentPath] = useState<string[]>([]);
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-
-  // Sorting
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>({
-    column: 'name',
-    direction: 'asc'
-  });
-
   // Auth headers helper
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
@@ -122,6 +158,23 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     }
     return headers;
   }, [getAuthToken]);
+
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<FileItem>({
+    storageKey: 'admin_files',
+    filters: FILES_FILTER_CONFIG,
+    filterFn: filterFile,
+    sortFn: sortFiles,
+    defaultSort: { column: 'name', direction: 'asc' }
+  });
 
   const loadFiles = useCallback(async () => {
     setIsLoading(true);
@@ -157,87 +210,13 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     loadFiles();
   }, [loadFiles]);
 
-  // Filter and sort files
-  const filteredFiles = useMemo(() => {
-    let result = [...files];
-
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (file) =>
-          file.name.toLowerCase().includes(query) ||
-          file.projectName?.toLowerCase().includes(query) ||
-          file.clientName?.toLowerCase().includes(query)
-      );
-    }
-
-    // Type filter
-    if (typeFilter !== 'all') {
-      result = result.filter((file) => {
-        if (typeFilter === 'folder') return file.type === 'folder';
-        if (typeFilter === 'image') return file.mimeType?.startsWith('image/');
-        if (typeFilter === 'document') {
-          return (
-            file.mimeType?.includes('pdf') ||
-            file.mimeType?.includes('document') ||
-            file.mimeType?.includes('text')
-          );
-        }
-        if (typeFilter === 'video') return file.mimeType?.startsWith('video/');
-        if (typeFilter === 'audio') return file.mimeType?.startsWith('audio/');
-        return true;
-      });
-    }
-
-    // Sort - folders first, then by column
-    if (sort) {
-      result.sort((a, b) => {
-        // Folders always first
-        if (a.type === 'folder' && b.type !== 'folder') return -1;
-        if (a.type !== 'folder' && b.type === 'folder') return 1;
-
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-
-        switch (sort.column) {
-        case 'name':
-          aVal = a.name.toLowerCase();
-          bVal = b.name.toLowerCase();
-          break;
-        case 'size':
-          aVal = a.size || 0;
-          bVal = b.size || 0;
-          break;
-        case 'updatedAt':
-          aVal = a.updatedAt;
-          bVal = b.updatedAt;
-          break;
-        }
-
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return result;
-  }, [files, searchQuery, typeFilter, sort]);
+  const filteredFiles = useMemo(() => applyFilters(files), [applyFilters, files]);
 
   const pagination = usePagination({ storageKey: 'admin_files_pagination', totalItems: filteredFiles.length });
   const paginatedFiles = filteredFiles.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
 
   function getFileIcon(file: FileItem): React.ReactNode {
     if (file.type === 'folder') return FILE_ICONS.folder;
@@ -308,8 +287,6 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     }
   }
 
-  const hasActiveFilters = Boolean(searchQuery) || typeFilter !== 'all';
-
   return (
     <TableLayout
       containerRef={containerRef as React.RefObject<HTMLDivElement>}
@@ -327,16 +304,14 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search files..."
           />
           <FilterDropdown
-            sections={[
-              { key: 'type', label: 'TYPE', options: TYPE_FILTER_OPTIONS }
-            ]}
-            values={{ type: typeFilter }}
-            onChange={(key, value) => setTypeFilter(value)}
+            sections={FILES_FILTER_CONFIG}
+            values={filterValues}
+            onChange={setFilter}
           />
           <IconButton
             icon="list"

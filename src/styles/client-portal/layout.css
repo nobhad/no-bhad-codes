@@ -518,7 +518,7 @@ body[data-page="client-portal"] {
 
 .breadcrumb-current {
   color: var(--portal-text-light);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .breadcrumb-separator {

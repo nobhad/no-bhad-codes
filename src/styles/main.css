@@ -148,7 +148,7 @@
     background-color: var(--color-dark);
     color: var(--color-light);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     border-radius: var(--portal-radius-sm);
     transition: top var(--transition-mouse) ease;
   }
@@ -274,7 +274,7 @@ html[data-theme="dark"] .tech-stack {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   margin: 0;
   color: var(--color-text-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: left;
   letter-spacing: 0.1em;
 }
@@ -285,7 +285,7 @@ html[data-theme="dark"] .tech-stack {
 }
 
 .closing-statement {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: left;
   font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   color: var(--color-primary, var(--color-text-primary));

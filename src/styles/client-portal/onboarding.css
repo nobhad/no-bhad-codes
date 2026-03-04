@@ -31,7 +31,7 @@
 
 .onboarding-title {
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-1);
   color: var(--portal-text-light);
 }
@@ -93,12 +93,12 @@
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .onboarding-step-label {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .onboarding-step-divider {
@@ -128,7 +128,7 @@
 
 .onboarding-step-title {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-1);
   color: var(--portal-text-light);
 }
@@ -169,7 +169,7 @@
 
 .onboarding-label {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
 }
 
@@ -305,7 +305,7 @@
 
 .onboarding-asset-title {
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   margin: 0 0 var(--space-0-5);
 }
@@ -336,7 +336,7 @@
 
 .onboarding-review-section-title {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
@@ -369,7 +369,7 @@
 .onboarding-review-value {
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: right;
 }
 
@@ -390,7 +390,7 @@
   color: var(--color-primary);
   padding: var(--space-0-5) var(--space-2);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Confirmation checkbox */
@@ -423,7 +423,7 @@
 .onboarding-confirm-text {
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* ============================================================================
@@ -448,7 +448,7 @@
 .onboarding-btn {
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition:
     background-color var(--transition-fast),

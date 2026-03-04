@@ -160,7 +160,7 @@ p.contact-options {
   display: block;
   margin-bottom: 1rem;
   font-size: var(--font-size-base);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   color: var(--color-text-primary);
   text-align: left;
   overflow-wrap: break-word; /* prevents long email/URLs from overflowing narrow containers */
@@ -263,7 +263,7 @@ p.contact-options {
 .contact-card-text {
   color: var(--color-black);
   font-size: 1.625rem;
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   text-align: left;
   margin: 0;
 }
@@ -341,7 +341,7 @@ p.contact-options {
   caret-color: var(--color-primary);
   font-family: inherit;
   font-size: var(--font-size-base);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   box-sizing: border-box;
   outline: none;
   box-shadow: none;
@@ -356,7 +356,7 @@ p.contact-options {
   width: 100%;
   height: var(--contact-input-height);
   padding: 0.78rem 0.85rem;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 /* Textarea dimensions */
@@ -368,7 +368,7 @@ p.contact-options {
   resize: none;
   overflow: hidden;
   padding: 0.78rem 0.85rem;
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* Placeholder styling */
@@ -419,7 +419,7 @@ p.contact-options {
   padding: 0.9375rem 1.875rem;
   font-family: var(--font-family-body, inherit);
   font-size: 0.85rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   cursor: pointer;
   z-index: 17;
@@ -523,7 +523,7 @@ html[data-theme="dark"] .input-item textarea {
 
 .email-box .a-wrapper a {
   font-size: clamp(0.875rem, 2.5vw, 1rem);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -553,10 +553,10 @@ html[data-theme="dark"] .input-item textarea {
   padding: 0.2rem 0.6rem;
   border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin-top: 4px;
   pointer-events: none;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 /* Dark theme: invert so tooltip remains readable */
@@ -580,10 +580,10 @@ section.contact-section .contact-form textarea.error {
   padding: clamp(12px, 3vw, 20px);
   margin-bottom: clamp(12px, 2vw, 16px);
   border-radius: var(--portal-radius-md);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   text-align: center;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 .form-message.success {

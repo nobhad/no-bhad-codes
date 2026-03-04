@@ -306,7 +306,7 @@ html {
 body {
   font-family: var(--font-family-body, Arial, Helvetica, sans-serif);
   font-size: var(--font-size-base);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
   margin: 0;
   padding: 0;
   background-color: var(--color-bg-primary);
@@ -521,7 +521,7 @@ img {
 
   body {
     font-size: 12pt;
-    line-height: 1.5;
+    line-height: var(--line-height-normal);
   }
 
   .no-print {

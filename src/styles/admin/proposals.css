@@ -83,7 +83,7 @@
   font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
   margin: 0 0 var(--space-1);
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 .template-meta {
@@ -654,7 +654,7 @@
 .comment-content {
   font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* Uses utility classes: flex flex-col gap-1 */

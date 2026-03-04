@@ -55,7 +55,7 @@
 }
 
 .round-selector label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0;
 }
 
@@ -134,7 +134,7 @@
 .annotation-tools-section h3 {
   margin: 0;
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--portal-text-secondary);
@@ -165,7 +165,7 @@
 .design-elements-section h3 {
   margin: 0;
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--portal-text-secondary);

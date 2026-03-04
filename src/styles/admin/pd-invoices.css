@@ -486,7 +486,7 @@
 
 #view-project-invoice-modal .invoice-notes-section p {
   color: var(--portal-text-light);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   margin: 0;
 }
 

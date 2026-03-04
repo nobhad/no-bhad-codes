@@ -280,3 +280,83 @@ export const DELETED_ITEMS_TYPE_OPTIONS: FilterOption[] = [
 export const DELETED_ITEMS_FILTER_CONFIG: FilterConfig[] = [
   { key: 'type', label: 'TYPE', options: DELETED_ITEMS_TYPE_OPTIONS }
 ];
+
+// ============================================
+// DESIGN REVIEW FILTER OPTIONS
+// ============================================
+
+export const DESIGN_REVIEW_STATUS_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Status' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'in-review', label: 'In Review' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'revision-requested', label: 'Needs Revision' },
+  { value: 'rejected', label: 'Rejected' }
+];
+
+export const DESIGN_REVIEWS_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: DESIGN_REVIEW_STATUS_OPTIONS }
+];
+
+// ============================================
+// FILE TYPE FILTER OPTIONS
+// ============================================
+
+export const FILE_TYPE_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Types' },
+  { value: 'folder', label: 'Folders' },
+  { value: 'image', label: 'Images' },
+  { value: 'document', label: 'Documents' },
+  { value: 'video', label: 'Videos' },
+  { value: 'audio', label: 'Audio' }
+];
+
+export const FILES_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'type', label: 'TYPE', options: FILE_TYPE_OPTIONS }
+];
+
+// ============================================
+// TIME TRACKING FILTER OPTIONS
+// ============================================
+
+export const TIME_TRACKING_BILLABLE_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Entries' },
+  { value: 'billable', label: 'Billable' },
+  { value: 'non-billable', label: 'Non-Billable' }
+];
+
+export const TIME_TRACKING_DATE_RANGE_OPTIONS: FilterOption[] = [
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'This Week' },
+  { value: 'month', label: 'This Month' },
+  { value: 'all', label: 'All Time' }
+];
+
+export const TIME_TRACKING_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'billable', label: 'BILLABLE', options: TIME_TRACKING_BILLABLE_OPTIONS }
+];
+
+// ============================================
+// ARTICLE FILTER OPTIONS
+// ============================================
+
+export const ARTICLE_STATUS_OPTIONS: FilterOption[] = [
+  { value: 'all', label: 'All Status' },
+  { value: 'published', label: 'Published' },
+  { value: 'draft', label: 'Draft' }
+];
+
+export const ARTICLES_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'category', label: 'CATEGORY', options: [{ value: 'all', label: 'All Categories' }] },
+  { key: 'status', label: 'STATUS', options: ARTICLE_STATUS_OPTIONS }
+];
+
+export const EMAIL_TEMPLATES_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'category', label: 'CATEGORY', options: [{ value: 'all', label: 'All Categories' }] },
+  { key: 'status', label: 'STATUS', options: EMAIL_TEMPLATE_STATUS_OPTIONS }
+];
+
+export const TASKS_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: TASK_STATUS_OPTIONS },
+  { key: 'priority', label: 'PRIORITY', options: TASK_PRIORITY_OPTIONS }
+];

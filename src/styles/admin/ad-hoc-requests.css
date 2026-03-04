@@ -178,7 +178,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-brand-primary);
   margin-bottom: var(--space-0-5);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 .ad-hoc-metric-label {
@@ -317,7 +317,7 @@
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 .invoice-section {

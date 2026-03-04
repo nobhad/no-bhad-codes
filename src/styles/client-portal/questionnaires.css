@@ -31,7 +31,7 @@
 
 .cp-section-title {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: 0 0 var(--space-3);
   text-transform: uppercase;
@@ -68,7 +68,7 @@
 
 .cp-questionnaire-title {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: 0;
 }
@@ -92,7 +92,7 @@
 
 .cp-questionnaire-due.overdue {
   color: var(--color-danger);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .cp-questionnaire-completed {
@@ -202,7 +202,7 @@
 .cp-questionnaire-form-title {
   flex: 1;
   font-size: var(--font-size-2xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: 0;
 }
@@ -232,14 +232,14 @@
 .cp-question-label {
   display: block;
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   margin-bottom: var(--space-3);
 }
 
 .cp-question-number {
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-right: var(--space-2);
 }
 

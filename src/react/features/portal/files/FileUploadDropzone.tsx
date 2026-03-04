@@ -309,7 +309,7 @@ export function FileUploadDropzone({
       aria-disabled={disabled}
     >
       <div className="tw-dropzone-content">
-        <Upload className={cn('tw-h-6 tw-w-6', state === 'drag-active' && 'tw-text-primary')} />
+        <Upload className={cn('icon-lg', state === 'drag-active' && 'tw-text-primary')} />
         <p className="tw-dropzone-text tw-text-primary">
           Drag and drop files here or
         </p>

@@ -142,7 +142,7 @@ li {
   gap: var(--space-2);
   text-decoration: none;
   color: var(--color-nav-text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-xl);
   pointer-events: auto;
   text-shadow: 0 2px 4px var(--color-shadow);
@@ -363,7 +363,7 @@ li {
   z-index: 1;
   text-transform: uppercase;
   font-family: var(--font-family-acme);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 0.9;
   position: relative;
   font-size: var(--menu-heading-size);
@@ -451,7 +451,7 @@ li {
   padding: var(--space-1) var(--space-3);
   border-radius: 1rem;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   z-index: 10;
@@ -485,7 +485,7 @@ html[data-theme="dark"] .coming-soon-banner {
   color: var(--color-primary);
   text-transform: uppercase;
   font-family: monospace;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   position: relative;
   text-shadow: none;
   font-size: var(--font-size-sm);
@@ -611,7 +611,7 @@ html[data-theme="dark"] .coming-soon-banner {
   padding: 0;
   line-height: 1;
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   font-family: var(--font-family-acme, "Acme", sans-serif);
 }

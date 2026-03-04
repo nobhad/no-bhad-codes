@@ -475,7 +475,7 @@
 .comment-text {
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* Uses utility classes: flex flex-col gap-1 */
@@ -675,7 +675,7 @@
   font-size: var(--font-size-sm);
   color: var(--portal-text-secondary);
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 .pending-request-actions {

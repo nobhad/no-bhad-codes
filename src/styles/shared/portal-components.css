@@ -1535,6 +1535,19 @@ a.text-danger:hover {
   background: var(--portal-alpha-white-10);
 }
 
+/* Status text color utilities - use instead of arbitrary TW values */
+.text-status-completed { color: var(--status-completed); }
+.text-status-active { color: var(--status-active); }
+.text-status-cancelled { color: var(--status-cancelled); }
+.text-status-pending { color: var(--status-pending); }
+.text-status-new { color: var(--status-new); }
+
+/* Card drag-over highlight state */
+.card-drag-highlight {
+  background: var(--portal-alpha-white-10);
+  border-color: var(--portal-text-light);
+}
+
 /* =====================================================
    SYSTEM STATUS PANEL COMPONENT CLASSES
    Used by SystemStatusPanel.tsx

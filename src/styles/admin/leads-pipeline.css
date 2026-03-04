@@ -256,7 +256,7 @@
 .lead-note-content {
   font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* Add button styles */
@@ -572,7 +572,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
 }
 
 .rule-condition,
@@ -581,7 +581,7 @@
 .leads-analytics-section .rule-condition {
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
 }
 
 .rule-condition code {
@@ -895,7 +895,7 @@
 .note-content {
   font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 /* ============================================

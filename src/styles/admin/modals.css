@@ -371,7 +371,7 @@
   white-space: pre-wrap;
   word-break: break-word;
   font-size: var(--font-size-sm);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
   margin: 0;
   color: var(--portal-text-light);
   font-family: var(--font-family-mono, "Consolas", "Monaco", monospace);

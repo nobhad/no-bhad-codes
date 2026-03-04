@@ -100,8 +100,8 @@
   background: transparent;
   color: var(--portal-text-light);
   font-size: var(--font-size-md, 15px);
-  font-weight: 400;
-  line-height: 1.5;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
   outline: none;
 }
 
@@ -118,7 +118,7 @@
   color: var(--portal-text-muted);
   font-size: var(--label-font-size);
   font-family: inherit;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* -----------------------------------------------------
@@ -163,7 +163,7 @@
   padding: var(--space-0-5, 4px) var(--space-1, 8px);
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs, 11px);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
 }
@@ -188,7 +188,7 @@
   background: transparent;
   color: var(--portal-text-light);
   font-size: var(--font-size-sm, 14px);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   text-align: left;
   cursor: pointer;
   transition: background-color var(--transition-fast) ease;
@@ -234,7 +234,7 @@
   border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-muted);
   font-size: var(--label-font-size);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* -----------------------------------------------------
