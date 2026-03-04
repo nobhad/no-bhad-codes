@@ -1992,7 +1992,7 @@ export class ClientPortalModule extends BaseModule {
         badges: {}, // Will be updated when counts are loaded
         onLogout: () => this.logout(),
         // Auth is cookie-based via credentials: 'include'; token getter is unused
-      getAuthToken: () => null
+        getAuthToken: () => null
       });
 
       this.reactNavigationMounted = true;
