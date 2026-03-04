@@ -50,7 +50,7 @@ export type NotificationFn = (
 /**
  * Configuration for a bulk action.
  */
-export interface BulkActionConfig<T, R = BulkOperationResult> {
+export interface BulkActionConfig<_T, R = BulkOperationResult> {
   /** Action name for logging */
   actionName: string;
   /** Confirmation message (set to false to skip confirmation) */

@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { cn } from '@react/lib/utils';
-import { AlertTriangle, WifiOff, Lock, SearchX, Loader2 } from 'lucide-react';
+import { AlertTriangle, WifiOff, Lock, SearchX } from 'lucide-react';
 
 // ============================================
 // EMPTY STATE COMPONENT
@@ -124,7 +124,7 @@ export function LoadingState({
       aria-live="polite"
       aria-label={message}
     >
-      <Loader2 className="loading-spinner" aria-hidden="true" />
+      <span className="loading-spinner" aria-hidden="true" />
       <p className="loading-message">{message}</p>
     </div>
   );

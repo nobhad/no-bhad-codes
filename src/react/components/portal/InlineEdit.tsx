@@ -37,7 +37,7 @@ export function InlineEdit({
   type = 'text',
   className,
   disabled = false,
-  showEditIcon = true,
+  showEditIcon = true
 }: InlineEditProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -144,7 +144,7 @@ export function InlineEdit({
         // Date input returns YYYY-MM-DD, convert to ISO string for storage
         if (newValue) {
           try {
-            const date = new Date(newValue + 'T00:00:00');
+            const date = new Date(`${newValue  }T00:00:00`);
             if (!isNaN(date.getTime())) {
               newValue = date.toISOString();
             }
@@ -230,7 +230,7 @@ export function formatCurrencyDisplay(value: string): string {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(num);
 }
 

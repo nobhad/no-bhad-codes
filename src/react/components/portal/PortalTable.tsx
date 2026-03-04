@@ -3,12 +3,13 @@ import { cn } from '@react/lib/utils';
 import { useStaggerChildren } from '@react/hooks/useGsap';
 
 /**
- * AdminTable
- * Table component matching the admin dashboard design system
- * Uses CSS classes from portal-tables.css for styling
+ * PortalTable
+ * Generic table component shared across admin and client portals.
+ * Uses CSS classes from portal-tables.css for styling.
+ * Formerly "AdminTable" — renamed to PortalTable since it is used across both admin and client portals.
  */
 
-interface AdminTableProps extends React.HTMLAttributes<HTMLTableElement> {
+interface PortalTableProps extends React.HTMLAttributes<HTMLTableElement> {
   /** Enable row hover effects */
   hoverable?: boolean;
   /** Compact row height */
@@ -17,8 +18,8 @@ interface AdminTableProps extends React.HTMLAttributes<HTMLTableElement> {
   animateRows?: boolean;
 }
 
-const AdminTable = React.forwardRef<HTMLTableElement, AdminTableProps>(
-  ({ className, hoverable = true, compact = false, animateRows = false, ...props }, ref) => {
+const PortalTable = React.forwardRef<HTMLTableElement, PortalTableProps>(
+  ({ className, ...props }, ref) => {
     return (
       <table
         ref={ref}
@@ -28,22 +29,22 @@ const AdminTable = React.forwardRef<HTMLTableElement, AdminTableProps>(
     );
   }
 );
-AdminTable.displayName = 'AdminTable';
+PortalTable.displayName = 'PortalTable';
 
-const AdminTableHeader = React.forwardRef<
+const PortalTableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
   <thead ref={ref} className={className} {...props} />
 ));
-AdminTableHeader.displayName = 'AdminTableHeader';
+PortalTableHeader.displayName = 'PortalTableHeader';
 
-interface AdminTableBodyProps extends React.HTMLAttributes<HTMLTableSectionElement> {
+interface PortalTableBodyProps extends React.HTMLAttributes<HTMLTableSectionElement> {
   /** Enable GSAP stagger animation */
   animate?: boolean;
 }
 
-const AdminTableBody = React.forwardRef<HTMLTableSectionElement, AdminTableBodyProps>(
+const PortalTableBody = React.forwardRef<HTMLTableSectionElement, PortalTableBodyProps>(
   ({ className, animate = false, ...props }, ref) => {
     const animationRef = useStaggerChildren<HTMLTableSectionElement>(0.05, 0.1);
     const combinedRef = animate ? animationRef : ref;
@@ -57,24 +58,24 @@ const AdminTableBody = React.forwardRef<HTMLTableSectionElement, AdminTableBodyP
     );
   }
 );
-AdminTableBody.displayName = 'AdminTableBody';
+PortalTableBody.displayName = 'PortalTableBody';
 
-const AdminTableFooter = React.forwardRef<
+const PortalTableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
   <tfoot ref={ref} className={className} {...props} />
 ));
-AdminTableFooter.displayName = 'AdminTableFooter';
+PortalTableFooter.displayName = 'PortalTableFooter';
 
-interface AdminTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+interface PortalTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   /** Whether row is selected */
   selected?: boolean;
   /** Whether row is clickable */
   clickable?: boolean;
 }
 
-const AdminTableRow = React.forwardRef<HTMLTableRowElement, AdminTableRowProps>(
+const PortalTableRow = React.forwardRef<HTMLTableRowElement, PortalTableRowProps>(
   ({ className, selected, clickable = false, ...props }, ref) => (
     <tr
       ref={ref}
@@ -84,16 +85,16 @@ const AdminTableRow = React.forwardRef<HTMLTableRowElement, AdminTableRowProps>(
     />
   )
 );
-AdminTableRow.displayName = 'AdminTableRow';
+PortalTableRow.displayName = 'PortalTableRow';
 
-interface AdminTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+interface PortalTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   /** Sortable column - shows sort indicator */
   sortable?: boolean;
   /** Current sort direction */
   sortDirection?: 'asc' | 'desc' | null;
 }
 
-const AdminTableHead = React.forwardRef<HTMLTableCellElement, AdminTableHeadProps>(
+const PortalTableHead = React.forwardRef<HTMLTableCellElement, PortalTableHeadProps>(
   ({ className, sortable, sortDirection, children, ...props }, ref) => (
     <th
       ref={ref}
@@ -119,41 +120,45 @@ const AdminTableHead = React.forwardRef<HTMLTableCellElement, AdminTableHeadProp
     </th>
   )
 );
-AdminTableHead.displayName = 'AdminTableHead';
+PortalTableHead.displayName = 'PortalTableHead';
 
-const AdminTableCell = React.forwardRef<
-  HTMLTableCellElement,
-  React.TdHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
-  <td ref={ref} className={className} {...props} />
-));
-AdminTableCell.displayName = 'AdminTableCell';
+interface PortalTableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
+  /** Label shown in mobile card layout via data-label attribute */
+  label?: string;
+}
 
-const AdminTableCaption = React.forwardRef<
+const PortalTableCell = React.forwardRef<HTMLTableCellElement, PortalTableCellProps>(
+  ({ className, label, ...props }, ref) => (
+    <td ref={ref} className={className} data-label={label || undefined} {...props} />
+  )
+);
+PortalTableCell.displayName = 'PortalTableCell';
+
+const PortalTableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
   <caption ref={ref} className={className} {...props} />
 ));
-AdminTableCaption.displayName = 'AdminTableCaption';
+PortalTableCaption.displayName = 'PortalTableCaption';
 
 /**
- * Empty state for tables - uses standardized .empty-state class
+ * Empty state for tables — uses standardized .empty-state class
  */
-interface AdminTableEmptyProps {
+interface PortalTableEmptyProps {
   /** Number of columns to span */
   colSpan: number;
-  /** Icon to display (SVG) - if omitted, default icon shown via CSS */
+  /** Icon to display (SVG) — if omitted, default icon shown via CSS */
   icon?: React.ReactNode;
   /** Message to display */
   message?: string;
 }
 
-function AdminTableEmpty({
+function PortalTableEmpty({
   colSpan,
   icon,
-  message = 'No data available',
-}: AdminTableEmptyProps) {
+  message = 'No data available'
+}: PortalTableEmptyProps) {
   return (
     <tr>
       <td colSpan={colSpan}>
@@ -167,9 +172,9 @@ function AdminTableEmpty({
 }
 
 /**
- * Loading state for tables - uses standardized .loading-state class
+ * Loading state for tables — uses standardized .loading-state class
  */
-interface AdminTableLoadingProps {
+interface PortalTableLoadingProps {
   /** Number of columns to span */
   colSpan: number;
   /** Number of skeleton rows to show (default: 1, shows spinner) */
@@ -178,8 +183,7 @@ interface AdminTableLoadingProps {
   message?: string;
 }
 
-function AdminTableLoading({ colSpan, rows = 1, message = 'Loading...' }: AdminTableLoadingProps) {
-  // Single row with spinner
+function PortalTableLoading({ colSpan, rows = 1, message = 'Loading...' }: PortalTableLoadingProps) {
   if (rows <= 1) {
     return (
       <tr>
@@ -192,7 +196,6 @@ function AdminTableLoading({ colSpan, rows = 1, message = 'Loading...' }: AdminT
     );
   }
 
-  // Multiple skeleton rows
   return (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -207,9 +210,9 @@ function AdminTableLoading({ colSpan, rows = 1, message = 'Loading...' }: AdminT
 }
 
 /**
- * Error state for tables - uses standardized .error-state class
+ * Error state for tables — uses standardized .error-state class
  */
-interface AdminTableErrorProps {
+interface PortalTableErrorProps {
   /** Number of columns to span */
   colSpan: number;
   /** Error message to display */
@@ -218,11 +221,11 @@ interface AdminTableErrorProps {
   onRetry?: () => void;
 }
 
-function AdminTableError({
+function PortalTableError({
   colSpan,
   message = 'Failed to load data',
-  onRetry,
-}: AdminTableErrorProps) {
+  onRetry
+}: PortalTableErrorProps) {
   return (
     <tr>
       <td colSpan={colSpan}>
@@ -240,15 +243,15 @@ function AdminTableError({
 }
 
 export {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableFooter,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableCaption,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableFooter,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableCaption,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
 };

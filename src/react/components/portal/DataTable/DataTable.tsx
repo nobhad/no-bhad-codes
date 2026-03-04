@@ -14,15 +14,15 @@ import {
 import { Checkbox } from '@react/components/ui/checkbox';
 import { cn } from '@react/lib/utils';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading
+} from '@react/components/portal/PortalTable';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -228,7 +228,7 @@ export function DataTable<T extends { id: number }>({
     <div ref={containerRef} className={cn('tw-section', className)}>
       {/* Stats Bar */}
       {stats.length > 0 && (
-        <div className="tw-flex tw-items-center tw-gap-6 tw-text-sm tw-text-muted">
+        <div className="tw-flex tw-items-center tw-gap-6 tw-text-sm text-muted">
           {stats.map((stat) => (
             <span key={stat.key} className="tw-flex tw-items-center tw-gap-1">
               {stat.label}:{' '}
@@ -244,7 +244,7 @@ export function DataTable<T extends { id: number }>({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         {/* Search */}
         <div className="tw-relative tw-flex-1 tw-min-w-[200px] tw-max-w-[320px]">
-          <span className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 tw-text-muted">
+          <span className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 text-muted">
             <Search className="tw-h-4 tw-w-4" />
           </span>
           <input
@@ -323,22 +323,22 @@ export function DataTable<T extends { id: number }>({
       )}
 
       {/* Table */}
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
             {/* Checkbox column */}
-            <AdminTableHead onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
                 className="tw-data-[state=checked]:tw-bg-[var(--color-brand-primary)] tw-data-[state=checked]:tw-border-[var(--color-brand-primary)]"
               />
-            </AdminTableHead>
+            </PortalTableHead>
 
             {/* Data columns */}
             {columns.map((column) => (
-              <AdminTableHead
+              <PortalTableHead
                 key={column.key}
                 sortable={column.sortable}
                 sortDirection={
@@ -352,28 +352,28 @@ export function DataTable<T extends { id: number }>({
                 className={column.headerClassName}
               >
                 {column.label}
-              </AdminTableHead>
+              </PortalTableHead>
             ))}
 
             {/* Actions column */}
             {rowActions.length > 0 && (
-              <AdminTableHead>Actions</AdminTableHead>
+              <PortalTableHead>Actions</PortalTableHead>
             )}
-          </AdminTableRow>
-        </AdminTableHeader>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading}>
+        <PortalTableBody animate={!isLoading}>
           {isLoading ? (
-            <AdminTableLoading colSpan={columns.length + 1 + (rowActions.length > 0 ? 1 : 0)} rows={5} />
+            <PortalTableLoading colSpan={columns.length + 1 + (rowActions.length > 0 ? 1 : 0)} rows={5} />
           ) : paginatedData.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}
               icon={<Inbox className="tw-h-6 tw-w-6" />}
               message={hasActiveFilters ? emptyFilteredMessage : emptyMessage}
             />
           ) : (
             paginatedData.map((item, index) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={item.id}
                 clickable={!!onRowClick}
                 onClick={() => handleRowClick(item)}
@@ -382,28 +382,28 @@ export function DataTable<T extends { id: number }>({
                 )}
               >
                 {/* Checkbox */}
-                <AdminTableCell onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(item)}
                     onCheckedChange={() => selection.toggleSelection(item)}
                     aria-label={`Select item ${item.id}`}
                     className="tw-data-[state=checked]:tw-bg-[var(--color-brand-primary)] tw-data-[state=checked]:tw-border-[var(--color-brand-primary)]"
                   />
-                </AdminTableCell>
+                </PortalTableCell>
 
                 {/* Data cells */}
                 {columns.map((column) => (
-                  <AdminTableCell
+                  <PortalTableCell
                     key={column.key}
                     className={column.cellClassName}
                   >
                     {renderCellContent(item, column, index)}
-                  </AdminTableCell>
+                  </PortalTableCell>
                 ))}
 
                 {/* Actions */}
                 {rowActions.length > 0 && (
-                  <AdminTableCell onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell onClick={(e) => e.stopPropagation()}>
                     <div className="tw-flex tw-items-center tw-gap-1">
                       {rowActions.map((action) => {
                         const show = action.show ? action.show(item) : true;
@@ -425,25 +425,25 @@ export function DataTable<T extends { id: number }>({
                         );
                       })}
                     </div>
-                  </AdminTableCell>
+                  </PortalTableCell>
                 )}
-              </AdminTableRow>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
 
       {/* Pagination */}
       {!isLoading && filteredData.length > 0 && (
-        <div className="tw-card tw-mt-4">
+        <div className="portal-card tw-mt-4">
           <div className="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-4">
-            <div className="tw-text-sm tw-text-muted">
+            <div className="tw-text-sm text-muted">
               {pagination.pageInfo}
             </div>
 
             <div className="tw-flex tw-items-center tw-gap-4">
               <div className="tw-flex tw-items-center tw-gap-2">
-                <label className="tw-label">Show</label>
+                <label className="label">Show</label>
                 <select
                   value={pagination.pageSize}
                   onChange={(e) => pagination.setPageSize(Number(e.target.value))}
@@ -481,7 +481,7 @@ export function DataTable<T extends { id: number }>({
                   <span className="tw-badge">
                     {pagination.page}
                   </span>
-                  <span className="tw-text-sm tw-text-muted">of {pagination.totalPages}</span>
+                  <span className="tw-text-sm text-muted">of {pagination.totalPages}</span>
                 </div>
 
                 <button

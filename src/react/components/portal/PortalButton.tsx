@@ -26,14 +26,14 @@ export const PortalButton = React.forwardRef<HTMLButtonElement, PortalButtonProp
       secondary: 'btn-secondary',
       danger: 'btn-danger',
       ghost: 'btn-ghost',
-      icon: 'btn-icon',
+      icon: 'btn-icon'
     };
 
     const sizeClasses: Record<string, string> = {
       sm: 'tw-text-sm tw-py-1 tw-px-2',
       md: '',
       lg: 'tw-text-lg tw-py-3 tw-px-6',
-      icon: '',
+      icon: ''
     };
 
     const baseClass = variantClasses[variant] || 'btn-primary';

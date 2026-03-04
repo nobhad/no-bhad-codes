@@ -300,19 +300,29 @@ export type {
 // ============================================
 
 export {
+  // Simple compound component (tabs without subtabs)
+  Tabs,
+  // Individual components for more control
   TabList,
   TabPanel,
   SubtabList,
   SubtabPanel,
   ViewToggle,
+  // Hooks
   useTabs,
   useSubtabs,
+  // Helpers
   createTabs,
   createTabIcons,
+  // Namespace export
   TabComponents
 } from './createTabs';
 
 export type {
+  // Simple Tabs types
+  TabContent,
+  TabsProps,
+  // Individual component types
   TabItem,
   TabIconMap,
   TabListProps,
@@ -324,3 +334,30 @@ export type {
   UseTabsOptions,
   UseTabsReturn
 } from './createTabs';
+
+// ============================================
+// SECTION/CONTAINER COMPONENTS
+// ============================================
+
+export {
+  Section,
+  Panel,
+  ContentStack,
+  ContentRow,
+  Grid,
+  TwoColumn,
+  PageHeader,
+  DetailView,
+  SectionComponents
+} from './createSection';
+
+export type {
+  SectionProps,
+  PanelProps,
+  ContentStackProps,
+  ContentRowProps,
+  GridProps,
+  TwoColumnProps,
+  PageHeaderProps,
+  DetailViewProps
+} from './createSection';

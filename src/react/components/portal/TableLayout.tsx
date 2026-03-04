@@ -19,7 +19,7 @@ export interface TableLayoutProps {
   stats?: React.ReactNode;
   /** Action buttons (search, filter, export, add) */
   actions?: React.ReactNode;
-  /** The AdminTable component */
+  /** The PortalTable component */
   children: React.ReactNode;
   /** Pagination component */
   pagination?: React.ReactNode;
@@ -39,7 +39,7 @@ export function TableLayout({
   pagination,
   bulkActions,
   className,
-  containerRef,
+  containerRef
 }: TableLayoutProps) {
   return (
     <div ref={containerRef} className={cn('table-layout', className)}>

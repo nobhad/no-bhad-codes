@@ -251,7 +251,6 @@ export function useDataFetch<T, P = void>(
     };
     // Deps array is intentionally spread from options to support dynamic dependency arrays.
     // This allows consumers to pass custom dependencies that trigger refetch.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchOnMount, ...deps]);
 
   return {
@@ -314,7 +313,7 @@ export function useListFetch<T, S = Record<string, unknown>>(options: {
 /**
  * Hook for CRUD operations on a resource.
  */
-export interface UseCrudOptions<T> {
+export interface UseCrudOptions<_T> {
   endpoint: string;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
@@ -348,7 +347,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`${itemName} created successfully`, 'success');
       return result;
     } catch (err) {
-      logger.error(`[useCrud] Create failed:`, err);
+      logger.error('[useCrud] Create failed:', err);
       showNotification?.(`Failed to create ${itemName}`, 'error');
       return null;
     }
@@ -367,7 +366,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`${itemName} updated successfully`, 'success');
       return result;
     } catch (err) {
-      logger.error(`[useCrud] Update failed:`, err);
+      logger.error('[useCrud] Update failed:', err);
       showNotification?.(`Failed to update ${itemName}`, 'error');
       return null;
     }
@@ -384,7 +383,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`${itemName} deleted successfully`, 'success');
       return true;
     } catch (err) {
-      logger.error(`[useCrud] Delete failed:`, err);
+      logger.error('[useCrud] Delete failed:', err);
       showNotification?.(`Failed to delete ${itemName}`, 'error');
       return false;
     }

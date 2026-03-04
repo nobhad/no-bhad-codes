@@ -109,24 +109,24 @@ export function TabList<T extends string>({
       let nextIndex: number | null = null;
 
       switch (e.key) {
-        case 'ArrowRight':
-        case 'ArrowDown':
-          e.preventDefault();
-          nextIndex = (currentIndex + 1) % enabledTabs.length;
-          break;
-        case 'ArrowLeft':
-        case 'ArrowUp':
-          e.preventDefault();
-          nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
-          break;
-        case 'Home':
-          e.preventDefault();
-          nextIndex = 0;
-          break;
-        case 'End':
-          e.preventDefault();
-          nextIndex = enabledTabs.length - 1;
-          break;
+      case 'ArrowRight':
+      case 'ArrowDown':
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % enabledTabs.length;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
+        break;
+      case 'Home':
+        e.preventDefault();
+        nextIndex = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        nextIndex = enabledTabs.length - 1;
+        break;
       }
 
       if (nextIndex !== null) {
@@ -276,22 +276,22 @@ export function SubtabList<T extends string>({
       let nextIndex: number | null = null;
 
       switch (e.key) {
-        case 'ArrowRight':
-          e.preventDefault();
-          nextIndex = (currentIndex + 1) % enabledTabs.length;
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
-          break;
-        case 'Home':
-          e.preventDefault();
-          nextIndex = 0;
-          break;
-        case 'End':
-          e.preventDefault();
-          nextIndex = enabledTabs.length - 1;
-          break;
+      case 'ArrowRight':
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % enabledTabs.length;
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + enabledTabs.length) % enabledTabs.length;
+        break;
+      case 'Home':
+        e.preventDefault();
+        nextIndex = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        nextIndex = enabledTabs.length - 1;
+        break;
       }
 
       if (nextIndex !== null) {
@@ -568,6 +568,139 @@ export function useTabs<T extends string>(
 export const useSubtabs = useTabs;
 
 // ============================================
+// SIMPLE TABS COMPOUND COMPONENT
+// ============================================
+
+/**
+ * Tab content item for Tabs compound component.
+ */
+export interface TabContent<T extends string = string> {
+  /** Tab ID matching TabItem id */
+  id: T;
+  /** Content to render when tab is active */
+  content: React.ReactNode;
+}
+
+export interface TabsProps<T extends string = string> {
+  /** Tab configuration array */
+  tabs: Array<TabItem<T>>;
+  /** Tab icons mapping (optional) */
+  tabIcons?: TabIconMap<T>;
+  /** Tab content mapping */
+  children: Array<TabContent<T>> | ((activeTab: T) => React.ReactNode);
+  /** Initial active tab */
+  initialTab?: T;
+  /** Controlled active tab (optional) */
+  activeTab?: T;
+  /** Tab change callback */
+  onTabChange?: (tabId: T) => void;
+  /** Wrapper className */
+  className?: string;
+  /** TabList className */
+  tabListClassName?: string;
+  /** TabPanel className */
+  tabPanelClassName?: string;
+  /** Aria label */
+  ariaLabel?: string;
+}
+
+/**
+ * Tabs - Simplified compound component combining TabList + TabPanel.
+ *
+ * Use this for straightforward tab implementations without subtabs.
+ * For more control, use TabList and TabPanel separately.
+ *
+ * @example
+ * // With content array
+ * <Tabs
+ *   tabs={[
+ *     { id: 'overview', label: 'Overview' },
+ *     { id: 'files', label: 'Files' }
+ *   ]}
+ *   initialTab="overview"
+ * >
+ *   {[
+ *     { id: 'overview', content: <OverviewContent /> },
+ *     { id: 'files', content: <FilesContent /> }
+ *   ]}
+ * </Tabs>
+ *
+ * @example
+ * // With render function
+ * <Tabs
+ *   tabs={TABS}
+ *   tabIcons={TAB_ICONS}
+ *   initialTab="overview"
+ *   onTabChange={(tab) => console.log('Tab changed:', tab)}
+ * >
+ *   {(activeTab) => {
+ *     switch (activeTab) {
+ *       case 'overview': return <OverviewTab />;
+ *       case 'files': return <FilesTab />;
+ *       default: return null;
+ *     }
+ *   }}
+ * </Tabs>
+ */
+export function Tabs<T extends string>({
+  tabs,
+  tabIcons,
+  children,
+  initialTab,
+  activeTab: controlledActiveTab,
+  onTabChange,
+  className,
+  tabListClassName,
+  tabPanelClassName,
+  ariaLabel
+}: TabsProps<T>) {
+  // Use first tab if no initialTab provided
+  const defaultTab = initialTab ?? tabs[0]?.id;
+
+  const { activeTab, setActiveTab } = useTabs({
+    initialTab: defaultTab,
+    onChange: onTabChange
+  });
+
+  // Support controlled mode
+  const currentTab = controlledActiveTab ?? activeTab;
+  const handleSetTab = controlledActiveTab !== undefined
+    ? (tabId: T) => onTabChange?.(tabId)
+    : setActiveTab;
+
+  // Render content based on children type
+  const renderContent = () => {
+    if (typeof children === 'function') {
+      return children(currentTab);
+    }
+
+    // Find matching content
+    const tabContent = children.find((c) => c.id === currentTab);
+    return tabContent?.content ?? null;
+  };
+
+  return (
+    <div className={cn('tabs-container', className)}>
+      <TabList
+        tabs={tabs}
+        tabIcons={tabIcons}
+        activeTab={currentTab}
+        setActiveTab={handleSetTab}
+        className={tabListClassName}
+        ariaLabel={ariaLabel}
+      />
+      <TabPanel
+        tabId={currentTab}
+        isActive={true}
+        className={tabPanelClassName}
+      >
+        {renderContent()}
+      </TabPanel>
+    </div>
+  );
+}
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -608,6 +741,7 @@ export function createTabIcons<T extends string>(
 // ============================================
 
 export const TabComponents = {
+  Tabs,
   TabList,
   TabPanel,
   SubtabList,

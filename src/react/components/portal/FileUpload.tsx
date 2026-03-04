@@ -17,7 +17,7 @@ const DEFAULT_ACCEPTED_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'text/plain',
   'application/zip',
-  'application/x-rar-compressed',
+  'application/x-rar-compressed'
 ];
 
 export interface FileUploadFile {
@@ -68,7 +68,7 @@ export function FileUpload({
   error,
   className,
   dropzoneText = 'Drag and drop files here, or click to browse',
-  dropzoneTextMobile = 'Tap to select files',
+  dropzoneTextMobile = 'Tap to select files'
 }: FileUploadProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -234,7 +234,7 @@ export function FileUpload({
             <Upload className="tw-h-8 tw-w-8" />
             <p className="dropzone-desktop">{dropzoneText}</p>
             <p className="dropzone-mobile">{dropzoneTextMobile}</p>
-            <span className="tw-text-sm tw-text-muted">
+            <span className="tw-text-sm text-muted">
               Max {maxFiles} files, {Math.round(maxSize / (1024 * 1024))}MB each
             </span>
           </div>
@@ -279,7 +279,7 @@ export function FileUploadProgress({
   error = false,
   errorMessage,
   onCancel,
-  className,
+  className
 }: FileUploadProgressProps) {
   return (
     <div
@@ -296,7 +296,7 @@ export function FileUploadProgress({
         <div className="tw-flex tw-justify-between tw-items-center tw-mb-1">
           <span className="tw-text-sm tw-truncate">{fileName}</span>
           {!complete && !error && (
-            <span className="tw-text-xs tw-text-muted">{Math.round(progress)}%</span>
+            <span className="tw-text-xs text-muted">{Math.round(progress)}%</span>
           )}
         </div>
 
@@ -318,7 +318,7 @@ export function FileUploadProgress({
         <button
           type="button"
           onClick={onCancel}
-          className="tw-p-1 tw-text-muted hover:tw-text-primary tw-transition-colors"
+          className="tw-p-1 text-muted hover:tw-text-primary tw-transition-colors"
           aria-label="Cancel upload"
         >
           <X className="tw-h-4 tw-w-4" />
@@ -355,7 +355,7 @@ export interface UseFileUploadReturn {
 export function useFileUpload({
   uploadFn,
   onSuccess,
-  onError,
+  onError
 }: UseFileUploadOptions): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -387,6 +387,6 @@ export function useFileUpload({
     isUploading,
     error,
     upload,
-    clearError,
+    clearError
   };
 }

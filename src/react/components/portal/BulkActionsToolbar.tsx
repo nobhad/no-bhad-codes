@@ -6,7 +6,7 @@ import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from './PortalDropdown';
 
 interface BulkAction {
@@ -72,7 +72,7 @@ export function BulkActionsToolbar({
   onStatusChange,
   onDelete,
   deleteLoading = false,
-  className,
+  className
 }: BulkActionsToolbarProps) {
   if (selectedCount === 0) return null;
 

@@ -8,7 +8,7 @@
  * Eliminates repeated form field patterns across components.
  */
 
-import * as React from 'react';
+import React, { useState, useCallback } from 'react';
 import { cn } from '@react/lib/utils';
 import { type LucideIcon } from 'lucide-react';
 
@@ -602,11 +602,11 @@ interface UseFormFieldOptions<T> {
 export function useFormField<T>(options: UseFormFieldOptions<T>) {
   const { initialValue, validate, transform } = options;
 
-  const [value, setValue] = React.useState<T>(initialValue);
-  const [error, setError] = React.useState<string | undefined>();
-  const [touched, setTouched] = React.useState(false);
+  const [value, setValue] = useState<T>(initialValue);
+  const [error, setError] = useState<string | undefined>();
+  const [touched, setTouched] = useState(false);
 
-  const onChange = React.useCallback(
+  const onChange = useCallback(
     (newValue: T) => {
       const transformedValue = transform ? transform(newValue) : newValue;
       setValue(transformedValue);
@@ -619,14 +619,14 @@ export function useFormField<T>(options: UseFormFieldOptions<T>) {
     [transform, touched, validate]
   );
 
-  const onBlur = React.useCallback(() => {
+  const onBlur = useCallback(() => {
     setTouched(true);
     if (validate) {
       setError(validate(value));
     }
   }, [validate, value]);
 
-  const reset = React.useCallback(() => {
+  const reset = useCallback(() => {
     setValue(initialValue);
     setError(undefined);
     setTouched(false);
