@@ -25,7 +25,7 @@ import type {
   ContactStats
 } from './admin-types';
 import { APP_CONSTANTS, getChartColor, getChartColorWithAlpha } from '../../config/constants';
-import { configureApiClient, apiFetch, apiPost, apiPut } from '../../utils/api-client';
+import { configureApiClient, apiFetch, apiPost, apiPut, unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 import { createDOMCache } from '../../utils/dom-cache';
 import { formatDate, formatDateTime, formatProjectType } from '../../utils/format-utils';
@@ -988,7 +988,8 @@ class AdminDashboard {
       const response = await apiFetch('/api/admin/contact-submissions');
 
       if (response.ok) {
-        const data = await response.json();
+        const raw = await response.json();
+        const data = unwrapApiData<{ submissions: ContactSubmission[]; stats: ContactStats }>(raw);
         this.updateContactsDisplay(data);
       }
     } catch (error) {
@@ -1124,8 +1125,10 @@ class AdminDashboard {
       const response = await apiPost(`/api/admin/leads/${leadId}/invite`);
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
+        const raw = await response.json();
+        const data = unwrapApiData<Record<string, unknown>>(raw);
+        // If unwrapped successfully (response.ok), treat as success
+        if (!data.error) {
           await alertSuccess(
             `Invitation sent to ${email}! They will receive a link to set up their account.`
           );
@@ -1135,15 +1138,15 @@ class AdminDashboard {
           this.loadLeads();
           this.loadProjects();
         } else {
-          await alertError(data.error || 'Failed to send invitation. Please try again.');
+          await alertError((data.error as string) || 'Failed to send invitation. Please try again.');
           if (inviteBtn) {
             inviteBtn.disabled = false;
             inviteBtn.textContent = 'Invite to Client Portal';
           }
         }
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        await alertError(errorData.error || 'Failed to send invitation. Please try again.');
+        const errorData = await response.json().catch(() => ({} as Record<string, unknown>));
+        await alertError((errorData as Record<string, unknown>).error as string || 'Failed to send invitation. Please try again.');
         if (inviteBtn) {
           inviteBtn.disabled = false;
           inviteBtn.textContent = 'Invite to Client Portal';
@@ -1462,7 +1465,8 @@ class AdminDashboard {
       const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
 
       if (response.ok) {
-        const data = await response.json();
+        const raw = await response.json();
+        const data = unwrapApiData<{ messages?: Message[] }>(raw);
         this.renderMessages(data.messages || []);
 
         // Mark messages as read
@@ -1679,7 +1683,7 @@ class AdminDashboard {
         updateSubtabActiveState(group, subtab, 'subtab');
         // Convert forTab to event name (support -> knowledgeBase for backwards compatibility)
         const eventName = forTab === 'support' ? 'knowledgeBase' : forTab;
-        document.dispatchEvent(new CustomEvent(`${eventName}SubtabChange`, { detail: { subtab } }));
+        window.dispatchEvent(new CustomEvent(`${eventName}SubtabChange`, { detail: { subtab } }));
         return;
       }
 
@@ -1688,7 +1692,7 @@ class AdminDashboard {
         const tabName = target.dataset.pdTab;
         if (!tabName) return;
         updateSubtabActiveState(group, tabName, 'pdTab');
-        document.dispatchEvent(new CustomEvent('projectDetailTabChange', { detail: { tabName } }));
+        window.dispatchEvent(new CustomEvent('projectDetailTabChange', { detail: { tabName } }));
         return;
       }
 
@@ -1697,7 +1701,7 @@ class AdminDashboard {
         const tabName = target.dataset.cdTab;
         if (!tabName) return;
         updateSubtabActiveState(group, tabName, 'cdTab');
-        document.dispatchEvent(new CustomEvent('clientDetailTabChange', { detail: { tabName } }));
+        window.dispatchEvent(new CustomEvent('clientDetailTabChange', { detail: { tabName } }));
 
       }
     });
@@ -2528,13 +2532,13 @@ class AdminDashboard {
 
       if (!response.ok) return;
 
-      const data = await response.json();
-      if (!data.success) return;
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
 
       // Update CRM badge (unread messages)
       const crmBadge = this.domCache.get('crmBadge');
       if (crmBadge) {
-        if (data.messages > 0) {
+        if ((data.messages as number) > 0) {
           crmBadge.textContent = String(data.messages);
           crmBadge.style.display = '';
         } else {

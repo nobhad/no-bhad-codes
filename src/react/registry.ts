@@ -64,6 +64,8 @@ interface ReactRegistry {
   portalAdHocRequests?: RegistryEntry;
   portalNavigation?: RegistryEntry;
   portalOnboarding?: RegistryEntry;
+  portalDashboard?: RegistryEntry;
+  portalProjectDetail?: RegistryEntry;
 }
 
 // Extend window to include our registry

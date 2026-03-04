@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch, apiPost } from '../../utils/api-client';
+import { apiFetch, apiPost, unwrapApiData } from '../../utils/api-client';
 import { formatTimeAgo } from '../../utils/time-utils';
 import type { DataItem } from './types';
 import { createLogger } from '../../utils/logger';
@@ -114,8 +114,9 @@ export default class PortalMessages extends PortalFeatureModule {
   private async loadThreads(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
-      this.threads = data.data || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.threads = (data.data as MessageThread[]) || (data as unknown as MessageThread[]) || [];
     } catch (error) {
       this.notify('Failed to load message threads', 'error');
       logger.error('Error loading threads:', error);
@@ -125,8 +126,9 @@ export default class PortalMessages extends PortalFeatureModule {
   private async loadMessages(threadId: number): Promise<void> {
     try {
       const response = await apiFetch(this.getMessagesEndpoint(threadId));
-      const data = await response.json();
-      this.messages = data.data || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.messages = (data.data as Message[]) || (data as unknown as Message[]) || [];
       this.renderMessages();
     } catch (error) {
       this.notify('Failed to load messages', 'error');

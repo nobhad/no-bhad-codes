@@ -29,6 +29,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface TemplateVariable {
   name: string;
@@ -159,10 +160,9 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load templates');
-      const data = await response.json();
-      const payload = data.data || data;
-      setTemplates(payload.templates || []);
-      setStats(payload.stats || { total: 0, active: 0, categories: [] });
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setTemplates((data.templates as EmailTemplate[]) || []);
+      setStats((data.stats as EmailTemplateStats) || { total: 0, active: 0, categories: [] });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load templates');
     } finally {

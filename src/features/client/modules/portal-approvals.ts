@@ -8,7 +8,7 @@
  * Shows pending items requiring client review/approval.
  */
 
-import { apiFetch, apiPost, parseJsonResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, parseApiResponse } from '../../../utils/api-client';
 import { showToast } from '../../../utils/toast-notifications';
 import { formatDate } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
@@ -146,7 +146,7 @@ export async function loadClientApprovals(): Promise<void> {
       throw new Error('Failed to load pending approvals');
     }
 
-    const data = await parseJsonResponse<{ approvals: PendingApproval[] }>(res);
+    const data = await parseApiResponse<{ approvals: PendingApproval[] }>(res);
     cachedApprovals = data.approvals || [];
 
     // Show/hide section based on whether there are pending items

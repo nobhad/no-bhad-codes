@@ -29,6 +29,7 @@ import { cn } from '@react/lib/utils';
 import { formatTimeAgo } from '../../../../utils/time-utils';
 import { formatCurrency } from '../../../../utils/format-utils';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface OverviewDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -91,13 +92,12 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load dashboard data');
-      const data = await response.json();
-      const payload = data.data || data;
-      setAttention(payload.attention || { overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
-      setSnapshot(payload.snapshot || { activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
-      setRecentActivity(payload.recentActivity || []);
-      setActiveProjects(payload.activeProjects || []);
-      setUpcomingTasks(payload.upcomingTasks || []);
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setAttention((payload.attention as typeof attention) || { overdueInvoices: 0, pendingContracts: 0, unreadMessages: 0 });
+      setSnapshot((payload.snapshot as typeof snapshot) || { activeProjects: 0, totalClients: 0, revenueMTD: 0, conversionRate: 0 });
+      setRecentActivity((payload.recentActivity as ActivityItem[]) || []);
+      setActiveProjects((payload.activeProjects as ProjectItem[]) || []);
+      setUpcomingTasks((payload.upcomingTasks as TaskItem[]) || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dashboard');
     } finally {

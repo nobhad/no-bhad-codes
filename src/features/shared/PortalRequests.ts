@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch, apiPut } from '../../utils/api-client';
+import { apiFetch, apiPut, unwrapApiData } from '../../utils/api-client';
 import { formatTimeAgo } from '../../utils/time-utils';
 import type { DataItem } from './types';
 import {
@@ -117,8 +117,9 @@ export default class PortalRequests extends PortalFeatureModule {
   private async loadRequests(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
-      this.requests = data.requests || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.requests = (data.requests as Request[]) || (data as unknown as Request[]) || [];
     } catch (error) {
       this.notify('Failed to load requests', 'error');
       logger.error('Error loading requests:', error);

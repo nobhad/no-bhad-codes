@@ -18,6 +18,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/components/portal/EmptyState';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface PerformanceKPI {
   id: string;
@@ -106,8 +107,8 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load performance data');
-      const result = await response.json();
-      setData(result);
+      const payload = unwrapApiData<PerformanceData>(await response.json());
+      setData(payload);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load performance data');
     } finally {

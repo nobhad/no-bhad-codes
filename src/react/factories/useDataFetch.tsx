@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useDataFetch');
@@ -299,10 +300,11 @@ export function useListFetch<T, S = Record<string, unknown>>(options: {
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}`);
       }
-      const data = await response.json();
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
       return {
-        items: data[itemsKey] || [],
-        stats: data.stats || defaultStats
+        items: (data[itemsKey] as T[]) || [],
+        stats: (data.stats as S) || defaultStats
       };
     },
     initialData: { items: [], stats: defaultStats },
@@ -343,7 +345,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error(`Failed to create ${itemName}`);
-      const result = await response.json();
+      const result = unwrapApiData<T>(await response.json());
       showNotification?.(`${itemName} created successfully`, 'success');
       return result;
     } catch (err) {
@@ -362,7 +364,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error(`Failed to update ${itemName}`);
-      const result = await response.json();
+      const result = unwrapApiData<T>(await response.json());
       showNotification?.(`${itemName} updated successfully`, 'success');
       return result;
     } catch (err) {

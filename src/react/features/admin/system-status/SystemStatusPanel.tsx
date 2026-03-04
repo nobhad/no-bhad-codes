@@ -23,6 +23,7 @@ import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { TIMING } from '../../../../constants/timing';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface ServiceStatus {
   id: string;
@@ -164,14 +165,13 @@ export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showN
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load system status');
-      const result = await response.json();
-      const payload = result.data || result;
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
       setData({
         services: Array.isArray(payload.services) ? payload.services : [],
         metrics: Array.isArray(payload.metrics) ? payload.metrics : [],
         incidents: Array.isArray(payload.incidents) ? payload.incidents : [],
-        overallStatus: payload.overallStatus || 'operational',
-        lastUpdated: payload.lastUpdated || new Date().toISOString()
+        overallStatus: (payload.overallStatus as SystemStatusData['overallStatus']) || 'operational',
+        lastUpdated: (payload.lastUpdated as string) || new Date().toISOString()
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load system status');

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Project, ProjectStats, ApiResponse } from '@react/features/admin/types';
+import type { Project, ProjectStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -77,23 +78,9 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         throw new Error(`Failed to fetch projects: ${response.statusText}`);
       }
 
-      const data = await response.json();
-
-      // Handle various response formats:
-      // 1. { projects: [...], stats: {...} } - most common
-      // 2. { success, data: { projects: [...] } }
-      // 3. { success, data: [...] }
-      // 4. Direct array [...]
-      let projectsArray: Project[] = [];
-      if (data.projects && Array.isArray(data.projects)) {
-        projectsArray = data.projects;
-      } else if (data.success && data.data) {
-        projectsArray = Array.isArray(data.data) ? data.data : data.data.projects || [];
-      } else if (Array.isArray(data)) {
-        projectsArray = data;
-      } else {
-        throw new Error(data.error || 'Failed to load projects');
-      }
+      const json = await response.json();
+      const data = unwrapApiData<{ projects: Project[] }>(json);
+      const projectsArray = data.projects || [];
 
       // Decode HTML entities in text fields to prevent double-encoding
       setProjects(decodeArrayFields(projectsArray, PROJECT_TEXT_FIELDS));
@@ -130,14 +117,11 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
           throw new Error(`Failed to update project: ${response.statusText}`);
         }
 
-        const data: ApiResponse<Project> = await response.json();
-
-        if (data.success) {
-          // Update local state
-          setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
-          return true;
-        }
-        throw new Error(data.error || 'Failed to update project');
+        const json = await response.json();
+        unwrapApiData<Project>(json);
+        // Update local state
+        setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+        return true;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'An error occurred';
         logger.error('[useProjects] Update error:', message);
@@ -172,12 +156,11 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         });
 
         if (response.ok) {
-          const data: ApiResponse<{ deleted: number }> = await response.json();
-          if (data.success) {
-            success = data.data?.deleted || ids.length;
-            // Remove from local state
-            setProjects((prev) => prev.filter((p) => !ids.includes(p.id)));
-          }
+          const json = await response.json();
+          const data = unwrapApiData<{ deleted: number }>(json);
+          success = data.deleted || ids.length;
+          // Remove from local state
+          setProjects((prev) => prev.filter((p) => !ids.includes(p.id)));
         } else {
           // Fallback to individual deletes
           for (const id of ids) {

@@ -8,7 +8,7 @@
  * Handles all API calls and data caching.
  */
 
-import { apiFetch, apiPost, apiPut, parseApiResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, parseApiResponse, unwrapApiData } from '../../../utils/api-client';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('AdminDataService');
@@ -226,17 +226,19 @@ class AdminDataService {
       const response = await apiPost(`/api/admin/leads/${leadId}/invite`);
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
+        const raw = await response.json();
+        const data = unwrapApiData<Record<string, unknown>>(raw);
+        // After unwrapping, a successful response means the invite worked
+        if (!data.error) {
           this.cache.invalidate('leads');
           this.cache.invalidate('projects');
           return { success: true };
         }
-        return { success: false, error: data.error || 'Failed to send invitation' };
+        return { success: false, error: (data.error as string) || 'Failed to send invitation' };
       }
 
-      const errorData = await response.json().catch(() => ({}));
-      return { success: false, error: errorData.error || 'Failed to send invitation' };
+      const errorData = await response.json().catch(() => ({} as Record<string, unknown>));
+      return { success: false, error: (errorData as Record<string, unknown>).error as string || 'Failed to send invitation' };
     } catch (error) {
       logger.error('Failed to invite lead', { error, leadId });
       return { success: false, error: 'An error occurred' };

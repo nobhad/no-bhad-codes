@@ -19,7 +19,7 @@ import {
 import { showToast } from '../../../utils/toast-notifications';
 import { createLogger } from '../../../utils/logger';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../../utils/api-client';
 import { el } from '../../../utils/dom-helpers';
 import { getReactComponent } from '../../../react/registry';
 
@@ -101,7 +101,8 @@ export async function openDesignReview(deliverableId: number): Promise<void> {
     const res = await apiFetch(`${API_BASE}/${deliverableId}`);
     if (!res.ok) throw new Error('Failed to fetch deliverable');
 
-    const { deliverable } = await res.json();
+    const raw = await res.json();
+    const { deliverable } = unwrapApiData<{ deliverable: Deliverable }>(raw);
     currentDeliverable = deliverable;
     currentRound = deliverable.roundNumber || 1;
 
@@ -123,7 +124,8 @@ async function loadDesignElements(deliverableId: number): Promise<void> {
   try {
     const res = await apiFetch(`${API_BASE}/${deliverableId}/design-elements`);
     if (res.ok) {
-      const { elements } = await res.json();
+      const elementsRaw = await res.json();
+      const { elements } = unwrapApiData<{ elements: DesignElement[] }>(elementsRaw);
       designElements = elements || [];
     }
   } catch (error) {
@@ -271,7 +273,8 @@ async function setupDesignViewer(): Promise<void> {
       return;
     }
 
-    const { version } = await res.json();
+    const versionRaw = await res.json();
+    const { version } = unwrapApiData<{ version: { filePath: string } }>(versionRaw);
 
     // Create annotation canvas
     annotationCanvas = await createAnnotationCanvas(version.filePath, container);

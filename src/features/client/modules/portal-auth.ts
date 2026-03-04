@@ -16,6 +16,7 @@ import type { AnyUser, ClientUser } from '../../../auth/auth-types';
 import { isClientUser } from '../../../auth/auth-types';
 import { createLogger } from '../../../utils/logger';
 import { ROUTES } from '../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../utils/api-client';
 import { validateEmail } from '../../../../shared/validation/validators';
 
 const logger = createLogger('PortalAuth');
@@ -224,8 +225,16 @@ async function restoreSessionFromCookie(callbacks: {
       return false;
     }
 
-    const json = await res.json();
-    const user = json.data?.user;
+    const raw = await res.json();
+    const json = unwrapApiData<{ user?: {
+      id: number;
+      email: string;
+      contactName?: string;
+      companyName?: string;
+      isAdmin?: boolean;
+      role?: string;
+    } }>(raw);
+    const user = json.user;
 
     if (!user) {
       window.location.href = ROUTES.CLIENT.LOGIN;

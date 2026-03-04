@@ -39,6 +39,7 @@ import { useSelection } from '@react/hooks/useSelection';
 import { DELIVERABLES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('DeliverablesTable');
@@ -206,8 +207,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load deliverables');
-      const data = await response.json();
-      const payload = data.data || data;
+      const payload = unwrapApiData<{ deliverables?: Deliverable[]; stats?: DeliverableStats }>(await response.json());
       setDeliverables(payload.deliverables || []);
       setStats(payload.stats || {
         total: 0,

@@ -19,6 +19,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { formatTimeAgo } from '../../../../utils/time-utils';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('MessagingPanel');
 
@@ -100,9 +101,8 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
       });
       if (!response.ok) throw new Error('Failed to load conversations');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setConversations(payload.conversations || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setConversations((data.conversations as Conversation[]) || []);
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
       setError(err instanceof Error ? err.message : 'Failed to load conversations');
@@ -123,9 +123,8 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
       });
       if (!response.ok) throw new Error('Failed to load messages');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setMessages(payload.messages || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setMessages((data.messages as Message[]) || []);
 
       // Mark as read
       await fetch(buildEndpoint.adminConversationRead(conversationId), {
@@ -166,9 +165,8 @@ export function MessagingPanel({ getAuthToken, showNotification, onNavigate, def
 
       if (!response.ok) throw new Error('Failed to send message');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setMessages((prev) => [...prev, payload.message]);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setMessages((prev) => [...prev, data.message as Message]);
 
       // Update conversation list
       setConversations((prev) =>

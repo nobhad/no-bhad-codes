@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch } from '../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../utils/api-client';
 import { formatTimeAgo } from '../../utils/time-utils';
 import { createLogger } from '../../utils/logger';
 import type { DataItem } from './types';
@@ -111,7 +111,8 @@ export default class PortalDashboard extends PortalFeatureModule {
   private async loadDashboardData(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
+      const raw = await response.json();
+      const data = unwrapApiData<DashboardData>(raw);
       this.dashboardData = data;
     } catch (error) {
       this.notify('Failed to load dashboard data', 'error');

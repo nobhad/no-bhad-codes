@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch, apiPut } from '../../utils/api-client';
+import { apiFetch, apiPut, unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('PortalSettings');
@@ -116,13 +116,15 @@ export default class PortalSettings extends PortalFeatureModule {
   private async loadSettings(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
-      this.profile = data.user || data;
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.profile = (data.user as UserProfile) || (data as unknown as UserProfile);
 
       // Load notification preferences
       const notifResponse = await apiFetch('/api/users/me/notifications');
-      const notifData = await notifResponse.json();
-      this.notifications = notifData || this.notifications;
+      const notifRaw = await notifResponse.json();
+      const notifData = unwrapApiData<Record<string, unknown>>(notifRaw);
+      this.notifications = (notifData as unknown as NotificationPreferences) || this.notifications;
     } catch (error) {
       this.notify('Failed to load settings', 'error');
       logger.error('Error loading settings:', error);

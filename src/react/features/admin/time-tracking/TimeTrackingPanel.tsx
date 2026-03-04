@@ -30,6 +30,7 @@ import { TIME_TRACKING_FILTER_CONFIG, TIME_TRACKING_DATE_RANGE_OPTIONS, TIME_TRA
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('TimeTrackingPanel');
 
@@ -191,10 +192,9 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
       });
       if (!response.ok) throw new Error('Failed to load time entries');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setEntries(payload.entries || []);
-      setStats(payload.stats || {
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setEntries((data.entries as TimeEntry[]) || []);
+      setStats((data.stats as TimeStats) || {
         totalHours: 0,
         billableHours: 0,
         billedHours: 0,
@@ -223,13 +223,12 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
 
       if (!response.ok) throw new Error('Failed to start timer');
 
-      const data = await response.json();
-      const payload = data.data || data;
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setActiveTimer({
-        entryId: payload.entryId,
+        entryId: data.entryId as string,
         startedAt: new Date(),
         description: '',
-        projectName: payload.projectName
+        projectName: data.projectName as string | undefined
       });
     } catch (err) {
       logger.error('Failed to start timer:', err);

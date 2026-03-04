@@ -28,6 +28,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { DESIGN_REVIEWS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface DesignReview {
   id: number;
@@ -154,10 +155,9 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load design reviews');
-      const data = await response.json();
-      const payload = data.data || data;
-      setReviews(payload.reviews || []);
-      setStats(payload.stats || { total: 0, pending: 0, approved: 0, inRevision: 0 });
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setReviews((data.reviews as DesignReview[]) || []);
+      setStats((data.stats as DesignReviewStats) || { total: 0, pending: 0, approved: 0, inRevision: 0 });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load design reviews');
     } finally {

@@ -30,6 +30,7 @@ import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { createLogger } from '../../../../utils/logger';
 
 const logger = createLogger('LeadDetailPanel');
@@ -108,8 +109,8 @@ export function LeadDetailPanel({
         credentials: 'include'
       });
       if (response.ok) {
-        const data = await response.json();
-        setTasks(data.tasks || []);
+        const data = unwrapApiData<Record<string, unknown>>(await response.json());
+        setTasks((data.tasks as LeadTask[]) || []);
       }
     } catch (err) {
       logger.error('Failed to fetch tasks:', err);
@@ -127,8 +128,8 @@ export function LeadDetailPanel({
         credentials: 'include'
       });
       if (response.ok) {
-        const data = await response.json();
-        setNotes(data.notes || []);
+        const data = unwrapApiData<Record<string, unknown>>(await response.json());
+        setNotes((data.notes as LeadNote[]) || []);
       }
     } catch (err) {
       logger.error('Failed to fetch notes:', err);

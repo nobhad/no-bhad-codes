@@ -11,6 +11,7 @@
 import { ICONS } from '../constants/icons';
 import { formatDate } from '../utils/format-utils';
 import { SanitizationUtils } from '../utils/sanitization-utils';
+import { unwrapApiData } from '../utils/api-client';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('NotificationBell');
@@ -217,8 +218,9 @@ export class NotificationBell {
         return;
       }
 
-      const data = await response.json();
-      this.notifications = data.notifications || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.notifications = (data.notifications as Notification[]) || [];
       this.unreadCount = this.notifications.filter((n) => !n.is_read).length;
 
       this.updateBadge();

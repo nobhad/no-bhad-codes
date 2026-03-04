@@ -23,7 +23,7 @@ import {
   downloadReceiptPdf
 } from '../../../utils/file-download';
 import { createReactCleanupHandler } from '../../../utils/react-cleanup';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { createLogger } from '../../../utils/logger';
 
@@ -117,20 +117,22 @@ export async function loadInvoices(ctx: ClientPortalContext): Promise<void> {
       throw new Error('Failed to fetch invoices');
     }
 
-    const data = await response.json();
+    const raw = await response.json();
+    const data = unwrapApiData<Record<string, unknown>>(raw);
 
     // Remove loading indicator
     const loading = invoicesContainer.querySelector('.invoices-loading');
     if (loading) loading.remove();
 
-    if (summaryOutstanding && data.summary) {
-      summaryOutstanding.textContent = formatCurrency(data.summary.totalOutstanding);
+    const summary = data.summary as Record<string, number> | undefined;
+    if (summaryOutstanding && summary) {
+      summaryOutstanding.textContent = formatCurrency(summary.totalOutstanding);
     }
-    if (summaryPaid && data.summary) {
-      summaryPaid.textContent = formatCurrency(data.summary.totalPaid);
+    if (summaryPaid && summary) {
+      summaryPaid.textContent = formatCurrency(summary.totalPaid);
     }
 
-    renderInvoicesList(invoicesContainer as HTMLElement, data.invoices || [], ctx);
+    renderInvoicesList(invoicesContainer as HTMLElement, (data.invoices as PortalInvoice[]) || [], ctx);
   } catch (error) {
     // Remove loading indicator on error
     const loading = invoicesContainer.querySelector('.invoices-loading');
@@ -308,8 +310,9 @@ async function handleReceiptDownload(invoiceId: number, invoiceNumber: string): 
       return;
     }
 
-    const receiptsData = await receiptsResponse.json();
-    const receipts = receiptsData.receipts || [];
+    const receiptsRaw = await receiptsResponse.json();
+    const receiptsData = unwrapApiData<Record<string, unknown>>(receiptsRaw);
+    const receipts = (receiptsData.receipts as Array<{ id: number; receipt_number?: string }>) || [];
 
     if (receipts.length === 0) {
       showToast('No receipt found for this invoice.', 'warning');

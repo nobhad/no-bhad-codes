@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch, apiPut } from '../../utils/api-client';
+import { apiFetch, apiPut, unwrapApiData } from '../../utils/api-client';
 import type { DataItem, ColumnDef } from './types';
 import {
   getInvoiceStatusLabel,
@@ -126,8 +126,9 @@ export default class PortalInvoices extends PortalFeatureModule {
   private async loadInvoices(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
-      this.invoices = data.invoices || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.invoices = (data.invoices as Invoice[]) || (data as unknown as Invoice[]) || [];
     } catch (error) {
       this.notify('Failed to load invoices', 'error');
       logger.error('Error loading invoices:', error);

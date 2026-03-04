@@ -567,10 +567,7 @@
   gap: var(--space-1);
 }
 
-.kanban-card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-1);
+.kanban-grid .kanban-card {
   padding: var(--space-1);
   border: var(--border-width) solid var(--portal-border-subtle);
 }

@@ -27,6 +27,7 @@ import type {
 } from './types';
 import { ONBOARDING_STEPS, DRAFT_STORAGE_KEY, DRAFT_SAVE_INTERVAL } from './types';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('OnboardingWizard');
@@ -149,9 +150,9 @@ export function OnboardingWizard({
       });
 
       if (response.ok) {
-        const apiData = await response.json();
-        if (apiData.data) {
-          const progress = apiData.data as OnboardingProgress;
+        const unwrapped = unwrapApiData<Record<string, unknown>>(await response.json());
+        if (unwrapped && Object.keys(unwrapped).length > 0) {
+          const progress = unwrapped as unknown as OnboardingProgress;
           setCurrentStep(progress.currentStep || 'basic-info');
           setCompletedSteps(progress.completedSteps || []);
           setFormData(progress.formData || {});

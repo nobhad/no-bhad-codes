@@ -38,6 +38,7 @@ import { useSelection } from '@react/hooks/useSelection';
 import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('WorkflowsTable');
@@ -201,8 +202,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load workflows');
-      const data = await response.json();
-      const payload = data.data || data;
+      const payload = unwrapApiData<{ workflows?: Workflow[]; stats?: WorkflowStats }>(await response.json());
       setWorkflows(payload.workflows || []);
       setStats(payload.stats || {
         total: 0,

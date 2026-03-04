@@ -15,6 +15,7 @@ import { PORTAL_DOCREQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { DocumentRequestCard, type DocumentRequest } from './DocumentRequestCard';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalDocumentRequests');
@@ -71,9 +72,7 @@ function useDocumentRequests(getAuthToken?: () => string | null) {
         throw new Error('Failed to fetch document requests');
       }
 
-      const raw = await response.json();
-      // Server uses sendSuccess() which wraps: { success, data: { requests } }
-      const data: ApiResponse = raw.data ?? raw;
+      const data: ApiResponse = unwrapApiData<ApiResponse>(await response.json());
 
       if (data.requests) {
         setRequests(data.requests);

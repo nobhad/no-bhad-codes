@@ -31,6 +31,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { FileUploadDropzone } from './FileUploadDropzone';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalFilesManager');
@@ -376,9 +377,7 @@ export function PortalFilesManager({
         throw new Error('Failed to fetch files');
       }
 
-      const raw = await response.json();
-      // Server uses sendSuccess() which wraps: { success, data: { files, projects } }
-      const data = raw.data ?? raw;
+      const data = unwrapApiData<{ files?: Record<string, unknown>[]; projects?: Project[] }>(await response.json());
       // Transform API response to match component interface (snake_case to camelCase)
       const transformedFiles = (data.files || []).map(transformFile);
       setFiles(transformedFiles);

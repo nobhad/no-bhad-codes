@@ -25,6 +25,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface Task {
   id: number;
@@ -172,8 +173,8 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       });
       if (!response.ok) throw new Error('Failed to fetch tasks');
 
-      const data = await response.json();
-      setTasks(data.data?.tasks || data.tasks || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setTasks((data.tasks as Task[]) || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -392,9 +393,8 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                 sortDirection={sort?.column === 'priority' ? sort.direction : null}
                 onClick={() => toggleSort('priority')}
               >
-                Priority
+                Project / Priority
               </PortalTableHead>
-              <PortalTableHead>Project</PortalTableHead>
               <PortalTableHead
                 className="date-col"
                 sortable
@@ -410,12 +410,12 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
 
           <PortalTableBody animate={!loading && !error}>
             {error ? (
-              <PortalTableError colSpan={7} message={error} onRetry={fetchTasks} />
+              <PortalTableError colSpan={6} message={error} onRetry={fetchTasks} />
             ) : loading ? (
-              <PortalTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={6} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <PortalTableEmpty
-                colSpan={7}
+                colSpan={6}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
@@ -450,19 +450,14 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                     </StatusBadge>
                   </PortalTableCell>
                   <PortalTableCell>
-                    <span
-                      className="priority-label"
-                      style={{ color: PRIORITY_COLORS[task.priority] }}
-                    >
-                      {getPriorityLabel(task.priority)}
-                    </span>
-                  </PortalTableCell>
-                  <PortalTableCell>
                     <div className="cell-content">
-                      {task.client_name && (
-                        <span className="cell-subtitle">{task.client_name}</span>
-                      )}
                       {task.project_name && <span className="cell-title">{task.project_name}</span>}
+                      <span
+                        className="priority-label"
+                        style={{ color: PRIORITY_COLORS[task.priority] }}
+                      >
+                        {getPriorityLabel(task.priority)}
+                      </span>
                     </div>
                   </PortalTableCell>
                   <PortalTableCell className="date-cell">

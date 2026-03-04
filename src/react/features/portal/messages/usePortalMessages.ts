@@ -12,6 +12,7 @@ import type {
   UpdateMessageResponse
 } from './types';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('usePortalMessages');
@@ -99,9 +100,7 @@ export function usePortalMessages({
         throw new Error('Failed to fetch threads');
       }
 
-      const raw = await response.json();
-      // Server uses sendSuccess() which wraps: { success, data: { threads } }
-      const data: ThreadsResponse = raw.data ?? raw;
+      const data: ThreadsResponse = unwrapApiData<ThreadsResponse>(await response.json());
       setThreads(data.threads ?? []);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load threads';
@@ -137,9 +136,7 @@ export function usePortalMessages({
           throw new Error('Failed to fetch messages');
         }
 
-        const raw = await response.json();
-        // Server uses sendSuccess() which wraps: { success, data: { messages, thread } }
-        const data: MessagesResponse = raw.data ?? raw;
+        const data: MessagesResponse = unwrapApiData<MessagesResponse>(await response.json());
         setMessages(data.messages ?? []);
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
@@ -219,8 +216,7 @@ export function usePortalMessages({
           throw new Error('Failed to send message');
         }
 
-        const raw = await response.json();
-        const data: SendMessageResponse = raw.data ?? raw;
+        const data: SendMessageResponse = unwrapApiData<SendMessageResponse>(await response.json());
 
         // Optimistically add the message
         setMessages((prev) => [...prev, data.message]);
@@ -271,8 +267,7 @@ export function usePortalMessages({
           throw new Error('Failed to edit message');
         }
 
-        const raw = await response.json();
-        const data: UpdateMessageResponse = raw.data ?? raw;
+        const data: UpdateMessageResponse = unwrapApiData<UpdateMessageResponse>(await response.json());
 
         // Update message in state
         setMessages((prev) => prev.map((m) => (m.id === messageId ? data.message : m)));
