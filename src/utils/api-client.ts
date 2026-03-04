@@ -311,6 +311,21 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
 }
 
 /**
+ * Unwrap API response data from the canonical `{ success, data }` envelope.
+ * Use this when you already have the parsed JSON object.
+ *
+ * @example
+ * const json = await response.json();
+ * const { clients, stats } = unwrapApiData(json);
+ */
+export function unwrapApiData<T>(json: unknown): T {
+  if (json && typeof json === 'object' && 'success' in json && (json as Record<string, unknown>).success === true) {
+    return ((json as Record<string, unknown>).data ?? {}) as T;
+  }
+  return json as T;
+}
+
+/**
  * Install global fetch interceptor to handle 401 responses
  * Call this once during app initialization.
  * This intercepts ALL fetch calls to /api/ endpoints.

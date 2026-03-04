@@ -8,7 +8,7 @@
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { formatDateTime } from '../../../utils/format-utils';
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost } from '../../../utils/api-client';
+import { apiFetch, apiPost, unwrapApiData } from '../../../utils/api-client';
 import { alertError, alertWarning } from '../../../utils/confirm-dialog';
 import { renderEmptyState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
@@ -54,7 +54,8 @@ export async function loadProjectMessages(
       return;
     }
 
-    const threadsData = (await threadsResponse.json()) as { threads?: MessageThreadResponse[] };
+    const threadsRaw = await threadsResponse.json();
+    const threadsData = unwrapApiData<{ threads?: MessageThreadResponse[] }>(threadsRaw);
     const threads: MessageThreadResponse[] = threadsData.threads || [];
 
     // Find thread for this project or client
@@ -79,7 +80,8 @@ export async function loadProjectMessages(
       return;
     }
 
-    const messagesData = (await messagesResponse.json()) as { messages?: MessageResponse[] };
+    const messagesRaw = await messagesResponse.json();
+    const messagesData = unwrapApiData<{ messages?: MessageResponse[] }>(messagesRaw);
     const messages: MessageResponse[] = messagesData.messages || [];
 
     if (messages.length === 0) {
@@ -146,8 +148,9 @@ export async function sendProjectMessage(
       });
 
       if (createResponse.ok) {
-        const data = await createResponse.json();
-        currentThreadId = data.thread?.id || data.threadId;
+        const raw = await createResponse.json();
+        const data = unwrapApiData<Record<string, unknown>>(raw);
+        currentThreadId = (data.thread as { id?: number })?.id || (data.threadId as number);
         messageInput.value = '';
         return true;
       }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Invoice, InvoiceStats, ApiResponse } from '@react/features/admin/types';
+import type { Invoice, InvoiceStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useInvoices');
@@ -119,23 +120,9 @@ export function useInvoices({
         throw new Error(`Failed to fetch invoices: ${response.statusText}`);
       }
 
-      const data = await response.json();
-
-      // Handle various response formats:
-      // 1. Direct array [...] - API returns plain array
-      // 2. { invoices: [...] }
-      // 3. { success, data: { invoices: [...] } }
-      // 4. { success, data: [...] }
-      if (Array.isArray(data)) {
-        setInvoices(data);
-      } else if (data.invoices && Array.isArray(data.invoices)) {
-        setInvoices(data.invoices);
-      } else if (data.success && data.data) {
-        const invoicesArray = Array.isArray(data.data) ? data.data : data.data.invoices || [];
-        setInvoices(invoicesArray);
-      } else {
-        throw new Error(data.error || 'Failed to load invoices');
-      }
+      const json = await response.json();
+      const data = unwrapApiData<{ invoices: Invoice[] }>(json);
+      setInvoices(data.invoices || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
@@ -160,17 +147,13 @@ export function useInvoices({
           throw new Error(`Failed to update invoice: ${response.statusText}`);
         }
 
-        const data: ApiResponse<Invoice> = await response.json();
-
-        if (data.success) {
-          // Update local state optimistically
-          setInvoices((prev) =>
-            prev.map((invoice) => (invoice.id === id ? { ...invoice, ...updates } : invoice))
-          );
-          return true;
-        }
-
-        return false;
+        const json = await response.json();
+        unwrapApiData<Invoice>(json);
+        // Update local state optimistically
+        setInvoices((prev) =>
+          prev.map((invoice) => (invoice.id === id ? { ...invoice, ...updates } : invoice))
+        );
+        return true;
       } catch (err) {
         logger.error('[useInvoices] Update error:', err);
         return false;

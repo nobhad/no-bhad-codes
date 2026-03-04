@@ -26,6 +26,7 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface Category {
   id: number;
@@ -121,8 +122,8 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load categories');
-      const data = await response.json();
-      setCategories(data.data?.categories || data.categories || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setCategories((data.categories as Category[]) || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load categories');
     } finally {

@@ -18,7 +18,7 @@ import { confirmDanger, promptDialog } from '../../../utils/confirm-dialog';
 import { getReactComponent } from '../../../react/registry';
 import { formatTimeAgo } from '../../../utils/time-utils';
 import { createReactCleanupHandler } from '../../../utils/react-cleanup';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../../utils/api-client';
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('PortalMessages');
@@ -185,8 +185,9 @@ export async function loadMessagesFromAPI(
       throw new Error('Failed to load message threads');
     }
 
-    const threadsData = await threadsResponse.json();
-    const threads: MessageThread[] = threadsData.threads || [];
+    const threadsRaw = await threadsResponse.json();
+    const threadsData = unwrapApiData<Record<string, unknown>>(threadsRaw);
+    const threads: MessageThread[] = (threadsData.threads as MessageThread[]) || [];
     cachedThreads = threads;
 
     // Render thread list
@@ -373,8 +374,9 @@ async function loadThreadMessages(
       throw new Error('Failed to load messages');
     }
 
-    const messagesData = await messagesResponse.json();
-    renderMessages(messagesContainer, messagesData.messages || [], ctx);
+    const messagesRaw = await messagesResponse.json();
+    const messagesData = unwrapApiData<Record<string, unknown>>(messagesRaw);
+    renderMessages(messagesContainer, (messagesData.messages as PortalMessage[]) || [], ctx);
 
     // Mark as read
     await apiFetch(`${MESSAGES_API}/threads/${threadId}/read`, {
@@ -684,10 +686,11 @@ export async function sendMessage(ctx: ClientPortalContext): Promise<void> {
       throw new Error(error.error || 'Failed to send message');
     }
 
-    const data = await response.json();
+    const raw = await response.json();
+    const data = unwrapApiData<Record<string, unknown>>(raw);
 
     if (data.threadId) {
-      currentThreadId = data.threadId;
+      currentThreadId = data.threadId as number;
     }
 
     // Clear input and attachments

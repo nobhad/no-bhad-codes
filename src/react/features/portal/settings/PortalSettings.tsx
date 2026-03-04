@@ -13,6 +13,7 @@ import { ProfileForm } from './ProfileForm';
 import { BillingForm } from './BillingForm';
 import { NotificationsForm } from './NotificationsForm';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalSettings');
@@ -110,21 +111,19 @@ export function PortalSettings({
         throw new Error('Failed to load profile');
       }
 
-      const json = await response.json();
-      // Server wraps response: { success, data: { client: {...} } }
-      const payload = json.data || json;
-      const clientData = payload.client || payload;
-      setProfile(clientData);
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      const rawClient = (payload.client || payload) as Record<string, unknown>;
+      setProfile(rawClient as unknown as ClientProfile);
 
       // Set billing if available
-      if (clientData.billing_address) {
-        setBilling(clientData.billing_address);
+      if (rawClient.billing_address) {
+        setBilling(rawClient.billing_address as BillingAddress);
       } else if (payload.billing_address) {
-        setBilling(payload.billing_address);
+        setBilling(payload.billing_address as BillingAddress);
       }
 
       // Set notification preferences if available
-      const notifPrefs = clientData.notification_preferences || payload.notification_preferences;
+      const notifPrefs = (rawClient.notification_preferences || payload.notification_preferences) as NotificationPreferences | undefined;
       if (notifPrefs) {
         setNotifications(prev => ({
           ...prev,

@@ -4,10 +4,10 @@ import type {
   ProjectMilestone,
   ProjectFile,
   Invoice,
-  Message,
-  ApiResponse
+  Message
 } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useProjectDetail');
@@ -151,21 +151,13 @@ export function useProjectDetail({
         throw new Error(`Failed to fetch project: ${response.statusText}`);
       }
 
-      // API returns { project, files, messages, updates } directly
-      // or { success, data: { project, ... } } format
-      const result = await response.json();
-
-      // Handle both response formats
-      if (result.project) {
-        return result.project as Project;
+      const json = await response.json();
+      const parsed = unwrapApiData<{ project: Project } | Project>(json);
+      // Handle unwrapped shape: either { project: {...} } or direct Project
+      if ('project' in parsed && parsed.project) {
+        return parsed.project;
       }
-      if (result.success && result.data?.project) {
-        return result.data.project as Project;
-      }
-      if (result.success && result.data) {
-        return result.data as Project;
-      }
-      throw new Error(result.error || 'Failed to load project');
+      return parsed as Project;
     } catch (err) {
       logger.error('[useProjectDetail] Error fetching project:', err);
       throw err;
@@ -186,11 +178,9 @@ export function useProjectDetail({
         return [];
       }
 
-      const result: ApiResponse<{ milestones: ProjectMilestone[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.milestones || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ milestones: ProjectMilestone[] }>(json);
+      return parsed.milestones || [];
     } catch (err) {
       logger.error('[useProjectDetail] Error fetching milestones:', err);
       return [];
@@ -210,11 +200,9 @@ export function useProjectDetail({
         return [];
       }
 
-      const result: ApiResponse<{ files: ProjectFile[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.files || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ files: ProjectFile[] }>(json);
+      return parsed.files || [];
     } catch (err) {
       logger.error('[useProjectDetail] Error fetching files:', err);
       return [];
@@ -234,11 +222,9 @@ export function useProjectDetail({
         return [];
       }
 
-      const result: ApiResponse<{ invoices: Invoice[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.invoices || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ invoices: Invoice[] }>(json);
+      return parsed.invoices || [];
     } catch (err) {
       logger.error('[useProjectDetail] Error fetching invoices:', err);
       return [];
@@ -258,11 +244,9 @@ export function useProjectDetail({
         return [];
       }
 
-      const result: ApiResponse<{ messages: Message[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.messages || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ messages: Message[] }>(json);
+      return parsed.messages || [];
     } catch (err) {
       logger.error('[useProjectDetail] Error fetching messages:', err);
       return [];
@@ -313,15 +297,13 @@ export function useProjectDetail({
           throw new Error(`Failed to send message: ${response.statusText}`);
         }
 
-        const result: ApiResponse<Message> = await response.json();
-        if (result.success && result.data) {
-          setData((prev) => ({
-            ...prev,
-            messages: [...prev.messages, result.data!]
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        const newMessage = unwrapApiData<Message>(json);
+        setData((prev) => ({
+          ...prev,
+          messages: [...prev.messages, newMessage]
+        }));
+        return true;
       } catch (err) {
         logger.error('[useProjectDetail] Send message error:', err);
         return false;
@@ -345,15 +327,13 @@ export function useProjectDetail({
           throw new Error(`Failed to update project: ${response.statusText}`);
         }
 
-        const result: ApiResponse<Project> = await response.json();
-        if (result.success) {
-          setData((prev) => ({
-            ...prev,
-            project: prev.project ? { ...prev.project, ...updates } : null
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        unwrapApiData<Project>(json);
+        setData((prev) => ({
+          ...prev,
+          project: prev.project ? { ...prev.project, ...updates } : null
+        }));
+        return true;
       } catch (err) {
         logger.error('[useProjectDetail] Update error:', err);
         return false;
@@ -377,15 +357,13 @@ export function useProjectDetail({
           throw new Error(`Failed to add milestone: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ProjectMilestone> = await response.json();
-        if (result.success && result.data) {
-          setData((prev) => ({
-            ...prev,
-            milestones: [...prev.milestones, result.data!]
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        const newMilestone = unwrapApiData<ProjectMilestone>(json);
+        setData((prev) => ({
+          ...prev,
+          milestones: [...prev.milestones, newMilestone]
+        }));
+        return true;
       } catch (err) {
         logger.error('[useProjectDetail] Add milestone error:', err);
         return false;
@@ -409,15 +387,13 @@ export function useProjectDetail({
           throw new Error(`Failed to update milestone: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ProjectMilestone> = await response.json();
-        if (result.success) {
-          setData((prev) => ({
-            ...prev,
-            milestones: prev.milestones.map((m) => (m.id === id ? { ...m, ...updates } : m))
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        unwrapApiData<ProjectMilestone>(json);
+        setData((prev) => ({
+          ...prev,
+          milestones: prev.milestones.map((m) => (m.id === id ? { ...m, ...updates } : m))
+        }));
+        return true;
       } catch (err) {
         logger.error('[useProjectDetail] Update milestone error:', err);
         return false;
@@ -496,15 +472,13 @@ export function useProjectDetail({
           throw new Error(`Failed to upload file: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ProjectFile> = await response.json();
-        if (result.success && result.data) {
-          setData((prev) => ({
-            ...prev,
-            files: [...prev.files, result.data!]
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        const newFile = unwrapApiData<ProjectFile>(json);
+        setData((prev) => ({
+          ...prev,
+          files: [...prev.files, newFile]
+        }));
+        return true;
       } catch (err) {
         logger.error('[useProjectDetail] Upload file error:', err);
         return false;

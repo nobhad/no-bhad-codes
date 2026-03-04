@@ -33,6 +33,7 @@ import { DOCUMENT_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('DocumentRequestsTable');
 
@@ -205,10 +206,9 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load document requests');
-      const data = await response.json();
-      const payload = data.data || data;
-      setRequests(payload.requests || []);
-      setStats(payload.stats || {
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setRequests((payload.requests as DocumentRequest[]) || []);
+      setStats((payload.stats as DocumentRequestStats) || {
         total: 0,
         pending: 0,
         submitted: 0,

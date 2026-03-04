@@ -172,6 +172,40 @@ router.delete(
 );
 
 /**
+ * POST /api/admin/proposals/bulk-delete - Bulk delete proposals
+ */
+router.post(
+  '/proposals/bulk-delete',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { proposalIds } = req.body;
+
+    if (!proposalIds || !Array.isArray(proposalIds) || proposalIds.length === 0) {
+      return errorResponse(res, 'proposalIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+    }
+
+    const db = getDatabase();
+    let deleted = 0;
+
+    for (const proposalId of proposalIds) {
+      const id = typeof proposalId === 'string' ? parseInt(proposalId, 10) : proposalId;
+      if (isNaN(id)) continue;
+
+      const result = await db.run(
+        'UPDATE proposals SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
+        [id]
+      );
+      if (result.changes && result.changes > 0) {
+        deleted++;
+      }
+    }
+
+    sendSuccess(res, { deleted });
+  })
+);
+
+/**
  * Map database status to frontend status
  */
 function mapStatus(dbStatus: string): string {

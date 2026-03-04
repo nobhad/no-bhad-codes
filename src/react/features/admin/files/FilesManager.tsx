@@ -35,6 +35,7 @@ import { FILES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('FilesManager');
 
@@ -191,10 +192,9 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       });
       if (!response.ok) throw new Error('Failed to load files');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setFiles(payload.files || []);
-      setStats(payload.stats || {
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setFiles((data.files as FileItem[]) || []);
+      setStats((data.stats as FileStats) || {
         totalFiles: 0,
         totalFolders: 0,
         totalSize: 0

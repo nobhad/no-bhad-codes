@@ -31,6 +31,7 @@
  */
 
 import { showToast } from './toast-notifications';
+import { unwrapApiData } from './api-client';
 import { createLogger } from './logger';
 
 const logger = createLogger('ApiWrappers');
@@ -401,7 +402,8 @@ async function parseResponseData<T>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type');
 
   if (contentType?.includes('application/json')) {
-    return (await response.json()) as T;
+    const json = await response.json();
+    return unwrapApiData<T>(json);
   }
 
   // For non-JSON responses, return empty object

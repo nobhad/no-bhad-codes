@@ -17,7 +17,7 @@ import { renderEmptyState } from '../../../components/empty-state';
 import { getReactComponent } from '../../../react/registry';
 import { showToast } from '../../../utils/toast-notifications';
 import { createLogger } from '../../../utils/logger';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../../utils/api-client';
 import { getCachedElement, invalidateCachedElement } from '../../../utils/dom-helpers';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 
@@ -79,8 +79,9 @@ export async function loadProjects(ctx: ClientPortalContext): Promise<void> {
       throw new Error('Failed to load projects');
     }
 
-    const data = await response.json();
-    const projects = data.projects || [];
+    const raw = await response.json();
+    const data = unwrapApiData<Record<string, unknown>>(raw);
+    const projects = (data.projects as ClientProject[]) || [];
 
     const projectsList = document.querySelector('.projects-list') as HTMLElement;
     if (projectsList && projects.length > 0) {
@@ -160,7 +161,8 @@ export async function fetchProjectDetails(
       return currentProject;
     }
 
-    const data = await response.json();
+    const raw = await response.json();
+    const data = unwrapApiData<Record<string, unknown>>(raw);
 
     // Transform and update updates
     if (data.updates && Array.isArray(data.updates)) {
@@ -170,7 +172,7 @@ export async function fetchProjectDetails(
         title: u.title || 'Update',
         description: u.description || '',
         author: u.author || 'System',
-        type: u.update_type || 'general'
+        type: (u.update_type || 'general') as 'general' | 'progress' | 'milestone' | 'issue' | 'resolution'
       }));
     }
 
@@ -351,8 +353,9 @@ export async function loadProjectPreview(_ctx: ClientPortalContext): Promise<voi
       throw new Error('Failed to load projects');
     }
 
-    const data = await response.json();
-    const projects = data.projects || [];
+    const raw = await response.json();
+    const data = unwrapApiData<Record<string, unknown>>(raw);
+    const projects = (data.projects as PortalProject[]) || [];
 
     // Find a project with a preview URL
     const projectWithPreview = projects.find((p: PortalProject) => p.preview_url);

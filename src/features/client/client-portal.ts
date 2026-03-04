@@ -44,7 +44,7 @@ import { formatTextWithLineBreaks, formatDate } from '../../utils/format-utils';
 import { showToast } from '../../utils/toast-notifications';
 import { withButtonLoading } from '../../utils/button-loading';
 import { initCopyEmailDelegation } from '../../utils/copy-email';
-import { installGlobalAuthInterceptor, apiFetch } from '../../utils/api-client';
+import { installGlobalAuthInterceptor, apiFetch, unwrapApiData } from '../../utils/api-client';
 import { getStatusBadgeHTML, createStatusBadge } from '../../components/status-badge';
 import { renderEmptyState } from '../../components/empty-state';
 import { initPortalHeader, type PortalHeader } from '../shared/portal-header';
@@ -798,13 +798,14 @@ export class ClientPortalModule extends BaseModule {
         })
       });
 
-      const data = await response.json();
+      const raw = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit project request');
+        throw new Error(raw.error || 'Failed to submit project request');
       }
 
-      showToast(data.message || 'Project request submitted successfully!', 'success');
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      showToast((data.message as string) || 'Project request submitted successfully!', 'success');
 
       // Clear the form
       const form = document.getElementById('new-project-form') as HTMLFormElement;
@@ -1129,8 +1130,9 @@ export class ClientPortalModule extends BaseModule {
         return;
       }
 
-      const projectsData = await projectsResponse.json();
-      const apiProjects = projectsData.projects || [];
+      const projectsRaw = await projectsResponse.json();
+      const projectsData = unwrapApiData<Record<string, unknown>>(projectsRaw);
+      const apiProjects = (projectsData.projects as ProjectResponse[]) || [];
 
       if (apiProjects.length === 0) {
         // No projects yet - show empty state with client name
@@ -1152,9 +1154,10 @@ export class ClientPortalModule extends BaseModule {
           try {
             const milestonesResponse = await apiFetch(`/api/projects/${apiProject.id}/milestones`);
             if (milestonesResponse.ok) {
-              const milestonesData = (await milestonesResponse.json()) as {
+              const milestonesRaw = await milestonesResponse.json();
+              const milestonesData = unwrapApiData<{
                 milestones?: ProjectMilestoneResponse[];
-              };
+              }>(milestonesRaw);
               milestones = milestonesData.milestones || [];
             } else {
               milestoneFetchFailures++;
@@ -1257,9 +1260,25 @@ export class ClientPortalModule extends BaseModule {
         return;
       }
 
-      const response_data = await response.json();
-      const stats = response_data.data?.stats;
-      const recentActivity = response_data.data?.recentActivity;
+      const response_raw = await response.json();
+      const response_data = unwrapApiData<{
+        stats?: {
+          activeProjects?: number;
+          pendingInvoices?: number;
+          unreadMessages?: number;
+          pendingDocRequests?: number;
+          pendingContracts?: number;
+        };
+        recentActivity?: Array<{
+          type: string;
+          title: string;
+          context: string;
+          date: string;
+          entityId?: number;
+        }>;
+      }>(response_raw);
+      const stats = response_data.stats;
+      const recentActivity = response_data.recentActivity;
 
       // Defensive check - if stats is missing, show empty state and return
       if (!stats) {
@@ -1616,7 +1635,8 @@ export class ClientPortalModule extends BaseModule {
         return;
       }
 
-      const data = (await response.json()) as ProjectDetailResponse;
+      const raw = await response.json();
+      const data = unwrapApiData<ProjectDetailResponse>(raw);
 
       // Transform and update updates
       if (data.updates && Array.isArray(data.updates)) {

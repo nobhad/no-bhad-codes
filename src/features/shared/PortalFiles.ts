@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch, apiPost, apiDelete } from '../../utils/api-client';
+import { apiFetch, apiPost, apiDelete, unwrapApiData } from '../../utils/api-client';
 import { formatTimeAgo } from '../../utils/time-utils';
 import type { DataItem } from './types';
 import { createLogger } from '../../utils/logger';
@@ -117,8 +117,9 @@ export default class PortalFiles extends PortalFeatureModule {
   private async loadFiles(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
-      this.files = data.files || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.files = (data.files as FileItem[]) || (data as unknown as FileItem[]) || [];
     } catch (error) {
       this.notify('Failed to load files', 'error');
       logger.error('Error loading files:', error);
@@ -130,8 +131,9 @@ export default class PortalFiles extends PortalFeatureModule {
 
     try {
       const response = await apiFetch(this.getFoldersEndpoint());
-      const data = await response.json();
-      this.folders = data.folders || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.folders = (data.folders as Folder[]) || (data as unknown as Folder[]) || [];
     } catch (error) {
       logger.error('Error loading folders:', error);
     }

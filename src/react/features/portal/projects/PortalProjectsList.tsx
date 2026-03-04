@@ -16,6 +16,7 @@ import { PORTAL_PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalProject, PortalProjectStatus } from '../types';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalProjectsList');
@@ -162,19 +163,17 @@ export function PortalProjectsList({
         throw new Error(`Failed to fetch projects: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
 
       // Handle various response formats and transform to PortalProject interface
       let rawProjects: Record<string, unknown>[] = [];
 
       if (data.projects && Array.isArray(data.projects)) {
         rawProjects = data.projects;
-      } else if (data.success && data.data) {
-        rawProjects = Array.isArray(data.data) ? data.data : (data.data.projects || []);
       } else if (Array.isArray(data)) {
-        rawProjects = data;
+        rawProjects = data as Record<string, unknown>[];
       } else {
-        throw new Error(data.error || 'Failed to load projects');
+        throw new Error((data.error as string) || 'Failed to load projects');
       }
 
       // Transform API response to match PortalProject interface (maps project_name to name)

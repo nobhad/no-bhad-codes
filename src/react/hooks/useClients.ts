@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Client, ClientStats, ApiResponse } from '@react/features/admin/types';
+import type { Client, ClientStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -103,15 +104,11 @@ export function useClients({
         throw new Error(`Failed to fetch clients: ${response.statusText}`);
       }
 
-      const data: ApiResponse<{ clients: Client[] }> = await response.json();
-
-      if (data.success && data.data) {
-        // Decode HTML entities in text fields to prevent double-encoding
-        const fetchedClients = data.data.clients || [];
-        setClients(decodeArrayFields(fetchedClients, CLIENT_TEXT_FIELDS));
-      } else {
-        throw new Error(data.error || 'Failed to load clients');
-      }
+      const json = await response.json();
+      const data = unwrapApiData<{ clients: Client[] }>(json);
+      // Decode HTML entities in text fields to prevent double-encoding
+      const fetchedClients = data.clients || [];
+      setClients(decodeArrayFields(fetchedClients, CLIENT_TEXT_FIELDS));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
@@ -136,17 +133,13 @@ export function useClients({
           throw new Error(`Failed to update client: ${response.statusText}`);
         }
 
-        const data: ApiResponse<Client> = await response.json();
-
-        if (data.success) {
-          // Update local state optimistically
-          setClients((prev) =>
-            prev.map((client) => (client.id === id ? { ...client, ...updates } : client))
-          );
-          return true;
-        }
-
-        return false;
+        const json = await response.json();
+        unwrapApiData<Client>(json);
+        // Update local state optimistically
+        setClients((prev) =>
+          prev.map((client) => (client.id === id ? { ...client, ...updates } : client))
+        );
+        return true;
       } catch (err) {
         logger.error('[useClients] Update error:', err);
         return false;
@@ -224,21 +217,17 @@ export function useClients({
           throw new Error(`Failed to send invite: ${response.statusText}`);
         }
 
-        const data: ApiResponse<unknown> = await response.json();
-
-        if (data.success) {
-          // Update local state with invitation timestamp
-          setClients((prev) =>
-            prev.map((client) =>
-              client.id === id
-                ? { ...client, invitation_sent_at: new Date().toISOString() }
-                : client
-            )
-          );
-          return true;
-        }
-
-        return false;
+        const json = await response.json();
+        unwrapApiData<unknown>(json);
+        // Update local state with invitation timestamp
+        setClients((prev) =>
+          prev.map((client) =>
+            client.id === id
+              ? { ...client, invitation_sent_at: new Date().toISOString() }
+              : client
+          )
+        );
+        return true;
       } catch (err) {
         logger.error('[useClients] Send invite error:', err);
         return false;

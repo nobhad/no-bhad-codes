@@ -9,7 +9,6 @@
  * ## Available Factories
  *
  * ### Mount Factories
- * - `createTableMount` - Basic mount/unmount for table components
  * - `createMountWrapper` - Full-featured mount with selector support
  * - `createSimpleMount` - Quick mount for simple components
  *
@@ -157,11 +156,7 @@ export { BUTTON_SETS } from '../../factories/buttons/button-sets';
 // MOUNT FACTORIES
 // ============================================
 
-// Legacy table mount (still widely used)
-export { createTableMount } from './createTableMount';
-export type { TableMountOptions, TableMountResult } from './createTableMount';
-
-// New streamlined mount wrapper
+// Streamlined mount wrapper
 export { createMountWrapper, createSimpleMount } from './createMountWrapper';
 export type {
   BaseMountOptions,

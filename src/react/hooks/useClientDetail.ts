@@ -7,10 +7,10 @@ import type {
   ClientNote,
   ClientDetailStats,
   ClientProject,
-  ClientTag,
-  ApiResponse
+  ClientTag
 } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useClientDetail');
@@ -133,12 +133,12 @@ export function useClientDetail({
         throw new Error(`Failed to fetch client: ${response.statusText}`);
       }
 
-      // API returns { success, data: { client, projects } }
-      const result: ApiResponse<{ client: Client; projects: unknown[] }> = await response.json();
-      if (result.success && result.data?.client) {
-        return result.data.client;
+      const json = await response.json();
+      const parsed = unwrapApiData<{ client: Client; projects: unknown[] }>(json);
+      if (parsed.client) {
+        return parsed.client;
       }
-      throw new Error(result.error || 'Failed to load client');
+      throw new Error('Failed to load client');
     } catch (err) {
       logger.error('[useClientDetail] Error fetching client:', err);
       throw err;
@@ -158,12 +158,9 @@ export function useClientDetail({
         return null;
       }
 
-      // API returns { success, data: { health: {...} } }
-      const result: ApiResponse<{ health: ClientHealth }> = await response.json();
-      if (result.success && result.data?.health) {
-        return result.data.health;
-      }
-      return null;
+      const json = await response.json();
+      const parsed = unwrapApiData<{ health: ClientHealth }>(json);
+      return parsed.health ?? null;
     } catch (err) {
       logger.error('[useClientDetail] Error fetching health:', err);
       return null;
@@ -183,11 +180,9 @@ export function useClientDetail({
         return [];
       }
 
-      const result: ApiResponse<{ contacts: ClientContact[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.contacts || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ contacts: ClientContact[] }>(json);
+      return parsed.contacts || [];
     } catch (err) {
       logger.error('[useClientDetail] Error fetching contacts:', err);
       return [];
@@ -207,11 +202,9 @@ export function useClientDetail({
         return [];
       }
 
-      const result: ApiResponse<{ activities: ClientActivity[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.activities || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ activities: ClientActivity[] }>(json);
+      return parsed.activities || [];
     } catch (err) {
       logger.error('[useClientDetail] Error fetching activities:', err);
       return [];
@@ -231,11 +224,9 @@ export function useClientDetail({
         return [];
       }
 
-      const result: ApiResponse<{ notes: ClientNote[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.notes || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ notes: ClientNote[] }>(json);
+      return parsed.notes || [];
     } catch (err) {
       logger.error('[useClientDetail] Error fetching notes:', err);
       return [];
@@ -255,12 +246,9 @@ export function useClientDetail({
         return null;
       }
 
-      // API returns { success, data: { stats: {...} } }
-      const result: ApiResponse<{ stats: ClientDetailStats }> = await response.json();
-      if (result.success && result.data?.stats) {
-        return result.data.stats;
-      }
-      return null;
+      const json = await response.json();
+      const parsed = unwrapApiData<{ stats: ClientDetailStats }>(json);
+      return parsed.stats ?? null;
     } catch (err) {
       logger.error('[useClientDetail] Error fetching stats:', err);
       return null;
@@ -280,11 +268,9 @@ export function useClientDetail({
         return [];
       }
 
-      const result: ApiResponse<{ projects: ClientProject[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.projects || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ projects: ClientProject[] }>(json);
+      return parsed.projects || [];
     } catch (err) {
       logger.error('[useClientDetail] Error fetching projects:', err);
       return [];
@@ -304,11 +290,9 @@ export function useClientDetail({
         return [];
       }
 
-      const result: ApiResponse<{ tags: ClientTag[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.tags || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ tags: ClientTag[] }>(json);
+      return parsed.tags || [];
     } catch (err) {
       logger.error('[useClientDetail] Error fetching tags:', err);
       return [];
@@ -328,11 +312,9 @@ export function useClientDetail({
         return [];
       }
 
-      const result: ApiResponse<{ tags: ClientTag[] }> = await response.json();
-      if (result.success && result.data) {
-        return result.data.tags || [];
-      }
-      return [];
+      const json = await response.json();
+      const parsed = unwrapApiData<{ tags: ClientTag[] }>(json);
+      return parsed.tags || [];
     } catch (err) {
       logger.error('[useClientDetail] Error fetching available tags:', err);
       return [];
@@ -402,15 +384,13 @@ export function useClientDetail({
           throw new Error(`Failed to update client: ${response.statusText}`);
         }
 
-        const result: ApiResponse<Client> = await response.json();
-        if (result.success) {
-          setData((prev) => ({
-            ...prev,
-            client: prev.client ? { ...prev.client, ...updates } : null
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        unwrapApiData<Client>(json);
+        setData((prev) => ({
+          ...prev,
+          client: prev.client ? { ...prev.client, ...updates } : null
+        }));
+        return true;
       } catch (err) {
         logger.error('[useClientDetail] Update error:', err);
         return false;
@@ -434,15 +414,13 @@ export function useClientDetail({
           throw new Error(`Failed to add contact: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ClientContact> = await response.json();
-        if (result.success && result.data) {
-          setData((prev) => ({
-            ...prev,
-            contacts: [...prev.contacts, result.data!]
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        const newContact = unwrapApiData<ClientContact>(json);
+        setData((prev) => ({
+          ...prev,
+          contacts: [...prev.contacts, newContact]
+        }));
+        return true;
       } catch (err) {
         logger.error('[useClientDetail] Add contact error:', err);
         return false;
@@ -466,15 +444,13 @@ export function useClientDetail({
           throw new Error(`Failed to update contact: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ClientContact> = await response.json();
-        if (result.success) {
-          setData((prev) => ({
-            ...prev,
-            contacts: prev.contacts.map((c) => (c.id === id ? { ...c, ...updates } : c))
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        unwrapApiData<ClientContact>(json);
+        setData((prev) => ({
+          ...prev,
+          contacts: prev.contacts.map((c) => (c.id === id ? { ...c, ...updates } : c))
+        }));
+        return true;
       } catch (err) {
         logger.error('[useClientDetail] Update contact error:', err);
         return false;
@@ -525,15 +501,13 @@ export function useClientDetail({
           throw new Error(`Failed to add note: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ClientNote> = await response.json();
-        if (result.success && result.data) {
-          setData((prev) => ({
-            ...prev,
-            notes: [result.data!, ...prev.notes]
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        const newNote = unwrapApiData<ClientNote>(json);
+        setData((prev) => ({
+          ...prev,
+          notes: [newNote, ...prev.notes]
+        }));
+        return true;
       } catch (err) {
         logger.error('[useClientDetail] Add note error:', err);
         return false;
@@ -557,15 +531,13 @@ export function useClientDetail({
           throw new Error(`Failed to update note: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ClientNote> = await response.json();
-        if (result.success) {
-          setData((prev) => ({
-            ...prev,
-            notes: prev.notes.map((n) => (n.id === id ? { ...n, ...updates } : n))
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        unwrapApiData<ClientNote>(json);
+        setData((prev) => ({
+          ...prev,
+          notes: prev.notes.map((n) => (n.id === id ? { ...n, ...updates } : n))
+        }));
+        return true;
       } catch (err) {
         logger.error('[useClientDetail] Update note error:', err);
         return false;
@@ -626,15 +598,13 @@ export function useClientDetail({
           throw new Error(`Failed to add tag: ${response.statusText}`);
         }
 
-        const result: ApiResponse<ClientTag> = await response.json();
-        if (result.success && result.data) {
-          setData((prev) => ({
-            ...prev,
-            tags: [...prev.tags, result.data!]
-          }));
-          return true;
-        }
-        return false;
+        const json = await response.json();
+        const newTag = unwrapApiData<ClientTag>(json);
+        setData((prev) => ({
+          ...prev,
+          tags: [...prev.tags, newTag]
+        }));
+        return true;
       } catch (err) {
         logger.error('[useClientDetail] Add tag error:', err);
         return false;
@@ -683,20 +653,18 @@ export function useClientDetail({
         throw new Error(`Failed to send invitation: ${response.statusText}`);
       }
 
-      const result: ApiResponse<{ invitation_sent_at: string }> = await response.json();
-      if (result.success) {
-        setData((prev) => ({
-          ...prev,
-          client: prev.client
-            ? {
-              ...prev.client,
-              invitation_sent_at: result.data?.invitation_sent_at || new Date().toISOString()
-            }
-            : null
-        }));
-        return true;
-      }
-      return false;
+      const json = await response.json();
+      const inviteData = unwrapApiData<{ invitation_sent_at: string }>(json);
+      setData((prev) => ({
+        ...prev,
+        client: prev.client
+          ? {
+            ...prev.client,
+            invitation_sent_at: inviteData.invitation_sent_at || new Date().toISOString()
+          }
+          : null
+      }));
+      return true;
     } catch (err) {
       logger.error('[useClientDetail] Send invitation error:', err);
       return false;

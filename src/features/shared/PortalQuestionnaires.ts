@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch } from '../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 import type { DataItem } from './types';
 
@@ -122,16 +122,18 @@ export default class PortalQuestionnaires extends PortalFeatureModule {
   private async loadData(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
 
       if (this.isAdmin) {
-        this.questionnaires = data.questionnaires || data || [];
+        this.questionnaires = (data.questionnaires as Questionnaire[]) || (data as unknown as Questionnaire[]) || [];
         // Also load assignments for admin
         const assignmentsResponse = await apiFetch('/api/questionnaires/assignments');
-        const assignmentsData = await assignmentsResponse.json();
-        this.assignments = assignmentsData.assignments || assignmentsData || [];
+        const assignmentsRaw = await assignmentsResponse.json();
+        const assignmentsData = unwrapApiData<Record<string, unknown>>(assignmentsRaw);
+        this.assignments = (assignmentsData.assignments as QuestionnaireAssignment[]) || (assignmentsData as unknown as QuestionnaireAssignment[]) || [];
       } else {
-        this.assignments = data.assignments || data || [];
+        this.assignments = (data.assignments as QuestionnaireAssignment[]) || (data as unknown as QuestionnaireAssignment[]) || [];
       }
     } catch (error) {
       this.notify('Failed to load questionnaires', 'error');

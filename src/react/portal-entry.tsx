@@ -25,6 +25,8 @@ import { mountPortalSettings, unmountPortalSettings } from './features/portal/se
 import { mountPortalAdHocRequests, unmountPortalAdHocRequests } from './features/portal/ad-hoc-requests';
 import { mountPortalNavigation, unmountPortalNavigation } from './features/portal/navigation';
 import { mountOnboardingWizard, unmountOnboardingWizard } from './features/portal/onboarding';
+import { mountPortalDashboard, unmountPortalDashboard } from './features/portal/dashboard/mount';
+import { mountPortalProjectDetail, unmountPortalProjectDetail } from './features/portal/projects';
 
 // Register all portal components
 registerReactComponent('portalInvoices', {
@@ -82,5 +84,17 @@ registerReactComponent('portalOnboarding', {
   unmount: unmountOnboardingWizard
 });
 
-// Log that React components are available
-logger.info('Portal components registered (11 modules)');
+// Components mounted directly by ReactModuleLoader (not via tab-content containers)
+// These are registered here for consistency but may also be mounted via
+// direct import in the vanilla TS portal code.
+registerReactComponent('portalDashboard', {
+  mount: mountPortalDashboard,
+  unmount: unmountPortalDashboard
+});
+
+registerReactComponent('portalProjectDetail', {
+  mount: mountPortalProjectDetail,
+  unmount: unmountPortalProjectDetail
+});
+
+logger.info('Portal components registered (13 modules)');

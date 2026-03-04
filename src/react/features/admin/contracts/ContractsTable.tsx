@@ -43,6 +43,7 @@ import { CONTRACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('ContractsTable');
 
@@ -210,10 +211,9 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
       });
       if (!response.ok) throw new Error('Failed to load contracts');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setContracts(payload.contracts || []);
-      setStats(payload.stats || {
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setContracts((payload.contracts as Contract[]) || []);
+      setStats((payload.stats as ContractStats) || {
         total: 0,
         draft: 0,
         pending: 0,

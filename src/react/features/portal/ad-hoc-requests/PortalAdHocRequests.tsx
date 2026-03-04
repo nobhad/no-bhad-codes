@@ -18,6 +18,7 @@ import { AdHocRequestCard } from './AdHocRequestCard';
 import { NewRequestForm } from './NewRequestForm';
 import type { AdHocRequest, NewAdHocRequestPayload } from './types';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalAdHocRequests');
@@ -118,10 +119,8 @@ export function PortalAdHocRequests({
         throw new Error('Failed to load requests');
       }
 
-      const raw = await response.json();
-      // Server uses sendSuccess() which wraps: { success, data: { requests } }
-      const data = raw.data ?? raw;
-      setRequests(data.requests || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setRequests((data.requests as AdHocRequest[]) || []);
     } catch (err) {
       logger.error('Error fetching requests:', err);
       setError(err instanceof Error ? err.message : 'Failed to load requests');
@@ -142,8 +141,8 @@ export function PortalAdHocRequests({
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setProjects(data.projects || []);
+        const data = unwrapApiData<Record<string, unknown>>(await response.json());
+        setProjects((data.projects as Array<{ id: number; name: string }>) || []);
       }
     } catch (err) {
       // Projects are optional, don't fail the whole component

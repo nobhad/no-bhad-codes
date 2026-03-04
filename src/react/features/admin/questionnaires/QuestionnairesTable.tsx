@@ -33,6 +33,7 @@ import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('QuestionnairesTable');
 
@@ -202,9 +203,8 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       });
       if (!response.ok) throw new Error('Failed to fetch questionnaires');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setQuestionnaires(payload.questionnaires || []);
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setQuestionnaires((payload.questionnaires as Questionnaire[]) || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

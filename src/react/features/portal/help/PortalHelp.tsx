@@ -13,6 +13,7 @@ import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import { BUSINESS_INFO } from '../../../../constants/business';
 import { TIMING } from '../../../../constants/timing';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { createLogger } from '../../../../utils/logger';
 import type { BaseMountOptions } from '@react/factories';
 
@@ -105,9 +106,8 @@ function usePortalHelp(getAuthToken?: () => string | null) {
         { headers: buildHeaders(), credentials: 'include' }
       );
       if (!response.ok) throw new Error('Failed to load featured articles');
-      const raw = await response.json();
-      const data = raw.data ?? raw;
-      setFeaturedArticles(data.articles || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setFeaturedArticles((data.articles as KBArticle[]) || []);
     } catch (err) {
       logger.error('Error fetching featured articles:', err);
     }
@@ -121,9 +121,8 @@ function usePortalHelp(getAuthToken?: () => string | null) {
         { headers: buildHeaders(), credentials: 'include' }
       );
       if (!response.ok) throw new Error('Failed to load categories');
-      const raw = await response.json();
-      const data = raw.data ?? raw;
-      const expandedCategories: ExpandedCategory[] = (data.categories || []).map(
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      const expandedCategories: ExpandedCategory[] = ((data.categories as KBCategory[]) || []).map(
         (cat: KBCategory) => ({
           ...cat,
           articles: [],
@@ -178,12 +177,11 @@ function usePortalHelp(getAuthToken?: () => string | null) {
         { headers: buildHeaders(), credentials: 'include' }
       );
       if (!response.ok) throw new Error('Failed to load category articles');
-      const raw = await response.json();
-      const data = raw.data ?? raw;
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
       setCategories(prev =>
         prev.map(c =>
           c.slug === categorySlug
-            ? { ...c, articles: data.articles || [], isLoading: false }
+            ? { ...c, articles: (data.articles as KBArticle[]) || [], isLoading: false }
             : c
         )
       );
@@ -206,9 +204,8 @@ function usePortalHelp(getAuthToken?: () => string | null) {
         { headers: buildHeaders(), credentials: 'include' }
       );
       if (!response.ok) throw new Error('Failed to load article');
-      const raw = await response.json();
-      const data = raw.data ?? raw;
-      setSelectedArticle(data.article);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setSelectedArticle(data.article as KBArticle);
       setViewMode('article');
     } catch (err) {
       logger.error('Error fetching article:', err);
@@ -244,9 +241,8 @@ function usePortalHelp(getAuthToken?: () => string | null) {
           { headers: buildHeaders(), credentials: 'include' }
         );
         if (!response.ok) throw new Error('Search failed');
-        const raw = await response.json();
-        const data = raw.data ?? raw;
-        setSearchResults(data.results || []);
+        const data = unwrapApiData<Record<string, unknown>>(await response.json());
+        setSearchResults((data.results as KBArticle[]) || []);
       } catch (err) {
         logger.error('Error searching articles:', err);
         setSearchResults([]);

@@ -40,6 +40,7 @@ import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('AdHocRequestsTable');
 
@@ -219,10 +220,9 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load ad-hoc requests');
-      const data = await response.json();
-      const payload = data.data || data;
-      setRequests(payload.requests || []);
-      setStats(payload.stats || {
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setRequests((payload.requests as AdHocRequest[]) || []);
+      setStats((payload.stats as AdHocRequestStats) || {
         total: 0,
         pending: 0,
         inProgress: 0,

@@ -8,7 +8,7 @@
 import { formatDate, formatCurrency } from '../../../utils/format-utils';
 import { SanitizationUtils } from '../../../utils/sanitization-utils';
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, parseApiResponse } from '../../../utils/api-client';
+import { apiFetch, parseApiResponse, unwrapApiData } from '../../../utils/api-client';
 import { renderEmptyState, renderErrorState } from '../../../components/empty-state';
 import { domCache } from './dom-cache';
 import type { InvoiceResponse, InvoiceLineItem } from '../../../types/api';
@@ -347,8 +347,9 @@ async function handleReceiptDownload(invoiceId: number, invoiceNumber: string): 
       return;
     }
 
-    const receiptsData = await receiptsResponse.json();
-    const receipts = receiptsData.receipts || [];
+    const receiptsRaw = await receiptsResponse.json();
+    const receiptsData = unwrapApiData<Record<string, unknown>>(receiptsRaw);
+    const receipts = (receiptsData.receipts as Array<{ id: number; receipt_number?: string }>) || [];
 
     if (receipts.length === 0) {
       const { showToast } = await import('../../../utils/toast-notifications');

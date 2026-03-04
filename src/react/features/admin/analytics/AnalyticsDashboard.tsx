@@ -32,6 +32,7 @@ import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 // Register Chart.js components once
@@ -294,7 +295,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load analytics');
-      const analyticsData = await response.json();
+      const analyticsData = unwrapApiData<AnalyticsData>(await response.json());
       setData(analyticsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics');

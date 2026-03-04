@@ -25,6 +25,7 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 interface Conversation {
   id: number;
@@ -133,9 +134,8 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
       });
       if (!response.ok) throw new Error('Failed to load conversations');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setConversations(payload.conversations || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setConversations((data.conversations as Conversation[]) || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversations');
     } finally {

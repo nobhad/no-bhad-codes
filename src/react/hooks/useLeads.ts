@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Lead, LeadStatus, LeadStats, ApiResponse } from '@react/features/admin/types';
+import type { Lead, LeadStatus, LeadStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
+import { unwrapApiData } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -108,20 +109,9 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         throw new Error(`Failed to fetch leads: ${response.statusText}`);
       }
 
-      const data = await response.json();
-
-      // Handle different response formats
-      let leadsArray: Lead[] = [];
-      if (data.success && data.data) {
-        // Could be { leads: [...] } or direct array
-        leadsArray = Array.isArray(data.data) ? data.data : data.data.leads || [];
-      } else if (Array.isArray(data)) {
-        leadsArray = data;
-      } else if (data.leads && Array.isArray(data.leads)) {
-        leadsArray = data.leads;
-      } else {
-        throw new Error(data.error || 'Failed to load leads');
-      }
+      const json = await response.json();
+      const data = unwrapApiData<{ leads: Lead[] }>(json);
+      const leadsArray = data.leads || [];
 
       // Decode HTML entities in text fields to prevent double-encoding
       setLeads(decodeArrayFields(leadsArray, LEAD_TEXT_FIELDS));
@@ -164,15 +154,11 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
           throw new Error(`Failed to update lead: ${response.statusText}`);
         }
 
-        const data: ApiResponse<Lead> = await response.json();
-
-        if (data.success) {
-          // Update local state optimistically
-          setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...updates } : lead)));
-          return true;
-        }
-
-        return false;
+        const json = await response.json();
+        unwrapApiData<Lead>(json);
+        // Update local state optimistically
+        setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...updates } : lead)));
+        return true;
       } catch (err) {
         logger.error('[useLeads] Update error:', err);
         return false;
@@ -205,17 +191,13 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
           throw new Error(`Failed to bulk update: ${response.statusText}`);
         }
 
-        const data: ApiResponse<unknown> = await response.json();
-
-        if (data.success) {
-          // Update local state
-          setLeads((prev) =>
-            prev.map((lead) => (ids.includes(lead.id) ? { ...lead, status } : lead))
-          );
-          return true;
-        }
-
-        return false;
+        const json = await response.json();
+        unwrapApiData<unknown>(json);
+        // Update local state
+        setLeads((prev) =>
+          prev.map((lead) => (ids.includes(lead.id) ? { ...lead, status } : lead))
+        );
+        return true;
       } catch (err) {
         logger.error('[useLeads] Bulk update error:', err);
         return false;
@@ -249,12 +231,11 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         });
 
         if (response.ok) {
-          const data: ApiResponse<{ deleted: number }> = await response.json();
-          if (data.success) {
-            success = data.data?.deleted || ids.length;
-            // Remove from local state
-            setLeads((prev) => prev.filter((lead) => !ids.includes(lead.id)));
-          }
+          const json = await response.json();
+          const data = unwrapApiData<{ deleted: number }>(json);
+          success = data.deleted || ids.length;
+          // Remove from local state
+          setLeads((prev) => prev.filter((lead) => !ids.includes(lead.id)));
         } else {
           // Fallback to individual deletes
           for (const id of ids) {

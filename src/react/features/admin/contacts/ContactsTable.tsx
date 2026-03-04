@@ -39,6 +39,7 @@ import { CONTACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('ContactsTable');
 
@@ -199,10 +200,9 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
       });
       if (!response.ok) throw new Error('Failed to load contacts');
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setContacts(payload.contacts || []);
-      setStats(payload.stats || {
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setContacts((payload.contacts as Contact[]) || []);
+      setStats((payload.stats as ContactStats) || {
         total: 0,
         active: 0,
         primary: 0,

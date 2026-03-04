@@ -11,6 +11,7 @@ import { getLucideIcon } from '@/react/factories';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalPreview');
@@ -103,14 +104,12 @@ export function PortalPreview({
         throw new Error(`Failed to fetch projects: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
 
       // Handle various response formats
       let projects: Record<string, unknown>[] = [];
       if (data.projects && Array.isArray(data.projects)) {
         projects = data.projects;
-      } else if (data.success && data.data) {
-        projects = Array.isArray(data.data) ? data.data : (data.data.projects || []);
       } else if (Array.isArray(data)) {
         projects = data;
       }

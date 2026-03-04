@@ -6,7 +6,7 @@
  */
 
 import { AdminAuth } from '../admin-auth';
-import { apiFetch, apiPost, apiPut, parseApiResponse } from '../../../utils/api-client';
+import { apiFetch, apiPost, apiPut, parseApiResponse, unwrapApiData } from '../../../utils/api-client';
 import {
   confirmDialog,
   confirmDanger,
@@ -132,8 +132,9 @@ export async function showApplyCreditPrompt(
       return;
     }
 
-    const depositsData = await depositsResponse.json();
-    const deposits = depositsData.deposits || [];
+    const depositsRaw = await depositsResponse.json();
+    const depositsData = unwrapApiData<Record<string, unknown>>(depositsRaw);
+    const deposits = (depositsData.deposits as Array<{ invoice_id: number; invoice_number: string; available_amount: number }>) || [];
 
     if (deposits.length === 0) {
       alertWarning('No paid deposits available to apply as credit');

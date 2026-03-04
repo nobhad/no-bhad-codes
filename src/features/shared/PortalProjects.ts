@@ -12,7 +12,7 @@
  */
 
 import { PortalFeatureModule } from './PortalFeatureModule';
-import { apiFetch } from '../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../utils/api-client';
 import type { DataItem, ColumnDef } from './types';
 import { createLogger } from '../../utils/logger';
 
@@ -110,8 +110,9 @@ export default class PortalProjects extends PortalFeatureModule {
   private async loadProjects(): Promise<void> {
     try {
       const response = await apiFetch(this.getApiEndpoint());
-      const data = await response.json();
-      this.projects = data.projects || data || [];
+      const raw = await response.json();
+      const data = unwrapApiData<Record<string, unknown>>(raw);
+      this.projects = (data.projects as Project[]) || (data as unknown as Project[]) || [];
     } catch (error) {
       this.notify('Failed to load projects', 'error');
       logger.error('Error loading projects:', error);

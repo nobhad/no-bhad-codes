@@ -39,6 +39,7 @@ import { formatDate } from '@react/utils/formatDate';
 import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filterConfigs';
 import type { SortConfig } from '@react/features/admin/types';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('DeletedItemsTable');
@@ -207,8 +208,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load deleted items');
-      const data = await response.json();
-      const payload = data.data || data;
+      const payload = unwrapApiData<{ items?: DeletedItem[]; stats?: DeletedItemsStats }>(await response.json());
       setItems(payload.items || []);
       setStats(payload.stats || {
         total: 0,

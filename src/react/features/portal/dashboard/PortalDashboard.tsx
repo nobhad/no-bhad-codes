@@ -11,6 +11,7 @@ import { formatRelativeTime, IconButton } from '@react/factories';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalDashboard');
@@ -129,11 +130,10 @@ function usePortalDashboard({
         throw new Error('Failed to load dashboard data');
       }
 
-      const json = await response.json();
-      const data: DashboardData | undefined = json.data;
+      const data = unwrapApiData<DashboardData>(await response.json());
 
       if (!data?.stats) {
-        logger.warn('Dashboard response missing stats:', json);
+        logger.warn('Dashboard response missing stats:', data);
         setStats(null);
         setRecentActivity([]);
         return;

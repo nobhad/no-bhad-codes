@@ -14,7 +14,7 @@ import { ICONS } from '../../../constants/icons';
 import { getStatusBadgeHTML } from '../../../components/status-badge';
 import { getReactComponent } from '../../../react/registry';
 import { showToast } from '../../../utils/toast-notifications';
-import { apiFetch } from '../../../utils/api-client';
+import { apiFetch, unwrapApiData } from '../../../utils/api-client';
 import { formatDate } from '../../../utils/format-utils';
 
 // Track React unmount function
@@ -185,7 +185,8 @@ async function loadMyResponses(): Promise<{
 }> {
   const res = await apiFetch(`${API_BASE}/my-responses`);
   if (!res.ok) throw new Error('Failed to load questionnaires');
-  return await res.json();
+  const raw = await res.json();
+  return unwrapApiData<{ responses: QuestionnaireResponse[]; stats: QuestionnaireStats }>(raw);
 }
 
 async function loadResponseDetails(
@@ -193,7 +194,8 @@ async function loadResponseDetails(
 ): Promise<{ response: QuestionnaireResponse; questionnaire: Questionnaire }> {
   const res = await apiFetch(`${API_BASE}/responses/${responseId}`);
   if (!res.ok) throw new Error('Failed to load questionnaire');
-  return await res.json();
+  const raw = await res.json();
+  return unwrapApiData<{ response: QuestionnaireResponse; questionnaire: Questionnaire }>(raw);
 }
 
 async function saveProgress(responseId: number, answers: Record<string, unknown>): Promise<void> {

@@ -13,6 +13,7 @@ import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('AdHocAnalytics');
 
@@ -68,9 +69,8 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load saved queries');
-      const data = await response.json();
-      const payload = data.data || data;
-      setSavedQueries(payload.queries || []);
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setSavedQueries((payload.queries as SavedQuery[]) || []);
     } catch (err) {
       logger.error('Failed to load saved queries:', err);
     }
@@ -99,9 +99,8 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
         throw new Error(errorData.message || 'Failed to execute query');
       }
 
-      const data = await response.json();
-      const payload = data.data || data;
-      setResult(payload.result);
+      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
+      setResult(payload.result as QueryResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to execute query');
     } finally {

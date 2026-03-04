@@ -20,6 +20,7 @@ import type {
   PortalQuestionnaireResponse,
   QuestionnaireStatus
 } from './types';
+import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 /**
@@ -115,10 +116,8 @@ export function PortalQuestionnairesView({
         throw new Error('Failed to fetch questionnaires');
       }
 
-      const raw = await response.json();
-      // Server uses sendSuccess() which wraps: { success, data: { responses } }
-      const data = raw.data ?? raw;
-      setResponses(data.responses || []);
+      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      setResponses((data.responses as PortalQuestionnaireResponse[]) || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load questionnaires';
       setError(errorMessage);
