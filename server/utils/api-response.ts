@@ -81,7 +81,7 @@ export const ErrorCodes = {
   EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
   OPERATION_FAILED: 'OPERATION_FAILED',
   INVALID_CLIENT: 'INVALID_CLIENT',
-  BAD_REQUEST: 'BAD_REQUEST',
+  BAD_REQUEST: 'BAD_REQUEST'
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
@@ -104,7 +104,7 @@ export function sendSuccess<T>(
   statusCode = 200
 ): Response {
   const response: ApiResponse<T> = {
-    success: true,
+    success: true
   };
 
   if (message) {
@@ -136,7 +136,7 @@ export function sendCreated<T>(
 export function messageResponse(res: Response, message: string, status = 200): Response {
   return res.status(status).json({
     success: true,
-    message,
+    message
   });
 }
 
@@ -157,7 +157,7 @@ export function sendError(
   const response: ApiResponse & { details?: Record<string, unknown> } = {
     success: false,
     error: message,
-    code,
+    code
   };
 
   if (details) {
@@ -179,7 +179,7 @@ export function errorResponse(
   return res.status(status).json({
     success: false,
     error: message,
-    code: code || getErrorCode(status),
+    code: code || getErrorCode(status)
   });
 }
 
@@ -197,7 +197,7 @@ export function errorResponseWithPayload(
     success: false,
     error: message,
     code: code || getErrorCode(status),
-    ...(payload || {}),
+    ...(payload || {})
   });
 }
 
@@ -331,8 +331,8 @@ export function sendPaginated<T>(
       total: pagination.total,
       totalPages,
       hasNext: pagination.page < totalPages,
-      hasPrev: pagination.page > 1,
-    },
+      hasPrev: pagination.page > 1
+    }
   };
 
   if (message) {
@@ -351,23 +351,23 @@ export function sendPaginated<T>(
  */
 function getErrorCode(status: number): string {
   switch (status) {
-    case 400:
-      return 'BAD_REQUEST';
-    case 401:
-      return 'UNAUTHORIZED';
-    case 403:
-      return 'ACCESS_DENIED';
-    case 404:
-      return 'RESOURCE_NOT_FOUND';
-    case 409:
-      return 'DUPLICATE_RESOURCE';
-    case 422:
-      return 'VALIDATION_ERROR';
-    case 429:
-      return 'RATE_LIMIT_EXCEEDED';
-    case 500:
-      return 'INTERNAL_ERROR';
-    default:
-      return 'ERROR';
+  case 400:
+    return 'BAD_REQUEST';
+  case 401:
+    return 'UNAUTHORIZED';
+  case 403:
+    return 'ACCESS_DENIED';
+  case 404:
+    return 'RESOURCE_NOT_FOUND';
+  case 409:
+    return 'DUPLICATE_RESOURCE';
+  case 422:
+    return 'VALIDATION_ERROR';
+  case 429:
+    return 'RATE_LIMIT_EXCEEDED';
+  case 500:
+    return 'INTERNAL_ERROR';
+  default:
+    return 'ERROR';
   }
 }

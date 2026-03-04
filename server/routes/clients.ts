@@ -36,12 +36,12 @@ const ClientValidationSchemas = {
     phone: { type: 'string' as const, maxLength: 30 },
     client_type: {
       type: 'string' as const,
-      allowedValues: ['business', 'individual', 'nonprofit', 'government'],
+      allowedValues: ['business', 'individual', 'nonprofit', 'government']
     },
     status: {
       type: 'string' as const,
-      allowedValues: ['active', 'inactive', 'pending'],
-    },
+      allowedValues: ['active', 'inactive', 'pending']
+    }
   },
   update: {
     email: { type: 'email' as const },
@@ -50,12 +50,12 @@ const ClientValidationSchemas = {
     phone: { type: 'string' as const, maxLength: 30 },
     status: {
       type: 'string' as const,
-      allowedValues: ['active', 'inactive', 'pending'],
-    },
+      allowedValues: ['active', 'inactive', 'pending']
+    }
   },
   invite: {
     // No body params needed - client info comes from DB via :id param
-  },
+  }
 };
 
 // =====================================================
@@ -123,7 +123,7 @@ router.put(
       req.user!.email,
       {
         contact_name: req.body.original_contact_name,
-        company_name: req.body.original_company_name,
+        company_name: req.body.original_company_name
       },
       { contact_name, company_name, phone },
       req
@@ -144,7 +144,7 @@ router.put(
     windowMs: 60 * 60 * 1000, // 1 hour
     maxRequests: 5,
     message: 'Too many password change attempts. Please try again later.',
-    keyGenerator: (req) => `password-change:${(req as AuthenticatedRequest).user?.id || req.ip}`,
+    keyGenerator: (req) => `password-change:${(req as AuthenticatedRequest).user?.id || req.ip}`
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
@@ -205,7 +205,7 @@ router.put(
       notify_new_message: messages,
       notify_project_update: status,
       notify_invoice_created: invoices,
-      email_frequency: weekly ? 'weekly_digest' : 'immediate',
+      email_frequency: weekly ? 'weekly_digest' : 'immediate'
     });
 
     sendSuccess(res, undefined, 'Notification preferences updated');
@@ -231,10 +231,10 @@ router.get(
         messages: prefs.notify_new_message,
         status: prefs.notify_project_update,
         invoices: prefs.notify_invoice_created,
-        weekly: prefs.email_frequency === 'weekly_digest',
+        weekly: prefs.email_frequency === 'weekly_digest'
       },
       // Also include full preferences for clients that want more options
-      fullPreferences: prefs,
+      fullPreferences: prefs
     });
   })
 );
@@ -304,7 +304,7 @@ router.put(
         state || null,
         zip || null,
         country || null,
-        req.user!.id,
+        req.user!.id
       ]
     );
 
@@ -329,7 +329,7 @@ router.get(
 
     // Get active projects count
     const projectsResult = await db.get(
-      "SELECT COUNT(*) as count FROM projects WHERE client_id = ? AND status IN ('planning', 'in-progress', 'review')",
+      'SELECT COUNT(*) as count FROM projects WHERE client_id = ? AND status IN (\'planning\', \'in-progress\', \'review\')',
       [clientId]
     );
     const activeProjects = projectsResult?.count || 0;
@@ -473,15 +473,15 @@ router.get(
         pendingInvoices,
         unreadMessages,
         pendingDocRequests,
-        pendingContracts,
+        pendingContracts
       },
       recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
         type: item.type,
         title: item.title,
         context: item.context,
         date: item.date,
-        entityId: item.entity_id,
-      })),
+        entityId: item.entity_id
+      }))
     });
   })
 );
@@ -498,7 +498,7 @@ router.get(
   cache({
     ttl: 300, // 5 minutes
     tags: ['clients', 'projects'],
-    keyGenerator: (_req) => 'clients:all',
+    keyGenerator: (_req) => 'clients:all'
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
@@ -541,7 +541,7 @@ router.get(
           tagsByClient.get(clientId)!.push({
             id: r.id as number,
             name: r.name as string,
-            color: (r.color as string) || '#6b7280',
+            color: (r.color as string) || '#6b7280'
           });
         }
 
@@ -550,13 +550,13 @@ router.get(
           const c = client as Record<string, unknown>;
           return {
             ...c,
-            tags: tagsByClient.get(c.id as number) || [],
+            tags: tagsByClient.get(c.id as number) || []
           };
         });
       },
       {
         ttl: 300,
-        tags: ['clients', 'projects'],
+        tags: ['clients', 'projects']
       }
     );
 
@@ -663,7 +663,7 @@ router.get(
   cache({
     ttl: 600, // 10 minutes
     tags: (req) => [`client:${req.params.id}`, 'projects'],
-    keyGenerator: (req) => `client:${req.params.id}:details`,
+    keyGenerator: (req) => `client:${req.params.id}:details`
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.id);
@@ -691,7 +691,7 @@ router.get(
       },
       {
         ttl: 600,
-        tags: [`client:${clientId}`],
+        tags: [`client:${clientId}`]
       }
     );
 
@@ -718,13 +718,13 @@ router.get(
       },
       {
         ttl: 300,
-        tags: [`client:${clientId}`, 'projects'],
+        tags: [`client:${clientId}`, 'projects']
       }
     );
 
     sendSuccess(res, {
       client,
-      projects,
+      projects
     });
   })
 );
@@ -765,7 +765,7 @@ router.post(
 
     // Check if email already exists
     const existingClient = await db.get('SELECT id FROM clients WHERE email = ?', [
-      email.toLowerCase(),
+      email.toLowerCase()
     ]);
 
     if (existingClient) {
@@ -790,7 +790,7 @@ router.post(
         contact_name || null,
         phone || null,
         client_type || 'business',
-        clientStatus,
+        clientStatus
       ]
     );
 
@@ -837,7 +837,7 @@ router.post(
             name: newClientContactName || 'Client',
             companyName: newClientCompanyName,
             loginUrl: portalUrl,
-            supportEmail: supportEmail,
+            supportEmail: supportEmail
           });
         }
       } else {
@@ -855,12 +855,12 @@ router.post(
         companyName: newClientCompanyName || 'Unknown Company',
         projectType: 'New Registration',
         budget: 'TBD',
-        timeline: 'New Client',
+        timeline: 'New Client'
       });
     } catch (emailError) {
       await logger.error('Failed to send welcome email:', {
         error: emailError instanceof Error ? emailError : undefined,
-        category: 'CLIENTS',
+        category: 'CLIENTS'
       });
       // Continue with response - don't fail client creation due to email issues
     }
@@ -903,7 +903,7 @@ router.put(
       const normalized = trimmed.toLowerCase();
       const existing = await db.get('SELECT id FROM clients WHERE email = ? AND id != ?', [
         normalized,
-        clientId,
+        clientId
       ]);
       if (existing) {
         return errorResponse(res, 'Email already in use by another client', 409, 'EMAIL_EXISTS');
@@ -1076,7 +1076,7 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-        `,
+        `
       });
 
       // Log the invitation
@@ -1090,14 +1090,14 @@ No Bhad Codes Team
         userType: 'admin',
         metadata: { clientName },
         ipAddress: req.ip || 'unknown',
-        userAgent: req.get('user-agent') || 'unknown',
+        userAgent: req.get('user-agent') || 'unknown'
       });
 
       sendSuccess(res, { clientId, email: clientEmail }, 'Invitation sent successfully');
     } catch (emailError) {
       await logger.error('[Clients] Failed to send invitation email:', {
         error: emailError instanceof Error ? emailError : undefined,
-        category: 'CLIENTS',
+        category: 'CLIENTS'
       });
       errorResponse(res, 'Failed to send invitation email', 500, 'EMAIL_FAILED');
     }
@@ -1177,7 +1177,7 @@ router.post(
       department,
       role,
       isPrimary,
-      notes,
+      notes
     });
 
     sendCreated(res, { contact });
@@ -1250,7 +1250,7 @@ router.get(
       startDate: startDate as string,
       endDate: endDate as string,
       limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
     });
 
     sendSuccess(res, { activities });
@@ -1282,7 +1282,7 @@ router.post(
       title,
       description,
       metadata,
-      createdBy: req.user?.email || 'admin',
+      createdBy: req.user?.email || 'admin'
     });
 
     sendCreated(res, { activity });
@@ -1310,7 +1310,7 @@ router.get(
       created_by: a.createdBy,
       created_at: a.createdAt,
       client_name: a.clientName,
-      company_name: a.companyName,
+      company_name: a.companyName
     }));
     sendSuccess(res, { activities: apiActivities });
   })
@@ -1337,7 +1337,7 @@ function toApiNote(n: {
     is_pinned: n.isPinned,
     created_at: n.createdAt,
     updated_at: n.updatedAt,
-    created_by: n.author,
+    created_by: n.author
   };
 }
 
@@ -1446,7 +1446,7 @@ router.post(
       isRequired,
       placeholder,
       defaultValue,
-      displayOrder,
+      displayOrder
     } = req.body;
 
     if (!fieldName || !fieldLabel || !fieldType) {
@@ -1466,7 +1466,7 @@ router.post(
       isRequired,
       placeholder,
       defaultValue,
-      displayOrder,
+      displayOrder
     });
 
     sendCreated(res, { field });
@@ -1711,7 +1711,7 @@ router.get(
     const { events, total } = await timelineService.getClientTimeline(req.user!.id, {
       projectId,
       limit,
-      offset,
+      offset
     });
 
     sendSuccess(res, { events, total, limit, offset });

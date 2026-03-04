@@ -15,7 +15,7 @@ import {
   emailTemplateService,
   type EmailTemplateCategory,
   type CreateTemplateData,
-  type UpdateTemplateData,
+  type UpdateTemplateData
 } from '../services/email-template-service.js';
 import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
 
@@ -97,7 +97,7 @@ router.post(
       body_html,
       body_text,
       variables,
-      is_active,
+      is_active
     };
 
     const template = await emailTemplateService.createTemplate(data, req.user?.email);
@@ -128,7 +128,7 @@ router.put(
       body_text,
       variables,
       is_active,
-      change_reason,
+      change_reason
     } = req.body;
 
     const data: UpdateTemplateData = {
@@ -139,7 +139,7 @@ router.put(
       body_html,
       body_text,
       variables,
-      is_active,
+      is_active
     };
 
     try {
@@ -400,7 +400,7 @@ router.get(
       templateId,
       recipientEmail,
       status,
-      limit,
+      limit
     });
 
     sendSuccess(res, { logs });

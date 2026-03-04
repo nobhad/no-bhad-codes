@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import {
   canAccessProject,
   canAccessTask,
-  canAccessChecklistItem,
+  canAccessChecklistItem
 } from '../../middleware/access-control.js';
 import { projectService } from '../../services/project-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
@@ -41,7 +41,7 @@ router.get(
       'in_progress',
       'completed',
       'cancelled',
-      'blocked',
+      'blocked'
     ];
     const statusFilter =
       status && validStatuses.includes(status as TaskStatus) ? (status as TaskStatus) : undefined;
@@ -50,7 +50,7 @@ router.get(
       status: statusFilter,
       assignedTo: assignedTo as string | undefined,
       milestoneId: milestoneId ? parseInt(milestoneId as string) : undefined,
-      includeSubtasks: includeSubtasks === 'true',
+      includeSubtasks: includeSubtasks === 'true'
     });
 
     sendSuccess(res, { tasks });

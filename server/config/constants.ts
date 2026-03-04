@@ -20,7 +20,7 @@ export const PROJECT_TYPES = [
   'ecommerce', // Legacy support
   'web-app',
   'browser-extension',
-  'other',
+  'other'
 ] as const;
 
 export type ProjectType = (typeof PROJECT_TYPES)[number];
@@ -35,7 +35,7 @@ export const PROJECT_STATUSES = [
   'on_hold',
   'completed',
   'cancelled',
-  'archived',
+  'archived'
 ] as const;
 
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
@@ -52,7 +52,7 @@ export const PROPOSAL_STATUSES = [
   'reviewed',
   'accepted',
   'rejected',
-  'converted',
+  'converted'
 ] as const;
 export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
 
@@ -60,7 +60,7 @@ export const MAINTENANCE_OPTIONS = [
   'diy',
   'essential',
   'standard',
-  'premium',
+  'premium'
 ] as const;
 export type MaintenanceOption = (typeof MAINTENANCE_OPTIONS)[number];
 
@@ -75,7 +75,7 @@ export const INVOICE_STATUSES = [
   'partial',
   'paid',
   'overdue',
-  'cancelled',
+  'cancelled'
 ] as const;
 
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
@@ -84,7 +84,7 @@ export const INVOICE_TYPES = [
   'standard',
   'recurring',
   'milestone',
-  'retainer',
+  'retainer'
 ] as const;
 
 export type InvoiceType = (typeof INVOICE_TYPES)[number];
@@ -98,7 +98,7 @@ export const TASK_STATUSES = [
   'in_progress',
   'completed',
   'cancelled',
-  'blocked',
+  'blocked'
 ] as const;
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
@@ -107,7 +107,7 @@ export const TASK_PRIORITIES = [
   'low',
   'medium',
   'high',
-  'urgent',
+  'urgent'
 ] as const;
 
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
@@ -122,7 +122,7 @@ export const LEAD_STATUSES = [
   'qualified',
   'unqualified',
   'converted',
-  'lost',
+  'lost'
 ] as const;
 
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
@@ -133,7 +133,7 @@ export const LEAD_SOURCES = [
   'social',
   'advertisement',
   'cold_outreach',
-  'other',
+  'other'
 ] as const;
 
 export type LeadSource = (typeof LEAD_SOURCES)[number];
@@ -146,7 +146,7 @@ export const MESSAGE_STATUSES = [
   'new',
   'read',
   'replied',
-  'archived',
+  'archived'
 ] as const;
 
 export type MessageStatus = (typeof MESSAGE_STATUSES)[number];
@@ -155,7 +155,7 @@ export const MESSAGE_PRIORITIES = [
   'low',
   'normal',
   'high',
-  'urgent',
+  'urgent'
 ] as const;
 
 export type MessagePriority = (typeof MESSAGE_PRIORITIES)[number];
@@ -164,7 +164,7 @@ export const THREAD_TYPES = [
   'general',
   'project',
   'support',
-  'billing',
+  'billing'
 ] as const;
 
 export type ThreadType = (typeof THREAD_TYPES)[number];
@@ -179,7 +179,7 @@ export const CONTRACT_STATUSES = [
   'viewed',
   'signed',
   'expired',
-  'cancelled',
+  'cancelled'
 ] as const;
 
 export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
@@ -194,7 +194,7 @@ export const DELIVERABLE_STATUSES = [
   'ready_for_review',
   'approved',
   'revision_requested',
-  'delivered',
+  'delivered'
 ] as const;
 
 export type DeliverableStatus = (typeof DELIVERABLE_STATUSES)[number];
@@ -208,7 +208,7 @@ export const DOCUMENT_REQUEST_STATUSES = [
   'submitted',
   'reviewed',
   'approved',
-  'rejected',
+  'rejected'
 ] as const;
 
 export type DocumentRequestStatus = (typeof DOCUMENT_REQUEST_STATUSES)[number];
@@ -226,7 +226,7 @@ export const NOTIFICATION_TYPES = [
   'task',
   'invoice',
   'project',
-  'system',
+  'system'
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -238,7 +238,7 @@ export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 export const PAGINATION = {
   DEFAULT_LIMIT: 50,
   MAX_LIMIT: 1000,
-  DEFAULT_PAGE: 1,
+  DEFAULT_PAGE: 1
 } as const;
 
 // ============================================
@@ -255,7 +255,7 @@ export const RATE_LIMITS = {
   /** Email sending rate limit */
   EMAIL: 30,
   /** Proposal submission rate limit */
-  PROPOSAL: 5,
+  PROPOSAL: 5
 } as const;
 
 // ============================================
@@ -275,7 +275,7 @@ export const FILE_UPLOAD = {
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'text/plain',
-    'text/csv',
+    'text/csv'
   ],
   /** Allowed MIME types for images */
   ALLOWED_IMAGE_TYPES: [
@@ -283,8 +283,8 @@ export const FILE_UPLOAD = {
     'image/png',
     'image/gif',
     'image/webp',
-    'image/svg+xml',
-  ],
+    'image/svg+xml'
+  ]
 } as const;
 
 // ============================================

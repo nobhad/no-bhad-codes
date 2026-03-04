@@ -44,8 +44,8 @@ export async function traceDbQuery<T>(
         [DB_NAME]: 'client_portal',
         [DB_OPERATION]: operation.toUpperCase(),
         [DB_STATEMENT]: sanitizeSql(sql),
-        ...additionalAttributes,
-      },
+        ...additionalAttributes
+      }
     },
     async (span: Span) => {
       try {
@@ -61,7 +61,7 @@ export async function traceDbQuery<T>(
       } catch (error) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'Database query failed',
+          message: error instanceof Error ? error.message : 'Database query failed'
         });
         span.recordException(error as Error);
         throw error;
@@ -93,8 +93,8 @@ export async function traceHttpRequest<T>(
         'http.url': url,
         'http.host': parsedUrl.host,
         'http.scheme': parsedUrl.protocol.replace(':', ''),
-        ...additionalAttributes,
-      },
+        ...additionalAttributes
+      }
     },
     async (span: Span) => {
       try {
@@ -104,7 +104,7 @@ export async function traceHttpRequest<T>(
       } catch (error) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'HTTP request failed',
+          message: error instanceof Error ? error.message : 'HTTP request failed'
         });
         span.recordException(error as Error);
         throw error;
@@ -138,7 +138,7 @@ export async function withSpan<T>(
     name,
     {
       kind: options?.kind || SpanKind.INTERNAL,
-      attributes: options?.attributes,
+      attributes: options?.attributes
     },
     async (span: Span) => {
       try {
@@ -148,7 +148,7 @@ export async function withSpan<T>(
       } catch (error) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : 'Operation failed',
+          message: error instanceof Error ? error.message : 'Operation failed'
         });
         span.recordException(error as Error);
         throw error;
@@ -240,7 +240,7 @@ function sanitizeSql(sql: string): string {
   // Truncate very long queries
   const maxLength = 500;
   if (sql.length > maxLength) {
-    return sql.substring(0, maxLength) + '...';
+    return `${sql.substring(0, maxLength)  }...`;
   }
   return sql;
 }
@@ -251,6 +251,6 @@ function sanitizeSql(sql: string): string {
 export function getTraceContextForLogs(): { traceId?: string; spanId?: string } {
   return {
     traceId: getCurrentTraceId(),
-    spanId: getCurrentSpanId(),
+    spanId: getCurrentSpanId()
   };
 }

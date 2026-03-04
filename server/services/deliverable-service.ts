@@ -10,7 +10,7 @@ import {
   DeliverableVersion,
   DeliverableComment,
   DesignElement,
-  DeliverableReview,
+  DeliverableReview
 } from '../models/deliverable.js';
 import { safeJsonParseArray } from '../utils/safe-json.js';
 
@@ -80,7 +80,7 @@ export class DeliverableService {
         createdById,
         roundNumber,
         options?.tags || '',
-        options?.reviewDeadline || null,
+        options?.reviewDeadline || null
       ]
     );
 
@@ -138,7 +138,7 @@ export class DeliverableService {
     const rows = await this.db.all(query, params);
     return {
       deliverables: rows.map((row: any) => this.formatDeliverable(row)),
-      total: Number(countResult?.count) || 0,
+      total: Number(countResult?.count) || 0
     };
   }
 
@@ -155,7 +155,7 @@ export class DeliverableService {
       status = existing.status,
       approval_status = existing.approval_status,
       review_deadline = existing.review_deadline,
-      tags = existing.tags,
+      tags = existing.tags
     } = updates;
 
     await this.db.run(
@@ -199,7 +199,7 @@ export class DeliverableService {
    */
   async getArchivedFileId(deliverableId: number): Promise<number | null> {
     const row = (await this.db.get('SELECT archived_file_id FROM deliverables WHERE id = ?', [
-      deliverableId,
+      deliverableId
     ])) as { archived_file_id: number | null } | undefined;
     return row?.archived_file_id ?? null;
   }
@@ -261,7 +261,7 @@ export class DeliverableService {
         fileSize,
         fileType,
         uploadedById,
-        changeNotes || null,
+        changeNotes || null
       ]
     );
 
@@ -329,7 +329,7 @@ export class DeliverableService {
         options?.x || null,
         options?.y || null,
         options?.annotationType || 'text',
-        options?.elementId || null,
+        options?.elementId || null
       ]
     );
 
@@ -481,7 +481,7 @@ export class DeliverableService {
         reviewerId,
         decision,
         feedback || null,
-        JSON.stringify(elementsReviewed || []),
+        JSON.stringify(elementsReviewed || [])
       ]
     );
 
@@ -531,7 +531,7 @@ export class DeliverableService {
       tags: row.tags,
       archived_file_id: row.archived_file_id ?? null,
       created_at: row.created_at,
-      updated_at: row.updated_at,
+      updated_at: row.updated_at
     };
   }
 
@@ -548,7 +548,7 @@ export class DeliverableService {
       resolved: Boolean(row.resolved),
       resolved_at: row.resolved_at,
       created_at: row.created_at,
-      updated_at: row.updated_at,
+      updated_at: row.updated_at
     };
   }
 
@@ -564,7 +564,7 @@ export class DeliverableService {
         'design elements reviewed'
       ),
       review_duration_minutes: row.review_duration_minutes,
-      created_at: row.created_at,
+      created_at: row.created_at
     };
   }
 }
@@ -628,7 +628,7 @@ export const deliverableService = {
   getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did),
   setArchivedFileId: (did: number, fid: number) =>
     getDeliverableService().setArchivedFileId(did, fid),
-  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did),
+  getArchivedFileId: (did: number) => getDeliverableService().getArchivedFileId(did)
 };
 
 export default deliverableService;

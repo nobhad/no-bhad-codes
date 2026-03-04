@@ -155,7 +155,7 @@ class NotificationPreferencesService {
       // Create default preferences
       await db.run('INSERT INTO notification_preferences (user_id, user_type) VALUES (?, ?)', [
         userId,
-        userType,
+        userType
       ]);
 
       prefs = await db.get(
@@ -203,7 +203,7 @@ class NotificationPreferencesService {
       'quiet_hours_enabled',
       'marketing_emails',
       'newsletter_emails',
-      'product_updates',
+      'product_updates'
     ];
 
     const stringFields = [
@@ -211,7 +211,7 @@ class NotificationPreferencesService {
       'digest_time',
       'digest_day',
       'quiet_hours_start',
-      'quiet_hours_end',
+      'quiet_hours_end'
     ];
 
     for (const field of booleanFields) {
@@ -282,7 +282,7 @@ class NotificationPreferencesService {
       deliverable_ready: 'notify_deliverable_ready',
       proposal_created: 'notify_proposal_created',
       contract_ready: 'notify_contract_ready',
-      file_uploaded: 'notify_file_uploaded',
+      file_uploaded: 'notify_file_uploaded'
     };
 
     const prefKey = typeMap[notificationType];
@@ -346,7 +346,7 @@ class NotificationPreferencesService {
         data.subject || null,
         data.messagePreview || null,
         data.status || 'pending',
-        data.metadata ? JSON.stringify(data.metadata) : null,
+        data.metadata ? JSON.stringify(data.metadata) : null
       ]
     );
 
@@ -402,7 +402,7 @@ class NotificationPreferencesService {
 
     return logs.map((log: any) => ({
       ...log,
-      metadata: safeJsonParseOrNull(log.metadata, 'notification log metadata'),
+      metadata: safeJsonParseOrNull(log.metadata, 'notification log metadata')
     })) as NotificationLog[];
   }
 
@@ -437,7 +437,7 @@ class NotificationPreferencesService {
         data.message || null,
         data.entityType || null,
         data.entityId || null,
-        data.priority || 0,
+        data.priority || 0
       ]
     );
   }
@@ -529,7 +529,7 @@ class NotificationPreferencesService {
       newsletter_emails: Boolean(row.newsletter_emails),
       product_updates: Boolean(row.product_updates),
       created_at: row.created_at,
-      updated_at: row.updated_at,
+      updated_at: row.updated_at
     };
   }
 }

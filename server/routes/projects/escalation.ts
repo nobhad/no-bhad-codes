@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import {
   escalateTaskPriorities,
   previewEscalation,
-  getEscalationSummary,
+  getEscalationSummary
 } from '../../services/priority-escalation-service.js';
 import { errorResponse } from '../../utils/api-response.js';
 
@@ -40,7 +40,7 @@ router.post(
       const result = await previewEscalation(projectId);
       return res.json({
         preview: true,
-        ...result,
+        ...result
       });
     }
 
@@ -50,7 +50,7 @@ router.post(
     res.json({
       success: true,
       message: `Escalated ${result.updatedCount} task(s)`,
-      ...result,
+      ...result
     });
   })
 );
@@ -78,7 +78,7 @@ router.get(
 
     res.json({
       projectId,
-      ...summary,
+      ...summary
     });
   })
 );

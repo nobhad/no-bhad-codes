@@ -35,7 +35,7 @@ router.get(
     const { projectId } = req.query;
     const db = getDatabase();
 
-    let whereClause = "WHERE d.status IN ('ready_for_review', 'revision_requested', 'approved')";
+    let whereClause = 'WHERE d.status IN (\'ready_for_review\', \'revision_requested\', \'approved\')';
     const params: (string | number)[] = [];
 
     if (projectId) {
@@ -77,7 +77,7 @@ router.get(
       pending: reviews.filter((r: { status: string }) => r.status === 'pending').length,
       inReview: reviews.filter((r: { status: string }) => r.status === 'in-review').length,
       approved: reviews.filter((r: { status: string }) => r.status === 'approved').length,
-      revisionRequested: reviews.filter((r: { status: string }) => r.status === 'revision-requested').length,
+      revisionRequested: reviews.filter((r: { status: string }) => r.status === 'revision-requested').length
     };
 
     res.json({ reviews, stats });

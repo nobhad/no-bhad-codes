@@ -60,7 +60,7 @@ async function createDemoUser() {
             'medium',
             50,
             new Date().toISOString().split('T')[0],
-            new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
+            new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 90 days from now
           ],
           function (projErr) {
             if (projErr) {

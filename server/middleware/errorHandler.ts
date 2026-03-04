@@ -61,7 +61,7 @@ function sanitizeRequestData(data: any): any {
     'privateKey',
     'private_key',
     'sessionId',
-    'session_id',
+    'session_id'
   ];
 
   const sanitized = { ...data };
@@ -100,11 +100,11 @@ export const errorHandler = (
       body: sanitizeRequestData(req.body),
       params: req.params,
       query: req.query,
-      headers: sanitizeRequestData(req.headers),
+      headers: sanitizeRequestData(req.headers)
     },
     requestId: req.id,
     ip: req.ip,
-    userAgent: req.get('user-agent'),
+    userAgent: req.get('user-agent')
   });
 
   // Handle specific error types
@@ -135,7 +135,7 @@ export const errorHandler = (
     error: message,
     code,
     timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   });
 };
 

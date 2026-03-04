@@ -86,11 +86,11 @@ export async function calculateMilestoneProgress(milestoneId: number): Promise<M
       completed,
       inProgress,
       pending,
-      percentage,
+      percentage
     };
   } catch (error) {
     logger.error(`[ProgressCalculator] Error calculating milestone ${milestoneId} progress:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -156,11 +156,11 @@ export async function calculateProjectProgress(projectId: number): Promise<Proje
       milestoneTasks,
       completedMilestoneTasks,
       standaloneTasks,
-      completedStandaloneTasks,
+      completedStandaloneTasks
     };
   } catch (error) {
     logger.error(`[ProgressCalculator] Error calculating project ${projectId} progress:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -181,7 +181,7 @@ export async function checkAndUpdateMilestoneCompletion(milestoneId: number): Pr
   try {
     // Get current milestone status
     const milestone = (await db.get('SELECT is_completed FROM milestones WHERE id = ?', [
-      milestoneId,
+      milestoneId
     ])) as { is_completed: boolean } | undefined;
 
     if (!milestone) {
@@ -216,7 +216,7 @@ export async function checkAndUpdateMilestoneCompletion(milestoneId: number): Pr
     return false;
   } catch (error) {
     logger.error(`[ProgressCalculator] Error checking milestone ${milestoneId} completion:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -250,7 +250,7 @@ export async function updateProjectProgress(projectId: number): Promise<number> 
     return progress.overallProgress;
   } catch (error) {
     logger.error(`[ProgressCalculator] Error updating project ${projectId} progress:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -274,7 +274,7 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
   try {
     // Get all milestones for project
     const milestones = (await db.all('SELECT id FROM milestones WHERE project_id = ?', [
-      projectId,
+      projectId
     ])) as Array<{ id: number }>;
 
     let milestonesUpdated = 0;
@@ -296,11 +296,11 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
 
     return {
       milestonesUpdated,
-      projectProgress,
+      projectProgress
     };
   } catch (error) {
     logger.error(`[ProgressCalculator] Error recalculating project ${projectId} progress:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -359,7 +359,7 @@ export async function getMilestonesWithProgress(projectId: number): Promise<
       progress_percentage:
         milestone.total_tasks > 0
           ? Math.round((milestone.completed_tasks / milestone.total_tasks) * 100)
-          : 0,
+          : 0
     }));
   } catch (error) {
     logger.error(
@@ -376,5 +376,5 @@ export default {
   checkAndUpdateMilestoneCompletion,
   updateProjectProgress,
   recalculateProjectProgress,
-  getMilestonesWithProgress,
+  getMilestonesWithProgress
 };

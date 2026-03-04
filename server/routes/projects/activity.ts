@@ -94,14 +94,14 @@ router.get(
     const projectCols = PROJECT_COLUMNS.split(', ').map(c => `p.${c}`).join(', ');
     const project = isAdmin
       ? await db.get(
-          `SELECT ${projectCols}, c.company_name, c.contact_name, c.email as client_email
+        `SELECT ${projectCols}, c.company_name, c.contact_name, c.email as client_email
            FROM projects p JOIN clients c ON p.client_id = c.id WHERE p.id = ?`,
-          [projectId]
-        )
+        [projectId]
+      )
       : await db.get(
-          `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`,
-          [projectId, req.user!.id]
-        );
+        `SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`,
+        [projectId, req.user!.id]
+      );
 
     if (!project) {
       return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
@@ -179,7 +179,7 @@ router.get(
       progressPercentage,
       upcomingMilestones,
       recentUpdates,
-      recentMessages,
+      recentMessages
     });
   })
 );

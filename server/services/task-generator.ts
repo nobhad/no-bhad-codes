@@ -11,8 +11,7 @@
 import { getDatabase } from '../database/init.js';
 import {
   getTaskTemplatesForMilestone,
-  TaskTemplate,
-  normalizeMilestoneTitle,
+  TaskTemplate
 } from '../config/default-tasks.js';
 import { normalizeProjectType } from '../config/default-milestones.js';
 import { userService } from './user-service.js';
@@ -133,7 +132,7 @@ export async function generateMilestoneTasks(
           template.estimatedHours || null,
           template.order,
           options.assignedTo || null,
-          assignedToUserId,
+          assignedToUserId
         ]
       );
 
@@ -146,7 +145,7 @@ export async function generateMilestoneTasks(
     return taskIds;
   } catch (error) {
     logger.error(`[TaskGenerator] Error generating tasks for milestone ${milestoneId}:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -261,7 +260,7 @@ export async function generateAllMilestoneTasksForProject(
     return totalTasksCreated;
   } catch (error) {
     logger.error(`[TaskGenerator] Error generating tasks for project ${projectId}:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -344,7 +343,7 @@ export async function backfillMilestoneTasks(): Promise<{
   }
 
   // Process each project's milestones sequentially
-  for (const [projectId, projectMilestones] of milestonesByProject) {
+  for (const [_projectId, projectMilestones] of milestonesByProject) {
     let previousMilestoneDueDate: string | null = null;
 
     for (let i = 0; i < projectMilestones.length; i++) {
@@ -361,7 +360,7 @@ export async function backfillMilestoneTasks(): Promise<{
           milestone.project_type,
           {
             skipIfExists: true,
-            startDate,
+            startDate
           }
         );
 
@@ -376,7 +375,7 @@ export async function backfillMilestoneTasks(): Promise<{
         const errorMessage = error instanceof Error ? error.message : String(error);
         errors.push({ milestoneId: milestone.id, error: errorMessage });
         logger.error(`[TaskGenerator] Failed to backfill milestone ${milestone.id}:`, {
-          message: errorMessage,
+          message: errorMessage
         });
       }
     }
@@ -389,7 +388,7 @@ export async function backfillMilestoneTasks(): Promise<{
   return {
     milestonesProcessed,
     tasksCreated,
-    errors,
+    errors
   };
 }
 
@@ -415,7 +414,7 @@ export function previewMilestoneTasks(
   if (!milestoneDueDate) {
     return templates.map((template) => ({
       ...template,
-      dueDate: null,
+      dueDate: null
     }));
   }
 
@@ -423,7 +422,7 @@ export function previewMilestoneTasks(
 
   return templates.map((template, index) => ({
     ...template,
-    dueDate: dueDates[index],
+    dueDate: dueDates[index]
   }));
 }
 
@@ -432,5 +431,5 @@ export default {
   generateAllMilestoneTasksForProject,
   getMilestonesWithoutTasks,
   backfillMilestoneTasks,
-  previewMilestoneTasks,
+  previewMilestoneTasks
 };

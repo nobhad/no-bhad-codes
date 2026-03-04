@@ -66,7 +66,7 @@ router.post(
 
         // Check for existing client with same email
         const existing = await db.get('SELECT id FROM clients WHERE LOWER(email) = LOWER(?)', [
-          newClient.email,
+          newClient.email
         ]);
         if (existing) {
           return errorResponse(
@@ -88,7 +88,7 @@ router.post(
         clientData = {
           contact_name: newClient.name,
           company_name: newClient.company || null,
-          email: newClient.email.toLowerCase(),
+          email: newClient.email.toLowerCase()
         };
 
         logger.info(`[AdminProjects] Created new client: ${finalClientId}`);
@@ -105,7 +105,7 @@ router.post(
         clientData = {
           contact_name: (client as { contact_name: string }).contact_name || '',
           company_name: (client as { company_name: string | null }).company_name,
-          email: (client as { email: string }).email,
+          email: (client as { email: string }).email
         };
       }
 
@@ -135,14 +135,14 @@ router.post(
             description,
             budget,
             timeline,
-            notes: notes || null,
+            notes: notes || null
           },
           projectId,
           projectName
         );
       } catch (fileError) {
         logger.error('[AdminProjects] Failed to save project file:', {
-          error: fileError instanceof Error ? fileError : undefined,
+          error: fileError instanceof Error ? fileError : undefined
         });
         // Non-critical error - don't fail the whole request
       }
@@ -164,7 +164,7 @@ router.post(
         );
       } catch (milestoneError) {
         logger.error('[AdminProjects] Failed to generate milestones:', {
-          error: milestoneError instanceof Error ? milestoneError : undefined,
+          error: milestoneError instanceof Error ? milestoneError : undefined
         });
         // Non-critical - don't fail the request
       }
@@ -173,7 +173,7 @@ router.post(
       errorTracker.captureMessage('Admin created project manually', 'info', {
         tags: { component: 'admin-projects' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { projectId, projectName, clientId: finalClientId },
+        extra: { projectId, projectName, clientId: finalClientId }
       });
 
       res.status(201).json({
@@ -181,11 +181,11 @@ router.post(
         message: 'Project created successfully',
         projectId,
         projectName,
-        clientId: finalClientId,
+        clientId: finalClientId
       });
     } catch (error) {
       logger.error('[AdminProjects] Error creating project:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponse(res, 'Failed to create project', 500, 'INTERNAL_ERROR');
     }
@@ -207,7 +207,7 @@ function generateAdminProjectName(
     ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web App',
     'browser-extension': 'Browser Extension',
-    other: 'Custom Project',
+    other: 'Custom Project'
   };
 
   const typeName = typeNames[projectType] || 'Web Project';
@@ -246,15 +246,15 @@ async function saveAdminProjectAsFile(
     clientInfo: {
       name: data.clientName,
       email: data.clientEmail,
-      companyName: data.companyName,
+      companyName: data.companyName
     },
     projectDetails: {
       type: data.projectType,
       description: data.description,
       timeline: data.timeline,
-      budget: data.budget,
+      budget: data.budget
     },
-    additionalInfo: data.notes,
+    additionalInfo: data.notes
   };
 
   // Generate descriptive filename with NoBhadCodes branding
@@ -289,7 +289,7 @@ async function saveAdminProjectAsFile(
       'application/json',
       'document',
       'Project intake form',
-      'admin',
+      'admin'
     ]
   );
 
@@ -348,7 +348,7 @@ router.post(
     errorTracker.captureMessage('Admin bulk deleted projects', 'info', {
       tags: { component: 'admin-projects' },
       user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-      extra: { projectIds, deleted, errors },
+      extra: { projectIds, deleted, errors }
     });
 
     sendSuccess(res, { deleted, errors: errors.length > 0 ? errors : undefined }, `Deleted ${deleted} projects`);

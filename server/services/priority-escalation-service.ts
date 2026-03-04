@@ -30,7 +30,7 @@ const PRIORITY_RANK: Record<PriorityLevel, number> = {
   low: 1,
   medium: 2,
   high: 3,
-  urgent: 4,
+  urgent: 4
 };
 
 /**
@@ -39,7 +39,7 @@ const PRIORITY_RANK: Record<PriorityLevel, number> = {
 const ESCALATION_THRESHOLDS = {
   URGENT: 1, // ≤ 1 day (tomorrow or overdue)
   HIGH: 3, // ≤ 3 days
-  MEDIUM: 7, // ≤ 7 days
+  MEDIUM: 7 // ≤ 7 days
 };
 
 /**
@@ -178,7 +178,7 @@ export async function escalateTaskPriorities(projectId?: number): Promise<Escala
           title: task.title,
           oldPriority: task.priority,
           newPriority: requiredPriority,
-          daysUntilDue,
+          daysUntilDue
         });
       }
     }
@@ -190,11 +190,11 @@ export async function escalateTaskPriorities(projectId?: number): Promise<Escala
 
     return {
       updatedCount: escalatedTasks.length,
-      escalatedTasks,
+      escalatedTasks
     };
   } catch (error) {
     logger.error('[PriorityEscalation] Error escalating priorities', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -251,18 +251,18 @@ export async function previewEscalation(projectId?: number): Promise<EscalationR
           title: task.title,
           oldPriority: task.priority,
           newPriority: requiredPriority,
-          daysUntilDue,
+          daysUntilDue
         });
       }
     }
 
     return {
       updatedCount: escalatedTasks.length,
-      escalatedTasks,
+      escalatedTasks
     };
   } catch (error) {
     logger.error('[PriorityEscalation] Error previewing escalation', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -309,7 +309,7 @@ export async function getEscalationSummary(projectId?: number): Promise<{
     low: 0,
     medium: 0,
     high: 0,
-    urgent: 0,
+    urgent: 0
   };
 
   let totalTasks = 0;
@@ -357,7 +357,7 @@ export async function getEscalationSummary(projectId?: number): Promise<{
     overdue: overdueResult?.count || 0,
     dueToday: dueTodayResult?.count || 0,
     dueThisWeek: dueThisWeekResult?.count || 0,
-    wouldEscalate: preview.updatedCount,
+    wouldEscalate: preview.updatedCount
   };
 }
 
@@ -369,5 +369,5 @@ export default {
   getRequiredPriority,
   shouldEscalate,
   PRIORITY_LEVELS,
-  PRIORITY_RANK,
+  PRIORITY_RANK
 };

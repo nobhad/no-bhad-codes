@@ -31,7 +31,7 @@ import type {
   InvoiceType,
   DiscountType,
   LateFeeType,
-  ReminderType,
+  ReminderType
 } from '../../types/invoice-types.js';
 
 // Re-export types for convenience
@@ -56,7 +56,7 @@ export type {
   InvoiceType,
   DiscountType,
   LateFeeType,
-  ReminderType,
+  ReminderType
 };
 
 // Extend DatabaseRow for proper typing
@@ -82,12 +82,12 @@ export const paymentTermsPresetSchema = defineSchema<PaymentTermsPreset>({
   lateFeeType: {
     column: 'late_fee_type',
     type: 'string',
-    transform: (v) => v as PaymentTermsPreset['lateFeeType'],
+    transform: (v) => v as PaymentTermsPreset['lateFeeType']
   },
   lateFeeFlatAmount: { column: 'late_fee_flat_amount', type: 'float?' },
   gracePeriodDays: { column: 'grace_period_days', type: 'number' },
   isDefault: { column: 'is_default', type: 'boolean' },
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const invoicePaymentSchema = defineSchema<InvoicePayment>({
@@ -98,7 +98,7 @@ export const invoicePaymentSchema = defineSchema<InvoicePayment>({
   paymentReference: { column: 'payment_reference', type: 'string?' },
   paymentDate: { column: 'payment_date', type: 'string' },
   notes: 'string?',
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const paymentPlanTemplateSchema = defineSchema<PaymentPlanTemplate>({
@@ -107,7 +107,7 @@ export const paymentPlanTemplateSchema = defineSchema<PaymentPlanTemplate>({
   description: 'string?',
   payments: { column: 'payments', type: 'json', default: [] },
   isDefault: { column: 'is_default', type: 'boolean' },
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const scheduledInvoiceSchema = defineSchema<ScheduledInvoice>({
@@ -118,7 +118,7 @@ export const scheduledInvoiceSchema = defineSchema<ScheduledInvoice>({
   triggerType: {
     column: 'trigger_type',
     type: 'string',
-    transform: (v) => v as ScheduledInvoice['triggerType'],
+    transform: (v) => v as ScheduledInvoice['triggerType']
   },
   triggerMilestoneId: { column: 'trigger_milestone_id', type: 'number?' },
   lineItems: { column: 'line_items', type: 'json', default: [] },
@@ -127,10 +127,10 @@ export const scheduledInvoiceSchema = defineSchema<ScheduledInvoice>({
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as ScheduledInvoice['status'],
+    transform: (v) => v as ScheduledInvoice['status']
   },
   generatedInvoiceId: { column: 'generated_invoice_id', type: 'number?' },
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const recurringInvoiceSchema = defineSchema<RecurringInvoice>({
@@ -140,7 +140,7 @@ export const recurringInvoiceSchema = defineSchema<RecurringInvoice>({
   frequency: {
     column: 'frequency',
     type: 'string',
-    transform: (v) => v as RecurringInvoice['frequency'],
+    transform: (v) => v as RecurringInvoice['frequency']
   },
   dayOfMonth: { column: 'day_of_month', type: 'number?' },
   dayOfWeek: { column: 'day_of_week', type: 'number?' },
@@ -152,7 +152,7 @@ export const recurringInvoiceSchema = defineSchema<RecurringInvoice>({
   nextGenerationDate: { column: 'next_generation_date', type: 'string' },
   lastGeneratedAt: { column: 'last_generated_at', type: 'string?' },
   isActive: { column: 'is_active', type: 'boolean' },
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const invoiceReminderSchema = defineSchema<InvoiceReminder>({
@@ -161,16 +161,16 @@ export const invoiceReminderSchema = defineSchema<InvoiceReminder>({
   reminderType: {
     column: 'reminder_type',
     type: 'string',
-    transform: (v) => v as ReminderType,
+    transform: (v) => v as ReminderType
   },
   scheduledDate: { column: 'scheduled_date', type: 'string' },
   sentAt: { column: 'sent_at', type: 'string?' },
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as InvoiceReminder['status'],
+    transform: (v) => v as InvoiceReminder['status']
   },
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const invoiceCreditSchema = defineSchema<InvoiceCredit>({
@@ -180,7 +180,7 @@ export const invoiceCreditSchema = defineSchema<InvoiceCredit>({
   depositInvoiceNumber: { column: 'deposit_invoice_number', type: 'string?' },
   amount: { column: 'amount', type: 'float' },
   appliedAt: { column: 'applied_at', type: 'string' },
-  appliedBy: { column: 'applied_by', type: 'string?' },
+  appliedBy: { column: 'applied_by', type: 'string?' }
 });
 
 // Invoice has many optional fields and joined data
@@ -195,7 +195,7 @@ export const invoiceSchema = definePartialSchema<Invoice>()({
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as InvoiceStatus,
+    transform: (v) => v as InvoiceStatus
   },
   dueDate: { column: 'due_date', type: 'string?' },
   issuedDate: { column: 'issued_date', type: 'string?' },
@@ -215,7 +215,7 @@ export const invoiceSchema = definePartialSchema<Invoice>()({
     column: 'invoice_type',
     type: 'string',
     default: 'standard',
-    transform: (v) => (v as InvoiceType) || 'standard',
+    transform: (v) => (v as InvoiceType) || 'standard'
   },
   depositForProjectId: { column: 'deposit_for_project_id', type: 'number?' },
   depositPercentage: { column: 'deposit_percentage', type: 'float?' },
@@ -227,7 +227,7 @@ export const invoiceSchema = definePartialSchema<Invoice>()({
   discountType: {
     column: 'discount_type',
     type: 'string?',
-    transform: (v) => v as DiscountType | undefined,
+    transform: (v) => v as DiscountType | undefined
   },
   discountValue: { column: 'discount_value', type: 'float?' },
   discountAmount: { column: 'discount_amount', type: 'float?' },
@@ -236,7 +236,7 @@ export const invoiceSchema = definePartialSchema<Invoice>()({
   lateFeeType: {
     column: 'late_fee_type',
     type: 'string?',
-    transform: (v) => v as LateFeeType | undefined,
+    transform: (v) => v as LateFeeType | undefined
   },
   lateFeeAmount: { column: 'late_fee_amount', type: 'float?' },
   lateFeeAppliedAt: { column: 'late_fee_applied_at', type: 'string?' },
@@ -245,7 +245,7 @@ export const invoiceSchema = definePartialSchema<Invoice>()({
   // Internal
   internalNotes: { column: 'internal_notes', type: 'string?' },
   invoicePrefix: { column: 'invoice_prefix', type: 'string?' },
-  invoiceSequence: { column: 'invoice_sequence', type: 'number?' },
+  invoiceSequence: { column: 'invoice_sequence', type: 'number?' }
 });
 
 // =====================================================

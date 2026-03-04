@@ -56,7 +56,7 @@ async function saveIntakeAsFile(
       name: intakeData.name,
       email: intakeData.email,
       projectFor: intakeData.projectFor || 'business',
-      companyName: intakeData.companyName || null,
+      companyName: intakeData.companyName || null
     },
     projectDetails: {
       type: intakeData.projectType,
@@ -64,13 +64,13 @@ async function saveIntakeAsFile(
       timeline: intakeData.timeline,
       budget: intakeData.budget,
       features: intakeData.features || [],
-      designLevel: intakeData.designLevel || null,
+      designLevel: intakeData.designLevel || null
     },
     technicalInfo: {
       techComfort: intakeData.techComfort || null,
-      domainHosting: intakeData.domainHosting || null,
+      domainHosting: intakeData.domainHosting || null
     },
-    additionalInfo: intakeData.additionalInfo || null,
+    additionalInfo: intakeData.additionalInfo || null
   };
 
   // Generate descriptive filename with NoBhadCodes branding
@@ -109,7 +109,7 @@ async function saveIntakeAsFile(
       'application/json',
       'document',
       'Project intake form submission',
-      'system',
+      'system'
     ]
   );
 
@@ -204,7 +204,7 @@ router.post(
     try {
       await logger.info('Received intake form submission', {
         category: 'INTAKE',
-        metadata: { body: req.body },
+        metadata: { body: req.body }
       });
 
       const intakeData: IntakeFormData = req.body;
@@ -232,7 +232,7 @@ router.post(
       const result = await db.transaction(async (ctx) => {
         // Check if client with this email already exists
         const existingClient = (await ctx.get('SELECT id, email FROM clients WHERE email = ?', [
-          intakeData.email,
+          intakeData.email
         ])) as ExistingClient | undefined;
 
         let clientId: number;
@@ -291,7 +291,7 @@ router.post(
             intakeData.projectType,
             intakeData.budget,
             intakeData.timeline,
-            notes,
+            notes
           ]
         );
 
@@ -309,8 +309,8 @@ router.post(
           [
             projectId,
             'Project Intake Received',
-            "Thank you for submitting your project details! We're reviewing your requirements and will provide a detailed proposal within 24-48 hours.",
-            systemUserId,
+            'Thank you for submitting your project details! We\'re reviewing your requirements and will provide a detailed proposal within 24-48 hours.',
+            systemUserId
           ]
         );
 
@@ -325,15 +325,15 @@ router.post(
               milestone.title,
               milestone.description,
               milestone.dueDate,
-              JSON.stringify(milestone.deliverables),
+              JSON.stringify(milestone.deliverables)
             ]
           );
           await logger.info(`Created milestone for project ${projectId}: ${milestone.title}`, {
-            category: 'INTAKE',
+            category: 'INTAKE'
           });
         }
         await logger.info(`Created ${milestones.length} milestones for project ${projectId}`, {
-          category: 'INTAKE',
+          category: 'INTAKE'
         });
 
         // Create proposal request if provided
@@ -378,7 +378,7 @@ router.post(
               taxRate,
               taxAmount,
               expirationDate,
-              validityDays,
+              validityDays
             ]
           );
           proposalRequestId = proposalResult.lastID!;
@@ -403,7 +403,7 @@ router.post(
                   item.unitLabel || null,
                   item.isTaxable !== false ? 1 : 0,
                   item.isOptional ? 1 : 0,
-                  index,
+                  index
                 ]
               );
             }
@@ -433,7 +433,7 @@ router.post(
       } catch (fileError) {
         await logger.error('[Intake] Failed to save intake file:', {
           error: fileError instanceof Error ? fileError : undefined,
-          category: 'INTAKE',
+          category: 'INTAKE'
         });
         // Non-critical error - don't fail the whole request
       }
@@ -448,7 +448,7 @@ router.post(
           clientId,
           projectId,
           email: intakeData.email,
-          type: 'client_access',
+          type: 'client_access'
         },
         jwtSecret,
         { expiresIn: '7d' }
@@ -465,7 +465,7 @@ router.post(
         } catch (emailError) {
           await logger.error('Failed to send emails:', {
             error: emailError instanceof Error ? emailError : undefined,
-            category: 'INTAKE',
+            category: 'INTAKE'
           });
         }
       }, 100);
@@ -490,27 +490,27 @@ router.post(
           estimatedDelivery: projectPlan.estimatedDelivery,
           nextSteps: proposalRequestId
             ? [
-                'Review your proposal in the client portal',
-                "We'll finalize your quote within 24-48 hours",
-                'Schedule a call to discuss the details',
-                'Begin project development upon agreement',
-              ]
+              'Review your proposal in the client portal',
+              'We\'ll finalize your quote within 24-48 hours',
+              'Schedule a call to discuss the details',
+              'Begin project development upon agreement'
+            ]
             : [
-                'Review your project details in the client portal',
-                "We'll send a detailed proposal within 24-48 hours",
-                'Schedule a discovery call to discuss requirements',
-                'Begin project development upon agreement',
-              ],
-        },
+              'Review your project details in the client portal',
+              'We\'ll send a detailed proposal within 24-48 hours',
+              'Schedule a discovery call to discuss requirements',
+              'Begin project development upon agreement'
+            ]
+        }
       });
     } catch (error: unknown) {
       await logger.error('Intake processing error:', {
         error: error instanceof Error ? error : undefined,
-        category: 'INTAKE',
+        category: 'INTAKE'
       });
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to process intake form', 500, 'INTERNAL_ERROR', {
-        details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error'
       });
     }
   }
@@ -557,31 +557,31 @@ router.get(
           status: getString(project, 'status'),
           type: getString(project, 'project_type'),
           timeline: getString(project, 'timeline'),
-          budget: getString(project, 'budget_range'),
+          budget: getString(project, 'budget_range')
         },
         client: {
           name: getString(project, 'contact_name'),
           company: getString(project, 'company_name'),
-          email: getString(project, 'email'),
+          email: getString(project, 'email')
         },
         latestUpdate: latestUpdate
           ? {
-              title: getString(latestUpdate, 'title'),
-              description: getString(latestUpdate, 'description'),
-              date: getString(latestUpdate, 'created_at'),
-              type: getString(latestUpdate, 'type'),
-            }
-          : null,
+            title: getString(latestUpdate, 'title'),
+            description: getString(latestUpdate, 'description'),
+            date: getString(latestUpdate, 'created_at'),
+            type: getString(latestUpdate, 'type')
+          }
+          : null
       };
 
       res.json({
         success: true,
-        data: responseData,
+        data: responseData
       });
     } catch (error: unknown) {
       await logger.error('Status check error:', {
         error: error instanceof Error ? error : undefined,
-        category: 'INTAKE',
+        category: 'INTAKE'
       });
       errorResponse(res, 'Failed to get project status', 500, 'INTERNAL_ERROR');
     }
@@ -613,7 +613,7 @@ function generateProjectName(
     ecommerce: 'E-commerce Store', // Legacy support
     'web-app': 'Web App',
     'browser-extension': 'Browser Extension',
-    other: 'Custom Project',
+    other: 'Custom Project'
   };
 
   const typeName = typeNames[projectType] || 'Web Project';
@@ -637,21 +637,21 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
   // Calculate timeline multiplier based on timeline selection
   let timelineWeeks = 4; // default
   switch (timeline) {
-    case 'asap':
-      timelineWeeks = 2;
-      break;
-    case '1-month':
-      timelineWeeks = 4;
-      break;
-    case '1-3-months':
-      timelineWeeks = 8;
-      break;
-    case '3-6-months':
-      timelineWeeks = 16;
-      break;
-    case 'flexible':
-      timelineWeeks = 6;
-      break;
+  case 'asap':
+    timelineWeeks = 2;
+    break;
+  case '1-month':
+    timelineWeeks = 4;
+    break;
+  case '1-3-months':
+    timelineWeeks = 8;
+    break;
+  case '3-6-months':
+    timelineWeeks = 16;
+    break;
+  case 'flexible':
+    timelineWeeks = 6;
+    break;
   }
 
   const addDays = (date: Date, days: number): string => {
@@ -666,7 +666,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
       title: 'Discovery & Planning',
       description: 'Review requirements, create project plan and timeline',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.15 * 7)),
-      deliverables: ['Requirements document', 'Project timeline', 'Technical specification'],
+      deliverables: ['Requirements document', 'Project timeline', 'Technical specification']
     },
     {
       title: 'Design & Wireframes',
@@ -676,27 +676,27 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
         'Wireframe mockups',
         'Color palette',
         'Typography selection',
-        'Design approval',
-      ],
+        'Design approval'
+      ]
     },
     {
       title: 'Development',
       description: 'Build the core functionality and features',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.7 * 7)),
-      deliverables: ['Core features implemented', 'Responsive design', 'Content integration'],
+      deliverables: ['Core features implemented', 'Responsive design', 'Content integration']
     },
     {
       title: 'Testing & Revisions',
       description: 'Quality assurance testing and client revisions',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.85 * 7)),
-      deliverables: ['Bug fixes', 'Performance optimization', 'Client feedback integration'],
+      deliverables: ['Bug fixes', 'Performance optimization', 'Client feedback integration']
     },
     {
       title: 'Launch',
       description: 'Final deployment and go-live',
       dueDate: addDays(now, timelineWeeks * 7),
-      deliverables: ['Production deployment', 'DNS configuration', 'Launch checklist complete'],
-    },
+      deliverables: ['Production deployment', 'DNS configuration', 'Launch checklist complete']
+    }
   ];
 
   // Add project-type specific milestones
@@ -707,7 +707,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
       title: 'Payment Integration',
       description: 'Set up payment processing and checkout flow',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.6 * 7)),
-      deliverables: ['Payment gateway setup', 'Checkout testing', 'Order management'],
+      deliverables: ['Payment gateway setup', 'Checkout testing', 'Order management']
     });
   }
 
@@ -716,7 +716,7 @@ function generateProjectMilestones(projectType: string, timeline: string): Miles
       title: 'User Authentication',
       description: 'Implement user login, registration, and security',
       dueDate: addDays(now, Math.floor(timelineWeeks * 0.4 * 7)),
-      deliverables: ['Login system', 'User registration', 'Password recovery'],
+      deliverables: ['Login system', 'User registration', 'Password recovery']
     });
   }
 

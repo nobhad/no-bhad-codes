@@ -15,7 +15,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   SEMRESATTRS_SERVICE_NAME,
   SEMRESATTRS_SERVICE_VERSION,
-  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
+  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT
 } from '@opentelemetry/semantic-conventions';
 import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
 import { ConsoleMetricExporter, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
@@ -27,7 +27,7 @@ import {
   SpanStatusCode,
   diag,
   DiagConsoleLogger,
-  DiagLogLevel,
+  DiagLogLevel
 } from '@opentelemetry/api';
 
 // Environment configuration
@@ -47,14 +47,14 @@ if (OTEL_DEBUG) {
 const resource = resourceFromAttributes({
   [SEMRESATTRS_SERVICE_NAME]: SERVICE_NAME,
   [SEMRESATTRS_SERVICE_VERSION]: SERVICE_VERSION,
-  [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: NODE_ENV,
+  [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: NODE_ENV
 });
 
 // Configure exporters based on environment
 function getTraceExporter() {
   if (NODE_ENV === 'production' && OTEL_EXPORTER_ENDPOINT) {
     return new OTLPTraceExporter({
-      url: OTEL_EXPORTER_ENDPOINT,
+      url: OTEL_EXPORTER_ENDPOINT
     });
   }
   // Use console exporter for development (only if debug enabled)
@@ -68,7 +68,7 @@ function getTraceExporter() {
 function getMetricExporter() {
   if (NODE_ENV === 'production' && OTEL_EXPORTER_ENDPOINT) {
     return new OTLPMetricExporter({
-      url: OTEL_EXPORTER_ENDPOINT,
+      url: OTEL_EXPORTER_ENDPOINT
     });
   }
   // Use console exporter for development (only if debug enabled)
@@ -103,9 +103,9 @@ export function initOpenTelemetry(): void {
 
     const metricReader = metricExporter
       ? new PeriodicExportingMetricReader({
-          exporter: metricExporter,
-          exportIntervalMillis: 60000, // Export every minute
-        })
+        exporter: metricExporter,
+        exportIntervalMillis: 60000 // Export every minute
+      })
       : undefined;
 
     // Paths to ignore for tracing
@@ -119,10 +119,10 @@ export function initOpenTelemetry(): void {
         getNodeAutoInstrumentations({
           // Disable noisy instrumentations in development
           '@opentelemetry/instrumentation-fs': {
-            enabled: NODE_ENV === 'production',
+            enabled: NODE_ENV === 'production'
           },
           '@opentelemetry/instrumentation-dns': {
-            enabled: NODE_ENV === 'production',
+            enabled: NODE_ENV === 'production'
           },
           // Configure HTTP instrumentation with request filter
           '@opentelemetry/instrumentation-http': {
@@ -130,14 +130,14 @@ export function initOpenTelemetry(): void {
             ignoreIncomingRequestHook: (req) => {
               const url = req.url || '';
               return ignorePaths.some((path) => url.startsWith(path));
-            },
+            }
           },
           // Configure Express instrumentation
           '@opentelemetry/instrumentation-express': {
-            enabled: true,
-          },
-        }),
-      ],
+            enabled: true
+          }
+        })
+      ]
     });
 
     sdk.start();

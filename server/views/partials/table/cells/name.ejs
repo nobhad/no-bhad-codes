@@ -1,0 +1,11 @@
+<%# Name Cell - displays contact_name or company_name %>
+<%# Locals: value, col, row %>
+<%
+var displayName = value;
+if (!displayName) {
+  if (row.contact_name) displayName = row.contact_name;
+  else if (row.company_name) displayName = row.company_name;
+  else if (row.first_name || row.last_name) displayName = ((row.first_name || '') + ' ' + (row.last_name || '')).trim();
+  else displayName = '—';
+}
+%><span class="cell-name"><%= displayName %></span>

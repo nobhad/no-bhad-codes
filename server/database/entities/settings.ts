@@ -53,12 +53,12 @@ export const systemSettingSchema = defineSchema<SystemSetting>({
   type: {
     column: 'setting_type',
     type: 'string',
-    transform: (v) => v as SettingType,
+    transform: (v) => v as SettingType
   },
   description: 'string?',
   isSensitive: { column: 'is_sensitive', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' },
+  updatedAt: { column: 'updated_at', type: 'string' }
 });
 
 // =====================================================

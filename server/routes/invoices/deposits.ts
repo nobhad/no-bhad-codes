@@ -34,13 +34,13 @@ router.post(
 
     if (!projectId || !clientId || !amount) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'amount'],
+        required: ['projectId', 'clientId', 'amount']
       });
     }
 
     if (typeof amount !== 'number' || amount <= 0) {
       return errorResponseWithPayload(res, 'Invalid amount', 400, 'INVALID_AMOUNT', {
-        message: 'Amount must be a positive number',
+        message: 'Amount must be a positive number'
       });
     }
 
@@ -56,10 +56,10 @@ router.post(
       sendCreated(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Deposit invoice created successfully');
     } catch (error: unknown) {
       logger.error('[Invoices] Error creating deposit invoice:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -88,7 +88,7 @@ router.get(
       const deposits = await getInvoiceService().getAvailableDeposits(projectId);
       sendSuccess(res, {
         deposits: deposits.map(toSnakeCaseDeposit),
-        count: deposits.length,
+        count: deposits.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -97,7 +97,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }

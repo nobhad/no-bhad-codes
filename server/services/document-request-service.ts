@@ -150,7 +150,7 @@ class DocumentRequestService {
         data.document_type || 'general',
         data.priority || 'normal',
         data.due_date || null,
-        data.is_required !== false ? 1 : 0,
+        data.is_required !== false ? 1 : 0
       ]
     );
 
@@ -189,7 +189,7 @@ class DocumentRequestService {
         description: template.description,
         document_type: template.document_type,
         is_required: template.is_required,
-        due_date: dueDate.toISOString().split('T')[0],
+        due_date: dueDate.toISOString().split('T')[0]
       });
 
       requests.push(request);
@@ -267,11 +267,11 @@ class DocumentRequestService {
     const params: (string | number)[] = [];
 
     if (status) {
-      query += ` WHERE dr.status = ?`;
+      query += ' WHERE dr.status = ?';
       params.push(status);
     }
 
-    query += ` ORDER BY dr.created_at DESC`;
+    query += ' ORDER BY dr.created_at DESC';
 
     const requests = await db.all(query, params);
     return requests as unknown as DocumentRequest[];
@@ -304,7 +304,7 @@ class DocumentRequestService {
       pending: stats?.pending || 0,
       uploaded: stats?.uploaded || 0,
       approved: stats?.approved || 0,
-      overdue: stats?.overdue || 0,
+      overdue: stats?.overdue || 0
     };
   }
 
@@ -375,7 +375,7 @@ class DocumentRequestService {
     // Only update if currently in 'requested' status
     if (request.status === 'requested') {
       await db.run(
-        "UPDATE document_requests SET status = 'viewed', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        'UPDATE document_requests SET status = \'viewed\', updated_at = CURRENT_TIMESTAMP WHERE id = ?',
         [id]
       );
 
@@ -577,7 +577,7 @@ class DocumentRequestService {
         originalFile.file_type || 'document',
         `Document Request: ${request.title}`,
         reviewerEmail,
-        'forms', // Category for approved document request files
+        'forms' // Category for approved document request files
       ]
     );
 
@@ -785,7 +785,7 @@ class DocumentRequestService {
         data.document_type || 'general',
         data.is_required !== false ? 1 : 0,
         data.days_until_due || 7,
-        data.created_by || null,
+        data.created_by || null
       ]
     );
 
@@ -823,7 +823,7 @@ class DocumentRequestService {
         data.document_type || template.document_type,
         data.is_required !== undefined ? (data.is_required ? 1 : 0) : template.is_required ? 1 : 0,
         data.days_until_due || template.days_until_due,
-        id,
+        id
       ]
     );
 
@@ -856,7 +856,7 @@ class DocumentRequestService {
       brand_assets: [],
       content: [],
       legal: [],
-      technical: [],
+      technical: []
     };
 
     for (const template of templates as unknown as DocumentRequestTemplate[]) {
@@ -989,7 +989,7 @@ class DocumentRequestService {
       uploaded: stats?.uploaded || 0,
       approved: stats?.approved || 0,
       rejected: stats?.rejected || 0,
-      overdue: stats?.overdue || 0,
+      overdue: stats?.overdue || 0
     };
   }
 }

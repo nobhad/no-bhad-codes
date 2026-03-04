@@ -76,7 +76,7 @@ router.post(
       'invoice',
       'contract',
       'deliverable',
-      'project',
+      'project'
     ];
     const validWorkflowTypes: WorkflowType[] = ['sequential', 'parallel', 'any_one'];
 
@@ -101,13 +101,13 @@ router.post(
       description,
       entity_type,
       workflow_type,
-      is_default,
+      is_default
     });
 
     res.status(201).json({
       success: true,
       message: 'Workflow created',
-      workflow,
+      workflow
     });
   })
 );
@@ -138,13 +138,13 @@ router.post(
       approver_type,
       approver_value,
       is_optional,
-      auto_approve_after_hours,
+      auto_approve_after_hours
     });
 
     res.status(201).json({
       success: true,
       message: 'Step added',
-      step,
+      step
     });
   })
 );
@@ -180,7 +180,7 @@ router.post(
       res.status(201).json({
         success: true,
         message: 'Approval workflow started',
-        instance,
+        instance
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to start workflow';
@@ -307,7 +307,7 @@ router.post(
       res.json({
         success: true,
         message: 'Approved',
-        instance,
+        instance
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to approve';
@@ -352,7 +352,7 @@ router.post(
       res.json({
         success: true,
         message: 'Rejected',
-        instance,
+        instance
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to reject';
@@ -382,7 +382,7 @@ router.post(
       res.json({
         success: true,
         message: 'Workflow cancelled',
-        instance,
+        instance
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to cancel workflow';

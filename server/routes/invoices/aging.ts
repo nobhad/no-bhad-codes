@@ -41,14 +41,14 @@ router.get(
           bucket: bucket.bucket,
           count: bucket.count,
           total_amount: bucket.totalAmount,
-          invoices: bucket.invoices.map(toSnakeCaseInvoice),
-        })),
+          invoices: bucket.invoices.map(toSnakeCaseInvoice)
+        }))
       };
 
       sendSuccess(res, { report: transformedReport });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to generate aging report', 500, 'REPORT_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })

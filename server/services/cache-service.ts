@@ -49,7 +49,7 @@ export class CacheService {
     misses: 0,
     sets: 0,
     deletes: 0,
-    errors: 0,
+    errors: 0
   };
   private config: CacheConfig | null = null;
 
@@ -81,7 +81,7 @@ export class CacheService {
         reconnectOnError: (err) => {
           const targetError = 'READONLY';
           return err.message.includes(targetError);
-        },
+        }
       });
 
       // Set up event listeners
@@ -103,7 +103,7 @@ export class CacheService {
 
         errorTracker.captureException(error, {
           tags: { component: 'redis-cache' },
-          extra: { config: this.config },
+          extra: { config: this.config }
         });
       });
 
@@ -119,7 +119,7 @@ export class CacheService {
       logger.info('[Cache] Cache service initialized successfully');
     } catch (error) {
       logger.error('[Cache] Failed to initialize cache service:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       throw new Error(`Cache service initialization failed: ${error}`);
     }
@@ -152,7 +152,7 @@ export class CacheService {
       }
     } catch (error) {
       logger.error(`[Cache] Get error for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       this.stats.misses++;
@@ -188,7 +188,7 @@ export class CacheService {
       return true;
     } catch (error) {
       logger.error(`[Cache] Set error for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return false;
@@ -209,7 +209,7 @@ export class CacheService {
       return result > 0;
     } catch (error) {
       logger.error(`[Cache] Delete error for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return false;
@@ -229,7 +229,7 @@ export class CacheService {
       return result === 1;
     } catch (error) {
       logger.error(`[Cache] Exists error for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return false;
@@ -249,7 +249,7 @@ export class CacheService {
       return result === 1;
     } catch (error) {
       logger.error(`[Cache] Expire error for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return false;
@@ -328,7 +328,7 @@ export class CacheService {
       return result;
     } catch (error) {
       logger.error(`[Cache] Increment error for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return null;
@@ -352,7 +352,7 @@ export class CacheService {
       await pipeline.exec();
     } catch (error) {
       logger.error('[Cache] Error storing cache tags:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
     }
   }
@@ -383,7 +383,7 @@ export class CacheService {
       return keys.length;
     } catch (error) {
       logger.error(`[Cache] Tag invalidation error for tag ${tag}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return 0;
@@ -412,7 +412,7 @@ export class CacheService {
       return keys.length;
     } catch (error) {
       logger.error(`[Cache] Pattern invalidation error for pattern ${pattern}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       this.stats.errors++;
       return 0;
@@ -456,11 +456,11 @@ export class CacheService {
       return {
         ...this.stats,
         memoryUsage,
-        keyCount,
+        keyCount
       };
     } catch (error) {
       logger.error('[Cache] Error getting cache stats:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       return this.stats;
     }
@@ -479,7 +479,7 @@ export class CacheService {
       return result === 'PONG';
     } catch (error) {
       logger.error('[Cache] Connection test failed:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       return false;
     }
@@ -521,7 +521,7 @@ export class CacheService {
       return fresh;
     } catch (error) {
       logger.error(`[Cache] Error in getOrSet for key ${key}:`, {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       throw error;
     }

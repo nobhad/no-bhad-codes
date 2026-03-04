@@ -24,7 +24,7 @@ import {
   type LeadNoteRow as NoteRow,
   type LeadSourceRow,
   type ProjectRow,
-  type DuplicateRow,
+  type DuplicateRow
 } from '../database/entities/index.js';
 
 // Type alias for backward compatibility
@@ -295,7 +295,7 @@ class LeadService {
         data.operator,
         data.thresholdValue,
         data.points,
-        data.isActive !== false ? 1 : 0,
+        data.isActive !== false ? 1 : 0
       ]
     );
 
@@ -401,26 +401,26 @@ class LeadService {
       const fieldValue = this.getFieldValue(project, rule.fieldName);
 
       switch (rule.operator) {
-        case 'equals':
-          matched = fieldValue?.toLowerCase() === rule.thresholdValue.toLowerCase();
-          break;
-        case 'contains':
-          matched = fieldValue?.toLowerCase().includes(rule.thresholdValue.toLowerCase()) || false;
-          break;
-        case 'greater_than':
-          matched = parseFloat(fieldValue || '0') > parseFloat(rule.thresholdValue);
-          break;
-        case 'less_than':
-          matched = parseFloat(fieldValue || '0') < parseFloat(rule.thresholdValue);
-          break;
-        case 'in': {
-          const values = rule.thresholdValue.split(',').map((v) => v.trim().toLowerCase());
-          matched = values.includes(fieldValue?.toLowerCase() || '');
-          break;
-        }
-        case 'not_empty':
-          matched = !!fieldValue && fieldValue.trim() !== '';
-          break;
+      case 'equals':
+        matched = fieldValue?.toLowerCase() === rule.thresholdValue.toLowerCase();
+        break;
+      case 'contains':
+        matched = fieldValue?.toLowerCase().includes(rule.thresholdValue.toLowerCase()) || false;
+        break;
+      case 'greater_than':
+        matched = parseFloat(fieldValue || '0') > parseFloat(rule.thresholdValue);
+        break;
+      case 'less_than':
+        matched = parseFloat(fieldValue || '0') < parseFloat(rule.thresholdValue);
+        break;
+      case 'in': {
+        const values = rule.thresholdValue.split(',').map((v) => v.trim().toLowerCase());
+        matched = values.includes(fieldValue?.toLowerCase() || '');
+        break;
+      }
+      case 'not_empty':
+        matched = !!fieldValue && fieldValue.trim() !== '';
+        break;
       }
 
       if (matched) {
@@ -430,7 +430,7 @@ class LeadService {
       breakdown.push({
         ruleName: rule.name,
         points: rule.points,
-        matched,
+        matched
       });
     }
 
@@ -463,7 +463,7 @@ class LeadService {
       description: project.description,
       priority: project.priority,
       client_type: project.client_type,
-      timeline: project.expected_close_date,
+      timeline: project.expected_close_date
     };
     return fieldMap[fieldName];
   }
@@ -475,7 +475,7 @@ class LeadService {
     const db = getDatabase();
 
     // Get all leads (projects in pending status)
-    const leads = (await db.all("SELECT id FROM projects WHERE status = 'pending'")) as unknown as {
+    const leads = (await db.all('SELECT id FROM projects WHERE status = \'pending\'')) as unknown as {
       id: number;
     }[];
 
@@ -519,11 +519,11 @@ class LeadService {
     if (stage.is_won) {
       updates.push('won_at = CURRENT_TIMESTAMP');
       if (stage.auto_convert_to_project) {
-        updates.push("status = 'in-progress'");
+        updates.push('status = \'in-progress\'');
       }
     } else if (stage.is_lost) {
       updates.push('lost_at = CURRENT_TIMESTAMP');
-      updates.push("status = 'on-hold'");
+      updates.push('status = \'on-hold\'');
     }
 
     values.push(projectId);
@@ -563,7 +563,7 @@ class LeadService {
 
       stagesWithLeads.push({
         ...stage,
-        leads: leadSummaries,
+        leads: leadSummaries
       });
     }
 
@@ -630,7 +630,7 @@ class LeadService {
         stageId: stage.id,
         stageName: stage.name,
         count: stageStats?.count || 0,
-        value: stageStats?.value ? parseFloat(String(stageStats.value)) : 0,
+        value: stageStats?.value ? parseFloat(String(stageStats.value)) : 0
       });
     }
 
@@ -646,7 +646,7 @@ class LeadService {
       weightedValue,
       avgDaysInPipeline: stats?.avg_days ? Math.round(stats.avg_days) : 0,
       conversionRate,
-      stageBreakdown,
+      stageBreakdown
     };
   }
 
@@ -677,7 +677,7 @@ class LeadService {
         data.dueTime || null,
         assignedToUserId,
         data.priority || 'medium',
-        data.reminderAt || null,
+        data.reminderAt || null
       ]
     );
 
@@ -824,7 +824,7 @@ class LeadService {
 
     // Update project's last activity
     await db.run('UPDATE projects SET last_activity_at = CURRENT_TIMESTAMP WHERE id = ?', [
-      task.project_id,
+      task.project_id
     ]);
 
     return toTask(task);
@@ -847,7 +847,7 @@ class LeadService {
 
     return rows.map((row) => ({
       ...toTask(row),
-      projectName: row.project_name,
+      projectName: row.project_name
     }));
   }
 
@@ -870,7 +870,7 @@ class LeadService {
 
     return rows.map((row) => ({
       ...toTask(row),
-      projectName: row.project_name,
+      projectName: row.project_name
     }));
   }
 
@@ -894,7 +894,7 @@ class LeadService {
 
     // Update project's last activity
     await db.run('UPDATE projects SET last_activity_at = CURRENT_TIMESTAMP WHERE id = ?', [
-      projectId,
+      projectId
     ]);
 
     const note = await db.get(
@@ -1144,12 +1144,12 @@ class LeadService {
             matchFields,
             status: 'pending',
             createdAt: new Date().toISOString(),
-            lead2: toLeadSummary(match as unknown as ProjectRow),
+            lead2: toLeadSummary(match as unknown as ProjectRow)
           });
         } else if ((existing as { status: string }).status === 'pending') {
           duplicates.push({
             ...toDuplicateResult(existing as unknown as DuplicateRow),
-            lead2: toLeadSummary(match as unknown as ProjectRow),
+            lead2: toLeadSummary(match as unknown as ProjectRow)
           });
         }
       }
@@ -1279,7 +1279,7 @@ class LeadService {
 
     // Total leads
     const totalLeads = (await db.get(
-      "SELECT COUNT(*) as count FROM projects WHERE status = 'pending'"
+      'SELECT COUNT(*) as count FROM projects WHERE status = \'pending\''
     )) as { count: number } | undefined;
 
     // New leads this month
@@ -1300,7 +1300,7 @@ class LeadService {
 
     // Average lead score
     const avgScore = (await db.get(
-      "SELECT AVG(lead_score) as avg FROM projects WHERE status = 'pending'"
+      'SELECT AVG(lead_score) as avg FROM projects WHERE status = \'pending\''
     )) as { avg: number | null } | undefined;
 
     // Average days to close
@@ -1360,9 +1360,9 @@ class LeadService {
         leadCount: s.lead_count,
         totalValue: parseFloat(String(s.total_value)) || 0,
         wonCount: s.won_count,
-        conversionRate: s.lead_count > 0 ? s.won_count / s.lead_count : 0,
+        conversionRate: s.lead_count > 0 ? s.won_count / s.lead_count : 0
       })),
-      scoreDistribution,
+      scoreDistribution
     };
   }
 
@@ -1392,7 +1392,7 @@ class LeadService {
         name: stage.name,
         count,
         value: parseFloat(String(stats?.value)) || 0,
-        conversionRate,
+        conversionRate
       });
 
       if (count > 0) {
@@ -1442,7 +1442,7 @@ class LeadService {
       leadCount: s.lead_count,
       totalValue: parseFloat(String(s.total_value)) || 0,
       wonCount: s.won_count,
-      conversionRate: s.lead_count > 0 ? s.won_count / s.lead_count : 0,
+      conversionRate: s.lead_count > 0 ? s.won_count / s.lead_count : 0
     }));
   }
 }

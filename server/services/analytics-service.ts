@@ -8,7 +8,7 @@
 import { getDatabase } from '../database/init.js';
 import { logger } from '../services/logger.js';
 import { userService } from './user-service.js';
-import { safeJsonParse, safeJsonParseArray, safeJsonParseObject } from '../utils/safe-json.js';
+import { safeJsonParseArray, safeJsonParseObject } from '../utils/safe-json.js';
 
 // ============================================
 // Types
@@ -200,7 +200,7 @@ class AnalyticsService {
         data.sort_order || 'DESC',
         data.chart_type || null,
         data.created_by || null,
-        createdByUserId,
+        createdByUserId
       ]
     );
 
@@ -228,7 +228,7 @@ class AnalyticsService {
     return reports.map((r: any) => ({
       ...r,
       filters: safeJsonParseObject(r.filters, 'report filters'),
-      columns: r.columns ? safeJsonParseArray<string>(r.columns, 'report columns') : null,
+      columns: r.columns ? safeJsonParseArray<string>(r.columns, 'report columns') : null
     }));
   }
 
@@ -246,7 +246,7 @@ class AnalyticsService {
     return {
       ...(report as unknown as SavedReport),
       filters: safeJsonParseObject(report.filters as string, 'report filters'),
-      columns: report.columns ? safeJsonParseArray<string>(report.columns as string, 'report columns') : null,
+      columns: report.columns ? safeJsonParseArray<string>(report.columns as string, 'report columns') : null
     };
   }
 
@@ -386,7 +386,7 @@ class AnalyticsService {
         data.format || 'pdf',
         data.include_charts !== false,
         nextSendAt,
-        data.created_by || null,
+        data.created_by || null
       ]
     );
 
@@ -413,7 +413,7 @@ class AnalyticsService {
 
     return schedules.map((s: any) => ({
       ...s,
-      recipients: safeJsonParseArray(s.recipients, 'schedule recipients'),
+      recipients: safeJsonParseArray(s.recipients, 'schedule recipients')
     }));
   }
 
@@ -430,7 +430,7 @@ class AnalyticsService {
 
     return {
       ...(schedule as unknown as ReportSchedule),
-      recipients: safeJsonParseArray(schedule.recipients as string, 'schedule recipients'),
+      recipients: safeJsonParseArray(schedule.recipients as string, 'schedule recipients')
     };
   }
 
@@ -527,7 +527,7 @@ class AnalyticsService {
 
     return schedules.map((s: any) => ({
       ...s,
-      recipients: safeJsonParseArray(s.recipients, 'schedule recipients'),
+      recipients: safeJsonParseArray(s.recipients, 'schedule recipients')
     }));
   }
 
@@ -571,41 +571,41 @@ class AnalyticsService {
     }
 
     switch (frequency) {
-      case 'daily':
-        // Already set for next occurrence
-        break;
+    case 'daily':
+      // Already set for next occurrence
+      break;
 
-      case 'weekly': {
-        const targetDay = dayOfWeek ?? 1; // Default to Monday
-        while (next.getDay() !== targetDay) {
-          next.setDate(next.getDate() + 1);
-        }
-        break;
+    case 'weekly': {
+      const targetDay = dayOfWeek ?? 1; // Default to Monday
+      while (next.getDay() !== targetDay) {
+        next.setDate(next.getDate() + 1);
       }
+      break;
+    }
 
-      case 'monthly': {
-        const targetDate = dayOfMonth ?? 1;
-        next.setDate(targetDate);
-        if (next <= now) {
-          next.setMonth(next.getMonth() + 1);
-        }
-        break;
+    case 'monthly': {
+      const targetDate = dayOfMonth ?? 1;
+      next.setDate(targetDate);
+      if (next <= now) {
+        next.setMonth(next.getMonth() + 1);
       }
+      break;
+    }
 
-      case 'quarterly': {
-        const targetQuarterDate = dayOfMonth ?? 1;
-        next.setDate(targetQuarterDate);
-        // Move to first month of next quarter
-        const currentQuarter = Math.floor(now.getMonth() / 3);
-        const nextQuarterMonth = (currentQuarter + 1) * 3;
-        if (nextQuarterMonth > 11) {
-          next.setFullYear(next.getFullYear() + 1);
-          next.setMonth(0);
-        } else {
-          next.setMonth(nextQuarterMonth);
-        }
-        break;
+    case 'quarterly': {
+      const targetQuarterDate = dayOfMonth ?? 1;
+      next.setDate(targetQuarterDate);
+      // Move to first month of next quarter
+      const currentQuarter = Math.floor(now.getMonth() / 3);
+      const nextQuarterMonth = (currentQuarter + 1) * 3;
+      if (nextQuarterMonth > 11) {
+        next.setFullYear(next.getFullYear() + 1);
+        next.setMonth(0);
+      } else {
+        next.setMonth(nextQuarterMonth);
       }
+      break;
+    }
     }
 
     return next.toISOString();
@@ -629,7 +629,7 @@ class AnalyticsService {
 
     return widgets.map((w: any) => ({
       ...w,
-      config: safeJsonParseObject(w.config, 'widget config'),
+      config: safeJsonParseObject(w.config, 'widget config')
     }));
   }
 
@@ -665,7 +665,7 @@ class AnalyticsService {
         data.position_y ?? 0,
         data.width ?? 1,
         data.height ?? 1,
-        data.refresh_interval ?? null,
+        data.refresh_interval ?? null
       ]
     );
 
@@ -685,7 +685,7 @@ class AnalyticsService {
 
     return {
       ...(widget as unknown as DashboardWidget),
-      config: safeJsonParseObject(widget.config as string, 'widget config'),
+      config: safeJsonParseObject(widget.config as string, 'widget config')
     };
   }
 
@@ -817,7 +817,7 @@ class AnalyticsService {
         position_x: config.x,
         position_y: config.y,
         width: config.w,
-        height: config.h,
+        height: config.h
       });
       widgets.push(widget);
     }
@@ -849,7 +849,7 @@ class AnalyticsService {
 
     // Check if snapshot already exists for today
     const existing = await db.get('SELECT id FROM kpi_snapshots WHERE snapshot_date = ? LIMIT 1', [
-      today,
+      today
     ]);
 
     if (existing) {
@@ -882,7 +882,7 @@ class AnalyticsService {
           kpi.value,
           previousValue,
           changePercent,
-          JSON.stringify(kpi.metadata ?? {}),
+          JSON.stringify(kpi.metadata ?? {})
         ]
       );
     }
@@ -913,13 +913,13 @@ class AnalyticsService {
    */
   private async calculateKPIs(): Promise<
     { type: string; value: number; metadata?: Record<string, any> }[]
-  > {
+    > {
     const db = getDatabase();
     const kpis: { type: string; value: number; metadata?: Record<string, any> }[] = [];
 
     // Total revenue (paid invoices)
     const revenue = await db.get(
-      "SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = 'paid'"
+      'SELECT COALESCE(SUM(total_amount), 0) as total FROM invoices WHERE status = \'paid\''
     );
     kpis.push({ type: 'total_revenue', value: Number(revenue?.total ?? 0) });
 
@@ -932,13 +932,13 @@ class AnalyticsService {
 
     // Active clients
     const activeClients = await db.get(
-      "SELECT COUNT(*) as count FROM clients WHERE status = 'active'"
+      'SELECT COUNT(*) as count FROM clients WHERE status = \'active\''
     );
     kpis.push({ type: 'active_clients', value: Number(activeClients?.count ?? 0) });
 
     // Active projects
     const activeProjects = await db.get(
-      "SELECT COUNT(*) as count FROM projects WHERE status IN ('in_progress', 'active')"
+      'SELECT COUNT(*) as count FROM projects WHERE status IN (\'in_progress\', \'active\')'
     );
     kpis.push({ type: 'active_projects', value: Number(activeProjects?.count ?? 0) });
 
@@ -971,7 +971,7 @@ class AnalyticsService {
     kpis.push({
       type: 'overdue_invoices',
       value: Number(overdue?.total ?? 0),
-      metadata: { count: Number(overdue?.count ?? 0) },
+      metadata: { count: Number(overdue?.count ?? 0) }
     });
 
     // Conversion rate (won / total closed)
@@ -1014,7 +1014,7 @@ class AnalyticsService {
 
     return snapshots.map((s: any) => ({
       ...s,
-      metadata: safeJsonParseObject(s.metadata, 'snapshot metadata'),
+      metadata: safeJsonParseObject(s.metadata, 'snapshot metadata')
     }));
   }
 
@@ -1037,7 +1037,7 @@ class AnalyticsService {
 
     return snapshots.map((s: any) => ({
       ...s,
-      metadata: safeJsonParseObject(s.metadata, 'snapshot metadata'),
+      metadata: safeJsonParseObject(s.metadata, 'snapshot metadata')
     }));
   }
 
@@ -1067,7 +1067,7 @@ class AnalyticsService {
         data.condition,
         data.threshold_value,
         JSON.stringify(data.notification_emails),
-        data.created_by || null,
+        data.created_by || null
       ]
     );
 
@@ -1083,7 +1083,7 @@ class AnalyticsService {
 
     return alerts.map((a: any) => ({
       ...a,
-      notification_emails: safeJsonParseArray<string>(a.notification_emails, 'alert emails'),
+      notification_emails: safeJsonParseArray<string>(a.notification_emails, 'alert emails')
     }));
   }
 
@@ -1100,7 +1100,7 @@ class AnalyticsService {
 
     return {
       ...(alert as unknown as MetricAlert),
-      notification_emails: safeJsonParseArray<string>(alert.notification_emails as string, 'alert emails'),
+      notification_emails: safeJsonParseArray<string>(alert.notification_emails as string, 'alert emails')
     };
   }
 
@@ -1182,21 +1182,21 @@ class AnalyticsService {
       const value = kpi.value;
 
       switch (alert.condition) {
-        case 'above':
-          triggered = value > alert.threshold_value;
-          break;
-        case 'below':
-          triggered = value < alert.threshold_value;
-          break;
-        case 'equals':
-          triggered = value === alert.threshold_value;
-          break;
-        case 'change_above':
-          triggered = (kpi.change_percent || 0) > alert.threshold_value;
-          break;
-        case 'change_below':
-          triggered = (kpi.change_percent || 0) < alert.threshold_value;
-          break;
+      case 'above':
+        triggered = value > alert.threshold_value;
+        break;
+      case 'below':
+        triggered = value < alert.threshold_value;
+        break;
+      case 'equals':
+        triggered = value === alert.threshold_value;
+        break;
+      case 'change_above':
+        triggered = (kpi.change_percent || 0) > alert.threshold_value;
+        break;
+      case 'change_below':
+        triggered = (kpi.change_percent || 0) < alert.threshold_value;
+        break;
       }
 
       results.push({ alert, currentValue: value, triggered });
@@ -1225,25 +1225,23 @@ class AnalyticsService {
     reportType: ReportType,
     filters: ReportFilters = {}
   ): Promise<{ data: any[]; summary: Record<string, any> }> {
-    const db = getDatabase();
-
     switch (reportType) {
-      case 'revenue':
-        return this.generateRevenueReport(filters);
-      case 'pipeline':
-        return this.generatePipelineReport(filters);
-      case 'project':
-        return this.generateProjectReport(filters);
-      case 'client':
-        return this.generateClientReport(filters);
-      case 'team':
-        return this.generateTeamReport(filters);
-      case 'lead':
-        return this.generateLeadReport(filters);
-      case 'invoice':
-        return this.generateInvoiceReport(filters);
-      default:
-        throw new Error(`Unknown report type: ${reportType}`);
+    case 'revenue':
+      return this.generateRevenueReport(filters);
+    case 'pipeline':
+      return this.generatePipelineReport(filters);
+    case 'project':
+      return this.generateProjectReport(filters);
+    case 'client':
+      return this.generateClientReport(filters);
+    case 'team':
+      return this.generateTeamReport(filters);
+    case 'lead':
+      return this.generateLeadReport(filters);
+    case 'invoice':
+      return this.generateInvoiceReport(filters);
+    default:
+      throw new Error(`Unknown report type: ${reportType}`);
     }
   }
 
@@ -1288,7 +1286,7 @@ class AnalyticsService {
     } catch (err) {
       logger.error('Error generating revenue report', {
         category: 'analytics',
-        metadata: { error: err, filters },
+        metadata: { error: err, filters }
       });
       throw err;
     }
@@ -1643,7 +1641,7 @@ class AnalyticsService {
 
   async checkAlertTriggers(): Promise<
     { alert: MetricAlert; currentValue: number; triggered: boolean }[]
-  > {
+    > {
     return this.checkAlerts();
   }
 
@@ -1655,7 +1653,7 @@ class AnalyticsService {
     } catch (err) {
       logger.error('Failed to generate revenue analytics', {
         category: 'analytics',
-        metadata: { error: err, dateRange },
+        metadata: { error: err, dateRange }
       });
       throw new Error('Revenue analytics generation failed');
     }
@@ -1686,7 +1684,7 @@ class AnalyticsService {
     startDate.setDate(startDate.getDate() - days);
     return {
       start: startDate.toISOString().split('T')[0],
-      end: endDate.toISOString().split('T')[0],
+      end: endDate.toISOString().split('T')[0]
     };
   }
 
@@ -1718,22 +1716,19 @@ class AnalyticsService {
   ): Promise<{ period: string; revenue: number; invoiceCount: number; averageInvoice: number }[]> {
     const db = getDatabase();
 
-    let dateFormat: string;
     let groupBy: string;
 
     switch (period) {
-      case 'month':
-        dateFormat = '%Y-%m';
-        groupBy = "strftime('%Y-%m', paid_at)";
-        break;
-      case 'quarter':
-        groupBy =
-          "strftime('%Y', paid_at) || '-Q' || ((CAST(strftime('%m', paid_at) AS INTEGER) + 2) / 3)";
-        break;
-      case 'year':
-        dateFormat = '%Y';
-        groupBy = "strftime('%Y', paid_at)";
-        break;
+    case 'month':
+      groupBy = 'strftime(\'%Y-%m\', paid_at)';
+      break;
+    case 'quarter':
+      groupBy =
+          'strftime(\'%Y\', paid_at) || \'-Q\' || ((CAST(strftime(\'%m\', paid_at) AS INTEGER) + 2) / 3)';
+      break;
+    case 'year':
+      groupBy = 'strftime(\'%Y\', paid_at)';
+      break;
     }
 
     let query = `
@@ -1771,7 +1766,7 @@ class AnalyticsService {
       period: r.period,
       revenue: r.revenue || 0,
       invoiceCount: r.invoice_count,
-      averageInvoice: r.average_invoice || 0,
+      averageInvoice: r.average_invoice || 0
     }));
   }
 
@@ -1810,8 +1805,8 @@ class AnalyticsService {
       byStatus: results.map((r) => ({
         status: r.status,
         value: r.total_value || 0,
-        count: r.count,
-      })),
+        count: r.count
+      }))
     };
   }
 
@@ -1858,7 +1853,7 @@ class AnalyticsService {
         params
       ),
       db.get(`SELECT COUNT(*) as count FROM proposals WHERE 1=1${dateFilter}`, params),
-      db.get(`SELECT COUNT(*) as count FROM clients WHERE 1=1${dateFilter}`, params),
+      db.get(`SELECT COUNT(*) as count FROM clients WHERE 1=1${dateFilter}`, params)
     ])) as Array<{ count: number } | undefined>;
 
     const contactCount = contacts?.count || 0;
@@ -1875,8 +1870,8 @@ class AnalyticsService {
         contactToLead: contactCount > 0 ? (leadCount / contactCount) * 100 : 0,
         leadToProposal: leadCount > 0 ? (proposalCount / leadCount) * 100 : 0,
         proposalToClient: proposalCount > 0 ? (clientCount / proposalCount) * 100 : 0,
-        overall: contactCount > 0 ? (clientCount / contactCount) * 100 : 0,
-      },
+        overall: contactCount > 0 ? (clientCount / contactCount) * 100 : 0
+      }
     };
   }
 
@@ -1915,7 +1910,7 @@ class AnalyticsService {
         FROM projects
         GROUP BY status
         ORDER BY count DESC
-      `),
+      `)
     ])) as [
       { average_value: number | null; average_duration: number | null } | undefined,
       Array<{ type: string; count: number; total_value: number }>,
@@ -1928,12 +1923,12 @@ class AnalyticsService {
       popularTypes: typeStats.map((t) => ({
         type: t.type || 'Unknown',
         count: t.count,
-        totalValue: t.total_value || 0,
+        totalValue: t.total_value || 0
       })),
       statusBreakdown: statusStats.map((s) => ({
         status: s.status,
-        count: s.count,
-      })),
+        count: s.count
+      }))
     };
   }
 
@@ -2004,7 +1999,7 @@ class AnalyticsService {
         firstProjectDate: r.first_project_date || '',
         lastProjectDate: r.last_project_date || '',
         lifetimeMonths,
-        monthlyValue: (r.total_revenue || 0) / lifetimeMonths,
+        monthlyValue: (r.total_revenue || 0) / lifetimeMonths
       };
     });
   }
@@ -2074,10 +2069,10 @@ class AnalyticsService {
           responseTime: Math.round(responseScore),
           approvalSpeed: Math.round(approvalScore),
           paymentSpeed: Math.round(paymentScore),
-          engagement: Math.round(engagementScore),
+          engagement: Math.round(engagementScore)
         },
         lastActivity: r.last_activity || '',
-        riskLevel: totalScore >= 70 ? 'low' : totalScore >= 40 ? 'medium' : 'high',
+        riskLevel: totalScore >= 70 ? 'low' : totalScore >= 40 ? 'medium' : 'high'
       };
     });
   }
@@ -2095,7 +2090,7 @@ class AnalyticsService {
       potentialValue: number;
       lastContact: string;
     }>
-  > {
+    > {
     const db = getDatabase();
 
     const clients = (await db.all(`
@@ -2125,7 +2120,7 @@ class AnalyticsService {
       'branding',
       'maintenance',
       'seo',
-      'hosting',
+      'hosting'
     ];
 
     return clients.map((c) => {
@@ -2143,7 +2138,7 @@ class AnalyticsService {
         missingServices,
         recommendedService,
         potentialValue: recommendedService === 'maintenance' ? 500 : 2000,
-        lastContact: c.last_contact || '',
+        lastContact: c.last_contact || ''
       };
     });
   }
@@ -2165,7 +2160,7 @@ class AnalyticsService {
       daysOverdue: number;
       remindersSent: number;
     }>
-  > {
+    > {
     const db = getDatabase();
 
     const results = (await db.all(`
@@ -2199,7 +2194,7 @@ class AnalyticsService {
       amount: r.amount || 0,
       dueDate: r.due_date,
       daysOverdue: r.days_overdue,
-      remindersSent: r.reminders_sent || 0,
+      remindersSent: r.reminders_sent || 0
     }));
   }
 
@@ -2216,7 +2211,7 @@ class AnalyticsService {
       daysWaiting: number;
       remindersSent: number;
     }>
-  > {
+    > {
     const db = getDatabase();
 
     const results = (await db.all(`
@@ -2251,7 +2246,7 @@ class AnalyticsService {
       clientName: r.client_name || 'Unknown',
       requestedDate: r.requested_date,
       daysWaiting: r.days_waiting,
-      remindersSent: r.reminders_sent || 0,
+      remindersSent: r.reminders_sent || 0
     }));
   }
 
@@ -2287,7 +2282,7 @@ class AnalyticsService {
         GROUP BY c.id, COALESCE(c.contact_name, c.company_name)
         HAVING pending > 0
         ORDER BY overdue DESC, pending DESC
-      `),
+      `)
     ])) as [
       { pending: number; submitted: number; approved: number; overdue: number } | undefined,
       Array<{ client_id: number; client_name: string; pending: number; overdue: number }>,
@@ -2302,8 +2297,8 @@ class AnalyticsService {
         clientId: c.client_id,
         clientName: c.client_name,
         pending: c.pending,
-        overdue: c.overdue,
-      })),
+        overdue: c.overdue
+      }))
     };
   }
 
@@ -2392,7 +2387,7 @@ class AnalyticsService {
         status: healthStatus,
         dueDate: p.due_date || '',
         completionPercent,
-        issues,
+        issues
       };
     });
 
@@ -2400,7 +2395,7 @@ class AnalyticsService {
       onTrack,
       atRisk,
       overdue,
-      projects: projectList,
+      projects: projectList
     };
   }
 }

@@ -45,8 +45,8 @@ export function formatZapierPayload(
     data: flattenObject(data),
     meta: {
       version: '1.0',
-      source: 'no-bhad-codes',
-    },
+      source: 'no-bhad-codes'
+    }
   };
 }
 
@@ -105,12 +105,12 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             due_date: '2026-03-10',
             line_items: [
               { description: 'Web Design', amount: 3000 },
-              { description: 'Development', amount: 2000 },
-            ],
-          },
+              { description: 'Development', amount: 2000 }
+            ]
+          }
         },
         123
-      ),
+      )
     },
     {
       event_type: 'invoice.paid',
@@ -128,11 +128,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             currency: 'USD',
             status: 'paid',
             paid_at: new Date().toISOString(),
-            payment_method: 'stripe',
-          },
+            payment_method: 'stripe'
+          }
         },
         123
-      ),
+      )
     },
     {
       event_type: 'project.created',
@@ -149,11 +149,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             status: 'active',
             start_date: '2026-02-15',
             due_date: '2026-04-15',
-            budget: 10000.0,
-          },
+            budget: 10000.0
+          }
         },
         456
-      ),
+      )
     },
     {
       event_type: 'project.completed',
@@ -168,11 +168,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             status: 'completed',
             completed_at: new Date().toISOString(),
             total_hours: 120,
-            final_amount: 12000.0,
-          },
+            final_amount: 12000.0
+          }
         },
         456
-      ),
+      )
     },
     {
       event_type: 'contract.signed',
@@ -187,11 +187,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             client_email: 'legal@shop.com',
             signer_name: 'John Smith',
             signed_at: new Date().toISOString(),
-            contract_type: 'standard',
-          },
+            contract_type: 'standard'
+          }
         },
         789
-      ),
+      )
     },
     {
       event_type: 'proposal.accepted',
@@ -206,11 +206,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             client_email: 'founder@startup.com',
             selected_tier: 'premium',
             total_price: 25000.0,
-            accepted_at: new Date().toISOString(),
-          },
+            accepted_at: new Date().toISOString()
+          }
         },
         101
-      ),
+      )
     },
     {
       event_type: 'task.completed',
@@ -225,11 +225,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             milestone: 'Design Phase',
             assigned_to: 'designer@company.com',
             completed_at: new Date().toISOString(),
-            actual_hours: 8,
-          },
+            actual_hours: 8
+          }
         },
         202
-      ),
+      )
     },
     {
       event_type: 'client.created',
@@ -243,11 +243,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             email: 'contact@newclient.com',
             company: 'New Client LLC',
             phone: '+1-555-0123',
-            created_at: new Date().toISOString(),
-          },
+            created_at: new Date().toISOString()
+          }
         },
         303
-      ),
+      )
     },
     {
       event_type: 'lead.created',
@@ -264,11 +264,11 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             project_type: 'web-design',
             budget_range: '$5k-$10k',
             message: 'Interested in your services',
-            created_at: new Date().toISOString(),
-          },
+            created_at: new Date().toISOString()
+          }
         },
         404
-      ),
+      )
     },
     {
       event_type: 'milestone.completed',
@@ -283,12 +283,12 @@ export function getZapierTriggerSamples(): ZapierTriggerSample[] {
             project_id: 456,
             status: 'completed',
             completed_at: new Date().toISOString(),
-            actual_hours: 40,
-          },
+            actual_hours: 40
+          }
         },
         505
-      ),
-    },
+      )
+    }
   ];
 }
 
@@ -314,8 +314,8 @@ export async function createZapierWebhook(
     data: '{{data}}',
     meta: {
       version: '1.0',
-      source: 'no-bhad-codes',
-    },
+      source: 'no-bhad-codes'
+    }
   });
 
   const result = (await db.run(
@@ -326,7 +326,7 @@ export async function createZapierWebhook(
 
   return {
     id: result.lastID || 0,
-    secret_key: secret,
+    secret_key: secret
   };
 }
 
@@ -346,90 +346,90 @@ export function getZapierEventTypes(): { value: string; label: string; descripti
     {
       value: 'invoice.created',
       label: 'Invoice Created',
-      description: 'When a new invoice is created',
+      description: 'When a new invoice is created'
     },
     {
       value: 'invoice.sent',
       label: 'Invoice Sent',
-      description: 'When an invoice is sent to client',
+      description: 'When an invoice is sent to client'
     },
     {
       value: 'invoice.paid',
       label: 'Invoice Paid',
-      description: 'When an invoice is marked as paid',
+      description: 'When an invoice is marked as paid'
     },
     {
       value: 'invoice.overdue',
       label: 'Invoice Overdue',
-      description: 'When an invoice becomes overdue',
+      description: 'When an invoice becomes overdue'
     },
 
     // Project events
     {
       value: 'project.created',
       label: 'Project Created',
-      description: 'When a new project is created',
+      description: 'When a new project is created'
     },
     {
       value: 'project.started',
       label: 'Project Started',
-      description: 'When a project status changes to active',
+      description: 'When a project status changes to active'
     },
     {
       value: 'project.completed',
       label: 'Project Completed',
-      description: 'When a project is completed',
+      description: 'When a project is completed'
     },
     {
       value: 'project.status_changed',
       label: 'Project Status Changed',
-      description: 'When project status changes',
+      description: 'When project status changes'
     },
 
     // Contract events
     {
       value: 'contract.created',
       label: 'Contract Created',
-      description: 'When a new contract is created',
+      description: 'When a new contract is created'
     },
     {
       value: 'contract.sent',
       label: 'Contract Sent',
-      description: 'When a contract is sent for signing',
+      description: 'When a contract is sent for signing'
     },
     {
       value: 'contract.signed',
       label: 'Contract Signed',
-      description: 'When a contract is signed',
+      description: 'When a contract is signed'
     },
 
     // Proposal events
     {
       value: 'proposal.created',
       label: 'Proposal Created',
-      description: 'When a new proposal is created',
+      description: 'When a new proposal is created'
     },
     {
       value: 'proposal.sent',
       label: 'Proposal Sent',
-      description: 'When a proposal is sent to client',
+      description: 'When a proposal is sent to client'
     },
     {
       value: 'proposal.accepted',
       label: 'Proposal Accepted',
-      description: 'When a proposal is accepted',
+      description: 'When a proposal is accepted'
     },
     {
       value: 'proposal.rejected',
       label: 'Proposal Rejected',
-      description: 'When a proposal is rejected',
+      description: 'When a proposal is rejected'
     },
 
     // Client events
     {
       value: 'client.created',
       label: 'Client Created',
-      description: 'When a new client is created',
+      description: 'When a new client is created'
     },
 
     // Lead events
@@ -437,7 +437,7 @@ export function getZapierEventTypes(): { value: string; label: string; descripti
     {
       value: 'lead.converted',
       label: 'Lead Converted',
-      description: 'When a lead becomes a client',
+      description: 'When a lead becomes a client'
     },
 
     // Task events
@@ -449,8 +449,8 @@ export function getZapierEventTypes(): { value: string; label: string; descripti
     {
       value: 'milestone.completed',
       label: 'Milestone Completed',
-      description: 'When a milestone is completed',
-    },
+      description: 'When a milestone is completed'
+    }
   ];
 }
 
@@ -459,5 +459,5 @@ export default {
   flattenObject,
   getZapierTriggerSamples,
   createZapierWebhook,
-  getZapierEventTypes,
+  getZapierEventTypes
 };

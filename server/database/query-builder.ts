@@ -422,7 +422,7 @@ export abstract class BaseQueryBuilder<T = DatabaseRow> {
         rowCount: rows.length,
         executionTime,
         sql,
-        params,
+        params
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
@@ -432,7 +432,7 @@ export abstract class BaseQueryBuilder<T = DatabaseRow> {
 
       const err = error as Error;
       await logger.error('Database query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Database query failed: ${err.message}`);
@@ -477,7 +477,7 @@ export abstract class BaseQueryBuilder<T = DatabaseRow> {
 
       const err = error as Error;
       await logger.error('Single row query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Database query failed: ${err.message}`);
@@ -514,7 +514,7 @@ export class SelectQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
     return {
       sql,
-      params: [...whereClause.params, ...havingClause.params],
+      params: [...whereClause.params, ...havingClause.params]
     };
   }
 
@@ -590,8 +590,8 @@ export class SelectQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
         total,
         totalPages,
         hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
+        hasPrev: page > 1
+      }
     };
   }
 
@@ -697,7 +697,7 @@ export class InsertQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
           } else {
             resolve({
               insertId: this.lastID,
-              changes: this.changes,
+              changes: this.changes
             });
           }
         });
@@ -719,7 +719,7 @@ export class InsertQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
       const err = error as Error;
       await logger.error('Insert query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Insert query failed: ${err.message}`);
@@ -794,7 +794,7 @@ export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
     return {
       sql,
-      params: [...updateParams, ...whereClause.params],
+      params: [...updateParams, ...whereClause.params]
     };
   }
 
@@ -834,7 +834,7 @@ export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
       const err = error as Error;
       await logger.error('Update query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Update query failed: ${err.message}`);
@@ -862,7 +862,7 @@ export class DeleteQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
     return {
       sql,
-      params: whereClause.params,
+      params: whereClause.params
     };
   }
 
@@ -902,7 +902,7 @@ export class DeleteQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
       const err = error as Error;
       await logger.error('Delete query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Delete query failed: ${err.message}`);
@@ -987,7 +987,7 @@ export class QueryBuilder {
         rowCount: rows.length,
         executionTime,
         sql,
-        params,
+        params
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
@@ -999,7 +999,7 @@ export class QueryBuilder {
 
       const err = error as Error;
       await logger.error('Database query failed', {
-        message: err.message,
+        message: err.message
       });
 
       throw new Error(`Database query failed: ${err.message}`);

@@ -262,7 +262,7 @@ class TimelineService {
       entity_type: event.entity_type,
       created_at: event.created_at,
       actor_name: event.actor_name,
-      actor_type: event.actor_type,
+      actor_type: event.actor_type
     }));
 
     // Filter by types if specified
@@ -302,7 +302,7 @@ class TimelineService {
     return this.getClientTimeline(project.client_id, {
       projectId,
       limit: options.limit,
-      offset: options.offset,
+      offset: options.offset
     });
   }
 
@@ -317,7 +317,7 @@ class TimelineService {
     byType: Record<string, number>;
     recentEvents: TimelineEvent[];
   }> {
-    const { events, total } = await this.getClientTimeline(clientId, { limit: 100 });
+    const { events, total: _total } = await this.getClientTimeline(clientId, { limit: 100 });
 
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
@@ -333,7 +333,7 @@ class TimelineService {
     return {
       totalEvents: recentEvents.length,
       byType,
-      recentEvents: recentEvents.slice(0, 10),
+      recentEvents: recentEvents.slice(0, 10)
     };
   }
 }

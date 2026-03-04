@@ -79,7 +79,7 @@ router.get(
     const articles = await knowledgeBaseService.searchArticles(query, {
       limit,
       userId: req.user?.id,
-      userType: req.user?.type,
+      userType: req.user?.type
     });
 
     sendSuccess(res, { articles, query });
@@ -128,7 +128,7 @@ router.post(
       isHelpful,
       userId: req.user?.id,
       userType: req.user?.type,
-      comment,
+      comment
     });
 
     sendSuccess(res, undefined, 'Feedback submitted');
@@ -172,7 +172,7 @@ router.post(
       description,
       icon,
       color,
-      sort_order,
+      sort_order
     });
 
     sendCreated(res, { category }, 'Category created');
@@ -297,7 +297,7 @@ router.post(
       keywords,
       is_featured,
       is_published,
-      author_email: req.user?.email,
+      author_email: req.user?.email
     });
 
     sendCreated(res, { article }, 'Article created');

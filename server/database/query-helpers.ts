@@ -122,7 +122,7 @@ export function buildSafeUpdate(
 
   return {
     setClause: setClauses.join(', '),
-    params,
+    params
   };
 }
 

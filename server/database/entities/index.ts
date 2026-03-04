@@ -32,7 +32,7 @@ export {
   toCustomField,
   toCustomFieldValue,
   toTag,
-  toClientNote,
+  toClientNote
 } from './client.js';
 
 // =====================================================
@@ -63,7 +63,7 @@ export {
   toLeadNote,
   toLeadSource,
   toLeadSummary,
-  toDuplicateResult,
+  toDuplicateResult
 } from './lead.js';
 
 // =====================================================
@@ -91,7 +91,7 @@ export {
   toTaskComment,
   toChecklistItem,
   toTimeEntry,
-  toProjectTemplate,
+  toProjectTemplate
 } from './project.js';
 
 // =====================================================
@@ -112,7 +112,7 @@ export {
   contractSchema,
   // Mappers
   toContractTemplate,
-  toContract,
+  toContract
 } from './contract.js';
 
 // =====================================================
@@ -151,7 +151,7 @@ export {
   toProposalComment,
   toProposalActivity,
   toProposalCustomItem,
-  toSignatureRequest,
+  toSignatureRequest
 } from './proposal.js';
 
 // =====================================================
@@ -207,7 +207,7 @@ export {
   toRecurringInvoice,
   toInvoiceReminder,
   toInvoiceCredit,
-  toInvoice,
+  toInvoice
 } from './invoice.js';
 
 // =====================================================
@@ -238,7 +238,7 @@ export {
   toReaction,
   toSubscription,
   toReadReceipt,
-  toPinnedMessage,
+  toPinnedMessage
 } from './message.js';
 
 // =====================================================
@@ -254,7 +254,7 @@ export {
   // Schemas
   systemSettingSchema,
   // Mappers
-  toSystemSetting,
+  toSystemSetting
 } from './settings.js';
 
 // =====================================================
@@ -273,5 +273,5 @@ export {
   // Schemas
   adHocRequestSchema,
   // Mappers
-  toAdHocRequest,
+  toAdHocRequest
 } from './ad-hoc-request.js';

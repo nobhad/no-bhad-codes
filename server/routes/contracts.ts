@@ -46,7 +46,7 @@ router.get(
     const contracts = await contractService.getContracts({
       projectId,
       clientId,
-      status,
+      status
     });
 
     sendSuccess(res, { contracts });
@@ -108,7 +108,7 @@ router.post(
       projectId,
       clientId,
       status,
-      expiresAt: expiresAt || null,
+      expiresAt: expiresAt || null
     });
 
     // Emit workflow event for contract creation
@@ -117,7 +117,7 @@ router.post(
       triggeredBy: req.user?.email || 'admin',
       projectId,
       clientId,
-      templateId,
+      templateId
     });
 
     sendCreated(res, { contract }, 'Contract created successfully');
@@ -208,7 +208,7 @@ router.post(
       entityId: contract.id,
       triggeredBy: req.user?.email || 'admin',
       projectId,
-      clientId,
+      clientId
     });
 
     sendCreated(res, { contract }, 'Contract created successfully');
@@ -277,7 +277,7 @@ router.post(
       expiresAt.setDate(expiresAt.getDate() + 30); // 30 day expiry
 
       await db.run(
-        `UPDATE projects SET contract_signature_token = ?, contract_signature_expires_at = ? WHERE id = ?`,
+        'UPDATE projects SET contract_signature_token = ?, contract_signature_expires_at = ? WHERE id = ?',
         [signatureToken, expiresAt.toISOString(), contract.projectId]
       );
     }
@@ -316,7 +316,7 @@ router.post(
   </div>
 </body>
 </html>
-      `.trim(),
+      `.trim()
     });
 
     // Log the send action
@@ -411,7 +411,7 @@ router.post(
   </div>
 </body>
 </html>
-      `.trim(),
+      `.trim()
     });
 
     await db.run(
@@ -442,7 +442,7 @@ router.post(
 
     const contract = await contractService.updateContract(contractId, {
       status: 'expired',
-      expiresAt: now,
+      expiresAt: now
     });
 
     await db.run(
@@ -480,7 +480,7 @@ router.post(
       content: content || original.content,
       status: 'draft',
       variables: original.variables,
-      parentContractId: original.id,
+      parentContractId: original.id
     });
 
     sendCreated(res, { contract: amendment }, 'Amendment created');
@@ -547,13 +547,13 @@ router.post(
   </div>
 </body>
 </html>
-      `.trim(),
+      `.trim()
     });
 
     await contractService.updateContract(contractId, {
       renewalReminderSentAt: new Date().toISOString(),
       lastReminderAt: new Date().toISOString(),
-      reminderCount: (contract.reminderCount || 0) + 1,
+      reminderCount: (contract.reminderCount || 0) + 1
     });
 
     await db.run(

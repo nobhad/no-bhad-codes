@@ -199,7 +199,7 @@ export function getBoolParam(
 export const PAGINATION_DEFAULTS = {
   DEFAULT_LIMIT: 50,
   MAX_LIMIT: 1000,
-  DEFAULT_PAGE: 1,
+  DEFAULT_PAGE: 1
 } as const;
 
 /**
@@ -262,11 +262,11 @@ export function getSortParams(
   defaultOrder: 'asc' | 'desc' = 'desc'
 ): SortParams {
   const sortBy = getStringParam(query.sort || query.sortBy, defaultSort, {
-    allowedValues: allowedColumns,
+    allowedValues: allowedColumns
   });
 
   const orderValue = getStringParam(query.order || query.sortOrder, defaultOrder, {
-    lowercase: true,
+    lowercase: true
   });
 
   const sortOrder: 'asc' | 'desc' = orderValue === 'asc' ? 'asc' : 'desc';

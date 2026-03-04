@@ -50,7 +50,7 @@ router.get(
       totalRuns: triggers.reduce((sum: number, t: { runCount: number }) => sum + (t.runCount || 0), 0),
       avgSuccessRate: triggers.length > 0
         ? Math.round(triggers.reduce((sum: number, t: { successRate: number }) => sum + (t.successRate || 0), 0) / triggers.length)
-        : 0,
+        : 0
     };
 
     res.json({ workflows: triggers, stats });
@@ -115,7 +115,7 @@ router.post(
       if (isNaN(id)) continue;
 
       const result = await db.run(
-        "UPDATE workflow_triggers SET is_active = ?, updated_at = datetime('now') WHERE id = ?",
+        'UPDATE workflow_triggers SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',
         [isActive, id]
       );
       if (result.changes && result.changes > 0) {
@@ -146,7 +146,7 @@ router.post(
       reminders: remindersSent,
       scheduledInvoices: scheduled,
       recurringInvoices: recurring,
-      overdueMarked: overdueCount,
+      overdueMarked: overdueCount
     });
   })
 );
@@ -173,8 +173,8 @@ router.post(
         projectsProcessed: result.projectsProcessed,
         milestonesCreated: result.milestonesCreated,
         tasksCreated: result.tasksCreated,
-        errors: result.errors,
-      },
+        errors: result.errors
+      }
     });
   })
 );
@@ -200,8 +200,8 @@ router.post(
       data: {
         milestonesProcessed: result.milestonesProcessed,
         tasksCreated: result.tasksCreated,
-        errors: result.errors,
-      },
+        errors: result.errors
+      }
     });
   })
 );

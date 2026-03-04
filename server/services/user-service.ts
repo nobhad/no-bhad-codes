@@ -74,7 +74,7 @@ class UserService {
 
     const db = await getDatabase();
     const user = (await db.get('SELECT id FROM users WHERE LOWER(email) = ?', [
-      normalizedEmail,
+      normalizedEmail
     ])) as { id: number } | undefined;
 
     const userId = user ? user.id : null;
@@ -131,7 +131,7 @@ class UserService {
   async getUserByEmail(email: string): Promise<User | null> {
     const db = await getDatabase();
     const user = await db.get(`SELECT ${USER_COLUMNS} FROM users WHERE LOWER(email) = ?`, [
-      email.toLowerCase().trim(),
+      email.toLowerCase().trim()
     ]);
     return user ? this.mapUser(user) : null;
   }
@@ -167,7 +167,7 @@ class UserService {
         data.email.toLowerCase().trim(),
         data.displayName,
         data.role || 'team_member',
-        data.avatarUrl || null,
+        data.avatarUrl || null
       ]
     );
 
@@ -189,7 +189,7 @@ class UserService {
     return this.createUser({
       email,
       displayName: displayName || email.split('@')[0],
-      role: 'team_member',
+      role: 'team_member'
     });
   }
 
@@ -210,7 +210,7 @@ class UserService {
   async deactivateUser(userId: number): Promise<void> {
     const db = await getDatabase();
     await db.run('UPDATE users SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
-      userId,
+      userId
     ]);
     this.clearCache();
   }
@@ -221,7 +221,7 @@ class UserService {
   async reactivateUser(userId: number): Promise<void> {
     const db = await getDatabase();
     await db.run('UPDATE users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
-      userId,
+      userId
     ]);
     this.clearCache();
   }
@@ -247,7 +247,7 @@ class UserService {
       is_active: Boolean(row.is_active),
       last_active_at: row.last_active_at,
       created_at: row.created_at,
-      updated_at: row.updated_at,
+      updated_at: row.updated_at
     };
   }
 
@@ -273,7 +273,7 @@ class UserService {
     return {
       columns: 'assigned_to, assigned_to_user_id',
       placeholders: '?, ?',
-      values: [email || null, userId],
+      values: [email || null, userId]
     };
   }
 
@@ -291,7 +291,7 @@ class UserService {
     const userId = await this.getUserIdByEmail(email);
     return {
       setClause: 'assigned_to = ?, assigned_to_user_id = ?',
-      values: [email || null, userId],
+      values: [email || null, userId]
     };
   }
 
@@ -306,7 +306,7 @@ class UserService {
     const userId = await this.getUserIdByEmailOrName(identifier);
     return {
       setClause: `${textColumn} = ?, ${userIdColumn} = ?`,
-      values: [identifier || null, userId],
+      values: [identifier || null, userId]
     };
   }
 }

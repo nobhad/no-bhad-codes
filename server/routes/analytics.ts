@@ -76,7 +76,7 @@ function getDateThreshold(days: number): string {
 const trackingRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   maxRequests: 100, // 100 requests per minute per IP
-  message: 'Too many tracking requests',
+  message: 'Too many tracking requests'
 });
 
 // Stricter rate limit for admin endpoints. Make configurable via env vars
@@ -87,7 +87,7 @@ const adminRateLimit = rateLimit({
   maxRequests: adminMaxRequests,
   // In development, skip strict admin limits to avoid local 429s
   skipIf: () => process.env.NODE_ENV === 'development',
-  message: 'Too many requests',
+  message: 'Too many requests'
 });
 
 interface TrackingPayload {
@@ -168,7 +168,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
           session.pageViews,
           session.totalTimeOnSite,
           session.bounced ? 1 : 0,
-          session.sessionId,
+          session.sessionId
         ]
       );
     } else {
@@ -195,7 +195,7 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
           ipAddress,
           deviceType,
           browser,
-          os,
+          os
         ]
       );
     }
@@ -238,15 +238,15 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
       category: 'analytics',
       metadata: {
         sessionId: session.sessionId,
-        eventCount: events.length,
-      },
+        eventCount: events.length
+      }
     });
 
     sendSuccess(res, undefined);
   } catch (error) {
     logger.error('Failed to process tracking events', {
       category: 'analytics',
-      metadata: { error },
+      metadata: { error }
     });
     errorResponse(res, 'Failed to process tracking events', 500, 'INTERNAL_ERROR');
   }
@@ -376,12 +376,12 @@ router.get(
         topReferrers,
         devices,
         browsers,
-        topInteractions,
+        topInteractions
       });
     } catch (error) {
       logger.error('Failed to get analytics summary', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       errorResponse(res, 'Failed to get analytics summary', 500, 'INTERNAL_ERROR');
     }
@@ -433,12 +433,12 @@ router.get(
       sendSuccess(res, {
         activeSessions: sessions.length,
         sessions,
-        recentPages,
+        recentPages
       });
     } catch (error) {
       logger.error('Failed to get realtime analytics', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       errorResponse(res, 'Failed to get realtime analytics', 500, 'INTERNAL_ERROR');
     }
@@ -484,14 +484,14 @@ router.delete(
 
       logger.info('Analytics data cleared', {
         category: 'analytics',
-        metadata: { deletedSessions: result.changes, olderThanDays: days },
+        metadata: { deletedSessions: result.changes, olderThanDays: days }
       });
 
       sendSuccess(res, { deletedSessions: result.changes });
     } catch (error) {
       logger.error('Failed to clear analytics data', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       errorResponse(res, 'Failed to clear analytics data', 500, 'INTERNAL_ERROR');
     }
@@ -567,13 +567,13 @@ router.get(
           totalPages:
             typeof total === 'number' && typeof limitNum === 'number'
               ? Math.ceil(total / limitNum)
-              : 0,
-        },
+              : 0
+        }
       });
     } catch (error) {
       logger.error('Failed to get sessions list', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       errorResponse(res, 'Failed to get sessions list', 500, 'INTERNAL_ERROR');
     }
@@ -630,12 +630,12 @@ router.get(
       sendSuccess(res, {
         session,
         pageViews,
-        interactions,
+        interactions
       });
     } catch (error) {
       logger.error('Failed to get session details', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       errorResponse(res, 'Failed to get session details', 500, 'INTERNAL_ERROR');
     }
@@ -693,11 +693,11 @@ router.get(
         summary: {
           totalSessions: sessions.length,
           totalPageViews: pageViews.length,
-          totalInteractions: interactions.length,
+          totalInteractions: interactions.length
         },
         sessions,
         pageViews,
-        interactions,
+        interactions
       };
 
       // Set headers for file download
@@ -711,7 +711,7 @@ router.get(
     } catch (error) {
       logger.error('Failed to export analytics data', {
         category: 'analytics',
-        metadata: { error },
+        metadata: { error }
       });
       errorResponse(res, 'Failed to export analytics data', 500, 'INTERNAL_ERROR');
     }
@@ -752,7 +752,7 @@ router.post(
     const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
     const report = await analyticsService.createSavedReport({
       ...req.body,
-      createdBy: userEmail,
+      createdBy: userEmail
     });
     sendCreated(res, { report });
   })
@@ -898,7 +898,7 @@ router.post(
     const schedule = await analyticsService.createReportSchedule({
       ...req.body,
       reportId,
-      createdBy: userEmail,
+      createdBy: userEmail
     });
     sendCreated(res, { schedule });
   })
@@ -987,7 +987,7 @@ router.post(
     const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
     const widget = await analyticsService.createDashboardWidget({
       ...req.body,
-      userEmail,
+      userEmail
     });
     sendCreated(res, { widget });
   })
@@ -1131,7 +1131,7 @@ router.get(
 
     const trend = await analyticsService.getKPITrend(req.params.type, {
       start: startDate.toISOString().split('T')[0],
-      end: endDate.toISOString().split('T')[0],
+      end: endDate.toISOString().split('T')[0]
     });
     sendSuccess(res, { trend });
   })
@@ -1167,7 +1167,7 @@ router.post(
     const userEmail = (req as Request & { user?: { email: string } }).user?.email || 'admin';
     const alert = await analyticsService.createMetricAlert({
       ...req.body,
-      createdBy: userEmail,
+      createdBy: userEmail
     });
     sendCreated(res, { alert });
   })

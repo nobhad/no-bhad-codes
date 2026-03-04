@@ -70,7 +70,7 @@ export class WebhookService {
         secretKey,
         options?.retryEnabled ? 1 : 0,
         options?.retryMaxAttempts || 3,
-        options?.retryBackoffSeconds || 60,
+        options?.retryBackoffSeconds || 60
       ]
     );
 
@@ -120,7 +120,7 @@ export class WebhookService {
       is_active = existing.is_active,
       retry_enabled = existing.retry_enabled,
       retry_max_attempts = existing.retry_max_attempts,
-      retry_backoff_seconds = existing.retry_backoff_seconds,
+      retry_backoff_seconds = existing.retry_backoff_seconds
     } = { ...updates };
 
     const eventString = Array.isArray(events) ? events.join(',') : events;
@@ -141,7 +141,7 @@ export class WebhookService {
         retry_enabled ? 1 : 0,
         retry_max_attempts,
         retry_backoff_seconds,
-        id,
+        id
       ]
     );
 
@@ -163,7 +163,7 @@ export class WebhookService {
   async toggleWebhook(id: number, active: boolean): Promise<WebhookConfig> {
     await this.db.run('UPDATE webhooks SET is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [
       active ? 1 : 0,
-      id,
+      id
     ]);
     const webhook = await this.getWebhookById(id);
     if (!webhook) throw new Error('Webhook not found');
@@ -221,10 +221,10 @@ export class WebhookService {
         'X-Signature': `${this.signingAlgorithm}=${signature}`,
         'X-Timestamp': new Date().toISOString(),
         'X-Event-ID': payload.event_id,
-        ...webhook.headers,
+        ...webhook.headers
       };
 
-      // eslint-disable-next-line no-undef
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -232,7 +232,7 @@ export class WebhookService {
         method: webhook.method,
         headers,
         body: JSON.stringify(payload),
-        signal: controller.signal,
+        signal: controller.signal
       });
 
       clearTimeout(timeoutId);
@@ -277,7 +277,7 @@ export class WebhookService {
     if (attempt > webhook.retry_max_attempts) {
       // Max retries exceeded
       await this.db.run(
-        "UPDATE webhook_deliveries SET status='failed', updated_at=CURRENT_TIMESTAMP WHERE id=?",
+        'UPDATE webhook_deliveries SET status=\'failed\', updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [deliveryId]
       );
       return;
@@ -330,7 +330,7 @@ export class WebhookService {
           retry_max_attempts: row.retry_max_attempts as number,
           retry_backoff_seconds: row.retry_backoff_seconds as number,
           created_at: row.created_at as string,
-          updated_at: row.updated_at as string,
+          updated_at: row.updated_at as string
         };
 
         let payload: WebhookPayload;
@@ -352,7 +352,7 @@ export class WebhookService {
       } catch (error) {
         logger.error(`[WebhookService] Failed to process retry for delivery ${row.id}:`, {
           error: error instanceof Error ? error : undefined,
-          metadata: { errorMessage: error instanceof Error ? error.message : String(error) },
+          metadata: { errorMessage: error instanceof Error ? error.message : String(error) }
         });
       }
     }
@@ -410,7 +410,7 @@ export class WebhookService {
     const rows = await this.db.all(query, params);
     return {
       deliveries: rows.map((row: Record<string, unknown>) => this.formatDelivery(row)),
-      total: Number(countResult?.count) || 0,
+      total: Number(countResult?.count) || 0
     };
   }
 
@@ -481,7 +481,7 @@ export class WebhookService {
       event_type: eventType,
       event_id: this.generateEventId(),
       timestamp: new Date().toISOString(),
-      data: customPayload,
+      data: customPayload
     };
   }
 
@@ -541,7 +541,7 @@ export class WebhookService {
       retry_max_attempts: Number(row.retry_max_attempts),
       retry_backoff_seconds: Number(row.retry_backoff_seconds),
       created_at: String(row.created_at),
-      updated_at: String(row.updated_at),
+      updated_at: String(row.updated_at)
     };
   }
 
@@ -563,7 +563,7 @@ export class WebhookService {
       delivered_at: row.delivered_at != null ? String(row.delivered_at) : null,
       next_retry_at: row.next_retry_at != null ? String(row.next_retry_at) : null,
       created_at: String(row.created_at),
-      updated_at: String(row.updated_at),
+      updated_at: String(row.updated_at)
     };
   }
 }
@@ -610,7 +610,7 @@ export const webhookService = {
     getWebhookService().getWebhookDeliveries(webhookId, options),
   getDeliveryStats: async (webhookId: number) => getWebhookService().getDeliveryStats(webhookId),
   processPendingRetries: async () => getWebhookService().processPendingRetries(),
-  regenerateSecret: async (webhookId: number) => getWebhookService().regenerateSecret(webhookId),
+  regenerateSecret: async (webhookId: number) => getWebhookService().regenerateSecret(webhookId)
 };
 
 export default webhookService;

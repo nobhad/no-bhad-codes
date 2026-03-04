@@ -78,7 +78,7 @@ router.get('/dashboard', (req: Request, res: Response) => {
       cssBundle: '/src/styles/bundles/admin.css',
       bodyClass: 'admin',
       bodyPage: 'admin',
-      isDev,
+      isDev
     });
   }
 
@@ -93,8 +93,69 @@ router.get('/dashboard', (req: Request, res: Response) => {
     cssBundle: '/src/styles/bundles/portal.css',
     bodyClass: 'client-portal',
     bodyPage: 'client-portal',
-    isDev,
+    isDev
   });
+});
+
+// ============================================
+// Tab Data Route (EJS hybrid tables)
+// ============================================
+
+/**
+ * GET /dashboard/tab/:tabId
+ * Returns an HTML fragment for a specific tab's table.
+ * Used by the client-side TableManager to lazy-load tab content.
+ */
+router.get('/dashboard/tab/:tabId', async (req: Request, res: Response) => {
+  const decoded = decodePortalJwt(req);
+
+  if (!decoded) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { tabId } = req.params;
+
+  try {
+    // Dynamic import to avoid circular dependencies at startup
+    const { fetchTabData, hasTabDataFetcher, getServerTableDef } = await import('../services/tab-data-service.js');
+
+    if (!hasTabDataFetcher(tabId)) {
+      return res.status(404).json({ error: `Unknown tab: ${tabId}` });
+    }
+
+    const tableDef = getServerTableDef(tabId);
+    if (!tableDef) {
+      return res.status(404).json({ error: `No table definition for: ${tabId}` });
+    }
+
+    // Extract user ID from JWT (admin uses 'id', client uses 'clientId')
+    const userId = (decoded as Record<string, unknown>).id as number
+      ?? (decoded as Record<string, unknown>).clientId as number
+      ?? 0;
+
+    const data = await fetchTabData(tabId, decoded.type as 'admin' | 'client', userId);
+
+    if (!data) {
+      return res.status(500).json({ error: 'Failed to fetch tab data' });
+    }
+
+    // Render the table partial as an HTML fragment
+    res.render('partials/table/table', {
+      tableDef,
+      rows: data.rows,
+      stats: data.stats,
+      icons: ICONS
+    }, (err: Error | null, html: string) => {
+      if (err) {
+        console.error('EJS render error:', err);
+        return res.status(500).json({ error: 'Render failed' });
+      }
+      res.type('html').send(html);
+    });
+  } catch (error) {
+    console.error(`Tab data error for ${tabId}:`, error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // ============================================

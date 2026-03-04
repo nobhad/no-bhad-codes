@@ -51,18 +51,8 @@ const DEFAULT_CONFIG: SchedulerConfig = {
   priorityEscalationTime: '0 6 * * *', // Daily at 6:00 AM
   analyticsRetentionDays: 365, // Keep analytics data for 1 year
   approvalReminderIntervals: [1, 3, 7], // Send reminders at 1, 3, and 7 days
-  approvalStallThresholdDays: 7, // Notify admin after 7 days without response
+  approvalStallThresholdDays: 7 // Notify admin after 7 days without response
 };
-
-interface ContractReminder {
-  id: number;
-  projectId: number;
-  reminderType: 'initial' | 'followup_3' | 'followup_7' | 'final_14';
-  scheduledDate: string;
-  sentAt: string | null;
-  status: 'pending' | 'sent' | 'skipped' | 'failed';
-  createdAt: string;
-}
 
 // Database query result interfaces for type safety
 interface ClientRow {
@@ -205,7 +195,7 @@ export class SchedulerService {
         await this.processReminders();
       } catch (error) {
         logger.error('[Scheduler] Error processing reminders:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     });
@@ -230,7 +220,7 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error generating invoices:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     });
@@ -259,7 +249,7 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during soft delete cleanup:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     });
@@ -284,7 +274,7 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during analytics cleanup:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     });
@@ -309,7 +299,7 @@ export class SchedulerService {
         }
       } catch (error) {
         logger.error('[Scheduler] Error during priority escalation:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     });
@@ -347,7 +337,7 @@ export class SchedulerService {
 
     // Delete old page views
     const pageViewsResult = await this.db.run('DELETE FROM page_views WHERE created_at < ?', [
-      cutoffISO,
+      cutoffISO
     ]);
 
     // Delete old interaction events
@@ -358,7 +348,7 @@ export class SchedulerService {
 
     return {
       pageViews: pageViewsResult?.changes || 0,
-      interactionEvents: interactionEventsResult?.changes || 0,
+      interactionEvents: interactionEventsResult?.changes || 0
     };
   }
 
@@ -392,7 +382,7 @@ export class SchedulerService {
 
         // Get client email from database
         const client = (await this.db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
-          invoice.clientId,
+          invoice.clientId
         ])) as ClientRow | undefined;
 
         if (!client || !client.email) {
@@ -411,7 +401,7 @@ export class SchedulerService {
           amount: invoice.amountTotal - (invoice.amountPaid || 0),
           dueDate: invoice.dueDate || '',
           reminderType: reminder.reminderType,
-          portalUrl,
+          portalUrl
         });
 
         // Mark reminder as sent
@@ -423,7 +413,7 @@ export class SchedulerService {
         );
       } catch (error) {
         logger.error(`[Scheduler] Failed to send reminder ${reminder.id}:`, {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
         await this.invoiceService.markReminderFailed(reminder.id);
       }
@@ -489,7 +479,7 @@ export class SchedulerService {
           clientName: reminder.contact_name || 'Valued Client',
           projectName: reminder.project_name,
           reminderType: reminder.reminder_type,
-          signingUrl,
+          signingUrl
         });
 
         await this.markContractReminderSent(reminder.id);
@@ -507,7 +497,7 @@ export class SchedulerService {
         );
       } catch (error) {
         logger.error(`[Scheduler] Failed to send contract reminder ${reminder.id}:`, {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
         await this.markContractReminderFailed(reminder.id);
       }
@@ -528,7 +518,7 @@ export class SchedulerService {
     // Clear any existing pending reminders for this project
     await this.db.run('DELETE FROM contract_reminders WHERE project_id = ? AND status = ?', [
       projectId,
-      'pending',
+      'pending'
     ]);
 
     // Schedule reminders at: 0 days (initial), 3 days, 7 days, 14 days
@@ -536,7 +526,7 @@ export class SchedulerService {
       { type: 'initial', daysFromNow: 0 },
       { type: 'followup_3', daysFromNow: 3 },
       { type: 'followup_7', daysFromNow: 7 },
-      { type: 'final_14', daysFromNow: 14 },
+      { type: 'final_14', daysFromNow: 14 }
     ];
 
     for (const reminder of reminderSchedule) {
@@ -570,7 +560,7 @@ export class SchedulerService {
     await this.db.run('UPDATE contract_reminders SET status = ?, sent_at = ? WHERE id = ?', [
       'sent',
       new Date().toISOString(),
-      reminderId,
+      reminderId
     ]);
   }
 
@@ -580,7 +570,7 @@ export class SchedulerService {
   private async markContractReminderSkipped(reminderId: number): Promise<void> {
     await this.db.run('UPDATE contract_reminders SET status = ? WHERE id = ?', [
       'skipped',
-      reminderId,
+      reminderId
     ]);
   }
 
@@ -590,7 +580,7 @@ export class SchedulerService {
   private async markContractReminderFailed(reminderId: number): Promise<void> {
     await this.db.run('UPDATE contract_reminders SET status = ? WHERE id = ?', [
       'failed',
-      reminderId,
+      reminderId
     ]);
   }
 
@@ -611,28 +601,28 @@ export class SchedulerService {
     let urgency = '';
 
     switch (reminderType) {
-      case 'initial':
-        subject = `Contract Ready for Signature: ${projectName}`;
-        message = `Your contract for "${projectName}" is ready for your signature.`;
-        break;
-      case 'followup_3':
-        subject = `Reminder: Contract Awaiting Signature - ${projectName}`;
-        message = `This is a friendly reminder that your contract for "${projectName}" is still awaiting your signature.`;
-        urgency = 'Please sign at your earliest convenience so we can get started on your project.';
-        break;
-      case 'followup_7':
-        subject = `Action Required: Contract Signature Needed - ${projectName}`;
-        message = `Your contract for "${projectName}" has been awaiting your signature for 7 days.`;
-        urgency = 'Please review and sign the contract to proceed with your project.';
-        break;
-      case 'final_14':
-        subject = `Final Reminder: Contract Signature Required - ${projectName}`;
-        message = `This is a final reminder that your contract for "${projectName}" needs to be signed.`;
-        urgency = 'The signature link will expire soon. Please sign today to avoid delays.';
-        break;
-      default:
-        subject = `Contract Awaiting Signature: ${projectName}`;
-        message = `Your contract for "${projectName}" is ready for your signature.`;
+    case 'initial':
+      subject = `Contract Ready for Signature: ${projectName}`;
+      message = `Your contract for "${projectName}" is ready for your signature.`;
+      break;
+    case 'followup_3':
+      subject = `Reminder: Contract Awaiting Signature - ${projectName}`;
+      message = `This is a friendly reminder that your contract for "${projectName}" is still awaiting your signature.`;
+      urgency = 'Please sign at your earliest convenience so we can get started on your project.';
+      break;
+    case 'followup_7':
+      subject = `Action Required: Contract Signature Needed - ${projectName}`;
+      message = `Your contract for "${projectName}" has been awaiting your signature for 7 days.`;
+      urgency = 'Please review and sign the contract to proceed with your project.';
+      break;
+    case 'final_14':
+      subject = `Final Reminder: Contract Signature Required - ${projectName}`;
+      message = `This is a final reminder that your contract for "${projectName}" needs to be signed.`;
+      urgency = 'The signature link will expire soon. Please sign today to avoid delays.';
+      break;
+    default:
+      subject = `Contract Awaiting Signature: ${projectName}`;
+      message = `Your contract for "${projectName}" is ready for your signature.`;
     }
 
     await emailService.sendEmail({
@@ -686,7 +676,7 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-      `,
+      `
     });
   }
 
@@ -730,38 +720,38 @@ No Bhad Codes Team
     let urgency = '';
 
     switch (reminderType) {
-      case 'upcoming':
-        subject = `Payment Reminder: Invoice #${invoiceNumber} Due Soon`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due on ${dueDate}.`;
-        break;
-      case 'due':
-        subject = `Payment Due Today: Invoice #${invoiceNumber}`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due today.`;
-        urgency = 'Please submit payment today to avoid late fees.';
-        break;
-      case 'overdue_3':
-        subject = `Payment Overdue: Invoice #${invoiceNumber}`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 3 days overdue.`;
-        urgency = 'Please submit payment as soon as possible.';
-        break;
-      case 'overdue_7':
-        subject = `URGENT: Payment Overdue - Invoice #${invoiceNumber}`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 7 days overdue.`;
-        urgency = 'Immediate payment is required to avoid service interruption.';
-        break;
-      case 'overdue_14':
-        subject = `FINAL NOTICE: Invoice #${invoiceNumber} Overdue`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 14 days overdue.`;
-        urgency = 'This is a final reminder before collection action may be taken.';
-        break;
-      case 'overdue_30':
-        subject = `COLLECTION NOTICE: Invoice #${invoiceNumber}`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 30 days overdue.`;
-        urgency = 'Please contact us immediately to discuss payment arrangements.';
-        break;
-      default:
-        subject = `Payment Reminder: Invoice #${invoiceNumber}`;
-        message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is pending payment.`;
+    case 'upcoming':
+      subject = `Payment Reminder: Invoice #${invoiceNumber} Due Soon`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due on ${dueDate}.`;
+      break;
+    case 'due':
+      subject = `Payment Due Today: Invoice #${invoiceNumber}`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is due today.`;
+      urgency = 'Please submit payment today to avoid late fees.';
+      break;
+    case 'overdue_3':
+      subject = `Payment Overdue: Invoice #${invoiceNumber}`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 3 days overdue.`;
+      urgency = 'Please submit payment as soon as possible.';
+      break;
+    case 'overdue_7':
+      subject = `URGENT: Payment Overdue - Invoice #${invoiceNumber}`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 7 days overdue.`;
+      urgency = 'Immediate payment is required to avoid service interruption.';
+      break;
+    case 'overdue_14':
+      subject = `FINAL NOTICE: Invoice #${invoiceNumber} Overdue`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 14 days overdue.`;
+      urgency = 'This is a final reminder before collection action may be taken.';
+      break;
+    case 'overdue_30':
+      subject = `COLLECTION NOTICE: Invoice #${invoiceNumber}`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is now 30 days overdue.`;
+      urgency = 'Please contact us immediately to discuss payment arrangements.';
+      break;
+    default:
+      subject = `Payment Reminder: Invoice #${invoiceNumber}`;
+      message = `Your invoice #${invoiceNumber} for $${amount.toFixed(2)} is pending payment.`;
     }
 
     await emailService.sendEmail({
@@ -816,7 +806,7 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-      `,
+      `
     });
   }
 
@@ -865,8 +855,8 @@ No Bhad Codes Team
         );
         const lastReminderAge = request.reminder_sent_at
           ? Math.floor(
-              (now.getTime() - new Date(request.reminder_sent_at).getTime()) / (1000 * 60 * 60 * 24)
-            )
+            (now.getTime() - new Date(request.reminder_sent_at).getTime()) / (1000 * 60 * 60 * 24)
+          )
           : requestAge;
 
         // Check if we should send a reminder based on intervals
@@ -883,7 +873,7 @@ No Bhad Codes Team
             entityId: request.entity_id,
             workflowName: request.workflow_name,
             reminderCount: request.reminder_count + 1,
-            daysWaiting: requestAge,
+            daysWaiting: requestAge
           });
 
           // Update reminder tracking
@@ -903,9 +893,9 @@ No Bhad Codes Team
           // Only notify once when crossing threshold
           const lastNotifyAge = request.reminder_sent_at
             ? Math.floor(
-                (now.getTime() - new Date(request.reminder_sent_at).getTime()) /
+              (now.getTime() - new Date(request.reminder_sent_at).getTime()) /
                   (1000 * 60 * 60 * 24)
-              )
+            )
             : 0;
 
           if (lastNotifyAge >= 1) {
@@ -914,13 +904,13 @@ No Bhad Codes Team
               entityId: request.entity_id,
               workflowName: request.workflow_name,
               approverEmail: request.approver_email,
-              daysStalled: requestAge,
+              daysStalled: requestAge
             });
 
             // Update to prevent repeated notifications
             await this.db.run('UPDATE approval_requests SET reminder_sent_at = ? WHERE id = ?', [
               now.toISOString(),
-              request.request_id,
+              request.request_id
             ]);
 
             logger.info(
@@ -1026,7 +1016,7 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-      `,
+      `
     });
   }
 
@@ -1121,7 +1111,7 @@ This is an automated alert from the approval system.
   </div>
 </body>
 </html>
-      `,
+      `
     });
   }
 
@@ -1138,7 +1128,7 @@ This is an automated alert from the approval system.
       analyticsCleanup: boolean;
       priorityEscalation: boolean;
     };
-  } {
+    } {
     return {
       isRunning: this.isRunning,
       config: this.config,
@@ -1147,8 +1137,8 @@ This is an automated alert from the approval system.
         invoiceGeneration: this.invoiceGenerationJob !== null,
         softDeleteCleanup: this.softDeleteCleanupJob !== null,
         analyticsCleanup: this.analyticsCleanupJob !== null,
-        priorityEscalation: this.priorityEscalationJob !== null,
-      },
+        priorityEscalation: this.priorityEscalationJob !== null
+      }
     };
   }
 

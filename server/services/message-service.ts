@@ -32,7 +32,7 @@ import {
   toReaction,
   toSubscription,
   toReadReceipt,
-  toPinnedMessage,
+  toPinnedMessage
 } from '../database/entities/index.js';
 
 // =====================================================
@@ -180,7 +180,7 @@ class MessageService {
     // Update message mention count
     await db.run('UPDATE messages SET mention_count = ? WHERE id = ?', [
       mentions.length,
-      messageId,
+      messageId
     ]);
 
     return savedMentions;
@@ -260,7 +260,7 @@ class MessageService {
 
     // Update message reaction count
     await db.run('UPDATE messages SET reaction_count = reaction_count + 1 WHERE id = ?', [
-      messageId,
+      messageId
     ]);
 
     const row = await db.get(`SELECT ${MESSAGE_REACTION_COLUMNS} FROM message_reactions WHERE id = ?`, [result.lastID]);
@@ -281,7 +281,7 @@ class MessageService {
     if (result.changes && result.changes > 0) {
       // Update message reaction count
       await db.run('UPDATE messages SET reaction_count = reaction_count - 1 WHERE id = ?', [
-        messageId,
+        messageId
       ]);
     }
   }
@@ -313,7 +313,7 @@ class MessageService {
       return {
         reaction: getString(r, 'reaction'),
         count: getNumber(r, 'count'),
-        users,
+        users
       };
     });
   }
@@ -380,7 +380,7 @@ class MessageService {
     }
 
     if (updates.length > 0) {
-      updates.push("updated_at = datetime('now')");
+      updates.push('updated_at = datetime(\'now\')');
       params.push(projectId, userEmail);
 
       await db.run(
@@ -459,14 +459,14 @@ class MessageService {
     }
 
     switch (notificationType) {
-      case 'all':
-        return sub.notifyAll;
-      case 'mention':
-        return sub.notifyMentions;
-      case 'reply':
-        return sub.notifyReplies;
-      default:
-        return sub.notifyAll;
+    case 'all':
+      return sub.notifyAll;
+    case 'mention':
+      return sub.notifyMentions;
+    case 'reply':
+      return sub.notifyReplies;
+    default:
+      return sub.notifyAll;
     }
   }
 
@@ -558,7 +558,7 @@ class MessageService {
     // Verify message belongs to thread
     const message = await db.get('SELECT id FROM messages WHERE id = ? AND thread_id = ?', [
       messageId,
-      threadId,
+      threadId
     ]);
 
     if (!message) {
@@ -574,7 +574,7 @@ class MessageService {
     if (result.changes && result.changes > 0) {
       // Update thread pinned count
       await db.run('UPDATE message_threads SET pinned_count = pinned_count + 1 WHERE id = ?', [
-        threadId,
+        threadId
       ]);
     }
 
@@ -600,7 +600,7 @@ class MessageService {
     if (result.changes && result.changes > 0) {
       // Update thread pinned count
       await db.run('UPDATE message_threads SET pinned_count = pinned_count - 1 WHERE id = ?', [
-        threadId,
+        threadId
       ]);
     }
   }
@@ -625,7 +625,7 @@ class MessageService {
       pinned.message = {
         senderName: getString(r, 'sender_name'),
         message: getString(r, 'message'),
-        createdAt: getString(r, 'message_created_at'),
+        createdAt: getString(r, 'message_created_at')
       };
       return pinned;
     });
@@ -641,9 +641,9 @@ class MessageService {
   async editMessage(messageId: number, newContent: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run("UPDATE messages SET message = ?, edited_at = datetime('now') WHERE id = ?", [
+    await db.run('UPDATE messages SET message = ?, edited_at = datetime(\'now\') WHERE id = ?', [
       newContent,
-      messageId,
+      messageId
     ]);
 
     // Re-process mentions
@@ -657,9 +657,9 @@ class MessageService {
   async deleteMessage(messageId: number, deletedBy: string): Promise<void> {
     const db = getDatabase();
 
-    await db.run("UPDATE messages SET deleted_at = datetime('now'), deleted_by = ? WHERE id = ?", [
+    await db.run('UPDATE messages SET deleted_at = datetime(\'now\'), deleted_by = ? WHERE id = ?', [
       deletedBy,
-      messageId,
+      messageId
     ]);
   }
 
@@ -670,7 +670,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run('UPDATE messages SET deleted_at = NULL, deleted_by = NULL WHERE id = ?', [
-      messageId,
+      messageId
     ]);
   }
 
@@ -685,7 +685,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      "UPDATE message_threads SET archived_at = datetime('now'), archived_by = ?, status = 'archived' WHERE id = ?",
+      'UPDATE message_threads SET archived_at = datetime(\'now\'), archived_by = ?, status = \'archived\' WHERE id = ?',
       [archivedBy, threadId]
     );
   }
@@ -697,7 +697,7 @@ class MessageService {
     const db = getDatabase();
 
     await db.run(
-      "UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = 'active' WHERE id = ?",
+      'UPDATE message_threads SET archived_at = NULL, archived_by = NULL, status = \'active\' WHERE id = ?',
       [threadId]
     );
   }
@@ -782,7 +782,7 @@ class MessageService {
         message: getString(r, 'message'),
         createdAt: getString(r, 'created_at'),
         projectId: r.project_id ? getNumber(r, 'project_id') : undefined,
-        projectName: r.project_name ? getString(r, 'project_name') : undefined,
+        projectName: r.project_name ? getString(r, 'project_name') : undefined
       };
     });
   }
@@ -807,7 +807,7 @@ class MessageService {
       parentMessageId: row.parent_message_id ? getNumber(row, 'parent_message_id') : undefined,
       reactionCount: getNumber(row, 'reaction_count') || 0,
       replyCount: getNumber(row, 'reply_count') || 0,
-      mentionCount: getNumber(row, 'mention_count') || 0,
+      mentionCount: getNumber(row, 'mention_count') || 0
     };
   }
 
@@ -834,7 +834,7 @@ class MessageService {
       notifyReplies: getBoolean(r, 'notify_replies'),
       mutedUntil: r.muted_until as string | undefined,
       createdAt: getString(r, 'created_at'),
-      updatedAt: getString(r, 'updated_at'),
+      updatedAt: getString(r, 'updated_at')
     };
   }
 
@@ -843,7 +843,6 @@ class MessageService {
     userEmail: string,
     userType: string
   ): Promise<number> {
-    const db = getDatabase();
     let count = 0;
     for (const messageId of messageIds) {
       try {
