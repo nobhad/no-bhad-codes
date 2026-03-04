@@ -11,10 +11,11 @@ import {
   DollarSign,
   Briefcase,
   CheckCircle,
-  BarChart3,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/components/portal/EmptyState';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
@@ -70,7 +71,7 @@ const KPI_ICONS: Record<string, React.ReactNode> = {
   tasks: <CheckCircle className="icon-lg" />,
   clients: <Users className="icon-lg" />,
   time: <Clock className="icon-lg" />,
-  target: <Target className="icon-lg" />,
+  target: <Target className="icon-lg" />
 };
 
 export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetricsProps) {
@@ -81,14 +82,14 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
     kpis: [],
     teamMembers: [],
     projectPerformance: [],
-    period: 'This Month',
+    period: 'This Month'
   });
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
 
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -102,7 +103,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
     try {
       const response = await fetch(`${API_ENDPOINTS.ADMIN.PERFORMANCE}?period=${period}`, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load performance data');
       const result = await response.json();
@@ -153,7 +154,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
       {/* Error State */}
       {error && (
         <div className="error-state">
-          {error}
+          <span>{error}</span>
           <button className="btn-secondary" onClick={loadPerformance}>
             Retry
           </button>
@@ -161,19 +162,19 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
       )}
 
       {/* KPIs */}
-      <div className="tw-grid-stats">
+      <div className="stats-grid">
         {isLoading ? (
-          <div className="loading-state">Loading performance data...</div>
+          <LoadingState message="Loading performance data..." />
         ) : (
           data.kpis.map((kpi) => (
-            <div key={kpi.id} className="tw-stat-card">
+            <div key={kpi.id} className="stat-card">
               <div className="stat-card-top">
                 <span className="field-label">{kpi.name}</span>
-                <span className="tw-text-muted">
+                <span className="text-muted">
                   {KPI_ICONS[kpi.icon] || <BarChart3 className="icon-lg" />}
                 </span>
               </div>
-              <div className="tw-stat-value">
+              <div className="stat-value">
                 {kpi.unit === '$' ? formatCurrency(kpi.value) : `${kpi.value}${kpi.unit}`}
               </div>
               <div className="stat-card-trend">
@@ -182,10 +183,10 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                 ) : kpi.trend === 'down' ? (
                   <TrendingDown className="icon-xs" />
                 ) : null}
-                <span className="tw-text-muted">
+                <span className="text-muted">
                   {formatPercentage(((kpi.value - kpi.previousValue) / kpi.previousValue) * 100)}
                 </span>
-                <span className="tw-text-muted">
+                <span className="text-muted">
                   Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
                 </span>
               </div>
@@ -194,7 +195,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                   className="tw-progress-bar"
                   style={{
                     width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
-                    backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)',
+                    backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)'
                   }}
                 />
               </div>
@@ -205,25 +206,25 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
 
       <div className="analytics-card-grid">
         {/* Team Performance */}
-        <div className="tw-card">
+        <div className="portal-card">
           <div className="section-header-with-actions">
-            <h3 className="tw-section-title">Team Performance</h3>
-            <Award className="icon-md tw-text-muted" />
+            <h3 className="section-title">Team Performance</h3>
+            <Award className="icon-md text-muted" />
           </div>
           {isLoading ? (
-            <div className="loading-state">Loading team data...</div>
+            <LoadingState message="Loading team data..." />
           ) : (
             <div className="source-list">
               {data.teamMembers.map((member, index) => (
                 <div key={member.id} className="tw-list-item">
-                  <span className="tw-text-muted">{index + 1}</span>
+                  <span className="text-muted">{index + 1}</span>
                   <div className="tw-flex-1">
                     <div>{member.name}</div>
-                    <div className="tw-text-muted">{member.role}</div>
+                    <div className="text-muted">{member.role}</div>
                   </div>
                   <div className="tw-text-right">
                     <div>{formatCurrency(member.revenueGenerated)}</div>
-                    <div className="tw-text-muted">{member.projectsCompleted} projects</div>
+                    <div className="text-muted">{member.projectsCompleted} projects</div>
                   </div>
                 </div>
               ))}
@@ -232,13 +233,13 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
         </div>
 
         {/* Project Performance */}
-        <div className="tw-card">
+        <div className="portal-card">
           <div className="section-header-with-actions">
-            <h3 className="tw-section-title">Project Status</h3>
-            <Briefcase className="icon-md tw-text-muted" />
+            <h3 className="section-title">Project Status</h3>
+            <Briefcase className="icon-md text-muted" />
           </div>
           {isLoading ? (
-            <div className="loading-state">Loading project data...</div>
+            <LoadingState message="Loading project data..." />
           ) : (
             <div className="source-list">
               {data.projectPerformance.map((project) => (
@@ -250,13 +251,13 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                   <div className="source-row">
                     <div>
                       <div>{project.name}</div>
-                      <div className="tw-text-muted">{project.clientName}</div>
+                      <div className="text-muted">{project.clientName}</div>
                     </div>
                     <span className="tw-badge">
                       {project.onTrack ? 'On Track' : 'At Risk'}
                     </span>
                   </div>
-                  <div className="source-row tw-text-muted">
+                  <div className="source-row text-muted">
                     <span>Budget: {formatCurrency(project.budget)}</span>
                     <span>{project.progress}%</span>
                   </div>
@@ -265,7 +266,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                       className="tw-progress-bar"
                       style={{
                         width: `${project.progress}%`,
-                        backgroundColor: getProgressColor(project.progress, project.onTrack),
+                        backgroundColor: getProgressColor(project.progress, project.onTrack)
                       }}
                     />
                   </div>

@@ -4,14 +4,15 @@
  */
 
 import * as React from 'react';
-import { FolderOpen, ChevronRight, RefreshCw } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { FolderOpen, ChevronRight } from 'lucide-react';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
+import { PORTAL_PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalProject, PortalProjectStatus } from '../types';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { createLogger } from '../../../../utils/logger';
@@ -35,7 +36,7 @@ function transformProject(apiProject: Record<string, unknown>): PortalProject {
     preview_url: apiProject.preview_url as string | undefined,
     client_id: apiProject.client_id as number | undefined,
     created_at: apiProject.created_at as string | undefined,
-    updated_at: apiProject.updated_at as string | undefined,
+    updated_at: apiProject.updated_at as string | undefined
   };
 }
 
@@ -56,8 +57,54 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
+    day: 'numeric'
   });
+}
+
+/**
+ * Filter project by search and status
+ */
+function filterProject(
+  project: PortalProject,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      project.name?.toLowerCase().includes(s) ||
+      project.description?.toLowerCase().includes(s);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (project.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Sort projects by column
+ */
+function sortProjects(
+  a: PortalProject,
+  b: PortalProject,
+  sort: { column: string; direction: 'asc' | 'desc' }
+): number {
+  const m = sort.direction === 'asc' ? 1 : -1;
+  switch (sort.column) {
+  case 'name':
+    return m * (a.name || '').localeCompare(b.name || '');
+  case 'status':
+    return m * (a.status || '').localeCompare(b.status || '');
+  case 'progress':
+    return m * ((a.progress || 0) - (b.progress || 0));
+  case 'date':
+    return m * (new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime());
+  default:
+    return 0;
+  }
 }
 
 /**
@@ -66,7 +113,7 @@ function formatDate(dateString: string): string {
 export function PortalProjectsList({
   getAuthToken,
   onSelectProject,
-  showNotification,
+  showNotification: _showNotification
 }: PortalProjectsListProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const cardsRef = useStaggerChildren<HTMLDivElement>(0.08, 0.1);
@@ -97,18 +144,18 @@ export function PortalProjectsList({
     try {
       const token = getAuthToken?.();
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       };
 
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(API_ENDPOINTS.PROJECTS, {
+      const response = await fetch(API_ENDPOINTS.PORTAL.PROJECTS, {
         method: 'GET',
         headers,
         credentials: 'include',
-        signal: abortControllerRef.current.signal,
+        signal: abortControllerRef.current.signal
       });
 
       if (!response.ok) {
@@ -151,6 +198,25 @@ export function PortalProjectsList({
     fetchProjects();
   }, [fetchProjects]);
 
+  // Table filters
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort: _sort,
+    toggleSort: _toggleSort,
+    applyFilters
+  } = useTableFilters<PortalProject>({
+    storageKey: 'portal_projects',
+    filters: PORTAL_PROJECTS_FILTER_CONFIG,
+    filterFn: filterProject,
+    sortFn: sortProjects,
+    defaultSort: { column: 'name', direction: 'asc' }
+  });
+
+  const filteredProjects = React.useMemo(() => applyFilters(projects), [applyFilters, projects]);
+
   // Handle project selection
   const handleProjectClick = (project: PortalProject) => {
     onSelectProject?.(String(project.id));
@@ -164,74 +230,58 @@ export function PortalProjectsList({
     }
   };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading projects...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={fetchProjects}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-
-  // Empty state
-  if (projects.length === 0) {
-    return (
-      <div ref={containerRef}>
-        <EmptyState
-          icon={<FolderOpen className="tw-h-6 tw-w-6" />}
-          message="No projects yet. Your projects will appear here once they begin."
-        />
-      </div>
-    );
-  }
-
   // Group projects by status for summary
   const activeCount = projects.filter(p => p.status === 'active' || p.status === 'in-progress').length;
   const completedCount = projects.filter(p => p.status === 'completed').length;
 
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Summary Stats */}
-      <div className="tw-grid-stats">
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Total</span>
-          <span className="tw-stat-value">{projects.length}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Active</span>
-          <span className="tw-stat-value">{activeCount}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Completed</span>
-          <span className="tw-stat-value">{completedCount}</span>
-        </div>
-      </div>
-
-      {/* Project Cards */}
-      <div ref={cardsRef} className="tw-section">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onClick={() => handleProjectClick(project)}
-            onPreviewClick={(e) => handlePreviewClick(e, project)}
+    <TableLayout
+      containerRef={containerRef}
+      title="PROJECTS"
+      stats={
+        <TableStats items={[
+          { value: projects.length, label: 'total' },
+          { value: activeCount, label: 'active', variant: 'active', hideIfZero: true },
+          { value: completedCount, label: 'completed', variant: 'completed', hideIfZero: true }
+        ]} />
+      }
+      actions={
+        <>
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search projects..." />
+          <FilterDropdown
+            sections={PORTAL_PROJECTS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={(key, value) => setFilter(key, value)}
           />
-        ))}
-      </div>
-    </div>
+          <IconButton action="refresh" onClick={fetchProjects} title="Refresh" loading={isLoading} />
+        </>
+      }
+    >
+      {isLoading ? (
+        <LoadingState message="Loading projects..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchProjects} />
+      ) : filteredProjects.length === 0 ? (
+        <EmptyState
+          icon={<FolderOpen className="icon-lg" />}
+          message={projects.length === 0
+            ? 'No projects yet. Your projects will appear here once they begin.'
+            : 'No projects match the current filters.'
+          }
+        />
+      ) : (
+        <div ref={cardsRef} className="portal-cards-list">
+          {filteredProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onClick={() => handleProjectClick(project)}
+              onPreviewClick={(e) => handlePreviewClick(e, project)}
+            />
+          ))}
+        </div>
+      )}
+    </TableLayout>
   );
 }
 
@@ -249,32 +299,32 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
   const statusLabel = statusConfig?.label || project.status;
 
   return (
-    <div onClick={onClick} className="tw-card-hover">
+    <div onClick={onClick} className="portal-card card-clickable">
       {/* Header: Name and Status */}
-      <div className="projlist-header">
-        <div className="projlist-name-wrap">
-          <FolderOpen className="tw-h-4 tw-w-4" />
-          <span className="tw-text-primary projlist-name">
+      <div className="portal-card-header">
+        <div className="portal-card-title-group">
+          <FolderOpen className="icon-xs" />
+          <span className="tw-text-primary">
             {decodeHtmlEntities(project.name)}
           </span>
         </div>
-        <div className="projlist-status-wrap">
+        <div className="portal-card-status-group">
           <span className="tw-badge">{statusLabel}</span>
-          <ChevronRight className="tw-h-4 tw-w-4" />
+          <ChevronRight className="icon-xs" />
         </div>
       </div>
 
       {/* Description */}
       {project.description && (
-        <p className="tw-text-muted projlist-desc">
+        <p className="portal-card-description">
           {decodeHtmlEntities(project.description)}
         </p>
       )}
 
       {/* Progress Bar */}
-      <div className="projlist-progress">
-        <div className="projlist-progress-header">
-          <span className="tw-label">Progress</span>
+      <div className="portal-card-progress">
+        <div className="portal-card-header">
+          <span className="label">Progress</span>
           <span className="tw-text-primary tw-text-sm">{project.progress}%</span>
         </div>
         <div className="tw-progress-track">
@@ -286,8 +336,8 @@ function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
       </div>
 
       {/* Footer: Date and Preview */}
-      <div className="projlist-footer">
-        <span className="tw-text-muted tw-text-xs">
+      <div className="portal-card-footer">
+        <span className="text-muted tw-text-xs">
           {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
         </span>
         {project.preview_url && (

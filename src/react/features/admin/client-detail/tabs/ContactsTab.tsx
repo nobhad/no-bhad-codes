@@ -12,7 +12,6 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -25,9 +24,14 @@ import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/Confir
 import type { ClientContact } from '../../types';
 import { CONTACT_ROLE_LABELS } from '../../types';
 
+/** Helper to get display name from contact */
+function getContactDisplayName(contact: ClientContact): string {
+  return [contact.firstName, contact.lastName].filter(Boolean).join(' ') || 'Unnamed';
+}
+
 interface ContactsTabProps {
   contacts: ClientContact[];
-  onAddContact: (contact: Omit<ClientContact, 'id' | 'client_id' | 'created_at'>) => Promise<boolean>;
+  onAddContact: (contact: Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
   onUpdateContact: (
     contactId: number,
     updates: Partial<ClientContact>
@@ -79,9 +83,9 @@ export function ContactsTab({
 
   // Sort contacts: primary first, then alphabetically
   const sortedContacts = [...contacts].sort((a, b) => {
-    if (a.is_primary && !b.is_primary) return -1;
-    if (!a.is_primary && b.is_primary) return 1;
-    return a.name.localeCompare(b.name);
+    if (a.isPrimary && !b.isPrimary) return -1;
+    if (!a.isPrimary && b.isPrimary) return 1;
+    return getContactDisplayName(a).localeCompare(getContactDisplayName(b));
   });
 
   // Start adding new contact
@@ -94,12 +98,12 @@ export function ContactsTab({
   // Start editing contact
   const handleStartEdit = useCallback((contact: ClientContact) => {
     setFormData({
-      name: contact.name,
-      email: contact.email,
+      name: getContactDisplayName(contact),
+      email: contact.email || '',
       phone: contact.phone || '',
       title: contact.title || '',
       role: (contact.role as ContactRole) || 'other',
-      is_primary: contact.is_primary,
+      is_primary: contact.isPrimary,
       notes: contact.notes || ''
     });
     setEditingId(contact.id);
@@ -121,7 +125,7 @@ export function ContactsTab({
     []
   );
 
-  // Submit form
+  // Submit form — split name into firstName/lastName for backend
   const handleSubmit = useCallback(async () => {
     if (!formData.name.trim() || !formData.email.trim()) {
       showNotification?.('Name and email are required', 'error');
@@ -130,9 +134,25 @@ export function ContactsTab({
 
     setIsSubmitting(true);
 
+    // Split name into firstName/lastName
+    const nameParts = formData.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const contactData = {
+      firstName,
+      lastName,
+      email: formData.email,
+      phone: formData.phone || undefined,
+      title: formData.title || undefined,
+      role: formData.role as ClientContact['role'],
+      isPrimary: formData.is_primary,
+      notes: formData.notes || undefined
+    };
+
     try {
       if (editingId) {
-        const success = await onUpdateContact(editingId, formData);
+        const success = await onUpdateContact(editingId, contactData);
         if (success) {
           showNotification?.('Contact updated', 'success');
           handleCancel();
@@ -140,7 +160,7 @@ export function ContactsTab({
           showNotification?.('Failed to update contact', 'error');
         }
       } else {
-        const success = await onAddContact(formData);
+        const success = await onAddContact(contactData as Omit<ClientContact, 'id' | 'clientId' | 'createdAt' | 'updatedAt'>);
         if (success) {
           showNotification?.('Contact added', 'success');
           handleCancel();
@@ -177,9 +197,9 @@ export function ContactsTab({
   // Set as primary
   const handleSetPrimary = useCallback(
     async (contact: ClientContact) => {
-      const success = await onUpdateContact(contact.id, { is_primary: true });
+      const success = await onUpdateContact(contact.id, { isPrimary: true });
       if (success) {
-        showNotification?.(`${contact.name} set as primary contact`, 'success');
+        showNotification?.(`${getContactDisplayName(contact)} set as primary contact`, 'success');
       } else {
         showNotification?.('Failed to update contact', 'error');
       }
@@ -191,7 +211,7 @@ export function ContactsTab({
   const renderForm = () => (
     <div className="tw-panel tw-mb-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-4">
-        <h3 className="tw-heading ">
+        <h3 className="heading ">
           {editingId ? 'Edit Contact' : 'Add Contact'}
         </h3>
         <button
@@ -235,7 +255,7 @@ export function ContactsTab({
         />
 
         <div className="tw-flex tw-flex-col tw-gap-1.5">
-          <label className="tw-label">
+          <label className="label">
             Role
           </label>
           <select
@@ -257,7 +277,7 @@ export function ContactsTab({
               checked={formData.is_primary}
               onCheckedChange={(checked) => handleFieldChange('is_primary', checked === true)}
             />
-            <span className="tw-text-muted">
+            <span className="text-muted">
               Primary Contact
             </span>
           </label>
@@ -292,7 +312,7 @@ export function ContactsTab({
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading tw-text-lg">
+        <h2 className="heading tw-text-lg">
           Contacts ({contacts.length})
         </h2>
         {!isAdding && !editingId && (
@@ -319,27 +339,27 @@ export function ContactsTab({
             <div
               key={contact.id}
               className={cn(
-                'tw-card',
-                contact.is_primary && 'tw-border-primary'
+                'portal-card',
+                contact.isPrimary && 'tw-border-primary'
               )}
             >
               {/* Contact Header */}
               <div className="tw-flex tw-items-start tw-justify-between tw-mb-3">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <div className="tw-w-10 tw-h-10 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center contacts-avatar">
-                    <User className="icon-lg tw-text-muted" />
+                    <User className="icon-lg text-muted" />
                   </div>
                   <div>
                     <div className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-heading ">
-                        {contact.name}
+                      <span className="heading ">
+                        {getContactDisplayName(contact)}
                       </span>
-                      {contact.is_primary && (
+                      {contact.isPrimary && (
                         <Star className="icon-xs tw-text-primary tw-fill-current" />
                       )}
                     </div>
                     {contact.title && (
-                      <span className="tw-text-muted tw-text-sm">
+                      <span className="text-muted tw-text-sm">
                         {contact.title}
                       </span>
                     )}
@@ -357,7 +377,7 @@ export function ContactsTab({
                       <Pencil className="icon-md tw-mr-2" />
                       Edit
                     </PortalDropdownItem>
-                    {!contact.is_primary && (
+                    {!contact.isPrimary && (
                       <PortalDropdownItem onClick={() => handleSetPrimary(contact)}>
                         <Star className="icon-md tw-mr-2" />
                         Set as Primary
@@ -376,7 +396,7 @@ export function ContactsTab({
               {/* Contact Details */}
               <div className="tw-flex tw-flex-col tw-gap-2">
                 <div className="tw-flex tw-items-center tw-gap-2">
-                  <Mail className="icon-sm tw-text-muted" />
+                  <Mail className="icon-sm text-muted" />
                   <a
                     href={`mailto:${contact.email}`}
                     className="tw-text-primary tw-text-sm"
@@ -387,10 +407,10 @@ export function ContactsTab({
 
                 {contact.phone && (
                   <div className="tw-flex tw-items-center tw-gap-2">
-                    <Phone className="icon-sm tw-text-muted" />
+                    <Phone className="icon-sm text-muted" />
                     <a
                       href={`tel:${contact.phone}`}
-                      className="tw-text-muted tw-text-sm"
+                      className="text-muted tw-text-sm"
                     >
                       {contact.phone}
                     </a>
@@ -399,8 +419,8 @@ export function ContactsTab({
 
                 {contact.role && (
                   <div className="tw-flex tw-items-center tw-gap-2">
-                    <Briefcase className="icon-sm tw-text-muted" />
-                    <span className="tw-text-muted tw-text-sm">
+                    <Briefcase className="icon-sm text-muted" />
+                    <span className="text-muted tw-text-sm">
                       {CONTACT_ROLE_LABELS[contact.role] || contact.role}
                     </span>
                   </div>
@@ -409,7 +429,7 @@ export function ContactsTab({
 
               {/* Notes */}
               {contact.notes && (
-                <p className="tw-text-muted tw-mt-3 tw-pt-3 contacts-notes">
+                <p className="text-muted tw-mt-3 tw-pt-3 contacts-notes">
                   {contact.notes}
                 </p>
               )}
@@ -423,7 +443,7 @@ export function ContactsTab({
         open={deleteDialog.isOpen}
         onOpenChange={deleteDialog.setIsOpen}
         title="Delete Contact"
-        description={`Are you sure you want to delete ${contactToDelete?.name}? This action cannot be undone.`}
+        description={`Are you sure you want to delete ${contactToDelete ? getContactDisplayName(contactToDelete) : ''}? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleConfirmDelete}

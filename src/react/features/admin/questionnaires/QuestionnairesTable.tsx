@@ -2,8 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ClipboardList,
-  Inbox,
-  AlertCircle,
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -14,19 +13,18 @@ import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar'
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
@@ -74,7 +72,7 @@ const QUESTIONNAIRE_STATUS_CONFIG: Record<string, { label: string }> = {
   in_progress: { label: 'In Progress' },
   completed: { label: 'Completed' },
   expired: { label: 'Expired' },
-  viewed: { label: 'Viewed' },
+  viewed: { label: 'Viewed' }
 };
 
 // Capitalize status label (fallback for unknown statuses)
@@ -114,20 +112,20 @@ function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'title':
-      return multiplier * a.title.localeCompare(b.title);
-    case 'client_name':
-      return multiplier * a.client_name.localeCompare(b.client_name);
-    case 'status':
-      return multiplier * a.status.localeCompare(b.status);
-    case 'due_date':
-      return multiplier * ((a.due_date || '').localeCompare(b.due_date || ''));
-    case 'completion_rate':
-      return multiplier * (a.completion_rate - b.completion_rate);
-    case 'created_at':
-      return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    default:
-      return 0;
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'client_name':
+    return multiplier * a.client_name.localeCompare(b.client_name);
+  case 'status':
+    return multiplier * a.status.localeCompare(b.status);
+  case 'due_date':
+    return multiplier * ((a.due_date || '').localeCompare(b.due_date || ''));
+  case 'completion_rate':
+    return multiplier * (a.completion_rate - b.completion_rate);
+  case 'created_at':
+    return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  default:
+    return 0;
   }
 }
 
@@ -160,7 +158,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Questionnaire>({
-    storageKey: 'admin_questionnaires',
+    storageKey: overviewMode ? undefined : 'admin_questionnaires',
     filters: QUESTIONNAIRES_FILTER_CONFIG,
     filterFn: filterQuestionnaire,
     sortFn: sortQuestionnaires,
@@ -225,7 +223,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update questionnaire');
@@ -270,7 +268,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete questionnaires');
@@ -345,7 +343,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
             { value: stats.draft, label: 'draft', hideIfZero: true },
             { value: stats.sent, label: 'sent', variant: 'pending', hideIfZero: true },
             { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true },
+            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total | ${stats.avgCompletion}% Avg Completion`}
         />
@@ -400,65 +398,65 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="name-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Questionnaire
-            </AdminTableHead>
-            <AdminTableHead className="client-col">Client</AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="client-col">Client</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'due_date' ? sort.direction : null}
               onClick={() => toggleSort('due_date')}
             >
               Due Date
-            </AdminTableHead>
-            <AdminTableHead className="progress-col">Progress</AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="progress-col">Progress</PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={7} message={error} onRetry={fetchQuestionnaires} />
+            <PortalTableError colSpan={7} message={error} onRetry={fetchQuestionnaires} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={7} rows={5} />
+            <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedQuestionnaires.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={7}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No questionnaires match your filters' : 'No questionnaires yet'}
             />
           ) : (
             paginatedQuestionnaires.map((questionnaire) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={questionnaire.id}
                 clickable
                 selected={selection.isSelected(questionnaire)}
               >
-                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(questionnaire)}
                     onCheckedChange={() => selection.toggleSelection(questionnaire)}
                     aria-label={`Select ${questionnaire.title}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="primary-cell">
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <ClipboardList className="cell-icon" />
                     <div className="cell-content">
@@ -468,21 +466,21 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       )}
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <span className="table-link">
                     {decodeHtmlEntities(questionnaire.client_name)}
                   </span>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <StatusBadge status={getStatusVariant(questionnaire.status)}>
                     {getStatusLabel(questionnaire.status)}
                   </StatusBadge>
-                </AdminTableCell>
-                <AdminTableCell className={cn(isOverdue(questionnaire) && 'text-danger')}>
+                </PortalTableCell>
+                <PortalTableCell className={cn(isOverdue(questionnaire) && 'text-danger')}>
                   {questionnaire.due_date && formatDate(questionnaire.due_date)}
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <div className="cell-content">
                     <div className="progress-cell">
                       <div className="progress-bar progress-sm">
@@ -497,8 +495,8 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       {questionnaire.responses_count}/{questionnaire.questions_count} questions
                     </span>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton
                       action="view"
@@ -511,12 +509,12 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       />
                     )}
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

@@ -14,12 +14,10 @@ import {
   FileText,
   Check,
   AlertCircle,
-  Edit3,
+  Edit3
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import type { StepProps, OnboardingStep } from '../types';
-import { ONBOARDING_STEPS } from '../types';
 
 interface ConfirmationStepProps extends StepProps {
   onGoToStep?: (step: OnboardingStep) => void;
@@ -38,7 +36,7 @@ interface SummarySectionProps {
 
 function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: SummarySectionProps) {
   return (
-    <div className="tw-card">
+    <div className="portal-card">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
         <div className="tw-flex tw-items-center tw-gap-2">
           <Icon className="tw-h-4 tw-w-4 tw-text-primary" />
@@ -57,7 +55,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
             onClick={onEdit}
             className="btn-ghost tw-text-[12px]"
           >
-            <Edit3 className="tw-h-3 tw-w-3" />
+            <Edit3 className="icon-xs" />
             Edit
           </button>
         )}
@@ -65,7 +63,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       <div className="tw-space-y-2">
         {items.map((item, index) => (
           <div key={index} className="tw-flex tw-gap-2 tw-text-[14px] tw-font-mono">
-            <span className="tw-text-[var(--portal-text-muted)] tw-min-w-[100px] tw-flex-shrink-0">
+            <span className="text-muted tw-min-w-[100px] tw-flex-shrink-0">
               {item.label}:
             </span>
             <span className="tw-text-primary">{item.value || '-'}</span>
@@ -79,7 +77,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
 /**
  * ConfirmationStep Component
  */
-export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: ConfirmationStepProps) {
+export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, onGoToStep }: ConfirmationStepProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
   const { basicInfo, projectOverview, requirements, assets } = data;
@@ -100,10 +98,10 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
     <div ref={containerRef} className="tw-section">
       {/* Section Header */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Review Your Information
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Please review all the information below before submitting.
         </p>
       </div>
@@ -137,7 +135,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
           { label: 'Name', value: basicInfo?.contactName || '' },
           { label: 'Email', value: basicInfo?.contactEmail || '' },
           { label: 'Phone', value: basicInfo?.contactPhone || '' },
-          { label: 'Contact via', value: basicInfo?.preferredContactMethod || '' },
+          { label: 'Contact via', value: basicInfo?.preferredContactMethod || '' }
         ]}
       />
 
@@ -150,7 +148,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
           items={[
             { label: 'Company', value: basicInfo?.companyName || '' },
             { label: 'Website', value: basicInfo?.companyWebsite || '' },
-            { label: 'Timezone', value: basicInfo?.timezone || '' },
+            { label: 'Timezone', value: basicInfo?.timezone || '' }
           ]}
         />
       )}
@@ -166,14 +164,14 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
           { label: 'Type', value: projectOverview?.projectType || '' },
           { label: 'Launch Date', value: projectOverview?.targetLaunchDate || '' },
           { label: 'Budget', value: projectOverview?.budget || '' },
-          { label: 'Audience', value: projectOverview?.targetAudience || '' },
+          { label: 'Audience', value: projectOverview?.targetAudience || '' }
         ]}
       />
 
       {/* Project Description */}
       {projectOverview?.projectDescription && (
-        <div className="tw-card">
-          <h4 className="tw-label tw-mb-2">
+        <div className="portal-card">
+          <h4 className="label tw-mb-2">
             Project Description
           </h4>
           <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
@@ -200,7 +198,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
               </span>
             ) : (
               'No'
-            ),
+            )
           },
           {
             label: 'Content Ready',
@@ -211,8 +209,8 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
               </span>
             ) : (
               'No'
-            ),
-          },
+            )
+          }
         ]}
       />
 
@@ -223,7 +221,7 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
         onEdit={onGoToStep ? () => onGoToStep('requirements') : undefined}
         items={[
           { label: 'Features', value: featuresDisplay },
-          { label: 'Integrations', value: requirements?.integrations || '' },
+          { label: 'Integrations', value: requirements?.integrations || '' }
         ]}
       />
 
@@ -244,15 +242,15 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
               </span>
             ) : (
               'Not provided'
-            ),
-          },
+            )
+          }
         ]}
       />
 
       {/* Additional Notes */}
       {requirements?.additionalNotes && (
-        <div className="tw-card">
-          <h4 className="tw-label tw-mb-2">
+        <div className="portal-card">
+          <h4 className="label tw-mb-2">
             Additional Notes
           </h4>
           <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
@@ -262,13 +260,13 @@ export function ConfirmationStep({ data, errors, isSubmitting, onGoToStep }: Con
       )}
 
       {/* Submission Notice */}
-      <div className="tw-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-primary">
+      <div className="portal-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-primary">
         <Check className="tw-h-4 tw-w-4 tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
         <div>
           <p className="tw-text-[14px] tw-font-bold tw-font-mono tw-text-primary">
             Ready to submit
           </p>
-          <p className="tw-text-[14px] tw-text-[var(--portal-text-muted)] tw-mt-1 tw-font-mono">
+          <p className="tw-text-[14px] text-muted tw-mt-1 tw-font-mono">
             Click "Complete Onboarding" below to submit your information. We'll review everything and
             get back to you within 1-2 business days.
           </p>

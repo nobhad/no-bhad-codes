@@ -25,15 +25,15 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
     contentReady: false,
     features: [],
     integrations: '',
-    additionalNotes: '',
+    additionalNotes: ''
   };
 
   const handleChange = (field: keyof RequirementsData, value: string | boolean | string[]) => {
     onUpdate({
       requirements: {
         ...requirements,
-        [field]: value,
-      },
+        [field]: value
+      }
     });
   };
 
@@ -53,17 +53,17 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef} className="tw-section">
       {/* Design Preferences Section */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Design Preferences
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Help us understand your visual style.
         </p>
       </div>
 
       {/* Design Style Selection */}
       <div className="tw-flex tw-flex-col tw-gap-2">
-        <label className="tw-field-label">
+        <label className="field-label">
           Design Style <span className="tw-text-primary">*</span>
         </label>
         <div className="tw-grid tw-grid-cols-2 md:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-2">
@@ -95,7 +95,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Color Preferences */}
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
-        <label className="tw-field-label">Color Preferences</label>
+        <label className="field-label">Color Preferences</label>
         <input
           type="text"
           value={requirements.colorPreferences}
@@ -134,10 +134,10 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Features Section */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Features & Functionality
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Select the features you need for your project.
         </p>
       </div>
@@ -181,8 +181,8 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Integrations */}
       <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-1">
-        <label className="tw-field-label tw-flex tw-items-center tw-gap-1">
-          <Link2 className="tw-h-4 tw-w-4" />
+        <label className="field-label tw-flex tw-items-center tw-gap-1">
+          <Link2 className="icon-xs" />
           Third-party Integrations
         </label>
         <textarea
@@ -196,8 +196,8 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Additional Notes */}
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
-        <label className="tw-field-label tw-flex tw-items-center tw-gap-1">
-          <FileText className="tw-h-4 tw-w-4" />
+        <label className="field-label tw-flex tw-items-center tw-gap-1">
+          <FileText className="icon-xs" />
           Additional Notes
         </label>
         <textarea

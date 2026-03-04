@@ -1,21 +1,20 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye, ChevronDown } from 'lucide-react';
+import { Inbox, ChevronDown } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -23,7 +22,7 @@ import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -92,26 +91,26 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'name':
-      return multiplier * (a.project_name || '').localeCompare(b.project_name || '');
-    case 'status':
-      return multiplier * a.status.localeCompare(b.status);
-    case 'type':
-      return multiplier * (a.project_type || '').localeCompare(b.project_type || '');
-    case 'budget':
-      return multiplier * ((a.budget || 0) - (b.budget || 0));
-    case 'start_date':
-      return (
-        multiplier *
+  case 'name':
+    return multiplier * (a.project_name || '').localeCompare(b.project_name || '');
+  case 'status':
+    return multiplier * a.status.localeCompare(b.status);
+  case 'type':
+    return multiplier * (a.project_type || '').localeCompare(b.project_type || '');
+  case 'budget':
+    return multiplier * ((a.budget || 0) - (b.budget || 0));
+  case 'start_date':
+    return (
+      multiplier *
         (new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime())
-      );
-    case 'end_date':
-      return (
-        multiplier *
+    );
+  case 'end_date':
+    return (
+      multiplier *
         (new Date(a.end_date || 0).getTime() - new Date(b.end_date || 0).getTime())
-      );
-    default:
-      return 0;
+    );
+  default:
+    return 0;
   }
 }
 
@@ -124,13 +123,13 @@ export function ProjectsTable({
   onNavigate,
   showNotification,
   defaultPageSize = 25,
-  overviewMode = false,
+  overviewMode = false
 }: ProjectsTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Data fetching
   const { projects, isLoading, error, stats, refetch, updateProject, bulkDelete } = useProjects({
-    getAuthToken,
+    getAuthToken
   });
 
   // Delete confirmation dialog
@@ -145,13 +144,13 @@ export function ProjectsTable({
     sort,
     toggleSort,
     applyFilters,
-    hasActiveFilters,
+    hasActiveFilters
   } = useTableFilters<Project>({
-    storageKey: 'admin_projects',
+    storageKey: overviewMode ? undefined : 'admin_projects',
     filters: PROJECTS_FILTER_CONFIG,
     filterFn: filterProject,
     sortFn: sortProjects,
-    defaultSort: { column: 'name', direction: 'asc' },
+    defaultSort: { column: 'name', direction: 'asc' }
   });
 
   // Apply filters to get filtered data
@@ -161,7 +160,7 @@ export function ProjectsTable({
   const pagination = usePagination({
     storageKey: overviewMode ? undefined : 'admin_projects_pagination',
     totalItems: filteredProjects.length,
-    defaultPageSize,
+    defaultPageSize
   });
 
   // Get paginated data
@@ -173,7 +172,7 @@ export function ProjectsTable({
   // Selection for bulk actions
   const selection = useSelection({
     getId: (project: Project) => project.id,
-    items: paginatedProjects,
+    items: paginatedProjects
   });
 
   // Export functionality
@@ -182,11 +181,11 @@ export function ProjectsTable({
     data: filteredProjects,
     onExport: (count) => {
       showNotification?.(`Exported ${count} project${count !== 1 ? 's' : ''} to CSV`, 'success');
-    },
+    }
   });
 
   // Bulk action loading state
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [_bulkActionLoading, setBulkActionLoading] = useState(false);
 
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
@@ -258,7 +257,7 @@ export function ProjectsTable({
       Object.entries(PROJECT_STATUS_CONFIG).map(([value, config]) => ({
         value,
         label: config.label,
-        color: `var(--status-${value})`,
+        color: `var(--status-${value})`
       })),
     []
   );
@@ -303,7 +302,7 @@ export function ProjectsTable({
             items={[
               { value: stats.total, label: 'total' },
               { value: stats.active, label: 'active', variant: 'active', hideIfZero: true },
-              { value: stats.onHold, label: 'on hold', variant: 'pending', hideIfZero: true },
+              { value: stats.onHold, label: 'on hold', variant: 'pending', hideIfZero: true }
             ]}
             tooltip={`${stats.total} Total - ${stats.active} Active - ${stats.completed} Completed - ${stats.onHold} On Hold`}
           />
@@ -365,90 +364,90 @@ export function ProjectsTable({
           ) : undefined
         }
       >
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
                   aria-label="Select all"
                 />
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="name-col"
                 sortable
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
                 Project
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="type-col"
                 sortable
                 sortDirection={sort?.column === 'type' ? sort.direction : null}
                 onClick={() => toggleSort('type')}
               >
                 Type
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="status-col"
                 sortable
                 sortDirection={sort?.column === 'status' ? sort.direction : null}
                 onClick={() => toggleSort('status')}
               >
                 Status
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="amount-col"
                 sortable
                 sortDirection={sort?.column === 'budget' ? sort.direction : null}
                 onClick={() => toggleSort('budget')}
               >
                 Budget
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="timeline-col"
                 sortable
                 sortDirection={sort?.column === 'start_date' ? sort.direction : null}
                 onClick={() => toggleSort('start_date')}
               >
                 Timeline
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!isLoading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
             ) : isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedProjects.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No projects match your filters' : 'No projects yet'}
               />
             ) : (
               paginatedProjects.map((project) => (
-                <AdminTableRow
+                <PortalTableRow
                   key={project.id}
                   clickable
                   selected={selection.isSelected(project)}
                   onClick={() => handleRowClick(project)}
                 >
                   {/* Checkbox */}
-                  <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(project)}
                       onCheckedChange={() => selection.toggleSelection(project)}
                       aria-label={`Select ${project.project_name || 'project'}`}
                     />
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Project Name & Client */}
-                  <AdminTableCell className="primary-cell name-col">
+                  <PortalTableCell className="primary-cell name-col">
                     <div className="cell-content">
                       <span className="cell-title">{decodeHtmlEntities(project.project_name) || 'Untitled Project'}</span>
                       <span className="cell-subtitle">
@@ -466,15 +465,15 @@ export function ProjectsTable({
                         <span className="target-stacked">Target: {formatDate(project.end_date)}</span>
                       )}
                     </div>
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Type */}
-                  <AdminTableCell className="type-col">
+                  <PortalTableCell className="type-col">
                     {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type}
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Status */}
-                  <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="status-dropdown-trigger">
@@ -499,15 +498,15 @@ export function ProjectsTable({
                           ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Budget */}
-                  <AdminTableCell className="amount-col">
+                  <PortalTableCell className="amount-col">
                     {formatCurrency(project.budget)}
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Timeline - consolidated dates */}
-                  <AdminTableCell className="timeline-cell">
+                  <PortalTableCell className="timeline-cell">
                     <div className="cell-content">
                       {project.timeline && (
                         <span className="cell-title">{project.timeline}</span>
@@ -516,10 +515,10 @@ export function ProjectsTable({
                         {formatDate(project.start_date)} → {formatDate(project.end_date)}
                       </span>
                     </div>
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Actions */}
-                  <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <IconButton
                         action="view"
@@ -527,12 +526,12 @@ export function ProjectsTable({
                         title="View project"
                       />
                     </div>
-                  </AdminTableCell>
-                </AdminTableRow>
+                  </PortalTableCell>
+                </PortalTableRow>
               ))
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       </TableLayout>
 
       {/* Delete Confirmation Dialog */}

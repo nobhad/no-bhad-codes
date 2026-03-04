@@ -1,26 +1,25 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye, Send, Check, FileText } from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { useInvoices } from '@react/hooks/useInvoices';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { usePagination } from '@react/hooks/usePagination';
@@ -32,7 +31,7 @@ import type { Invoice, InvoiceStatus, SortConfig } from '../types';
 import { INVOICE_STATUS_CONFIG } from '../types';
 import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '../../../../utils/format-utils';
-import { INVOICES_FILTER_CONFIG, INVOICE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import { INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface InvoicesTableProps {
@@ -109,23 +108,24 @@ function sortInvoices(a: Invoice, b: Invoice, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'invoice_number':
-      return multiplier * (a.invoice_number || '').localeCompare(b.invoice_number || '');
-    case 'client':
-      return multiplier * (a.client_name || '').localeCompare(b.client_name || '');
-    case 'amount':
-      const aAmount = typeof a.amount_total === 'string' ? parseFloat(a.amount_total) : (a.amount_total || 0);
-      const bAmount = typeof b.amount_total === 'string' ? parseFloat(b.amount_total) : (b.amount_total || 0);
-      return multiplier * (aAmount - bAmount);
-    case 'status':
-      return multiplier * getDisplayStatus(a).localeCompare(getDisplayStatus(b));
-    case 'due_date':
-      return (
-        multiplier *
+  case 'invoice_number':
+    return multiplier * (a.invoice_number || '').localeCompare(b.invoice_number || '');
+  case 'client':
+    return multiplier * (a.client_name || '').localeCompare(b.client_name || '');
+  case 'amount': {
+    const aAmount = typeof a.amount_total === 'string' ? parseFloat(a.amount_total) : (a.amount_total || 0);
+    const bAmount = typeof b.amount_total === 'string' ? parseFloat(b.amount_total) : (b.amount_total || 0);
+    return multiplier * (aAmount - bAmount);
+  }
+  case 'status':
+    return multiplier * getDisplayStatus(a).localeCompare(getDisplayStatus(b));
+  case 'due_date':
+    return (
+      multiplier *
         (new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime())
-      );
-    default:
-      return 0;
+    );
+  default:
+    return 0;
   }
 }
 
@@ -139,7 +139,7 @@ export function InvoicesTable({
   onNavigate,
   showNotification,
   defaultPageSize = 25,
-  overviewMode = false,
+  overviewMode = false
 }: InvoicesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -150,7 +150,6 @@ export function InvoicesTable({
     error,
     stats,
     refetch,
-    updateInvoice,
     markAsPaid,
     sendInvoice,
     downloadPdf,
@@ -172,11 +171,10 @@ export function InvoicesTable({
     setSearch,
     sort,
     toggleSort,
-    clearFilters,
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Invoice>({
-    storageKey: 'admin_invoices',
+    storageKey: overviewMode ? undefined : 'admin_invoices',
     filters: INVOICES_FILTER_CONFIG,
     filterFn: filterInvoice,
     sortFn: sortInvoices,
@@ -448,67 +446,67 @@ export function InvoicesTable({
           ) : undefined
         }
       >
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
                   aria-label="Select all"
                 />
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="invoice-col"
                 sortable
                 sortDirection={sort?.column === 'invoice_number' ? sort.direction : null}
                 onClick={() => toggleSort('invoice_number')}
               >
                 Invoice #
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="contact-col"
                 sortable
                 sortDirection={sort?.column === 'client' ? sort.direction : null}
                 onClick={() => toggleSort('client')}
               >
                 Client / Project
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="amount-col"
                 sortable
                 sortDirection={sort?.column === 'amount' ? sort.direction : null}
                 onClick={() => toggleSort('amount')}
               >
                 Amount
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="status-col"
                 sortable
                 sortDirection={sort?.column === 'status' ? sort.direction : null}
                 onClick={() => toggleSort('status')}
               >
                 Status
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sort?.column === 'due_date' ? sort.direction : null}
                 onClick={() => toggleSort('due_date')}
               >
                 Due Date
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!isLoading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
             ) : isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedInvoices.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No invoices match your filters' : 'No invoices yet'}
@@ -523,28 +521,28 @@ export function InvoicesTable({
                 const canDownload = !isDraft;
 
                 return (
-                  <AdminTableRow
+                  <PortalTableRow
                     key={invoice.id}
                     clickable
                     selected={selection.isSelected(invoice)}
                     onClick={() => handleRowClick(invoice)}
                   >
                     {/* Checkbox */}
-                    <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selection.isSelected(invoice)}
                         onCheckedChange={() => selection.toggleSelection(invoice)}
                         aria-label={`Select invoice ${invoice.invoice_number}`}
                       />
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Invoice Number */}
-                    <AdminTableCell className="invoice-cell">
+                    <PortalTableCell className="invoice-cell">
                       <span className="mono-text">{invoice.invoice_number}</span>
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Client / Project */}
-                    <AdminTableCell className="primary-cell contact-cell">
+                    <PortalTableCell className="primary-cell contact-cell">
                       <div className="cell-content">
                         <span className="cell-title">{decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}</span>
                         {invoice.project_name && <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>}
@@ -555,27 +553,27 @@ export function InvoicesTable({
                           <span className="date-stacked">Due: {formatDate(invoice.due_date)}</span>
                         )}
                       </div>
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Amount */}
-                    <AdminTableCell className="amount-cell">
+                    <PortalTableCell className="amount-cell">
                       {formatCurrency(invoice.amount_total)}
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Status */}
-                    <AdminTableCell className="status-cell">
+                    <PortalTableCell className="status-cell">
                       <StatusBadge status={getStatusVariant(displayStatus)}>
                         {INVOICE_STATUS_CONFIG[displayStatus]?.label || displayStatus}
                       </StatusBadge>
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Due Date */}
-                    <AdminTableCell className="date-cell">
+                    <PortalTableCell className="date-cell">
                       {invoice.due_date && formatDate(invoice.due_date)}
-                    </AdminTableCell>
+                    </PortalTableCell>
 
                     {/* Actions */}
-                    <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                       <div className="table-actions">
                         <IconButton
                           action="view"
@@ -610,13 +608,13 @@ export function InvoicesTable({
                           />
                         )}
                       </div>
-                    </AdminTableCell>
-                  </AdminTableRow>
+                    </PortalTableCell>
+                  </PortalTableRow>
                 );
               })
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       </TableLayout>
 
       {/* Delete Confirmation Dialog */}

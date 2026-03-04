@@ -4,7 +4,7 @@ import {
   Package,
   AlertCircle,
   Inbox,
-  ChevronDown,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -14,24 +14,23 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -77,6 +76,8 @@ interface DeliverablesTableProps {
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
+  defaultPageSize?: number;
+  overviewMode?: boolean;
 }
 
 const DELIVERABLE_STATUS_CONFIG: Record<string, { label: string }> = {
@@ -84,7 +85,7 @@ const DELIVERABLE_STATUS_CONFIG: Record<string, { label: string }> = {
   'in-progress': { label: 'In Progress' },
   review: { label: 'In Review' },
   approved: { label: 'Approved' },
-  delivered: { label: 'Delivered' },
+  delivered: { label: 'Delivered' }
 };
 
 // Filter function
@@ -115,20 +116,20 @@ function sortDeliverables(a: Deliverable, b: Deliverable, sort: SortConfig): num
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'title':
-      return multiplier * a.title.localeCompare(b.title);
-    case 'project':
-      return multiplier * a.projectName.localeCompare(b.projectName);
-    case 'dueDate':
-      return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-    case 'updatedAt':
-      return multiplier * (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
-    default:
-      return 0;
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'project':
+    return multiplier * a.projectName.localeCompare(b.projectName);
+  case 'dueDate':
+    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
+  case 'updatedAt':
+    return multiplier * (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+  default:
+    return 0;
   }
 }
 
-export function DeliverablesTable({ projectId, getAuthToken, showNotification, onNavigate }: DeliverablesTableProps) {
+export function DeliverablesTable({ projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DeliverablesTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -151,7 +152,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     inProgress: 0,
     review: 0,
     delivered: 0,
-    overdue: 0,
+    overdue: 0
   });
 
   // Filtering and sorting
@@ -165,7 +166,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Deliverable>({
-    storageKey: 'admin_deliverables',
+    storageKey: overviewMode ? undefined : 'admin_deliverables',
     filters: DELIVERABLES_FILTER_CONFIG,
     filterFn: filterDeliverable,
     sortFn: sortDeliverables,
@@ -177,9 +178,9 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
   // Pagination
   const pagination = usePagination({
-    storageKey: 'admin_deliverables_pagination',
+    storageKey: overviewMode ? undefined : 'admin_deliverables_pagination',
     totalItems: filteredDeliverables.length,
-    defaultPageSize: 25
+    defaultPageSize
   });
 
   const paginatedDeliverables = useMemo(
@@ -214,7 +215,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         inProgress: 0,
         review: 0,
         delivered: 0,
-        overdue: 0,
+        overdue: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load deliverables');
@@ -234,7 +235,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update deliverable');
@@ -263,7 +264,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete deliverables');
@@ -326,7 +327,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
             { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
             { value: stats.review, label: 'review', variant: 'pending', hideIfZero: true },
             { value: stats.delivered, label: 'delivered', variant: 'completed', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inProgress} In Progress • ${stats.review} Review • ${stats.delivered} Delivered`}
         />
@@ -381,73 +382,73 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="name-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Deliverable
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="project-col"
               sortable
               sortDirection={sort?.column === 'project' ? sort.direction : null}
               onClick={() => toggleSort('project')}
             >
               Project
-            </AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead className="version-col">Ver</AdminTableHead>
-            <AdminTableHead className="files-col">Files</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead className="version-col">Ver</PortalTableHead>
+            <PortalTableHead className="files-col">Files</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
               onClick={() => toggleSort('dueDate')}
             >
               Due
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={8} message={error} onRetry={loadDeliverables} />
+            <PortalTableError colSpan={8} message={error} onRetry={loadDeliverables} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={8} rows={5} />
+            <PortalTableLoading colSpan={8} rows={5} />
           ) : paginatedDeliverables.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={8}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No deliverables match your filters' : 'No deliverables yet'}
             />
           ) : (
             paginatedDeliverables.map((deliverable) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={deliverable.id}
                 clickable
                 selected={selection.isSelected(deliverable)}
               >
-                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(deliverable)}
                     onCheckedChange={() => selection.toggleSelection(deliverable)}
                     aria-label={`Select ${deliverable.title}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="primary-cell">
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <Package className="cell-icon" />
                     <div className="cell-content">
@@ -455,8 +456,8 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                       <span className="cell-subtitle">{deliverable.clientName}</span>
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -466,8 +467,8 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                   >
                     {deliverable.projectName}
                   </button>
-                </AdminTableCell>
-                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
                       <button className="status-dropdown-trigger">
@@ -492,10 +493,10 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                         ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
-                </AdminTableCell>
-                <AdminTableCell>v{deliverable.version}</AdminTableCell>
-                <AdminTableCell>{deliverable.files}</AdminTableCell>
-                <AdminTableCell className="date-cell">
+                </PortalTableCell>
+                <PortalTableCell>v{deliverable.version}</PortalTableCell>
+                <PortalTableCell>{deliverable.files}</PortalTableCell>
+                <PortalTableCell className="date-cell">
                   {deliverable.dueDate && (
                     <span
                       className={cn(
@@ -509,8 +510,8 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                       {formatDate(deliverable.dueDate)}
                     </span>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
@@ -520,12 +521,12 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                     <IconButton action="copy-link" title="Share Link" />
                     <IconButton action="delete" title="Delete" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

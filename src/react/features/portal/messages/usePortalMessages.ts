@@ -2,8 +2,6 @@
  * usePortalMessages Hook
  * Data fetching and state management for portal messages
  */
-/* eslint-disable no-undef */
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type {
   MessageThread,
@@ -101,8 +99,10 @@ export function usePortalMessages({
         throw new Error('Failed to fetch threads');
       }
 
-      const data: ThreadsResponse = await response.json();
-      setThreads(data.threads);
+      const raw = await response.json();
+      // Server uses sendSuccess() which wraps: { success, data: { threads } }
+      const data: ThreadsResponse = raw.data ?? raw;
+      setThreads(data.threads ?? []);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load threads';
       setThreadsError(message);
@@ -137,8 +137,10 @@ export function usePortalMessages({
           throw new Error('Failed to fetch messages');
         }
 
-        const data: MessagesResponse = await response.json();
-        setMessages(data.messages);
+        const raw = await response.json();
+        // Server uses sendSuccess() which wraps: { success, data: { messages, thread } }
+        const data: MessagesResponse = raw.data ?? raw;
+        setMessages(data.messages ?? []);
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
           return;
@@ -217,7 +219,8 @@ export function usePortalMessages({
           throw new Error('Failed to send message');
         }
 
-        const data: SendMessageResponse = await response.json();
+        const raw = await response.json();
+        const data: SendMessageResponse = raw.data ?? raw;
 
         // Optimistically add the message
         setMessages((prev) => [...prev, data.message]);
@@ -268,7 +271,8 @@ export function usePortalMessages({
           throw new Error('Failed to edit message');
         }
 
-        const data: UpdateMessageResponse = await response.json();
+        const raw = await response.json();
+        const data: UpdateMessageResponse = raw.data ?? raw;
 
         // Update message in state
         setMessages((prev) => prev.map((m) => (m.id === messageId ? data.message : m)));

@@ -1,14 +1,10 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
-  Mail,
-  Phone,
-  Building,
   Inbox,
   Star,
   StarOff,
-  ChevronDown,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -17,30 +13,29 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
-import { CONTACTS_FILTER_CONFIG, CONTACT_STATUS_OPTIONS } from '../shared/filterConfigs';
+import { CONTACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
@@ -84,7 +79,7 @@ interface ContactsTableProps {
 
 const CONTACT_STATUS_CONFIG: Record<string, { label: string }> = {
   active: { label: 'Active' },
-  inactive: { label: 'Inactive' },
+  inactive: { label: 'Inactive' }
 };
 
 // Filter function
@@ -116,16 +111,16 @@ function sortContacts(a: Contact, b: Contact, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'name':
-      return multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-    case 'email':
-      return multiplier * a.email.localeCompare(b.email);
-    case 'company':
-      return multiplier * (a.company || '').localeCompare(b.company || '');
-    case 'createdAt':
-      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    default:
-      return 0;
+  case 'name':
+    return multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+  case 'email':
+    return multiplier * a.email.localeCompare(b.email);
+  case 'company':
+    return multiplier * (a.company || '').localeCompare(b.company || '');
+  case 'createdAt':
+    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  default:
+    return 0;
   }
 }
 
@@ -150,7 +145,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     total: 0,
     active: 0,
     primary: 0,
-    withCompany: 0,
+    withCompany: 0
   });
 
   // Filtering and sorting
@@ -164,7 +159,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Contact>({
-    storageKey: 'admin_contacts',
+    storageKey: overviewMode ? undefined : 'admin_contacts',
     filters: CONTACTS_FILTER_CONFIG,
     filterFn: filterContact,
     sortFn: sortContacts,
@@ -211,7 +206,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         total: 0,
         active: 0,
         primary: 0,
-        withCompany: 0,
+        withCompany: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load contacts');
@@ -231,7 +226,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update contact');
@@ -256,7 +251,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ isPrimary: !isPrimary }),
+        body: JSON.stringify({ isPrimary: !isPrimary })
       });
 
       if (!response.ok) throw new Error('Failed to update contact');
@@ -283,7 +278,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete contacts');
@@ -338,7 +333,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
           items={[
             { value: stats.total, label: 'total' },
             { value: stats.active, label: 'active', variant: 'active', hideIfZero: true },
-            { value: stats.primary, label: 'primary', variant: 'pending', hideIfZero: true },
+            { value: stats.primary, label: 'primary', variant: 'pending', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.primary} Primary • ${stats.withCompany} With Company`}
         />
@@ -393,57 +388,57 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead className="star-col"></AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="star-col"></PortalTableHead>
+            <PortalTableHead
               className="contact-col"
               sortable
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
               Contact
-            </AdminTableHead>
-            <AdminTableHead className="client-col">Client</AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="client-col">Client</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={6} message={error} onRetry={loadContacts} />
+            <PortalTableError colSpan={6} message={error} onRetry={loadContacts} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={6} rows={5} />
+            <PortalTableLoading colSpan={6} rows={5} />
           ) : paginatedContacts.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={6}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No contacts match your filters' : 'No contacts yet'}
             />
           ) : (
             paginatedContacts.map((contact) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={contact.id}
                 clickable
                 selected={selection.isSelected(contact)}
               >
-                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(contact)}
                     onCheckedChange={() => selection.toggleSelection(contact)}
                     aria-label={`Select ${contact.firstName} ${contact.lastName}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="star-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="star-cell" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => togglePrimary(contact.id, contact.isPrimary)}
                     className={cn(
@@ -458,8 +453,8 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                       <StarOff className="icon-sm" />
                     )}
                   </button>
-                </AdminTableCell>
-                <AdminTableCell className="primary-cell contact-cell">
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell contact-cell">
                   <div className="cell-content">
                     <span className="cell-title">
                       {contact.firstName} {contact.lastName}
@@ -474,8 +469,8 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                       <span className="cell-subtitle">{contact.role}</span>
                     )}
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="client-cell">
+                </PortalTableCell>
+                <PortalTableCell className="client-cell">
                   {contact.clientName && (
                     <button
                       onClick={(e) => {
@@ -487,8 +482,8 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                       {contact.clientName}
                     </button>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
                       <button className="status-dropdown-trigger">
@@ -513,18 +508,18 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                         ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

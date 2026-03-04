@@ -23,15 +23,15 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
     projectDescription: '',
     targetLaunchDate: '',
     budget: '',
-    targetAudience: '',
+    targetAudience: ''
   };
 
   const handleChange = (field: keyof ProjectOverviewData, value: string) => {
     onUpdate({
       projectOverview: {
         ...projectOverview,
-        [field]: value,
-      },
+        [field]: value
+      }
     });
   };
 
@@ -43,10 +43,10 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef} className="tw-section">
       {/* Section Header */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Project Details
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Tell us about your project goals and timeline.
         </p>
       </div>
@@ -55,12 +55,12 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
         {/* Project Name */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">
+          <label className="field-label">
             Project Name <span className="tw-text-primary">*</span>
           </label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <FolderKanban className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <FolderKanban className="icon-xs" />
             </div>
             <input
               type="text"
@@ -77,7 +77,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Project Type */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">
+          <label className="field-label">
             Project Type <span className="tw-text-primary">*</span>
           </label>
           <select
@@ -100,7 +100,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Project Description */}
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
-        <label className="tw-field-label">
+        <label className="field-label">
           Project Description <span className="tw-text-primary">*</span>
         </label>
         <textarea
@@ -119,10 +119,10 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Timeline & Budget Section */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Timeline & Budget
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Help us understand your constraints.
         </p>
       </div>
@@ -130,10 +130,10 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
         {/* Target Launch Date */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">Target Launch Date</label>
+          <label className="field-label">Target Launch Date</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <Calendar className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <Calendar className="icon-xs" />
             </div>
             <input
               type="date"
@@ -142,17 +142,17 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="tw-input tw-pl-10"
             />
           </div>
-          <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
+          <span className="tw-text-[12px] text-muted">
             When do you want to launch?
           </span>
         </div>
 
         {/* Budget Range */}
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="tw-field-label">Budget Range</label>
+          <label className="field-label">Budget Range</label>
           <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-              <DollarSign className="tw-h-4 tw-w-4" />
+            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+              <DollarSign className="icon-xs" />
             </div>
             <select
               value={projectOverview.budget}
@@ -167,7 +167,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               ))}
             </select>
           </div>
-          <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
+          <span className="tw-text-[12px] text-muted">
             This helps us recommend the right scope
           </span>
         </div>
@@ -175,10 +175,10 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Target Audience */}
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
-        <label className="tw-field-label">Target Audience</label>
+        <label className="field-label">Target Audience</label>
         <div className="tw-relative">
-          <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 tw-text-[var(--portal-text-muted)]">
-            <Users className="tw-h-4 tw-w-4" />
+          <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+            <Users className="icon-xs" />
           </div>
           <input
             type="text"

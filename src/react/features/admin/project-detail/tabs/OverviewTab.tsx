@@ -73,7 +73,6 @@ export function OverviewTab({
 
   const deleteDialog = useConfirmDialog();
 
-  // Toggle milestone expansion
   const toggleMilestoneExpand = useCallback((id: number) => {
     setExpandedMilestones((prev) => {
       const next = new Set(prev);
@@ -86,7 +85,6 @@ export function OverviewTab({
     });
   }, []);
 
-  // Handle add milestone
   const handleAddMilestone = useCallback(async () => {
     if (!newMilestoneTitle.trim()) return;
 
@@ -104,7 +102,6 @@ export function OverviewTab({
     }
   }, [newMilestoneTitle, onAddMilestone, showNotification]);
 
-  // Handle toggle milestone
   const handleToggleMilestone = useCallback(
     async (id: number) => {
       const success = await onToggleMilestone(id);
@@ -115,7 +112,6 @@ export function OverviewTab({
     [onToggleMilestone, showNotification]
   );
 
-  // Handle delete milestone
   const handleDeleteMilestone = useCallback(async () => {
     if (deletingMilestoneId === null) return;
 
@@ -128,7 +124,6 @@ export function OverviewTab({
     setDeletingMilestoneId(null);
   }, [deletingMilestoneId, onDeleteMilestone, showNotification]);
 
-  // Handle inline edit save
   const handleSaveField = useCallback(
     async (field: keyof Project, value: string): Promise<boolean> => {
       const success = await onUpdateProject({ [field]: value });
@@ -143,54 +138,45 @@ export function OverviewTab({
   );
 
   return (
-    <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-6">
+    <div className="project-overview-grid">
       {/* Left Column - Project Info */}
-      <div className="lg:tw-col-span-2 tw-flex tw-flex-col tw-gap-6">
+      <div className="project-overview-main">
         {/* Project Details Card */}
         <div className="tw-panel">
-          <h3 className="tw-section-title">
-            Project Details
-          </h3>
+          <h3 className="section-title">Project Details</h3>
 
-          <div className="tw-grid tw-grid-cols-2 tw-gap-4">
-            {/* Project Type */}
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-label">Type</span>
-              <span className="tw-text-primary">
+          <div className="project-info-grid">
+            <div className="project-info-field">
+              <span className="label">Type</span>
+              <span className="text-primary">
                 {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type || ''}
               </span>
             </div>
 
-            {/* Timeline */}
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-label">Timeline</span>
-              <span className="tw-text-primary">
-                {project.timeline || ''}
-              </span>
+            <div className="project-info-field">
+              <span className="label">Timeline</span>
+              <span className="text-primary">{project.timeline || ''}</span>
             </div>
 
-            {/* Start Date */}
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-label">Start Date</span>
-              <span className="tw-text-primary tw-flex tw-items-center tw-gap-1">
+            <div className="project-info-field">
+              <span className="label">Start Date</span>
+              <div className="project-info-field-value">
                 <Calendar className="icon-xs" />
-                {formatDate(project.start_date)}
-              </span>
+                <span>{formatDate(project.start_date)}</span>
+              </div>
             </div>
 
-            {/* End Date */}
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-label">Target End Date</span>
-              <span className="tw-text-primary tw-flex tw-items-center tw-gap-1">
+            <div className="project-info-field">
+              <span className="label">Target End Date</span>
+              <div className="project-info-field-value">
                 <Calendar className="icon-xs" />
-                {formatDate(project.end_date)}
-              </span>
+                <span>{formatDate(project.end_date)}</span>
+              </div>
             </div>
 
-            {/* Budget */}
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-label">Budget</span>
-              <div className="tw-flex tw-items-center tw-gap-1">
+            <div className="project-info-field">
+              <span className="label">Budget</span>
+              <div className="project-info-field-value">
                 <DollarSign className="icon-xs" />
                 <InlineEdit
                   value={String(project.budget || '')}
@@ -203,10 +189,9 @@ export function OverviewTab({
               </div>
             </div>
 
-            {/* Price */}
-            <div className="tw-flex tw-flex-col tw-gap-1">
-              <span className="tw-label">Quoted Price</span>
-              <div className="tw-flex tw-items-center tw-gap-1">
+            <div className="project-info-field">
+              <span className="label">Quoted Price</span>
+              <div className="project-info-field-value">
                 <DollarSign className="icon-xs" />
                 <InlineEdit
                   value={String(project.price || '')}
@@ -220,15 +205,10 @@ export function OverviewTab({
             </div>
           </div>
 
-          {/* Description */}
           {project.description && (
-            <div className="tw-divider tw-mt-4 tw-pt-4 tw-border-t tw-border-[var(--portal-border-color)]">
-              <span className="tw-label tw-block tw-mb-1">
-                Description
-              </span>
-              <p className="tw-text-muted tw-text-sm">
-                {project.description}
-              </p>
+            <div className="panel-description">
+              <span className="label">Description</span>
+              <p className="text-muted">{project.description}</p>
             </div>
           )}
         </div>
@@ -236,20 +216,17 @@ export function OverviewTab({
         {/* URLs Card */}
         {(project.preview_url || project.repo_url || project.production_url) && (
           <div className="tw-panel">
-            <h3 className="tw-section-title ">
-              Links
-            </h3>
-
-            <div className="tw-flex tw-flex-col tw-gap-3">
+            <h3 className="section-title">Links</h3>
+            <div className="link-list">
               {project.preview_url && (
                 <a
                   href={project.preview_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-list-item tw-text-primary hover:tw-underline"
+                  className="link-list-item"
                 >
                   <LinkIcon className="icon-md" />
-                  Preview URL
+                  <span>Preview URL</span>
                   <ExternalLink className="icon-xs" />
                 </a>
               )}
@@ -258,10 +235,10 @@ export function OverviewTab({
                   href={project.repo_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-list-item tw-text-primary hover:tw-underline"
+                  className="link-list-item"
                 >
                   <LinkIcon className="icon-md" />
-                  Repository
+                  <span>Repository</span>
                   <ExternalLink className="icon-xs" />
                 </a>
               )}
@@ -270,10 +247,10 @@ export function OverviewTab({
                   href={project.production_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-list-item tw-text-primary hover:tw-underline"
+                  className="link-list-item"
                 >
                   <LinkIcon className="icon-md" />
-                  Production URL
+                  <span>Production URL</span>
                   <ExternalLink className="icon-xs" />
                 </a>
               )}
@@ -283,36 +260,28 @@ export function OverviewTab({
 
         {/* Milestones Card */}
         <div className="tw-panel">
-          <div className="tw-flex tw-items-center tw-justify-between tw-mb-4">
-            <h3 className="tw-section-title">
-              Milestones
-            </h3>
-            <button
-              className="btn-ghost"
-              onClick={() => setShowAddMilestone(true)}
-            >
+          <div className="panel-card-header">
+            <h3 className="section-title">Milestones</h3>
+            <button className="btn-ghost" onClick={() => setShowAddMilestone(true)}>
               <Plus className="icon-md" />
               Add
             </button>
           </div>
 
           {/* Progress Bar */}
-          <div className="tw-mb-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
-              <span className="tw-label">Progress</span>
-              <span className="tw-text-primary tw-text-sm">{progress}%</span>
+          <div className="progress-field">
+            <div className="progress-field-header">
+              <span className="label">Progress</span>
+              <span className="text-muted">{progress}%</span>
             </div>
-            <div className="tw-progress-track">
-              <div
-                className="tw-progress-bar"
-                style={{ width: `${progress}%` }}
-              />
+            <div className="progress-bar progress-sm">
+              <div className="progress-fill" style={{ width: `${progress}%` }} />
             </div>
           </div>
 
           {/* Add Milestone Form */}
           {showAddMilestone && (
-            <div className="tw-card tw-flex tw-items-center tw-gap-2 tw-mb-4">
+            <div className="milestone-add-form">
               <input
                 type="text"
                 placeholder="Milestone title..."
@@ -326,11 +295,12 @@ export function OverviewTab({
                   }
                 }}
                 autoFocus
-                className="tw-input tw-flex-1 tw-text-sm"
+                className="form-input"
+                style={{ flex: 1 }}
               />
-              <button className="btn-primary" onClick={handleAddMilestone}>
+              <PortalButton variant="primary" size="sm" onClick={handleAddMilestone}>
                 Add
-              </button>
+              </PortalButton>
               <button
                 className="btn-ghost"
                 onClick={() => {
@@ -350,73 +320,77 @@ export function OverviewTab({
               <span>No milestones yet</span>
             </div>
           ) : (
-            <div className="tw-flex tw-flex-col tw-gap-2">
+            <div className="milestone-list">
               {milestones.map((milestone) => (
-                <div
-                  key={milestone.id}
-                  className="tw-card"
-                >
-                  <div
-                    className="tw-list-item"
-                    onClick={() => toggleMilestoneExpand(milestone.id)}
-                  >
+                <div key={milestone.id} className="milestone-item-wrapper">
+                  {/* Milestone row */}
+                  <div className="milestone-item">
                     <button
+                      className={cn(
+                        'milestone-checkbox',
+                        milestone.is_completed && 'is-completed'
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleToggleMilestone(milestone.id);
                       }}
-                      className={cn(
-                        'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors tw-rounded-none',
-                        milestone.is_completed
-                          ? 'tw-bg-white tw-border-primary'
-                          : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
-                      )}
+                      aria-label={milestone.is_completed ? 'Mark incomplete' : 'Mark complete'}
                     >
-                      {milestone.is_completed && (
-                        <Check className="icon-xs tw-text-black" />
-                      )}
+                      {milestone.is_completed && <Check className="icon-xs" />}
                     </button>
 
-                    <span
-                      className={cn(
-                        'tw-flex-1 ',
-                        milestone.is_completed
-                          ? 'tw-text-muted tw-line-through'
-                          : 'tw-text-primary'
-                      )}
+                    <div
+                      className="milestone-content"
+                      onClick={() => toggleMilestoneExpand(milestone.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleMilestoneExpand(milestone.id);
+                        }
+                      }}
                     >
-                      {decodeHtmlEntities(milestone.title)}
-                    </span>
-
-                    {milestone.due_date && (
-                      <span className="tw-text-muted tw-text-sm">
-                        {formatDate(milestone.due_date)}
+                      <span
+                        className={cn(
+                          'milestone-title',
+                          milestone.is_completed && 'completed'
+                        )}
+                      >
+                        {decodeHtmlEntities(milestone.title)}
                       </span>
-                    )}
 
-                    {expandedMilestones.has(milestone.id) ? (
-                      <ChevronDown className="icon-md" />
-                    ) : (
-                      <ChevronRight className="icon-md" />
-                    )}
+                      {milestone.due_date && (
+                        <span className="milestone-due">{formatDate(milestone.due_date)}</span>
+                      )}
+                    </div>
+
+                    <button
+                      className="btn-icon"
+                      onClick={() => toggleMilestoneExpand(milestone.id)}
+                      aria-label={expandedMilestones.has(milestone.id) ? 'Collapse' : 'Expand'}
+                    >
+                      {expandedMilestones.has(milestone.id) ? (
+                        <ChevronDown className="icon-sm" />
+                      ) : (
+                        <ChevronRight className="icon-sm" />
+                      )}
+                    </button>
                   </div>
 
                   {/* Expanded Content */}
                   {expandedMilestones.has(milestone.id) && (
-                    <div className="tw-px-3 tw-pb-3 tw-pt-0 tw-ml-8 ">
+                    <div className="milestone-expanded-content">
                       {milestone.description && (
-                        <p className="tw-text-muted tw-mt-2 tw-text-sm">
+                        <p className="milestone-description">
                           {decodeHtmlEntities(milestone.description)}
                         </p>
                       )}
 
                       {milestone.deliverables && milestone.deliverables.length > 0 && (
-                        <ul className="tw-mt-2 tw-space-y-1">
+                        <ul className="milestone-deliverables">
                           {milestone.deliverables.map((deliverable, idx) => (
-                            <li
-                              key={idx}
-                              className="tw-text-muted tw-flex tw-items-start tw-gap-1 tw-text-sm"
-                            >
+                            <li key={idx} className="milestone-description">
                               <span>•</span>
                               {deliverable}
                             </li>
@@ -424,7 +398,7 @@ export function OverviewTab({
                         </ul>
                       )}
 
-                      <div className="tw-mt-3 tw-flex tw-justify-end">
+                      <div className="milestone-actions">
                         <button
                           className="btn-ghost"
                           onClick={(e) => {
@@ -447,39 +421,30 @@ export function OverviewTab({
       </div>
 
       {/* Right Column - Sidebar */}
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="project-overview-sidebar">
         {/* Client Info Card */}
         <div className="tw-panel">
-          <h3 className="tw-section-title ">
-            Client
-          </h3>
+          <h3 className="section-title">Client</h3>
 
-          <div className="tw-flex tw-flex-col tw-gap-3">
+          <div className="link-list">
             {project.contact_name && (
-              <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="project-info-field-value">
                 <User className="icon-md" />
-                <span className="tw-text-primary ">
-                  {project.contact_name}
-                </span>
+                <span>{project.contact_name}</span>
               </div>
             )}
 
             {project.company_name && (
-              <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="project-info-field-value">
                 <Building className="icon-md" />
-                <span className="tw-text-primary ">
-                  {project.company_name}
-                </span>
+                <span>{project.company_name}</span>
               </div>
             )}
 
             {project.email && (
-              <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="project-info-field-value">
                 <Mail className="icon-md" />
-                <a
-                  href={`mailto:${project.email}`}
-                  className="tw-text-primary "
-                >
+                <a href={`mailto:${project.email}`} className="text-primary">
                   {project.email}
                 </a>
               </div>
@@ -489,37 +454,23 @@ export function OverviewTab({
 
         {/* Financial Summary Card */}
         <div className="tw-panel">
-          <h3 className="tw-section-title ">
-            Financials
-          </h3>
+          <h3 className="section-title">Financials</h3>
 
-          <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-stat-card tw-flex tw-items-center tw-justify-between">
-              <span className="tw-stat-label">
-                Outstanding Balance
-              </span>
-              <span className="tw-stat-value">
-                {formatCurrency(outstandingBalance)}
-              </span>
+          <div>
+            <div className="financial-row">
+              <span className="financial-row-label">Outstanding Balance</span>
+              <span className="financial-row-value">{formatCurrency(outstandingBalance)}</span>
             </div>
 
-            <div className="tw-stat-card tw-flex tw-items-center tw-justify-between">
-              <span className="tw-stat-label">
-                Total Paid
-              </span>
-              <span className="tw-stat-value">
-                {formatCurrency(totalPaid)}
-              </span>
+            <div className="financial-row">
+              <span className="financial-row-label">Total Paid</span>
+              <span className="financial-row-value">{formatCurrency(totalPaid)}</span>
             </div>
 
             {project.deposit_amount !== undefined && project.deposit_amount > 0 && (
-              <div className="tw-stat-card tw-flex tw-items-center tw-justify-between">
-                <span className="tw-stat-label">
-                  Deposit Amount
-                </span>
-                <span className="tw-stat-value">
-                  {formatCurrency(project.deposit_amount)}
-                </span>
+              <div className="financial-row">
+                <span className="financial-row-label">Deposit Amount</span>
+                <span className="financial-row-value">{formatCurrency(project.deposit_amount)}</span>
               </div>
             )}
           </div>
@@ -527,42 +478,34 @@ export function OverviewTab({
 
         {/* Quick Stats */}
         <div className="tw-panel">
-          <h3 className="tw-section-title ">
-            Quick Stats
-          </h3>
+          <h3 className="section-title">Quick Stats</h3>
 
-          <div className="tw-grid-stats tw-grid tw-grid-cols-2">
-            <div className="tw-stat-card">
-              <span className="tw-stat-label">Files</span>
-              <span className="tw-stat-value">
-                {project.file_count ?? 0}
-              </span>
+          <div className="quick-stats-grid">
+            <div className="stat-card">
+              <span className="stat-label">Files</span>
+              <span className="stat-value">{project.file_count ?? 0}</span>
             </div>
 
-            <div className="tw-stat-card">
-              <span className="tw-stat-label">Messages</span>
-              <span className="tw-stat-value">
+            <div className="stat-card">
+              <span className="stat-label">Messages</span>
+              <span className="stat-value">
                 {project.message_count ?? 0}
                 {(project.unread_count ?? 0) > 0 && (
-                  <span className="tw-ml-1 tw-text-sm">
-                    ({project.unread_count} new)
-                  </span>
+                  <span className="text-muted"> ({project.unread_count} new)</span>
                 )}
               </span>
             </div>
 
-            <div className="tw-stat-card">
-              <span className="tw-stat-label">Milestones</span>
-              <span className="tw-stat-value">
+            <div className="stat-card">
+              <span className="stat-label">Milestones</span>
+              <span className="stat-value">
                 {milestones.filter((m) => m.is_completed).length}/{milestones.length}
               </span>
             </div>
 
-            <div className="tw-stat-card">
-              <span className="tw-stat-label">Created</span>
-              <span className="tw-text-primary ">
-                {formatDate(project.created_at)}
-              </span>
+            <div className="stat-card">
+              <span className="stat-label">Created</span>
+              <span className="text-muted">{formatDate(project.created_at)}</span>
             </div>
           </div>
         </div>

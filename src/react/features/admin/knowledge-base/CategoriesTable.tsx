@@ -4,23 +4,23 @@ import {
   Folder,
   Inbox,
   CheckCircle,
-  XCircle,
+  XCircle
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -44,13 +44,13 @@ interface CategoriesTableProps {
   overviewMode?: boolean;
 }
 
-export function CategoriesTable({ onNavigate, getAuthToken, showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
+export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
   const containerRef = useFadeIn();
 
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -70,7 +70,7 @@ export function CategoriesTable({ onNavigate, getAuthToken, showNotification, de
     try {
       const response = await fetch(API_ENDPOINTS.ADMIN.KB_CATEGORIES, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load categories');
       const data = await response.json();
@@ -102,9 +102,9 @@ export function CategoriesTable({ onNavigate, getAuthToken, showNotification, de
         let aVal: string | number = '';
         let bVal: string | number = '';
         switch (sort.column) {
-          case 'name': aVal = a.name; bVal = b.name; break;
-          case 'article_count': aVal = a.article_count; bVal = b.article_count; break;
-          case 'sort_order': aVal = a.sort_order ?? 0; bVal = b.sort_order ?? 0; break;
+        case 'name': aVal = a.name; bVal = b.name; break;
+        case 'article_count': aVal = a.article_count; bVal = b.article_count; break;
+        case 'sort_order': aVal = a.sort_order ?? 0; bVal = b.sort_order ?? 0; break;
         }
         if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
@@ -117,7 +117,7 @@ export function CategoriesTable({ onNavigate, getAuthToken, showNotification, de
   const pagination = usePagination({
     totalItems: filteredCategories.length,
     storageKey: overviewMode ? undefined : 'admin_kb_categories_pagination',
-    defaultPageSize,
+    defaultPageSize
   });
 
   const paginatedCategories = filteredCategories.slice(
@@ -145,7 +145,7 @@ export function CategoriesTable({ onNavigate, getAuthToken, showNotification, de
         <TableStats
           items={[
             { value: categories.length, label: 'categories' },
-            { value: activeCount, label: 'active', variant: 'completed', hideIfZero: true },
+            { value: activeCount, label: 'active', variant: 'completed', hideIfZero: true }
           ]}
           tooltip={`${categories.length} Categories • ${activeCount} Active`}
         />
@@ -179,45 +179,45 @@ export function CategoriesTable({ onNavigate, getAuthToken, showNotification, de
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead
               sortable
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
               Name
-            </AdminTableHead>
-            <AdminTableHead>Slug</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead>Slug</PortalTableHead>
+            <PortalTableHead
               className="text-center"
               sortable
               sortDirection={sort?.column === 'article_count' ? sort.direction : null}
               onClick={() => toggleSort('article_count')}
             >
               Articles
-            </AdminTableHead>
-            <AdminTableHead className="text-center">Active</AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="text-center">Active</PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={5} message={error} onRetry={loadCategories} />
+            <PortalTableError colSpan={5} message={error} onRetry={loadCategories} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={5} rows={5} />
+            <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedCategories.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No categories match your search' : 'No categories yet'}
             />
           ) : (
             paginatedCategories.map((category) => (
-              <AdminTableRow key={category.id} clickable>
-                <AdminTableCell className="primary-cell">
+              <PortalTableRow key={category.id} clickable>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <Folder className="cell-icon" />
                     <div className="cell-content">
@@ -227,29 +227,29 @@ export function CategoriesTable({ onNavigate, getAuthToken, showNotification, de
                       )}
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell>
+                </PortalTableCell>
+                <PortalTableCell>
                   <code className="text-mono">{category.slug}</code>
-                </AdminTableCell>
-                <AdminTableCell className="text-center">{category.article_count}</AdminTableCell>
-                <AdminTableCell className="text-center">
+                </PortalTableCell>
+                <PortalTableCell className="text-center">{category.article_count}</PortalTableCell>
+                <PortalTableCell className="text-center">
                   {category.is_active !== false ? (
                     <CheckCircle className="cell-icon-sm status-completed" />
                   ) : (
                     <XCircle className="cell-icon-sm status-cancelled" />
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="edit" title="Edit" />
                     <IconButton action="delete" title="Delete" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

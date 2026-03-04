@@ -57,161 +57,161 @@ import { mountDocumentsDashboard, unmountDocumentsDashboard } from './features/a
 // Register detail views
 registerReactComponent('clientDetail', {
   mount: mountClientDetail,
-  unmount: unmountClientDetail,
+  unmount: unmountClientDetail
 });
 
 registerReactComponent('projectDetail', {
   mount: mountProjectDetail,
-  unmount: unmountProjectDetail,
+  unmount: unmountProjectDetail
 });
 
 // Register table components
 registerReactComponent('projectsTable', {
   mount: mountProjectsTable,
-  unmount: unmountProjectsTable,
+  unmount: unmountProjectsTable
 });
 
 registerReactComponent('clientsTable', {
   mount: mountClientsTable,
-  unmount: unmountClientsTable,
+  unmount: unmountClientsTable
 });
 
 registerReactComponent('leadsTable', {
   mount: mountLeadsTable,
-  unmount: unmountLeadsTable,
+  unmount: unmountLeadsTable
 });
 
 registerReactComponent('invoicesTable', {
   mount: mountInvoicesTable,
-  unmount: unmountInvoicesTable,
+  unmount: unmountInvoicesTable
 });
 
 registerReactComponent('contactsTable', {
   mount: mountContactsTable,
-  unmount: unmountContactsTable,
+  unmount: unmountContactsTable
 });
 
 registerReactComponent('contractsTable', {
   mount: mountContractsTable,
-  unmount: unmountContractsTable,
+  unmount: unmountContractsTable
 });
 
 registerReactComponent('deliverablesTable', {
   mount: mountDeliverablesTable,
-  unmount: unmountDeliverablesTable,
+  unmount: unmountDeliverablesTable
 });
 
 registerReactComponent('documentRequestsTable', {
   mount: mountDocumentRequestsTable,
-  unmount: unmountDocumentRequestsTable,
+  unmount: unmountDocumentRequestsTable
 });
 
 registerReactComponent('questionnairesTable', {
   mount: mountQuestionnairesTable,
-  unmount: unmountQuestionnairesTable,
+  unmount: unmountQuestionnairesTable
 });
 
 registerReactComponent('adHocRequestsTable', {
   mount: mountAdHocRequestsTable,
-  unmount: unmountAdHocRequestsTable,
+  unmount: unmountAdHocRequestsTable
 });
 
 registerReactComponent('proposalsTable', {
   mount: mountProposalsTable,
-  unmount: unmountProposalsTable,
+  unmount: unmountProposalsTable
 });
 
 registerReactComponent('globalTasksTable', {
   mount: mountGlobalTasksTable,
-  unmount: unmountGlobalTasksTable,
+  unmount: unmountGlobalTasksTable
 });
 
 registerReactComponent('deletedItemsTable', {
   mount: mountDeletedItemsTable,
-  unmount: unmountDeletedItemsTable,
+  unmount: unmountDeletedItemsTable
 });
 
 // Register feature components
 registerReactComponent('tasksManager', {
   mount: mountTasksManager,
-  unmount: unmountTasksManager,
+  unmount: unmountTasksManager
 });
 
 registerReactComponent('workflowsManager', {
   mount: mountWorkflowsManager,
-  unmount: unmountWorkflowsManager,
+  unmount: unmountWorkflowsManager
 });
 
 registerReactComponent('filesManager', {
   mount: mountFilesManager,
-  unmount: unmountFilesManager,
+  unmount: unmountFilesManager
 });
 
 registerReactComponent('emailTemplatesManager', {
   mount: mountEmailTemplatesManager,
-  unmount: unmountEmailTemplatesManager,
+  unmount: unmountEmailTemplatesManager
 });
 
 registerReactComponent('knowledgeBase', {
   mount: mountKnowledgeBase,
-  unmount: unmountKnowledgeBase,
+  unmount: unmountKnowledgeBase
 });
 
 registerReactComponent('messagingPanel', {
   mount: mountMessagingPanel,
-  unmount: unmountMessagingPanel,
+  unmount: unmountMessagingPanel
 });
 
 registerReactComponent('timeTrackingPanel', {
   mount: mountTimeTrackingPanel,
-  unmount: unmountTimeTrackingPanel,
+  unmount: unmountTimeTrackingPanel
 });
 
 registerReactComponent('designReviewPanel', {
   mount: mountDesignReviewPanel,
-  unmount: unmountDesignReviewPanel,
+  unmount: unmountDesignReviewPanel
 });
 
 registerReactComponent('systemStatusPanel', {
   mount: mountSystemStatusPanel,
-  unmount: unmountSystemStatusPanel,
+  unmount: unmountSystemStatusPanel
 });
 
 // Register analytics components
 registerReactComponent('overviewDashboard', {
   mount: mountOverviewDashboard,
-  unmount: unmountOverviewDashboard,
+  unmount: unmountOverviewDashboard
 });
 
 registerReactComponent('analyticsDashboard', {
   mount: mountAnalyticsDashboard,
-  unmount: unmountAnalyticsDashboard,
+  unmount: unmountAnalyticsDashboard
 });
 
 registerReactComponent('adHocAnalytics', {
   mount: mountAdHocAnalytics,
-  unmount: unmountAdHocAnalytics,
+  unmount: unmountAdHocAnalytics
 });
 
 registerReactComponent('performanceMetrics', {
   mount: mountPerformanceMetrics,
-  unmount: unmountPerformanceMetrics,
+  unmount: unmountPerformanceMetrics
 });
 
 // Register dashboard components (parent tab groups)
 registerReactComponent('workDashboard', {
   mount: mountWorkDashboard,
-  unmount: unmountWorkDashboard,
+  unmount: unmountWorkDashboard
 });
 
 registerReactComponent('crmDashboard', {
   mount: mountCRMDashboard,
-  unmount: unmountCRMDashboard,
+  unmount: unmountCRMDashboard
 });
 
 registerReactComponent('documentsDashboard', {
   mount: mountDocumentsDashboard,
-  unmount: unmountDocumentsDashboard,
+  unmount: unmountDocumentsDashboard
 });
 
 // Log that React components are available

@@ -7,7 +7,7 @@ import {
   BarChart3,
   Table,
   Code,
-  Trash2,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
@@ -38,7 +38,7 @@ interface AdHocAnalyticsProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: AdHocAnalyticsProps) {
+export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalyticsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -65,7 +65,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
     try {
       const response = await fetch(API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load saved queries');
       const data = await response.json();
@@ -91,7 +91,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ query, dateRange }),
+        body: JSON.stringify({ query, dateRange })
       });
 
       if (!response.ok) {
@@ -117,7 +117,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ name: queryName, query }),
+        body: JSON.stringify({ name: queryName, query })
       });
 
       if (!response.ok) throw new Error('Failed to save query');
@@ -138,7 +138,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
       const response = await fetch(buildEndpoint.adminAdHocQuery(queryId), {
         method: 'DELETE',
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to delete query');
@@ -161,7 +161,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
 
     const csv = [
       result.columns.join(','),
-      ...result.rows.map((row) => result.columns.map((col) => JSON.stringify(row[col] ?? '')).join(',')),
+      ...result.rows.map((row) => result.columns.map((col) => JSON.stringify(row[col] ?? '')).join(','))
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -177,7 +177,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
     return new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
+      year: 'numeric'
     });
   }
 
@@ -185,7 +185,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
       {/* Header */}
       <div className="perf-header">
-        <h2 className="tw-heading perf-heading">Custom Analytics</h2>
+        <h2 className="heading perf-heading">Custom Analytics</h2>
         <div className="tw-tab-list perf-tab-list">
           {(['7d', '30d', '90d', 'custom'] as const).map((range) => (
             <button
@@ -203,22 +203,22 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
         {/* Saved Queries Sidebar */}
         <div>
           <div className="tw-panel">
-            <h3 className="tw-section-title analytics-section-title">Saved Queries</h3>
+            <h3 className="section-title analytics-section-title">Saved Queries</h3>
             {savedQueries.length === 0 ? (
-              <p className="tw-text-muted analytics-empty-text">No saved queries yet</p>
+              <p className="text-muted analytics-empty-text">No saved queries yet</p>
             ) : (
               <div>
                 {savedQueries.map((sq) => (
                   <div
                     key={sq.id}
-                    className="tw-card-hover analytics-query-card"
+                    className="portal-card card-clickable analytics-query-card"
                     onClick={() => loadQuery(sq)}
                   >
                     <div className="analytics-query-header">
                       <div className="analytics-query-content">
                         <span className="analytics-query-name">{sq.name}</span>
                         {sq.lastRun && (
-                          <span className="tw-text-muted analytics-query-date">
+                          <span className="text-muted analytics-query-date">
                             Last run: {formatDate(sq.lastRun)}
                           </span>
                         )}
@@ -247,7 +247,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
             <div className="analytics-editor-header">
               <div className="analytics-editor-title">
                 <Code className="analytics-editor-icon" />
-                <span className="tw-section-title">Query</span>
+                <span className="section-title">Query</span>
               </div>
               <div className="analytics-editor-actions">
                 <input
@@ -271,7 +271,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
               className="tw-textarea"
             />
             <div className="analytics-editor-footer">
-              <span className="tw-text-muted analytics-hint">
+              <span className="text-muted analytics-hint">
                 Use SQL-like syntax to query your data
               </span>
               <button className="btn-primary" onClick={runQuery} disabled={isLoading || !query}>
@@ -283,7 +283,12 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
 
           {/* Error State */}
           {error && (
-            <div className="error-state">{error}</div>
+            <div className="error-state">
+              {error}
+              <button className="btn-secondary" onClick={runQuery}>
+                Retry
+              </button>
+            </div>
           )}
 
           {/* Results */}
@@ -292,7 +297,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
               <div className="analytics-results-header">
                 <div className="analytics-results-stats">
                   <span>{result.rowCount} rows</span>
-                  <span className="tw-text-muted">Executed in {result.executionTime}ms</span>
+                  <span className="text-muted">Executed in {result.executionTime}ms</span>
                 </div>
                 <div className="analytics-results-actions">
                   <div className="tw-tab-list perf-tab-list">
@@ -337,7 +342,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                     </tbody>
                   </table>
                   {result.rowCount > 100 && (
-                    <p className="tw-text-muted analytics-pagination">
+                    <p className="text-muted analytics-pagination">
                       Showing first 100 of {result.rowCount} rows
                     </p>
                   )}
@@ -346,7 +351,7 @@ export function AdHocAnalytics({ onNavigate, getAuthToken, showNotification }: A
                 <div className="empty-state analytics-chart-empty">
                   <BarChart3 className="analytics-chart-icon" />
                   <p>Chart visualization</p>
-                  <p className="tw-text-muted analytics-chart-hint">Select numeric columns to visualize</p>
+                  <p className="text-muted analytics-chart-hint">Select numeric columns to visualize</p>
                 </div>
               )}
             </div>

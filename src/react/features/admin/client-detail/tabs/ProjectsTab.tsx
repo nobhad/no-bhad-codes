@@ -1,8 +1,5 @@
 import * as React from 'react';
 import { FolderKanban, ExternalLink, Clock } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
 
@@ -20,18 +17,6 @@ function formatDate(dateString: string): string {
     day: 'numeric',
     year: 'numeric'
   });
-}
-
-/**
- * Get progress bar color
- */
-function getProgressColor(progress: number, status: string): string {
-  if (status === 'completed') return 'tw-bg-[var(--status-completed)]';
-  if (status === 'cancelled') return 'tw-bg-[var(--status-cancelled)]';
-  if (progress >= 75) return 'tw-bg-[var(--status-completed)]';
-  if (progress >= 50) return 'tw-bg-[var(--color-brand-primary)]';
-  if (progress >= 25) return 'tw-bg-[var(--status-warning)]';
-  return 'tw-bg-[var(--portal-text-muted)]';
 }
 
 /**
@@ -70,12 +55,12 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
     return (
       <div
         key={project.id}
-        className="tw-card tw-group"
+        className="portal-card tw-group"
       >
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
           <div className="tw-flex-1 tw-min-w-0">
             <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-              <h4 className="tw-heading tw-truncate ">
+              <h4 className="heading tw-truncate ">
                 {project.project_name}
               </h4>
               <span className="tw-badge tw-text-xs">
@@ -83,7 +68,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
               </span>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-muted tw-text-sm">
+            <div className="tw-flex tw-items-center tw-gap-2 text-muted tw-text-sm">
               <Clock className="icon-xs" />
               <span>Created {formatDate(project.created_at)}</span>
             </div>
@@ -102,8 +87,8 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
         {(project.status === 'active' || project.status === 'in-progress') && (
           <div className="tw-mt-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
-              <span className="tw-label">Progress</span>
-              <span className="tw-text-muted tw-text-sm">
+              <span className="label">Progress</span>
+              <span className="text-muted tw-text-sm">
                 {progress}%
               </span>
             </div>
@@ -128,11 +113,11 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
     return (
       <div>
-        <h3 className="tw-section-title ">
+        <h3 className="section-title ">
           {title} ({projectList.length})
         </h3>
         {projectList.length === 0 ? (
-          <p className="tw-text-muted  tw-text-muted tw-italic">
+          <p className="text-muted  text-muted tw-italic">
             {emptyMessage}
           </p>
         ) : (
@@ -148,23 +133,23 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading tw-text-lg">
+        <h2 className="heading tw-text-lg">
           Projects ({projects.length})
         </h2>
 
         {/* Summary stats */}
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-text-center">
-            <span className="tw-stat-value tw-text-lg">
+            <span className="stat-value tw-text-lg">
               {activeProjects.length}
             </span>
-            <span className="tw-text-muted tw-ml-1 tw-text-sm">Active</span>
+            <span className="text-muted tw-ml-1 tw-text-sm">Active</span>
           </div>
           <div className="tw-text-center">
-            <span className="tw-stat-value tw-text-lg">
+            <span className="stat-value tw-text-lg">
               {completedProjects.length}
             </span>
-            <span className="tw-text-muted tw-ml-1 tw-text-sm">
+            <span className="text-muted tw-ml-1 tw-text-sm">
               Completed
             </span>
           </div>

@@ -557,15 +557,18 @@ export interface ClientHealth {
  */
 export interface ClientContact {
   id: number;
-  client_id: number;
-  name: string;
-  email: string;
+  clientId: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
   phone?: string;
   title?: string;
-  role?: 'primary' | 'billing' | 'technical' | 'decision_maker' | 'other';
-  is_primary: boolean;
+  department?: string;
+  role?: 'primary' | 'billing' | 'technical' | 'decision_maker' | 'general' | 'other';
+  isPrimary: boolean;
   notes?: string;
-  created_at: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 /**
@@ -573,12 +576,12 @@ export interface ClientContact {
  */
 export interface ClientActivity {
   id: number;
-  client_id: number;
-  type: string;
+  clientId: number;
+  activityType: string;
   title: string;
   description?: string;
-  created_at: string;
-  created_by?: string;
+  createdAt: string;
+  createdBy?: string;
   metadata?: Record<string, unknown>;
 }
 

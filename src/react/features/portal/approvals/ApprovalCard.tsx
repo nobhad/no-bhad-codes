@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatCardDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { PendingApproval, ApprovalEntityType } from './types';
 
@@ -39,11 +37,11 @@ interface ApprovalCardProps {
 
 /** Entity type icon mapping */
 const ENTITY_ICONS: Record<ApprovalEntityType, React.ReactNode> = {
-  proposal: <FileText className="tw-h-3.5 tw-w-3.5" />,
-  invoice: <Receipt className="tw-h-3.5 tw-w-3.5" />,
-  contract: <FileSignature className="tw-h-3.5 tw-w-3.5" />,
-  deliverable: <Package className="tw-h-3.5 tw-w-3.5" />,
-  project: <FolderOpen className="tw-h-3.5 tw-w-3.5" />
+  proposal: <FileText className="icon-xs" />,
+  invoice: <Receipt className="icon-xs" />,
+  contract: <FileSignature className="icon-xs" />,
+  deliverable: <Package className="icon-xs" />,
+  project: <FolderOpen className="icon-xs" />
 };
 
 /** Entity type display labels */
@@ -71,7 +69,7 @@ export function ApprovalCard({
 
   const overdue = isOverdue(approval.due_by);
   const dueDaysText = getDueDaysText(approval.due_by);
-  const entityIcon = ENTITY_ICONS[approval.entity_type] || <FileText className="tw-h-3.5 tw-w-3.5" />;
+  const entityIcon = ENTITY_ICONS[approval.entity_type] || <FileText className="icon-xs" />;
   const entityLabel = ENTITY_LABELS[approval.entity_type] || approval.entity_type;
 
   const handleApprove = async () => {
@@ -105,31 +103,33 @@ export function ApprovalCard({
   return (
     <>
       <div
-        className={cn('tw-card', onNavigate && 'tw-card-hover')}
+        className={cn('portal-card', onNavigate && 'portal-card card-clickable')}
         style={{ borderColor: overdue ? 'var(--portal-text-light)' : undefined }}
         onClick={onNavigate ? handleCardClick : undefined}
       >
         {/* Header */}
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-mb-2">
-          <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="portal-card-header">
+          <div className="portal-card-title-group">
             {/* Entity type icon */}
-            <div className="tw-text-muted">{entityIcon}</div>
+            <div className="text-muted">{entityIcon}</div>
 
             <div className="tw-flex tw-flex-col tw-gap-0.5">
               <span className="tw-text-primary tw-text-sm">
                 {approval.entity_name || `${entityLabel} #${approval.entity_id}`}
               </span>
-              <span className="tw-label tw-text-xs">{entityLabel}</span>
+              <span className="label tw-text-xs">{entityLabel}</span>
             </div>
           </div>
 
           {/* Status badge */}
-          <span className="tw-badge">{approval.status}</span>
+          <div className="portal-card-status-group">
+            <span className="tw-badge">{approval.status}</span>
+          </div>
         </div>
 
         {/* Description */}
         {approval.description && (
-          <p className="tw-text-muted tw-text-sm tw-mb-2">
+          <p className="text-muted tw-text-sm tw-mb-2">
             {approval.description}
           </p>
         )}
@@ -137,15 +137,15 @@ export function ApprovalCard({
         {/* Meta info row */}
         <div className="tw-flex tw-items-center tw-gap-3 tw-mb-3">
           {/* Requested date */}
-          <div className="tw-flex tw-items-center tw-gap-1 tw-text-muted">
-            <Clock className="tw-h-3 tw-w-3" />
+          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+            <Clock className="icon-xs" />
             <span className="tw-text-xs">Requested {formatCardDate(approval.requested_at)}</span>
           </div>
 
           {/* Due date indicator */}
           {dueDaysText && (
-            <div className={cn('tw-flex tw-items-center tw-gap-1', overdue ? 'tw-text-primary' : 'tw-text-muted')}>
-              {overdue && <AlertCircle className="tw-h-3 tw-w-3" />}
+            <div className={cn('tw-flex tw-items-center tw-gap-1', overdue ? 'tw-text-primary' : 'text-muted')}>
+              {overdue && <AlertCircle className="icon-xs" />}
               <span className="tw-text-xs">{dueDaysText}</span>
             </div>
           )}
@@ -155,11 +155,11 @@ export function ApprovalCard({
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2" onClick={(e) => e.stopPropagation()}>
           <div className="tw-flex tw-items-center tw-gap-2">
             <button className="btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
-              <Check className="tw-h-4 tw-w-4" />
+              <Check className="icon-xs" />
               Approve
             </button>
             <button className="btn-secondary" disabled={disabled} onClick={() => setShowRejectDialog(true)}>
-              <X className="tw-h-4 tw-w-4" />
+              <X className="icon-xs" />
               Reject
             </button>
           </div>
@@ -168,7 +168,7 @@ export function ApprovalCard({
           {onNavigate && (
             <button className="btn-ghost tw-text-sm" onClick={handleCardClick}>
               View Details
-              <ChevronRight className="tw-h-3 tw-w-3" />
+              <ChevronRight className="icon-xs" />
             </button>
           )}
         </div>

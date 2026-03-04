@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   CheckCircle,
   Circle,
   Clock,
@@ -12,7 +11,7 @@ import {
   Inbox,
   LayoutGrid,
   List,
-  ChevronDown,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -22,24 +21,23 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDateShort } from '@react/utils/formatDate';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -80,14 +78,14 @@ const TASK_STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode 
   in_progress: { label: 'In Progress', icon: <Clock className="icon-sm" /> },
   completed: { label: 'Done', icon: <CheckCircle className="icon-sm" /> },
   blocked: { label: 'Blocked', icon: <AlertTriangle className="icon-sm" /> },
-  cancelled: { label: 'Cancelled', icon: <Circle className="icon-sm" /> },
+  cancelled: { label: 'Cancelled', icon: <Circle className="icon-sm" /> }
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgent', color: 'var(--status-cancelled)' },
   high: { label: 'High', color: 'var(--status-pending)' },
   medium: { label: 'Medium', color: 'var(--status-active)' },
-  low: { label: 'Low', color: 'var(--portal-text-muted)' },
+  low: { label: 'Low', color: 'var(--portal-text-muted)' }
 };
 
 interface GlobalTasksTableProps {
@@ -134,18 +132,18 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'title':
-      return multiplier * a.title.localeCompare(b.title);
-    case 'priority': {
-      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-      return multiplier * ((priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4));
-    }
-    case 'dueDate':
-      return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
-    case 'status':
-      return multiplier * a.status.localeCompare(b.status);
-    default:
-      return 0;
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'priority': {
+    const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+    return multiplier * ((priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4));
+  }
+  case 'dueDate':
+    return multiplier * ((a.dueDate || '').localeCompare(b.dueDate || ''));
+  case 'status':
+    return multiplier * a.status.localeCompare(b.status);
+  default:
+    return 0;
   }
 }
 
@@ -171,7 +169,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
     pending: 0,
     inProgress: 0,
     completed: 0,
-    overdue: 0,
+    overdue: 0
   });
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
@@ -186,7 +184,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Task>({
-    storageKey: 'admin_global_tasks',
+    storageKey: overviewMode ? undefined : 'admin_global_tasks',
     filters: GLOBAL_TASKS_FILTER_CONFIG,
     filterFn: filterTask,
     sortFn: sortTasks,
@@ -234,7 +232,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
         pending: 0,
         inProgress: 0,
         completed: 0,
-        overdue: 0,
+        overdue: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load tasks');
@@ -254,7 +252,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update task');
@@ -281,7 +279,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete tasks');
@@ -337,7 +335,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
             { value: stats.total, label: 'total' },
             { value: stats.pending, label: 'to do', variant: 'pending', hideIfZero: true },
             { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total - ${stats.pending} To Do - ${stats.inProgress} In Progress - ${stats.completed} Done${stats.overdue > 0 ? ` - ${stats.overdue} Overdue` : ''}`}
         />
@@ -409,79 +407,79 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
       }
     >
       {viewMode === 'list' ? (
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
                   aria-label="Select all"
                 />
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="name-col"
                 sortable
                 sortDirection={sort?.column === 'title' ? sort.direction : null}
                 onClick={() => toggleSort('title')}
               >
                 Task
-              </AdminTableHead>
-              <AdminTableHead className="project-col">Project</AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead className="project-col">Project</PortalTableHead>
+              <PortalTableHead
                 className="priority-col"
                 sortable
                 sortDirection={sort?.column === 'priority' ? sort.direction : null}
                 onClick={() => toggleSort('priority')}
               >
                 Priority
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="status-col"
                 sortable
                 sortDirection={sort?.column === 'status' ? sort.direction : null}
                 onClick={() => toggleSort('status')}
               >
                 Status
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sort?.column === 'dueDate' ? sort.direction : null}
                 onClick={() => toggleSort('dueDate')}
               >
                 Due Date
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!isLoading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={loadTasks} />
+              <PortalTableError colSpan={7} message={error} onRetry={loadTasks} />
             ) : isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
             ) : (
               paginatedTasks.map((task) => (
-                <AdminTableRow
+                <PortalTableRow
                   key={task.id}
                   clickable
                   selected={selection.isSelected(task)}
                 >
-                  <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(task)}
                       onCheckedChange={() => selection.toggleSelection(task)}
                       aria-label={`Select ${task.title}`}
                     />
-                  </AdminTableCell>
-                  <AdminTableCell className="primary-cell name-cell">
+                  </PortalTableCell>
+                  <PortalTableCell className="primary-cell name-cell">
                     <div className="cell-content">
                       {task.projectName && (
                         <span className="project-stacked">{task.projectName}</span>
@@ -501,8 +499,8 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                         <span className="date-stacked">{formatDateShort(task.dueDate)}</span>
                       )}
                     </div>
-                  </AdminTableCell>
-                  <AdminTableCell className="project-cell">
+                  </PortalTableCell>
+                  <PortalTableCell className="project-cell">
                     {task.projectName && (
                       <span
                         onClick={() => onNavigate?.('projects', task.projectId != null ? String(task.projectId) : undefined)}
@@ -511,8 +509,8 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                         {task.projectName}
                       </span>
                     )}
-                  </AdminTableCell>
-                  <AdminTableCell className="priority-cell">
+                  </PortalTableCell>
+                  <PortalTableCell className="priority-cell">
                     <div className="cell-with-icon">
                       <span
                         className="priority-indicator"
@@ -520,8 +518,8 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                       />
                       <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
                     </div>
-                  </AdminTableCell>
-                  <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                  </PortalTableCell>
+                  <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="status-dropdown-trigger">
@@ -546,8 +544,8 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                           ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
-                  </AdminTableCell>
-                  <AdminTableCell className="date-cell">
+                  </PortalTableCell>
+                  <PortalTableCell className="date-cell">
                     {task.dueDate && (
                       <span
                         className={cn(
@@ -560,18 +558,18 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                         {formatDateShort(task.dueDate)}
                       </span>
                     )}
-                  </AdminTableCell>
-                  <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  </PortalTableCell>
+                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <IconButton action="view" title="View" />
                       <IconButton action="edit" title="Edit" />
                     </div>
-                  </AdminTableCell>
-                </AdminTableRow>
+                  </PortalTableCell>
+                </PortalTableRow>
               ))
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       ) : (
         <TasksKanbanView
           tasks={filteredTasks}
@@ -585,8 +583,8 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
 
 function TasksKanbanView({
   tasks,
-  onStatusChange,
-  isLoading,
+  onStatusChange: _onStatusChange,
+  isLoading
 }: {
   tasks: Task[];
   onStatusChange: (taskId: number, status: string) => void;
@@ -596,7 +594,7 @@ function TasksKanbanView({
     { id: 'pending', label: 'To Do', color: 'var(--portal-text-secondary)' },
     { id: 'in_progress', label: 'In Progress', color: 'var(--status-active)' },
     { id: 'blocked', label: 'Blocked', color: 'var(--status-pending)' },
-    { id: 'completed', label: 'Done', color: 'var(--status-completed)' },
+    { id: 'completed', label: 'Done', color: 'var(--status-completed)' }
   ];
 
   if (isLoading) {

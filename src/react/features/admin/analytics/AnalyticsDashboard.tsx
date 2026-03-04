@@ -1,5 +1,20 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+  Filler,
+  type ChartData as ChartJSData,
+  type ChartOptions,
+  type ChartConfiguration
+} from 'chart.js';
 import {
   TrendingUp,
   TrendingDown,
@@ -11,21 +26,30 @@ import {
   PieChart,
   LineChart,
   Download,
-  RefreshCw,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
-interface KPI {
-  id: string;
-  label: string;
-  value: string | number;
-  change?: number;
-  changeLabel?: string;
-  icon: React.ReactNode;
-}
+// Register Chart.js components once
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+// ============================================
+// Types
+// ============================================
 
 interface ChartData {
   labels: string[];
@@ -51,6 +75,15 @@ interface AnalyticsData {
   sourceBreakdown: { source: string; count: number; percentage: number }[];
 }
 
+interface KPI {
+  id: string;
+  label: string;
+  value: string | number;
+  change?: number;
+  changeLabel?: string;
+  icon: React.ReactNode;
+}
+
 interface AnalyticsDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
@@ -58,6 +91,171 @@ interface AnalyticsDashboardProps {
 }
 
 type AnalyticsSubtab = 'overview' | 'revenue' | 'leads' | 'projects';
+type ChartType = 'line' | 'bar' | 'pie';
+
+// ============================================
+// CSS variable resolver
+// ============================================
+
+/** Resolve a CSS variable string like "var(--status-active)" to a hex/rgb value. */
+function resolveCssVar(value: string): string {
+  if (!value.startsWith('var(')) return value;
+  const name = value.slice(4, -1).trim();
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || value;
+}
+
+// ============================================
+// ChartWidget — renders a real Chart.js chart
+// ============================================
+
+interface ChartWidgetProps {
+  data?: ChartData;
+  type: ChartType;
+}
+
+function ChartWidget({ data, type }: ChartWidgetProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<ChartJS | null>(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // Destroy previous instance
+    if (chartRef.current) {
+      chartRef.current.destroy();
+      chartRef.current = null;
+    }
+
+    // No data — don't render
+    if (!data || !data.labels?.length) return;
+
+    // Resolve CSS variable colors
+    const textMuted = resolveCssVar('var(--portal-text-muted)');
+    const borderColor = resolveCssVar('var(--portal-border-color)');
+    const textSecondary = resolveCssVar('var(--portal-text-secondary)');
+
+    const resolvedDatasets = data.datasets.map((ds) => {
+      const color = resolveCssVar(ds.color);
+      if (type === 'pie') {
+        // For pie charts, generate multiple colors from the palette
+        const palette = [
+          resolveCssVar('var(--color-brand-primary)'),
+          resolveCssVar('var(--status-completed)'),
+          resolveCssVar('var(--status-pending)'),
+          resolveCssVar('var(--status-active)'),
+          resolveCssVar('var(--status-qualified)'),
+          resolveCssVar('var(--status-new)')
+        ];
+        return {
+          label: ds.label,
+          data: ds.data,
+          backgroundColor: ds.data.map((_, i) => palette[i % palette.length]),
+          borderWidth: 0
+        };
+      }
+      if (type === 'line') {
+        return {
+          label: ds.label,
+          data: ds.data,
+          borderColor: color,
+          backgroundColor: `${color  }18`, // ~10% opacity fill
+          pointBackgroundColor: color,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          fill: true,
+          tension: 0.3,
+          borderWidth: 1.5
+        };
+      }
+      // bar
+      return {
+        label: ds.label,
+        data: ds.data,
+        backgroundColor: `${color  }99`, // ~60% opacity
+        borderColor: color,
+        borderWidth: 1
+      };
+    });
+
+    const commonOptions: ChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: type === 'pie',
+          labels: {
+            color: textSecondary,
+            font: { size: 11 },
+            boxWidth: 10
+          }
+        },
+        tooltip: {
+          backgroundColor: resolveCssVar('var(--portal-bg-dark)'),
+          titleColor: resolveCssVar('var(--portal-text-light)'),
+          bodyColor: textSecondary,
+          borderColor: borderColor,
+          borderWidth: 1
+        }
+      }
+    };
+
+    const axesOptions =
+      type !== 'pie'
+        ? {
+          x: {
+            ticks: { color: textMuted, font: { size: 10 } },
+            grid: { color: `${borderColor  }40` },
+            border: { color: borderColor }
+          },
+          y: {
+            ticks: { color: textMuted, font: { size: 10 } },
+            grid: { color: `${borderColor  }40` },
+            border: { color: borderColor }
+          }
+        }
+        : undefined;
+
+    const config: ChartConfiguration = {
+      type: type as 'line' | 'bar' | 'pie',
+      data: {
+        labels: data.labels,
+        datasets: resolvedDatasets
+      } as ChartJSData,
+      options: {
+        ...commonOptions,
+        ...(axesOptions ? { scales: axesOptions } : {})
+      }
+    };
+
+    chartRef.current = new ChartJS(canvasRef.current, config);
+
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, [data, type]);
+
+  const hasData = data && data.labels?.length > 0;
+
+  if (!hasData) {
+    return (
+      <div className="chart-placeholder">
+        <BarChart3 className="icon-xl text-muted" />
+        <p className="text-muted">No data available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="chart-canvas-wrapper">
+      <canvas ref={canvasRef} />
+    </div>
+  );
+}
+
+// ============================================
+// AnalyticsDashboard
+// ============================================
 
 export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
   const containerRef = useFadeIn();
@@ -67,7 +265,6 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [activeSubtab, setActiveSubtab] = useState<AnalyticsSubtab>('overview');
 
-  // Listen for subtab change events from header (standardized pattern)
   useEffect(() => {
     function handleSubtabChange(e: CustomEvent<{ subtab: string }>) {
       const subtab = e.detail.subtab as AnalyticsSubtab;
@@ -75,7 +272,6 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
         setActiveSubtab(subtab);
       }
     }
-
     document.addEventListener('analyticsSubtabChange', handleSubtabChange as EventListener);
     return () => {
       document.removeEventListener('analyticsSubtabChange', handleSubtabChange as EventListener);
@@ -84,26 +280,20 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
 
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     return headers;
   }, [getAuthToken]);
 
   const loadAnalytics = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const response = await fetch(`${API_ENDPOINTS.ADMIN.ANALYTICS}?range=${dateRange}`, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load analytics');
-
       const analyticsData = await response.json();
       setData(analyticsData);
     } catch (err) {
@@ -119,69 +309,68 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
 
   const kpis: KPI[] = data
     ? [
-        {
-          id: 'revenue',
-          label: 'Revenue',
-          value: formatCurrency(data.kpis.revenue.value),
-          change: data.kpis.revenue.change,
-          changeLabel: 'vs last period',
-          icon: <DollarSign className="icon-lg" />,
-        },
-        {
-          id: 'clients',
-          label: 'Total Clients',
-          value: data.kpis.clients.value,
-          change: data.kpis.clients.change,
-          changeLabel: 'new this period',
-          icon: <Users className="icon-lg" />,
-        },
-        {
-          id: 'projects',
-          label: 'Active Projects',
-          value: data.kpis.projects.value,
-          change: data.kpis.projects.change,
-          changeLabel: 'vs last period',
-          icon: <Briefcase className="icon-lg" />,
-        },
-        {
-          id: 'invoices',
-          label: 'Invoices Sent',
-          value: data.kpis.invoices.value,
-          change: data.kpis.invoices.change,
-          changeLabel: 'this period',
-          icon: <FileText className="icon-lg" />,
-        },
-        {
-          id: 'conversion',
-          label: 'Conversion Rate',
-          value: `${data.kpis.conversionRate.value}%`,
-          change: data.kpis.conversionRate.change,
-          changeLabel: 'vs last period',
-          icon: <TrendingUp className="icon-lg" />,
-        },
-        {
-          id: 'avgValue',
-          label: 'Avg Project Value',
-          value: formatCurrency(data.kpis.avgProjectValue.value),
-          change: data.kpis.avgProjectValue.change,
-          changeLabel: 'vs last period',
-          icon: <BarChart3 className="icon-lg" />,
-        },
-      ]
+      {
+        id: 'revenue',
+        label: 'Revenue',
+        value: formatCurrency(data.kpis.revenue.value),
+        change: data.kpis.revenue.change,
+        changeLabel: 'vs last period',
+        icon: <DollarSign className="icon-lg" />
+      },
+      {
+        id: 'clients',
+        label: 'Total Clients',
+        value: data.kpis.clients.value,
+        change: data.kpis.clients.change,
+        changeLabel: 'new this period',
+        icon: <Users className="icon-lg" />
+      },
+      {
+        id: 'projects',
+        label: 'Active Projects',
+        value: data.kpis.projects.value,
+        change: data.kpis.projects.change,
+        changeLabel: 'vs last period',
+        icon: <Briefcase className="icon-lg" />
+      },
+      {
+        id: 'invoices',
+        label: 'Invoices Sent',
+        value: data.kpis.invoices.value,
+        change: data.kpis.invoices.change,
+        changeLabel: 'this period',
+        icon: <FileText className="icon-lg" />
+      },
+      {
+        id: 'conversion',
+        label: 'Conversion Rate',
+        value: `${data.kpis.conversionRate.value}%`,
+        change: data.kpis.conversionRate.change,
+        changeLabel: 'vs last period',
+        icon: <TrendingUp className="icon-lg" />
+      },
+      {
+        id: 'avgValue',
+        label: 'Avg Project Value',
+        value: formatCurrency(data.kpis.avgProjectValue.value),
+        change: data.kpis.avgProjectValue.change,
+        changeLabel: 'vs last period',
+        icon: <BarChart3 className="icon-lg" />
+      }
+    ]
     : [];
 
   const dateRangeOptions = [
     { value: '7d', label: 'Last 7 days' },
     { value: '30d', label: 'Last 30 days' },
     { value: '90d', label: 'Last 90 days' },
-    { value: '1y', label: 'Last year' },
+    { value: '1y', label: 'Last year' }
   ];
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="analytics-view">
-      {/* Actions Bar - page-level controls */}
+      {/* Actions Bar */}
       <div className="analytics-actions-bar action-bar">
-        {/* Date range selector - button group on desktop, dropdown on mobile */}
         <div className="date-range-selector">
           {dateRangeOptions.map((option) => (
             <button
@@ -203,237 +392,104 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
         </button>
       </div>
 
-      {/* Error State */}
       {error && (
-        <div className="error-state">
-          {error}
-          <button className="btn-secondary" onClick={loadAnalytics}>
-            Retry
-          </button>
+        <div className="data-table-card">
+          <ErrorState message={error} onRetry={loadAnalytics} />
         </div>
       )}
 
-      {/* Loading State */}
       {isLoading ? (
-        <div className="loading-state">Loading analytics data...</div>
+        <LoadingState message="Loading analytics data..." />
       ) : (
         <>
-          {/* Overview Subtab - Show all KPIs and charts */}
           {activeSubtab === 'overview' && (
             <>
-              {/* KPIs Grid */}
               <div className="kpi-cards-row">
-                {kpis.map((kpi) => (
-                  <div key={kpi.id} className="kpi-card">
-                    <div className="kpi-card-icon">{kpi.icon}</div>
-                    <span className="kpi-card-label">{kpi.label}</span>
-                    <div className="kpi-card-value">{kpi.value}</div>
-                    {kpi.change !== undefined && (
-                      <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
-                        {kpi.change >= 0 ? (
-                          <TrendingUp className="icon-xs" />
-                        ) : (
-                          <TrendingDown className="icon-xs" />
-                        )}
-                        <span className="change-value">
-                          {kpi.change >= 0 ? '+' : ''}
-                          {kpi.change}%
-                        </span>
-                        <span className="change-label">{kpi.changeLabel}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {kpis.map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
-
-              {/* Charts Grid */}
               <div className="analytics-card-grid">
                 <div className="analytics-chart-card">
                   <div className="analytics-card-header">
                     <h3>Revenue Over Time</h3>
                     <LineChart className="icon-md" />
                   </div>
-                  <ChartPlaceholder data={data?.revenueChart} type="line" />
+                  <ChartWidget data={data?.revenueChart} type="line" />
                 </div>
-
                 <div className="analytics-chart-card">
                   <div className="analytics-card-header">
                     <h3>Projects by Status</h3>
                     <PieChart className="icon-md" />
                   </div>
-                  <ChartPlaceholder data={data?.projectsChart} type="pie" />
+                  <ChartWidget data={data?.projectsChart} type="pie" />
                 </div>
-
                 <div className="analytics-chart-card">
                   <div className="analytics-card-header">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
-                  <ChartPlaceholder data={data?.leadsChart} type="bar" />
+                  <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
-
                 <div className="analytics-chart-card">
                   <h3>Lead Sources</h3>
-                  <div className="source-list">
-                    {data?.sourceBreakdown?.map((source, index) => (
-                      <div key={source.source} className="source-item">
-                        <div className="source-row">
-                          <span>{source.source}</span>
-                          <span className="source-value">
-                            {source.count} ({source.percentage}%)
-                          </span>
-                        </div>
-                        <div className="source-progress-track">
-                          <div
-                            className="source-progress-bar"
-                            style={{ width: `${source.percentage}%`, backgroundColor: getSourceColor(index) }}
-                          />
-                        </div>
-                      </div>
-                    )) || <div className="empty-state">No data available</div>}
-                  </div>
+                  <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
             </>
           )}
 
-          {/* Revenue Subtab */}
           {activeSubtab === 'revenue' && (
             <>
               <div className="kpi-cards-row kpi-cards-row--3">
                 {kpis
                   .filter((kpi) => ['revenue', 'invoices', 'avgValue'].includes(kpi.id))
-                  .map((kpi) => (
-                    <div key={kpi.id} className="kpi-card">
-                      <div className="kpi-card-icon">{kpi.icon}</div>
-                      <span className="kpi-card-label">{kpi.label}</span>
-                      <div className="kpi-card-value">{kpi.value}</div>
-                      {kpi.change !== undefined && (
-                        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
-                          {kpi.change >= 0 ? (
-                            <TrendingUp className="icon-xs" />
-                          ) : (
-                            <TrendingDown className="icon-xs" />
-                          )}
-                          <span className="change-value">
-                            {kpi.change >= 0 ? '+' : ''}
-                            {kpi.change}%
-                          </span>
-                          <span className="change-label">{kpi.changeLabel}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
-
               <div className="analytics-chart-card">
                 <div className="analytics-card-header">
                   <h3>Revenue Over Time</h3>
                   <LineChart className="icon-md" />
                 </div>
-                <ChartPlaceholder data={data?.revenueChart} type="line" />
+                <ChartWidget data={data?.revenueChart} type="line" />
               </div>
             </>
           )}
 
-          {/* Leads Subtab */}
           {activeSubtab === 'leads' && (
             <>
               <div className="kpi-cards-row kpi-cards-row--2">
                 {kpis
                   .filter((kpi) => ['clients', 'conversion'].includes(kpi.id))
-                  .map((kpi) => (
-                    <div key={kpi.id} className="kpi-card">
-                      <div className="kpi-card-icon">{kpi.icon}</div>
-                      <span className="kpi-card-label">{kpi.label}</span>
-                      <div className="kpi-card-value">{kpi.value}</div>
-                      {kpi.change !== undefined && (
-                        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
-                          {kpi.change >= 0 ? (
-                            <TrendingUp className="icon-xs" />
-                          ) : (
-                            <TrendingDown className="icon-xs" />
-                          )}
-                          <span className="change-value">
-                            {kpi.change >= 0 ? '+' : ''}
-                            {kpi.change}%
-                          </span>
-                          <span className="change-label">{kpi.changeLabel}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
-
               <div className="analytics-card-grid">
                 <div className="analytics-chart-card">
                   <div className="analytics-card-header">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
-                  <ChartPlaceholder data={data?.leadsChart} type="bar" />
+                  <ChartWidget data={data?.leadsChart} type="bar" />
                 </div>
-
                 <div className="analytics-chart-card">
                   <h3>Lead Sources</h3>
-                  <div className="source-list">
-                    {data?.sourceBreakdown?.map((source, index) => (
-                      <div key={source.source} className="source-item">
-                        <div className="source-row">
-                          <span>{source.source}</span>
-                          <span className="source-value">
-                            {source.count} ({source.percentage}%)
-                          </span>
-                        </div>
-                        <div className="source-progress-track">
-                          <div
-                            className="source-progress-bar"
-                            style={{ width: `${source.percentage}%`, backgroundColor: getSourceColor(index) }}
-                          />
-                        </div>
-                      </div>
-                    )) || <div className="empty-state">No data available</div>}
-                  </div>
+                  <SourceBreakdown sources={data?.sourceBreakdown} />
                 </div>
               </div>
             </>
           )}
 
-          {/* Projects Subtab */}
           {activeSubtab === 'projects' && (
             <>
               <div className="kpi-cards-row kpi-cards-row--2">
                 {kpis
                   .filter((kpi) => ['projects', 'avgValue'].includes(kpi.id))
-                  .map((kpi) => (
-                    <div key={kpi.id} className="kpi-card">
-                      <div className="kpi-card-icon">{kpi.icon}</div>
-                      <span className="kpi-card-label">{kpi.label}</span>
-                      <div className="kpi-card-value">{kpi.value}</div>
-                      {kpi.change !== undefined && (
-                        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
-                          {kpi.change >= 0 ? (
-                            <TrendingUp className="icon-xs" />
-                          ) : (
-                            <TrendingDown className="icon-xs" />
-                          )}
-                          <span className="change-value">
-                            {kpi.change >= 0 ? '+' : ''}
-                            {kpi.change}%
-                          </span>
-                          <span className="change-label">{kpi.changeLabel}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
-
               <div className="analytics-chart-card">
                 <div className="analytics-card-header">
                   <h3>Projects by Status</h3>
                   <PieChart className="icon-md" />
                 </div>
-                <ChartPlaceholder data={data?.projectsChart} type="pie" />
+                <ChartWidget data={data?.projectsChart} type="pie" />
               </div>
             </>
           )}
@@ -443,30 +499,75 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
   );
 }
 
-function ChartPlaceholder({
-  data,
-}: {
-  data?: ChartData;
-  type: 'line' | 'bar' | 'pie';
-}) {
+// ============================================
+// KpiCard — extracted to avoid repetition
+// ============================================
+
+function KpiCard({ kpi }: { kpi: KPI }) {
   return (
-    <div className="chart-placeholder">
-      <BarChart3 className="icon-xl tw-text-muted" />
-      <p className="tw-text-muted">{data?.labels?.length || 0} data points</p>
+    <div className="kpi-card">
+      <div className="kpi-card-icon">{kpi.icon}</div>
+      <span className="kpi-card-label">{kpi.label}</span>
+      <div className="kpi-card-value">{kpi.value}</div>
+      {kpi.change !== undefined && (
+        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+          {kpi.change >= 0 ? <TrendingUp className="icon-xs" /> : <TrendingDown className="icon-xs" />}
+          <span className="change-value">
+            {kpi.change >= 0 ? '+' : ''}
+            {kpi.change}%
+          </span>
+          <span className="change-label">{kpi.changeLabel}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function getSourceColor(index: number): string {
-  const colors = [
-    'var(--color-brand-primary)',
-    'var(--status-completed)',
-    'var(--status-pending)',
-    'var(--status-active)',
-    'var(--status-qualified)',
-    'var(--status-new)',
-  ];
-  return colors[index % colors.length];
+// ============================================
+// SourceBreakdown — lead source progress bars
+// ============================================
+
+const SOURCE_COLORS = [
+  'var(--color-brand-primary)',
+  'var(--status-completed)',
+  'var(--status-pending)',
+  'var(--status-active)',
+  'var(--status-qualified)',
+  'var(--status-new)'
+];
+
+function SourceBreakdown({
+  sources
+}: {
+  sources?: { source: string; count: number; percentage: number }[];
+}) {
+  if (!sources?.length) {
+    return <div className="empty-state">No data available</div>;
+  }
+
+  return (
+    <div className="source-list">
+      {sources.map((source, index) => (
+        <div key={source.source} className="source-item">
+          <div className="source-row">
+            <span>{source.source}</span>
+            <span className="source-value">
+              {source.count} ({source.percentage}%)
+            </span>
+          </div>
+          <div className="source-progress-track">
+            <div
+              className="source-progress-bar"
+              style={{
+                width: `${source.percentage}%`,
+                backgroundColor: SOURCE_COLORS[index % SOURCE_COLORS.length]
+              }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default AnalyticsDashboard;

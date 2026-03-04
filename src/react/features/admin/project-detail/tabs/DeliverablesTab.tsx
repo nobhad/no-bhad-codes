@@ -4,7 +4,6 @@ import {
   Package,
   Check,
   Clock,
-  ChevronRight,
   Calendar,
   Inbox
 } from 'lucide-react';
@@ -92,13 +91,13 @@ export function DeliverablesTab({
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div>
-            <span className="tw-text-muted ">Overall Progress: </span>
+            <span className="text-muted ">Overall Progress: </span>
             <span className="tw-text-primary tw-font-semibold">
               {progress}%
             </span>
           </div>
           <div>
-            <span className="tw-text-muted ">Deliverables: </span>
+            <span className="text-muted ">Deliverables: </span>
             <span className="tw-text-primary tw-font-semibold">
               {completedCount}/{totalCount}
             </span>
@@ -155,7 +154,7 @@ export function DeliverablesTab({
                         <h4
                           className={cn(
                             milestone.is_completed
-                              ? 'tw-text-muted'
+                              ? 'text-muted'
                               : 'tw-text-primary',
                             ''
                           )}
@@ -163,7 +162,7 @@ export function DeliverablesTab({
                           {milestone.title}
                         </h4>
                         {milestone.description && (
-                          <p className="tw-text-muted deliv-milestone-desc">
+                          <p className="text-muted deliv-milestone-desc">
                             {milestone.description}
                           </p>
                         )}
@@ -172,7 +171,7 @@ export function DeliverablesTab({
 
                     {/* Due Date */}
                     {milestone.due_date && (
-                      <span className="tw-text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
+                      <span className="text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
                         <Calendar className="icon-xs" />
                         {formatDate(milestone.due_date)}
                       </span>
@@ -205,7 +204,7 @@ export function DeliverablesTab({
                           <span
                             className={cn(
                               item.isCompleted
-                                ? 'tw-text-muted tw-line-through'
+                                ? 'text-muted tw-line-through'
                                 : 'tw-text-primary',
                               ''
                             )}
@@ -223,7 +222,7 @@ export function DeliverablesTab({
       )}
 
       {/* Legend */}
-      <div className="tw-flex tw-items-center tw-gap-6 tw-text-muted tw-text-xs">
+      <div className="tw-flex tw-items-center tw-gap-6 text-muted tw-text-xs">
         <div className="tw-flex tw-items-center tw-gap-2">
           <div className="tw-w-4 tw-h-4 tw-bg-white tw-flex tw-items-center tw-justify-center deliv-icon-box">
             <Check className="icon-xs tw-text-black" />

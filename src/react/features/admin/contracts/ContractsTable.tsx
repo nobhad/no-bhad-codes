@@ -1,16 +1,14 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Plus,
   FileText,
   Inbox,
   CheckCircle,
   Clock,
   XCircle,
-  Download,
   Eye,
   Send,
-  ChevronDown,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -19,24 +17,23 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -82,7 +79,7 @@ const CONTRACT_STATUS_CONFIG: Record<string, { label: string; icon: React.ReactN
   viewed: { label: 'Viewed', icon: <Eye /> },
   signed: { label: 'Signed', icon: <CheckCircle /> },
   expired: { label: 'Expired', icon: <Clock /> },
-  cancelled: { label: 'Cancelled', icon: <XCircle /> },
+  cancelled: { label: 'Cancelled', icon: <XCircle /> }
 };
 
 interface ContractsTableProps {
@@ -126,14 +123,14 @@ function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'title':
-      return multiplier * (a.templateName || '').localeCompare(b.templateName || '');
-    case 'client':
-      return multiplier * (a.clientName || '').localeCompare(b.clientName || '');
-    case 'createdAt':
-      return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    default:
-      return 0;
+  case 'title':
+    return multiplier * (a.templateName || '').localeCompare(b.templateName || '');
+  case 'client':
+    return multiplier * (a.clientName || '').localeCompare(b.clientName || '');
+  case 'createdAt':
+    return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  default:
+    return 0;
   }
 }
 
@@ -159,7 +156,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     draft: 0,
     pending: 0,
     signed: 0,
-    expired: 0,
+    expired: 0
   });
 
   // Filtering and sorting
@@ -173,7 +170,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Contract>({
-    storageKey: 'admin_contracts',
+    storageKey: overviewMode ? undefined : 'admin_contracts',
     filters: CONTRACTS_FILTER_CONFIG,
     filterFn: filterContract,
     sortFn: sortContracts,
@@ -221,7 +218,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         draft: 0,
         pending: 0,
         signed: 0,
-        expired: 0,
+        expired: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load contracts');
@@ -241,7 +238,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         method: 'PATCH',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) throw new Error('Failed to update contract');
@@ -294,7 +291,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify({ ids })
       });
 
       if (!response.ok) throw new Error('Failed to delete contracts');
@@ -351,7 +348,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
             { value: stats.draft, label: 'draft', hideIfZero: true },
             { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
             { value: stats.signed, label: 'signed', variant: 'completed', hideIfZero: true },
-            { value: stats.expired, label: 'expired', variant: 'overdue', hideIfZero: true },
+            { value: stats.expired, label: 'expired', variant: 'overdue', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.draft} Draft • ${stats.pending} Pending • ${stats.signed} Signed`}
         />
@@ -406,75 +403,75 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="contract-col"
               sortable
               sortDirection={sort?.column === 'title' ? sort.direction : null}
               onClick={() => toggleSort('title')}
             >
               Contract
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="client-col"
               sortable
               sortDirection={sort?.column === 'client' ? sort.direction : null}
               onClick={() => toggleSort('client')}
             >
               Client
-            </AdminTableHead>
-            <AdminTableHead className="project-col">Project</AdminTableHead>
-            <AdminTableHead className="email-col">
+            </PortalTableHead>
+            <PortalTableHead className="project-col">Project</PortalTableHead>
+            <PortalTableHead className="email-col">
               Email
-            </AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'createdAt' ? sort.direction : null}
               onClick={() => toggleSort('createdAt')}
             >
               Created
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={8} message={error} onRetry={loadContracts} />
+            <PortalTableError colSpan={8} message={error} onRetry={loadContracts} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={8} rows={5} />
+            <PortalTableLoading colSpan={8} rows={5} />
           ) : paginatedContracts.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={8}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No contracts match your filters' : 'No contracts yet'}
             />
           ) : (
             paginatedContracts.map((contract) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={contract.id}
                 clickable
                 selected={selection.isSelected(contract)}
               >
-                <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(contract)}
                     onCheckedChange={() => selection.toggleSelection(contract)}
-                    aria-label={`Select ${contract.templateName || 'Contract ' + contract.id}`}
+                    aria-label={`Select ${contract.templateName || `Contract ${  contract.id}`}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="contract-cell">
+                </PortalTableCell>
+                <PortalTableCell className="contract-cell">
                   <div className="cell-with-icon">
                     <FileText className="cell-icon" />
                     <div className="cell-content">
@@ -484,8 +481,8 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                       )}
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="client-cell">
+                </PortalTableCell>
+                <PortalTableCell className="client-cell">
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
@@ -495,8 +492,8 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                   >
                     {contract.clientName}
                   </span>
-                </AdminTableCell>
-                <AdminTableCell className="project-cell">
+                </PortalTableCell>
+                <PortalTableCell className="project-cell">
                   {contract.projectName && (
                     <span
                       onClick={(e) => {
@@ -508,11 +505,11 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                       {contract.projectName}
                     </span>
                   )}
-                </AdminTableCell>
-                <AdminTableCell className="email-cell">
+                </PortalTableCell>
+                <PortalTableCell className="email-cell">
                   {contract.clientEmail}
-                </AdminTableCell>
-                <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
                       <button className="status-dropdown-trigger">
@@ -537,9 +534,9 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                         ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">{formatDate(contract.createdAt)}</AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">{formatDate(contract.createdAt)}</PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {contract.status === 'draft' && (
@@ -551,12 +548,12 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                     )}
                     <IconButton action="download" title="Download" />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

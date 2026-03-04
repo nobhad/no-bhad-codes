@@ -14,11 +14,10 @@ import {
   ChevronDown,
   ChevronUp,
   Paperclip,
-  Download,
-  RefreshCw,
+  Download
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
 import { formatCardDate, formatCurrency, formatFileSize } from '@react/utils/cardFormatters';
+import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { AdHocRequest } from './types';
 import { AD_HOC_REQUEST_STATUS_CONFIG, AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
 
@@ -40,7 +39,7 @@ export function AdHocRequestCard({
   request,
   onApprove,
   onDecline,
-  disabled = false,
+  disabled = false
 }: AdHocRequestCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
@@ -75,19 +74,19 @@ export function AdHocRequestCard({
 
   return (
     <>
-      <div className="tw-card">
+      <div className="portal-card">
         {/* Header */}
         <div
-          className="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-cursor-pointer"
+          className="portal-card-header tw-cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <div className="tw-flex-1 card-content-truncate">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-              <h3 className="tw-text-primary tw-text-sm tw-font-semibold">
+          <div className="portal-card-title-group tw-flex-col tw-items-start">
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <span className="tw-text-primary tw-text-sm tw-font-semibold">
                 {request.title}
-              </h3>
+              </span>
               {hasAttachments && (
-                <Paperclip className="tw-h-3 tw-w-3 tw-shrink-0" />
+                <Paperclip className="icon-xs flex-shrink-0" />
               )}
             </div>
             <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
@@ -100,13 +99,13 @@ export function AdHocRequestCard({
               >
                 {AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.label || request.priority}
               </span>
-              <span className="tw-text-muted tw-text-xs">
+              <span className="text-muted tw-text-xs">
                 {formatCardDate(request.created_at)}
               </span>
             </div>
           </div>
 
-          <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="portal-card-status-group">
             {hasQuote && (
               <span className="tw-text-primary tw-text-sm tw-font-semibold">
                 {formatCurrency(request.quote!.total_amount)}
@@ -114,16 +113,16 @@ export function AdHocRequestCard({
             )}
             <button
               type="button"
-              className="btn-icon"
+              className="icon-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
             >
               {isExpanded ? (
-                <ChevronUp className="tw-h-3.5 tw-w-3.5" />
+                <ChevronUp className="icon-xs" />
               ) : (
-                <ChevronDown className="tw-h-3.5 tw-w-3.5" />
+                <ChevronDown className="icon-xs" />
               )}
             </button>
           </div>
@@ -134,8 +133,8 @@ export function AdHocRequestCard({
           <div className="tw-section tw-border-t tw-border-[var(--portal-border-color)] tw-mt-3 tw-pt-3">
             {/* Description */}
             <div>
-              <label className="tw-label">Description</label>
-              <p className="tw-text-secondary tw-text-sm tw-mt-1 tw-whitespace-pre-wrap">
+              <label className="label">Description</label>
+              <p className="text-muted tw-text-sm tw-mt-1 tw-whitespace-pre-wrap">
                 {request.description}
               </p>
             </div>
@@ -143,8 +142,8 @@ export function AdHocRequestCard({
             {/* Project */}
             {request.project_name && (
               <div className="tw-flex tw-items-center tw-gap-2">
-                <FileText className="tw-h-3.5 tw-w-3.5" />
-                <span className="tw-text-secondary tw-text-xs">
+                <FileText className="icon-xs" />
+                <span className="text-muted tw-text-xs">
                   Project: {request.project_name}
                 </span>
               </div>
@@ -153,7 +152,7 @@ export function AdHocRequestCard({
             {/* Attachments */}
             {hasAttachments && (
               <div>
-                <label className="tw-label">Attachments</label>
+                <label className="label">Attachments</label>
                 <div className="tw-mt-1 tw-flex tw-flex-col tw-gap-1">
                   {request.attachments!.map((attachment) => (
                     <div
@@ -161,11 +160,11 @@ export function AdHocRequestCard({
                       className="tw-list-item tw-justify-between"
                     >
                       <div className="tw-flex tw-items-center tw-gap-2 card-content-truncate">
-                        <Paperclip className="tw-h-3 tw-w-3 tw-shrink-0" />
+                        <Paperclip className="icon-xs flex-shrink-0" />
                         <span className="tw-text-primary tw-text-xs">
                           {attachment.filename}
                         </span>
-                        <span className="tw-text-muted tw-text-xs">
+                        <span className="text-muted tw-text-xs">
                           ({formatFileSize(attachment.file_size)})
                         </span>
                       </div>
@@ -173,10 +172,10 @@ export function AdHocRequestCard({
                         <a
                           href={attachment.download_url}
                           download={attachment.filename}
-                          className="btn-icon"
+                          className="icon-btn"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <Download className="tw-h-3 tw-w-3" />
+                          <Download className="icon-xs" />
                         </a>
                       )}
                     </div>
@@ -188,14 +187,14 @@ export function AdHocRequestCard({
             {/* Quote Details */}
             {hasQuote && (
               <div className="tw-panel tw-p-3">
-                <label className="tw-label">Quote Details</label>
+                <label className="label">Quote Details</label>
                 <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-2">
                   {/* Hours and Rate */}
                   {request.quote!.hours_estimated > 0 && (
                     <div className="tw-flex tw-items-center tw-justify-between">
                       <div className="tw-flex tw-items-center tw-gap-2">
-                        <Clock className="tw-h-3.5 tw-w-3.5" />
-                        <span className="tw-text-secondary tw-text-xs">
+                        <Clock className="icon-xs" />
+                        <span className="text-muted tw-text-xs">
                           Estimated Hours
                         </span>
                       </div>
@@ -209,8 +208,8 @@ export function AdHocRequestCard({
                   {request.quote!.flat_fee && request.quote!.flat_fee > 0 && (
                     <div className="tw-flex tw-items-center tw-justify-between">
                       <div className="tw-flex tw-items-center tw-gap-2">
-                        <DollarSign className="tw-h-3.5 tw-w-3.5" />
-                        <span className="tw-text-secondary tw-text-xs">
+                        <DollarSign className="icon-xs" />
+                        <span className="text-muted tw-text-xs">
                           Flat Fee
                         </span>
                       </div>
@@ -233,8 +232,8 @@ export function AdHocRequestCard({
                   {/* Notes */}
                   {request.quote!.notes && (
                     <div className="tw-pt-2">
-                      <span className="tw-text-muted tw-text-xs">Notes:</span>
-                      <p className="tw-text-secondary tw-text-xs tw-mt-0.5">
+                      <span className="text-muted tw-text-xs">Notes:</span>
+                      <p className="text-muted tw-text-xs tw-mt-0.5">
                         {request.quote!.notes}
                       </p>
                     </div>
@@ -242,7 +241,7 @@ export function AdHocRequestCard({
 
                   {/* Expiry */}
                   {request.quote!.expires_at && (
-                    <div className="tw-text-muted tw-text-xs">
+                    <div className="text-muted tw-text-xs">
                       Quote valid until: {formatCardDate(request.quote!.expires_at)}
                     </div>
                   )}
@@ -258,7 +257,7 @@ export function AdHocRequestCard({
                   onClick={() => setShowDeclineDialog(true)}
                   disabled={disabled || isLoading}
                 >
-                  <X className="tw-h-3.5 tw-w-3.5" />
+                  <X className="icon-xs" />
                   Decline
                 </button>
                 <button
@@ -266,7 +265,7 @@ export function AdHocRequestCard({
                   onClick={() => setShowApproveDialog(true)}
                   disabled={disabled || isLoading}
                 >
-                  <Check className="tw-h-3.5 tw-w-3.5" />
+                  <Check className="icon-xs" />
                   Approve Quote
                 </button>
               </div>
@@ -276,72 +275,28 @@ export function AdHocRequestCard({
       </div>
 
       {/* Approve Confirmation Dialog */}
-      {showApproveDialog && (
-        <div
-          className="tw-modal-overlay"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !isLoading) setShowApproveDialog(false);
-          }}
-        >
-          <div className="tw-modal">
-            <h3 className="tw-heading">Approve Quote</h3>
-            <p className="tw-text-secondary tw-text-sm tw-mt-2">
-              Are you sure you want to approve this quote for {hasQuote ? formatCurrency(request.quote!.total_amount) : ''}? Work will begin after approval.
-            </p>
-            <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-4">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowApproveDialog(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn-primary tw-flex tw-items-center tw-gap-1.5"
-                onClick={handleApprove}
-                disabled={isLoading}
-              >
-                {isLoading && <RefreshCw className="tw-h-3.5 tw-w-3.5 tw-animate-spin" />}
-                Approve
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showApproveDialog}
+        onOpenChange={setShowApproveDialog}
+        title="Approve Quote"
+        description={`Are you sure you want to approve this quote${hasQuote ? ` for ${formatCurrency(request.quote!.total_amount)}` : ''}? Work will begin after approval.`}
+        confirmText="Approve"
+        variant="info"
+        loading={isLoading}
+        onConfirm={handleApprove}
+      />
 
       {/* Decline Confirmation Dialog */}
-      {showDeclineDialog && (
-        <div
-          className="tw-modal-overlay"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !isLoading) setShowDeclineDialog(false);
-          }}
-        >
-          <div className="tw-modal">
-            <h3 className="tw-heading">Decline Quote</h3>
-            <p className="tw-text-secondary tw-text-sm tw-mt-2">
-              Are you sure you want to decline this quote? You can submit a new request if your requirements change.
-            </p>
-            <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-4">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowDeclineDialog(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn-danger tw-flex tw-items-center tw-gap-1.5"
-                onClick={handleDecline}
-                disabled={isLoading}
-              >
-                {isLoading && <RefreshCw className="tw-h-3.5 tw-w-3.5 tw-animate-spin" />}
-                Decline
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showDeclineDialog}
+        onOpenChange={setShowDeclineDialog}
+        title="Decline Quote"
+        description="Are you sure you want to decline this quote? You can submit a new request if your requirements change."
+        confirmText="Decline"
+        variant="danger"
+        loading={isLoading}
+        onConfirm={handleDecline}
+      />
     </>
   );
 }

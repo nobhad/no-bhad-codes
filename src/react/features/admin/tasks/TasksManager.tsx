@@ -8,16 +8,16 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { formatDate } from '@react/utils/formatDate';
 import { usePagination } from '@react/hooks/usePagination';
@@ -60,10 +60,10 @@ const PRIORITY_COLORS: Record<Task['priority'], string> = {
   low: 'var(--portal-text-muted)',
   medium: 'var(--status-info)',
   high: 'var(--status-warning)',
-  urgent: 'var(--status-danger)',
+  urgent: 'var(--status-danger)'
 };
 
-export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getAuthToken, showNotification }: TasksManagerProps) {
+export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getAuthToken, showNotification: _showNotification }: TasksManagerProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -104,7 +104,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
 
       const response = await fetch(`${API_ENDPOINTS.ADMIN.TASKS}?${params}`, {
         headers: getHeaders(),
-        credentials: 'include',
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch tasks');
 
@@ -145,31 +145,32 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       let bVal: string | number = '';
 
       switch (sortField) {
-        case 'title':
-          aVal = a.title.toLowerCase();
-          bVal = b.title.toLowerCase();
-          break;
-        case 'status':
-          aVal = a.status;
-          bVal = b.status;
-          break;
-        case 'priority':
-          const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-          aVal = priorityOrder[a.priority];
-          bVal = priorityOrder[b.priority];
-          break;
-        case 'assignee_name':
-          aVal = (a.assignee_name || '').toLowerCase();
-          bVal = (b.assignee_name || '').toLowerCase();
-          break;
-        case 'due_date':
-          aVal = a.due_date || '';
-          bVal = b.due_date || '';
-          break;
-        case 'created_at':
-          aVal = a.created_at;
-          bVal = b.created_at;
-          break;
+      case 'title':
+        aVal = a.title.toLowerCase();
+        bVal = b.title.toLowerCase();
+        break;
+      case 'status':
+        aVal = a.status;
+        bVal = b.status;
+        break;
+      case 'priority': {
+        const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+        aVal = priorityOrder[a.priority];
+        bVal = priorityOrder[b.priority];
+        break;
+      }
+      case 'assignee_name':
+        aVal = (a.assignee_name || '').toLowerCase();
+        bVal = (b.assignee_name || '').toLowerCase();
+        break;
+      case 'due_date':
+        aVal = a.due_date || '';
+        bVal = b.due_date || '';
+        break;
+      case 'created_at':
+        aVal = a.created_at;
+        bVal = b.created_at;
+        break;
       }
 
       if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
@@ -180,7 +181,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
     return filtered;
   }, [tasks, searchQuery, statusFilter, priorityFilter, sortField, sortDirection]);
 
-  const pagination = usePagination({ totalItems: filteredTasks.length });
+  const pagination = usePagination({ storageKey: 'admin_tasks_pagination', totalItems: filteredTasks.length });
   const paginatedTasks = filteredTasks.slice(
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
@@ -192,7 +193,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       in_progress: [],
       review: [],
       completed: [],
-      blocked: [],
+      blocked: []
     };
 
     filteredTasks.forEach((task) => {
@@ -217,7 +218,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       in_progress: 'In Progress',
       review: 'In Review',
       completed: 'Completed',
-      blocked: 'Blocked',
+      blocked: 'Blocked'
     };
     return labels[status];
   }
@@ -227,7 +228,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       low: 'Low',
       medium: 'Medium',
       high: 'High',
-      urgent: 'Urgent',
+      urgent: 'Urgent'
     };
     return labels[priority];
   }
@@ -262,37 +263,44 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
     const statusColumns: Task['status'][] = ['todo', 'in_progress', 'review', 'completed', 'blocked'];
 
     return (
-      <div className="board-view">
+      <div className="kanban-board">
         {statusColumns.map((status) => (
-          <div key={status} className="board-column">
-            <div className="board-column-header">
-              <h3 className="board-column-title">{getStatusLabel(status)}</h3>
-              <span className="board-column-count">{tasksByStatus[status].length}</span>
+          <div key={status} className="kanban-column" data-status={status}>
+            <div className="kanban-column-header">
+              <span className="kanban-column-title">{getStatusLabel(status)}</span>
+              <span className="kanban-column-count">{tasksByStatus[status].length}</span>
             </div>
-            <div className="board-column-content">
-              {tasksByStatus[status].map((task) => (
-                <div
-                  key={task.id}
-                  className="board-card"
-                  onClick={() => onNavigate?.('task-detail', String(task.id))}
-                >
-                  <div className="board-card-header">
-                    <div
-                      className="priority-dot"
-                      style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
-                    />
-                    <span className="board-card-title">{task.title}</span>
-                  </div>
-                  {task.due_date && (
-                    <div className={`board-card-due ${isOverdue(task) ? 'text-danger' : ''}`}>
-                      Due: {formatDate(task.due_date)}
+            <div className="kanban-column-content">
+              {tasksByStatus[status].length === 0 ? (
+                <div className="empty-state">No tasks</div>
+              ) : (
+                tasksByStatus[status].map((task) => (
+                  <div
+                    key={task.id}
+                    className="kanban-card"
+                    onClick={() => onNavigate?.('task-detail', String(task.id))}
+                  >
+                    <div className="kanban-card-type">
+                      <div
+                        className="priority-dot"
+                        style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
+                      />
                     </div>
-                  )}
-                  {task.assignee_name && (
-                    <div className="board-card-assignee">{task.assignee_name}</div>
-                  )}
-                </div>
-              ))}
+                    <div className="kanban-card-title">{task.title}</div>
+                    {(task.assignee_name || task.due_date) && (
+                      <div className="kanban-card-subtitle">
+                        {task.assignee_name}
+                        {task.assignee_name && task.due_date && ' · '}
+                        {task.due_date && (
+                          <span className={isOverdue(task) ? 'text-danger' : ''}>
+                            {formatDate(task.due_date)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         ))}
@@ -319,7 +327,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
             { value: stats.inProgress, label: 'in progress', variant: 'pending', hideIfZero: true },
             { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true },
             { value: stats.blocked, label: 'blocked', variant: 'cancelled', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.todo} To Do • ${stats.inProgress} In Progress • ${stats.completed} Completed • ${stats.blocked} Blocked • ${stats.overdue} Overdue`}
         />
@@ -334,7 +342,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
           <FilterDropdown
             sections={[
               { key: 'status', label: 'STATUS', options: TASK_STATUS_OPTIONS },
-              { key: 'priority', label: 'PRIORITY', options: TASK_PRIORITY_OPTIONS },
+              { key: 'priority', label: 'PRIORITY', options: TASK_PRIORITY_OPTIONS }
             ]}
             values={{ status: statusFilter, priority: priorityFilter }}
             onChange={handleFilterChange}
@@ -378,59 +386,59 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
       }
     >
       {viewMode === 'list' ? (
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead
                 sortable
                 sortDirection={sortField === 'title' ? sortDirection : null}
                 onClick={() => handleSort('title')}
               >
                 Task
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 sortable
                 sortDirection={sortField === 'status' ? sortDirection : null}
                 onClick={() => handleSort('status')}
               >
                 Status
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 sortable
                 sortDirection={sortField === 'priority' ? sortDirection : null}
                 onClick={() => handleSort('priority')}
               >
                 Priority
-              </AdminTableHead>
-              <AdminTableHead>Project</AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead>Project</PortalTableHead>
+              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sortField === 'due_date' ? sortDirection : null}
                 onClick={() => handleSort('due_date')}
               >
                 Due Date
-              </AdminTableHead>
-              <AdminTableHead className="text-right">Hours</AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="text-right">Hours</PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!loading && !error}>
+          <PortalTableBody animate={!loading && !error}>
             {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={fetchTasks} />
+              <PortalTableError colSpan={7} message={error} onRetry={fetchTasks} />
             ) : loading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
               />
             ) : (
               paginatedTasks.map((task) => (
-                <AdminTableRow key={task.id} clickable>
-                  <AdminTableCell className="primary-cell">
+                <PortalTableRow key={task.id} clickable>
+                  <PortalTableCell className="primary-cell">
                     <div className="cell-with-icon">
                       <div
                         className="priority-dot"
@@ -451,43 +459,43 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                         )}
                       </div>
                     </div>
-                  </AdminTableCell>
-                  <AdminTableCell className="status-cell">
+                  </PortalTableCell>
+                  <PortalTableCell className="status-cell">
                     <StatusBadge status={getStatusVariant(task.status)} size="sm">
                       {getStatusLabel(task.status)}
                     </StatusBadge>
-                  </AdminTableCell>
-                  <AdminTableCell>
+                  </PortalTableCell>
+                  <PortalTableCell>
                     <span
                       className="priority-label"
                       style={{ color: PRIORITY_COLORS[task.priority] }}
                     >
                       {getPriorityLabel(task.priority)}
                     </span>
-                  </AdminTableCell>
-                  <AdminTableCell>
+                  </PortalTableCell>
+                  <PortalTableCell>
                     <div className="cell-content">
                       {task.client_name && (
                         <span className="cell-subtitle">{task.client_name}</span>
                       )}
                       {task.project_name && <span className="cell-title">{task.project_name}</span>}
                     </div>
-                  </AdminTableCell>
-                  <AdminTableCell className="date-cell">
+                  </PortalTableCell>
+                  <PortalTableCell className="date-cell">
                     <span className={isOverdue(task) ? 'text-danger' : ''}>
                       {formatDate(task.due_date)}
                       {isOverdue(task) && <span className="overdue-label">Overdue</span>}
                     </span>
-                  </AdminTableCell>
-                  <AdminTableCell className="text-right">
+                  </PortalTableCell>
+                  <PortalTableCell className="text-right">
                     <span className="text-muted">
                       {task.actual_hours !== null ? `${task.actual_hours}` : ''}
                       {task.estimated_hours !== null && (
                         <span>/{task.estimated_hours}h</span>
                       )}
                     </span>
-                  </AdminTableCell>
-                  <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  </PortalTableCell>
+                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <PortalButton
                         variant="ghost"
@@ -504,12 +512,12 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                         Edit
                       </PortalButton>
                     </div>
-                  </AdminTableCell>
-                </AdminTableRow>
+                  </PortalTableCell>
+                </PortalTableRow>
               ))
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       ) : (
         renderBoardView()
       )}

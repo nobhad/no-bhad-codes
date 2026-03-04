@@ -8,9 +8,7 @@ import { useRef, useState, useCallback } from 'react';
 import { Upload, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { formatCardDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { IconButton } from '@react/factories';
-import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { createLogger } from '../../../../utils/logger';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
 
@@ -242,31 +240,32 @@ export function DocumentRequestCard({
 
   return (
     <div
-      className={cn('tw-card', isDragging && 'tw-table-row-selected')}
-      style={{ borderColor: isDragging ? 'var(--portal-text-light)' : undefined }}
+      className={cn('portal-card', isDragging && 'card-drag-highlight')}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
       {/* Header */}
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-mb-2">
-        <div className="tw-flex-1 card-content-truncate">
-          <h3 className="tw-text-primary tw-text-sm">{request.title}</h3>
-          {request.description && (
-            <p className="tw-text-muted tw-text-sm tw-mt-1">
-              {request.description}
-            </p>
-          )}
+      <div className="portal-card-header">
+        <div className="portal-card-title-group">
+          <span className="tw-text-primary tw-text-sm">{request.title}</span>
         </div>
-        <span className="tw-badge">{statusInfo.text}</span>
+        <div className="portal-card-status-group">
+          <span className="tw-badge">{statusInfo.text}</span>
+        </div>
       </div>
+
+      {/* Description */}
+      {request.description && (
+        <p className="portal-card-description">{request.description}</p>
+      )}
 
       {/* Due Date */}
       {request.due_date && (
         <div className="tw-flex tw-items-center tw-gap-1 tw-mb-2">
-          <Clock className="tw-h-4 tw-w-4" />
-          <span className={cn('tw-text-sm', overdue ? 'tw-text-primary' : 'tw-text-muted')}>
+          <Clock className="icon-xs" />
+          <span className={cn('tw-text-sm', overdue ? 'tw-text-primary' : 'text-muted')}>
             Due {formatCardDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
@@ -277,11 +276,11 @@ export function DocumentRequestCard({
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
         <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2 tw-mb-2">
-          <FileText className="tw-h-4 tw-w-4" />
+          <FileText className="icon-xs" />
           <span className="tw-text-primary tw-flex-1 tw-text-sm">
             {request.uploaded_file.filename}
           </span>
-          <span className="tw-text-muted tw-text-xs">
+          <span className="text-muted tw-text-xs">
             {formatFileSize(request.uploaded_file.file_size)}
           </span>
         </div>
@@ -292,9 +291,9 @@ export function DocumentRequestCard({
         <div className="tw-mt-2">
           {selectedFile ? (
             <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2">
-              <FileText className="tw-h-4 tw-w-4" />
+              <FileText className="icon-xs" />
               <span className="tw-text-primary tw-flex-1 tw-text-sm">{selectedFile.name}</span>
-              <span className="tw-text-muted tw-text-xs">{formatFileSize(selectedFile.size)}</span>
+              <span className="text-muted tw-text-xs">{formatFileSize(selectedFile.size)}</span>
               <IconButton action="close" onClick={clearSelectedFile} disabled={isUploading} />
             </div>
           ) : (
@@ -302,11 +301,11 @@ export function DocumentRequestCard({
               className="tw-dropzone"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="tw-h-5 tw-w-5" />
-              <p className="tw-text-muted tw-text-sm">
+              <Upload className="icon-sm" />
+              <p className="text-muted tw-text-sm">
                 Drop file here or <span className="tw-text-primary">browse</span>
               </p>
-              <p className="tw-text-muted tw-text-xs tw-mt-1">
+              <p className="text-muted tw-text-xs tw-mt-1">
                 PDF, DOC, DOCX, TXT, JPG, PNG (max 10MB)
               </p>
             </div>
@@ -332,7 +331,7 @@ export function DocumentRequestCard({
 
       {/* Rejection Message */}
       {isRejected && (
-        <div className="tw-panel tw-mt-2" style={{ borderColor: 'var(--portal-text-light)' }}>
+        <div className="tw-panel tw-mt-2 text-status-cancelled">
           <p className="tw-text-sm">Please resubmit with the requested changes.</p>
         </div>
       )}

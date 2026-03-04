@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/factories';
 
 // Lazy load child components
 const WorkflowsTable = React.lazy(() => import('./WorkflowsTable').then(m => ({ default: m.WorkflowsTable })));
@@ -36,7 +37,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
   // Individual subtab views
   if (activeSubtab === 'approvals' || activeSubtab === 'triggers') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading workflows...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
         <WorkflowsTable
           onNavigate={onNavigate}
           getAuthToken={getAuthToken}
@@ -48,7 +49,7 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
 
   if (activeSubtab === 'email-templates') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading email templates...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
         <EmailTemplatesManager
           onNavigate={onNavigate}
           getAuthToken={getAuthToken}
@@ -61,24 +62,26 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
   // Overview - show all tables stacked with default pagination of 10
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
-      <React.Suspense fallback={<div className="loading-state">Loading workflows...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
         <section className="overview-table-section">
           <WorkflowsTable
             onNavigate={onNavigate}
             getAuthToken={getAuthToken}
             showNotification={showNotification}
             defaultPageSize={10}
+            overviewMode
           />
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading email templates...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
         <section className="overview-table-section">
           <EmailTemplatesManager
             onNavigate={onNavigate}
             getAuthToken={getAuthToken}
             showNotification={showNotification}
             defaultPageSize={10}
+            overviewMode
           />
         </section>
       </React.Suspense>

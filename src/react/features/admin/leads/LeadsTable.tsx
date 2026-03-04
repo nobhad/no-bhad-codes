@@ -1,21 +1,20 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox, Download, RefreshCw, Eye, Mail, ChevronDown } from 'lucide-react';
+import { Inbox, ChevronDown } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableHead,
-  AdminTableRow,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableHead,
+  PortalTableRow,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -38,6 +37,7 @@ import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../
 import { formatDate } from '@react/utils/formatDate';
 import { LEADS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { LeadDetailPanel } from './LeadDetailPanel';
 
 interface LeadsTableProps {
   /** Auth token getter for API calls */
@@ -91,21 +91,21 @@ function sortLeads(a: Lead, b: Lead, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'name':
-      return multiplier * (a.contact_name || '').localeCompare(b.contact_name || '');
-    case 'company':
-      return multiplier * (a.company_name || '').localeCompare(b.company_name || '');
-    case 'status':
-      return multiplier * a.status.localeCompare(b.status);
-    case 'source':
-      return multiplier * (a.source || '').localeCompare(b.source || '');
-    case 'created_at':
-      return (
-        multiplier *
+  case 'name':
+    return multiplier * (a.contact_name || '').localeCompare(b.contact_name || '');
+  case 'company':
+    return multiplier * (a.company_name || '').localeCompare(b.company_name || '');
+  case 'status':
+    return multiplier * a.status.localeCompare(b.status);
+  case 'source':
+    return multiplier * (a.source || '').localeCompare(b.source || '');
+  case 'created_at':
+    return (
+      multiplier *
         (new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
-      );
-    default:
-      return 0;
+    );
+  default:
+    return 0;
   }
 }
 
@@ -118,7 +118,7 @@ export function LeadsTable({
   onNavigate,
   showNotification,
   defaultPageSize = 25,
-  overviewMode = false,
+  overviewMode = false
 }: LeadsTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -141,7 +141,7 @@ export function LeadsTable({
     applyFilters,
     hasActiveFilters
   } = useTableFilters<Lead>({
-    storageKey: 'admin_leads',
+    storageKey: overviewMode ? undefined : 'admin_leads',
     filters: LEADS_FILTER_CONFIG,
     filterFn: filterLead,
     sortFn: sortLeads,
@@ -186,7 +186,7 @@ export function LeadsTable({
   );
 
   // Bulk action loading state
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [_bulkActionLoading, setBulkActionLoading] = useState(false);
 
   // Handle bulk status change
   const handleBulkStatusChange = useCallback(
@@ -264,7 +264,7 @@ export function LeadsTable({
     [updateLead, showNotification]
   );
 
-  // Handle view lead
+  // Handle view lead (full-page navigation)
   const handleViewLead = useCallback(
     (leadId: number) => {
       onNavigate?.('lead-detail', String(leadId));
@@ -272,12 +272,37 @@ export function LeadsTable({
     [onNavigate]
   );
 
-  // Handle row click
+  // Detail panel state
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+
+  // Open detail panel on row click instead of navigating
   const handleRowClick = useCallback(
     (lead: Lead) => {
-      handleViewLead(lead.id);
+      setSelectedLead(lead);
     },
-    [handleViewLead]
+    []
+  );
+
+  // Close detail panel
+  const handleClosePanel = useCallback(() => {
+    setSelectedLead(null);
+  }, []);
+
+  // Handle status change from panel
+  const handlePanelStatusChange = useCallback(
+    async (leadId: number, newStatus: LeadStatus) => {
+      const success = await updateLead(leadId, { status: newStatus });
+      if (success) {
+        showNotification?.(`Status updated to ${LEAD_STATUS_CONFIG[newStatus].label}`, 'success');
+        // Update the selected lead in panel
+        setSelectedLead((prev) =>
+          prev && prev.id === leadId ? { ...prev, status: newStatus } : prev
+        );
+      } else {
+        showNotification?.('Failed to update status', 'error');
+      }
+    },
+    [updateLead, showNotification]
   );
 
   return (
@@ -352,83 +377,83 @@ export function LeadsTable({
           ) : undefined
         }
       >
-        <AdminTable>
-          <AdminTableHeader>
-            <AdminTableRow>
-              <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+        <PortalTable>
+          <PortalTableHeader>
+            <PortalTableRow>
+              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
                   aria-label="Select all"
                 />
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="contact-col"
                 sortable
                 sortDirection={sort?.column === 'name' ? sort.direction : null}
                 onClick={() => toggleSort('name')}
               >
                 Contact
-              </AdminTableHead>
-              <AdminTableHead className="type-col">Project Type</AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead className="type-col">Project Type</PortalTableHead>
+              <PortalTableHead
                 className="status-col"
                 sortable
                 sortDirection={sort?.column === 'status' ? sort.direction : null}
                 onClick={() => toggleSort('status')}
               >
                 Status
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="source-col"
                 sortable
                 sortDirection={sort?.column === 'source' ? sort.direction : null}
                 onClick={() => toggleSort('source')}
               >
                 Source
-              </AdminTableHead>
-              <AdminTableHead
+              </PortalTableHead>
+              <PortalTableHead
                 className="date-col"
                 sortable
                 sortDirection={sort?.column === 'created_at' ? sort.direction : null}
                 onClick={() => toggleSort('created_at')}
               >
                 Created
-              </AdminTableHead>
-              <AdminTableHead className="actions-col">Actions</AdminTableHead>
-            </AdminTableRow>
-          </AdminTableHeader>
+              </PortalTableHead>
+              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            </PortalTableRow>
+          </PortalTableHeader>
 
-          <AdminTableBody animate={!isLoading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <AdminTableError colSpan={7} message={error} onRetry={refetch} />
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
             ) : isLoading ? (
-              <AdminTableLoading colSpan={7} rows={5} />
+              <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedLeads.length === 0 ? (
-              <AdminTableEmpty
+              <PortalTableEmpty
                 colSpan={7}
                 icon={<Inbox />}
                 message={hasActiveFilters ? 'No leads match your filters' : 'No leads yet'}
               />
             ) : (
               paginatedLeads.map((lead) => (
-                <AdminTableRow
+                <PortalTableRow
                   key={lead.id}
                   clickable
                   selected={selection.isSelected(lead)}
                   onClick={() => handleRowClick(lead)}
                 >
                   {/* Checkbox */}
-                  <AdminTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(lead)}
                       onCheckedChange={() => selection.toggleSelection(lead)}
                       aria-label={`Select ${lead.contact_name || 'lead'}`}
                     />
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Contact - consolidated name, email, company, phone */}
-                  <AdminTableCell className="primary-cell contact-cell">
+                  <PortalTableCell className="primary-cell contact-cell">
                     <div className="cell-content">
                       <span className="cell-title">{decodeHtmlEntities(lead.contact_name) || 'Unknown'}</span>
                       <span className="cell-subtitle">{decodeHtmlEntities(lead.email)}</span>
@@ -452,15 +477,15 @@ export function LeadsTable({
                         </span>
                       )}
                     </div>
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Project Type */}
-                  <AdminTableCell className="type-cell">
+                  <PortalTableCell className="type-cell">
                     {PROJECT_TYPE_LABELS[lead.project_type || ''] || lead.project_type}
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Status */}
-                  <AdminTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
                         <button className="status-dropdown-trigger">
@@ -485,20 +510,20 @@ export function LeadsTable({
                           ))}
                       </PortalDropdownContent>
                     </PortalDropdown>
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Source */}
-                  <AdminTableCell className="source-cell">
+                  <PortalTableCell className="source-cell">
                     {LEAD_SOURCE_LABELS[lead.source || ''] || lead.source}
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Created Date */}
-                  <AdminTableCell className="date-cell">
+                  <PortalTableCell className="date-cell">
                     {formatDate(lead.created_at)}
-                  </AdminTableCell>
+                  </PortalTableCell>
 
                   {/* Actions */}
-                  <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <IconButton
                         action="view"
@@ -513,12 +538,12 @@ export function LeadsTable({
                         />
                       )}
                     </div>
-                  </AdminTableCell>
-                </AdminTableRow>
+                  </PortalTableCell>
+                </PortalTableRow>
               ))
             )}
-          </AdminTableBody>
-        </AdminTable>
+          </PortalTableBody>
+        </PortalTable>
       </TableLayout>
 
       {/* Delete Confirmation Dialog */}
@@ -532,6 +557,16 @@ export function LeadsTable({
         onConfirm={handleBulkDelete}
         variant="danger"
         loading={deleteDialog.isLoading}
+      />
+
+      {/* Lead Detail Overlay Panel */}
+      <LeadDetailPanel
+        lead={selectedLead}
+        onClose={handleClosePanel}
+        onStatusChange={handlePanelStatusChange}
+        onNavigate={onNavigate}
+        getAuthToken={getAuthToken}
+        showNotification={showNotification}
       />
     </>
   );

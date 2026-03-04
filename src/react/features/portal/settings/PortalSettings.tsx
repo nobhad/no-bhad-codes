@@ -6,9 +6,9 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { User, CreditCard, Bell } from 'lucide-react';
+import { TabPanel } from '@react/factories';
+import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { TabList, TabPanel } from '@react/factories';
 import { ProfileForm } from './ProfileForm';
 import { BillingForm } from './BillingForm';
 import { NotificationsForm } from './NotificationsForm';
@@ -51,20 +51,6 @@ export interface PortalSettingsProps {
 
 // Tab types
 type SettingsTab = 'profile' | 'billing' | 'notifications';
-
-// Tab configuration
-const TABS: Array<{ id: SettingsTab; label: string }> = [
-  { id: 'profile', label: 'Profile' },
-  { id: 'billing', label: 'Billing' },
-  { id: 'notifications', label: 'Notifications' }
-];
-
-// Tab icons mapping
-const TAB_ICONS: Record<SettingsTab, React.ElementType> = {
-  profile: User,
-  billing: CreditCard,
-  notifications: Bell
-};
 
 /**
  * PortalSettings Component
@@ -150,7 +136,18 @@ export function PortalSettings({
   // Initial fetch - run only once on mount
   useEffect(() => {
     fetchProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Listen for EJS subtab changes (subtabs are rendered server-side)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const subtab = (e as CustomEvent).detail?.subtab;
+      if (subtab === 'profile' || subtab === 'billing' || subtab === 'notifications') {
+        setActiveTab(subtab);
+      }
+    };
+    window.addEventListener('settingsSubtabChange', handler);
+    return () => window.removeEventListener('settingsSubtabChange', handler);
   }, []);
 
   // Update profile
@@ -225,62 +222,38 @@ export function PortalSettings({
     }
   }, [buildHeaders]);
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <span className="loading-spinner"></span>
-        <span>Loading settings...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <p>{error}</p>
-        <button className="btn-secondary" onClick={fetchProfile}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div ref={containerRef} className="settings-section">
-      {/* Tabs */}
-      <TabList
-        tabs={TABS}
-        tabIcons={TAB_ICONS}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        ariaLabel="Settings tabs"
-      />
+    <div ref={containerRef} className="tw-section">
+      {isLoading ? (
+        <LoadingState message="Loading settings..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchProfile} />
+      ) : (
+        <>
+          <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
+            {profile && (
+              <ProfileForm
+                profile={profile}
+                onUpdate={handleProfileUpdate}
+              />
+            )}
+          </TabPanel>
 
-      {/* Tab Content */}
-      <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
-        {profile && (
-          <ProfileForm
-            profile={profile}
-            onUpdate={handleProfileUpdate}
-          />
-        )}
-      </TabPanel>
+          <TabPanel tabId="billing" isActive={activeTab === 'billing'}>
+            <BillingForm
+              billing={billing}
+              onUpdate={handleBillingUpdate}
+            />
+          </TabPanel>
 
-      <TabPanel tabId="billing" isActive={activeTab === 'billing'}>
-        <BillingForm
-          billing={billing}
-          onUpdate={handleBillingUpdate}
-        />
-      </TabPanel>
-
-      <TabPanel tabId="notifications" isActive={activeTab === 'notifications'}>
-        <NotificationsForm
-          preferences={notifications}
-          onUpdate={handleNotificationsUpdate}
-        />
-      </TabPanel>
+          <TabPanel tabId="notifications" isActive={activeTab === 'notifications'}>
+            <NotificationsForm
+              preferences={notifications}
+              onUpdate={handleNotificationsUpdate}
+            />
+          </TabPanel>
+        </>
+      )}
     </div>
   );
 }

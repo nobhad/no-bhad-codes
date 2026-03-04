@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { LoadingState } from '@react/factories';
 
 // Lazy load child components
 const ProjectsTable = React.lazy(() => import('../projects/ProjectsTable').then(m => ({ default: m.ProjectsTable })));
@@ -37,7 +38,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
   // Render individual views for specific subtabs
   if (activeSubtab === 'projects') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading projects...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
         <ProjectsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -45,7 +46,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
 
   if (activeSubtab === 'tasks') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading tasks...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading tasks..." />}>
         <GlobalTasksTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -53,7 +54,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
 
   if (activeSubtab === 'ad-hoc-requests') {
     return (
-      <React.Suspense fallback={<div className="loading-state">Loading requests...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading requests..." />}>
         <AdHocRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
       </React.Suspense>
     );
@@ -62,7 +63,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
   // Overview - show all tables stacked with default pagination of 10
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
-      <React.Suspense fallback={<div className="loading-state">Loading projects...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
         <section className="overview-table-section">
           <ProjectsTable
             onNavigate={onNavigate}
@@ -74,7 +75,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading tasks...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading tasks..." />}>
         <section className="overview-table-section">
           <GlobalTasksTable
             onNavigate={onNavigate}
@@ -86,7 +87,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<div className="loading-state">Loading requests...</div>}>
+      <React.Suspense fallback={<LoadingState message="Loading requests..." />}>
         <section className="overview-table-section">
           <AdHocRequestsTable
             onNavigate={onNavigate}

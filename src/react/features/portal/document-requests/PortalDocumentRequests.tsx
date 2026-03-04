@@ -4,11 +4,14 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { FileText, CheckCircle, Clock, AlertCircle, RefreshCw } from 'lucide-react';
-import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { EmptyState } from '@react/components/portal/EmptyState';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { FileText } from 'lucide-react';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { IconButton } from '@react/factories';
+import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
+import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { PORTAL_DOCREQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { DocumentRequestCard, type DocumentRequest } from './DocumentRequestCard';
 import { createLogger } from '../../../../utils/logger';
@@ -68,7 +71,9 @@ function useDocumentRequests(getAuthToken?: () => string | null) {
         throw new Error('Failed to fetch document requests');
       }
 
-      const data: ApiResponse = await response.json();
+      const raw = await response.json();
+      // Server uses sendSuccess() which wraps: { success, data: { requests } }
+      const data: ApiResponse = raw.data ?? raw;
 
       if (data.requests) {
         setRequests(data.requests);
@@ -109,6 +114,29 @@ function calculateSummary(requests: DocumentRequest[]): DocumentRequestSummary {
 }
 
 /**
+ * Filter document request by search and status
+ */
+function filterDocRequest(
+  request: DocumentRequest,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const s = search.toLowerCase();
+    const matchesSearch =
+      request.title?.toLowerCase().includes(s) ||
+      request.description?.toLowerCase().includes(s);
+    if (!matchesSearch) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (request.status !== filters.status) return false;
+  }
+
+  return true;
+}
+
+/**
  * PortalDocumentRequests Component
  */
 export function PortalDocumentRequests({
@@ -116,129 +144,131 @@ export function PortalDocumentRequests({
   showNotification
 }: PortalDocumentRequestsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-
   const { requests, isLoading, error, refetch } = useDocumentRequests(getAuthToken);
   const summary = calculateSummary(requests);
 
+  // Table filters
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    applyFilters
+  } = useTableFilters<DocumentRequest>({
+    storageKey: 'portal_document_requests',
+    filters: PORTAL_DOCREQUESTS_FILTER_CONFIG,
+    filterFn: filterDocRequest
+  });
+
+  const filteredRequests = useMemo(() => applyFilters(requests), [applyFilters, requests]);
+
   // Handle upload success
-  const handleUploadSuccess = useCallback((requestId: number) => {
+  const handleUploadSuccess = useCallback((_requestId: number) => {
     // Refetch to get updated status
     refetch();
   }, [refetch]);
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="loading-state">
-        <RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />
-        <span>Loading document requests...</span>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="error-state">
-        <div className="tw-text-center tw-mb-4">{error}</div>
-        <button className="btn-secondary" onClick={refetch}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   // Separate requests by action needed
-  const actionNeeded = requests.filter(r => r.status === 'pending' || r.status === 'rejected');
-  const inReview = requests.filter(r => r.status === 'submitted');
-  const completed = requests.filter(r => r.status === 'approved');
+  const actionNeeded = filteredRequests.filter(r => r.status === 'pending' || r.status === 'rejected');
+  const inReview = filteredRequests.filter(r => r.status === 'submitted');
+  const completed = filteredRequests.filter(r => r.status === 'approved');
 
   return (
-    <div ref={containerRef} className="tw-section">
-      {/* Summary Cards */}
-      <div className="tw-grid-stats">
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Total</span>
-          <span className="tw-stat-value">{summary.total}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Pending</span>
-          <span className="tw-stat-value">{summary.pending + summary.rejected}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">In Review</span>
-          <span className="tw-stat-value">{summary.submitted}</span>
-        </div>
-        <div className="tw-stat-card">
-          <span className="tw-stat-label">Approved</span>
-          <span className="tw-stat-value">{summary.approved}</span>
-        </div>
-      </div>
-
-      {/* Empty State */}
-      {requests.length === 0 && (
+    <TableLayout
+      containerRef={containerRef}
+      title="DOCUMENT REQUESTS"
+      stats={
+        <TableStats items={[
+          { value: summary.total, label: 'total' },
+          { value: summary.pending + summary.rejected, label: 'action needed', variant: 'pending', hideIfZero: true },
+          { value: summary.submitted, label: 'in review', hideIfZero: true },
+          { value: summary.approved, label: 'approved', variant: 'completed', hideIfZero: true }
+        ]} />
+      }
+      actions={
+        <>
+          <SearchFilter value={search} onChange={setSearch} placeholder="Search requests..." />
+          <FilterDropdown
+            sections={PORTAL_DOCREQUESTS_FILTER_CONFIG}
+            values={filterValues}
+            onChange={(key, value) => setFilter(key, value)}
+          />
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
+        </>
+      }
+    >
+      {isLoading ? (
+        <LoadingState message="Loading document requests..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={refetch} />
+      ) : filteredRequests.length === 0 ? (
         <EmptyState
-          icon={<FileText className="tw-h-6 tw-w-6" />}
-          message="No document requests yet. Requests will appear here when your project team needs documents from you."
+          icon={<FileText className="icon-lg" />}
+          message={requests.length === 0
+            ? 'No document requests yet. Requests will appear here when your project team needs documents from you.'
+            : 'No document requests match the current filters.'
+          }
         />
-      )}
+      ) : (
+        <div className="portal-cards-list">
+          {/* Action Needed Section */}
+          {actionNeeded.length > 0 && (
+            <div className="tw-section">
+              <div className="portal-card-header">
+                <h3 className="section-title">Action Needed</h3>
+                <span className="tw-badge">{actionNeeded.length}</span>
+              </div>
+              <div className="tw-section">
+                {actionNeeded.map(request => (
+                  <DocumentRequestCard
+                    key={request.id}
+                    request={request}
+                    onUploadSuccess={handleUploadSuccess}
+                    getAuthToken={getAuthToken}
+                    showNotification={showNotification}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Action Needed Section */}
-      {actionNeeded.length > 0 && (
-        <div>
-          <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
-            <h2 className="tw-section-title">Action Needed</h2>
-            <span className="tw-badge">{actionNeeded.length}</span>
-          </div>
-          <div className="tw-section">
-            {actionNeeded.map(request => (
-              <DocumentRequestCard
-                key={request.id}
-                request={request}
-                onUploadSuccess={handleUploadSuccess}
-                getAuthToken={getAuthToken}
-                showNotification={showNotification}
-              />
-            ))}
-          </div>
+          {/* In Review Section */}
+          {inReview.length > 0 && (
+            <div className="tw-section">
+              <h3 className="section-title">In Review</h3>
+              <div className="tw-section">
+                {inReview.map(request => (
+                  <DocumentRequestCard
+                    key={request.id}
+                    request={request}
+                    onUploadSuccess={handleUploadSuccess}
+                    getAuthToken={getAuthToken}
+                    showNotification={showNotification}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Completed Section */}
+          {completed.length > 0 && (
+            <div className="tw-section">
+              <h3 className="section-title">Completed</h3>
+              <div className="tw-section">
+                {completed.map(request => (
+                  <DocumentRequestCard
+                    key={request.id}
+                    request={request}
+                    onUploadSuccess={handleUploadSuccess}
+                    getAuthToken={getAuthToken}
+                    showNotification={showNotification}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
-
-      {/* In Review Section */}
-      {inReview.length > 0 && (
-        <div>
-          <h2 className="tw-section-title tw-mb-2">In Review</h2>
-          <div className="tw-section">
-            {inReview.map(request => (
-              <DocumentRequestCard
-                key={request.id}
-                request={request}
-                onUploadSuccess={handleUploadSuccess}
-                getAuthToken={getAuthToken}
-                showNotification={showNotification}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Completed Section */}
-      {completed.length > 0 && (
-        <div>
-          <h2 className="tw-section-title tw-mb-2">Completed</h2>
-          <div className="tw-section">
-            {completed.map(request => (
-              <DocumentRequestCard
-                key={request.id}
-                request={request}
-                onUploadSuccess={handleUploadSuccess}
-                getAuthToken={getAuthToken}
-                showNotification={showNotification}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    </TableLayout>
   );
 }

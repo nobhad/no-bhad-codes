@@ -4,7 +4,7 @@ import {
   GitBranch,
   Inbox,
   Zap,
-  ChevronDown,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -15,21 +15,21 @@ import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar'
 import { formatDate } from '@react/utils/formatDate';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
-  AdminTable,
-  AdminTableHeader,
-  AdminTableBody,
-  AdminTableRow,
-  AdminTableHead,
-  AdminTableCell,
-  AdminTableEmpty,
-  AdminTableLoading,
-  AdminTableError,
-} from '@react/components/portal/AdminTable';
+  PortalTable,
+  PortalTableHeader,
+  PortalTableBody,
+  PortalTableRow,
+  PortalTableHead,
+  PortalTableCell,
+  PortalTableEmpty,
+  PortalTableLoading,
+  PortalTableError
+} from '@react/components/portal/PortalTable';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
   PortalDropdownContent,
-  PortalDropdownItem,
+  PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
@@ -69,20 +69,21 @@ interface WorkflowsTableProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
   defaultPageSize?: number;
+  overviewMode?: boolean;
 }
 
 const WORKFLOWS_FILTER_CONFIG = [
-  { key: 'status', label: 'STATUS', options: WORKFLOW_STATUS_OPTIONS },
+  { key: 'status', label: 'STATUS', options: WORKFLOW_STATUS_OPTIONS }
 ];
 
 const WORKFLOW_STATUS_CONFIG: Record<string, { label: string }> = {
   active: { label: 'Active' },
-  inactive: { label: 'Inactive' },
+  inactive: { label: 'Inactive' }
 };
 
 const BULK_STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
+  { value: 'inactive', label: 'Inactive' }
 ];
 
 function filterWorkflow(
@@ -111,20 +112,20 @@ function sortWorkflows(a: Workflow, b: Workflow, sort: SortConfig): number {
   const multiplier = direction === 'asc' ? 1 : -1;
 
   switch (column) {
-    case 'name':
-      return a.name.localeCompare(b.name) * multiplier;
-    case 'runCount':
-      return (a.runCount - b.runCount) * multiplier;
-    case 'successRate':
-      return (a.successRate - b.successRate) * multiplier;
-    case 'updatedAt':
-      return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
-    default:
-      return 0;
+  case 'name':
+    return a.name.localeCompare(b.name) * multiplier;
+  case 'runCount':
+    return (a.runCount - b.runCount) * multiplier;
+  case 'successRate':
+    return (a.successRate - b.successRate) * multiplier;
+  case 'updatedAt':
+    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * multiplier;
+  default:
+    return 0;
   }
 }
 
-export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25 }: WorkflowsTableProps) {
+export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
   const containerRef = useFadeIn();
 
   const getHeaders = useCallback(() => {
@@ -146,7 +147,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     active: 0,
     inactive: 0,
     totalRuns: 0,
-    avgSuccessRate: 0,
+    avgSuccessRate: 0
   });
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -158,21 +159,21 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     sort,
     toggleSort,
     applyFilters,
-    hasActiveFilters,
+    hasActiveFilters
   } = useTableFilters<Workflow>({
-    storageKey: 'admin_workflows',
+    storageKey: overviewMode ? undefined : 'admin_workflows',
     filters: WORKFLOWS_FILTER_CONFIG,
     filterFn: filterWorkflow,
     sortFn: sortWorkflows,
-    defaultSort: { column: 'updatedAt', direction: 'desc' },
+    defaultSort: { column: 'updatedAt', direction: 'desc' }
   });
 
   const filteredWorkflows = useMemo(() => applyFilters(workflows), [applyFilters, workflows]);
 
   const pagination = usePagination({
-    storageKey: 'admin_workflows_pagination',
+    storageKey: overviewMode ? undefined : 'admin_workflows_pagination',
     totalItems: filteredWorkflows.length,
-    defaultPageSize,
+    defaultPageSize
   });
 
   const paginatedWorkflows = useMemo(
@@ -182,7 +183,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
 
   const selection = useSelection({
     getId: (workflow: Workflow) => workflow.id,
-    items: paginatedWorkflows,
+    items: paginatedWorkflows
   });
 
   const handleFilterChange = useCallback(
@@ -208,7 +209,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         active: 0,
         inactive: 0,
         totalRuns: 0,
-        avgSuccessRate: 0,
+        avgSuccessRate: 0
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load workflows');
@@ -227,7 +228,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ workflowIds: [workflowId], status: newStatus }),
+        body: JSON.stringify({ workflowIds: [workflowId], status: newStatus })
       });
       if (!response.ok) throw new Error('Failed to update workflow status');
       setWorkflows((prev) =>
@@ -252,7 +253,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ workflowIds, status: newStatus }),
+        body: JSON.stringify({ workflowIds, status: newStatus })
       });
       if (!response.ok) throw new Error('Failed to update workflow statuses');
       setWorkflows((prev) =>
@@ -286,7 +287,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ workflowIds }),
+        body: JSON.stringify({ workflowIds })
       });
       if (!response.ok) throw new Error('Failed to delete workflows');
       setWorkflows((prev) => prev.filter((w) => !selection.selectedIds.has(w.id)));
@@ -303,7 +304,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
   const filterSections = WORKFLOWS_FILTER_CONFIG.map((config) => ({
     key: config.key,
     label: config.label,
-    options: config.options,
+    options: config.options
   }));
 
   return (
@@ -315,7 +316,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
           items={[
             { value: stats.total, label: 'total' },
             { value: stats.active, label: 'active', variant: 'completed', hideIfZero: true },
-            { value: stats.inactive, label: 'inactive', variant: 'cancelled', hideIfZero: true },
+            { value: stats.inactive, label: 'inactive', variant: 'cancelled', hideIfZero: true }
           ]}
           tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.inactive} Inactive • ${stats.totalRuns} Runs`}
         />
@@ -376,74 +377,74 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         ) : undefined
       }
     >
-      <AdminTable>
-        <AdminTableHeader>
-          <AdminTableRow>
-            <AdminTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+      <PortalTable>
+        <PortalTableHeader>
+          <PortalTableRow>
+            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
               />
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="name-col"
               sortable
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
               Workflow
-            </AdminTableHead>
-            <AdminTableHead className="type-col">Trigger</AdminTableHead>
-            <AdminTableHead className="count-col">Steps</AdminTableHead>
-            <AdminTableHead className="status-col">Status</AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead className="type-col">Trigger</PortalTableHead>
+            <PortalTableHead className="count-col">Steps</PortalTableHead>
+            <PortalTableHead className="status-col">Status</PortalTableHead>
+            <PortalTableHead
               className="count-col"
               sortable
               sortDirection={sort?.column === 'runCount' ? sort.direction : null}
               onClick={() => toggleSort('runCount')}
             >
               Runs
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="count-col"
               sortable
               sortDirection={sort?.column === 'successRate' ? sort.direction : null}
               onClick={() => toggleSort('successRate')}
             >
               Success
-            </AdminTableHead>
-            <AdminTableHead
+            </PortalTableHead>
+            <PortalTableHead
               className="date-col"
               sortable
               sortDirection={sort?.column === 'updatedAt' ? sort.direction : null}
               onClick={() => toggleSort('updatedAt')}
             >
               Updated
-            </AdminTableHead>
-            <AdminTableHead className="actions-col">Actions</AdminTableHead>
-          </AdminTableRow>
-        </AdminTableHeader>
+            </PortalTableHead>
+            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+          </PortalTableRow>
+        </PortalTableHeader>
 
-        <AdminTableBody animate={!isLoading && !error}>
+        <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <AdminTableError colSpan={9} message={error} onRetry={loadWorkflows} />
+            <PortalTableError colSpan={9} message={error} onRetry={loadWorkflows} />
           ) : isLoading ? (
-            <AdminTableLoading colSpan={9} rows={5} />
+            <PortalTableLoading colSpan={9} rows={5} />
           ) : paginatedWorkflows.length === 0 ? (
-            <AdminTableEmpty
+            <PortalTableEmpty
               colSpan={9}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
             />
           ) : (
             paginatedWorkflows.map((workflow) => (
-              <AdminTableRow
+              <PortalTableRow
                 key={workflow.id}
                 clickable
                 selected={selection.isSelected(workflow)}
               >
-                <AdminTableCell
+                <PortalTableCell
                   className="bulk-select-cell"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -452,8 +453,8 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                     onCheckedChange={() => selection.toggleSelection(workflow)}
                     aria-label={`Select ${workflow.name}`}
                   />
-                </AdminTableCell>
-                <AdminTableCell className="primary-cell">
+                </PortalTableCell>
+                <PortalTableCell className="primary-cell">
                   <div className="cell-with-icon">
                     <GitBranch className="cell-icon" />
                     <div className="cell-content">
@@ -461,17 +462,18 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                       {workflow.description && (
                         <span className="cell-subtitle">{workflow.description}</span>
                       )}
+                      <span className="trigger-stacked">{workflow.trigger}</span>
                     </div>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="type-cell">
+                </PortalTableCell>
+                <PortalTableCell className="type-cell">
                   <div className="cell-with-icon">
                     <Zap className="cell-icon-sm status-pending" />
                     <span>{workflow.trigger}</span>
                   </div>
-                </AdminTableCell>
-                <AdminTableCell className="count-cell">{workflow.steps} steps</AdminTableCell>
-                <AdminTableCell
+                </PortalTableCell>
+                <PortalTableCell className="count-cell">{workflow.steps} steps</PortalTableCell>
+                <PortalTableCell
                   className="status-cell"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -499,9 +501,9 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                         ))}
                     </PortalDropdownContent>
                   </PortalDropdown>
-                </AdminTableCell>
-                <AdminTableCell className="count-cell">{workflow.runCount}</AdminTableCell>
-                <AdminTableCell className="count-cell">
+                </PortalTableCell>
+                <PortalTableCell className="count-cell">{workflow.runCount}</PortalTableCell>
+                <PortalTableCell className="count-cell">
                   <span
                     className={
                       workflow.successRate >= 90
@@ -513,11 +515,11 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                   >
                     {workflow.successRate}%
                   </span>
-                </AdminTableCell>
-                <AdminTableCell className="date-cell">
+                </PortalTableCell>
+                <PortalTableCell className="date-cell">
                   {formatDate(workflow.updatedAt)}
-                </AdminTableCell>
-                <AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                </PortalTableCell>
+                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton
                       action="edit"
@@ -533,12 +535,12 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                       title="Delete"
                     />
                   </div>
-                </AdminTableCell>
-              </AdminTableRow>
+                </PortalTableCell>
+              </PortalTableRow>
             ))
           )}
-        </AdminTableBody>
-      </AdminTable>
+        </PortalTableBody>
+      </PortalTable>
     </TableLayout>
   );
 }

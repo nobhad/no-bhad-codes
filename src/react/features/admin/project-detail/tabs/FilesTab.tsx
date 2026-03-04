@@ -13,7 +13,6 @@ import {
   Inbox
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { ProjectFile } from '../../types';
 import { FILE_CATEGORY_OPTIONS } from '../../types';
@@ -221,14 +220,14 @@ export function FilesTab({
             <p className="tw-text-primary ">
               {isDragging ? 'Drop files here' : 'Drag and drop files here, or click to select'}
             </p>
-            <p className="tw-text-muted tw-mt-1 tw-text-sm">
+            <p className="text-muted tw-mt-1 tw-text-sm">
               Supports images, PDFs, documents, and archives
             </p>
           </div>
 
           {/* Category Selector */}
           <div className="tw-flex tw-items-center tw-gap-2 tw-mt-2" onClick={(e) => e.stopPropagation()}>
-            <span className="tw-text-muted tw-text-sm">Category:</span>
+            <span className="text-muted tw-text-sm">Category:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -263,19 +262,19 @@ export function FilesTab({
           <table className="tw-w-full">
             <thead>
               <tr className="files-table-header">
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   File
                 </th>
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Size
                 </th>
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Uploaded
                 </th>
-                <th className="tw-label tw-text-left tw-px-4 tw-py-3">
+                <th className="label tw-text-left tw-px-4 tw-py-3">
                   Shared
                 </th>
-                <th className="tw-label tw-text-right tw-px-4 tw-py-3">
+                <th className="label tw-text-right tw-px-4 tw-py-3">
                   Actions
                 </th>
               </tr>
@@ -294,17 +293,17 @@ export function FilesTab({
                           {file.original_name}
                         </span>
                         {file.category && (
-                          <span className="tw-text-muted tw-text-sm">
+                          <span className="text-muted tw-text-sm">
                             {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category}
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="tw-px-4 tw-py-3 tw-text-muted ">
+                  <td className="tw-px-4 tw-py-3 text-muted ">
                     {formatFileSize(file.file_size)}
                   </td>
-                  <td className="tw-px-4 tw-py-3 tw-text-muted ">
+                  <td className="tw-px-4 tw-py-3 text-muted ">
                     {formatDate(file.created_at)}
                   </td>
                   <td className="tw-px-4 tw-py-3">

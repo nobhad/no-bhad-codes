@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { useCallback, useState } from 'react';
-import { Upload, File, X, Image, FileText, FolderOpen } from 'lucide-react';
+import { Upload, X, Image, FileText, FolderOpen } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -25,7 +25,7 @@ const ALLOWED_FILE_TYPES = [
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain',
-  'application/zip',
+  'application/zip'
 ];
 
 /**
@@ -48,7 +48,7 @@ function getFileIcon(type: string) {
 /**
  * AssetsStep Component
  */
-export function AssetsStep({ data, onUpdate, errors }: StepProps) {
+export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -58,15 +58,15 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
     files: [],
     logoProvided: false,
     existingAssets: '',
-    contentAccess: '',
+    contentAccess: ''
   };
 
   const handleChange = (field: keyof AssetData, value: UploadedFile[] | boolean | string) => {
     onUpdate({
       assets: {
         ...assets,
-        [field]: value,
-      },
+        [field]: value
+      }
     });
   };
 
@@ -96,7 +96,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           name: file.name,
           size: file.size,
           type: file.type,
-          uploadedAt: new Date().toISOString(),
+          uploadedAt: new Date().toISOString()
         });
       });
 
@@ -145,10 +145,10 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
     <div ref={containerRef} className="tw-section">
       {/* Section Header */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Upload Assets
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Share any files, logos, or resources for your project.
         </p>
       </div>
@@ -179,14 +179,14 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
         <Upload
           className={cn(
             'tw-h-8 tw-w-8 tw-mb-3',
-            isDragging ? 'tw-text-primary' : 'tw-text-[var(--portal-text-muted)]'
+            isDragging ? 'tw-text-primary' : 'text-muted'
           )}
         />
 
         <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-mb-1">
           Drag and drop files here
         </p>
-        <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)] tw-mb-3">
+        <p className="tw-text-[12px] text-muted tw-mb-3">
           or click to browse
         </p>
 
@@ -194,7 +194,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           Browse Files
         </button>
 
-        <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)] tw-mt-3">
+        <p className="tw-text-[12px] text-muted tw-mt-3">
           Max 25MB per file. Supports images, PDFs, and documents.
         </p>
       </div>
@@ -209,8 +209,8 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
       {/* Uploaded Files List */}
       {assets.files.length > 0 && (
         <div className="tw-flex tw-flex-col tw-gap-2 tw-mt-4">
-          <label className="tw-label tw-flex tw-items-center tw-gap-1">
-            <FolderOpen className="tw-h-4 tw-w-4" />
+          <label className="label tw-flex tw-items-center tw-gap-1">
+            <FolderOpen className="icon-xs" />
             Uploaded Files ({assets.files.length})
           </label>
           <div className="tw-flex tw-flex-col tw-gap-1">
@@ -221,12 +221,12 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
                   key={file.id}
                   className="tw-list-item"
                 >
-                  <FileIcon className="tw-h-4 tw-w-4 tw-text-[var(--portal-text-muted)] tw-flex-shrink-0" />
+                  <FileIcon className="tw-h-4 tw-w-4 text-muted tw-flex-shrink-0" />
                   <div className="tw-flex-1 tw-min-w-0">
                     <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-truncate">
                       {file.name}
                     </p>
-                    <p className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
+                    <p className="tw-text-[12px] text-muted">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -236,7 +236,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
                     className="btn-icon"
                     title="Remove file"
                   >
-                    <X className="tw-h-4 tw-w-4" />
+                    <X className="icon-xs" />
                   </button>
                 </div>
               );
@@ -262,17 +262,17 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Additional Asset Information */}
       <div className="tw-mb-4">
-        <h3 className="tw-heading tw-text-lg">
+        <h3 className="heading tw-text-lg">
           Additional Resources
         </h3>
-        <p className="tw-text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-[14px] tw-mt-1">
           Tell us about any other assets or content access we may need.
         </p>
       </div>
 
       {/* Existing Assets */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="tw-field-label">Existing Assets</label>
+        <label className="field-label">Existing Assets</label>
         <textarea
           value={assets.existingAssets}
           onChange={(e) => handleChange('existingAssets', e.target.value)}
@@ -284,7 +284,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Content Access */}
       <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
-        <label className="tw-field-label">Content & Access Details</label>
+        <label className="field-label">Content & Access Details</label>
         <textarea
           value={assets.contentAccess}
           onChange={(e) => handleChange('contentAccess', e.target.value)}
@@ -292,7 +292,7 @@ export function AssetsStep({ data, onUpdate, errors }: StepProps) {
           rows={2}
           className="tw-textarea"
         />
-        <span className="tw-text-[12px] tw-text-[var(--portal-text-muted)]">
+        <span className="tw-text-[12px] text-muted">
           Never share passwords directly. We'll provide a secure way to share credentials if needed.
         </span>
       </div>

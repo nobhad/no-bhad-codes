@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useState, useCallback } from 'react';
 import { StickyNote, Plus, Pin, Pencil, Trash2, X, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { ClientNote } from '../../types';
 
@@ -167,7 +166,7 @@ export function NotesTab({
   const renderForm = () => (
     <div className="tw-panel tw-mb-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
-        <h3 className="tw-heading tw-text-sm">
+        <h3 className="heading tw-text-sm">
           {editingId ? 'Edit Note' : 'New Note'}
         </h3>
         <button
@@ -208,7 +207,7 @@ export function NotesTab({
     <div
       key={note.id}
       className={cn(
-        'tw-card tw-group',
+        'portal-card tw-group',
         note.is_pinned && 'tw-border-primary'
       )}
     >
@@ -218,7 +217,7 @@ export function NotesTab({
           {note.is_pinned && (
             <Pin className="icon-xs tw-text-primary tw-fill-current" />
           )}
-          <span className="tw-text-muted tw-text-xs">
+          <span className="text-muted tw-text-xs">
             {formatDate(note.created_at)}
             {note.updated_at !== note.created_at && ' (edited)'}
           </span>
@@ -253,14 +252,14 @@ export function NotesTab({
       </div>
 
       {/* Note content */}
-      <p className="tw-text-muted tw-text-sm tw-whitespace-pre-wrap">
+      <p className="text-muted tw-text-sm tw-whitespace-pre-wrap">
         {note.content}
       </p>
 
       {/* Note footer */}
       {note.created_by && (
         <div className="tw-mt-2 tw-pt-2 tw-border-t">
-          <span className="tw-text-muted tw-text-xs">
+          <span className="text-muted tw-text-xs">
             by {note.created_by}
           </span>
         </div>
@@ -272,7 +271,7 @@ export function NotesTab({
     <div className="tw-section">
       {/* Header */}
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-heading tw-text-lg">
+        <h2 className="heading tw-text-lg">
           Notes ({notes.length})
         </h2>
         {!isAdding && !editingId && (
@@ -298,7 +297,7 @@ export function NotesTab({
           {/* Pinned notes section */}
           {pinnedNotes.length > 0 && (
             <div>
-              <h3 className="tw-label tw-mb-2">
+              <h3 className="label tw-mb-2">
                 Pinned
               </h3>
               <div className="tw-grid tw-grid-cols-2 tw-gap-3">
@@ -311,7 +310,7 @@ export function NotesTab({
           {unpinnedNotes.length > 0 && (
             <div>
               {pinnedNotes.length > 0 && (
-                <h3 className="tw-label tw-mb-2">
+                <h3 className="label tw-mb-2">
                   Recent
                 </h3>
               )}
