@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const DELIVERABLE_COLUMNS = `
@@ -80,7 +80,7 @@ router.get(
       revisionRequested: reviews.filter((r: { status: string }) => r.status === 'revision-requested').length
     };
 
-    res.json({ reviews, stats });
+    sendSuccess(res, { reviews, stats });
   })
 );
 
@@ -131,7 +131,7 @@ router.get(
       WHERE entity_type = 'deliverable' AND entity_id = ?
     `, [reviewId]);
 
-    res.json({ review: { ...review, attachments } });
+    sendSuccess(res, { review: { ...review, attachments } });
   })
 );
 
@@ -171,7 +171,7 @@ router.patch(
 
     const updated = await db.get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [reviewId]);
 
-    res.json({ success: true, review: updated });
+    sendSuccess(res, { review: updated });
   })
 );
 

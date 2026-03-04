@@ -25,7 +25,7 @@ import {
   addPageNumbers,
   PAGE_MARGINS
 } from '../../utils/pdf-utils.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { logger } from '../../services/logger.js';
@@ -796,13 +796,11 @@ ${BUSINESS_INFO.email}
       // Continue - don't fail the request if reminder scheduling fails
     }
 
-    res.json({
-      success: true,
-      message: 'Signature request sent',
+    sendSuccess(res, {
       clientEmail,
       expiresAt: expiresAt.toISOString(),
       emailSent: emailResult.success
-    });
+    }, 'Signature request sent');
   })
 );
 
@@ -874,7 +872,7 @@ router.get(
       );
     }
 
-    res.json({
+    sendSuccess(res, {
       projectId: projectId,
       projectName: p.project_name,
       price: p.price,
@@ -1116,12 +1114,10 @@ ${BUSINESS_INFO.email}
       // Continue - don't fail the signing if reminder cancellation fails
     }
 
-    res.json({
-      success: true,
-      message: 'Contract signed successfully',
+    sendSuccess(res, {
       signedAt,
       signerName
-    });
+    }, 'Contract signed successfully');
   })
 );
 
@@ -1231,12 +1227,10 @@ router.post(
       ]
     );
 
-    res.json({
-      success: true,
-      message: 'Contract countersigned successfully',
+    sendSuccess(res, {
       countersignedAt,
       signerName
-    });
+    }, 'Contract countersigned successfully');
   })
 );
 
@@ -1266,7 +1260,7 @@ router.get(
 
     const p = project as Record<string, unknown>;
 
-    res.json({
+    sendSuccess(res, {
       isSigned: !!p.contract_signed_at,
       signedAt: p.contract_signed_at,
       signerName: p.contract_signer_name,

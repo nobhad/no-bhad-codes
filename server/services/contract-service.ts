@@ -88,8 +88,8 @@ class ContractService {
         c.contact_name,
         c.email,
         c.company_name
-      FROM projects p
-      JOIN clients c ON p.client_id = c.id
+      FROM active_projects p
+      JOIN active_clients c ON p.client_id = c.id
       WHERE p.id = ? AND c.id = ?`,
       [projectId, clientId]
     );
@@ -238,9 +238,9 @@ class ContractService {
         c.email as client_email,
         t.name as template_name,
         t.type as template_type
-      FROM contracts
-      LEFT JOIN projects p ON contracts.project_id = p.id
-      LEFT JOIN clients c ON contracts.client_id = c.id
+      FROM active_contracts contracts
+      LEFT JOIN active_projects p ON contracts.project_id = p.id
+      LEFT JOIN active_clients c ON contracts.client_id = c.id
       LEFT JOIN contract_templates t ON contracts.template_id = t.id
     `;
     const where: string[] = [];
@@ -280,9 +280,9 @@ class ContractService {
         c.email as client_email,
         t.name as template_name,
         t.type as template_type
-       FROM contracts
-       LEFT JOIN projects p ON contracts.project_id = p.id
-       LEFT JOIN clients c ON contracts.client_id = c.id
+       FROM active_contracts contracts
+       LEFT JOIN active_projects p ON contracts.project_id = p.id
+       LEFT JOIN active_clients c ON contracts.client_id = c.id
        LEFT JOIN contract_templates t ON contracts.template_id = t.id
        WHERE contracts.id = ?`,
       [contractId]
@@ -481,9 +481,9 @@ class ContractService {
         c.email as client_email,
         t.name as template_name,
         t.type as template_type
-       FROM contracts
-       LEFT JOIN projects p ON contracts.project_id = p.id
-       LEFT JOIN clients c ON contracts.client_id = c.id
+       FROM active_contracts contracts
+       LEFT JOIN active_projects p ON contracts.project_id = p.id
+       LEFT JOIN active_clients c ON contracts.client_id = c.id
        LEFT JOIN contract_templates t ON contracts.template_id = t.id
        WHERE contracts.signature_token = ?`,
       [token]

@@ -278,7 +278,7 @@
   border: var(--border-width) solid var(--color-primary);
   color: var(--color-primary);
   display: none;
-  z-index: 10;
+  z-index: var(--z-index-elevated);
 }
 
 /* Show badge when it has content */

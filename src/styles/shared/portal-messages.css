@@ -282,7 +282,7 @@
   padding: var(--space-1);
   display: flex;
   gap: var(--space-1);
-  z-index: 10;
+  z-index: var(--z-index-elevated);
 }
 
 .portal .reaction-picker.hidden {
@@ -563,7 +563,7 @@
   height: var(--icon-size-md);
   color: var(--portal-text-muted);
   pointer-events: none;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 .messaging-search-container .tw-input,

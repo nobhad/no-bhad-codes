@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseScheduledInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -57,11 +57,9 @@ router.post(
         terms
       });
 
-      res.status(201).json({
-        success: true,
-        message: 'Invoice scheduled',
+      sendSuccess(res, {
         scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
-      });
+      }, 'Invoice scheduled', 201);
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to schedule invoice', 500, 'SCHEDULING_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -85,8 +83,7 @@ router.get(
     try {
       const scheduled = await getInvoiceService().getScheduledInvoices();
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
         count: scheduled.length
       });
@@ -125,8 +122,7 @@ router.get(
     try {
       const scheduled = await getInvoiceService().getScheduledInvoices(projectId);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
         count: scheduled.length
       });
@@ -166,10 +162,7 @@ router.delete(
     try {
       await getInvoiceService().cancelScheduledInvoice(scheduledId);
 
-      res.json({
-        success: true,
-        message: 'Scheduled invoice cancelled'
-      });
+      sendSuccess(res, undefined, 'Scheduled invoice cancelled');
     } catch (error: unknown) {
       errorResponseWithPayload(
         res,

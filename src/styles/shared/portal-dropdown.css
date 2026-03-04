@@ -1003,7 +1003,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   border-top: none;
   background-color: var(--portal-bg-pitch);
   position: relative;
-  z-index: 2;
+  z-index: var(--z-index-content);
 }
 
 /* Menu - opens UPWARD, flush with trigger */
@@ -1023,7 +1023,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   margin: 0;
   padding: 0;
   box-shadow: none;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 /* Menu items */

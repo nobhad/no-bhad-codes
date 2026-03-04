@@ -51,7 +51,7 @@ section.contact-section .contact-hero-desktop {
   justify-content: center;
   align-items: center;
   background: var(--color-neutral-300);
-  z-index: 10;
+  z-index: var(--z-index-elevated);
   cursor: default;
 }
 
@@ -66,7 +66,7 @@ section.contact-section .contact-hero-desktop {
     justify-content: center;
     align-items: center;
     background: var(--color-neutral-300);
-    z-index: 10;
+    z-index: var(--z-index-elevated);
     cursor: default;
     opacity: 0;
     visibility: hidden;
@@ -152,7 +152,7 @@ section.contact-section h2 {
 .contact-form-column {
   width: 100%;
   position: relative;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 /* Contact options */
@@ -256,7 +256,7 @@ p.contact-options {
   padding: 2rem;
   box-sizing: border-box;
   pointer-events: auto;
-  z-index: 10;
+  z-index: var(--z-index-elevated);
 }
 
 /* Contact text on card - always black on white card background */
@@ -346,7 +346,7 @@ p.contact-options {
   outline: none;
   box-shadow: none;
   position: relative;
-  z-index: 0;
+  z-index: var(--z-index-base);
   -webkit-appearance: none;
   --placeholder-opacity: 0;
 }
@@ -381,7 +381,7 @@ p.contact-options {
 
 /* Focus state - raise z-index so border shows over adjacent field */
 .contact-form .input-wrapper:focus-within {
-  z-index: 1;
+  z-index: var(--z-index-content);
   position: relative;
 }
 
@@ -422,7 +422,7 @@ p.contact-options {
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   cursor: pointer;
-  z-index: 17;
+  z-index: var(--z-index-20);
   overflow: visible;
 }
 
@@ -491,7 +491,7 @@ html[data-theme="dark"] .input-item textarea {
   width: min(55vw, 520px);
   opacity: 0.09;
   pointer-events: none;
-  z-index: 0;
+  z-index: var(--z-index-base);
 }
 
 .contact-bg-avatar .avatar-blurb-container {

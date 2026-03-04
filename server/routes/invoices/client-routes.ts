@@ -105,7 +105,7 @@ router.get(
       if (!(await canAccessInvoice(req, invoice.id))) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
-      res.json({ success: true, invoice });
+      sendSuccess(res, { invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {
@@ -149,7 +149,7 @@ router.get(
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
-      res.json({ success: true, invoice });
+      sendSuccess(res, { invoice });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('not found')) {

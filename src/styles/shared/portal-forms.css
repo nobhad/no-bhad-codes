@@ -134,7 +134,7 @@
   position: absolute;
   top: var(--space-1, 0.25rem);
   left: var(--space-2, 0.5rem);
-  z-index: 1;
+  z-index: var(--z-index-content);
   font-size: var(--font-size-xs, 11px);
   font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
@@ -253,7 +253,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   margin: 0;
   padding: 0;
   cursor: pointer;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 .portal-checkbox:has(input:checked) {
   background: var(--portal-border-color);
@@ -437,7 +437,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   justify-content: center;
   color: var(--portal-text-muted);
   pointer-events: none;
-  z-index: 11; /* Stay above input z-index:10 during focus */
+  z-index: var(--z-index-20); /* Stay above input z-index:10 during focus */
 }
 
 .search-bar-icon svg {
@@ -909,7 +909,7 @@ input.search-bar-input {
   justify-content: center;
   color: var(--portal-text-muted);
   pointer-events: none;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 .form-field-icon svg {

@@ -7,7 +7,7 @@ import { errorTracker } from '../../services/error-tracking.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { getDatabase } from '../../database/init.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -88,7 +88,7 @@ router.get(
         }
       };
 
-      res.json(systemStatus);
+      sendSuccess(res, systemStatus);
     } catch (error) {
       logger.error('Error getting system status:', {
         error: error instanceof Error ? error : undefined
@@ -180,8 +180,7 @@ router.get(
         offset: offset ? Math.max(0, parseInt(String(offset), 10) || 0) : 0
       });
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         data: logs,
         count: logs.length
       });
@@ -223,7 +222,7 @@ router.get(
       // Get new leads count (pending intake + new contact submissions)
       const leadsCount = await db.get(`
         SELECT
-          (SELECT COUNT(*) FROM projects WHERE status = 'pending') +
+          (SELECT COUNT(*) FROM active_projects WHERE status = 'pending') +
           (SELECT COUNT(*) FROM contact_submissions WHERE status = 'new') as count
       `);
 
@@ -231,14 +230,13 @@ router.get(
       // Note: Uses unified messages table with context_type after migration 085
       const messagesCount = await db.get(`
         SELECT COUNT(*) as count
-        FROM messages
+        FROM active_messages
         WHERE context_type = 'general'
           AND read_at IS NULL
           AND sender_type != 'admin'
       `);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         leads: leadsCount?.count || 0,
         messages: messagesCount?.count || 0
       });
@@ -312,8 +310,7 @@ router.get(
         ).length
       };
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         tasks,
         stats
       });
@@ -356,12 +353,12 @@ router.get(
 
       // Attention items
       const overdueInvoices = await db.get(`
-        SELECT COUNT(*) as count FROM invoices
+        SELECT COUNT(*) as count FROM active_invoices
         WHERE due_date < date('now') AND status != 'paid'
       `);
 
       const pendingContracts = await db.get(`
-        SELECT COUNT(*) as count FROM projects
+        SELECT COUNT(*) as count FROM active_projects
         WHERE contract_signed_at IS NULL
         AND status NOT IN ('completed', 'cancelled')
       `);
@@ -372,22 +369,22 @@ router.get(
       `);
 
       const unreadMessages = await db.get(`
-        SELECT COUNT(*) as count FROM messages
+        SELECT COUNT(*) as count FROM active_messages
         WHERE read_at IS NULL AND sender_type != 'admin'
       `);
 
       // Snapshot metrics
       const activeProjects = await db.get(`
-        SELECT COUNT(*) as count FROM projects
+        SELECT COUNT(*) as count FROM active_projects
         WHERE status IN ('active', 'in-progress', 'in_progress')
       `);
 
       const totalClients = await db.get(`
-        SELECT COUNT(*) as count FROM clients
+        SELECT COUNT(*) as count FROM active_clients
       `);
 
       const revenueMTD = await db.get(`
-        SELECT COALESCE(SUM(amount_paid), 0) as total FROM invoices
+        SELECT COALESCE(SUM(amount_paid), 0) as total FROM active_invoices
         WHERE strftime('%Y-%m', paid_date) = strftime('%Y-%m', 'now')
         AND status = 'paid'
       `);
@@ -422,8 +419,8 @@ router.get(
           p.status,
           COALESCE(p.progress, 0) as progress,
           p.estimated_end_date as dueDate
-        FROM projects p
-        LEFT JOIN clients c ON p.client_id = c.id
+        FROM active_projects p
+        LEFT JOIN active_clients c ON p.client_id = c.id
         WHERE p.status IN ('active', 'in-progress', 'in_progress')
         ORDER BY p.estimated_end_date ASC NULLS LAST
         LIMIT 5
@@ -439,8 +436,7 @@ router.get(
       const convertedLeads = Number(leadsStats?.converted) || 0;
       const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         attention: {
           overdueInvoices: overdueInvoices?.count || 0,
           pendingContracts: pendingContracts?.count || 0,

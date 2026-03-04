@@ -652,7 +652,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin: 0;
   padding: 0;
   cursor: pointer;
-  z-index: 1;
+  z-index: var(--z-index-content);
 }
 
 /* Checked state - change wrapper background */
@@ -1188,7 +1188,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   box-shadow: var(--shadow-dropdown);
   clip-path: inset(-20px -20px 0 -20px);
   position: relative;
-  z-index: 101;
+  z-index: var(--z-index-nav-dropdown);
 }
 
 [data-page="admin"] .custom-dropdown-item {
@@ -1251,14 +1251,14 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
    Admin Sidebar Footer & Logout Button
    ================================================ */
 [data-page="admin"] .sidebar-footer {
-  z-index: 1000;
+  z-index: var(--z-index-max);
   pointer-events: auto;
 }
 
 [data-page="admin"] .sidebar-footer .sidebar-btn {
   pointer-events: auto;
   cursor: pointer;
-  z-index: 1001;
+  z-index: var(--z-index-max);
   position: relative;
 }
 

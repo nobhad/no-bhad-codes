@@ -70,7 +70,7 @@
   transition:
     background-color var(--transition-theme, 0.4s),
     box-shadow var(--transition-theme, 0.4s);
-  z-index: 10;
+  z-index: var(--z-index-elevated);
 }
 
 .back-button svg {

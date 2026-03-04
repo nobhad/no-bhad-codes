@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
@@ -39,8 +39,7 @@ router.get(
     try {
       const reminders = await getInvoiceService().getInvoiceReminders(invoiceId);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         reminders: reminders.map(toSnakeCaseReminder),
         count: reminders.length
       });
@@ -74,10 +73,7 @@ router.post(
     try {
       await getInvoiceService().skipReminder(reminderId);
 
-      res.json({
-        success: true,
-        message: 'Reminder skipped'
-      });
+      sendSuccess(res, undefined, 'Reminder skipped');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to skip reminder', 500, 'SKIP_FAILED', {
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -231,11 +227,9 @@ ${BUSINESS_INFO.name}
         `
       });
 
-      res.json({
-        success: true,
-        message: 'Payment reminder sent successfully',
+      sendSuccess(res, {
         sentTo: clientEmail
-      });
+      }, 'Payment reminder sent successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
 

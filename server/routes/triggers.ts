@@ -14,7 +14,7 @@ import {
   workflowTriggerService,
   EventType
 } from '../services/workflow-trigger-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -32,7 +32,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const eventType = req.query.eventType as EventType | undefined;
     const triggers = await workflowTriggerService.getTriggers(eventType);
-    res.json({ triggers });
+    sendSuccess(res, { triggers });
   })
 );
 
@@ -44,7 +44,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    res.json({
+    sendSuccess(res, {
       eventTypes: workflowTriggerService.getEventTypes(),
       actionTypes: workflowTriggerService.getActionTypes()
     });
@@ -69,7 +69,7 @@ router.get(
       return errorResponse(res, 'Trigger not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
-    res.json({ trigger });
+    sendSuccess(res, { trigger });
   })
 );
 
@@ -112,11 +112,7 @@ router.post(
       priority
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Trigger created',
-      trigger
-    });
+    sendSuccess(res, { trigger }, 'Trigger created', 201);
   })
 );
 
@@ -138,11 +134,7 @@ router.put(
       return errorResponse(res, 'Trigger not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
-    res.json({
-      success: true,
-      message: 'Trigger updated',
-      trigger
-    });
+    sendSuccess(res, { trigger }, 'Trigger updated');
   })
 );
 
@@ -160,10 +152,7 @@ router.delete(
     }
 
     await workflowTriggerService.deleteTrigger(id);
-    res.json({
-      success: true,
-      message: 'Trigger deleted'
-    });
+    sendSuccess(res, undefined, 'Trigger deleted');
   })
 );
 
@@ -185,11 +174,7 @@ router.post(
       return errorResponse(res, 'Trigger not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
-    res.json({
-      success: true,
-      message: `Trigger ${trigger.is_active ? 'activated' : 'deactivated'}`,
-      trigger
-    });
+    sendSuccess(res, { trigger }, `Trigger ${trigger.is_active ? 'activated' : 'deactivated'}`);
   })
 );
 
@@ -209,7 +194,7 @@ router.get(
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
 
     const logs = await workflowTriggerService.getTriggerLogs(triggerId, limit);
-    res.json({ logs });
+    sendSuccess(res, { logs });
   })
 );
 
@@ -225,7 +210,7 @@ router.get(
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
 
     const events = await workflowTriggerService.getSystemEvents(eventType, limit);
-    res.json({ events });
+    sendSuccess(res, { events });
   })
 );
 
@@ -249,10 +234,7 @@ router.post(
       isTest: true
     });
 
-    res.json({
-      success: true,
-      message: `Event ${event_type} emitted`
-    });
+    sendSuccess(res, undefined, `Event ${event_type} emitted`);
   })
 );
 

@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { clientInfoService, OnboardingStatus } from '../services/client-info-service.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -39,7 +39,7 @@ router.get(
       return errorResponse(res, 'Client not found', 404);
     }
 
-    res.json({ status });
+    sendSuccess(res, { status });
   })
 );
 
@@ -58,7 +58,7 @@ router.get(
 
     const items = await clientInfoService.getMissingItems(clientId);
 
-    res.json({ items });
+    sendSuccess(res, { items });
   })
 );
 
@@ -77,7 +77,7 @@ router.get(
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
 
-    res.json({ progress });
+    sendSuccess(res, { progress });
   })
 );
 
@@ -106,11 +106,7 @@ router.post(
       projectId
     );
 
-    res.json({
-      success: true,
-      message: 'Progress saved',
-      progress
-    });
+    sendSuccess(res, { progress }, 'Progress saved');
   })
 );
 
@@ -130,11 +126,7 @@ router.post(
 
     const progress = await clientInfoService.completeOnboarding(clientId, finalData);
 
-    res.json({
-      success: true,
-      message: 'Onboarding completed',
-      progress
-    });
+    sendSuccess(res, { progress }, 'Onboarding completed');
   })
 );
 
@@ -164,7 +156,7 @@ router.get(
       onboardingStatus
     });
 
-    res.json({ statuses });
+    sendSuccess(res, { statuses });
   })
 );
 
@@ -188,7 +180,7 @@ router.get(
       return errorResponse(res, 'Client not found', 404);
     }
 
-    res.json({ status });
+    sendSuccess(res, { status });
   })
 );
 
@@ -208,7 +200,7 @@ router.get(
 
     const items = await clientInfoService.getMissingItems(clientId);
 
-    res.json({ items });
+    sendSuccess(res, { items });
   })
 );
 
@@ -228,11 +220,7 @@ router.post(
 
     const completeness = await clientInfoService.calculateCompleteness(clientId);
 
-    res.json({
-      success: true,
-      message: 'Completeness recalculated',
-      completeness
-    });
+    sendSuccess(res, { completeness }, 'Completeness recalculated');
   })
 );
 
@@ -252,7 +240,7 @@ router.get(
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
 
-    res.json({ progress });
+    sendSuccess(res, { progress });
   })
 );
 
@@ -272,10 +260,7 @@ router.delete(
 
     await clientInfoService.resetOnboarding(clientId);
 
-    res.json({
-      success: true,
-      message: 'Onboarding reset'
-    });
+    sendSuccess(res, undefined, 'Onboarding reset');
   })
 );
 

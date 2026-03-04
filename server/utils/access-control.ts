@@ -26,7 +26,7 @@ export async function isUserAdmin(req: JWTAuthRequest): Promise<boolean> {
   // For admin users with id > 0 (not the special admin account), verify from database
   if (req.user.id > 0) {
     const db = getDatabase();
-    const client = await db.get('SELECT is_admin FROM clients WHERE id = ?', [req.user.id]);
+    const client = await db.get('SELECT is_admin FROM active_clients WHERE id = ?', [req.user.id]);
     return !!(client && client.is_admin === 1);
   }
 
@@ -43,7 +43,7 @@ export async function canAccessProject(req: JWTAuthRequest, projectId: number): 
   }
 
   const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
+  const row = await db.get('SELECT 1 FROM active_projects WHERE id = ? AND client_id = ?', [
     projectId,
     req.user?.id
   ]);
@@ -60,7 +60,7 @@ export async function canAccessInvoice(req: JWTAuthRequest, invoiceId: number): 
   }
 
   const db = getDatabase();
-  const row = await db.get('SELECT 1 FROM invoices WHERE id = ? AND client_id = ?', [
+  const row = await db.get('SELECT 1 FROM active_invoices WHERE id = ? AND client_id = ?', [
     invoiceId,
     req.user?.id
   ]);
@@ -87,7 +87,7 @@ export async function canAccessFile(req: JWTAuthRequest, fileId: number): Promis
   const row = await db.get(
     `SELECT 1
      FROM files f
-     LEFT JOIN projects p ON f.project_id = p.id
+     LEFT JOIN active_projects p ON f.project_id = p.id
      WHERE f.id = ?
        AND (
          f.uploaded_by = ?
@@ -113,7 +113,7 @@ export async function canAccessFolder(req: JWTAuthRequest, folderId: number): Pr
   const row = await db.get(
     `SELECT 1
      FROM file_folders ff
-     JOIN projects p ON ff.project_id = p.id
+     JOIN active_projects p ON ff.project_id = p.id
      WHERE ff.id = ? AND p.client_id = ?`,
     [folderId, req.user?.id]
   );
@@ -133,7 +133,7 @@ export async function canAccessTask(req: JWTAuthRequest, taskId: number): Promis
   const row = await db.get(
     `SELECT 1
      FROM project_tasks t
-     JOIN projects p ON t.project_id = p.id
+     JOIN active_projects p ON t.project_id = p.id
      WHERE t.id = ? AND p.client_id = ?`,
     [taskId, req.user?.id]
   );
@@ -156,7 +156,7 @@ export async function canAccessMilestone(
   const row = await db.get(
     `SELECT 1
      FROM milestones m
-     JOIN projects p ON m.project_id = p.id
+     JOIN active_projects p ON m.project_id = p.id
      WHERE m.id = ? AND p.client_id = ?`,
     [milestoneId, req.user?.id]
   );
@@ -180,7 +180,7 @@ export async function canAccessChecklistItem(
     `SELECT 1
      FROM task_checklist_items i
      JOIN project_tasks t ON i.task_id = t.id
-     JOIN projects p ON t.project_id = p.id
+     JOIN active_projects p ON t.project_id = p.id
      WHERE i.id = ? AND p.client_id = ?`,
     [itemId, req.user?.id]
   );
@@ -204,7 +204,7 @@ export async function canAccessFileComment(
     `SELECT 1
      FROM file_comments fc
      JOIN files f ON fc.file_id = f.id
-     JOIN projects p ON f.project_id = p.id
+     JOIN active_projects p ON f.project_id = p.id
      WHERE fc.id = ? AND p.client_id = ?`,
     [commentId, req.user?.id]
   );
@@ -223,7 +223,7 @@ export async function canAccessThread(req: JWTAuthRequest, threadId: number): Pr
   const db = getDatabase();
   const row = await db.get(
     `SELECT 1
-     FROM message_threads mt
+     FROM active_message_threads mt
      WHERE mt.id = ? AND mt.client_id = ?`,
     [threadId, req.user?.id]
   );
@@ -245,7 +245,7 @@ export async function canAccessDocumentRequest(
   const db = getDatabase();
   const row = await db.get(
     `SELECT 1
-     FROM document_requests dr
+     FROM active_document_requests dr
      WHERE dr.id = ? AND dr.client_id = ?`,
     [requestId, req.user?.id]
   );
@@ -267,7 +267,7 @@ export async function canAccessContract(
   const db = getDatabase();
   const row = await db.get(
     `SELECT 1
-     FROM contracts c
+     FROM active_contracts c
      WHERE c.id = ? AND c.client_id = ?`,
     [contractId, req.user?.id]
   );
@@ -307,13 +307,13 @@ export async function getClientIdFromEntity(
   const db = getDatabase();
 
   const queries: Record<string, string> = {
-    project: 'SELECT client_id FROM projects WHERE id = ?',
-    invoice: 'SELECT client_id FROM invoices WHERE id = ?',
-    file: 'SELECT p.client_id FROM files f JOIN projects p ON f.project_id = p.id WHERE f.id = ?',
-    task: 'SELECT p.client_id FROM project_tasks t JOIN projects p ON t.project_id = p.id WHERE t.id = ?',
+    project: 'SELECT client_id FROM active_projects WHERE id = ?',
+    invoice: 'SELECT client_id FROM active_invoices WHERE id = ?',
+    file: 'SELECT p.client_id FROM files f JOIN active_projects p ON f.project_id = p.id WHERE f.id = ?',
+    task: 'SELECT p.client_id FROM project_tasks t JOIN active_projects p ON t.project_id = p.id WHERE t.id = ?',
     milestone:
-      'SELECT p.client_id FROM milestones m JOIN projects p ON m.project_id = p.id WHERE m.id = ?',
-    thread: 'SELECT client_id FROM message_threads WHERE id = ?'
+      'SELECT p.client_id FROM milestones m JOIN active_projects p ON m.project_id = p.id WHERE m.id = ?',
+    thread: 'SELECT client_id FROM active_message_threads WHERE id = ?'
   };
 
   const query = queries[entityType];

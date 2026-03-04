@@ -3,7 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { cacheService } from '../../services/cache-service.js';
 import { errorTracker } from '../../services/error-tracking.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -30,7 +30,7 @@ router.get(
 
     try {
       const stats = await cacheService.getStats();
-      res.json({
+      sendSuccess(res, {
         cache: stats,
         timestamp: new Date().toISOString()
       });
@@ -73,10 +73,9 @@ router.post(
           user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
         });
 
-        res.json({
-          message: 'Cache cleared successfully',
+        sendSuccess(res, {
           timestamp: new Date().toISOString()
-        });
+        }, 'Cache cleared successfully');
       } else {
         errorResponse(res, 'Failed to clear cache', 500, 'CACHE_CLEAR_FAILED');
       }
@@ -142,13 +141,12 @@ router.post(
         extra: { tag, pattern, invalidatedCount: count }
       });
 
-      res.json({
-        message: `Invalidated ${count} cache entries`,
+      sendSuccess(res, {
         count,
         tag,
         pattern,
         timestamp: new Date().toISOString()
-      });
+      }, `Invalidated ${count} cache entries`);
     } catch (error) {
       logger.error('Error invalidating cache:', {
         error: error instanceof Error ? error : undefined

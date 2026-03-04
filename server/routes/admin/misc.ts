@@ -3,7 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { emailService } from '../../services/email-service.js';
 import { softDeleteService, SoftDeleteEntityType } from '../../services/soft-delete-service.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
@@ -60,11 +60,7 @@ router.post(
       );
     }
 
-    res.json({
-      success: true,
-      message: 'Test email sent successfully',
-      to: adminEmail
-    });
+    sendSuccess(res, { to: adminEmail }, 'Test email sent successfully');
   })
 );
 
@@ -114,7 +110,7 @@ router.get(
       };
     });
 
-    res.json({ items: transformedItems, stats });
+    sendSuccess(res, { items: transformedItems, stats });
   })
 );
 
@@ -127,7 +123,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const stats = await softDeleteService.getDeletedItemStats();
-    res.json(stats);
+    sendSuccess(res, stats);
   })
 );
 
@@ -142,12 +138,11 @@ router.delete(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
 
-    res.json({
-      success: errors.length === 0,
-      message: `Trash emptied. Permanently deleted ${deleted.total} items.`,
+    sendSuccess(res, {
+      allSucceeded: errors.length === 0,
       deleted,
       errors: errors.length > 0 ? errors : undefined
-    });
+    }, `Trash emptied. Permanently deleted ${deleted.total} items.`);
   })
 );
 
@@ -162,12 +157,11 @@ router.post(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
 
-    res.json({
-      success: errors.length === 0,
-      message: `Cleanup complete. Permanently deleted ${deleted.total} items.`,
+    sendSuccess(res, {
+      allSucceeded: errors.length === 0,
       deleted,
       errors: errors.length > 0 ? errors : undefined
-    });
+    }, `Cleanup complete. Permanently deleted ${deleted.total} items.`);
   })
 );
 
@@ -218,8 +212,8 @@ router.post(
       }
     }
 
-    res.json({
-      success: errors.length === 0,
+    sendSuccess(res, {
+      allSucceeded: errors.length === 0,
       restored,
       errors: errors.length > 0 ? errors : undefined
     });
@@ -273,8 +267,8 @@ router.post(
       }
     }
 
-    res.json({
-      success: errors.length === 0,
+    sendSuccess(res, {
+      allSucceeded: errors.length === 0,
       deleted,
       errors: errors.length > 0 ? errors : undefined
     });
@@ -316,10 +310,7 @@ router.post(
     const result = await softDeleteService.restore(entityType, entityId);
 
     if (result.success) {
-      res.json({
-        success: true,
-        message: result.message
-      });
+      sendSuccess(res, undefined, result.message);
     } else {
       errorResponse(res, result.message, 400, 'RESTORE_FAILED');
     }
@@ -361,10 +352,7 @@ router.delete(
     const result = await softDeleteService.forceDelete(entityType, entityId);
 
     if (result.success) {
-      res.json({
-        success: true,
-        message: result.message
-      });
+      sendSuccess(res, undefined, result.message);
     } else {
       errorResponse(res, result.message, 400, 'DELETE_FAILED');
     }
@@ -410,7 +398,7 @@ router.get(
       inactive: clients.filter((c: { status: string }) => c.status === 'inactive').length
     };
 
-    res.json({ clients, stats });
+    sendSuccess(res, { clients, stats });
   })
 );
 
@@ -522,7 +510,7 @@ router.get(
       withCompany: allContacts.filter((c) => c.company).length
     };
 
-    res.json({ contacts: allContacts, stats });
+    sendSuccess(res, { contacts: allContacts, stats });
   })
 );
 
@@ -596,7 +584,7 @@ router.patch(
       [contactId]
     );
 
-    res.json({ success: true, contact: updatedContact });
+    sendSuccess(res, { contact: updatedContact });
   })
 );
 
@@ -627,7 +615,7 @@ router.post(
       }
     }
 
-    res.json({ success: true, deleted });
+    sendSuccess(res, { deleted });
   })
 );
 
@@ -662,7 +650,7 @@ router.post(
       }
     }
 
-    res.json({ success: true, deleted });
+    sendSuccess(res, { deleted });
   })
 );
 
@@ -727,7 +715,7 @@ router.put(
 
     const updatedTask = await db.get(`SELECT ${PROJECT_TASK_COLUMNS} FROM project_tasks WHERE id = ?`, [taskId]);
 
-    res.json({ success: true, task: updatedTask });
+    sendSuccess(res, { task: updatedTask });
   })
 );
 
@@ -790,7 +778,7 @@ router.get(
       totalSize: files.reduce((sum: number, f: { fileSize: number }) => sum + (f.fileSize || 0), 0)
     };
 
-    res.json({ files, stats });
+    sendSuccess(res, { files, stats });
   })
 );
 
@@ -819,7 +807,7 @@ router.delete(
     // Delete from database (file system cleanup can be handled separately)
     await db.run('DELETE FROM files WHERE id = ?', [fileId]);
 
-    res.json({ success: true, message: 'File deleted' });
+    sendSuccess(res, undefined, 'File deleted');
   })
 );
 
@@ -879,7 +867,7 @@ router.get(
       approved: deliverables.filter((d: { status: string }) => d.status === 'approved').length
     };
 
-    res.json({ deliverables, stats });
+    sendSuccess(res, { deliverables, stats });
   })
 );
 
@@ -910,7 +898,7 @@ router.post(
       }
     }
 
-    res.json({ success: true, deleted });
+    sendSuccess(res, { deleted });
   })
 );
 
@@ -949,7 +937,7 @@ router.post(
       }
     }
 
-    res.json({ success: true, deleted });
+    sendSuccess(res, { deleted });
   })
 );
 
@@ -1154,7 +1142,7 @@ router.get(
         }]
       };
 
-      res.json({
+      sendSuccess(res, {
         kpis: {
           revenue: {
             value: currentRevenue?.value || 0,

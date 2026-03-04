@@ -22,7 +22,7 @@ import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
-import { errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -574,10 +574,7 @@ router.get(
           : null
       };
 
-      res.json({
-        success: true,
-        data: responseData
-      });
+      sendSuccess(res, responseData);
     } catch (error: unknown) {
       await logger.error('Status check error:', {
         error: error instanceof Error ? error : undefined,

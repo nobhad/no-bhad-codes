@@ -202,11 +202,10 @@ class MessageService {
     const db = getDatabase();
     const rows = await db.all(
       `SELECT m.*, mt.subject as thread_subject
-       FROM messages m
+       FROM active_messages m
        JOIN message_mentions mm ON m.id = mm.message_id
-       JOIN message_threads mt ON m.thread_id = mt.id
+       JOIN active_message_threads mt ON m.thread_id = mt.id
        WHERE (mm.mentioned_type = 'all' OR mm.mentioned_id = ?)
-         AND m.deleted_at IS NULL
        ORDER BY m.created_at DESC
        LIMIT ?`,
       [userEmail, limit]
@@ -496,7 +495,7 @@ class MessageService {
 
     // Get all unread messages in thread
     const messages = await db.all(
-      `SELECT m.id FROM messages m
+      `SELECT m.id FROM active_messages m
        LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
        WHERE m.thread_id = ? AND mrr.id IS NULL`,
       [userEmail, threadId]
@@ -530,14 +529,14 @@ class MessageService {
     // Different query based on user type
     const query =
       userType === 'admin'
-        ? `SELECT COUNT(*) as count FROM messages m
+        ? `SELECT COUNT(*) as count FROM active_messages m
          LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
-         WHERE m.sender_type != 'admin' AND m.deleted_at IS NULL AND mrr.id IS NULL`
-        : `SELECT COUNT(*) as count FROM messages m
-         JOIN message_threads mt ON m.thread_id = mt.id
+         WHERE m.sender_type != 'admin' AND mrr.id IS NULL`
+        : `SELECT COUNT(*) as count FROM active_messages m
+         JOIN active_message_threads mt ON m.thread_id = mt.id
          LEFT JOIN message_read_receipts mrr ON m.id = mrr.message_id AND mrr.user_email = ?
-         WHERE mt.client_id = (SELECT id FROM clients WHERE email = ?)
-           AND m.sender_type != 'client' AND m.deleted_at IS NULL AND mrr.id IS NULL`;
+         WHERE mt.client_id = (SELECT id FROM active_clients WHERE email = ?)
+           AND m.sender_type != 'client' AND mrr.id IS NULL`;
 
     const params = userType === 'admin' ? [userEmail] : [userEmail, userEmail];
     const row = await db.get(query, params);
@@ -556,7 +555,7 @@ class MessageService {
     const db = getDatabase();
 
     // Verify message belongs to thread
-    const message = await db.get('SELECT id FROM messages WHERE id = ? AND thread_id = ?', [
+    const message = await db.get('SELECT id FROM active_messages WHERE id = ? AND thread_id = ?', [
       messageId,
       threadId
     ]);
@@ -613,7 +612,7 @@ class MessageService {
     const rows = await db.all(
       `SELECT pm.*, m.sender_name, m.message, m.created_at as message_created_at
        FROM pinned_messages pm
-       JOIN messages m ON pm.message_id = m.id
+       JOIN active_messages m ON pm.message_id = m.id
        WHERE pm.thread_id = ?
        ORDER BY pm.pinned_at DESC`,
       [threadId]
@@ -712,8 +711,8 @@ class MessageService {
     const db = getDatabase();
 
     const query = parentMessageId
-      ? `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE thread_id = ? AND parent_message_id = ? AND deleted_at IS NULL ORDER BY created_at ASC`
-      : `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE thread_id = ? AND parent_message_id IS NULL AND deleted_at IS NULL ORDER BY created_at ASC`;
+      ? `SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE thread_id = ? AND parent_message_id = ? ORDER BY created_at ASC`
+      : `SELECT ${MESSAGE_COLUMNS} FROM active_messages WHERE thread_id = ? AND parent_message_id IS NULL ORDER BY created_at ASC`;
 
     const params = parentMessageId ? [threadId, parentMessageId] : [threadId];
     const rows = await db.all(query, params);
@@ -744,10 +743,10 @@ class MessageService {
       SELECT m.id as message_id, m.thread_id, mt.subject as thread_subject,
              m.sender_name, m.message, m.created_at,
              mt.project_id, p.project_name
-      FROM messages m
-      JOIN message_threads mt ON m.thread_id = mt.id
-      LEFT JOIN projects p ON mt.project_id = p.id
-      WHERE m.message LIKE ? AND m.deleted_at IS NULL
+      FROM active_messages m
+      JOIN active_message_threads mt ON m.thread_id = mt.id
+      LEFT JOIN active_projects p ON mt.project_id = p.id
+      WHERE m.message LIKE ?
     `;
 
     const params: (string | number)[] = [`%${query}%`];
@@ -860,11 +859,10 @@ class MessageService {
     const result = await db.get(
       `
       SELECT COUNT(*) as count
-      FROM messages m
+      FROM active_messages m
       LEFT JOIN message_read_receipts mrr
         ON m.id = mrr.message_id AND mrr.user_email = ?
       WHERE m.thread_id = ?
-        AND m.deleted_at IS NULL
         AND mrr.id IS NULL
     `,
       [userEmail, threadId]
@@ -877,8 +875,8 @@ class MessageService {
     const db = getDatabase();
     return db.all(`
       SELECT mt.*, p.project_name
-      FROM message_threads mt
-      LEFT JOIN projects p ON mt.project_id = p.id
+      FROM active_message_threads mt
+      LEFT JOIN active_projects p ON mt.project_id = p.id
       WHERE mt.archived_at IS NOT NULL
       ORDER BY mt.archived_at DESC
     `);

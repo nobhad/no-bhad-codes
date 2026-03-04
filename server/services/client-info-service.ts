@@ -124,7 +124,7 @@ class ClientInfoService {
          COUNT(*) as total,
          SUM(CASE WHEN status IN ('requested', 'viewed') THEN 1 ELSE 0 END) as pending,
          SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved
-       FROM document_requests
+       FROM active_document_requests
        WHERE client_id = ?`,
       [clientId]
     )) as { total: number; pending: number; approved: number } | undefined;
@@ -146,7 +146,7 @@ class ClientInfoService {
     // Get client profile to check completeness
     const client = (await db.get(
       `SELECT company_name, contact_name, email, phone, address
-       FROM clients WHERE id = ?`,
+       FROM active_clients WHERE id = ?`,
       [clientId]
     )) as
       | {
@@ -278,7 +278,7 @@ class ClientInfoService {
 
     const client = (await db.get(
       `SELECT id, company_name, contact_name, email
-       FROM clients WHERE id = ?`,
+       FROM active_clients WHERE id = ?`,
       [clientId]
     )) as { id: number; company_name?: string; contact_name?: string; email: string } | undefined;
 
@@ -310,8 +310,7 @@ class ClientInfoService {
     // Get all clients
     const clients = (await db.all(
       `SELECT id, company_name, contact_name, email
-       FROM clients
-       WHERE deleted_at IS NULL
+       FROM active_clients
        ORDER BY COALESCE(company_name, contact_name) ASC`
     )) as Array<{ id: number; company_name?: string; contact_name?: string; email: string }>;
 
@@ -357,7 +356,7 @@ class ClientInfoService {
     // Check profile completeness
     const client = (await db.get(
       `SELECT company_name, contact_name, email, phone, address
-       FROM clients WHERE id = ?`,
+       FROM active_clients WHERE id = ?`,
       [clientId]
     )) as
       | {
@@ -406,7 +405,7 @@ class ClientInfoService {
     // Check pending document requests
     const pendingDocs = (await db.all(
       `SELECT id, title, description, due_date, priority
-       FROM document_requests
+       FROM active_document_requests
        WHERE client_id = ? AND status IN ('requested', 'viewed')
        ORDER BY CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC`,
       [clientId]

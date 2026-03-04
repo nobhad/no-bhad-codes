@@ -2,6 +2,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
+import { sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -164,8 +165,7 @@ router.get(
       });
     }
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       recentActivity: recentActivity.map((item: Record<string, unknown>) => ({
         type: item.type,
         title: item.title,

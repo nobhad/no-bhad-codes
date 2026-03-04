@@ -37,7 +37,7 @@ section.page-hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  z-index: -1;
+  z-index: var(--z-index-behind);
 }
 
 /* Page entering state - MUST be invisible before GSAP animates in */
@@ -137,7 +137,7 @@ section.business-card-section.page-hidden {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  z-index: -1;
+  z-index: var(--z-index-behind);
 }
 
 /* Also hide intro children when page is hidden - use !important to override GSAP inline styles */
@@ -379,7 +379,7 @@ section[data-page].page-hidden {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
-  z-index: -1 !important;
+  z-index: var(--z-index-behind) !important;
   pointer-events: none !important;
 }
 

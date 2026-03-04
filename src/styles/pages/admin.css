@@ -186,7 +186,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
   flex-direction: column;
   height: 100vh;
   min-height: 100vh;
-  z-index: 60;
+  z-index: var(--z-index-50);
   position: relative;
 }
 

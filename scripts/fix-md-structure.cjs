@@ -10,7 +10,7 @@ const src = fs.readFileSync(file, 'utf8');
 const lines = src.split('\n');
 const out = [];
 let inFence = false;
-let fenceLang = null;
+let _fenceLang = null;
 let olCounter = null;
 for (let i = 0; i < lines.length; i++) {
   let line = lines[i];
@@ -25,7 +25,7 @@ for (let i = 0; i < lines.length; i++) {
         line = '```text';
       }
       inFence = true;
-      fenceLang = line;
+      _fenceLang = line;
       out.push(line);
       continue;
     } else {
@@ -34,7 +34,7 @@ for (let i = 0; i < lines.length; i++) {
       // ensure blank line after fence (if not EOF)
       if (i + 1 < lines.length && lines[i + 1].trim() !== '') out.push('');
       inFence = false;
-      fenceLang = null;
+      _fenceLang = null;
       continue;
     }
   }

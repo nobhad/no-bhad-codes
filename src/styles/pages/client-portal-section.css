@@ -156,7 +156,7 @@ section.client-portal-section button[type="submit"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5;
+  z-index: var(--z-index-content);
 }
 
 .client-portal-section .password-toggle:hover {

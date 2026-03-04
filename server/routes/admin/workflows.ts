@@ -6,6 +6,7 @@ import { backfillMilestones } from '../../services/milestone-generator.js';
 import { backfillMilestoneTasks } from '../../services/task-generator.js';
 import { logger } from '../../services/logger.js';
 import { getDatabase } from '../../database/init.js';
+import { sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.get(
         : 0
     };
 
-    res.json({ workflows: triggers, stats });
+    sendSuccess(res, { workflows: triggers, stats });
   })
 );
 
@@ -84,7 +85,7 @@ router.post(
       }
     }
 
-    res.json({ success: true, deleted });
+    sendSuccess(res, { deleted });
   })
 );
 
@@ -123,7 +124,7 @@ router.post(
       }
     }
 
-    res.json({ success: true, updated });
+    sendSuccess(res, { updated });
   })
 );
 
@@ -141,13 +142,12 @@ router.post(
     const remindersSent = await scheduler.triggerReminderProcessing();
     const { scheduled, recurring } = await scheduler.triggerInvoiceGeneration();
 
-    res.json({
-      message: 'Scheduler run completed',
+    sendSuccess(res, {
       reminders: remindersSent,
       scheduledInvoices: scheduled,
       recurringInvoices: recurring,
       overdueMarked: overdueCount
-    });
+    }, 'Scheduler run completed');
   })
 );
 
@@ -166,16 +166,12 @@ router.post(
 
     const result = await backfillMilestones();
 
-    res.json({
-      success: true,
-      message: `Backfill complete: ${result.milestonesCreated} milestones and ${result.tasksCreated} tasks created for ${result.projectsProcessed} projects`,
-      data: {
-        projectsProcessed: result.projectsProcessed,
-        milestonesCreated: result.milestonesCreated,
-        tasksCreated: result.tasksCreated,
-        errors: result.errors
-      }
-    });
+    sendSuccess(res, {
+      projectsProcessed: result.projectsProcessed,
+      milestonesCreated: result.milestonesCreated,
+      tasksCreated: result.tasksCreated,
+      errors: result.errors
+    }, `Backfill complete: ${result.milestonesCreated} milestones and ${result.tasksCreated} tasks created for ${result.projectsProcessed} projects`);
   })
 );
 
@@ -194,15 +190,11 @@ router.post(
 
     const result = await backfillMilestoneTasks();
 
-    res.json({
-      success: true,
-      message: `Backfill complete: ${result.tasksCreated} tasks created for ${result.milestonesProcessed} milestones`,
-      data: {
-        milestonesProcessed: result.milestonesProcessed,
-        tasksCreated: result.tasksCreated,
-        errors: result.errors
-      }
-    });
+    sendSuccess(res, {
+      milestonesProcessed: result.milestonesProcessed,
+      tasksCreated: result.tasksCreated,
+      errors: result.errors
+    }, `Backfill complete: ${result.tasksCreated} tasks created for ${result.milestonesProcessed} milestones`);
   })
 );
 

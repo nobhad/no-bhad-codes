@@ -7,7 +7,7 @@ import {
   previewEscalation,
   getEscalationSummary
 } from '../../services/priority-escalation-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.post(
     if (preview) {
       // Preview mode - show what would be escalated
       const result = await previewEscalation(projectId);
-      return res.json({
+      return sendSuccess(res, {
         preview: true,
         ...result
       });
@@ -47,11 +47,9 @@ router.post(
     // Execute escalation
     const result = await escalateTaskPriorities(projectId);
 
-    res.json({
-      success: true,
-      message: `Escalated ${result.updatedCount} task(s)`,
+    sendSuccess(res, {
       ...result
-    });
+    }, `Escalated ${result.updatedCount} task(s)`);
   })
 );
 
@@ -76,7 +74,7 @@ router.get(
 
     const summary = await getEscalationSummary(projectId);
 
-    res.json({
+    sendSuccess(res, {
       projectId,
       ...summary
     });

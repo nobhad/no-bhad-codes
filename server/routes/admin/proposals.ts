@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROPOSAL_REQUEST_COLUMNS = `
@@ -69,7 +69,7 @@ router.get(
       declined: mappedProposals.filter((p: { status: string }) => p.status === 'declined').length
     };
 
-    res.json({ proposals: mappedProposals, stats });
+    sendSuccess(res, { proposals: mappedProposals, stats });
   })
 );
 
@@ -98,7 +98,7 @@ router.post(
 
     const updated = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
 
-    res.json({ success: true, proposal: updated });
+    sendSuccess(res, { proposal: updated });
   })
 );
 
@@ -140,7 +140,7 @@ router.post(
 
     const newProposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [result.lastID]);
 
-    res.json({ success: true, proposal: newProposal });
+    sendSuccess(res, { proposal: newProposal });
   })
 );
 
@@ -167,7 +167,7 @@ router.delete(
       WHERE id = ?
     `, [proposalId]);
 
-    res.json({ success: true });
+    sendSuccess(res);
   })
 );
 

@@ -15,7 +15,7 @@ import {
   emailTemplateService,
   type EmailTemplateCategory
 } from '../../services/email-template-service.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -39,7 +39,7 @@ router.get(
     };
 
     // Return in format expected by frontend
-    res.json({ templates, stats });
+    sendSuccess(res, { templates, stats });
   })
 );
 
@@ -63,7 +63,7 @@ router.get(
       return errorResponse(res, 'Template not found', 404, 'NOT_FOUND');
     }
 
-    res.json({ template });
+    sendSuccess(res, { template });
   })
 );
 
@@ -94,7 +94,7 @@ router.put(
       return errorResponse(res, 'Template not found', 404, 'NOT_FOUND');
     }
 
-    res.json({ success: true, template });
+    sendSuccess(res, { template });
   })
 );
 

@@ -11,7 +11,7 @@ import archiver from 'archiver';
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import { getInvoiceService, toSnakeCasePayment } from './helpers.js';
@@ -39,8 +39,7 @@ router.get(
 
     try {
       const payments = await getInvoiceService().getAllPayments(dateFrom, dateTo);
-      res.json({
-        success: true,
+      sendSuccess(res, {
         payments: payments.map(toSnakeCasePayment),
         count: payments.length
       });
