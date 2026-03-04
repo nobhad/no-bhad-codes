@@ -140,6 +140,11 @@ export class PageTransitionModule extends BaseModule {
         id: 'admin-login',
         route: '#/admin-login',
         title: 'Admin Login - No Bhad Codes'
+      },
+      {
+        id: 'portal-login',
+        route: '#/portal',
+        title: 'Portal - No Bhad Codes'
       }
     ];
 
@@ -257,9 +262,11 @@ export class PageTransitionModule extends BaseModule {
     }
 
     const path = hash.replace('#/', '').replace('#', '');
+    // Strip query string from hash path (e.g. 'portal?session=expired' → 'portal')
+    const cleanPath = path.split('?')[0];
 
     // Check for project detail routes (#/projects/slug)
-    if (path.startsWith('projects/') && path !== 'projects/') {
+    if (cleanPath.startsWith('projects/') && cleanPath !== 'projects/') {
       return 'project-detail';
     }
 
@@ -270,10 +277,11 @@ export class PageTransitionModule extends BaseModule {
       about: 'about',
       projects: 'projects',
       contact: 'contact',
-      'admin-login': 'admin-login'
+      'admin-login': 'admin-login',
+      'portal': 'portal-login'
     };
 
-    return hashToPage[path] || null;
+    return hashToPage[cleanPath] || null;
   }
 
   /**

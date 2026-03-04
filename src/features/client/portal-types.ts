@@ -69,4 +69,5 @@ export interface ClientPortalContext {
   escapeHtml: (text: string) => string;
   switchView?: (view: string) => void;
   refreshData?: () => Promise<void>;
+  onSelectProject?: (projectId: string) => void;
 }

@@ -248,7 +248,9 @@ export interface AdminDashboardContext {
   getAuthToken: () => string | null;
   showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   refreshData: () => Promise<void>;
-  switchTab: (tab: string) => void;
+  switchTab: (tab: string, entityId?: string) => void;
+  /** Entity ID to pass when navigating to detail views */
+  currentEntityId?: string | null;
 }
 
 // Analytics event type for analytics tracking

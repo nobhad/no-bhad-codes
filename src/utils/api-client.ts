@@ -120,8 +120,11 @@ function handleSessionExpired(): void {
   // Dispatch session expired event for auth system integration
   window.dispatchEvent(new CustomEvent(AUTH_EVENTS.SESSION_EXPIRED));
 
-  // Check if we're in admin or client portal
-  const isAdminPage = window.location.pathname.includes(ROUTES.ADMIN.LOGIN);
+  // Detect portal type from path for legacy /admin paths.
+  // After the /portal + /dashboard consolidation, both ROUTES.ADMIN.LOGIN and
+  // ROUTES.CLIENT.LOGIN point to /portal, so the redirect destination is the
+  // same regardless of role. The check is kept for any legacy /admin/* paths.
+  const isAdminPage = window.location.pathname.startsWith('/admin');
 
   // Clear all auth data
   sessionStorage.clear();
@@ -143,9 +146,9 @@ function handleSessionExpired(): void {
     // Default: redirect to login page after a brief delay
     setTimeout(() => {
       if (isAdminPage) {
-        window.location.href = ROUTES.ADMIN.LOGIN;
+        window.location.href = `${ROUTES.ADMIN.LOGIN}?session=expired`;
       } else {
-        window.location.href = ROUTES.CLIENT.LOGIN;
+        window.location.href = `${ROUTES.CLIENT.LOGIN}?session=expired`;
       }
     }, 1500);
   }

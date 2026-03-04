@@ -171,6 +171,23 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
+      name: 'PortalLoginModule',
+      type: 'dom',
+      factory: async () => {
+        const hash = window.location.hash;
+        if (hash === '#/portal') {
+          const { PortalLoginOnMainSite } = await import('../features/main-site/portal-login');
+          return new PortalLoginOnMainSite();
+        }
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'PortalLoginModule'
+        };
+      }
+    },
+    {
       name: 'ProjectsModule',
       type: 'dom',
       factory: async () => {
@@ -214,10 +231,12 @@ export function registerModules(debug: boolean = false): void {
       name: 'ClientPortalModule',
       type: 'dom',
       factory: async () => {
-        // Load client portal on all /client/* pages except intake (which uses TerminalIntakeModule)
+        // Load client portal on /portal (login), /dashboard (client), and /client/* pages except intake
         const currentPath = window.location.pathname;
+        const pageType = document.body.getAttribute('data-page') || '';
         const isClientPage =
-          currentPath.startsWith('/client') && !currentPath.includes('/client/intake');
+          (currentPath === '/dashboard' && pageType === 'client-portal') ||
+          (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
         if (isClientPage) {
           const { ClientPortalModule } = await import('../features/client/client-portal');
           return new ClientPortalModule();
@@ -235,9 +254,10 @@ export function registerModules(debug: boolean = false): void {
       name: 'AdminDashboardModule',
       type: 'dom',
       factory: async () => {
-        // Only load admin dashboard on admin pages
+        // Load admin dashboard on /admin/* pages and /dashboard (admin)
         const currentPath = window.location.pathname;
-        if (currentPath.includes('/admin')) {
+        const pageType = document.body.getAttribute('data-page') || '';
+        if (currentPath.includes('/admin') || (currentPath === '/dashboard' && pageType === 'admin')) {
           const { AdminDashboard } = await import('../features/admin/admin-dashboard');
           const adminDashboard = new AdminDashboard();
           // Expose globally for onclick handlers in rendered HTML
@@ -312,6 +332,7 @@ export function registerModules(debug: boolean = false): void {
 export function getMainSiteModules(): string[] {
   const hash = window.location.hash;
   const isAdminLogin = hash === '#/admin-login' || hash === '#admin-login';
+  const isPortalLogin = hash === '#/portal' || hash.startsWith('#/portal?');
 
   const modules = [
     'ThemeModule',
@@ -325,9 +346,12 @@ export function getMainSiteModules(): string[] {
     'ProjectsModule'
   ];
 
-  // Add admin login module if on admin-login route
   if (isAdminLogin) {
     modules.push('AdminLoginModule');
+  }
+
+  if (isPortalLogin) {
+    modules.push('PortalLoginModule');
   }
 
   return modules;

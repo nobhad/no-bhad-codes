@@ -15,6 +15,7 @@ import { authStore } from '../../../auth';
 import type { AnyUser, ClientUser } from '../../../auth/auth-types';
 import { isClientUser } from '../../../auth/auth-types';
 import { createLogger } from '../../../utils/logger';
+import { ROUTES } from '../../../constants/api-endpoints';
 import { validateEmail } from '../../../../shared/validation/validators';
 
 const logger = createLogger('PortalAuth');
@@ -117,14 +118,16 @@ export async function handleLogin(
         return;
       }
 
-      // If user is admin, redirect to admin dashboard
-      if (result.data.role === 'admin') {
-        window.location.href = '/admin/';
+      const authUser = toAuthUser(result.data);
+
+      // Admin always redirects directly — no need to load client projects.
+      if (authUser.isAdmin) {
+        window.location.href = ROUTES.PORTAL.DASHBOARD;
         return;
       }
 
-      // Call success handler
-      await callbacks.onLoginSuccess(toAuthUser(result.data));
+      // Client: delegate to caller to handle dashboard transition.
+      await callbacks.onLoginSuccess(authUser);
       return;
     }
 
@@ -140,18 +143,19 @@ export async function handleLogin(
 }
 
 /**
- * Check for existing authentication
- * Delegates to authStore.validateSession()
+ * Check for existing authentication.
+ *
+ * Two-path strategy to eliminate the in-page duplicate auth gate:
+ *  1. authStore has a session → validate with server → show dashboard.
+ *  2. authStore is empty (e.g. fresh page load, new tab, expired sessionStorage)
+ *     → try to restore session from the JWT cookie via GET /api/auth/profile.
+ *     If the cookie is valid we show the dashboard directly; if not we redirect
+ *     to the login page. The in-page auth gate is NEVER shown.
  */
 export async function checkExistingAuth(callbacks: {
   onAuthValid: (user: AuthUser) => Promise<void>;
 }): Promise<boolean> {
-  // Check if already authenticated via authStore
-  if (!authStore.isAuthenticated()) {
-    return false;
-  }
-
-  // Check for redirect parameter first - if user is already logged in and there's a redirect, go there
+  // Check for redirect parameter first
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUrl = urlParams.get('redirect');
   if (redirectUrl && redirectUrl.startsWith('/')) {
@@ -159,44 +163,103 @@ export async function checkExistingAuth(callbacks: {
     return true;
   }
 
-  try {
-    // Validate session with server
-    const isValid = await authStore.validateSession();
+  // ── Path 1: authStore has an in-memory/sessionStorage session ─────────────
+  if (authStore.isAuthenticated()) {
+    try {
+      const isValid = await authStore.validateSession();
 
-    if (isValid) {
-      const user = authStore.getCurrentUser();
-
-      if (!user) {
+      if (!isValid) {
+        window.location.href = ROUTES.CLIENT.LOGIN;
         return false;
       }
 
-      // If user is admin, redirect to admin dashboard
+      const user = authStore.getCurrentUser();
+      if (!user) {
+        window.location.href = ROUTES.CLIENT.LOGIN;
+        return false;
+      }
+
       if (user.role === 'admin') {
-        logger.info('User is admin, redirecting to /admin/');
-        window.location.href = '/admin/';
+        window.location.href = ROUTES.PORTAL.DASHBOARD;
         return true;
       }
 
       await callbacks.onAuthValid(toAuthUser(user));
       return true;
+    } catch (error) {
+      logger.error('Auth validation failed', {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      window.location.href = ROUTES.CLIENT.LOGIN;
+      return false;
+    }
+  }
+
+  // ── Path 2: No authStore session — restore from JWT cookie if valid ────────
+  // This handles: landing on /dashboard directly (bookmark / new tab) after the
+  // server already validated the cookie and rendered the portal template.
+  // We fetch the full profile using the HttpOnly cookie. If valid we show the
+  // dashboard; if not we redirect to login. Either way the in-page auth gate
+  // is never shown to the user.
+  return await restoreSessionFromCookie(callbacks);
+}
+
+/**
+ * Attempt to restore a client session from the JWT cookie by fetching the
+ * user profile from the server. On success calls onAuthValid and returns true.
+ * On any failure redirects to the login page and returns false.
+ */
+async function restoreSessionFromCookie(callbacks: {
+  onAuthValid: (user: AuthUser) => Promise<void>;
+}): Promise<boolean> {
+  try {
+    const res = await fetch('/api/auth/profile', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!res.ok) {
+      // Cookie invalid, expired, or user not found → go to login
+      window.location.href = ROUTES.CLIENT.LOGIN;
+      return false;
     }
 
-    return false;
+    const json = await res.json();
+    const user = json.data?.user;
+
+    if (!user) {
+      window.location.href = ROUTES.CLIENT.LOGIN;
+      return false;
+    }
+
+    const authUser: AuthUser = {
+      id: user.id,
+      email: user.email,
+      name: user.contactName || user.companyName || user.email.split('@')[0],
+      contactName: user.contactName,
+      companyName: user.companyName,
+      isAdmin: user.isAdmin,
+      type: user.role
+    };
+
+    await callbacks.onAuthValid(authUser);
+    return true;
   } catch (error) {
-    logger.error('Auth check failed', {
+    logger.error('Session restore from cookie failed', {
       error: error instanceof Error ? error.message : String(error)
     });
+    window.location.href = ROUTES.CLIENT.LOGIN;
     return false;
   }
 }
 
 /**
- * Handle user logout - clear session and redirect to landing page
+ * Handle user logout - clear session and redirect to client login
  * Delegates to authStore.logout()
  */
 export async function handleLogout(): Promise<void> {
   await authStore.logout();
-  window.location.href = '/';
+  window.location.href = ROUTES.CLIENT.LOGIN;
 }
 
 /**

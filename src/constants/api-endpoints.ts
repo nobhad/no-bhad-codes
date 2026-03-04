@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
   DOCUMENT_REQUESTS_MY: '/api/document-requests/my-requests',
   AD_HOC_REQUESTS: '/api/ad-hoc-requests',
   AD_HOC_REQUESTS_BULK_DELETE: '/api/ad-hoc-requests/bulk-delete',
+  AD_HOC_REQUESTS_MY: '/api/ad-hoc-requests/my-requests',
   TRIGGERS: '/api/triggers',
   APPROVALS: '/api/approvals',
   APPROVALS_PENDING: '/api/approvals/pending',
@@ -40,6 +41,8 @@ export const API_ENDPOINTS = {
   ANALYTICS: '/api/analytics',
   DELIVERABLES: '/api/v1/deliverables',
   FILES: '/api/uploads',
+  FILES_CLIENT: '/api/uploads/client',
+  FILES_MULTIPLE: '/api/uploads/multiple',
   RECEIPTS: '/api/receipts',
 
   // Client portal features
@@ -56,6 +59,7 @@ export const API_ENDPOINTS = {
 
   // Auth
   AUTH: '/api/auth',
+  AUTH_PORTAL_LOGIN: '/api/auth/portal-login',
 
   // Admin-specific endpoints (require admin authentication)
   ADMIN: {
@@ -178,6 +182,9 @@ export const buildEndpoint = {
   // Files
   adminFile: (id: number | string) => `${API_ENDPOINTS.ADMIN.FILES}/${id}`,
   fileAction: (id: number | string, action: string) => `${API_ENDPOINTS.FILES}/${id}/${action}`,
+  fileView: (id: number | string) => `${API_ENDPOINTS.FILES}/file/${id}`,
+  fileDownload: (id: number | string) => `${API_ENDPOINTS.FILES}/file/${id}?download=true`,
+  fileDelete: (id: number | string) => `${API_ENDPOINTS.FILES}/file/${id}`,
 
   // Deleted Items
   adminDeletedItemRestore: (id: number | string) => `${API_ENDPOINTS.ADMIN.DELETED_ITEMS}/${id}/restore`,
@@ -204,6 +211,8 @@ export const buildEndpoint = {
 
   // Ad-Hoc Requests
   adHocRequest: (id: number | string) => `${API_ENDPOINTS.AD_HOC_REQUESTS}/${id}`,
+  adHocRequestApprove: (id: number | string) => `${API_ENDPOINTS.AD_HOC_REQUESTS_MY}/${id}/approve`,
+  adHocRequestDecline: (id: number | string) => `${API_ENDPOINTS.AD_HOC_REQUESTS_MY}/${id}/decline`,
 
   // Ad-Hoc Analytics
   adminAdHocQuery: (id: number | string) => `${API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES}/${id}`,
@@ -215,15 +224,26 @@ export const buildEndpoint = {
 /**
  * Application routes for redirects and navigation
  * Use these instead of hardcoded paths
+ *
+ * Canonical routes:
+ *   PORTAL.LOGIN     → /#/portal    (unified login hash page on main site)
+ *   PORTAL.DASHBOARD → /dashboard   (role-based dashboard, reads JWT)
+ *
+ * ADMIN and CLIENT are aliases kept for backward compatibility.
+ * All old /admin/login, /client/login, /admin, /client URLs redirect to the canonical routes.
  */
 export const ROUTES = {
+  PORTAL: {
+    LOGIN: '/#/portal',
+    DASHBOARD: '/dashboard'
+  },
   ADMIN: {
-    LOGIN: '/admin',
-    DASHBOARD: '/admin/login'
+    LOGIN: '/#/portal',
+    DASHBOARD: '/dashboard'
   },
   CLIENT: {
-    LOGIN: '/client/login.html',
-    PORTAL: '/client/portal.html'
+    LOGIN: '/#/portal',
+    PORTAL: '/dashboard'
   }
 } as const;
 

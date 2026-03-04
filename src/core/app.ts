@@ -290,6 +290,11 @@ export class Application {
       section: 'contact',
       title: 'Contact - No Bhad Codes'
     });
+    routerService.addRoute({
+      path: '#/portal',
+      section: 'portal-login',
+      title: 'Portal - No Bhad Codes'
+    });
     // Root path
     routerService.addRoute({
       path: '/',
@@ -304,15 +309,19 @@ export class Application {
    */
   private async initializeModules(): Promise<void> {
     const currentPath = window.location.pathname;
+    const pageType = document.body.getAttribute('data-page') || '';
+    const isDashboard = currentPath === '/dashboard';
     const isClientPortal =
-      currentPath.startsWith('/client') && !currentPath.includes('/client/intake');
+      (isDashboard && pageType === 'client-portal') ||
+      (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
     const isClientIntake = currentPath.includes('/client/intake');
-    const isAdminPage = currentPath.includes('/admin');
+    const isAdminPage =
+      currentPath.includes('/admin') || (isDashboard && pageType === 'admin');
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
     let baseCoreModules: string[];
     if (isClientPortal) {
-      // All /client/* pages use portal modules (including set-password, login, etc.)
+      // /portal login, /dashboard (client), and /client/* pages use portal modules
       baseCoreModules = getClientPortalModules();
     } else if (isClientIntake) {
       baseCoreModules = getClientIntakeModules();

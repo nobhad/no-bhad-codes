@@ -121,7 +121,9 @@ export function buildApiUrl(endpoint: string): string {
  * will be proxied by Vite to the backend and preserve cookie behavior.
  */
 export const authEndpoints = {
-  login: '/api/auth/login',
+  // Unified login endpoint — handles both admin and client authentication.
+  // Routes to admin or client path server-side based on the submitted email.
+  login: '/api/auth/portal-login',
   logout: '/api/auth/logout',
   refresh: '/api/auth/refresh',
   validate: '/api/auth/validate',

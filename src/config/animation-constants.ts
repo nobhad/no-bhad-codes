@@ -122,8 +122,8 @@ export const ANIMATION_DIMENSIONS = {
   FORM_FIELD_HEIGHT: 60,
   FORM_FIELD_COMPRESSED: 20,
   FORM_FIELD_WIDTH_START: 150,
-  FORM_FIELD_WIDTH_FULL: 460, // --contact-input-width
-  FORM_MESSAGE_WIDTH_FULL: 640, // --contact-textarea-width
+  FORM_FIELD_WIDTH_FULL: 520, // --contact-input-width
+  FORM_MESSAGE_WIDTH_FULL: 520, // --contact-textarea-width (same as input, single column)
 
   // Business card interaction dimensions
   CARD_HOVER_LIFT: 10, // pixels
