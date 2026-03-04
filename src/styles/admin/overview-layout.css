@@ -117,12 +117,7 @@
   margin-bottom: var(--space-2);
 }
 
-/* Stat card SVG sizing for overview - color from portal-stat-cards.css */
-.portal .overview-stat-card .stat-card-top svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-  flex-shrink: 0;
-}
+/* Stat card SVG color from portal-stat-cards.css; sizing from unified rule below */
 
 /* All overview labels - consistent larger size */
 .overview-linear .field-label {
@@ -168,6 +163,7 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: var(--portal-section-gap);
+  align-items: start;
 }
 
 .overview-col-main,
@@ -205,12 +201,12 @@
 
 /* Panel icons - inherit color from parent */
 .overview-panel-title > .panel-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   color: inherit;
 }
 
-/* Panel action button - flex for icon alignment */
+/* Panel action link - borderless, text-only */
 .overview-panel-action {
   display: inline-flex;
   align-items: center;
@@ -255,13 +251,38 @@
   color: var(--status-cancelled);
 }
 
-.overview-panel-body {
-  padding: var(--space-2) var(--space-3);
+/* Consistent icon sizing across all overview panel contexts
+   Excludes empty state icons (.icon-xl etc.) which have their own sizing */
+.overview-panel svg:not(.icon-xs):not(.icon-sm):not(.icon-md):not(.icon-lg):not(.icon-xl) {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  flex-shrink: 0;
 }
 
-/* No padding for activity feeds - they have their own item padding */
+/* Stat card icons - slightly larger for KPI prominence */
+.portal .overview-stat-card svg {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+/* Panel action arrow - smaller, subtle */
+.overview-panel-action svg {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}
+
+.overview-panel-body {
+  padding: var(--space-1-5) var(--space-3);
+}
+
+/* Activity feeds handle their own horizontal padding; keep vertical consistent */
 .overview-panel-body:has(.activity-feed) {
   padding: 0;
+}
+
+/* Quick actions grid - override padding since ovdash-quick-actions handles layout */
+.overview-panel-body.ovdash-quick-actions {
+  padding: var(--space-1-5) var(--space-3) var(--space-2);
 }
 
 .overview-panel-body--compact {
@@ -560,6 +581,7 @@
 
 .kanban-column h4 {
   margin-bottom: var(--space-1);
+  text-align: center;
 }
 
 .kanban-items {
@@ -894,11 +916,6 @@
     grid-template-columns: 1fr;
   }
 
-  .overview-col-aside {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .overview-attention-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -908,15 +925,11 @@
   .overview-linear,
   .overview-dashboard {
     padding-bottom: var(--space-6);
-    gap: var(--space-4);
+    gap: var(--portal-section-gap);
   }
 
   .overview-stats-strip,
   .overview-stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .overview-col-aside {
     grid-template-columns: 1fr;
   }
 

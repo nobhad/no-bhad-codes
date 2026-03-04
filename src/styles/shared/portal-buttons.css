@@ -21,7 +21,7 @@ button:has(> svg) {
 /* Icon before text (default order) */
 :is(.btn, .btn-primary, .btn-secondary, .btn-outline) > :is(svg, .btn-icon),
 .icon-btn > :is(svg, .icon-btn-svg),
-button > :is(.icon-wrap, .tab-icon, svg) {
+button:not(.overview-panel-action) > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
 }
 
@@ -123,11 +123,11 @@ button.dropdown-trigger > svg.dropdown-caret,
   min-height: auto;
 }
 
-/* Outline button - transparent with border */
+/* Outline button - transparent with border, uses button border tokens */
 .btn-outline {
   background: transparent;
-  color: var(--portal-text-light);
-  border: var(--portal-border);
+  color: var(--btn-portal-color);
+  border: var(--btn-portal-border-width) solid var(--btn-portal-border-color);
 }
 .btn-outline:hover {
   background: var(--btn-portal-hover-bg);

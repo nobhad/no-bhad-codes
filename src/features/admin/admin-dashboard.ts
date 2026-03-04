@@ -1653,7 +1653,7 @@ class AdminDashboard {
         updateSubtabActiveState(group, subtab, 'subtab');
         // Convert forTab to event name (support -> knowledgeBase for backwards compatibility)
         const eventName = forTab === 'support' ? 'knowledgeBase' : forTab;
-        window.dispatchEvent(new CustomEvent(`${eventName}SubtabChange`, { detail: { subtab } }));
+        document.dispatchEvent(new CustomEvent(`${eventName}SubtabChange`, { detail: { subtab } }));
         return;
       }
 
@@ -1662,7 +1662,7 @@ class AdminDashboard {
         const tabName = target.dataset.pdTab;
         if (!tabName) return;
         updateSubtabActiveState(group, tabName, 'pdTab');
-        window.dispatchEvent(new CustomEvent('projectDetailTabChange', { detail: { tabName } }));
+        document.dispatchEvent(new CustomEvent('projectDetailTabChange', { detail: { tabName } }));
         return;
       }
 
@@ -1671,7 +1671,7 @@ class AdminDashboard {
         const tabName = target.dataset.cdTab;
         if (!tabName) return;
         updateSubtabActiveState(group, tabName, 'cdTab');
-        window.dispatchEvent(new CustomEvent('clientDetailTabChange', { detail: { tabName } }));
+        document.dispatchEvent(new CustomEvent('clientDetailTabChange', { detail: { tabName } }));
 
       }
     });

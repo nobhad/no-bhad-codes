@@ -291,6 +291,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .dashboard-content {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
   padding: var(--portal-header-top, 20px) 24px var(--space-3) 24px;
   gap: 0;
   background: var(--portal-bg-pitch);

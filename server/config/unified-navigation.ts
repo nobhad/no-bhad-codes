@@ -127,6 +127,7 @@ export const ICON_KEYS = {
   settingsClient: 'settingsClient',
   panelLeft: 'panelLeft',
   logOut: 'logOut',
+  package: 'package',
   logOutClient: 'logOutClient'
 } as const;
 

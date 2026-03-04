@@ -201,12 +201,21 @@
     }
   }
 
-  /* Sidebar auto-collapse on mobile — stays in flow as 56px icon strip */
+  /* Sidebar auto-collapse on mobile — stays in flow as 56px icon strip.
+     Toggle hides it completely (width 0) so content fills full width. */
   @media (--mobile) {
     .portal .sidebar {
       width: 56px;
       min-width: 56px;
       max-width: 56px;
+    }
+
+    .portal .sidebar.collapsed {
+      width: 0;
+      min-width: 0;
+      max-width: 0;
+      overflow: hidden;
+      padding: 0;
     }
 
     .portal .sidebar .sidebar-buttons .btn .btn-text {

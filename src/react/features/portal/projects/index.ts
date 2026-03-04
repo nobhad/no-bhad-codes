@@ -10,6 +10,7 @@ export {
   unmountPortalProjects,
   mountPortalProjectDetail,
   unmountPortalProjectDetail,
-  shouldUseReactPortalProjects
+  shouldUseReactPortalProjects,
+  shouldUseReactPortalProjectDetail
 } from './mount';
 export type { PortalProjectsMountOptions, PortalProjectDetailMountOptions } from './mount';
