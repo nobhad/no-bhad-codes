@@ -52,7 +52,7 @@ export function NavItem({
     >
       <Icon
         className={cn(
-          'tw-h-4 tw-w-4 tw-flex-shrink-0',
+          'icon-sm tw-flex-shrink-0',
           isActive && 'tw-text-primary'
         )}
       />

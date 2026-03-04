@@ -221,7 +221,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
                   key={file.id}
                   className="tw-list-item"
                 >
-                  <FileIcon className="tw-h-4 tw-w-4 text-muted tw-flex-shrink-0" />
+                  <FileIcon className="icon-sm text-muted tw-flex-shrink-0" />
                   <div className="tw-flex-1 tw-min-w-0">
                     <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-truncate">
                       {file.name}
