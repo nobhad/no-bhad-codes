@@ -5,6 +5,7 @@
  */
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   X,
@@ -247,7 +248,7 @@ export function LeadDetailPanel({
   const decodedName = decodeHtmlEntities(lead.contact_name) || 'Unknown';
   const decodedCompany = decodeHtmlEntities(lead.company_name);
 
-  return (
+  return createPortal(
     <>
       {/* Overlay backdrop */}
       <div className="details-overlay" onClick={onClose} />
@@ -359,7 +360,7 @@ export function LeadDetailPanel({
                     {lead.email}
                     {lead.email && (
                       <button
-                        className="icon-btn icon-btn-ghost"
+                        className="copy-email-btn"
                         onClick={() => handleCopyEmail(lead.email)}
                         title="Copy email"
                       >
@@ -489,7 +490,8 @@ export function LeadDetailPanel({
         confirmText="Activate"
         onConfirm={handleActivate}
       />
-    </>
+    </>,
+    document.body
   );
 }
 

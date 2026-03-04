@@ -41,6 +41,75 @@ function transformProject(apiProject: Record<string, unknown>): PortalProject {
   };
 }
 
+/**
+ * ProjectCard Component
+ */
+interface ProjectCardProps {
+  project: PortalProject;
+  onClick: () => void;
+  onPreviewClick: (e: React.MouseEvent) => void;
+}
+
+const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCardProps) => {
+  const statusConfig = PORTAL_PROJECT_STATUS_CONFIG[project.status as PortalProjectStatus];
+  const statusLabel = statusConfig?.label || project.status;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      className="portal-card card-clickable"
+    >
+      {/* Header: Name and Status */}
+      <div className="portal-card-header">
+        <div className="portal-card-title-group">
+          <FolderOpen className="icon-xs" />
+          <span className="tw-text-primary">
+            {decodeHtmlEntities(project.name)}
+          </span>
+        </div>
+        <div className="portal-card-status-group">
+          <span className="tw-badge">{statusLabel}</span>
+          <ChevronRight className="icon-xs" />
+        </div>
+      </div>
+
+      {/* Description */}
+      {project.description && (
+        <p className="portal-card-description">
+          {decodeHtmlEntities(project.description)}
+        </p>
+      )}
+
+      {/* Progress Bar */}
+      <div className="portal-card-progress">
+        <div className="portal-card-header">
+          <span className="label">Progress</span>
+          <span className="tw-text-primary tw-text-sm">{project.progress}%</span>
+        </div>
+        <div className="tw-progress-track">
+          <div
+            className="tw-progress-bar"
+            style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Footer: Date and Preview */}
+      <div className="portal-card-footer">
+        <span className="text-muted tw-text-xs">
+          {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
+        </span>
+        {project.preview_url && (
+          <IconButton action="external-link" onClick={onPreviewClick} title="View Preview" />
+        )}
+      </div>
+    </div>
+  );
+});
+
 interface PortalProjectsListProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
@@ -281,68 +350,5 @@ export function PortalProjectsList({
         </div>
       )}
     </TableLayout>
-  );
-}
-
-/**
- * ProjectCard Component
- */
-interface ProjectCardProps {
-  project: PortalProject;
-  onClick: () => void;
-  onPreviewClick: (e: React.MouseEvent) => void;
-}
-
-function ProjectCard({ project, onClick, onPreviewClick }: ProjectCardProps) {
-  const statusConfig = PORTAL_PROJECT_STATUS_CONFIG[project.status as PortalProjectStatus];
-  const statusLabel = statusConfig?.label || project.status;
-
-  return (
-    <div onClick={onClick} className="portal-card card-clickable">
-      {/* Header: Name and Status */}
-      <div className="portal-card-header">
-        <div className="portal-card-title-group">
-          <FolderOpen className="icon-xs" />
-          <span className="tw-text-primary">
-            {decodeHtmlEntities(project.name)}
-          </span>
-        </div>
-        <div className="portal-card-status-group">
-          <span className="tw-badge">{statusLabel}</span>
-          <ChevronRight className="icon-xs" />
-        </div>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <p className="portal-card-description">
-          {decodeHtmlEntities(project.description)}
-        </p>
-      )}
-
-      {/* Progress Bar */}
-      <div className="portal-card-progress">
-        <div className="portal-card-header">
-          <span className="label">Progress</span>
-          <span className="tw-text-primary tw-text-sm">{project.progress}%</span>
-        </div>
-        <div className="tw-progress-track">
-          <div
-            className="tw-progress-bar"
-            style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Footer: Date and Preview */}
-      <div className="portal-card-footer">
-        <span className="text-muted tw-text-xs">
-          {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
-        </span>
-        {project.preview_url && (
-          <IconButton action="external-link" onClick={onPreviewClick} title="View Preview" />
-        )}
-      </div>
-    </div>
   );
 }

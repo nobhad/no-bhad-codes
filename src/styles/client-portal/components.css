@@ -207,7 +207,7 @@
 
 .upload-other-description-wrap {
   margin-top: var(--space-1);
-  padding-left: 24px;
+  padding-left: var(--space-6, 1.5rem);
 }
 
 .upload-other-description-wrap .form-textarea {

@@ -8,7 +8,7 @@ import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { StatCard } from '@react/components/portal';
 import { formatRelativeTime, IconButton } from '@react/factories';
-import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
@@ -187,7 +187,7 @@ interface ActivityListProps {
 function ActivityList({ activities, onNavigate }: ActivityListProps) {
   if (activities.length === 0) {
     return (
-      <p className="text-muted">No recent activity</p>
+      <EmptyState message="No recent activity" />
     );
   }
 

@@ -9,76 +9,39 @@
  *
  * IMPORTANT: These MUST be unlayered to override layered tokens.
  * Imported by both admin.css and portal.css.
+ *
+ * NOTE: Most light-mode CSS variable definitions live in
+ * src/design-system/tokens/portal-theme.css (the single source of truth).
+ * This file handles:
+ *   1. Direct element styles that reference variables
+ *   2. Admin-only alpha overlay overrides (not in portal-theme.css)
+ *   3. The `.portal` wrapper selector for client portal
  */
 
 /* ============================================
- * SHARED LIGHT MODE VARIABLES
- * Applied to both admin and client portal
+ * SHARED LIGHT MODE - ELEMENT STYLES
+ * ============================================
+ * Variable definitions are in portal-theme.css.
+ * Here we apply those variables to elements.
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"],
 html[data-theme="light"] body[data-page="client-portal"] .portal {
-  /* Text colors - ALL BLACK */
-  --portal-text-light: #000000;
-  --portal-text-primary: #000000;
-  --portal-text-secondary: #000000;
-  --portal-text-muted: #000000;
-  --portal-text-dark: #ffffff; /* For dark surfaces in light mode */
-
-  /* Background colors - WHITE BASE */
-  --portal-bg-pitch: #ffffff;
-  --portal-bg-darkest: #ffffff;
-  --portal-bg-darker: #f5f5f5;
-  --portal-bg-dark: #e5e5e5;
-  --portal-bg-medium: #d5d5d5;
-  --portal-bg-light: #c5c5c5;
-  --portal-bg-hover: #e5e5e5;
-
-  /* Border system - BLACK BORDERS */
-  --portal-border-color: #000000;
-  --portal-border: var(--border-width) solid var(--portal-border-color);
-  --table-border-color: var(--portal-border-color);
-  --color-border: var(--portal-border-color);
-
-  /* Apply directly */
-  background-color: #ffffff;
-  color: #000000;
+  background-color: var(--portal-bg-pitch);
+  color: var(--portal-text-primary);
 }
 
 /* ============================================
  * ADMIN-ONLY LIGHT MODE EXTENSIONS
+ * Alpha overlays that invert from white to black for light mode.
+ * These are NOT defined in portal-theme.css.
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"] {
-  /* Generic text colors - ALL BLACK */
-  --color-dark: #000000;
-  --color-white: #ffffff;
-  --color-text-primary: #000000;
-  --color-text-secondary: #000000;
-  --color-text-tertiary: #000000;
-
-  /* Gray scale - for text use black, for backgrounds use grays */
-  --color-gray-100: #f5f5f5;
-  --color-gray-200: #e5e5e5;
-  --color-gray-300: #d5d5d5;
-  --color-gray-400: #c5c5c5;
-  --color-gray-500: #b5b5b5;
-  --color-neutral-400: #000000;
-  --color-neutral-500: #000000;
-  --color-neutral-600: #000000;
-  --color-neutral-700: #000000;
-  --color-neutral-800: #000000;
-  --color-neutral-900: #000000;
-
-  /* Admin-specific backgrounds */
-  --portal-bg-readonly: #f5f5f5;
-
-  /* Alpha overlays - use black for light mode */
   --portal-alpha-white-08: rgba(0, 0, 0, 0.08);
   --portal-alpha-white-10: rgba(0, 0, 0, 0.1);
   --portal-alpha-white-15: rgba(0, 0, 0, 0.15);
   --portal-alpha-white-20: rgba(0, 0, 0, 0.2);
   --portal-alpha-white-30: rgba(0, 0, 0, 0.3);
-  --portal-border-subtle: rgba(0, 0, 0, 0.1);
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
@@ -86,18 +49,15 @@ html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
 }
 
 /* ============================================
- * CLIENT PORTAL-ONLY LIGHT MODE EXTENSIONS
+ * CLIENT PORTAL-ONLY LIGHT MODE - ELEMENT STYLES
  * ============================================ */
-html[data-theme="light"] body[data-page="client-portal"] {
-  --portal-bg-lighter: #b5b5b5;
-}
 
-/* Light mode sidebar text must be black */
+/* Light mode sidebar text uses portal text variable */
 html[data-theme="light"] body[data-page="client-portal"] .sidebar,
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn,
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn .btn-text,
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn .btn-icon {
-  color: #000000;
+  color: var(--portal-text-primary);
 }
 
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn:hover,
@@ -107,5 +67,5 @@ html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn.active {
 
 /* Light mode dashboard content */
 html[data-theme="light"] body[data-page="client-portal"] .dashboard-content {
-  color: #000000;
+  color: var(--portal-text-primary);
 }

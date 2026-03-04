@@ -6,7 +6,7 @@
   display: grid;
 }
 
-@media (min-width: 960px) {
+@media (--tablet-wide-up) {
   .portal .requests-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;

@@ -8,6 +8,9 @@ import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Pencil, Loader2, Check, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+
+/** Delay before saving on blur, allows button click events to register first */
+const BLUR_SAVE_DELAY_MS = 150;
 import { createLogger } from '../../../utils/logger';
 
 const logger = createLogger('InlineEditField');
@@ -153,7 +156,7 @@ export function InlineEditField({
       if (isEditing && !isSaving) {
         saveValue();
       }
-    }, 150);
+    }, BLUR_SAVE_DELAY_MS);
   }, [isEditing, isSaving, saveValue]);
 
   // Display value

@@ -139,6 +139,12 @@ export function DataTable<T extends { id: number }>({
     defaultSort
   });
 
+  // Total column span (checkbox + data columns + optional actions)
+  const colSpan = useMemo(
+    () => columns.length + 1 + (rowActions.length > 0 ? 1 : 0),
+    [columns.length, rowActions.length]
+  );
+
   // Apply filters to get filtered data
   const filteredData = useMemo(() => applyFilters(data), [applyFilters, data]);
 
@@ -162,7 +168,10 @@ export function DataTable<T extends { id: number }>({
   });
 
   // Default export config (empty - only used if exportConfig is not provided)
-  const defaultExportConfig: ExportConfig = { filename: storageKey, columns: [] };
+  const defaultExportConfig: ExportConfig = useMemo(
+    () => ({ filename: storageKey, columns: [] }),
+    [storageKey]
+  );
 
   // Export functionality
   const { exportCsv, isExporting } = useExport({
@@ -202,6 +211,29 @@ export function DataTable<T extends { id: number }>({
       onRowClick?.(item);
     },
     [onRowClick]
+  );
+
+  // Sort toggle handler - stable reference to avoid re-renders in column headers
+  const handleToggleSort = useCallback(
+    (columnKey: string) => {
+      toggleSort(columnKey);
+    },
+    [toggleSort]
+  );
+
+  // Memoized column header data to avoid recalculating sort state per render
+  const columnHeaders = useMemo(
+    () =>
+      columns.map((column) => ({
+        key: column.key,
+        label: column.label,
+        sortable: column.sortable,
+        sortKey: column.sortKey || column.key,
+        headerClassName: column.headerClassName,
+        sortDirection:
+          sort?.column === (column.sortKey || column.key) ? sort.direction : null
+      })),
+    [columns, sort]
   );
 
   // Render cell content
@@ -337,21 +369,19 @@ export function DataTable<T extends { id: number }>({
             </PortalTableHead>
 
             {/* Data columns */}
-            {columns.map((column) => (
+            {columnHeaders.map((header) => (
               <PortalTableHead
-                key={column.key}
-                sortable={column.sortable}
-                sortDirection={
-                  sort?.column === (column.sortKey || column.key) ? sort.direction : null
-                }
+                key={header.key}
+                sortable={header.sortable}
+                sortDirection={header.sortDirection}
                 onClick={
-                  column.sortable
-                    ? () => toggleSort(column.sortKey || column.key)
+                  header.sortable
+                    ? () => handleToggleSort(header.sortKey)
                     : undefined
                 }
-                className={column.headerClassName}
+                className={header.headerClassName}
               >
-                {column.label}
+                {header.label}
               </PortalTableHead>
             ))}
 
@@ -364,10 +394,10 @@ export function DataTable<T extends { id: number }>({
 
         <PortalTableBody animate={!isLoading}>
           {isLoading ? (
-            <PortalTableLoading colSpan={columns.length + 1 + (rowActions.length > 0 ? 1 : 0)} rows={5} />
+            <PortalTableLoading colSpan={colSpan} rows={5} />
           ) : paginatedData.length === 0 ? (
             <PortalTableEmpty
-              colSpan={columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}
+              colSpan={colSpan}
               icon={<Inbox className="tw-h-6 tw-w-6" />}
               message={hasActiveFilters ? emptyFilteredMessage : emptyMessage}
             />

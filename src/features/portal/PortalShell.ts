@@ -65,6 +65,9 @@ export class PortalShell extends BaseModule {
   /** Hash-based routing flag to prevent re-entrant updates */
   private isNavigating = false;
 
+  /** Guard against concurrent switchTab calls */
+  private isSwitching = false;
+
   constructor() {
     super('PortalShell');
 
@@ -152,6 +155,18 @@ export class PortalShell extends BaseModule {
    * @param updateHash - Whether to update the URL hash (default: true)
    */
   async switchTab(tabId: string, updateHash = true): Promise<void> {
+    // Prevent concurrent tab switches — last call wins
+    if (this.isSwitching) return;
+    this.isSwitching = true;
+
+    try {
+      await this.performTabSwitch(tabId, updateHash);
+    } finally {
+      this.isSwitching = false;
+    }
+  }
+
+  private async performTabSwitch(tabId: string, updateHash: boolean): Promise<void> {
     // Verify tab access
     if (!canAccessTab(tabId, this.role)) {
       this.warn(`Tab "${tabId}" not accessible for role "${this.role}"`);

@@ -17,6 +17,8 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { getPortalConfig, ADMIN_TAB_IDS, CLIENT_TAB_IDS, ICONS } from '../config/navigation.js';
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
+import { sendUnauthorized, sendNotFound, sendForbidden, sendServerError } from '../utils/api-response.js';
+import { logger } from '../services/logger.js';
 
 const router = Router();
 
@@ -110,7 +112,7 @@ router.get('/dashboard/tab/:tabId', async (req: Request, res: Response) => {
   const decoded = decodePortalJwt(req);
 
   if (!decoded) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return sendUnauthorized(res, 'Authentication required');
   }
 
   const { tabId } = req.params;
@@ -120,23 +122,31 @@ router.get('/dashboard/tab/:tabId', async (req: Request, res: Response) => {
     const { fetchTabData, hasTabDataFetcher, getServerTableDef } = await import('../services/tab-data-service.js');
 
     if (!hasTabDataFetcher(tabId)) {
-      return res.status(404).json({ error: `Unknown tab: ${tabId}` });
+      return sendNotFound(res, `Unknown tab: ${tabId}`);
     }
 
     const tableDef = getServerTableDef(tabId);
     if (!tableDef) {
-      return res.status(404).json({ error: `No table definition for: ${tabId}` });
+      return sendNotFound(res, `No table definition for: ${tabId}`);
+    }
+
+    // Enforce role-based tab access: tab's portal must match user's role
+    if (tableDef.portal !== decoded.type) {
+      return sendForbidden(res, 'Access denied for this tab');
     }
 
     // Extract user ID from JWT (admin uses 'id', client uses 'clientId')
-    const userId = (decoded as Record<string, unknown>).id as number
-      ?? (decoded as Record<string, unknown>).clientId as number
-      ?? 0;
+    const decodedPayload = decoded as Record<string, unknown>;
+    const userId = (decodedPayload.id as number) ?? (decodedPayload.clientId as number);
+
+    if (!userId) {
+      return sendUnauthorized(res, 'Invalid token: missing user ID');
+    }
 
     const data = await fetchTabData(tabId, decoded.type as 'admin' | 'client', userId);
 
     if (!data) {
-      return res.status(500).json({ error: 'Failed to fetch tab data' });
+      return sendServerError(res, 'Failed to fetch tab data');
     }
 
     // Render the table partial as an HTML fragment
@@ -147,14 +157,16 @@ router.get('/dashboard/tab/:tabId', async (req: Request, res: Response) => {
       icons: ICONS
     }, (err: Error | null, html: string) => {
       if (err) {
-        console.error('EJS render error:', err);
-        return res.status(500).json({ error: 'Render failed' });
+        logger.error('EJS render error:', { error: err });
+        return sendServerError(res, 'Render failed');
       }
       res.type('html').send(html);
     });
   } catch (error) {
-    console.error(`Tab data error for ${tabId}:`, error);
-    res.status(500).json({ error: 'Internal server error' });
+    logger.error(`Tab data error for ${tabId}:`, {
+      error: error instanceof Error ? error : new Error(String(error))
+    });
+    return sendServerError(res);
   }
 });
 

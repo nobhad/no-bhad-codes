@@ -39,7 +39,7 @@ body:has(.portal) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 var(--space-6, 1.5rem);
   box-sizing: border-box;
   z-index: var(--z-index-nav);
   box-shadow: none;
@@ -72,6 +72,8 @@ body:has(.portal) {
   text-decoration: none;
   color: var(--portal-text-light);
   transition: color var(--transition-mouse) ease;
+  padding-left: var(--sidebar-icon-indent, 18px);
+  margin-left: calc(-1 * var(--space-6, 1.5rem));
 }
 
 .portal-global-header .header-branding:hover {
@@ -93,7 +95,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 
 .portal-global-header .header-logo-text {
   font-family: var(--font-family-sans);
-  font-size: var(--font-size-base);
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);

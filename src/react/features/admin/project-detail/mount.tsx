@@ -13,6 +13,8 @@ export interface ProjectDetailMountOptions extends BaseMountOptions {
   onBack?: () => void;
   /** Callback to edit project */
   onEdit?: (projectId: number) => void;
+  /** Callback to navigate to related entities */
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 export const {

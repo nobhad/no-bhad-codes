@@ -34,6 +34,7 @@ interface OverviewTabProps {
   onAddMilestone: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
   onToggleMilestone: (id: number) => Promise<boolean>;
   onDeleteMilestone: (id: number) => Promise<boolean>;
+  onNavigate?: (tab: string, entityId?: string) => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -74,6 +75,7 @@ export function OverviewTab({
   onAddMilestone,
   onToggleMilestone,
   onDeleteMilestone,
+  onNavigate,
   showNotification
 }: OverviewTabProps) {
   const [expandedMilestones, setExpandedMilestones] = useState<Set<number>>(new Set());
@@ -473,14 +475,32 @@ export function OverviewTab({
             {project.contact_name && (
               <div className="project-info-field-value">
                 <User className="icon-md" />
-                <span>{project.contact_name}</span>
+                {project.client_id && onNavigate ? (
+                  <button
+                    className="client-nav-link"
+                    onClick={() => onNavigate('client-detail', String(project.client_id))}
+                  >
+                    {project.contact_name}
+                  </button>
+                ) : (
+                  <span>{project.contact_name}</span>
+                )}
               </div>
             )}
 
             {project.company_name && (
               <div className="project-info-field-value">
                 <Building className="icon-md" />
-                <span>{project.company_name}</span>
+                {project.client_id && onNavigate ? (
+                  <button
+                    className="client-nav-link"
+                    onClick={() => onNavigate('client-detail', String(project.client_id))}
+                  >
+                    {project.company_name}
+                  </button>
+                ) : (
+                  <span>{project.company_name}</span>
+                )}
               </div>
             )}
 

@@ -416,6 +416,7 @@ router.get(
           p.id,
           p.project_name as name,
           COALESCE(c.company_name, c.contact_name, '') as client,
+          p.client_id,
           p.status,
           COALESCE(p.progress, 0) as progress,
           p.estimated_end_date as dueDate

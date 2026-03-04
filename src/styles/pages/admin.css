@@ -1578,17 +1578,17 @@ body.modal-open .dashboard-content {
   }
 }
 
-/* Modal z-index - using @layer utilities for proper cascade */
+/* Modal z-index - overlay must sit above sidebar, panel above overlay */
 @layer utilities {
   [data-page="admin"] .details-panel,
   [data-page="admin"] .admin-modal-overlay,
   [data-page="admin"] #lead-details-panel,
   [data-page="admin"] #contact-details-panel {
-    z-index: var(--z-index-portal-sidebar);
+    z-index: var(--z-index-portal-modal);
   }
 
   [data-page="admin"] .details-overlay {
-    z-index: var(--z-index-portal-header);
+    z-index: calc(var(--z-index-portal-modal) - 1);
   }
 }
 

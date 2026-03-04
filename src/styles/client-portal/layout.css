@@ -106,37 +106,37 @@ body[data-page="client-portal"] {
 }
 
 /* Messages page: remove ALL outer padding on mobile so content fills width */
-/* Using body[data-active-tab] selector for reliable specificity */
+/* Specificity increased via .portal ancestor to override .dashboard-content base padding */
 @media (--compact-mobile) {
-  /* Primary selector: data attribute on body */
-  body[data-active-tab="messages"] .dashboard-content,
+  /* Primary selector: data attribute on body + .portal ancestor for specificity */
+  body[data-active-tab="messages"] .portal .dashboard-content,
   /* Fallback: class-based selector added via JS */
-  body.messages-tab-active .dashboard-content {
-    padding: 0 !important;
+  body.messages-tab-active .portal .dashboard-content {
+    padding: 0;
   }
 
-  body[data-active-tab="messages"] .portal-header-subtabs,
-  body.messages-tab-active .portal-header-subtabs {
-    margin: 0 !important;
-    padding: var(--space-2) !important;
+  body[data-active-tab="messages"] .portal .portal-header-subtabs,
+  body.messages-tab-active .portal .portal-header-subtabs {
+    margin: 0;
+    padding: var(--space-2);
   }
 
-  body[data-active-tab="messages"] .tab-content,
-  body[data-active-tab="messages"] .content-wrapper,
-  body.messages-tab-active .tab-content,
-  body.messages-tab-active .content-wrapper {
-    padding: 0 !important;
-    margin: 0 !important;
+  body[data-active-tab="messages"] .portal .tab-content,
+  body[data-active-tab="messages"] .portal .content-wrapper,
+  body.messages-tab-active .portal .tab-content,
+  body.messages-tab-active .portal .content-wrapper {
+    padding: 0;
+    margin: 0;
   }
 
-  body[data-active-tab="messages"] .messages-layout,
-  body.messages-tab-active .messages-layout {
+  body[data-active-tab="messages"] .portal .messages-layout,
+  body.messages-tab-active .portal .messages-layout {
     gap: 0;
   }
 
   /* Messages container spacing on mobile */
-  body[data-active-tab="messages"] .messages-container,
-  body.messages-tab-active .messages-container {
+  body[data-active-tab="messages"] .portal .messages-container,
+  body.messages-tab-active .portal .messages-container {
     margin: 0;
     /* Keep border-radius per design docs - main containers use --portal-radius-md */
   }
@@ -148,8 +148,8 @@ body[data-page="client-portal"] {
    ============================================ */
 
 /* Hidden by default on ALL screen sizes */
-.mobile-menu-toggle {
-  display: none !important;
+.portal .dashboard-content .mobile-menu-toggle {
+  display: none;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -162,7 +162,7 @@ body[data-page="client-portal"] {
   flex-shrink: 0;
 }
 
-.mobile-menu-toggle:focus-visible {
+.portal .dashboard-content .mobile-menu-toggle:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
@@ -170,7 +170,7 @@ body[data-page="client-portal"] {
 /* Show mobile menu toggle ONLY on mobile when sidebar is collapsed */
 @media (--compact-mobile) {
   .portal .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
-    display: flex !important;
+    display: flex;
   }
 }
 
@@ -298,11 +298,6 @@ body[data-page="client-portal"] {
   /* Reset any inherited margins - gap handles spacing */
   margin-top: 0;
   margin-bottom: 0;
-}
-
-/* Dashboard Header (hidden - standard header shown) */
-.dashboard-header {
-  display: none;
 }
 
 /* ============================================
