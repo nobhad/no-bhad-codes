@@ -5,7 +5,7 @@ if (!file) {
   console.error('Usage: node fix-md-tables.js <markdown-file>');
   process.exit(2);
 }
-let src = fs.readFileSync(file, 'utf8');
+const src = fs.readFileSync(file, 'utf8');
 const lines = src.split('\n');
 let inFence = false;
 for (let i = 0; i < lines.length; i++) {
@@ -29,8 +29,8 @@ for (let i = 0; i < lines.length; i++) {
       const hasTrailing = /\|\s*$/.test(lines[j]);
       // remove spaces around pipes
       let newLine = lines[j].replace(/\s*\|\s*/g, '|').trim();
-      if (hasLeading && !newLine.startsWith('|')) newLine = '|' + newLine;
-      if (hasTrailing && !newLine.endsWith('|')) newLine = newLine + '|';
+      if (hasLeading && !newLine.startsWith('|')) newLine = `|${  newLine}`;
+      if (hasTrailing && !newLine.endsWith('|')) newLine = `${newLine  }|`;
       lines[j] = newLine;
       j++;
     }

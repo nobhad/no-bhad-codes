@@ -6,9 +6,9 @@ if (!file) {
   console.error('Usage: node fix-md-structure.cjs <markdown-file>');
   process.exit(2);
 }
-let src = fs.readFileSync(file, 'utf8');
+const src = fs.readFileSync(file, 'utf8');
 const lines = src.split('\n');
-let out = [];
+const out = [];
 let inFence = false;
 let fenceLang = null;
 let olCounter = null;

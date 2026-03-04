@@ -48,7 +48,7 @@ let skipped = 0;
 for (const project of projects) {
   // Check if file already exists for this project
   const existingFile = db
-    .prepare(`SELECT id FROM files WHERE project_id = ? AND description LIKE '%intake%'`)
+    .prepare('SELECT id FROM files WHERE project_id = ? AND description LIKE \'%intake%\'')
     .get(project.id);
 
   if (existingFile) {
@@ -65,16 +65,16 @@ for (const project of projects) {
     clientInfo: {
       name: project.contact_name || 'Unknown',
       email: project.email || 'unknown@example.com',
-      companyName: project.company_name || null,
+      companyName: project.company_name || null
     },
     projectDetails: {
       type: project.project_type || 'other',
       description: project.description || '',
       timeline: project.timeline || '',
       budget: project.budget_range || '',
-      features: project.features ? project.features.split(',').map((f: string) => f.trim()) : [],
+      features: project.features ? project.features.split(',').map((f: string) => f.trim()) : []
     },
-    note: 'Backfilled from project data',
+    note: 'Backfilled from project data'
   };
 
   // Generate filename
