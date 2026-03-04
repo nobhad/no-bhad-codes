@@ -25,6 +25,9 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { ARTICLES_FILTER_CONFIG, ARTICLE_STATUS_OPTIONS } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 interface Article {
@@ -72,11 +75,48 @@ interface ArticlesTableProps {
   overviewMode?: boolean;
 }
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Status' },
-  { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' }
-];
+function filterArticle(
+  article: Article,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !article.title.toLowerCase().includes(query) &&
+      !article.summary?.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
+
+  if (filters.category && filters.category !== 'all') {
+    if (article.category_id !== Number(filters.category)) return false;
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if (filters.status === 'published' && !article.is_published) return false;
+    if (filters.status === 'draft' && article.is_published) return false;
+  }
+
+  return true;
+}
+
+function sortArticles(a: Article, b: Article, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'title':
+    return multiplier * a.title.localeCompare(b.title);
+  case 'view_count':
+    return multiplier * (a.view_count - b.view_count);
+  case 'updated_at':
+    return multiplier * a.updated_at.localeCompare(b.updated_at);
+  default:
+    return 0;
+  }
+}
 
 export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
@@ -102,10 +142,22 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     published: 0,
     draft: 0
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<Article>({
+    storageKey: overviewMode ? undefined : 'admin_kb_articles',
+    filters: ARTICLES_FILTER_CONFIG,
+    filterFn: filterArticle,
+    sortFn: sortArticles
+  });
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -150,6 +202,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     loadData();
   }, [loadData]);
 
+  // Dynamic category filter options built from API data
   const categoryFilterOptions = useMemo(() => [
     { value: 'all', label: 'All Categories' },
     ...categories.map((cat) => ({
@@ -158,42 +211,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     }))
   ], [categories]);
 
-  const filteredArticles = useMemo(() => {
-    let result = [...articles];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.title.toLowerCase().includes(query) ||
-          a.summary?.toLowerCase().includes(query)
-      );
-    }
-    if (categoryFilter !== 'all') {
-      result = result.filter((a) => a.category_id === Number(categoryFilter));
-    }
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'published') {
-        result = result.filter((a) => a.is_published);
-      } else if (statusFilter === 'draft') {
-        result = result.filter((a) => !a.is_published);
-      }
-    }
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-        switch (sort.column) {
-        case 'title': aVal = a.title; bVal = b.title; break;
-        case 'view_count': aVal = a.view_count; bVal = b.view_count; break;
-        case 'updated_at': aVal = a.updated_at; bVal = b.updated_at; break;
-        }
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [articles, searchQuery, categoryFilter, statusFilter, sort]);
+  const filteredArticles = useMemo(() => applyFilters(articles), [applyFilters, articles]);
 
   const pagination = usePagination({
     totalItems: filteredArticles.length,
@@ -205,25 +223,6 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     (pagination.page - 1) * pagination.pageSize,
     pagination.page * pagination.pageSize
   );
-
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
-  }
-
-  function handleFilterChange(key: string, value: string) {
-    if (key === 'category') {
-      setCategoryFilter(value);
-    } else if (key === 'status') {
-      setStatusFilter(value);
-    }
-  }
-
-  const hasActiveFilters = searchQuery || categoryFilter !== 'all' || statusFilter !== 'all';
 
   return (
     <TableLayout
@@ -242,17 +241,17 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search articles..."
           />
           <FilterDropdown
             sections={[
               { key: 'category', label: 'CATEGORY', options: categoryFilterOptions },
-              { key: 'status', label: 'STATUS', options: STATUS_FILTER_OPTIONS }
+              { key: 'status', label: 'STATUS', options: ARTICLE_STATUS_OPTIONS }
             ]}
-            values={{ category: categoryFilter, status: statusFilter }}
-            onChange={handleFilterChange}
+            values={filterValues}
+            onChange={setFilter}
           />
           <IconButton action="download" title="Export" />
           <IconButton action="refresh" onClick={loadData} disabled={isLoading} title="Refresh" />

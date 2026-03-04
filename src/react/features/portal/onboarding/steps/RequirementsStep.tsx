@@ -83,7 +83,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                   : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-primary'
               )}
             >
-              <Palette className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              <Palette className="icon-sm tw-flex-shrink-0" />
               <span>{style}</span>
             </button>
           ))}
@@ -171,7 +171,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                     : 'tw-border-primary'
                 )}
               >
-                {isSelected && <Check className="tw-h-3 tw-w-3 tw-text-white" strokeWidth={3} />}
+                {isSelected && <Check className="icon-xs tw-text-white" strokeWidth={3} />}
               </div>
               <span>{feature}</span>
             </button>

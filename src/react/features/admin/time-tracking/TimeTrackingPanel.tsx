@@ -25,6 +25,9 @@ import {
 } from '@react/components/portal/PortalTable';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
+import { useTableFilters } from '@react/hooks/useTableFilters';
+import { TIME_TRACKING_FILTER_CONFIG, TIME_TRACKING_DATE_RANGE_OPTIONS, TIME_TRACKING_BILLABLE_OPTIONS } from '../shared/filterConfigs';
+import type { SortConfig } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
@@ -63,18 +66,45 @@ interface TimeTrackingPanelProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-const DATE_RANGE_OPTIONS = [
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'This Week' },
-  { value: 'month', label: 'This Month' },
-  { value: 'all', label: 'All Time' }
-];
+function filterTimeEntry(
+  entry: TimeEntry,
+  filters: Record<string, string>,
+  search: string
+): boolean {
+  if (search) {
+    const query = search.toLowerCase();
+    if (
+      !entry.description.toLowerCase().includes(query) &&
+      !entry.projectName?.toLowerCase().includes(query) &&
+      !entry.taskName?.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+  }
 
-const BILLABLE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All Entries' },
-  { value: 'billable', label: 'Billable' },
-  { value: 'non-billable', label: 'Non-Billable' }
-];
+  if (filters.billable && filters.billable !== 'all') {
+    if (filters.billable === 'billable' && !entry.billable) return false;
+    if (filters.billable === 'non-billable' && entry.billable) return false;
+  }
+
+  return true;
+}
+
+function sortTimeEntries(a: TimeEntry, b: TimeEntry, sort: SortConfig): number {
+  const { column, direction } = sort;
+  const multiplier = direction === 'asc' ? 1 : -1;
+
+  switch (column) {
+  case 'date':
+    return multiplier * (a.date + a.startTime).localeCompare(b.date + b.startTime);
+  case 'duration':
+    return multiplier * (a.duration - b.duration);
+  case 'project':
+    return multiplier * (a.projectName || '').localeCompare(b.projectName || '');
+  default:
+    return 0;
+  }
+}
 
 export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingPanelProps) {
   const containerRef = useFadeIn();
@@ -98,16 +128,8 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
   } | null>(null);
   const [timerDisplay, setTimerDisplay] = useState('00:00:00');
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
+  // Date range affects API call, stays outside the hook
   const [dateRange, setDateRange] = useState<string>('week');
-  const [billableFilter, setBillableFilter] = useState<string>('all');
-
-  // Sorting
-  const [sort, setSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>({
-    column: 'date',
-    direction: 'desc'
-  });
 
   // Auth headers helper
   const getHeaders = useCallback(() => {
@@ -120,6 +142,23 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
     }
     return headers;
   }, [getAuthToken]);
+
+  const {
+    filterValues,
+    setFilter,
+    search,
+    setSearch,
+    sort,
+    toggleSort,
+    applyFilters,
+    hasActiveFilters
+  } = useTableFilters<TimeEntry>({
+    storageKey: 'admin_time_tracking',
+    filters: TIME_TRACKING_FILTER_CONFIG,
+    filterFn: filterTimeEntry,
+    sortFn: sortTimeEntries,
+    defaultSort: { column: 'date', direction: 'desc' }
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -220,54 +259,7 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
     }
   }
 
-  // Filter entries
-  const filteredEntries = useMemo(() => {
-    let result = [...entries];
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (entry) =>
-          entry.description.toLowerCase().includes(query) ||
-          entry.projectName?.toLowerCase().includes(query) ||
-          entry.taskName?.toLowerCase().includes(query)
-      );
-    }
-
-    if (billableFilter !== 'all') {
-      result = result.filter((entry) =>
-        billableFilter === 'billable' ? entry.billable : !entry.billable
-      );
-    }
-
-    if (sort) {
-      result.sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-
-        switch (sort.column) {
-        case 'date':
-          aVal = a.date + a.startTime;
-          bVal = b.date + b.startTime;
-          break;
-        case 'duration':
-          aVal = a.duration;
-          bVal = b.duration;
-          break;
-        case 'project':
-          aVal = a.projectName || '';
-          bVal = b.projectName || '';
-          break;
-        }
-
-        if (aVal < bVal) return sort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return result;
-  }, [entries, searchQuery, billableFilter, sort]);
+  const filteredEntries = useMemo(() => applyFilters(entries), [applyFilters, entries]);
 
   const pagination = usePagination({ storageKey: 'admin_time_tracking_pagination', totalItems: filteredEntries.length });
   const paginatedEntries = filteredEntries.slice(
@@ -275,16 +267,14 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
     pagination.page * pagination.pageSize
   );
 
-  function toggleSort(column: string) {
-    setSort((prev) => {
-      if (prev?.column === column) {
-        return prev.direction === 'asc' ? { column, direction: 'desc' } : null;
-      }
-      return { column, direction: 'asc' };
-    });
+  // Combine hook filter state with external dateRange for FilterDropdown
+  function handleFilterChange(key: string, value: string) {
+    if (key === 'dateRange') {
+      setDateRange(value);
+    } else {
+      setFilter(key, value);
+    }
   }
-
-  const hasActiveFilters = searchQuery || billableFilter !== 'all';
 
   return (
     <TableLayout
@@ -304,20 +294,17 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
       actions={
         <>
           <SearchFilter
-            value={searchQuery}
-            onChange={setSearchQuery}
+            value={search}
+            onChange={setSearch}
             placeholder="Search entries..."
           />
           <FilterDropdown
             sections={[
-              { key: 'dateRange', label: 'DATE RANGE', options: DATE_RANGE_OPTIONS },
-              { key: 'billable', label: 'BILLABLE', options: BILLABLE_FILTER_OPTIONS }
+              { key: 'dateRange', label: 'DATE RANGE', options: TIME_TRACKING_DATE_RANGE_OPTIONS },
+              { key: 'billable', label: 'BILLABLE', options: TIME_TRACKING_BILLABLE_OPTIONS }
             ]}
-            values={{ dateRange, billable: billableFilter }}
-            onChange={(key, value) => {
-              if (key === 'dateRange') setDateRange(value);
-              if (key === 'billable') setBillableFilter(value);
-            }}
+            values={{ dateRange, billable: filterValues.billable ?? 'all' }}
+            onChange={handleFilterChange}
           />
           {!activeTimer && (
             <PortalButton variant="primary" size="sm" onClick={startTimer}>
