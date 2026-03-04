@@ -62,7 +62,7 @@
 
 [data-page="admin"] .inline-edit-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-error-alpha-20);
+  box-shadow: 0 0 0 2px var(--portal-alpha-primary-20);
 }
 
 [data-page="admin"] .inline-edit-input::placeholder {

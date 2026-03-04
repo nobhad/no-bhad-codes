@@ -1601,11 +1601,16 @@ a.text-danger:hover {
   width: var(--space-7);
 }
 
-/* Quick actions 2x2 grid */
+/* Quick actions grid - stacks when space is tight */
 .ovdash-quick-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--space-1);
+}
+
+/* Quick action buttons - ensure visible borders */
+.ovdash-quick-actions .btn {
+  border: var(--btn-portal-border-width) solid var(--btn-portal-border-color);
 }
 
 /* ============================================
