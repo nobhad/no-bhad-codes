@@ -13,8 +13,7 @@ import { Sentry, shutdownOpenTelemetry } from './instrument.js';
 // Import observability utilities after instrumentation
 import {
   initMetrics,
-  registerDbStatsCallback,
-  recordHttpRequest,
+  registerDbStatsCallback
 } from './observability/metrics.js';
 
 import express from 'express';
@@ -32,9 +31,8 @@ import { getSchedulerService } from './services/scheduler-service.js';
 import { registerWorkflowAutomations } from './services/workflow-automations.js';
 import {
   initializeDatabase,
-  getDatabase,
   closeDatabase,
-  getDatabaseStats,
+  getDatabaseStats
 } from './database/init.js';
 import { MigrationManager } from './database/migrations.js';
 import sqlite3 from 'sqlite3';
@@ -99,7 +97,7 @@ errorTracker.init({
   release: process.env.npm_package_version,
   enableProfiling: process.env.NODE_ENV === 'production',
   sampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
 });
 
 // Request ID for tracing (must be early for logging)
@@ -114,25 +112,25 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"], // GSAP does not require unsafe-eval
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        defaultSrc: ['\'self\''],
+        scriptSrc: ['\'self\'', '\'unsafe-inline\''], // GSAP does not require unsafe-eval
+        styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+        imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
         connectSrc: [
-          "'self'",
+          '\'self\'',
           'https://api.sentry.io',
           // Allow localhost API connections in development (Vite on 4000 -> Express on 4001)
           ...(process.env.NODE_ENV !== 'production'
             ? ['http://localhost:4001', 'ws://localhost:4001']
-            : []),
+            : [])
         ],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        mediaSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        frameSrc: ["'none'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
-      },
+        fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+        mediaSrc: ['\'self\''],
+        objectSrc: ['\'none\''],
+        frameSrc: ['\'none\''],
+        baseUri: ['\'self\''],
+        formAction: ['\'self\'']
+      }
     },
     // Prevent clickjacking
     frameguard: { action: 'deny' },
@@ -143,7 +141,7 @@ app.use(
     // XSS filter (legacy browsers)
     xssFilter: true,
     // Referrer policy - don't leak referrer to external sites
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
   })
 );
 
@@ -158,8 +156,8 @@ app.use(
       'Authorization',
       'X-Requested-With',
       'X-Request-ID',
-      'x-csrf-token',
-    ],
+      'x-csrf-token'
+    ]
   })
 );
 
@@ -189,7 +187,7 @@ app.use((req, res, next) => {
       httpOnly: false, // Must be readable by JavaScript
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
   }
   next();
@@ -202,7 +200,7 @@ app.use(
     sanitizeBody: true,
     sanitizeQuery: true,
     sanitizeParams: true,
-    skipPaths: ['/uploads'], // Skip file upload paths
+    skipPaths: ['/uploads'] // Skip file upload paths
   })
 );
 
@@ -243,7 +241,7 @@ app.get('/', (req, res) => {
         knowledgeBase: '/api/v1/kb',
         webhooks: '/api/v1/webhooks',
         dataQuality: '/api/v1/data-quality',
-        contact: '/api/v1/contact',
+        contact: '/api/v1/contact'
       },
       // Legacy endpoints (still supported)
       legacy: {
@@ -265,9 +263,9 @@ app.get('/', (req, res) => {
         knowledgeBase: '/api/kb',
         webhooks: '/api/webhooks',
         dataQuality: '/api/data-quality',
-        contact: '/api/contact',
-      },
-    },
+        contact: '/api/contact'
+      }
+    }
   });
 });
 
@@ -314,7 +312,7 @@ app.use(
       // Skip CSRF for analytics tracking (public endpoint, uses rate limiting)
       if (req.path.includes('/analytics/track')) return true;
       return false;
-    },
+    }
   })
 );
 
@@ -351,7 +349,7 @@ const apiRouters = [
   { path: '/integrations', router: integrationsRouter },
   { path: '/data-quality', router: dataQualityRouter },
   { path: '/settings', router: settingsRouter },
-  { path: '/receipts', router: receiptsRouter },
+  { path: '/receipts', router: receiptsRouter }
 ];
 
 // Mount all routers at both /api and /api/v1
@@ -378,13 +376,13 @@ app.use((req, res) => {
       request: {
         method: req.method,
         url: req.originalUrl,
-        headers: req.headers as Record<string, string>,
-      },
+        headers: req.headers as Record<string, string>
+      }
     }
   );
 
   errorResponseWithPayload(res, 'Route not found', 404, 'RESOURCE_NOT_FOUND', {
-    message: `Cannot ${req.method} ${req.originalUrl}`,
+    message: `Cannot ${req.method} ${req.originalUrl}`
   });
 });
 
@@ -409,10 +407,10 @@ async function startServer() {
       const stats = getDatabaseStats();
       return stats
         ? {
-            active: stats.activeConnections,
-            idle: stats.idleConnections,
-            queued: stats.queuedRequests,
-          }
+          active: stats.activeConnections,
+          idle: stats.idleConnections,
+          queued: stats.queuedRequests
+        }
         : { active: 0, idle: 0, queued: 0 };
     });
     logger.info('Observability metrics initialized');
@@ -427,7 +425,7 @@ async function startServer() {
       logger.info('Database migrations complete');
     } catch (migrationError) {
       logger.error('Migration failed:', {
-        error: migrationError instanceof Error ? migrationError : undefined,
+        error: migrationError instanceof Error ? migrationError : undefined
       });
       throw migrationError;
     } finally {
@@ -441,10 +439,10 @@ async function startServer() {
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || '',
+        pass: process.env.SMTP_PASS || ''
       },
       from: process.env.SMTP_FROM || 'nobhaduri@gmail.com',
-      replyTo: process.env.SMTP_REPLY_TO,
+      replyTo: process.env.SMTP_REPLY_TO
     };
 
     try {
@@ -452,7 +450,7 @@ async function startServer() {
       logger.info('Email service initialized');
     } catch (emailError) {
       logger.warn('Email service initialization failed:', {
-        error: emailError instanceof Error ? emailError : undefined,
+        error: emailError instanceof Error ? emailError : undefined
       });
       logger.info('Server will continue without email functionality');
     }
@@ -465,7 +463,7 @@ async function startServer() {
         password: process.env.REDIS_PASSWORD,
         db: parseInt(process.env.REDIS_DB || '0'),
         keyPrefix: process.env.REDIS_KEY_PREFIX || 'nbc:',
-        lazyConnect: true,
+        lazyConnect: true
       };
 
       try {
@@ -473,7 +471,7 @@ async function startServer() {
         logger.info('Cache service initialized');
       } catch (cacheError) {
         logger.warn('Cache service initialization failed:', {
-          error: cacheError instanceof Error ? cacheError : undefined,
+          error: cacheError instanceof Error ? cacheError : undefined
         });
         logger.info('Server will continue without caching functionality');
       }
@@ -487,13 +485,13 @@ async function startServer() {
         const scheduler = getSchedulerService({
           enableReminders: process.env.SCHEDULER_REMINDERS !== 'false',
           enableScheduledInvoices: process.env.SCHEDULER_SCHEDULED !== 'false',
-          enableRecurringInvoices: process.env.SCHEDULER_RECURRING !== 'false',
+          enableRecurringInvoices: process.env.SCHEDULER_RECURRING !== 'false'
         });
         scheduler.start();
         logger.info('Scheduler service initialized');
       } catch (schedulerError) {
         logger.warn('Scheduler service initialization failed:', {
-          error: schedulerError instanceof Error ? schedulerError : undefined,
+          error: schedulerError instanceof Error ? schedulerError : undefined
         });
         logger.info('Server will continue without scheduling functionality');
       }
@@ -507,7 +505,7 @@ async function startServer() {
       logger.info('Workflow automations registered');
     } catch (workflowError) {
       logger.warn('Workflow automations registration failed:', {
-        error: workflowError instanceof Error ? workflowError : undefined,
+        error: workflowError instanceof Error ? workflowError : undefined
       });
       logger.info('Server will continue without workflow automations');
     }
@@ -519,7 +517,7 @@ async function startServer() {
 
       errorTracker.captureMessage(`Server started on port ${PORT}`, 'info', {
         tags: { component: 'server' },
-        extra: { port: PORT, environment: process.env.NODE_ENV },
+        extra: { port: PORT, environment: process.env.NODE_ENV }
       });
     });
 
@@ -534,7 +532,7 @@ async function startServer() {
         logger.info('Scheduler service stopped');
       } catch (error) {
         logger.error('Error stopping scheduler:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
 
@@ -547,7 +545,7 @@ async function startServer() {
           await closeDatabase();
         } catch (dbErr) {
           logger.error('Error closing database:', {
-            error: dbErr instanceof Error ? dbErr : undefined,
+            error: dbErr instanceof Error ? dbErr : undefined
           });
         }
 
@@ -558,7 +556,7 @@ async function startServer() {
           logger.info('Error tracking closed');
         } catch (error) {
           logger.error('Error closing error tracking:', {
-            error: error instanceof Error ? error : undefined,
+            error: error instanceof Error ? error : undefined
           });
         }
 
@@ -568,7 +566,7 @@ async function startServer() {
           logger.info('OpenTelemetry shutdown complete');
         } catch (error) {
           logger.error('Error shutting down OpenTelemetry:', {
-            error: error instanceof Error ? error : undefined,
+            error: error instanceof Error ? error : undefined
           });
         }
 
@@ -589,7 +587,7 @@ async function startServer() {
   } catch (error) {
     logger.error('Failed to start server:', { error: error instanceof Error ? error : undefined });
     errorTracker.captureException(error as Error, {
-      tags: { component: 'server', phase: 'startup' },
+      tags: { component: 'server', phase: 'startup' }
     });
     process.exit(1);
   }
@@ -599,7 +597,7 @@ async function startServer() {
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', { error });
   errorTracker.captureException(error, {
-    tags: { type: 'uncaughtException' },
+    tags: { type: 'uncaughtException' }
   });
   process.exit(1);
 });
@@ -609,7 +607,7 @@ process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection:', { metadata: { promise: promise.toString(), reason } });
   errorTracker.captureException(new Error(`Unhandled Rejection: ${reason}`), {
     tags: { type: 'unhandledRejection' },
-    extra: { promise: promise.toString(), reason },
+    extra: { promise: promise.toString(), reason }
   });
   process.exit(1);
 });

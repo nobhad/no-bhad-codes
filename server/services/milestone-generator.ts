@@ -12,7 +12,7 @@ import { getDatabase } from '../database/init.js';
 import {
   getMilestoneTemplates,
   normalizeProjectType,
-  MilestoneTemplate,
+  MilestoneTemplate
 } from '../config/default-milestones.js';
 import { generateMilestoneTasks } from './task-generator.js';
 import { logger } from './logger.js';
@@ -129,7 +129,7 @@ export async function generateDefaultMilestones(
     return { milestonesCreated: milestoneIds.length, tasksCreated: totalTasksCreated };
   } catch (error) {
     logger.error(`[MilestoneGenerator] Error generating milestones for project ${projectId}:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -167,7 +167,7 @@ export function previewMilestones(
 
   return templates.map((template) => ({
     ...template,
-    dueDate: calculateDueDate(baseDate, template.estimatedDays),
+    dueDate: calculateDueDate(baseDate, template.estimatedDays)
   }));
 }
 
@@ -197,11 +197,11 @@ export async function regenerateMilestones(
     // Generate new milestones and tasks
     return generateDefaultMilestones(projectId, projectType, {
       startDate: startDate || new Date(),
-      skipIfExists: false,
+      skipIfExists: false
     });
   } catch (error) {
     logger.error(`[MilestoneGenerator] Error regenerating milestones for project ${projectId}:`, {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -269,7 +269,7 @@ export async function backfillMilestones(): Promise<{
       const startDate = project.start_date ? new Date(project.start_date) : new Date();
       const result = await generateDefaultMilestones(project.id, project.project_type, {
         startDate,
-        skipIfExists: true,
+        skipIfExists: true
       });
 
       milestonesCreated += result.milestonesCreated;
@@ -279,7 +279,7 @@ export async function backfillMilestones(): Promise<{
       const errorMessage = error instanceof Error ? error.message : String(error);
       errors.push({ projectId: project.id, error: errorMessage });
       logger.error(`[MilestoneGenerator] Failed to backfill project ${project.id}:`, {
-        message: errorMessage,
+        message: errorMessage
       });
     }
   }
@@ -292,7 +292,7 @@ export async function backfillMilestones(): Promise<{
     projectsProcessed,
     milestonesCreated,
     tasksCreated,
-    errors,
+    errors
   };
 }
 
@@ -301,5 +301,5 @@ export default {
   previewMilestones,
   regenerateMilestones,
   getProjectsWithoutMilestones,
-  backfillMilestones,
+  backfillMilestones
 };

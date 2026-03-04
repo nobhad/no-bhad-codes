@@ -1,4 +1,3 @@
-import { logger } from '../services/logger.js';
 /**
  * ===============================================
  * INTEGRATIONS API ROUTES
@@ -13,7 +12,7 @@ import { logger } from '../services/logger.js';
  */
 
 import { Router } from 'express';
-import express, { Request, Response } from 'express';
+import express, { Response } from 'express';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import {
@@ -25,8 +24,6 @@ import {
   // Slack/Discord
   formatSlackMessage,
   formatDiscordMessage,
-  sendSlackNotification,
-  sendDiscordNotification,
   saveNotificationConfig,
   getNotificationConfigs,
   deleteNotificationConfig,
@@ -47,7 +44,7 @@ import {
   exportProjectToICal,
   exportUpcomingToICal,
   saveCalendarSyncConfig,
-  getCalendarSyncConfig,
+  getCalendarSyncConfig
 } from '../services/integrations';
 import { getDatabase } from '../database/init';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
@@ -88,7 +85,7 @@ router.get(
     // Enhance with runtime checks
     const enhanced = statuses.map((status: Record<string, unknown>) => ({
       ...status,
-      runtime_configured: checkRuntimeConfiguration(status.integration_type as string),
+      runtime_configured: checkRuntimeConfiguration(status.integration_type as string)
     }));
 
     sendSuccess(res, { integrations: enhanced });
@@ -97,17 +94,17 @@ router.get(
 
 function checkRuntimeConfiguration(type: string): boolean {
   switch (type) {
-    case 'stripe':
-      return isStripeConfigured();
-    case 'google_calendar':
-      return isGoogleCalendarConfigured();
-    case 'slack':
-    case 'discord':
-      return true; // Configured per-webhook
-    case 'zapier':
-      return true; // Uses existing webhook system
-    default:
-      return false;
+  case 'stripe':
+    return isStripeConfigured();
+  case 'google_calendar':
+    return isGoogleCalendarConfigured();
+  case 'slack':
+  case 'discord':
+    return true; // Configured per-webhook
+  case 'zapier':
+    return true; // Uses existing webhook system
+  default:
+    return false;
   }
 }
 
@@ -165,8 +162,8 @@ router.post(
       {
         webhook: {
           id: webhook.id,
-          secretKey: webhook.secret_key,
-        },
+          secretKey: webhook.secret_key
+        }
       },
       'Zapier webhook created'
     );
@@ -245,7 +242,7 @@ router.post(
       webhook_url,
       channel,
       events,
-      is_active: is_active !== false,
+      is_active: is_active !== false
     };
 
     const saved = await saveNotificationConfig(config);
@@ -316,8 +313,8 @@ router.post(
         id: 1,
         number: 'INV-PREVIEW-001',
         client_name: 'Preview Client',
-        amount: 1000.0,
-      },
+        amount: 1000.0
+      }
     };
 
     if (platform === 'slack') {
@@ -388,7 +385,7 @@ router.post(
       amount: Math.round(invoiceData.total_amount * 100), // Convert to cents
       description: `Invoice #${invoiceData.invoice_number}`,
       successUrl,
-      cancelUrl,
+      cancelUrl
     });
 
     sendCreated(res, { paymentLink });
@@ -492,12 +489,12 @@ router.get(
       connected: Boolean(syncConfig?.isActive),
       syncConfig: syncConfig
         ? {
-            syncMilestones: syncConfig.syncMilestones,
-            syncTasks: syncConfig.syncTasks,
-            syncInvoiceDueDates: syncConfig.syncInvoiceDueDates,
-            lastSyncAt: syncConfig.lastSyncAt,
-          }
-        : null,
+          syncMilestones: syncConfig.syncMilestones,
+          syncTasks: syncConfig.syncTasks,
+          syncInvoiceDueDates: syncConfig.syncInvoiceDueDates,
+          lastSyncAt: syncConfig.lastSyncAt
+        }
+        : null
     });
   })
 );
@@ -556,7 +553,7 @@ router.post(
       syncMilestones: true,
       syncTasks: true,
       syncInvoiceDueDates: false,
-      isActive: true,
+      isActive: true
     });
 
     sendSuccess(res, undefined, 'Calendar connected successfully');
@@ -586,7 +583,7 @@ router.put(
       syncMilestones: syncMilestones ?? existing.syncMilestones,
       syncTasks: syncTasks ?? existing.syncTasks,
       syncInvoiceDueDates: syncInvoiceDueDates ?? existing.syncInvoiceDueDates,
-      isActive: isActive ?? existing.isActive,
+      isActive: isActive ?? existing.isActive
     });
 
     sendSuccess(res, undefined, 'Calendar settings updated');

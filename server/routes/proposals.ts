@@ -16,7 +16,7 @@ import { createRateLimiter } from '../middleware/rate-limiter.js';
 const signatureRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   maxRequests: 10,
-  blockDurationMs: 60 * 60 * 1000, // 1 hour block
+  blockDurationMs: 60 * 60 * 1000 // 1 hour block
 });
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -44,7 +44,7 @@ import {
   PdfPageContext,
   ensureSpace,
   addPageNumbers,
-  PAGE_MARGINS,
+  PAGE_MARGINS
 } from '../utils/pdf-utils.js';
 import { notDeleted } from '../database/query-helpers.js';
 import { userService } from '../services/user-service.js';
@@ -53,7 +53,7 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated,
+  sendCreated
 } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 
@@ -70,7 +70,7 @@ const VALID_PROJECT_TYPES = [
   'ecommerce', // Legacy support
   'web-app',
   'browser-extension',
-  'other',
+  'other'
 ];
 
 /**
@@ -157,7 +157,7 @@ router.get(
 
     if (!VALID_PROJECT_TYPES.includes(projectType)) {
       return errorResponseWithPayload(res, 'Invalid project type', 400, 'VALIDATION_ERROR', {
-        validTypes: VALID_PROJECT_TYPES,
+        validTypes: VALID_PROJECT_TYPES
       });
     }
 
@@ -184,13 +184,13 @@ router.post(
       'projectType',
       'selectedTier',
       'basePrice',
-      'finalPrice',
+      'finalPrice'
     ];
     const missingFields = requiredFields.filter((field) => !(field in submission));
 
     if (missingFields.length > 0) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'VALIDATION_ERROR', {
-        missingFields,
+        missingFields
       });
     }
 
@@ -261,7 +261,7 @@ router.post(
           submission.basePrice,
           submission.finalPrice,
           submission.maintenanceOption || null,
-          submission.clientNotes || null,
+          submission.clientNotes || null
         ]
       );
 
@@ -282,7 +282,7 @@ router.post(
               feature.featurePrice,
               feature.featureCategory || null,
               feature.isIncludedInTier ? 1 : 0,
-              feature.isAddon ? 1 : 0,
+              feature.isAddon ? 1 : 0
             ]
           );
         }
@@ -303,7 +303,7 @@ router.post(
       projectId: submission.projectId,
       clientId: submission.clientId,
       selectedTier: submission.selectedTier,
-      finalPrice: submission.finalPrice,
+      finalPrice: submission.finalPrice
     });
 
     sendCreated(
@@ -312,7 +312,7 @@ router.post(
         proposalId: result,
         projectId: submission.projectId,
         selectedTier: submission.selectedTier,
-        finalPrice: submission.finalPrice,
+        finalPrice: submission.finalPrice
       },
       'Proposal submitted successfully'
     );
@@ -380,12 +380,12 @@ router.get(
       reviewedAt: proposal.reviewed_at,
       reviewedBy: proposal.reviewed_by,
       project: {
-        name: getString(p, 'project_name'),
+        name: getString(p, 'project_name')
       },
       client: {
         name: getString(p, 'client_name'),
         email: getString(p, 'client_email'),
-        company: proposal.company_name,
+        company: proposal.company_name
       },
       features: features.map((f) => {
         const fr = f as unknown as Record<string, unknown>;
@@ -395,9 +395,9 @@ router.get(
           featurePrice: getNumber(fr, 'feature_price'),
           featureCategory: f.feature_category,
           isIncludedInTier: Boolean(f.is_included_in_tier),
-          isAddon: Boolean(f.is_addon),
+          isAddon: Boolean(f.is_addon)
         };
-      }),
+      })
     });
   })
 );
@@ -485,18 +485,18 @@ router.get(
           createdAt: getString(p, 'created_at'),
           reviewedAt: proposal.reviewed_at,
           project: {
-            name: getString(p, 'project_name'),
+            name: getString(p, 'project_name')
           },
           client: {
             name: getString(p, 'client_name'),
             email: getString(p, 'client_email'),
-            company: proposal.company_name,
-          },
+            company: proposal.company_name
+          }
         };
       }),
       total: countResult.count,
       limit: parseInt(limit as string, 10),
-      offset: parseInt(offset as string, 10),
+      offset: parseInt(offset as string, 10)
     });
   })
 );
@@ -517,7 +517,7 @@ router.put(
     // Validate status
     if (status && !VALID_STATUSES.includes(status)) {
       return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', {
-        validStatuses: VALID_STATUSES,
+        validStatuses: VALID_STATUSES
       });
     }
 
@@ -538,7 +538,7 @@ router.put(
 
       updates.push('status = ?');
       params.push(status);
-      updates.push("reviewed_at = datetime('now')");
+      updates.push('reviewed_at = datetime(\'now\')');
       updates.push('reviewed_by = ?');
       params.push(reviewerEmail);
       updates.push('reviewed_by_user_id = ?');
@@ -559,19 +559,19 @@ router.put(
     await db.run(`UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`, params);
 
     await logger.info(`[Proposals] Updated proposal ${id} - status: ${status || 'unchanged'}`, {
-      category: 'PROPOSALS',
+      category: 'PROPOSALS'
     });
 
     // Emit workflow events for status changes
     if (status === 'accepted') {
       await workflowTriggerService.emit('proposal.accepted', {
         entityId: parseInt(id, 10),
-        triggeredBy: req.user?.email || 'admin',
+        triggeredBy: req.user?.email || 'admin'
       });
     } else if (status === 'rejected') {
       await workflowTriggerService.emit('proposal.rejected', {
         entityId: parseInt(id, 10),
-        triggeredBy: req.user?.email || 'admin',
+        triggeredBy: req.user?.email || 'admin'
       });
     }
 
@@ -627,7 +627,7 @@ router.post(
         description: getString(fr, 'feature_name'),
         quantity: 1,
         unitPrice: getNumber(fr, 'feature_price'),
-        total: getNumber(fr, 'feature_price'),
+        total: getNumber(fr, 'feature_price')
       };
     });
 
@@ -655,13 +655,13 @@ router.post(
           getNumber(proposal as unknown as Record<string, unknown>, 'final_price'),
           dueDate.toISOString().split('T')[0],
           JSON.stringify(lineItems),
-          `Converted from proposal #${id}`,
+          `Converted from proposal #${id}`
         ]
       );
 
       // Update proposal status to converted
       await ctx.run(
-        "UPDATE proposal_requests SET status = 'converted', reviewed_at = datetime('now') WHERE id = ?",
+        'UPDATE proposal_requests SET status = \'converted\', reviewed_at = datetime(\'now\') WHERE id = ?',
         [id]
       );
 
@@ -669,7 +669,7 @@ router.post(
     });
 
     await logger.info(`[Proposals] Converted proposal ${id} to invoice ${invoiceNumber}`, {
-      category: 'PROPOSALS',
+      category: 'PROPOSALS'
     });
 
     sendSuccess(res, { invoiceId, invoiceNumber }, 'Proposal converted to invoice');
@@ -744,9 +744,9 @@ router.get(
     // Get signature data if proposal is signed
     const signature = (proposal as any).signed_at
       ? ((await db.get(
-          `SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
-          [id]
-        )) as
+        `SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
+        [id]
+      )) as
           | {
               signer_name?: string;
               signer_email?: string;
@@ -764,16 +764,17 @@ router.get(
 
     // Helper functions
     const formatDate = (dateStr: string | undefined | null): string => {
-      if (!dateStr)
+      if (!dateStr) {
         return new Date().toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
-          day: 'numeric',
+          day: 'numeric'
         });
+      }
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
+        day: 'numeric'
       });
     };
 
@@ -788,7 +789,7 @@ router.get(
         diy: 'DIY (Self-Managed)',
         essential: 'Essential Plan',
         standard: 'Standard Plan',
-        premium: 'Premium Plan',
+        premium: 'Premium Plan'
       };
       return maintenanceNames[option] || option;
     };
@@ -821,7 +822,7 @@ router.get(
       topMargin: PAGE_MARGINS.top,
       bottomMargin: PAGE_MARGINS.bottom,
       contentWidth: pageWidth - PAGE_MARGINS.left - PAGE_MARGINS.right,
-      fonts: { regular: helvetica, bold: helveticaBold },
+      fonts: { regular: helvetica, bold: helveticaBold }
     };
 
     // Helper to get current page
@@ -834,7 +835,7 @@ router.get(
         y: context.y,
         size: 10,
         font: helvetica,
-        color: rgb(0.4, 0.4, 0.4),
+        color: rgb(0.4, 0.4, 0.4)
       });
       context.y -= 20;
     };
@@ -853,7 +854,7 @@ router.get(
       y: ctx.y - 20,
       size: 28,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15),
+      color: rgb(0.15, 0.15, 0.15)
     });
 
     // Logo and business info on right (logo left of text, text left-aligned)
@@ -867,7 +868,7 @@ router.get(
         x: logoX,
         y: ctx.y - logoHeight + 10,
         width: logoWidth,
-        height: logoHeight,
+        height: logoHeight
       });
       textStartX = logoX + logoWidth + 18;
     }
@@ -878,35 +879,35 @@ router.get(
       y: ctx.y - 11,
       size: 15,
       font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     page().drawText(BUSINESS_INFO.owner, {
       x: textStartX,
       y: ctx.y - 34,
       size: 10,
       font: helvetica,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page().drawText(BUSINESS_INFO.tagline, {
       x: textStartX,
       y: ctx.y - 54,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page().drawText(BUSINESS_INFO.email, {
       x: textStartX,
       y: ctx.y - 70,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page().drawText(BUSINESS_INFO.website, {
       x: textStartX,
       y: ctx.y - 86,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
 
     ctx.y -= 120; // Account for 100pt logo height
@@ -916,7 +917,7 @@ router.get(
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
       thickness: 1,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(0.7, 0.7, 0.7)
     });
     ctx.y -= 21;
 
@@ -929,14 +930,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page().drawText(getString(p, 'client_name') || 'Client', {
       x: leftMargin,
       y: ctx.y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     let clientLineY = ctx.y - 30;
     if (proposal.company_name) {
@@ -945,7 +946,7 @@ router.get(
         y: clientLineY,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       clientLineY -= 15;
     }
@@ -954,7 +955,7 @@ router.get(
       y: clientLineY,
       size: 10,
       font: helvetica,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
 
     // Right side - Prepared By & Date
@@ -963,28 +964,28 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page().drawText(BUSINESS_INFO.name, {
       x: rightCol,
       y: ctx.y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     page().drawText('Date:', {
       x: rightCol,
       y: ctx.y - 45,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page().drawText(formatDate(getString(p, 'created_at')), {
       x: rightCol,
       y: ctx.y - 60,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
 
     ctx.y -= 90;
@@ -995,7 +996,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8),
+      color: rgb(0, 0.4, 0.8)
     });
     ctx.y -= 18;
 
@@ -1004,14 +1005,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     page().drawText(getString(p, 'project_name'), {
       x: leftMargin + 55,
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 15;
 
@@ -1020,7 +1021,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     page().drawText(
       getString(p, 'project_type')
@@ -1036,7 +1037,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8),
+      color: rgb(0, 0.4, 0.8)
     });
     ctx.y -= 18;
 
@@ -1046,7 +1047,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 15;
     page().drawText(`Base Price: $${getNumber(p, 'base_price').toLocaleString()}`, {
@@ -1054,7 +1055,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 20;
 
@@ -1066,7 +1067,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       ctx.y -= 15;
       for (const f of includedFeatures) {
@@ -1078,7 +1079,7 @@ router.get(
           y: ctx.y,
           size: 10,
           font: helvetica,
-          color: rgb(0, 0, 0),
+          color: rgb(0, 0, 0)
         });
         ctx.y -= 12;
       }
@@ -1095,7 +1096,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       ctx.y -= 15;
       for (const f of addons) {
@@ -1108,7 +1109,7 @@ router.get(
           y: ctx.y,
           size: 10,
           font: helvetica,
-          color: rgb(0, 0, 0),
+          color: rgb(0, 0, 0)
         });
         ctx.y -= 12;
       }
@@ -1123,7 +1124,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       ctx.y -= 15;
       page().drawText(formatMaintenance(proposal.maintenance_option), {
@@ -1131,7 +1132,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       ctx.y -= 20;
     }
@@ -1145,7 +1146,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8),
+      color: rgb(0, 0.4, 0.8)
     });
     ctx.y -= 18;
 
@@ -1154,7 +1155,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     const basePriceText = `$${getNumber(p, 'base_price').toLocaleString()}`;
     page().drawText(basePriceText, {
@@ -1162,7 +1163,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 15;
 
@@ -1173,7 +1174,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       const addonsTotalText = `$${addonsTotal.toLocaleString()}`;
       page().drawText(addonsTotalText, {
@@ -1181,7 +1182,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       ctx.y -= 15;
     }
@@ -1192,7 +1193,7 @@ router.get(
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
       thickness: 1,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     ctx.y -= 15;
 
@@ -1202,7 +1203,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     const totalText = `$${getNumber(p, 'final_price').toLocaleString()}`;
     page().drawText(totalText, {
@@ -1210,7 +1211,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
 
     // === PAYMENT SCHEDULE ===
@@ -1221,7 +1222,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8),
+      color: rgb(0, 0.4, 0.8)
     });
     ctx.y -= 20;
 
@@ -1241,21 +1242,21 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     page().drawText('When Due', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     page().drawText('Amount', {
       x: rightMargin - 70,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.y -= 5;
 
@@ -1264,7 +1265,7 @@ router.get(
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
       thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(0.7, 0.7, 0.7)
     });
     ctx.y -= paymentRowHeight;
 
@@ -1274,14 +1275,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     page().drawText('Upon contract signing', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     const depositText = `$${depositAmount.toLocaleString()}`;
     page().drawText(depositText, {
@@ -1289,7 +1290,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 5;
 
@@ -1298,7 +1299,7 @@ router.get(
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
       thickness: 0.25,
-      color: rgb(0.85, 0.85, 0.85),
+      color: rgb(0.85, 0.85, 0.85)
     });
     ctx.y -= paymentRowHeight;
 
@@ -1308,14 +1309,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     page().drawText('Upon project completion', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     const finalPaymentText = `$${finalPayment.toLocaleString()}`;
     page().drawText(finalPaymentText, {
@@ -1323,7 +1324,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 5;
 
@@ -1332,7 +1333,7 @@ router.get(
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
       thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(0.7, 0.7, 0.7)
     });
     ctx.y -= paymentRowHeight;
 
@@ -1342,7 +1343,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     const totalInvestmentText = `$${finalPrice.toLocaleString()}`;
     page().drawText(totalInvestmentText, {
@@ -1350,7 +1351,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 15;
 
@@ -1362,7 +1363,7 @@ router.get(
         y: ctx.y,
         size: 8,
         font: helvetica,
-        color: rgb(0.5, 0.5, 0.5),
+        color: rgb(0.5, 0.5, 0.5)
       }
     );
 
@@ -1375,7 +1376,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       ctx.y -= 15;
       page().drawText(proposal.client_notes, {
@@ -1383,7 +1384,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
     }
 
@@ -1397,7 +1398,7 @@ router.get(
         y: ctx.y,
         size: 14,
         font: helveticaBold,
-        color: rgb(0, 0.4, 0.8),
+        color: rgb(0, 0.4, 0.8)
       });
       ctx.y -= 18;
 
@@ -1418,7 +1419,7 @@ router.get(
               y: ctx.y,
               size: 9,
               font: helvetica,
-              color: rgb(0.3, 0.3, 0.3),
+              color: rgb(0.3, 0.3, 0.3)
             });
             ctx.y -= 12;
             ensureSpace(ctx, 12, drawContinuationHeader);
@@ -1433,7 +1434,7 @@ router.get(
             y: ctx.y,
             size: 9,
             font: helvetica,
-            color: rgb(0.3, 0.3, 0.3),
+            color: rgb(0.3, 0.3, 0.3)
           });
           ctx.y -= 12;
         }
@@ -1452,7 +1453,7 @@ router.get(
         y: ctx.y,
         size: 14,
         font: helveticaBold,
-        color: rgb(0, 0.4, 0.8),
+        color: rgb(0, 0.4, 0.8)
       });
       ctx.y -= 20;
 
@@ -1466,7 +1467,7 @@ router.get(
         height: sigBoxHeight,
         borderColor: rgb(0.7, 0.7, 0.7),
         borderWidth: 1,
-        color: rgb(0.98, 0.98, 0.98),
+        color: rgb(0.98, 0.98, 0.98)
       });
 
       // Embed signature image if available (drawn signature)
@@ -1496,7 +1497,7 @@ router.get(
         } catch (sigError) {
           await logger.error('[PDF] Failed to embed signature image:', {
             error: sigError instanceof Error ? sigError : undefined,
-            category: 'PROPOSALS',
+            category: 'PROPOSALS'
           });
         }
       } else if (signature.signature_data && signature.signature_method === 'typed') {
@@ -1507,7 +1508,7 @@ router.get(
           y: sigBoxY - 45,
           size: 24,
           font: helvetica,
-          color: rgb(0, 0, 0.6),
+          color: rgb(0, 0, 0.6)
         });
       }
 
@@ -1520,7 +1521,7 @@ router.get(
         y: detailsY,
         size: 11,
         font: helveticaBold,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       detailsY -= 14;
 
@@ -1530,7 +1531,7 @@ router.get(
           y: detailsY,
           size: 9,
           font: helvetica,
-          color: rgb(0.3, 0.3, 0.3),
+          color: rgb(0.3, 0.3, 0.3)
         });
         detailsY -= 12;
       }
@@ -1541,7 +1542,7 @@ router.get(
           y: detailsY,
           size: 9,
           font: helvetica,
-          color: rgb(0.3, 0.3, 0.3),
+          color: rgb(0.3, 0.3, 0.3)
         });
         detailsY -= 12;
       }
@@ -1555,7 +1556,7 @@ router.get(
         y: detailsY,
         size: 9,
         font: helvetica,
-        color: rgb(0.4, 0.4, 0.4),
+        color: rgb(0.4, 0.4, 0.4)
       });
 
       ctx.y = sigBoxY - sigBoxHeight - 15;
@@ -1568,7 +1569,7 @@ router.get(
           y: ctx.y,
           size: 8,
           font: helvetica,
-          color: rgb(0.5, 0.5, 0.5),
+          color: rgb(0.5, 0.5, 0.5)
         }
       );
       ctx.y -= 12;
@@ -1579,7 +1580,7 @@ router.get(
           y: ctx.y,
           size: 7,
           font: helvetica,
-          color: rgb(0.6, 0.6, 0.6),
+          color: rgb(0.6, 0.6, 0.6)
         });
       }
     }
@@ -1595,14 +1596,14 @@ router.get(
       y: footerY,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page().drawText(footerText2, {
       x: (width - helvetica.widthOfTextAtSize(footerText2, 9)) / 2,
       y: footerY - 12,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
 
     // Add page numbers if multiple pages
@@ -1610,7 +1611,7 @@ router.get(
       await addPageNumbers(pdfDoc, {
         format: (pageNum, total) => `Page ${pageNum} of ${total}`,
         fontSize: 8,
-        marginBottom: 20,
+        marginBottom: 20
       });
     }
 
@@ -1628,7 +1629,7 @@ router.get(
           font: helveticaBold,
           color: rgb(0, 0.6, 0.2),
           opacity: 0.08,
-          rotate: degrees(-35),
+          rotate: degrees(-35)
         });
       }
     }

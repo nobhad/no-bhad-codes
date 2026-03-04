@@ -35,7 +35,7 @@ router.get(
       startDate: startDate as string | undefined,
       endDate: endDate as string | undefined,
       userName: userName as string | undefined,
-      taskId: taskId ? parseInt(taskId as string) : undefined,
+      taskId: taskId ? parseInt(taskId as string) : undefined
     });
 
     // Transform to frontend format (hours -> duration_minutes, billable -> is_billable)
@@ -45,7 +45,7 @@ router.get(
       is_billable: entry.billable === true,
       hourly_rate: entry.hourlyRate || null,
       user_email: entry.userName || 'admin',
-      user_name: entry.userName || 'Admin',
+      user_name: entry.userName || 'Admin'
     }));
 
     sendSuccess(res, { entries: transformedEntries });
@@ -78,7 +78,7 @@ router.post(
       hourly_rate,
       hourlyRate,
       task_id,
-      taskId,
+      taskId
     } = req.body;
 
     // Calculate hours from duration_minutes if provided, otherwise use hours
@@ -104,7 +104,7 @@ router.post(
       description: description || null,
       billable: is_billable !== undefined ? is_billable : billable !== undefined ? billable : true,
       hourlyRate: hourly_rate || hourlyRate || null,
-      taskId: task_id || taskId || null,
+      taskId: task_id || taskId || null
     };
 
     const entry = await projectService.logTime(projectId, normalizedData);
@@ -131,7 +131,7 @@ router.put(
       hourly_rate,
       hourlyRate,
       task_id,
-      taskId,
+      taskId
     } = req.body;
 
     // Calculate hours from duration_minutes if provided

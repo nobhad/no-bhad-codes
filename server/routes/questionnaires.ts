@@ -17,7 +17,7 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated,
+  sendCreated
 } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 
@@ -166,7 +166,7 @@ router.post(
         await logger.error(`[Questionnaire] Failed to generate PDF for response ${responseId}:`, {
           error: pdfError instanceof Error ? pdfError : undefined,
           category: 'QUESTIONNAIRE',
-          metadata: { responseId },
+          metadata: { responseId }
         });
       }
     }
@@ -182,7 +182,7 @@ router.post(
       projectName: response.project_name,
       exportedFileId,
       completedAt: response.completed_at,
-      triggeredBy: req.user?.email,
+      triggeredBy: req.user?.email
     });
 
     sendSuccess(
@@ -190,8 +190,8 @@ router.post(
       {
         response: {
           ...response,
-          exported_file_id: exportedFileId,
-        },
+          exported_file_id: exportedFileId
+        }
       },
       'Questionnaire submitted'
     );
@@ -256,7 +256,7 @@ router.post(
       questions,
       is_active,
       auto_send_on_project_create,
-      display_order,
+      display_order
     } = req.body;
 
     if (!name || !questions || !Array.isArray(questions)) {
@@ -273,7 +273,7 @@ router.post(
       is_active,
       auto_send_on_project_create,
       display_order,
-      created_by: createdBy,
+      created_by: createdBy
     });
 
     sendCreated(res, { questionnaire }, 'Questionnaire created');
@@ -409,7 +409,7 @@ router.post(
         400,
         undefined,
         {
-          existing_response_id: existing.id,
+          existing_response_id: existing.id
         }
       );
     }
@@ -418,7 +418,7 @@ router.post(
       questionnaire_id: questionnaireId,
       client_id,
       project_id,
-      due_date,
+      due_date
     });
 
     sendCreated(res, { response }, 'Questionnaire sent to client');
@@ -532,7 +532,7 @@ router.get(
 
     sendPdfResponse(res, pdfBytes, {
       filename: `questionnaire_${safeQuestionnaireName}_${safeClientName}.pdf`,
-      disposition: 'inline',
+      disposition: 'inline'
     });
   })
 );

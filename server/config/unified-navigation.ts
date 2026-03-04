@@ -127,7 +127,7 @@ export const ICON_KEYS = {
   settingsClient: 'settingsClient',
   panelLeft: 'panelLeft',
   logOut: 'logOut',
-  logOutClient: 'logOutClient',
+  logOutClient: 'logOutClient'
 } as const;
 
 export type IconKey = keyof typeof ICON_KEYS;
@@ -145,7 +145,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     order: 1,
     shortcut: '1',
-    activeForRole: 'admin', // Default active for both roles
+    activeForRole: 'admin' // Default active for both roles
   },
   {
     id: 'projects',
@@ -154,7 +154,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     group: 'work',
     order: 2,
-    badge: 'badge-projects',
+    badge: 'badge-projects'
   },
   {
     id: 'messages',
@@ -163,7 +163,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     group: 'crm',
     order: 3,
-    badge: 'badge-messages',
+    badge: 'badge-messages'
   },
   {
     id: 'files',
@@ -173,7 +173,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     group: 'documents',
     order: 4,
     badge: 'badge-documents',
-    dataTab: 'files',
+    dataTab: 'files'
   },
   {
     id: 'invoices',
@@ -182,7 +182,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     group: 'documents',
     order: 5,
-    badge: 'badge-invoices',
+    badge: 'badge-invoices'
   },
   {
     id: 'requests',
@@ -191,7 +191,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     group: 'work',
     order: 6,
-    badge: 'badge-requests',
+    badge: 'badge-requests'
   },
   {
     id: 'questionnaires',
@@ -200,14 +200,14 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     group: 'documents',
     order: 7,
-    badge: 'badge-questionnaires',
+    badge: 'badge-questionnaires'
   },
   {
     id: 'settings',
     label: 'Settings',
     icon: 'settingsClient',
     roles: ['client'],
-    order: 100, // Always last for client
+    order: 100 // Always last for client
   },
 
   // ========== ADMIN-ONLY TABS ==========
@@ -218,7 +218,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin'],
     order: 2,
     shortcut: '2',
-    dataTab: 'work',
+    dataTab: 'work'
   },
   {
     id: 'workflows',
@@ -226,7 +226,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'lineChart',
     roles: ['admin'],
     order: 3,
-    shortcut: '3',
+    shortcut: '3'
   },
   {
     id: 'crm',
@@ -235,7 +235,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin'],
     order: 4,
     shortcut: '4',
-    ariaLabel: 'Clients & Leads',
+    ariaLabel: 'Clients & Leads'
   },
   {
     id: 'documents',
@@ -243,7 +243,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'fileText',
     roles: ['admin'],
     order: 5,
-    shortcut: '5',
+    shortcut: '5'
   },
   {
     id: 'tasks',
@@ -251,7 +251,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'checkCircle',
     roles: ['admin'],
     group: 'work',
-    order: 8,
+    order: 8
   },
   {
     id: 'leads',
@@ -259,7 +259,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'users',
     roles: ['admin'],
     group: 'crm',
-    order: 9,
+    order: 9
   },
   {
     id: 'contacts',
@@ -267,7 +267,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'users',
     roles: ['admin'],
     group: 'crm',
-    order: 10,
+    order: 10
   },
   {
     id: 'clients',
@@ -275,7 +275,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'users',
     roles: ['admin'],
     group: 'crm',
-    order: 11,
+    order: 11
   },
   {
     id: 'contracts',
@@ -283,7 +283,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'fileText',
     roles: ['admin'],
     group: 'documents',
-    order: 12,
+    order: 12
   },
   {
     id: 'document-requests',
@@ -291,7 +291,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'fileText',
     roles: ['admin'],
     group: 'documents',
-    order: 13,
+    order: 13
   },
   {
     id: 'analytics',
@@ -299,7 +299,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'barChart',
     roles: ['admin'],
     order: 14,
-    shortcut: '6',
+    shortcut: '6'
   },
   {
     id: 'support',
@@ -308,7 +308,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin'],
     order: 15,
     shortcut: '7',
-    ariaLabel: 'Knowledge Base',
+    ariaLabel: 'Knowledge Base'
   },
   {
     id: 'system',
@@ -317,7 +317,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin'],
     order: 16,
     shortcut: '8',
-    ariaLabel: 'System Status',
+    ariaLabel: 'System Status'
   },
 
   // ========== CLIENT-ONLY TABS ==========
@@ -327,22 +327,22 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     icon: 'checkCircle',
     roles: ['client'],
     order: 18,
-    badge: 'badge-approvals',
+    badge: 'badge-approvals'
   },
   {
     id: 'review',
     label: 'Review',
     icon: 'eye',
     roles: ['client'],
-    order: 19,
+    order: 19
   },
   {
     id: 'help',
     label: 'Help',
     icon: 'helpCircle',
     roles: ['client'],
-    order: 20,
-  },
+    order: 20
+  }
 ];
 
 // ============================================
@@ -360,8 +360,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'projects', label: 'Projects', roles: ['admin'] },
       { id: 'tasks', label: 'Tasks', roles: ['admin'] },
-      { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'] },
-    ],
+      { id: 'ad-hoc-requests', label: 'Requests', roles: ['admin'] }
+    ]
   },
   // Admin: CRM group subtabs
   {
@@ -374,8 +374,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'leads', label: 'Leads', roles: ['admin'] },
       { id: 'contacts', label: 'Contacts', roles: ['admin'] },
       { id: 'messages', label: 'Messages', roles: ['admin'] },
-      { id: 'clients', label: 'Clients', roles: ['admin'] },
-    ],
+      { id: 'clients', label: 'Clients', roles: ['admin'] }
+    ]
   },
   // Admin: Documents group subtabs
   {
@@ -388,8 +388,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'invoices', label: 'Invoices', roles: ['admin'] },
       { id: 'contracts', label: 'Contracts', roles: ['admin'] },
       { id: 'document-requests', label: 'Document Requests', roles: ['admin'] },
-      { id: 'questionnaires', label: 'Questionnaires', roles: ['admin'] },
-    ],
+      { id: 'questionnaires', label: 'Questionnaires', roles: ['admin'] }
+    ]
   },
   // Admin: Analytics subtabs
   {
@@ -401,8 +401,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'revenue', label: 'Revenue', roles: ['admin'] },
       { id: 'leads', label: 'Leads', roles: ['admin'] },
-      { id: 'projects', label: 'Projects', roles: ['admin'] },
-    ],
+      { id: 'projects', label: 'Projects', roles: ['admin'] }
+    ]
   },
   // Admin: Workflows subtabs
   {
@@ -414,8 +414,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'approvals', label: 'Approvals', roles: ['admin'] },
       { id: 'triggers', label: 'Triggers', roles: ['admin'] },
-      { id: 'email-templates', label: 'Email Templates', roles: ['admin'] },
-    ],
+      { id: 'email-templates', label: 'Email Templates', roles: ['admin'] }
+    ]
   },
   // Admin: Knowledge subtabs
   {
@@ -426,8 +426,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     subtabs: [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'categories', label: 'Categories', roles: ['admin'] },
-      { id: 'articles', label: 'Articles', roles: ['admin'] },
-    ],
+      { id: 'articles', label: 'Articles', roles: ['admin'] }
+    ]
   },
   // Client: Settings subtabs
   {
@@ -437,8 +437,8 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     subtabs: [
       { id: 'profile', label: 'Profile', roles: ['client'], active: true },
       { id: 'billing', label: 'Billing', roles: ['client'] },
-      { id: 'notifications', label: 'Notifications', roles: ['client'] },
-    ],
+      { id: 'notifications', label: 'Notifications', roles: ['client'] }
+    ]
   },
   // Client: Project detail subtabs
   {
@@ -451,41 +451,12 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'updates', label: 'Updates', roles: ['client'], dataAttr: 'pd-tab' },
       { id: 'files', label: 'Files', roles: ['client'], dataAttr: 'pd-tab' },
       { id: 'messages', label: 'Messages', roles: ['client'], dataAttr: 'pd-tab' },
-      { id: 'invoices', label: 'Invoices', roles: ['client'], dataAttr: 'pd-tab' },
-    ],
-  },
-  // Admin: Project detail subtabs
-  {
-    id: 'project-detail-subtabs',
-    forTab: 'project-detail',
-    roles: ['admin'],
-    subtabs: [
-      { id: 'overview', label: 'Overview', roles: ['admin'], active: true, dataAttr: 'pd-tab' },
-      { id: 'files', label: 'Files', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'deliverables', label: 'Deliverables', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'messages', label: 'Messages', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'invoices', label: 'Invoices', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'tasks', label: 'Tasks', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'time', label: 'Time', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'contract', label: 'Contract', roles: ['admin'], dataAttr: 'pd-tab' },
-      { id: 'notes', label: 'Notes', roles: ['admin'], dataAttr: 'pd-tab' },
-    ],
-  },
-  // Admin: Client detail subtabs
-  {
-    id: 'client-detail-subtabs',
-    forTab: 'client-detail',
-    roles: ['admin'],
-    subtabs: [
-      { id: 'overview', label: 'Overview', roles: ['admin'], active: true, dataAttr: 'cd-tab' },
-      { id: 'contacts', label: 'Contacts', roles: ['admin'], dataAttr: 'cd-tab' },
-      { id: 'activity', label: 'Activity', roles: ['admin'], dataAttr: 'cd-tab' },
-      { id: 'projects', label: 'Projects', roles: ['admin'], dataAttr: 'cd-tab' },
-      { id: 'invoices', label: 'Invoices', roles: ['admin'], dataAttr: 'cd-tab' },
-      { id: 'notes', label: 'Notes', roles: ['admin'], dataAttr: 'cd-tab' },
-    ],
-  },
+      { id: 'invoices', label: 'Invoices', roles: ['client'], dataAttr: 'pd-tab' }
+    ]
+  }
 ];
+// NOTE: project-detail and client-detail subtabs are managed by their React components (ProjectDetail.tsx, ClientDetail.tsx)
+// and must NOT be defined here — doing so creates duplicate tab bars.
 
 // ============================================
 // TAB TITLES MAPPING (for page headers)
@@ -525,7 +496,7 @@ export const UNIFIED_TAB_TITLES: Record<string, string> = {
   preview: 'Project Preview',
   review: 'Project Preview',
   help: 'Help',
-  'new-project': 'New Project',
+  'new-project': 'New Project'
 };
 
 // ============================================
@@ -540,33 +511,33 @@ export const UNIFIED_TAB_GROUPS: Record<
     label: 'Work',
     tabs: ['projects', 'tasks', 'ad-hoc-requests'],
     defaultTab: 'projects',
-    roles: ['admin'],
+    roles: ['admin']
   },
   crm: {
     label: 'CRM',
     tabs: ['leads', 'contacts', 'messages', 'clients'],
     defaultTab: 'leads',
-    roles: ['admin'],
+    roles: ['admin']
   },
   documents: {
     label: 'Documents',
     tabs: ['invoices', 'contracts', 'document-requests', 'questionnaires'],
     defaultTab: 'invoices',
-    roles: ['admin'],
+    roles: ['admin']
   },
   // Client groups (for hash routing)
   docs: {
     label: 'Documents',
     tabs: ['files', 'invoices', 'documents', 'questionnaires'],
     defaultTab: 'files',
-    roles: ['client'],
+    roles: ['client']
   },
   support: {
     label: 'Support',
     tabs: ['messages', 'help'],
     defaultTab: 'messages',
-    roles: ['client'],
-  },
+    roles: ['client']
+  }
 };
 
 // ============================================
@@ -590,7 +561,7 @@ export function getNavigationForRole(role: UserRole): UnifiedNavItem[] {
 export function getSubtabGroupsForRole(role: UserRole): UnifiedSubtabGroup[] {
   return UNIFIED_SUBTAB_GROUPS.filter((group) => group.roles.includes(role)).map((group) => ({
     ...group,
-    subtabs: group.subtabs.filter((subtab) => subtab.roles.includes(role)),
+    subtabs: group.subtabs.filter((subtab) => subtab.roles.includes(role))
   }));
 }
 
@@ -604,7 +575,7 @@ export function getFeaturesForRole(role: UserRole): PortalFeatures {
     themeToggle: true, // Shared: both roles
     mobileMenuToggle: role === 'client', // Client only (admin has sidebar toggle)
     subtabs: true, // Both roles
-    secondarySidebar: false, // Removed — not used
+    secondarySidebar: false // Removed — not used
   };
 }
 
@@ -623,7 +594,7 @@ export function getCapabilitiesForRole(role: UserRole): FeatureCapabilities {
     canViewAll: isAdmin,
     canAssign: isAdmin,
     canManageUsers: isAdmin,
-    canAccessAnalytics: isAdmin,
+    canAccessAnalytics: isAdmin
   };
 }
 

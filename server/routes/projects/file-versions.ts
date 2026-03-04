@@ -4,7 +4,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessFile } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -56,7 +56,7 @@ router.post(
       file_size: file.size,
       mime_type: file.mimetype,
       uploaded_by: req.user!.email,
-      comment,
+      comment
     });
 
     sendCreated(res, { version });

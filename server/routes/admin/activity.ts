@@ -149,7 +149,7 @@ router.get(
         recentActivity
           .filter((a: Record<string, unknown>) => a.client_id)
           .map((a: Record<string, unknown>) => a.client_id as number)
-      ),
+      )
     ];
     const clientMap: Record<number, string> = {};
 
@@ -173,8 +173,8 @@ router.get(
         date: item.date,
         entityId: item.entity_id,
         clientId: item.client_id,
-        clientName: item.client_id ? clientMap[item.client_id as number] : null,
-      })),
+        clientName: item.client_id ? clientMap[item.client_id as number] : null
+      }))
     });
   })
 );

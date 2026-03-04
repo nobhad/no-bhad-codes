@@ -76,14 +76,14 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       triggeredBy: createdById?.toString() || 'system',
       projectId,
       title,
-      type,
+      type
     });
 
     sendCreated(res, { deliverable });
   } catch (error) {
     logger.error('[Deliverables] Failed to create deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to create deliverable', 500, 'INTERNAL_ERROR');
   }
@@ -116,7 +116,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     logger.error('[Deliverables] Failed to retrieve deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to retrieve deliverable', 500, 'INTERNAL_ERROR');
   }
@@ -150,14 +150,14 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
       status: status as string | undefined,
       roundNumber: roundNumber ? parseInt(roundNumber as string, 10) : undefined,
       limit: parsedLimit,
-      offset: parsedOffset,
+      offset: parsedOffset
     });
 
     sendSuccess(res, { deliverables: result.deliverables, pagination: { total: result.total } });
   } catch (error) {
     logger.error('[Deliverables] Failed to list deliverables', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to list deliverables', 500, 'INTERNAL_ERROR');
   }
@@ -188,7 +188,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
     }
     logger.error('[Deliverables] Failed to update deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to update deliverable', 500, 'INTERNAL_ERROR');
   }
@@ -236,7 +236,7 @@ router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
           fileName: latestVersion.file_name,
           fileSize: latestVersion.file_size,
           fileType: latestVersion.file_type,
-          uploadedBy: reviewedById?.toString() || 'system',
+          uploadedBy: reviewedById?.toString() || 'system'
         });
 
         // Update deliverable with archived file reference
@@ -249,13 +249,13 @@ router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
           projectId: deliverable.project_id,
           fileName: latestVersion.file_name,
           source: 'deliverable_archive',
-          deliverableId: deliverableId,
+          deliverableId: deliverableId
         });
       } catch (archiveError) {
         // Log but don't fail the lock operation if archiving fails
         logger.error('[Deliverables] Failed to archive deliverable file', {
           error: archiveError instanceof Error ? archiveError : new Error(String(archiveError)),
-          category: 'DELIVERABLE',
+          category: 'DELIVERABLE'
         });
       }
     }
@@ -265,7 +265,7 @@ router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
       entityId: deliverableId,
       triggeredBy: reviewedById?.toString() || 'system',
       projectId: deliverable.project_id,
-      archivedFileId: archivedFile?.id,
+      archivedFileId: archivedFile?.id
     });
 
     sendSuccess(
@@ -274,7 +274,7 @@ router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
         deliverable,
         archivedFile: archivedFile
           ? { id: archivedFile.id, project_id: archivedFile.project_id }
-          : null,
+          : null
       },
       'Deliverable approved and locked'
     );
@@ -284,7 +284,7 @@ router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
     }
     logger.error('[Deliverables] Failed to lock deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to lock deliverable', 500, 'INTERNAL_ERROR');
   }
@@ -323,7 +323,7 @@ router.post('/:id/revision', async (req: AuthenticatedRequest, res: Response) =>
     await workflowTriggerService.emit('deliverable.rejected', {
       entityId: deliverableId,
       triggeredBy: reviewedById?.toString() || 'system',
-      reason,
+      reason
     });
 
     sendSuccess(res, { deliverable }, 'Revision requested');
@@ -333,7 +333,7 @@ router.post('/:id/revision', async (req: AuthenticatedRequest, res: Response) =>
     }
     logger.error('[Deliverables] Failed to request revision', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to request revision', 500, 'INTERNAL_ERROR');
   }
@@ -361,7 +361,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     logger.error('[Deliverables] Failed to delete deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to delete deliverable', 500, 'INTERNAL_ERROR');
   }
@@ -409,7 +409,7 @@ router.post('/:id/versions', async (req: AuthenticatedRequest, res: Response) =>
     }
     logger.error('[Deliverables] Failed to upload version', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to upload version', 500, 'INTERNAL_ERROR');
   }
@@ -437,7 +437,7 @@ router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => 
   } catch (error) {
     logger.error('[Deliverables] Failed to list versions', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to list versions', 500, 'INTERNAL_ERROR');
   }
@@ -470,7 +470,7 @@ router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Respon
   } catch (error) {
     logger.error('[Deliverables] Failed to retrieve latest version', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to retrieve latest version', 500, 'INTERNAL_ERROR');
   }
@@ -505,7 +505,7 @@ router.post('/:id/comments', async (req: AuthenticatedRequest, res: Response) =>
       x,
       y,
       annotationType,
-      elementId,
+      elementId
     });
 
     sendCreated(res, { comment });
@@ -515,7 +515,7 @@ router.post('/:id/comments', async (req: AuthenticatedRequest, res: Response) =>
     }
     logger.error('[Deliverables] Failed to add comment', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to add comment', 500, 'INTERNAL_ERROR');
   }
@@ -542,14 +542,14 @@ router.get('/:id/comments', async (req: AuthenticatedRequest, res: Response) => 
 
     const comments = await deliverableService.getDeliverableComments(deliverableId, {
       resolved: resolved === 'true',
-      elementId: elementId as string,
+      elementId: elementId as string
     });
 
     sendSuccess(res, { comments });
   } catch (error) {
     logger.error('[Deliverables] Failed to list comments', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to list comments', 500, 'INTERNAL_ERROR');
   }
@@ -594,7 +594,7 @@ router.patch(
       }
       logger.error('[Deliverables] Failed to resolve comment', {
         error: error instanceof Error ? error : new Error(String(error)),
-        category: 'DELIVERABLE',
+        category: 'DELIVERABLE'
       });
       errorResponse(res, 'Failed to resolve comment', 500, 'INTERNAL_ERROR');
     }
@@ -637,7 +637,7 @@ router.delete(
     } catch (error) {
       logger.error('[Deliverables] Failed to delete comment', {
         error: error instanceof Error ? error : new Error(String(error)),
-        category: 'DELIVERABLE',
+        category: 'DELIVERABLE'
       });
       errorResponse(res, 'Failed to delete comment', 500, 'INTERNAL_ERROR');
     }
@@ -677,7 +677,7 @@ router.post('/:id/elements', async (req: AuthenticatedRequest, res: Response) =>
     }
     logger.error('[Deliverables] Failed to create design element', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to create design element', 500, 'INTERNAL_ERROR');
   }
@@ -705,7 +705,7 @@ router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => 
   } catch (error) {
     logger.error('[Deliverables] Failed to list design elements', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to list design elements', 500, 'INTERNAL_ERROR');
   }
@@ -756,7 +756,7 @@ router.patch(
       }
       logger.error('[Deliverables] Failed to update element approval status', {
         error: error instanceof Error ? error : new Error(String(error)),
-        category: 'DELIVERABLE',
+        category: 'DELIVERABLE'
       });
       errorResponse(res, 'Failed to update element approval status', 500, 'INTERNAL_ERROR');
     }
@@ -803,7 +803,7 @@ router.post('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => 
     }
     logger.error('[Deliverables] Failed to create review', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to create review', 500, 'INTERNAL_ERROR');
   }
@@ -831,7 +831,7 @@ router.get('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     logger.error('[Deliverables] Failed to list reviews', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'DELIVERABLE',
+      category: 'DELIVERABLE'
     });
     errorResponse(res, 'Failed to list reviews', 500, 'INTERNAL_ERROR');
   }

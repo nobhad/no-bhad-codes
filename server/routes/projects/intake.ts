@@ -6,7 +6,7 @@ import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
-import { getString, getNumber } from '../../database/row-helpers.js';
+import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { errorResponse } from '../../utils/api-response.js';
@@ -111,7 +111,7 @@ router.get(
       return sendPdfResponse(res, cachedPdf, {
         filename: `nobhadcodes_intake_${safeClientName}.pdf`,
         disposition: 'inline',
-        cacheStatus: 'HIT',
+        cacheStatus: 'HIT'
       });
     }
 
@@ -137,7 +137,7 @@ router.get(
         month: 'long',
         day: 'numeric',
         hour: 'numeric',
-        minute: '2-digit',
+        minute: '2-digit'
       });
     };
 
@@ -147,7 +147,7 @@ router.get(
         '1-month': '1 Month',
         '1-3-months': '1-3 Months',
         '3-6-months': '3-6 Months',
-        flexible: 'Flexible',
+        flexible: 'Flexible'
       };
       return timelineMap[timeline] || timeline;
     };
@@ -159,7 +159,7 @@ router.get(
         '2.5k-5k': '$2,500 - $5,000',
         '5k-10k': '$5,000 - $10,000',
         '10k-25k': '$10,000 - $25,000',
-        '25k+': '$25,000+',
+        '25k+': '$25,000+'
       };
       return budgetMap[budget] || budget;
     };
@@ -173,7 +173,7 @@ router.get(
         ecommerce: 'E-commerce Store',
         'web-app': 'Web Application',
         'browser-extension': 'Browser Extension',
-        other: 'Custom Project',
+        other: 'Custom Project'
       };
       return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
     };
@@ -185,7 +185,7 @@ router.get(
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+        .replace(/&#39;/g, '\'');
     };
 
     // Create PDF document using pdf-lib
@@ -230,7 +230,7 @@ router.get(
       y: y - 20,
       size: 28,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15),
+      color: rgb(0.15, 0.15, 0.15)
     });
 
     // Logo and business info on right (logo left of text, text left-aligned)
@@ -244,7 +244,7 @@ router.get(
         x: logoX,
         y: y - logoHeight + 10,
         width: logoWidth,
-        height: logoHeight,
+        height: logoHeight
       });
       textStartX = logoX + logoWidth + 18;
     }
@@ -255,35 +255,35 @@ router.get(
       y: y - 11,
       size: 15,
       font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     page.drawText(BUSINESS_INFO.owner, {
       x: textStartX,
       y: y - 34,
       size: 10,
       font: helvetica,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page.drawText(BUSINESS_INFO.tagline, {
       x: textStartX,
       y: y - 54,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page.drawText(BUSINESS_INFO.email, {
       x: textStartX,
       y: y - 70,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page.drawText(BUSINESS_INFO.website, {
       x: textStartX,
       y: y - 86,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
 
     y -= 120; // Account for 100pt logo height
@@ -293,7 +293,7 @@ router.get(
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 1,
-      color: lineGray,
+      color: lineGray
     });
     y -= 21; // 0.3 inch gap
 
@@ -306,7 +306,7 @@ router.get(
       y: y,
       size: 11,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
 
     // Client name (bold)
@@ -315,7 +315,7 @@ router.get(
       y: y - 14,
       size: 10,
       font: helveticaBold,
-      color: black,
+      color: black
     });
 
     // Company name (if exists)
@@ -326,7 +326,7 @@ router.get(
         y: clientLineY,
         size: 10,
         font: helvetica,
-        color: black,
+        color: black
       });
       clientLineY -= 11;
     }
@@ -337,7 +337,7 @@ router.get(
       y: clientLineY,
       size: 10,
       font: helvetica,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
 
     // Right side - DATE:
@@ -346,14 +346,14 @@ router.get(
       y: y,
       size: 9,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     page.drawText(formatDate(intakeData.submittedAt), {
       x: rightMargin - helvetica.widthOfTextAtSize(formatDate(intakeData.submittedAt), 9),
       y: y,
       size: 9,
       font: helvetica,
-      color: black,
+      color: black
     });
 
     // PROJECT #:
@@ -362,7 +362,7 @@ router.get(
       y: y - 14,
       size: 9,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     const projectIdText = `#${intakeData.projectId}`;
     page.drawText(projectIdText, {
@@ -370,7 +370,7 @@ router.get(
       y: y - 14,
       size: 9,
       font: helvetica,
-      color: black,
+      color: black
     });
 
     y -= 72; // Move past client info section (1.0 inch)
@@ -380,7 +380,7 @@ router.get(
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 0.5,
-      color: rgb(0.9, 0.9, 0.9),
+      color: rgb(0.9, 0.9, 0.9)
     });
     y -= 21;
 
@@ -398,7 +398,7 @@ router.get(
       y: y,
       size: 12,
       font: helveticaBold,
-      color: black,
+      color: black
     });
     y -= 20;
 
@@ -408,7 +408,7 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: black,
+      color: black
     });
     const nameX = leftMargin + helveticaBold.widthOfTextAtSize('Project Name: ', 10);
     page.drawText(sanitizeForPdf(decodeHtml(intakeData.projectName)), {
@@ -416,7 +416,7 @@ router.get(
       y: y,
       size: 10,
       font: helvetica,
-      color: black,
+      color: black
     });
     y -= 16;
 
@@ -426,7 +426,7 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: black,
+      color: black
     });
     const typeX = leftMargin + helveticaBold.widthOfTextAtSize('Project Type: ', 10);
     page.drawText(sanitizeForPdf(formatProjectType(intakeData.projectDetails.type)), {
@@ -434,7 +434,7 @@ router.get(
       y: y,
       size: 10,
       font: helvetica,
-      color: black,
+      color: black
     });
     y -= 16;
 
@@ -444,7 +444,7 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: black,
+      color: black
     });
     const timelineX = leftMargin + helveticaBold.widthOfTextAtSize('Timeline: ', 10);
     page.drawText(sanitizeForPdf(formatTimeline(intakeData.projectDetails.timeline)), {
@@ -452,7 +452,7 @@ router.get(
       y: y,
       size: 10,
       font: helvetica,
-      color: black,
+      color: black
     });
     y -= 16;
 
@@ -464,7 +464,7 @@ router.get(
       y: y,
       size: 10,
       font: helvetica,
-      color: black,
+      color: black
     });
     y -= 30;
 
@@ -474,7 +474,7 @@ router.get(
       y: y,
       size: 12,
       font: helveticaBold,
-      color: black,
+      color: black
     });
     y -= 18;
 
@@ -511,7 +511,7 @@ router.get(
         y: y,
         size: 12,
         font: helveticaBold,
-        color: black,
+        color: black
       });
       y -= 18;
 
@@ -524,7 +524,7 @@ router.get(
           y: y,
           size: 10,
           font: helvetica,
-          color: black,
+          color: black
         });
         y -= 14;
       }
@@ -541,7 +541,7 @@ router.get(
         y: y,
         size: 12,
         font: helveticaBold,
-        color: black,
+        color: black
       });
       y -= 18;
 
@@ -551,7 +551,7 @@ router.get(
           y: y,
           size: 10,
           font: helveticaBold,
-          color: black,
+          color: black
         });
         const tcX = leftMargin + helveticaBold.widthOfTextAtSize('Technical Comfort: ', 10);
         page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.techComfort)), {
@@ -559,7 +559,7 @@ router.get(
           y: y,
           size: 10,
           font: helvetica,
-          color: black,
+          color: black
         });
         y -= 14;
       }
@@ -569,7 +569,7 @@ router.get(
           y: y,
           size: 10,
           font: helveticaBold,
-          color: black,
+          color: black
         });
         const dhX = leftMargin + helveticaBold.widthOfTextAtSize('Domain/Hosting: ', 10);
         page.drawText(sanitizeForPdf(decodeHtml(intakeData.technicalInfo.domainHosting)), {
@@ -577,7 +577,7 @@ router.get(
           y: y,
           size: 10,
           font: helvetica,
-          color: black,
+          color: black
         });
         y -= 14;
       }
@@ -589,7 +589,7 @@ router.get(
       start: { x: leftMargin, y: 72 }, // 1 inch from bottom
       end: { x: rightMargin, y: 72 },
       thickness: 0.5,
-      color: rgb(0.8, 0.8, 0.8),
+      color: rgb(0.8, 0.8, 0.8)
     });
 
     // Footer contact info (centered with bullet separators)
@@ -600,7 +600,7 @@ router.get(
       y: 36, // 0.5 inch from bottom
       size: 7,
       font: helvetica,
-      color: lightGray,
+      color: lightGray
     });
 
     // Generate PDF bytes and send response
@@ -626,7 +626,7 @@ router.get(
     sendPdfResponse(res, pdfBytes, {
       filename: `nobhadcodes_intake_${safeClientName}.pdf`,
       disposition: 'inline',
-      cacheStatus: 'MISS',
+      cacheStatus: 'MISS'
     });
   })
 );

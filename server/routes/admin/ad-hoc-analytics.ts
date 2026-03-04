@@ -17,14 +17,6 @@ import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
-// List of tables that can be queried
-const ALLOWED_TABLES = [
-  'clients', 'projects', 'invoices', 'tasks', 'milestones',
-  'messages', 'message_threads', 'contracts', 'deliverables',
-  'contact_submissions', 'client_activities', 'proposals',
-  'document_requests', 'ad_hoc_requests', 'files'
-];
-
 // Validate query is safe (SELECT only, no dangerous keywords)
 function isQuerySafe(query: string): { safe: boolean; reason?: string } {
   const normalizedQuery = query.trim().toLowerCase();
@@ -112,7 +104,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { query, dateRange } = req.body;
+    const { query } = req.body;
 
     if (!query || query.trim().length === 0) {
       return errorResponse(res, 'Query is required', 400, 'MISSING_QUERY');
@@ -131,7 +123,7 @@ router.post(
       // Execute the query with a LIMIT to prevent huge result sets
       let safeQuery = query.trim();
       if (!safeQuery.toLowerCase().includes('limit')) {
-        safeQuery = safeQuery.replace(/;?\s*$/, '') + ' LIMIT 1000';
+        safeQuery = `${safeQuery.replace(/;?\s*$/, '')  } LIMIT 1000`;
       }
 
       const rows = await db.all(safeQuery);
@@ -145,8 +137,8 @@ router.post(
           queryLength: query.length,
           rowCount: rows.length,
           executionTime,
-          user: req.user?.email,
-        },
+          user: req.user?.email
+        }
       });
 
       res.json({
@@ -161,8 +153,8 @@ router.post(
       logger.error('[Ad-hoc Analytics] Query failed', {
         error: err instanceof Error ? err : new Error(String(err)),
         metadata: {
-          user: req.user?.email,
-        },
+          user: req.user?.email
+        }
       });
 
       return errorResponse(

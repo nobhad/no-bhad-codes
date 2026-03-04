@@ -6,6 +6,10 @@
  *
  * Admin-specific time tracking endpoints for the TimeTrackingPanel.
  * Provides global time entry management across all projects.
+ *
+ * Schema (after migration 070):
+ *   time_entries: id, project_id, task_id, user_id, description,
+ *                 hours, date, billable, hourly_rate, created_at, updated_at
  */
 
 import express from 'express';
@@ -13,12 +17,11 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
 import { errorResponse } from '../../utils/api-response.js';
-import { projectService } from '../../services/project-service.js';
 
-// Explicit column lists for SELECT queries (avoid SELECT *)
+// Matches the actual time_entries schema after migration 070
 const TIME_ENTRY_COLUMNS = `
-  id, project_id, task_id, user_id, user_name, description, hours, date,
-  billable, hourly_rate, start_time, end_time, created_at, updated_at
+  id, project_id, task_id, user_id, description, hours, date,
+  billable, hourly_rate, created_at, updated_at
 `.replace(/\s+/g, ' ').trim();
 
 const router = express.Router();
@@ -39,15 +42,15 @@ router.get(
     const now = new Date();
 
     switch (range) {
-      case '7d':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
-      case '30d':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
-      case '90d':
-        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
+    case '7d':
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      break;
+    case '30d':
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      break;
+    case '90d':
+      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      break;
     }
 
     let whereClause = 'WHERE 1=1';
@@ -69,31 +72,27 @@ router.get(
         te.project_id as projectId,
         p.project_name as projectName,
         te.task_id as taskId,
-        t.title as taskName,
-        te.user_name as userName,
+        pt.title as taskName,
+        COALESCE(u.display_name, u.email, 'Admin') as userName,
         te.description,
         te.hours,
         ROUND(te.hours * 60) as duration_minutes,
         te.date,
         te.billable as is_billable,
         te.hourly_rate as hourlyRate,
-        te.billed,
         te.created_at as createdAt
       FROM time_entries te
       JOIN projects p ON te.project_id = p.id
-      LEFT JOIN tasks t ON te.task_id = t.id
+      LEFT JOIN project_tasks pt ON te.task_id = pt.id
+      LEFT JOIN users u ON te.user_id = u.id
       ${whereClause}
       ORDER BY te.date DESC, te.created_at DESC
     `, params);
 
     // Calculate stats
     const totalHours = entries.reduce((sum: number, e: { hours: number }) => sum + (e.hours || 0), 0);
-    const billableEntries = entries.filter((e: { is_billable: boolean }) => e.is_billable);
+    const billableEntries = entries.filter((e: { is_billable: number }) => e.is_billable);
     const billableHours = billableEntries.reduce((sum: number, e: { hours: number }) => sum + (e.hours || 0), 0);
-    const billedHours = entries
-      .filter((e: { billed: boolean }) => e.billed)
-      .reduce((sum: number, e: { hours: number }) => sum + (e.hours || 0), 0);
-    const unbilledHours = billableHours - billedHours;
     const totalValue = billableEntries.reduce(
       (sum: number, e: { hours: number; hourlyRate: number }) => sum + (e.hours || 0) * (e.hourlyRate || 0),
       0
@@ -104,9 +103,9 @@ router.get(
       stats: {
         totalHours: Math.round(totalHours * 100) / 100,
         billableHours: Math.round(billableHours * 100) / 100,
-        billedHours: Math.round(billedHours * 100) / 100,
-        unbilledHours: Math.round(unbilledHours * 100) / 100,
-        totalValue: Math.round(totalValue * 100) / 100,
+        billedHours: 0,
+        unbilledHours: Math.round(billableHours * 100) / 100,
+        totalValue: Math.round(totalValue * 100) / 100
       }
     });
   })
@@ -114,6 +113,7 @@ router.get(
 
 /**
  * POST /api/admin/time-entries/start - Start a timer
+ * Creates a time entry with 0 hours; use created_at as the start reference.
  */
 router.post(
   '/time-entries/start',
@@ -129,28 +129,31 @@ router.post(
       return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // Create a new time entry with start time
+    // Look up user_id from the admin's email
+    const user = await db.get('SELECT id FROM users WHERE email = ?', [req.user?.email]);
+
     const result = await db.run(`
       INSERT INTO time_entries (
-        project_id, task_id, user_name, description, date, hours, billable, start_time, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, date('now'), 0, 1, datetime('now'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        project_id, task_id, user_id, description, date, hours, billable, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, date('now'), 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `, [
       projectId,
       taskId || null,
-      req.user?.email || 'Admin',
-      description || '',
+      user?.id || null,
+      description || ''
     ]);
 
     res.json({
       success: true,
       entryId: result.lastID,
-      projectName: project.project_name,
+      projectName: project.project_name
     });
   })
 );
 
 /**
  * POST /api/admin/time-entries/:entryId/stop - Stop a timer
+ * Calculates elapsed time from created_at to now.
  */
 router.post(
   '/time-entries/:entryId/stop',
@@ -165,20 +168,20 @@ router.post(
 
     const db = getDatabase();
 
-    // Get the entry with start time
-    const entry = await db.get('SELECT start_time FROM time_entries WHERE id = ?', [entryId]);
+    // Get the entry — use created_at as timer start reference
+    const entry = await db.get('SELECT created_at FROM time_entries WHERE id = ? AND hours = 0', [entryId]);
     if (!entry) {
-      return errorResponse(res, 'Time entry not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Active timer not found', 404, 'NOT_FOUND');
     }
 
-    // Calculate hours from start_time to now
-    const startTime = new Date(entry.start_time);
+    // Calculate hours from created_at to now
+    const startTime = new Date(entry.created_at);
     const endTime = new Date();
     const hours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
 
     await db.run(`
       UPDATE time_entries
-      SET hours = ?, end_time = datetime('now'), updated_at = CURRENT_TIMESTAMP
+      SET hours = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `, [Math.round(hours * 100) / 100, entryId]);
 
@@ -208,19 +211,22 @@ router.post(
 
     const db = getDatabase();
 
+    // Look up user_id from the admin's email
+    const user = await db.get('SELECT id FROM users WHERE email = ?', [req.user?.email]);
+
     const result = await db.run(`
       INSERT INTO time_entries (
-        project_id, task_id, user_name, description, date, hours, billable, hourly_rate, created_at, updated_at
+        project_id, task_id, user_id, description, date, hours, billable, hourly_rate, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `, [
       projectId,
       taskId || null,
-      req.user?.email || 'Admin',
+      user?.id || null,
       description || '',
       date || new Date().toISOString().split('T')[0],
       hours,
       billable ? 1 : 0,
-      hourlyRate || null,
+      hourlyRate || null
     ]);
 
     const entry = await db.get(`SELECT ${TIME_ENTRY_COLUMNS} FROM time_entries WHERE id = ?`, [result.lastID]);

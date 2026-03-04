@@ -1,0 +1,39 @@
+<%# Table Row - Single <tr> with cell rendering %>
+<%# Locals: row, rowIndex, columns, tableDef %>
+
+<tr
+  class="table-row"
+  data-row-id="<%= row.id %>"
+  data-row="<%- JSON.stringify(row) %>"
+  data-row-index="<%= rowIndex %>"
+  <% if (tableDef.features.rowClick && tableDef.rowClickTarget) { %>
+    role="link"
+    tabindex="0"
+    data-click-target="<%= tableDef.rowClickTarget %>"
+    style="cursor: pointer;"
+  <% } %>
+>
+  <% columns.forEach(function(col) { %>
+    <% if (col.id === '_select') { %>
+      <td class="select-col bulk-select-cell">
+        <input type="checkbox" class="table-checkbox row-checkbox" data-row-id="<%= row.id %>" aria-label="Select row" />
+      </td>
+    <% } else if (col.id === '_actions') { %>
+      <td class="actions-cell actions-col">
+        <button type="button" class="btn-icon" data-action="view" data-row-id="<%= row.id %>" title="View details" aria-label="View">
+          <svg class="lucide-icon" width="16" height="16"><use href="#icon-eye"></use></svg>
+        </button>
+      </td>
+    <% } else { %>
+      <td
+        class="<%= col.className || '' %><%= col.primary ? ' primary-cell' : '' %><%= col.hideMobile ? ' hide-mobile' : '' %><%= col.hideTablet ? ' hide-tablet' : '' %>"
+        <% if (col.align) { %> style="text-align: <%= col.align %>"<% } %>
+      >
+        <%- include('cells/' + col.type, { value: row[col.id], col, row }) %>
+        <% if (col.secondaryKey && row[col.secondaryKey]) { %>
+          <span class="cell-secondary"><%= row[col.secondaryKey] %></span>
+        <% } %>
+      </td>
+    <% } %>
+  <% }); %>
+</tr>

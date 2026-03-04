@@ -22,7 +22,7 @@ import {
   type CustomFieldRow,
   type CustomFieldValueRow,
   type TagRow,
-  type ClientNoteRow,
+  type ClientNoteRow
 } from '../database/entities/index.js';
 
 // Type alias for backward compatibility
@@ -307,12 +307,12 @@ class ClientService {
         data.department || null,
         data.role || 'general',
         data.isPrimary ? 1 : 0,
-        data.notes || null,
+        data.notes || null
       ]
     );
 
     const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      result.lastID,
+      result.lastID
     ])) as unknown as ContactRow | undefined;
 
     if (!contact) {
@@ -324,7 +324,7 @@ class ClientService {
       activityType: 'contact_added',
       title: `Added contact: ${data.firstName} ${data.lastName}`,
       metadata: { contactId: result.lastID },
-      createdBy: 'admin',
+      createdBy: 'admin'
     });
 
     return toContact(contact);
@@ -350,7 +350,7 @@ class ClientService {
   async getContact(contactId: number): Promise<ClientContact | null> {
     const db = getDatabase();
     const row = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId,
+      contactId
     ])) as unknown as ContactRow | undefined;
     return row ? toContact(row) : null;
   }
@@ -363,7 +363,7 @@ class ClientService {
 
     // Get existing contact to know the client
     const existing = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId,
+      contactId
     ])) as unknown as ContactRow | undefined;
 
     if (!existing) {
@@ -374,7 +374,7 @@ class ClientService {
     if (data.isPrimary) {
       await db.run('UPDATE client_contacts SET is_primary = 0 WHERE client_id = ? AND id != ?', [
         existing.client_id,
-        contactId,
+        contactId
       ]);
     }
 
@@ -426,7 +426,7 @@ class ClientService {
     }
 
     const updated = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId,
+      contactId
     ])) as unknown as ContactRow | undefined;
 
     if (!updated) {
@@ -444,7 +444,7 @@ class ClientService {
 
     // Get contact info for activity log
     const contact = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
-      contactId,
+      contactId
     ])) as unknown as ContactRow | undefined;
 
     if (!contact) {
@@ -458,7 +458,7 @@ class ClientService {
       activityType: 'contact_removed',
       title: `Removed contact: ${contact.first_name} ${contact.last_name}`,
       metadata: { contactId },
-      createdBy: 'admin',
+      createdBy: 'admin'
     });
   }
 
@@ -503,7 +503,7 @@ class ClientService {
         activity.title,
         activity.description || null,
         activity.metadata ? JSON.stringify(activity.metadata) : null,
-        createdByUserId,
+        createdByUserId
       ]
     );
 
@@ -511,7 +511,7 @@ class ClientService {
     await db.run('UPDATE clients SET last_contact_date = DATE("now") WHERE id = ?', [clientId]);
 
     const row = (await db.get(`SELECT ${CLIENT_ACTIVITY_COLUMNS} FROM client_activities WHERE id = ?`, [
-      result.lastID,
+      result.lastID
     ])) as unknown as ActivityRow | undefined;
 
     if (!row) {
@@ -583,7 +583,7 @@ class ClientService {
     return rows.map((row) => ({
       ...toActivity(row),
       clientName: row.contact_name,
-      companyName: row.company_name,
+      companyName: row.company_name
     }));
   }
 
@@ -695,12 +695,12 @@ class ClientService {
         data.isRequired ? 1 : 0,
         data.placeholder || null,
         data.defaultValue || null,
-        data.displayOrder || 0,
+        data.displayOrder || 0
       ]
     );
 
     const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
-      result.lastID,
+      result.lastID
     ])) as unknown as CustomFieldRow | undefined;
 
     if (!field) {
@@ -775,7 +775,7 @@ class ClientService {
     }
 
     const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
-      fieldId,
+      fieldId
     ])) as unknown as CustomFieldRow | undefined;
 
     if (!field) {
@@ -841,8 +841,6 @@ class ClientService {
     clientId: number,
     values: { fieldId: number; value: string | null }[]
   ): Promise<void> {
-    const db = getDatabase();
-
     for (const { fieldId, value } of values) {
       await this.setCustomFieldValue(clientId, fieldId, value);
     }
@@ -949,7 +947,7 @@ class ClientService {
 
     await db.run('INSERT OR IGNORE INTO client_tags (client_id, tag_id) VALUES (?, ?)', [
       clientId,
-      tagId,
+      tagId
     ]);
 
     // Log activity
@@ -961,7 +959,7 @@ class ClientService {
         activityType: 'tag_added',
         title: `Added tag: ${tag.name}`,
         metadata: { tagId },
-        createdBy: 'admin',
+        createdBy: 'admin'
       });
     }
   }
@@ -985,7 +983,7 @@ class ClientService {
         activityType: 'tag_removed',
         title: `Removed tag: ${tag.name}`,
         metadata: { tagId },
-        createdBy: 'admin',
+        createdBy: 'admin'
       });
     }
   }
@@ -1152,9 +1150,9 @@ class ClientService {
         paymentHistory: paymentScore,
         engagement: engagementScore,
         projectSuccess: projectScore,
-        communicationScore,
+        communicationScore
       },
-      lastCalculated: new Date().toISOString(),
+      lastCalculated: new Date().toISOString()
     };
   }
 
@@ -1275,7 +1273,7 @@ class ClientService {
       averagePaymentDays: paymentDays?.avg_days ? Math.round(paymentDays.avg_days) : 0,
       lifetimeValue: ltv,
       messageCount: messageCount?.count || 0,
-      lastActivityDate: lastActivity?.last_date ?? undefined,
+      lastActivityDate: lastActivity?.last_date ?? undefined
     };
   }
 

@@ -23,7 +23,7 @@ const RecurringValidationSchemas = {
     clientId: [{ type: 'required' as const }, { type: 'number' as const, min: 1 }],
     frequency: [
       { type: 'required' as const },
-      { type: 'string' as const, allowedValues: ['weekly', 'monthly', 'quarterly'] },
+      { type: 'string' as const, allowedValues: ['weekly', 'monthly', 'quarterly'] }
     ],
     startDate: [{ type: 'required' as const }, { type: 'string' as const, minLength: 8, maxLength: 20 }],
     endDate: { type: 'string' as const, maxLength: 20 },
@@ -31,8 +31,8 @@ const RecurringValidationSchemas = {
     dayOfMonth: { type: 'number' as const, min: 1, max: 31 },
     dayOfWeek: { type: 'number' as const, min: 0, max: 6 },
     notes: { type: 'string' as const, maxLength: 2000 },
-    terms: { type: 'string' as const, maxLength: 2000 },
-  },
+    terms: { type: 'string' as const, maxLength: 2000 }
+  }
 };
 
 /**
@@ -60,7 +60,7 @@ router.post(
       notes,
       terms,
       startDate,
-      endDate,
+      endDate
     } = req.body;
 
     try {
@@ -74,13 +74,13 @@ router.post(
         notes,
         terms,
         startDate,
-        endDate,
+        endDate
       });
 
       sendCreated(res, { recurring_invoice: toSnakeCaseRecurringInvoice(recurring) }, 'Recurring invoice pattern created');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create recurring invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -103,7 +103,7 @@ router.get(
 
       sendSuccess(res, {
         recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
-        count: recurring.length,
+        count: recurring.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -112,7 +112,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -142,7 +142,7 @@ router.get(
 
       sendSuccess(res, {
         recurring_invoices: recurring.map(toSnakeCaseRecurringInvoice),
-        count: recurring.length,
+        count: recurring.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -151,7 +151,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -183,7 +183,7 @@ router.put(
       sendSuccess(res, { recurring_invoice: toSnakeCaseRecurringInvoice(recurring) }, 'Recurring invoice updated');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to update recurring invoice', 500, 'UPDATE_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -214,7 +214,7 @@ router.post(
       messageResponse(res, 'Recurring invoice paused');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to pause recurring invoice', 500, 'PAUSE_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -245,7 +245,7 @@ router.post(
       messageResponse(res, 'Recurring invoice resumed');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to resume recurring invoice', 500, 'RESUME_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -276,7 +276,7 @@ router.delete(
       messageResponse(res, 'Recurring invoice deleted');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to delete recurring invoice', 500, 'DELETION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })

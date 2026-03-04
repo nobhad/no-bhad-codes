@@ -26,7 +26,7 @@ router.get(
 
     const messages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, read_at, created_at
+    SELECT id, sender_type, sender_name, message as content, read_at, created_at
     FROM messages
     WHERE project_id = ? AND context_type = 'project'
     ORDER BY created_at ASC
@@ -44,9 +44,10 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id);
-    const { message } = req.body;
+    // Accept both 'content' (frontend) and 'message' (legacy)
+    const content = req.body.content || req.body.message;
 
-    if (!message || message.trim().length === 0) {
+    if (!content || content.trim().length === 0) {
       return errorResponse(res, 'Message content is required', 400, 'MISSING_MESSAGE');
     }
 
@@ -72,23 +73,23 @@ router.post(
       [
         projectId,
         projectData?.client_id,
-        req.user!.type, // Now uses 'admin' directly (unified schema)
+        req.user!.type,
         req.user!.email,
-        message.trim(),
+        content.trim()
       ]
     );
 
     const newMessage = await db.get(
       `
-    SELECT id, sender_type, sender_name, message, read_at, created_at
+    SELECT id, sender_type, sender_name, message as content, read_at, created_at
     FROM messages WHERE id = ?
   `,
       [result.lastID]
     );
 
     res.status(201).json({
-      message: 'Message sent successfully',
-      messageData: newMessage,
+      success: true,
+      data: newMessage
     });
   })
 );
@@ -120,7 +121,7 @@ router.put(
     );
 
     res.json({
-      message: 'Messages marked as read',
+      message: 'Messages marked as read'
     });
   })
 );

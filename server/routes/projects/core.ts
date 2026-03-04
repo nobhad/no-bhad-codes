@@ -35,7 +35,7 @@ router.get(
   authenticateToken,
   cache({
     ttl: 300, // 5 minutes
-    tags: ['projects', 'clients'],
+    tags: ['projects', 'clients']
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const db = getDatabase();
@@ -108,7 +108,7 @@ router.get(
       project.stats = {
         file_count: project.file_count,
         message_count: project.message_count,
-        unread_count: project.unread_count,
+        unread_count: project.unread_count
       };
       // Remove flat properties to avoid duplication
       delete project.file_count;
@@ -169,12 +169,12 @@ router.get(
       [projectId]
     );
 
-    // Get project messages
+    // Get project messages (filter by context_type after migration 085)
     const messages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message, read_at, created_at
+    SELECT id, sender_type, sender_name, message as content, read_at, created_at
     FROM messages
-    WHERE project_id = ?
+    WHERE project_id = ? AND context_type = 'project'
     ORDER BY created_at ASC
   `,
       [projectId]
@@ -195,7 +195,7 @@ router.get(
       project,
       files,
       messages,
-      updates,
+      updates
     });
   })
 );
@@ -233,7 +233,7 @@ router.post(
     } catch (milestoneError) {
       await logger.error('[Projects] Failed to generate milestones:', {
         error: milestoneError instanceof Error ? milestoneError : undefined,
-        category: 'PROJECTS',
+        category: 'PROJECTS'
       });
       // Non-critical - don't fail the request
     }
@@ -253,12 +253,12 @@ router.post(
         companyName: client?.company_name || 'Unknown Company',
         projectType: projectType,
         budget: budget || 'Not specified',
-        timeline: timeline || 'Not specified',
+        timeline: timeline || 'Not specified'
       });
     } catch (emailError) {
       await logger.error('Failed to send admin notification:', {
         error: emailError instanceof Error ? emailError : undefined,
-        category: 'PROJECTS',
+        category: 'PROJECTS'
       });
     }
 
@@ -268,13 +268,13 @@ router.post(
       triggeredBy: req.user?.email || 'client',
       clientId: req.user!.id,
       projectType,
-      name,
+      name
     });
 
     res.status(201).json({
       success: true,
       message: 'Project request submitted successfully. We will review and get back to you soon!',
-      project: newProject,
+      project: newProject
     });
   })
 );
@@ -293,7 +293,7 @@ router.post(
       priority = 'medium',
       start_date,
       due_date,
-      budget,
+      budget
     } = req.body;
 
     const db = getDatabase();
@@ -322,7 +322,7 @@ router.post(
       const projectType = (newProject as { project_type?: string })?.project_type || null;
       const projectStartDate = start_date ? new Date(start_date) : undefined;
       const generationResult = await generateDefaultMilestones(result.lastID!, projectType, {
-        startDate: projectStartDate,
+        startDate: projectStartDate
       });
       await logger.info(
         `[Projects] Generated ${generationResult.milestonesCreated} milestones and ${generationResult.tasksCreated} tasks for project ${result.lastID}`,
@@ -331,7 +331,7 @@ router.post(
     } catch (milestoneError) {
       await logger.error('[Projects] Failed to generate milestones:', {
         error: milestoneError instanceof Error ? milestoneError : undefined,
-        category: 'PROJECTS',
+        category: 'PROJECTS'
       });
       // Non-critical - don't fail the request
     }
@@ -341,12 +341,12 @@ router.post(
       entityId: result.lastID,
       triggeredBy: 'admin',
       clientId: client_id,
-      name,
+      name
     });
 
     res.status(201).json({
       message: 'Project created successfully',
-      project: newProject,
+      project: newProject
     });
   })
 );
@@ -368,7 +368,7 @@ router.put(
     } else {
       project = await db.get(`SELECT ${PROJECT_COLUMNS} FROM projects WHERE id = ? AND client_id = ?`, [
         projectId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
@@ -385,7 +385,7 @@ router.put(
         'in-review',
         'completed',
         'on-hold',
-        'cancelled',
+        'cancelled'
       ];
       let raw =
         typeof req.body.status === 'string'
@@ -432,35 +432,35 @@ router.put(
       production_url: 'production_url',
       deposit_amount: 'deposit_amount',
       contract_signed_at: 'contract_signed_at',
-      contract_signed_date: 'contract_signed_at', // Frontend sends contract_signed_date
+      contract_signed_date: 'contract_signed_at' // Frontend sends contract_signed_date
     };
     const allowedUpdates = isAdmin
       ? [
-          'name',
-          'project_name',
-          'project_type',
-          'description',
-          'status',
-          'priority',
-          'start_date',
-          'due_date',
-          'end_date',
-          'estimated_end_date',
-          'budget',
-          'price',
-          'timeline',
-          'preview_url',
-          'progress',
-          'notes',
-          'admin_notes',
-          'repository_url',
-          'repo_url',
-          'staging_url',
-          'production_url',
-          'deposit_amount',
-          'contract_signed_at',
-          'contract_signed_date',
-        ]
+        'name',
+        'project_name',
+        'project_type',
+        'description',
+        'status',
+        'priority',
+        'start_date',
+        'due_date',
+        'end_date',
+        'estimated_end_date',
+        'budget',
+        'price',
+        'timeline',
+        'preview_url',
+        'progress',
+        'notes',
+        'admin_notes',
+        'repository_url',
+        'repo_url',
+        'staging_url',
+        'production_url',
+        'deposit_amount',
+        'contract_signed_at',
+        'contract_signed_date'
+      ]
       : ['description']; // Clients can only update description
 
     for (const field of allowedUpdates) {
@@ -517,7 +517,7 @@ router.put(
         entityId: projectId,
         triggeredBy: req.user?.email || 'system',
         previousStatus: project.status,
-        newStatus: req.body.status,
+        newStatus: req.body.status
       });
     }
 
@@ -534,10 +534,10 @@ router.put(
           const statusDescriptions: { [key: string]: string } = {
             pending: 'Your project has been queued and will begin soon.',
             'in-progress': 'Work has begun on your project and is progressing well.',
-            'in-review': "Your project is complete and under review. We'll have updates soon.",
+            'in-review': 'Your project is complete and under review. We\'ll have updates soon.',
             completed: 'Congratulations! Your project has been completed successfully.',
             'on-hold':
-              "Your project has been temporarily paused. We'll keep you updated on next steps.",
+              'Your project has been temporarily paused. We\'ll keep you updated on next steps.'
           };
 
           const clientEmail = getString(client, 'email');
@@ -553,16 +553,16 @@ router.put(
             nextSteps:
               req.body.status === 'completed'
                 ? [
-                    'Review the final deliverables',
-                    'Provide feedback',
-                    'Schedule follow-up if needed',
-                  ]
+                  'Review the final deliverables',
+                  'Provide feedback',
+                  'Schedule follow-up if needed'
+                ]
                 : req.body.status === 'in-review'
                   ? [
-                      'Review will be completed within 2 business days',
-                      'We may contact you for clarifications',
-                    ]
-                  : [],
+                    'Review will be completed within 2 business days',
+                    'We may contact you for clarifications'
+                  ]
+                  : []
           });
 
           // Send admin notification for milestone completion
@@ -576,16 +576,16 @@ router.put(
                 clientId: client.id,
                 clientName: client.contact_name || 'Unknown',
                 companyName: client.company_name || 'Unknown Company',
-                completedAt: new Date().toISOString(),
+                completedAt: new Date().toISOString()
               },
-              timestamp: new Date(),
+              timestamp: new Date()
             });
           }
         }
       } catch (emailError) {
         await logger.error('Failed to send project update email:', {
           error: emailError instanceof Error ? emailError : undefined,
-          category: 'PROJECTS',
+          category: 'PROJECTS'
         });
         // Continue with response - don't fail project update due to email issues
       }
@@ -593,7 +593,7 @@ router.put(
 
     res.json({
       message: 'Project updated successfully',
-      project: updatedProject,
+      project: updatedProject
     });
   })
 );
@@ -618,7 +618,7 @@ router.delete(
       success: true,
       message: result.message,
       projectId,
-      affectedItems: result.affectedItems,
+      affectedItems: result.affectedItems
     });
   })
 );
@@ -776,7 +776,7 @@ router.post(
         `Project Report - Generated ${dateStr}`,
         req.user?.email || 'admin',
         'document',
-        false,
+        false
       ]
     );
 
@@ -786,8 +786,8 @@ router.post(
       file: {
         id: result.lastID,
         filename,
-        size: pdfBytes.length,
-      },
+        size: pdfBytes.length
+      }
     });
   })
 );
@@ -840,7 +840,7 @@ router.post(
         `Statement of Work - Generated ${dateStr}`,
         req.user?.email || 'admin',
         'contract',
-        false,
+        false
       ]
     );
 
@@ -850,8 +850,8 @@ router.post(
       file: {
         id: result.lastID,
         filename,
-        size: pdfBytes.length,
-      },
+        size: pdfBytes.length
+      }
     });
   })
 );

@@ -56,7 +56,7 @@ router.get(
     // Map database statuses to frontend statuses
     const mappedProposals = proposals.map((p: Record<string, unknown>) => ({
       ...p,
-      status: mapStatus(p.status as string),
+      status: mapStatus(p.status as string)
     }));
 
     // Calculate stats
@@ -66,7 +66,7 @@ router.get(
       sent: mappedProposals.filter((p: { status: string }) => p.status === 'sent').length,
       viewed: mappedProposals.filter((p: { status: string }) => p.status === 'viewed').length,
       accepted: mappedProposals.filter((p: { status: string }) => p.status === 'accepted').length,
-      declined: mappedProposals.filter((p: { status: string }) => p.status === 'declined').length,
+      declined: mappedProposals.filter((p: { status: string }) => p.status === 'declined').length
     };
 
     res.json({ proposals: mappedProposals, stats });
@@ -185,7 +185,7 @@ function mapStatus(dbStatus: string): string {
     'viewed': 'viewed',
     'draft': 'draft',
     'declined': 'declined',
-    'expired': 'expired',
+    'expired': 'expired'
   };
 
   return statusMap[dbStatus] || 'draft';

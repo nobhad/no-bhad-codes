@@ -62,7 +62,7 @@ export class InvoicePaymentService {
 
     return this.updateInvoiceStatus(id, 'paid', {
       ...paymentData,
-      paidDate,
+      paidDate
     });
   }
 
@@ -116,7 +116,7 @@ export class InvoicePaymentService {
       paymentMethod,
       paymentReference || null,
       paidDate,
-      id,
+      id
     ];
     const startUpdate = Date.now();
     await this.db.run(updateInvoiceSql, updateInvoiceParams);
@@ -124,8 +124,8 @@ export class InvoicePaymentService {
       metadata: {
         sql: updateInvoiceSql,
         params: updateInvoiceParams,
-        durationMs: Date.now() - startUpdate,
-      },
+        durationMs: Date.now() - startUpdate
+      }
     });
 
     // If fully paid, skip remaining reminders
@@ -139,8 +139,8 @@ export class InvoicePaymentService {
         metadata: {
           sql: skipRemindersSql,
           params: skipRemindersParams,
-          durationMs: Date.now() - startSkip,
-        },
+          durationMs: Date.now() - startSkip
+        }
       });
     }
 
@@ -178,7 +178,7 @@ export class InvoicePaymentService {
       paymentMethod,
       paymentReference || null,
       paymentDate,
-      notes || null,
+      notes || null
     ]);
 
     const payment: InvoicePayment = {
@@ -189,7 +189,7 @@ export class InvoicePaymentService {
       paymentReference,
       paymentDate,
       notes,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
     // Auto-generate receipt for this payment
@@ -198,18 +198,18 @@ export class InvoicePaymentService {
       const receiptRecord = await receiptService.createReceipt(invoiceId, payment.id, amount, {
         paymentMethod,
         paymentReference,
-        paymentDate,
+        paymentDate
       });
       receipt = {
         id: receiptRecord.id,
-        receiptNumber: receiptRecord.receiptNumber,
+        receiptNumber: receiptRecord.receiptNumber
       };
       logger.info(
         `[PaymentService] Receipt ${receiptRecord.receiptNumber} generated for payment ${payment.id}`
       );
     } catch (receiptError) {
       logger.error('[PaymentService] Failed to generate receipt', {
-        error: receiptError instanceof Error ? receiptError : undefined,
+        error: receiptError instanceof Error ? receiptError : undefined
       });
       // Don't fail the payment if receipt generation fails
     }
@@ -237,7 +237,7 @@ export class InvoicePaymentService {
       paymentReference: row.payment_reference,
       paymentDate: row.payment_date,
       notes: row.notes,
-      createdAt: row.created_at,
+      createdAt: row.created_at
     }));
   }
 
@@ -274,7 +274,7 @@ export class InvoicePaymentService {
       paymentReference: row.payment_reference,
       paymentDate: row.payment_date,
       notes: row.notes,
-      createdAt: row.created_at,
+      createdAt: row.created_at
     }));
   }
 }

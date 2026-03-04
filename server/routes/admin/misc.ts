@@ -48,7 +48,7 @@ router.post(
       to: adminEmail,
       subject: 'No Bhad Codes - Test Email',
       text: 'This is a test email from the admin dashboard. Email service is working correctly.',
-      html: '<p>This is a test email from the admin dashboard.</p><p>Email service is working correctly.</p>',
+      html: '<p>This is a test email from the admin dashboard.</p><p>Email service is working correctly.</p>'
     });
 
     if (!result.success) {
@@ -63,7 +63,7 @@ router.post(
     res.json({
       success: true,
       message: 'Test email sent successfully',
-      to: adminEmail,
+      to: adminEmail
     });
   })
 );
@@ -88,13 +88,13 @@ router.get(
     const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
     if (entityType && !validTypes.includes(entityType)) {
       return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
-        validTypes,
+        validTypes
       });
     }
 
     const [items, stats] = await Promise.all([
       softDeleteService.getDeletedItems(entityType),
-      softDeleteService.getDeletedItemStats(),
+      softDeleteService.getDeletedItemStats()
     ]);
 
     // Transform to match frontend expected format
@@ -110,7 +110,7 @@ router.get(
         deletedBy: item.deletedBy || 'Unknown',
         deletedAt: item.deletedAt,
         expiresAt,
-        originalId: String(item.id),
+        originalId: String(item.id)
       };
     });
 
@@ -146,7 +146,7 @@ router.delete(
       success: errors.length === 0,
       message: `Trash emptied. Permanently deleted ${deleted.total} items.`,
       deleted,
-      errors: errors.length > 0 ? errors : undefined,
+      errors: errors.length > 0 ? errors : undefined
     });
   })
 );
@@ -166,7 +166,7 @@ router.post(
       success: errors.length === 0,
       message: `Cleanup complete. Permanently deleted ${deleted.total} items.`,
       deleted,
-      errors: errors.length > 0 ? errors : undefined,
+      errors: errors.length > 0 ? errors : undefined
     });
   })
 );
@@ -221,7 +221,7 @@ router.post(
     res.json({
       success: errors.length === 0,
       restored,
-      errors: errors.length > 0 ? errors : undefined,
+      errors: errors.length > 0 ? errors : undefined
     });
   })
 );
@@ -276,7 +276,7 @@ router.post(
     res.json({
       success: errors.length === 0,
       deleted,
-      errors: errors.length > 0 ? errors : undefined,
+      errors: errors.length > 0 ? errors : undefined
     });
   })
 );
@@ -305,7 +305,7 @@ router.post(
     const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
     if (!validTypes.includes(entityType)) {
       return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
-        validTypes,
+        validTypes
       });
     }
 
@@ -318,7 +318,7 @@ router.post(
     if (result.success) {
       res.json({
         success: true,
-        message: result.message,
+        message: result.message
       });
     } else {
       errorResponse(res, result.message, 400, 'RESTORE_FAILED');
@@ -350,7 +350,7 @@ router.delete(
     const validTypes: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
     if (!validTypes.includes(entityType)) {
       return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
-        validTypes,
+        validTypes
       });
     }
 
@@ -363,7 +363,7 @@ router.delete(
     if (result.success) {
       res.json({
         success: true,
-        message: result.message,
+        message: result.message
       });
     } else {
       errorResponse(res, result.message, 400, 'DELETE_FAILED');
@@ -407,7 +407,7 @@ router.get(
       total: clients.length,
       active: clients.filter((c: { status: string }) => c.status === 'active').length,
       pending: clients.filter((c: { status: string }) => c.status === 'pending').length,
-      inactive: clients.filter((c: { status: string }) => c.status === 'inactive').length,
+      inactive: clients.filter((c: { status: string }) => c.status === 'inactive').length
     };
 
     res.json({ clients, stats });
@@ -420,6 +420,7 @@ router.get(
 
 /**
  * GET /api/admin/contacts - List all contacts across all clients
+ * Includes both explicit client_contacts AND the client's own contact info
  */
 router.get(
   '/contacts',
@@ -428,8 +429,8 @@ router.get(
   asyncHandler(async (_req: AuthenticatedRequest, res: express.Response) => {
     const db = getDatabase();
 
-    // Get all contacts with client info
-    const contacts = await db.all(`
+    // Get explicit contacts from client_contacts table
+    const explicitContacts = await db.all(`
       SELECT
         cc.id,
         cc.first_name as firstName,
@@ -438,7 +439,7 @@ router.get(
         cc.phone,
         cc.role,
         cc.is_primary as isPrimary,
-        CASE WHEN cc.is_primary = 1 THEN 'active' ELSE 'active' END as status,
+        'active' as status,
         cc.client_id as clientId,
         c.company_name as company,
         c.company_name as clientName,
@@ -450,21 +451,78 @@ router.get(
       ORDER BY cc.is_primary DESC, cc.created_at DESC
     `);
 
+    // Get clients' own contact info (as primary contacts)
+    const clientContacts = await db.all(`
+      SELECT
+        c.id,
+        c.contact_name,
+        c.email,
+        c.phone,
+        c.company_name as company,
+        c.status,
+        c.created_at as createdAt,
+        c.updated_at as updatedAt
+      FROM clients c
+      WHERE c.deleted_at IS NULL
+    `);
+
+    // Track which client IDs already have explicit contacts
+    const clientIdsWithContacts = new Set(
+      explicitContacts.map((c: { clientId: number }) => c.clientId)
+    );
+
+    // Build unified contacts list
+    type ContactRow = Record<string, unknown>;
+    const allContacts: ContactRow[] = [];
+
+    // Add explicit contacts (transformed)
+    for (const c of explicitContacts as ContactRow[]) {
+      allContacts.push({
+        ...c,
+        isPrimary: c.isPrimary === 1
+      });
+    }
+
+    // Add clients as contacts (for those without explicit contacts)
+    for (const client of clientContacts as ContactRow[]) {
+      const contactName = (client.contact_name as string) || '';
+      const nameParts = contactName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      const isPrimary = !clientIdsWithContacts.has(client.id as number);
+
+      allContacts.push({
+        id: 100000 + (client.id as number),
+        firstName,
+        lastName,
+        email: client.email,
+        phone: client.phone,
+        role: 'client',
+        isPrimary,
+        status: 'active',
+        clientId: client.id,
+        company: client.company,
+        clientName: client.company,
+        createdAt: client.createdAt,
+        updatedAt: client.updatedAt
+      });
+    }
+
+    // Sort: primary first, then by creation date
+    allContacts.sort((a, b) => {
+      if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1;
+      return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+    });
+
     // Calculate stats
     const stats = {
-      total: contacts.length,
-      active: contacts.length,
-      primary: contacts.filter((c: { isPrimary: number }) => c.isPrimary === 1).length,
-      withCompany: contacts.filter((c: { company: string | null }) => c.company).length,
+      total: allContacts.length,
+      active: allContacts.length,
+      primary: allContacts.filter((c) => c.isPrimary).length,
+      withCompany: allContacts.filter((c) => c.company).length
     };
 
-    // Transform isPrimary from 0/1 to boolean
-    const transformedContacts = contacts.map((c: Record<string, unknown>) => ({
-      ...c,
-      isPrimary: c.isPrimary === 1,
-    }));
-
-    res.json({ contacts: transformedContacts, stats });
+    res.json({ contacts: allContacts, stats });
   })
 );
 
@@ -729,7 +787,7 @@ router.get(
 
     const stats = {
       total: files.length,
-      totalSize: files.reduce((sum: number, f: { fileSize: number }) => sum + (f.fileSize || 0), 0),
+      totalSize: files.reduce((sum: number, f: { fileSize: number }) => sum + (f.fileSize || 0), 0)
     };
 
     res.json({ files, stats });
@@ -818,7 +876,7 @@ router.get(
       pending: deliverables.filter((d: { status: string }) => d.status === 'pending').length,
       inProgress: deliverables.filter((d: { status: string }) => d.status === 'in_progress').length,
       completed: deliverables.filter((d: { status: string }) => d.status === 'completed').length,
-      approved: deliverables.filter((d: { status: string }) => d.status === 'approved').length,
+      approved: deliverables.filter((d: { status: string }) => d.status === 'approved').length
     };
 
     res.json({ deliverables, stats });
@@ -883,7 +941,7 @@ router.post(
 
       // Soft delete proposal
       const result = await db.run(
-        "UPDATE proposals SET deleted_at = datetime('now') WHERE id = ? AND deleted_at IS NULL",
+        'UPDATE proposals SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
         [id]
       );
       if (result.changes && result.changes > 0) {
@@ -912,82 +970,82 @@ router.get(
       const db = getDatabase();
       const { range = '30d' } = req.query;
 
-    // Calculate date ranges for current and previous periods
-    let daysBack = 30;
-    if (range === '7d') daysBack = 7;
-    else if (range === '90d') daysBack = 90;
-    else if (range === '1y') daysBack = 365;
+      // Calculate date ranges for current and previous periods
+      let daysBack = 30;
+      if (range === '7d') daysBack = 7;
+      else if (range === '90d') daysBack = 90;
+      else if (range === '1y') daysBack = 365;
 
-    const now = new Date();
-    const currentStart = new Date();
-    currentStart.setDate(currentStart.getDate() - daysBack);
-    const previousStart = new Date();
-    previousStart.setDate(previousStart.getDate() - (daysBack * 2));
+      const now = new Date();
+      const currentStart = new Date();
+      currentStart.setDate(currentStart.getDate() - daysBack);
+      const previousStart = new Date();
+      previousStart.setDate(previousStart.getDate() - (daysBack * 2));
 
-    const currentStartStr = currentStart.toISOString().split('T')[0];
-    const previousStartStr = previousStart.toISOString().split('T')[0];
-    const nowStr = now.toISOString().split('T')[0];
+      const currentStartStr = currentStart.toISOString().split('T')[0];
+      const previousStartStr = previousStart.toISOString().split('T')[0];
+      const nowStr = now.toISOString().split('T')[0];
 
-    // Get current period revenue (use updated_at as fallback for paid_date)
-    const currentRevenue = await db.get(`
+      // Get current period revenue (use updated_at as fallback for paid_date)
+      const currentRevenue = await db.get(`
       SELECT COALESCE(SUM(amount_total), 0) as value
       FROM invoices
       WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ? AND DATE(COALESCE(paid_date, updated_at)) <= ?
     `, [currentStartStr, nowStr]);
 
-    // Get previous period revenue
-    const previousRevenue = await db.get(`
+      // Get previous period revenue
+      const previousRevenue = await db.get(`
       SELECT COALESCE(SUM(amount_total), 0) as value
       FROM invoices
       WHERE status = 'paid' AND DATE(COALESCE(paid_date, updated_at)) >= ? AND DATE(COALESCE(paid_date, updated_at)) < ?
     `, [previousStartStr, currentStartStr]);
 
-    // Get current period clients
-    const currentClients = await db.get(`
+      // Get current period clients
+      const currentClients = await db.get(`
       SELECT COUNT(*) as value FROM clients WHERE deleted_at IS NULL
     `);
-    const newClientsCurrentPeriod = await db.get(`
+      const newClientsCurrentPeriod = await db.get(`
       SELECT COUNT(*) as value FROM clients
       WHERE deleted_at IS NULL AND DATE(created_at) >= ?
     `, [currentStartStr]);
-    const newClientsPreviousPeriod = await db.get(`
+      const newClientsPreviousPeriod = await db.get(`
       SELECT COUNT(*) as value FROM clients
       WHERE deleted_at IS NULL AND DATE(created_at) >= ? AND DATE(created_at) < ?
     `, [previousStartStr, currentStartStr]);
 
-    // Get current period active projects
-    const activeProjects = await db.get(`
+      // Get current period active projects
+      const activeProjects = await db.get(`
       SELECT COUNT(*) as value FROM projects
       WHERE status IN ('active', 'in-progress', 'in_progress') AND deleted_at IS NULL
     `);
-    const newProjectsCurrentPeriod = await db.get(`
+      const newProjectsCurrentPeriod = await db.get(`
       SELECT COUNT(*) as value FROM projects
       WHERE deleted_at IS NULL AND DATE(created_at) >= ?
     `, [currentStartStr]);
-    const newProjectsPreviousPeriod = await db.get(`
+      const newProjectsPreviousPeriod = await db.get(`
       SELECT COUNT(*) as value FROM projects
       WHERE deleted_at IS NULL AND DATE(created_at) >= ? AND DATE(created_at) < ?
     `, [previousStartStr, currentStartStr]);
 
-    // Get invoices sent in current period
-    const invoicesSent = await db.get(`
+      // Get invoices sent in current period
+      const invoicesSent = await db.get(`
       SELECT COUNT(*) as value FROM invoices
       WHERE DATE(created_at) >= ?
     `, [currentStartStr]);
-    const invoicesSentPrevious = await db.get(`
+      const invoicesSentPrevious = await db.get(`
       SELECT COUNT(*) as value FROM invoices
       WHERE DATE(created_at) >= ? AND DATE(created_at) < ?
     `, [previousStartStr, currentStartStr]);
 
-    // Get conversion rate (leads converted to active projects)
-    const leadsStats = await db.get(`
+      // Get conversion rate (leads converted to active projects)
+      const leadsStats = await db.get(`
       SELECT
         COUNT(*) as total,
         COALESCE(SUM(CASE WHEN status IN ('active', 'in-progress', 'in_progress', 'completed') THEN 1 ELSE 0 END), 0) as converted
       FROM projects
       WHERE deleted_at IS NULL
     `);
-    const leadsStatsPrevious = await db.get(`
+      const leadsStatsPrevious = await db.get(`
       SELECT
         COUNT(*) as total,
         COALESCE(SUM(CASE WHEN status IN ('active', 'in-progress', 'in_progress', 'completed') THEN 1 ELSE 0 END), 0) as converted
@@ -995,31 +1053,31 @@ router.get(
       WHERE deleted_at IS NULL AND DATE(created_at) < ?
     `, [currentStartStr]);
 
-    const currentConversionRate = (leadsStats?.total || 0) > 0
-      ? Math.round(((leadsStats?.converted || 0) / leadsStats.total) * 100)
-      : 0;
-    const previousConversionRate = (leadsStatsPrevious?.total || 0) > 0
-      ? Math.round(((leadsStatsPrevious?.converted || 0) / leadsStatsPrevious.total) * 100)
-      : 0;
+      const currentConversionRate = (leadsStats?.total || 0) > 0
+        ? Math.round(((leadsStats?.converted || 0) / leadsStats.total) * 100)
+        : 0;
+      const previousConversionRate = (leadsStatsPrevious?.total || 0) > 0
+        ? Math.round(((leadsStatsPrevious?.converted || 0) / leadsStatsPrevious.total) * 100)
+        : 0;
 
-    // Get average project value (use expected_value column)
-    const avgProjectValue = await db.get(`
+      // Get average project value (use expected_value column)
+      const avgProjectValue = await db.get(`
       SELECT COALESCE(AVG(expected_value), 0) as value
       FROM projects WHERE deleted_at IS NULL AND expected_value > 0
     `);
-    const avgProjectValuePrevious = await db.get(`
+      const avgProjectValuePrevious = await db.get(`
       SELECT COALESCE(AVG(expected_value), 0) as value
       FROM projects WHERE deleted_at IS NULL AND expected_value > 0 AND DATE(created_at) < ?
     `, [currentStartStr]);
 
-    // Calculate percentage changes
-    const calcChange = (current: number, previous: number): number => {
-      if (previous === 0) return current > 0 ? 100 : 0;
-      return Math.round(((current - previous) / previous) * 100);
-    };
+      // Calculate percentage changes
+      const calcChange = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return Math.round(((current - previous) / previous) * 100);
+      };
 
-    // Revenue chart data (by month or day depending on range)
-    const revenueChartData = await db.all(`
+      // Revenue chart data (by month or day depending on range)
+      const revenueChartData = await db.all(`
       SELECT
         strftime('%Y-%m-%d', COALESCE(paid_date, updated_at)) as date,
         SUM(amount_total) as revenue
@@ -1029,15 +1087,15 @@ router.get(
       ORDER BY date ASC
     `, [currentStartStr]);
 
-    // Projects by status chart
-    const projectsByStatus = await db.all(`
+      // Projects by status chart
+      const projectsByStatus = await db.all(`
       SELECT status, COUNT(*) as count
       FROM projects WHERE deleted_at IS NULL
       GROUP BY status
     `);
 
-    // Lead funnel data - use project statuses directly
-    const leadFunnelData = await db.all(`
+      // Lead funnel data - use project statuses directly
+      const leadFunnelData = await db.all(`
       SELECT status, COUNT(*) as count
       FROM projects
       WHERE deleted_at IS NULL
@@ -1054,80 +1112,80 @@ router.get(
         END
     `);
 
-    // Source breakdown - simplified query
-    const sourceBreakdownData = await db.all(`
+      // Source breakdown - simplified query
+      const sourceBreakdownData = await db.all(`
       SELECT 'Direct' as source, COUNT(*) as count
       FROM projects
       WHERE deleted_at IS NULL
     `);
 
-    const totalLeads = sourceBreakdownData.reduce((sum: number, s: { count: number }) => sum + s.count, 0);
-    const sourceBreakdown = sourceBreakdownData.map((s: { source: string; count: number }) => ({
-      source: s.source,
-      count: s.count,
-      percentage: totalLeads > 0 ? Math.round((s.count / totalLeads) * 100) : 0
-    }));
+      const totalLeads = sourceBreakdownData.reduce((sum: number, s: { count: number }) => sum + s.count, 0);
+      const sourceBreakdown = sourceBreakdownData.map((s: { source: string; count: number }) => ({
+        source: s.source,
+        count: s.count,
+        percentage: totalLeads > 0 ? Math.round((s.count / totalLeads) * 100) : 0
+      }));
 
-    // Format chart data
-    const revenueChart = {
-      labels: revenueChartData.map((d: { date: string }) => d.date),
-      datasets: [{
-        label: 'Revenue',
-        data: revenueChartData.map((d: { revenue: number }) => d.revenue),
-        color: 'var(--status-completed)'
-      }]
-    };
+      // Format chart data
+      const revenueChart = {
+        labels: revenueChartData.map((d: { date: string }) => d.date),
+        datasets: [{
+          label: 'Revenue',
+          data: revenueChartData.map((d: { revenue: number }) => d.revenue),
+          color: 'var(--status-completed)'
+        }]
+      };
 
-    const projectsChart = {
-      labels: projectsByStatus.map((p: { status: string }) => p.status),
-      datasets: [{
-        label: 'Projects',
-        data: projectsByStatus.map((p: { count: number }) => p.count),
-        color: 'var(--color-brand-primary)'
-      }]
-    };
+      const projectsChart = {
+        labels: projectsByStatus.map((p: { status: string }) => p.status),
+        datasets: [{
+          label: 'Projects',
+          data: projectsByStatus.map((p: { count: number }) => p.count),
+          color: 'var(--color-brand-primary)'
+        }]
+      };
 
-    const leadsChart = {
-      labels: leadFunnelData.map((l: { status: string }) => l.status),
-      datasets: [{
-        label: 'Leads',
-        data: leadFunnelData.map((l: { count: number }) => l.count),
-        color: 'var(--status-pending)'
-      }]
-    };
+      const leadsChart = {
+        labels: leadFunnelData.map((l: { status: string }) => l.status),
+        datasets: [{
+          label: 'Leads',
+          data: leadFunnelData.map((l: { count: number }) => l.count),
+          color: 'var(--status-pending)'
+        }]
+      };
 
-    res.json({
-      kpis: {
-        revenue: {
-          value: currentRevenue?.value || 0,
-          change: calcChange(currentRevenue?.value || 0, previousRevenue?.value || 0)
+      res.json({
+        kpis: {
+          revenue: {
+            value: currentRevenue?.value || 0,
+            change: calcChange(currentRevenue?.value || 0, previousRevenue?.value || 0)
+          },
+          clients: {
+            value: currentClients?.value || 0,
+            change: calcChange(newClientsCurrentPeriod?.value || 0, newClientsPreviousPeriod?.value || 0)
+          },
+          projects: {
+            value: activeProjects?.value || 0,
+            change: calcChange(newProjectsCurrentPeriod?.value || 0, newProjectsPreviousPeriod?.value || 0)
+          },
+          invoices: {
+            value: invoicesSent?.value || 0,
+            change: calcChange(invoicesSent?.value || 0, invoicesSentPrevious?.value || 0)
+          },
+          conversionRate: {
+            value: currentConversionRate,
+            change: currentConversionRate - previousConversionRate
+          },
+          avgProjectValue: {
+            value: Math.round(avgProjectValue?.value || 0),
+            change: calcChange(avgProjectValue?.value || 0, avgProjectValuePrevious?.value || 0)
+          }
         },
-        clients: {
-          value: currentClients?.value || 0,
-          change: calcChange(newClientsCurrentPeriod?.value || 0, newClientsPreviousPeriod?.value || 0)
-        },
-        projects: {
-          value: activeProjects?.value || 0,
-          change: calcChange(newProjectsCurrentPeriod?.value || 0, newProjectsPreviousPeriod?.value || 0)
-        },
-        invoices: {
-          value: invoicesSent?.value || 0,
-          change: calcChange(invoicesSent?.value || 0, invoicesSentPrevious?.value || 0)
-        },
-        conversionRate: {
-          value: currentConversionRate,
-          change: currentConversionRate - previousConversionRate
-        },
-        avgProjectValue: {
-          value: Math.round(avgProjectValue?.value || 0),
-          change: calcChange(avgProjectValue?.value || 0, avgProjectValuePrevious?.value || 0)
-        }
-      },
-      revenueChart,
-      projectsChart,
-      leadsChart,
-      sourceBreakdown
-    });
+        revenueChart,
+        projectsChart,
+        leadsChart,
+        sourceBreakdown
+      });
     } catch (error) {
       console.error('[Analytics Error]', error);
       return errorResponse(res, 'Failed to load analytics data', 500, 'ANALYTICS_ERROR');

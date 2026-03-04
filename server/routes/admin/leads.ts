@@ -86,8 +86,8 @@ router.get(
           total: stats?.total || 0,
           new: stats?.new || 0,
           inProgress: stats?.inProgress || 0,
-          converted: stats?.converted || 0,
-        },
+          converted: stats?.converted || 0
+        }
       });
     } catch (error) {
       logger.error('Error fetching leads:', { error: error instanceof Error ? error : undefined });
@@ -153,12 +153,12 @@ router.get(
           new: stats?.new || 0,
           read: stats?.read || 0,
           replied: stats?.replied || 0,
-          archived: stats?.archived || 0,
-        },
+          archived: stats?.archived || 0
+        }
       });
     } catch (error) {
       logger.error('Error fetching contact submissions:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponse(res, 'Failed to fetch contact submissions', 500, 'INTERNAL_ERROR');
     }
@@ -207,7 +207,7 @@ router.put(
       sendSuccess(res, undefined, 'Status updated successfully');
     } catch (error) {
       logger.error('Error updating contact submission status:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponse(res, 'Failed to update status', 500, 'INTERNAL_ERROR');
     }
@@ -287,7 +287,7 @@ router.post(
             null, // company_name - not available from contact form
             null, // phone - not available from contact form
             invitationToken,
-            expiresAt,
+            expiresAt
           ]
         );
 
@@ -301,18 +301,18 @@ router.post(
           if (!contactEmail || !emailRegex.test(contactEmail)) {
             logger.warn('Invalid contact email format, skipping invitation email', {
               category: 'leads',
-              metadata: { clientId },
+              metadata: { clientId }
             });
           } else {
-          const baseUrl =
+            const baseUrl =
             process.env.CLIENT_PORTAL_URL || process.env.FRONTEND_URL || 'http://localhost:4000';
-          const inviteLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
+            const inviteLink = `${baseUrl}/client/set-password.html?token=${invitationToken}`;
 
-          try {
-            await emailService.sendEmail({
-              to: contactEmail,
-              subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
-              html: `
+            try {
+              await emailService.sendEmail({
+                to: contactEmail,
+                subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
+                html: `
                 <h2>Welcome, ${contact.name}!</h2>
                 <p>You've been invited to set up your client portal account.</p>
                 <p>Click the link below to create your password and access your portal:</p>
@@ -320,14 +320,14 @@ router.post(
                 <p>This link will expire in 7 days.</p>
                 <p>If you didn't expect this email, please ignore it.</p>
               `,
-              text: `Welcome, ${contact.name}!\n\nYou've been invited to set up your client portal account.\n\nVisit this link to create your password: ${inviteLink}\n\nThis link will expire in 7 days.`,
-            });
-          } catch (emailError) {
-            logger.error('Failed to send invitation email:', {
-              error: emailError instanceof Error ? emailError : undefined,
-            });
+                text: `Welcome, ${contact.name}!\n\nYou've been invited to set up your client portal account.\n\nVisit this link to create your password: ${inviteLink}\n\nThis link will expire in 7 days.`
+              });
+            } catch (emailError) {
+              logger.error('Failed to send invitation email:', {
+                error: emailError instanceof Error ? emailError : undefined
+              });
             // Don't fail the conversion if email fails
-          }
+            }
           }
         }
       }
@@ -345,7 +345,7 @@ router.post(
         {
           clientId,
           isExisting: !!existingClient,
-          invitationSent: sendInvitation && !existingClient,
+          invitationSent: sendInvitation && !existingClient
         },
         existingClient
           ? 'Contact linked to existing client'
@@ -353,7 +353,7 @@ router.post(
       );
     } catch (error) {
       logger.error('Error converting contact to client:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponse(res, 'Failed to convert contact to client', 500, 'INTERNAL_ERROR');
     }
@@ -398,7 +398,7 @@ router.put(
         'converted',
         'lost',
         'on-hold',
-        'cancelled',
+        'cancelled'
       ];
       if (!status || !validStatuses.includes(status)) {
         return errorResponse(
@@ -451,13 +451,13 @@ router.put(
           previousStatus: project.status,
           newStatus: status,
           cancelledBy: status === 'cancelled' ? cancelled_by : null,
-          cancellationReason: status === 'cancelled' ? cancellation_reason : null,
+          cancellationReason: status === 'cancelled' ? cancellation_reason : null
         },
         'Lead status updated successfully'
       );
     } catch (error) {
       logger.error('Error updating lead status:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponse(res, 'Failed to update lead status', 500, 'INTERNAL_ERROR');
     }
@@ -632,14 +632,14 @@ No Bhad Codes Team
   </div>
 </body>
 </html>
-        `,
+        `
       });
 
       // Log the invitation
       errorTracker.captureMessage('Admin sent client invitation', 'info', {
         tags: { component: 'admin-invite' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, clientEmail: leadEmail },
+        extra: { leadId: id, clientEmail: leadEmail }
       });
 
       sendSuccess(
@@ -647,7 +647,7 @@ No Bhad Codes Team
         {
           clientId,
           email: leadEmail,
-          emailResult,
+          emailResult
         },
         'Invitation sent successfully'
       );
@@ -691,7 +691,7 @@ router.post(
 
       // Update lead status to converted and set start_date
       await db.run(
-        "UPDATE projects SET status = ?, start_date = date('now'), updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        'UPDATE projects SET status = ?, start_date = date(\'now\'), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
         ['converted', id]
       );
 
@@ -699,7 +699,7 @@ router.post(
       errorTracker.captureMessage('Admin activated lead as project', 'info', {
         tags: { component: 'admin-leads' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' },
-        extra: { leadId: id, projectName: lead.project_name },
+        extra: { leadId: id, projectName: lead.project_name }
       });
 
       sendSuccess(res, { projectId: id }, 'Lead activated as project successfully');
@@ -754,7 +754,7 @@ router.post(
       operator,
       thresholdValue,
       points,
-      isActive,
+      isActive
     });
 
     sendCreated(res, { rule });
@@ -921,7 +921,7 @@ router.post(
       dueTime,
       assignedTo,
       priority,
-      reminderAt,
+      reminderAt
     });
 
     sendCreated(res, { task });
@@ -1301,7 +1301,7 @@ router.post(
       if (isNaN(id)) continue;
 
       const result = await db.run(
-        `UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL`,
+        'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL',
         [now, deletedBy, id]
       );
       if (result.changes && result.changes > 0) {

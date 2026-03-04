@@ -26,7 +26,7 @@ router.get('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     logger.error('[Webhooks] Failed to list webhooks', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to list webhooks', 500, 'INTERNAL_ERROR');
   }
@@ -55,7 +55,7 @@ router.get('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => 
   } catch (error) {
     logger.error('[Webhooks] Failed to retrieve webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to retrieve webhook', 500, 'INTERNAL_ERROR');
   }
@@ -76,7 +76,7 @@ router.post('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
       method,
       headers,
       retryMaxAttempts,
-      retryBackoffSeconds,
+      retryBackoffSeconds
     } = req.body;
 
     if (!name || !url || !events || !payloadTemplate) {
@@ -105,7 +105,7 @@ router.post('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
       method: method || 'POST',
       headers: headers || {},
       retryMaxAttempts,
-      retryBackoffSeconds,
+      retryBackoffSeconds
     });
 
     // Don't expose secret key
@@ -114,7 +114,7 @@ router.post('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     logger.error('[Webhooks] Failed to create webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to create webhook', 500, 'INTERNAL_ERROR');
   }
@@ -151,7 +151,7 @@ router.put('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => 
     }
     logger.error('[Webhooks] Failed to update webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to update webhook', 500, 'INTERNAL_ERROR');
   }
@@ -173,7 +173,7 @@ router.delete('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) 
   } catch (error) {
     logger.error('[Webhooks] Failed to delete webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to delete webhook', 500, 'INTERNAL_ERROR');
   }
@@ -207,7 +207,7 @@ router.patch('/webhooks/:id/toggle', async (req: AuthenticatedRequest, res: Resp
     }
     logger.error('[Webhooks] Failed to toggle webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to toggle webhook', 500, 'INTERNAL_ERROR');
   }
@@ -244,7 +244,7 @@ router.post('/webhooks/:id/test', async (req: AuthenticatedRequest, res: Respons
   } catch (error) {
     logger.error('[Webhooks] Failed to test webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to test webhook', 500, 'INTERNAL_ERROR');
   }
@@ -278,7 +278,7 @@ router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Re
       status: statusFilter,
       eventType: eventType as string | undefined,
       limit: parsedLimit,
-      offset: parsedOffset,
+      offset: parsedOffset
     });
 
     sendSuccess(res, {
@@ -286,13 +286,13 @@ router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Re
       pagination: {
         total: result.total,
         limit: parsedLimit,
-        offset: parsedOffset,
-      },
+        offset: parsedOffset
+      }
     });
   } catch (error) {
     logger.error('[Webhooks] Failed to list deliveries', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to list deliveries', 500, 'INTERNAL_ERROR');
   }
@@ -323,7 +323,7 @@ router.get(
     } catch (error) {
       logger.error('[Webhooks] Failed to retrieve delivery', {
         error: error instanceof Error ? error : new Error(String(error)),
-        category: 'WEBHOOK',
+        category: 'WEBHOOK'
       });
       errorResponse(res, 'Failed to retrieve delivery', 500, 'INTERNAL_ERROR');
     }
@@ -347,7 +347,7 @@ router.get('/webhooks/:id/stats', async (req: AuthenticatedRequest, res: Respons
   } catch (error) {
     logger.error('[Webhooks] Failed to retrieve statistics', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to retrieve statistics', 500, 'INTERNAL_ERROR');
   }
@@ -388,7 +388,7 @@ router.post('/webhooks/:id/retry', async (req: AuthenticatedRequest, res: Respon
   } catch (error) {
     logger.error('[Webhooks] Failed to retry delivery', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to retry delivery', 500, 'INTERNAL_ERROR');
   }
@@ -412,14 +412,14 @@ router.post('/webhooks/:id/secret/regenerate', async (req: AuthenticatedRequest,
       res,
       {
         secret_key: newSecret,
-        warning: 'Update any consumers of this webhook with the new secret key',
+        warning: 'Update any consumers of this webhook with the new secret key'
       },
       'Secret regenerated successfully'
     );
   } catch (error) {
     logger.error('[Webhooks] Failed to regenerate secret', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to regenerate secret', 500, 'INTERNAL_ERROR');
   }
@@ -444,7 +444,7 @@ router.post('/events/trigger', async (req: AuthenticatedRequest, res: Response) 
   } catch (error) {
     logger.error('[Webhooks] Failed to trigger event', {
       error: error instanceof Error ? error : new Error(String(error)),
-      category: 'WEBHOOK',
+      category: 'WEBHOOK'
     });
     errorResponse(res, 'Failed to trigger event', 500, 'INTERNAL_ERROR');
   }

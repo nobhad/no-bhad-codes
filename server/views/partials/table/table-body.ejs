@@ -1,0 +1,44 @@
+<%# Table Body - Actual <table> with sortable headers and data rows %>
+<%# Locals: tableDef, rows %>
+
+<table class="data-table" role="grid">
+  <thead>
+    <tr>
+      <% tableDef.columns.forEach(function(col) { %>
+        <% if (col.id === '_select') { %>
+          <th class="select-col bulk-select-cell" scope="col">
+            <input type="checkbox" class="table-checkbox" data-action="select-all" aria-label="Select all rows" />
+          </th>
+        <% } else if (col.id === '_actions') { %>
+          <th class="actions-col" scope="col"></th>
+        <% } else { %>
+          <th
+            class="<%= col.className || '' %><%= col.sortable ? ' sortable' : '' %><%= col.hideMobile ? ' hide-mobile' : '' %><%= col.hideTablet ? ' hide-tablet' : '' %>"
+            scope="col"
+            <% if (col.sortable) { %>
+              data-sort-key="<%= col.id %>"
+              role="columnheader"
+              aria-sort="none"
+              tabindex="0"
+            <% } %>
+            <% if (col.align) { %> style="text-align: <%= col.align %>"<% } %>
+          >
+            <% if (col.sortable) { %>
+              <button type="button" class="sort-button">
+                <span><%= col.label %></span>
+                <span class="sort-indicator" aria-hidden="true"></span>
+              </button>
+            <% } else { %>
+              <%= col.label %>
+            <% } %>
+          </th>
+        <% } %>
+      <% }); %>
+    </tr>
+  </thead>
+  <tbody>
+    <% rows.forEach(function(row, rowIndex) { %>
+      <%- include('table-row', { row, rowIndex, columns: tableDef.columns, tableDef }) %>
+    <% }); %>
+  </tbody>
+</table>

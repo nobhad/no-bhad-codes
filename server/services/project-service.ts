@@ -24,7 +24,7 @@ import {
   type CommentRow,
   type ChecklistRow,
   type TimeEntryRow,
-  type TemplateRow,
+  type TemplateRow
 } from '../database/entities/index.js';
 
 // Type alias for backward compatibility
@@ -326,7 +326,7 @@ class ProjectService {
         data.dueDate || null,
         data.estimatedHours || null,
         sortOrder,
-        data.parentTaskId || null,
+        data.parentTaskId || null
       ]
     );
 
@@ -398,7 +398,7 @@ class ProjectService {
     ).map((row) => ({
       ...toTask(row),
       projectName: row.project_name,
-      milestoneTitle: row.milestone_title,
+      milestoneTitle: row.milestone_title
     }));
 
     // Attach subtasks if requested
@@ -545,7 +545,7 @@ class ProjectService {
         await checkAndUpdateMilestoneCompletion(currentTask.milestone_id);
       } catch (error) {
         logger.error('[ProjectService] Error updating milestone completion:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
         // Don't fail the task update if milestone update fails
       }
@@ -557,7 +557,7 @@ class ProjectService {
         await updateProjectProgress(currentTask.project_id);
       } catch (error) {
         logger.error('[ProjectService] Error updating project progress:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
         // Don't fail the task update if project progress update fails
       }
@@ -578,7 +578,7 @@ class ProjectService {
 
     // Get task info before deleting to update milestone/project progress
     const task = (await db.get('SELECT milestone_id, project_id FROM project_tasks WHERE id = ?', [
-      taskId,
+      taskId
     ])) as { milestone_id: number | null; project_id: number } | undefined;
 
     if (!task) {
@@ -593,7 +593,7 @@ class ProjectService {
         await checkAndUpdateMilestoneCompletion(task.milestone_id);
       } catch (error) {
         logger.error('[ProjectService] Error updating milestone completion after task deletion:', {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     }
@@ -603,7 +603,7 @@ class ProjectService {
       await updateProjectProgress(task.project_id);
     } catch (error) {
       logger.error('[ProjectService] Error updating project progress after task deletion:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
     }
   }
@@ -730,7 +730,7 @@ class ProjectService {
     const db = getDatabase();
     await db.run('DELETE FROM task_dependencies WHERE task_id = ? AND depends_on_task_id = ?', [
       taskId,
-      dependsOnTaskId,
+      dependsOnTaskId
     ]);
   }
 
@@ -897,7 +897,7 @@ class ProjectService {
         data.hours,
         data.date,
         data.billable !== false ? 1 : 0,
-        data.hourlyRate || null,
+        data.hourlyRate || null
       ]
     );
 
@@ -1100,17 +1100,17 @@ class ProjectService {
       byUser: byUser.map((u) => ({
         userName: String(u.user_name),
         hours: parseFloat(String(u.hours)),
-        amount: parseFloat(String(u.amount)),
+        amount: parseFloat(String(u.amount))
       })),
       byTask: byTask.map((t) => ({
         taskId: Number(t.task_id),
         taskTitle: String(t.task_title),
-        hours: parseFloat(String(t.hours)),
+        hours: parseFloat(String(t.hours))
       })),
       byWeek: byWeek.map((w) => ({
         weekStart: String(w.week_start),
-        hours: parseFloat(String(w.hours)),
-      })),
+        hours: parseFloat(String(w.hours))
+      }))
     };
   }
 
@@ -1138,7 +1138,7 @@ class ProjectService {
       endDate,
       totalHours: 0,
       totalAmount: 0,
-      byUser: [],
+      byUser: []
     };
 
     for (const user of byUser) {
@@ -1167,8 +1167,8 @@ class ProjectService {
         projects: userProjects.map((p) => ({
           projectId: Number(p.project_id),
           projectName: String(p.project_name),
-          hours: parseFloat(String(p.hours)),
-        })),
+          hours: parseFloat(String(p.hours))
+        }))
       });
     }
 
@@ -1197,7 +1197,7 @@ class ProjectService {
         data.defaultMilestones ? JSON.stringify(data.defaultMilestones) : null,
         data.defaultTasks ? JSON.stringify(data.defaultTasks) : null,
         data.estimatedDurationDays || null,
-        data.defaultHourlyRate || null,
+        data.defaultHourlyRate || null
       ]
     );
 
@@ -1268,7 +1268,7 @@ class ProjectService {
         templateId,
         template.defaultHourlyRate,
         template.defaultTasks.reduce((sum, t) => sum + (t.estimatedHours || 0), 0),
-        startDate,
+        startDate
       ]
     );
     const projectId = projectResult.lastID as number;
@@ -1291,7 +1291,7 @@ class ProjectService {
           milestone.description,
           milestone.deliverables,
           dueDate.toISOString().split('T')[0],
-          milestone.order,
+          milestone.order
         ]
       );
       milestoneIds.push(milestoneResult.lastID as number);
@@ -1316,7 +1316,7 @@ class ProjectService {
           task.description,
           task.priority || 'medium',
           task.estimatedHours,
-          taskOrder++,
+          taskOrder++
         ]
       );
       taskIds.push(taskResult.lastID as number);
@@ -1457,10 +1457,10 @@ class ProjectService {
         scheduleHealth,
         budgetHealth,
         taskCompletion,
-        milestoneProgress,
+        milestoneProgress
       },
       issues,
-      lastCalculated: new Date().toISOString(),
+      lastCalculated: new Date().toISOString()
     };
   }
 
@@ -1566,7 +1566,7 @@ class ProjectService {
       weeks,
       hoursCompleted,
       tasksCompleted,
-      averageVelocity: Math.round(averageVelocity * 10) / 10,
+      averageVelocity: Math.round(averageVelocity * 10) / 10
     };
   }
 
@@ -1581,7 +1581,7 @@ class ProjectService {
     const db = getDatabase();
     await db.run('INSERT OR IGNORE INTO project_tags (project_id, tag_id) VALUES (?, ?)', [
       projectId,
-      tagId,
+      tagId
     ]);
   }
 
@@ -1592,7 +1592,7 @@ class ProjectService {
     const db = getDatabase();
     await db.run('DELETE FROM project_tags WHERE project_id = ? AND tag_id = ?', [
       projectId,
-      tagId,
+      tagId
     ]);
   }
 
@@ -1718,7 +1718,7 @@ class ProjectService {
       ...toTask(row),
       projectName: row.project_name,
       clientName: row.client_name,
-      milestoneTitle: row.milestone_title,
+      milestoneTitle: row.milestone_title
     }));
   }
 }

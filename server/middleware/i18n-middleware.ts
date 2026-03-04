@@ -8,16 +8,16 @@ export type Locale = 'en' | 'es' | 'fr';
 const translations: Record<Locale, Record<string, string>> = {
   en: {
     greeting: 'Hello',
-    farewell: 'Goodbye',
+    farewell: 'Goodbye'
   },
   es: {
     greeting: 'Hola',
-    farewell: 'Adiós',
+    farewell: 'Adiós'
   },
   fr: {
     greeting: 'Bonjour',
-    farewell: 'Au revoir',
-  },
+    farewell: 'Au revoir'
+  }
 };
 
 export function detectLocale(req: Request): Locale {

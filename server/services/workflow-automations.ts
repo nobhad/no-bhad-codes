@@ -97,14 +97,14 @@ async function handleProposalAccepted(data: {
       description: getString(proposalRow as Record<string, unknown>, 'description') || null,
       project_name: getString(proposalRow as Record<string, unknown>, 'project_name') || null,
       maintenance_option:
-        getString(proposalRow as Record<string, unknown>, 'maintenance_option') || null,
+        getString(proposalRow as Record<string, unknown>, 'maintenance_option') || null
     };
 
     // Check if project already exists
     if (proposal.project_id) {
       logger.info('proposal.accepted: Project already exists', {
         category: 'workflow',
-        metadata: { projectId: proposal.project_id, proposalId },
+        metadata: { projectId: proposal.project_id, proposalId }
       });
 
       // Update existing project with proposal data if needed
@@ -136,7 +136,7 @@ async function handleProposalAccepted(data: {
         projectName,
         proposal.project_type,
         proposal.description,
-        proposal.final_price,
+        proposal.final_price
       ]
     );
 
@@ -145,12 +145,12 @@ async function handleProposalAccepted(data: {
     // Link proposal to the new project
     await db.run('UPDATE proposal_requests SET project_id = ? WHERE id = ?', [
       projectId,
-      proposalId,
+      proposalId
     ]);
 
     logger.info('proposal.accepted: Created project from proposal', {
       category: 'workflow',
-      metadata: { projectId, proposalId },
+      metadata: { projectId, proposalId }
     });
 
     // Generate default milestones for the project
@@ -161,12 +161,12 @@ async function handleProposalAccepted(data: {
         metadata: {
           projectId,
           milestonesCreated: milestoneResult.milestonesCreated,
-          tasksCreated: milestoneResult.tasksCreated,
-        },
+          tasksCreated: milestoneResult.tasksCreated
+        }
       });
     } catch (milestoneError) {
       logger.error('[WorkflowAutomation] proposal.accepted: Failed to generate milestones', {
-        error: milestoneError instanceof Error ? milestoneError : undefined,
+        error: milestoneError instanceof Error ? milestoneError : undefined
       });
       // Don't fail the automation if milestone generation fails
     }
@@ -177,11 +177,11 @@ async function handleProposalAccepted(data: {
       triggeredBy: data.triggeredBy || 'workflow-automation',
       clientId: proposal.client_id,
       projectType: proposal.project_type,
-      proposalId: proposalId,
+      proposalId: proposalId
     });
   } catch (error) {
     logger.error('[WorkflowAutomation] proposal.accepted: Error creating project', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -223,13 +223,13 @@ async function handleContractSigned(data: {
   try {
     // Get current project status
     const project = await db.get('SELECT id, status, project_name FROM projects WHERE id = ?', [
-      projectId,
+      projectId
     ]);
 
     if (!project) {
       logger.warn('contract.signed: Project not found', {
         category: 'workflow',
-        metadata: { projectId },
+        metadata: { projectId }
       });
       return;
     }
@@ -244,7 +244,7 @@ async function handleContractSigned(data: {
     ) {
       logger.info('contract.signed: Project already in active state, skipping', {
         category: 'workflow',
-        metadata: { projectId, previousStatus },
+        metadata: { projectId, previousStatus }
       });
       return;
     }
@@ -260,7 +260,7 @@ async function handleContractSigned(data: {
 
     logger.info('contract.signed: Updated project status to active', {
       category: 'workflow',
-      metadata: { projectId },
+      metadata: { projectId }
     });
 
     // Log to contract_signature_log
@@ -274,8 +274,8 @@ async function handleContractSigned(data: {
           previousStatus,
           newStatus: 'active',
           signerName: data.signerName,
-          activatedAt: new Date().toISOString(),
-        }),
+          activatedAt: new Date().toISOString()
+        })
       ]
     );
 
@@ -285,11 +285,11 @@ async function handleContractSigned(data: {
       triggeredBy: data.triggeredBy || 'workflow-automation',
       previousStatus,
       newStatus: 'active',
-      reason: 'contract_signed',
+      reason: 'contract_signed'
     });
   } catch (error) {
     logger.error('[WorkflowAutomation] contract.signed: Error updating project status', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -362,7 +362,7 @@ async function handleMilestoneCompleted(data: {
           description: deliverable.name || milestoneTitle,
           quantity: 1,
           rate: deliverable.price,
-          amount: deliverable.price,
+          amount: deliverable.price
         });
       }
     }
@@ -378,7 +378,7 @@ async function handleMilestoneCompleted(data: {
       if (!isPaymentMilestone) {
         logger.info('project.milestone_completed: Not a payment milestone, skipping invoice', {
           category: 'workflow',
-          metadata: { milestoneId, milestoneTitle },
+          metadata: { milestoneId, milestoneTitle }
         });
         return;
       }
@@ -389,7 +389,7 @@ async function handleMilestoneCompleted(data: {
         'project.milestone_completed: Payment milestone has no amounts, manual invoice required',
         {
           category: 'workflow',
-          metadata: { milestoneId, milestoneTitle },
+          metadata: { milestoneId, milestoneTitle }
         }
       );
       return;
@@ -397,13 +397,13 @@ async function handleMilestoneCompleted(data: {
 
     // Check if an invoice already exists for this milestone
     const existingInvoice = await db.get('SELECT id FROM invoices WHERE milestone_id = ?', [
-      milestoneId,
+      milestoneId
     ]);
 
     if (existingInvoice) {
       logger.info('project.milestone_completed: Invoice already exists for milestone', {
         category: 'workflow',
-        metadata: { milestoneId },
+        metadata: { milestoneId }
       });
       return;
     }
@@ -416,12 +416,12 @@ async function handleMilestoneCompleted(data: {
       clientId,
       lineItems,
       notes: `${projectName} - ${milestoneTitle}\n\n${description || 'Invoice for milestone completion.'}`,
-      terms: 'Payment due within 14 days of receipt.',
+      terms: 'Payment due within 14 days of receipt.'
     });
 
     logger.info('project.milestone_completed: Created draft invoice for milestone', {
       category: 'workflow',
-      metadata: { invoiceId: invoice.id, milestoneId, amount: invoiceAmount },
+      metadata: { invoiceId: invoice.id, milestoneId, amount: invoiceAmount }
     });
 
     // Emit invoice.created event
@@ -431,11 +431,11 @@ async function handleMilestoneCompleted(data: {
       projectId,
       clientId,
       milestoneId,
-      amount: invoiceAmount,
+      amount: invoiceAmount
     });
   } catch (error) {
     logger.error('[WorkflowAutomation] project.milestone_completed: Error creating invoice', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }
@@ -459,7 +459,7 @@ async function getClientEmail(clientId: number): Promise<{ email: string; name: 
 
   return {
     email: String(client.email),
-    name: String(client.contact_name || client.company_name || 'Valued Client'),
+    name: String(client.contact_name || client.company_name || 'Valued Client')
   };
 }
 
@@ -477,7 +477,7 @@ async function sendClientNotification(
   if (!client) {
     logger.warn('sendClientNotification: Client email not found', {
       category: 'workflow',
-      metadata: { clientId },
+      metadata: { clientId }
     });
     return;
   }
@@ -517,17 +517,17 @@ async function sendClientNotification(
           </div>
         </body>
         </html>
-      `,
+      `
     });
 
     logger.info('Client notification sent', {
       category: 'workflow',
-      metadata: { clientId, subject },
+      metadata: { clientId, subject }
     });
   } catch (error) {
     logger.error('Failed to send client notification', {
       category: 'workflow',
-      metadata: { clientId, subject, error: String(error) },
+      metadata: { clientId, subject, error: String(error) }
     });
   }
 }
@@ -577,7 +577,7 @@ async function notifyContractSigned(data: {
 
   const db = getDatabase();
   const project = (await db.get('SELECT project_name, client_id FROM projects WHERE id = ?', [
-    projectId,
+    projectId
   ])) as Record<string, unknown> | undefined;
 
   if (!project) return;
@@ -799,9 +799,9 @@ export function registerWorkflowAutomations(): void {
         'deliverable.approved -> Notify client',
         'questionnaire.completed -> Notify client',
         'document_request.approved -> Notify client',
-        'invoice.paid -> Notify client',
-      ],
-    },
+        'invoice.paid -> Notify client'
+      ]
+    }
   });
 }
 

@@ -20,7 +20,7 @@ import {
   getBooleanOrNull,
   getFloat,
   getFloatOrNull,
-  getDate,
+  getDate
 } from './row-helpers.js';
 
 /**
@@ -84,70 +84,70 @@ function extractValue(row: DatabaseRow, mapping: FieldMapping): unknown {
   let value: unknown;
 
   switch (type) {
-    case 'string':
-      value = getString(row, column);
-      break;
-    case 'string?':
-      value = getStringOrNull(row, column);
-      break;
-    case 'number':
-      value = getNumber(row, column);
-      break;
-    case 'number?':
-      value = getNumberOrNull(row, column);
-      break;
-    case 'boolean':
-      value = getBoolean(row, column);
-      break;
-    case 'boolean?':
-      value = getBooleanOrNull(row, column);
-      break;
-    case 'float':
-      value = getFloat(row, column);
-      break;
-    case 'float?':
-      value = getFloatOrNull(row, column);
-      break;
-    case 'json':
-      {
-        const rawValue = row[column];
-        if (typeof rawValue === 'string') {
-          try {
-            value = JSON.parse(rawValue);
-          } catch {
-            value = defaultValue ?? {};
-          }
-        } else if (rawValue != null) {
-          value = rawValue;
-        } else {
+  case 'string':
+    value = getString(row, column);
+    break;
+  case 'string?':
+    value = getStringOrNull(row, column);
+    break;
+  case 'number':
+    value = getNumber(row, column);
+    break;
+  case 'number?':
+    value = getNumberOrNull(row, column);
+    break;
+  case 'boolean':
+    value = getBoolean(row, column);
+    break;
+  case 'boolean?':
+    value = getBooleanOrNull(row, column);
+    break;
+  case 'float':
+    value = getFloat(row, column);
+    break;
+  case 'float?':
+    value = getFloatOrNull(row, column);
+    break;
+  case 'json':
+    {
+      const rawValue = row[column];
+      if (typeof rawValue === 'string') {
+        try {
+          value = JSON.parse(rawValue);
+        } catch {
           value = defaultValue ?? {};
         }
+      } else if (rawValue != null) {
+        value = rawValue;
+      } else {
+        value = defaultValue ?? {};
       }
-      break;
-    case 'json?':
-      {
-        const rawValue = row[column];
-        if (typeof rawValue === 'string') {
-          try {
-            value = JSON.parse(rawValue);
-          } catch {
-            value = null;
-          }
-        } else if (rawValue != null) {
-          value = rawValue;
-        } else {
+    }
+    break;
+  case 'json?':
+    {
+      const rawValue = row[column];
+      if (typeof rawValue === 'string') {
+        try {
+          value = JSON.parse(rawValue);
+        } catch {
           value = null;
         }
+      } else if (rawValue != null) {
+        value = rawValue;
+      } else {
+        value = null;
       }
-      break;
-    case 'date':
-      value = getDate(row, column) ?? new Date();
-      break;
-    case 'date?':
-      value = getDate(row, column);
-      break;
-    default:
-      value = row[column];
+    }
+    break;
+  case 'date':
+    value = getDate(row, column) ?? new Date();
+    break;
+  case 'date?':
+    value = getDate(row, column);
+    break;
+  default:
+    value = row[column];
   }
 
   // Apply default if value is null/undefined
@@ -202,7 +202,7 @@ export function field(
   return (fieldName: string) => ({
     column: options?.column ?? camelToSnake(fieldName),
     type,
-    ...options,
+    ...options
   });
 }
 
@@ -230,14 +230,14 @@ export const fields = {
   json: (column?: string, defaultValue?: unknown) => ({
     column: column ?? '',
     type: 'json' as const,
-    default: defaultValue ?? {},
+    default: defaultValue ?? {}
   }),
   /** Optional JSON field */
   jsonOrNull: (column?: string) => ({ column: column ?? '', type: 'json?' as const }),
   /** Required date field */
   date: (column?: string) => ({ column: column ?? '', type: 'date' as const }),
   /** Optional date field */
-  dateOrNull: (column?: string) => ({ column: column ?? '', type: 'date?' as const }),
+  dateOrNull: (column?: string) => ({ column: column ?? '', type: 'date?' as const })
 };
 
 /**
@@ -266,14 +266,14 @@ export function defineSchema<T>(
       // It's just a type, derive column name from key
       schema[key] = {
         column: camelToSnake(key),
-        type: value as FieldType,
+        type: value as FieldType
       };
     } else {
       // It's a full FieldMapping, use column from mapping or derive from key
       const mapping = value as FieldMapping;
       schema[key] = {
         ...mapping,
-        column: mapping.column || camelToSnake(key),
+        column: mapping.column || camelToSnake(key)
       };
     }
   }
@@ -308,13 +308,13 @@ export function definePartialSchema<T>() {
       if (typeof value === 'string') {
         schema[key] = {
           column: camelToSnake(key),
-          type: value as FieldType,
+          type: value as FieldType
         };
       } else {
         const mapping = value as FieldMapping;
         schema[key] = {
           ...mapping,
-          column: mapping.column || camelToSnake(key),
+          column: mapping.column || camelToSnake(key)
         };
       }
     }

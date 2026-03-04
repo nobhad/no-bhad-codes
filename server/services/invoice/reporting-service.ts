@@ -11,7 +11,7 @@ import type {
   Invoice,
   InvoiceAgingBucket,
   InvoiceAgingReport,
-  InvoiceRow,
+  InvoiceRow
 } from '../../types/invoice-types.js';
 import type { Database } from '../../database/init.js';
 
@@ -62,7 +62,7 @@ export class InvoiceReportingService {
       totalAmount: row?.total_amount || 0,
       totalPaid: row?.total_paid || 0,
       totalOutstanding: row?.total_outstanding || 0,
-      overdue: row?.overdue || 0,
+      overdue: row?.overdue || 0
     };
   }
 
@@ -100,7 +100,7 @@ export class InvoiceReportingService {
       ['1-30', { bucket: '1-30', count: 0, totalAmount: 0, invoices: [] }],
       ['31-60', { bucket: '31-60', count: 0, totalAmount: 0, invoices: [] }],
       ['61-90', { bucket: '61-90', count: 0, totalAmount: 0, invoices: [] }],
-      ['90+', { bucket: '90+', count: 0, totalAmount: 0, invoices: [] }],
+      ['90+', { bucket: '90+', count: 0, totalAmount: 0, invoices: [] }]
     ]);
 
     let totalOutstanding = 0;
@@ -139,7 +139,7 @@ export class InvoiceReportingService {
     return {
       generatedAt: todayStr,
       totalOutstanding,
-      buckets: Array.from(buckets.values()),
+      buckets: Array.from(buckets.values())
     };
   }
 
@@ -205,7 +205,7 @@ export class InvoiceReportingService {
       partial: 0,
       paid: 0,
       overdue: 0,
-      cancelled: 0,
+      cancelled: 0
     };
 
     for (const row of statusRows) {
@@ -229,7 +229,7 @@ export class InvoiceReportingService {
       (row: { month: string; revenue: number; count: number }) => ({
         month: row.month,
         revenue: row.revenue || 0,
-        count: row.count,
+        count: row.count
       })
     );
 
@@ -241,7 +241,7 @@ export class InvoiceReportingService {
       averageInvoiceAmount: basicStats?.avg_amount || 0,
       averageDaysToPayment: basicStats?.avg_days_to_payment || 0,
       statusBreakdown,
-      monthlyRevenue,
+      monthlyRevenue
     };
   }
 }

@@ -13,7 +13,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import {
   emailTemplateService,
-  type EmailTemplateCategory,
+  type EmailTemplateCategory
 } from '../../services/email-template-service.js';
 import { errorResponse } from '../../utils/api-response.js';
 
@@ -35,7 +35,7 @@ router.get(
     const stats = {
       total: templates.length,
       active: templates.filter((t) => t.is_active).length,
-      categories: categories,
+      categories: categories
     };
 
     // Return in format expected by frontend
@@ -87,7 +87,7 @@ router.put(
       subject,
       body_html,
       category,
-      is_active,
+      is_active
     });
 
     if (!template) {

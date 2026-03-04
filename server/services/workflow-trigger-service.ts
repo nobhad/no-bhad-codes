@@ -11,7 +11,6 @@
  */
 
 import { getDatabase } from '../database/init.js';
-import { emailService } from './email-service.js';
 import { userService } from './user-service.js';
 import { logger } from './logger.js';
 import { parseIfString } from '../utils/safe-json.js';
@@ -128,7 +127,7 @@ class WorkflowTriggerService {
         this.extractEntityType(eventType),
         context.entityId ?? null,
         JSON.stringify(context),
-        context.triggeredBy || 'system',
+        context.triggeredBy || 'system'
       ]
     );
 
@@ -197,7 +196,7 @@ class WorkflowTriggerService {
         await listener(context);
       } catch (error) {
         logger.error(`[WorkflowTrigger] Listener failed for ${eventType}:`, {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     }
@@ -280,7 +279,7 @@ class WorkflowTriggerService {
         data.action_type,
         JSON.stringify(data.action_config),
         data.is_active !== false,
-        data.priority || 0,
+        data.priority || 0
       ]
     );
     return this.getTrigger(result.lastID!) as Promise<WorkflowTrigger>;
@@ -454,7 +453,7 @@ class WorkflowTriggerService {
       'questionnaire.completed',
       'task.created',
       'task.completed',
-      'task.overdue',
+      'task.overdue'
     ];
   }
 
@@ -467,7 +466,7 @@ class WorkflowTriggerService {
       { type: 'create_task', description: 'Create a task for the project' },
       { type: 'update_status', description: 'Update entity status' },
       { type: 'webhook', description: 'Call an external webhook URL' },
-      { type: 'notify', description: 'Send in-app notification' },
+      { type: 'notify', description: 'Send in-app notification' }
     ];
   }
 
@@ -486,43 +485,43 @@ class WorkflowTriggerService {
     );
 
     switch (trigger.action_type) {
-      case 'send_email':
-        await this.executeSendEmail(
+    case 'send_email':
+      await this.executeSendEmail(
           config as { template: string; to: string; subject?: string },
           context
-        );
-        break;
+      );
+      break;
 
-      case 'create_task':
-        await this.executeCreateTask(
+    case 'create_task':
+      await this.executeCreateTask(
           config as { title: string; description?: string; assignee?: string; due_days?: number },
           context
-        );
-        break;
+      );
+      break;
 
-      case 'update_status':
-        await this.executeUpdateStatus(
+    case 'update_status':
+      await this.executeUpdateStatus(
           config as { entity: string; status: string; field?: string },
           context
-        );
-        break;
+      );
+      break;
 
-      case 'webhook':
-        await this.executeWebhook(
+    case 'webhook':
+      await this.executeWebhook(
           config as { url: string; method?: string; headers?: Record<string, string> },
           context
-        );
-        break;
+      );
+      break;
 
-      case 'notify':
-        await this.executeNotify(
+    case 'notify':
+      await this.executeNotify(
           config as { channel: string; message: string },
           context
-        );
-        break;
+      );
+      break;
 
-      default:
-        logger.warn(`[WorkflowTrigger] Unknown action type: ${trigger.action_type}`);
+    default:
+      logger.warn(`[WorkflowTrigger] Unknown action type: ${trigger.action_type}`);
     }
   }
 
@@ -590,7 +589,7 @@ class WorkflowTriggerService {
         this.interpolate(config.title, context),
         config.description ? this.interpolate(config.description, context) : null,
         assigneeUserId,
-        dueDate,
+        dueDate
       ]
     );
 
@@ -611,24 +610,24 @@ class WorkflowTriggerService {
     let entityId: number | undefined;
 
     switch (config.entity) {
-      case 'project':
-        table = 'projects';
-        idField = 'id';
-        entityId = context.projectId as number;
-        break;
-      case 'invoice':
-        table = 'invoices';
-        idField = 'id';
-        entityId = context.invoiceId as number;
-        break;
-      case 'client':
-        table = 'clients';
-        idField = 'id';
-        entityId = context.clientId as number;
-        break;
-      default:
-        logger.warn(`[WorkflowTrigger] Unknown entity type for update_status: ${config.entity}`);
-        return;
+    case 'project':
+      table = 'projects';
+      idField = 'id';
+      entityId = context.projectId as number;
+      break;
+    case 'invoice':
+      table = 'invoices';
+      idField = 'id';
+      entityId = context.invoiceId as number;
+      break;
+    case 'client':
+      table = 'clients';
+      idField = 'id';
+      entityId = context.clientId as number;
+      break;
+    default:
+      logger.warn(`[WorkflowTrigger] Unknown entity type for update_status: ${config.entity}`);
+      return;
     }
 
     if (!entityId) {
@@ -658,15 +657,15 @@ class WorkflowTriggerService {
         method: config.method || 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...config.headers,
+          ...config.headers
         },
-        body: JSON.stringify(context),
+        body: JSON.stringify(context)
       });
 
       logger.info(`[WorkflowTrigger] Webhook ${config.url} returned ${response.status}`);
     } catch (error) {
       logger.error('[WorkflowTrigger] Webhook failed:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       throw error;
     }

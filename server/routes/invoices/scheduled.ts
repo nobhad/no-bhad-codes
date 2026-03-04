@@ -36,12 +36,12 @@ router.post(
       triggerMilestoneId,
       lineItems,
       notes,
-      terms,
+      terms
     } = req.body;
 
     if (!projectId || !clientId || !scheduledDate || !lineItems?.length) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'scheduledDate', 'lineItems'],
+        required: ['projectId', 'clientId', 'scheduledDate', 'lineItems']
       });
     }
 
@@ -54,17 +54,17 @@ router.post(
         triggerMilestoneId,
         lineItems,
         notes,
-        terms,
+        terms
       });
 
       res.status(201).json({
         success: true,
         message: 'Invoice scheduled',
-        scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled),
+        scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to schedule invoice', 500, 'SCHEDULING_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -88,7 +88,7 @@ router.get(
       res.json({
         success: true,
         scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
-        count: scheduled.length,
+        count: scheduled.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -97,7 +97,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -128,7 +128,7 @@ router.get(
       res.json({
         success: true,
         scheduled_invoices: scheduled.map(toSnakeCaseScheduledInvoice),
-        count: scheduled.length,
+        count: scheduled.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -137,7 +137,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -168,7 +168,7 @@ router.delete(
 
       res.json({
         success: true,
-        message: 'Scheduled invoice cancelled',
+        message: 'Scheduled invoice cancelled'
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -177,7 +177,7 @@ router.delete(
         500,
         'CANCELLATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }

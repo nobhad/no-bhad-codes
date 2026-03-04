@@ -139,14 +139,14 @@ export const contractTemplateSchema = defineSchema<ContractTemplate>({
   type: {
     column: 'type',
     type: 'string',
-    transform: (v) => v as ContractTemplateType,
+    transform: (v) => v as ContractTemplateType
   },
   content: 'string',
   variables: { column: 'variables', type: 'json?' },
   isDefault: { column: 'is_default', type: 'boolean' },
   isActive: { column: 'is_active', type: 'boolean' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' },
+  updatedAt: { column: 'updated_at', type: 'string' }
 });
 
 // Contract has many optional joined fields
@@ -159,14 +159,14 @@ export const contractSchema = definePartialSchema<Contract>()({
   status: {
     column: 'status',
     type: 'string',
-    transform: (v) => v as ContractStatus,
+    transform: (v) => v as ContractStatus
   },
   variables: { column: 'variables', type: 'json?' },
   templateName: { column: 'template_name', type: 'string?' },
   templateType: {
     column: 'template_type',
     type: 'string?',
-    transform: (v) => v as ContractTemplateType | null,
+    transform: (v) => v as ContractTemplateType | null
   },
   projectName: { column: 'project_name', type: 'string?' },
   clientName: { column: 'client_name', type: 'string?' },
@@ -195,7 +195,7 @@ export const contractSchema = definePartialSchema<Contract>()({
   signedAt: { column: 'signed_at', type: 'string?' },
   expiresAt: { column: 'expires_at', type: 'string?' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' },
+  updatedAt: { column: 'updated_at', type: 'string' }
 });
 
 // =====================================================

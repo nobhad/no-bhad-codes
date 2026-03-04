@@ -41,7 +41,7 @@ async function testCacheService(): Promise<void> {
       password: process.env.REDIS_PASSWORD,
       db: parseInt(process.env.REDIS_DB || '0'),
       keyPrefix: process.env.REDIS_KEY_PREFIX || 'test:',
-      lazyConnect: true,
+      lazyConnect: true
     };
 
     console.log('🔗 Connecting to Redis...');

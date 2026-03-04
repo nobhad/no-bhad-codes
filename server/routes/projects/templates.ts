@@ -83,7 +83,7 @@ router.post(
     sendCreated(res, {
       projectId: result.projectId,
       milestoneIds: result.milestoneIds,
-      taskIds: result.taskIds,
+      taskIds: result.taskIds
     }, 'Project created from template successfully');
   })
 );

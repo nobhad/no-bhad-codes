@@ -125,12 +125,12 @@ export const mentionSchema = defineSchema<Mention>({
   mentionedType: {
     column: 'mentioned_type',
     type: 'string',
-    transform: (v) => v as 'user' | 'team' | 'all',
+    transform: (v) => v as 'user' | 'team' | 'all'
   },
   mentionedId: { column: 'mentioned_id', type: 'string?' },
   notified: { column: 'notified', type: 'boolean' },
   notifiedAt: { column: 'notified_at', type: 'string?' },
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const reactionSchema = defineSchema<Reaction>({
@@ -139,7 +139,7 @@ export const reactionSchema = defineSchema<Reaction>({
   userEmail: { column: 'user_email', type: 'string' },
   userType: { column: 'user_type', type: 'string' },
   reaction: 'string',
-  createdAt: { column: 'created_at', type: 'string' },
+  createdAt: { column: 'created_at', type: 'string' }
 });
 
 export const subscriptionSchema = defineSchema<Subscription>({
@@ -152,7 +152,7 @@ export const subscriptionSchema = defineSchema<Subscription>({
   notifyReplies: { column: 'notify_replies', type: 'boolean' },
   mutedUntil: { column: 'muted_until', type: 'string?' },
   createdAt: { column: 'created_at', type: 'string' },
-  updatedAt: { column: 'updated_at', type: 'string' },
+  updatedAt: { column: 'updated_at', type: 'string' }
 });
 
 export const readReceiptSchema = defineSchema<ReadReceipt>({
@@ -160,7 +160,7 @@ export const readReceiptSchema = defineSchema<ReadReceipt>({
   messageId: { column: 'message_id', type: 'number' },
   userEmail: { column: 'user_email', type: 'string' },
   userType: { column: 'user_type', type: 'string' },
-  readAt: { column: 'read_at', type: 'string' },
+  readAt: { column: 'read_at', type: 'string' }
 });
 
 // PinnedMessage has optional 'message' computed field
@@ -169,7 +169,7 @@ export const pinnedMessageSchema = definePartialSchema<PinnedMessage>()({
   threadId: { column: 'thread_id', type: 'number' },
   messageId: { column: 'message_id', type: 'number' },
   pinnedBy: { column: 'pinned_by', type: 'string' },
-  pinnedAt: { column: 'pinned_at', type: 'string' },
+  pinnedAt: { column: 'pinned_at', type: 'string' }
 });
 
 // =====================================================

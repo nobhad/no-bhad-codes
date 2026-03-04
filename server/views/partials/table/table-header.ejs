@@ -1,0 +1,54 @@
+<%# Table Header - Title bar with stats and action buttons %>
+<%# Locals: tableDef, stats %>
+
+<div class="data-table-header">
+  <div class="table-header-left">
+    <h3 class="table-title"><%= tableDef.title %></h3>
+    <% if (stats && stats.total !== undefined) { %>
+      <span class="table-stats-badge"><%= stats.total %> total</span>
+    <% } %>
+  </div>
+
+  <div class="table-header-right table-actions">
+    <% if (tableDef.features.search) { %>
+      <div class="table-search" data-action="search">
+        <input
+          type="text"
+          class="table-search-input form-input"
+          placeholder="Search <%= tableDef.title.toLowerCase() %>..."
+          aria-label="Search <%= tableDef.title.toLowerCase() %>"
+        />
+      </div>
+    <% } %>
+
+    <% if (tableDef.features.filter && tableDef.filters) { %>
+      <% tableDef.filters.forEach(function(filter) { %>
+        <select class="table-filter-select form-input" data-filter="<%= filter.id %>" aria-label="Filter by <%= filter.label %>">
+          <% filter.options.forEach(function(opt) { %>
+            <option value="<%= opt.value %>"><%= opt.label %></option>
+          <% }); %>
+        </select>
+      <% }); %>
+    <% } %>
+
+    <% if (tableDef.features.export) { %>
+      <button type="button" class="btn btn-secondary btn-sm" data-action="export" title="Export CSV">
+        <svg class="lucide-icon" width="16" height="16"><use href="#icon-download"></use></svg>
+        <span class="btn-label">Export</span>
+      </button>
+    <% } %>
+
+    <% if (tableDef.features.refresh) { %>
+      <button type="button" class="btn btn-secondary btn-sm" data-action="refresh" title="Refresh">
+        <svg class="lucide-icon" width="16" height="16"><use href="#icon-refresh-cw"></use></svg>
+      </button>
+    <% } %>
+  </div>
+</div>
+
+<% if (tableDef.features.select) { %>
+  <div class="bulk-actions-toolbar" data-action="bulk-toolbar" style="display: none;">
+    <span class="bulk-selected-count">0 selected</span>
+    <button type="button" class="btn btn-danger btn-sm" data-action="bulk-delete">Delete</button>
+  </div>
+<% } %>

@@ -13,7 +13,6 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
 import { errorResponse } from '../../utils/api-response.js';
-import { logger } from '../../services/logger.js';
 
 const router = express.Router();
 
@@ -199,7 +198,7 @@ router.post(
       thread.project_id,
       req.user?.email || 'Admin',
       content.trim(),
-      attachments ? JSON.stringify(attachments) : null,
+      attachments ? JSON.stringify(attachments) : null
     ]);
 
     // Update thread's last_message_at

@@ -29,7 +29,7 @@ export interface FileValidationResult {
 export const ALLOWED_FILE_TYPES = {
   images: {
     mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
-    extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
+    extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
   },
   documents: {
     mimeTypes: [
@@ -39,14 +39,14 @@ export const ALLOWED_FILE_TYPES = {
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'text/plain',
-      'text/csv',
+      'text/csv'
     ],
-    extensions: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv'],
+    extensions: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv']
   },
   archives: {
     mimeTypes: ['application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed'],
-    extensions: ['.zip', '.rar', '.7z'],
-  },
+    extensions: ['.zip', '.rar', '.7z']
+  }
 };
 
 // Max file sizes (in bytes)
@@ -54,7 +54,7 @@ export const MAX_FILE_SIZES = {
   image: 10 * 1024 * 1024, // 10MB
   document: 25 * 1024 * 1024, // 25MB
   archive: 50 * 1024 * 1024, // 50MB
-  default: 10 * 1024 * 1024, // 10MB
+  default: 10 * 1024 * 1024 // 10MB
 };
 
 // Email validation regex (RFC 5322 compliant, simplified)
@@ -80,7 +80,7 @@ const XSS_PATTERNS = [
   /expression\s*\(/gi,
   /url\s*\(/gi,
   /<!--/gi,
-  /-->/gi,
+  /-->/gi
 ];
 
 // SQL injection patterns
@@ -88,7 +88,7 @@ const SQL_INJECTION_PATTERNS = [
   /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|EXEC|UNION|FETCH|DECLARE|OPEN)\b)/gi,
   /(--|;|\/\*|\*\/|@@|@|char\(|nchar\(|varchar\(|nvarchar\(|cast\(|convert\()/gi,
   /(\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/gi,
-  /'\s*(OR|AND)\s+'[^']*'\s*=\s*'[^']*/gi,
+  /'\s*(OR|AND)\s+'[^']*'\s*=\s*'[^']*/gi
 ];
 
 /**
@@ -136,7 +136,7 @@ export function validateEmail(email: string): ValidationResult {
     valid: errors.length === 0,
     value: email,
     errors,
-    sanitized: trimmed,
+    sanitized: trimmed
   };
 }
 
@@ -183,7 +183,7 @@ export function validatePhone(phone: string): ValidationResult {
     valid: errors.length === 0,
     value: phone,
     errors,
-    sanitized,
+    sanitized
   };
 }
 
@@ -234,7 +234,7 @@ export function validateUrl(url: string): ValidationResult {
     valid: errors.length === 0,
     value: url,
     errors,
-    sanitized: normalized,
+    sanitized: normalized
   };
 }
 
@@ -275,7 +275,7 @@ export function detectXSS(input: string): { detected: boolean; patterns: string[
 
   return {
     detected: detectedPatterns.length > 0,
-    patterns: detectedPatterns,
+    patterns: detectedPatterns
   };
 }
 
@@ -296,7 +296,7 @@ export function detectSQLInjection(input: string): { detected: boolean; patterns
 
   return {
     detected: detectedPatterns.length > 0,
-    patterns: detectedPatterns,
+    patterns: detectedPatterns
   };
 }
 
@@ -439,7 +439,7 @@ export function validateFile(
     errors,
     mimeType,
     extension,
-    sizeBytes,
+    sizeBytes
   };
 }
 
@@ -482,58 +482,58 @@ export function validateObject(
 
     // Type-specific validation
     switch (rules.type) {
-      case 'email': {
-        const result = validateEmail(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
-        sanitized[field] = result.sanitized;
-        break;
+    case 'email': {
+      const result = validateEmail(String(value));
+      if (!result.valid) fieldErrors.push(...result.errors);
+      sanitized[field] = result.sanitized;
+      break;
+    }
+    case 'phone': {
+      const result = validatePhone(String(value));
+      if (!result.valid) fieldErrors.push(...result.errors);
+      sanitized[field] = result.sanitized;
+      break;
+    }
+    case 'url': {
+      const result = validateUrl(String(value));
+      if (!result.valid) fieldErrors.push(...result.errors);
+      sanitized[field] = result.sanitized;
+      break;
+    }
+    case 'text': {
+      const strValue = String(value);
+      const sanitizeResult = sanitizeInput(strValue, { maxLength: rules.maxLength });
+      if (rules.minLength && strValue.length < rules.minLength) {
+        fieldErrors.push(`${field} must be at least ${rules.minLength} characters`);
       }
-      case 'phone': {
-        const result = validatePhone(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
-        sanitized[field] = result.sanitized;
-        break;
+      if (rules.maxLength && strValue.length > rules.maxLength) {
+        fieldErrors.push(`${field} must be at most ${rules.maxLength} characters`);
       }
-      case 'url': {
-        const result = validateUrl(String(value));
-        if (!result.valid) fieldErrors.push(...result.errors);
-        sanitized[field] = result.sanitized;
-        break;
+      if (rules.pattern && !rules.pattern.test(strValue)) {
+        fieldErrors.push(`${field} format is invalid`);
       }
-      case 'text': {
-        const strValue = String(value);
-        const sanitizeResult = sanitizeInput(strValue, { maxLength: rules.maxLength });
-        if (rules.minLength && strValue.length < rules.minLength) {
-          fieldErrors.push(`${field} must be at least ${rules.minLength} characters`);
+      sanitized[field] = sanitizeResult.value;
+      break;
+    }
+    case 'number': {
+      const numValue = Number(value);
+      if (isNaN(numValue)) {
+        fieldErrors.push(`${field} must be a number`);
+      } else {
+        if (rules.min !== undefined && numValue < rules.min) {
+          fieldErrors.push(`${field} must be at least ${rules.min}`);
         }
-        if (rules.maxLength && strValue.length > rules.maxLength) {
-          fieldErrors.push(`${field} must be at most ${rules.maxLength} characters`);
+        if (rules.max !== undefined && numValue > rules.max) {
+          fieldErrors.push(`${field} must be at most ${rules.max}`);
         }
-        if (rules.pattern && !rules.pattern.test(strValue)) {
-          fieldErrors.push(`${field} format is invalid`);
-        }
-        sanitized[field] = sanitizeResult.value;
-        break;
+        sanitized[field] = numValue;
       }
-      case 'number': {
-        const numValue = Number(value);
-        if (isNaN(numValue)) {
-          fieldErrors.push(`${field} must be a number`);
-        } else {
-          if (rules.min !== undefined && numValue < rules.min) {
-            fieldErrors.push(`${field} must be at least ${rules.min}`);
-          }
-          if (rules.max !== undefined && numValue > rules.max) {
-            fieldErrors.push(`${field} must be at most ${rules.max}`);
-          }
-          sanitized[field] = numValue;
-        }
-        break;
-      }
-      case 'boolean': {
-        sanitized[field] = Boolean(value);
-        break;
-      }
+      break;
+    }
+    case 'boolean': {
+      sanitized[field] = Boolean(value);
+      break;
+    }
     }
 
     if (fieldErrors.length > 0) {
@@ -544,7 +544,7 @@ export function validateObject(
   return {
     valid: Object.keys(errors).length === 0,
     errors,
-    sanitized,
+    sanitized
   };
 }
 
@@ -559,5 +559,5 @@ export default {
   validateFile,
   validateObject,
   ALLOWED_FILE_TYPES,
-  MAX_FILE_SIZES,
+  MAX_FILE_SIZES
 };

@@ -20,7 +20,7 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated,
+  sendCreated
 } from '../utils/api-response.js';
 
 const router = express.Router();
@@ -31,16 +31,16 @@ function getInvoiceService() {
 
 function mapTaskPriority(priority?: string | null): 'low' | 'medium' | 'high' | 'urgent' {
   switch (priority) {
-    case 'low':
-      return 'low';
-    case 'medium':
-      return 'medium';
-    case 'high':
-      return 'high';
-    case 'urgent':
-      return 'urgent';
-    default:
-      return 'medium';
+  case 'low':
+    return 'low';
+  case 'medium':
+    return 'medium';
+  case 'high':
+    return 'high';
+  case 'urgent':
+    return 'urgent';
+  default:
+    return 'medium';
   }
 }
 
@@ -49,23 +49,20 @@ function buildTaskDescription(request: AdHocRequest): string {
     `Ad hoc request #${request.id}`,
     `Type: ${request.requestType}`,
     `Priority: ${request.priority}`,
-    `Urgency: ${request.urgency}`,
+    `Urgency: ${request.urgency}`
   ];
 
   const quoteParts: string[] = [];
-  if (request.estimatedHours !== null)
-    quoteParts.push(`Estimated hours: ${request.estimatedHours}`);
-  if (request.hourlyRate !== null)
-    quoteParts.push(`Hourly rate: $${request.hourlyRate.toFixed(2)}`);
+  if (request.estimatedHours !== null) {quoteParts.push(`Estimated hours: ${request.estimatedHours}`);}
+  if (request.hourlyRate !== null) {quoteParts.push(`Hourly rate: $${request.hourlyRate.toFixed(2)}`);}
   if (request.flatRate !== null) quoteParts.push(`Flat rate: $${request.flatRate.toFixed(2)}`);
-  if (request.quotedPrice !== null)
-    quoteParts.push(`Quoted total: $${request.quotedPrice.toFixed(2)}`);
+  if (request.quotedPrice !== null) {quoteParts.push(`Quoted total: $${request.quotedPrice.toFixed(2)}`);}
 
   return [
     request.description,
     '',
     summaryParts.join(' | '),
-    quoteParts.length ? `Quote: ${quoteParts.join(' | ')}` : '',
+    quoteParts.length ? `Quote: ${quoteParts.join(' | ')}` : ''
   ]
     .filter(Boolean)
     .join('\n');
@@ -94,7 +91,7 @@ function buildAdHocLineItem(
       description: `Ad hoc request #${request.id}: ${request.title}`,
       quantity: Number(data.totalHours.toFixed(2)),
       rate: Number(rate.toFixed(2)),
-      amount: Number(data.totalAmount.toFixed(2)),
+      amount: Number(data.totalAmount.toFixed(2))
     };
   }
 
@@ -103,7 +100,7 @@ function buildAdHocLineItem(
       description: `Ad hoc request #${request.id}: ${request.title}`,
       quantity: 1,
       rate: Number(request.quotedPrice.toFixed(2)),
-      amount: Number(request.quotedPrice.toFixed(2)),
+      amount: Number(request.quotedPrice.toFixed(2))
     };
   }
 
@@ -112,7 +109,7 @@ function buildAdHocLineItem(
       description: `Ad hoc request #${request.id}: ${request.title}`,
       quantity: 1,
       rate: Number(request.flatRate.toFixed(2)),
-      amount: Number(request.flatRate.toFixed(2)),
+      amount: Number(request.flatRate.toFixed(2))
     };
   }
 
@@ -122,7 +119,7 @@ function buildAdHocLineItem(
       description: `Ad hoc request #${request.id}: ${request.title}`,
       quantity: Number(request.estimatedHours.toFixed(2)),
       rate: Number(request.hourlyRate.toFixed(2)),
-      amount: Number(amount.toFixed(2)),
+      amount: Number(amount.toFixed(2))
     };
   }
 
@@ -137,7 +134,7 @@ async function getAdHocTimeSummary(
   }
 
   const entries = await projectService.getTimeEntries(request.projectId, {
-    taskId: request.taskId,
+    taskId: request.taskId
   });
   const billableEntries = entries.filter((entry) => entry.billable);
 
@@ -187,7 +184,7 @@ router.get(
     const requests = await adHocRequestService.getRequests({
       clientId,
       status: status as any,
-      requestType: requestType as any,
+      requestType: requestType as any
     });
 
     sendSuccess(res, { requests });
@@ -241,7 +238,7 @@ router.post(
     if (attachmentFileId) {
       const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ?', [
         Number(attachmentFileId),
-        Number(projectId),
+        Number(projectId)
       ]);
       if (!attachment) {
         return errorResponse(
@@ -262,7 +259,7 @@ router.post(
       priority,
       urgency,
       status: 'submitted',
-      attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null,
+      attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null
     });
 
     sendCreated(res, { request }, 'Request submitted');
@@ -296,7 +293,7 @@ router.post(
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
-      status: 'approved',
+      status: 'approved'
     });
     sendSuccess(res, { request: updatedRequest }, 'Quote approved');
   })
@@ -329,7 +326,7 @@ router.post(
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
-      status: 'declined',
+      status: 'declined'
     });
     sendSuccess(res, { request: updatedRequest }, 'Quote declined');
   })
@@ -374,7 +371,7 @@ router.get(
       status: status as any,
       requestType: requestType as any,
       priority: priority as any,
-      urgency: urgency as any,
+      urgency: urgency as any
     });
 
     sendSuccess(res, { requests });
@@ -398,7 +395,7 @@ router.get(
     }
 
     const entries = await projectService.getTimeEntries(request.projectId, {
-      taskId: request.taskId,
+      taskId: request.taskId
     });
     sendSuccess(res, { entries });
   })
@@ -432,7 +429,7 @@ router.post(
       date,
       description,
       billable: billable !== false,
-      hourlyRate: hourlyRate ?? request.hourlyRate ?? undefined,
+      hourlyRate: hourlyRate ?? request.hourlyRate ?? undefined
     });
 
     sendCreated(res, { entry }, 'Time logged');
@@ -470,7 +467,7 @@ router.post(
       flatRate,
       hourlyRate,
       quotedPrice,
-      attachmentFileId,
+      attachmentFileId
     } = req.body;
 
     if (!projectId || !clientId || !title || !description || !requestType) {
@@ -502,7 +499,7 @@ router.post(
       const db = getDatabase();
       const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ?', [
         Number(attachmentFileId),
-        Number(projectId),
+        Number(projectId)
       ]);
       if (!attachment) {
         return errorResponse(
@@ -527,7 +524,7 @@ router.post(
       flatRate,
       hourlyRate,
       quotedPrice,
-      attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null,
+      attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null
     });
 
     sendCreated(res, { request }, 'Ad hoc request created');
@@ -546,7 +543,7 @@ router.put(
       requestType,
       priority,
       urgency,
-      autoCreateInvoice = true, // Default to auto-create invoice on completion
+      autoCreateInvoice = true // Default to auto-create invoice on completion
     } = req.body;
 
     if (status && !adHocRequestService.isValidStatus(status)) {
@@ -587,14 +584,14 @@ router.put(
           const lineItem = buildAdHocLineItem(request, {
             useTimeEntries: !!request.taskId,
             totalHours: summary.totalHours,
-            totalAmount: summary.totalAmount,
+            totalAmount: summary.totalAmount
           });
 
           autoInvoice = await getInvoiceService().createInvoice({
             projectId: request.projectId,
             clientId: request.clientId,
             lineItems: [lineItem],
-            notes: `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`,
+            notes: `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`
           });
 
           const db = getDatabase();
@@ -608,7 +605,7 @@ router.put(
         // Log error but don't fail the request update
         await logger.error('[AdHocRequests] Auto-invoice creation failed:', {
           error: invoiceError instanceof Error ? invoiceError : undefined,
-          category: 'AD_HOC',
+          category: 'AD_HOC'
         });
       }
     }
@@ -729,7 +726,7 @@ ${BUSINESS_INFO.email}
   </div>
 </body>
 </html>
-      `.trim(),
+      `.trim()
     });
 
     const updatedRequest =
@@ -769,7 +766,7 @@ router.post(
     const lineItem = buildAdHocLineItem(request, {
       useTimeEntries,
       totalHours: summary.totalHours,
-      totalAmount: summary.totalAmount,
+      totalAmount: summary.totalAmount
     });
 
     const invoice = await getInvoiceService().createInvoice({
@@ -779,7 +776,7 @@ router.post(
       notes:
         notes || `Ad Hoc Work - Request #${request.id}: ${request.title}\n\n${request.description}`,
       terms: terms || undefined,
-      dueDate: dueDate || undefined,
+      dueDate: dueDate || undefined
     });
 
     const db = getDatabase();
@@ -841,7 +838,7 @@ router.post(
         buildAdHocLineItem(reqItem, {
           useTimeEntries,
           totalHours: summary.totalHours,
-          totalAmount: summary.totalAmount,
+          totalAmount: summary.totalAmount
         })
       );
     }
@@ -854,7 +851,7 @@ router.post(
         notes ||
         `Ad Hoc Work (Bundle) - Requests bundled: ${requests.map((r) => `#${r.id}`).join(', ')}`,
       terms: terms || undefined,
-      dueDate: dueDate || undefined,
+      dueDate: dueDate || undefined
     });
 
     const db = getDatabase();
@@ -888,7 +885,7 @@ router.get(
       params.push(clientId);
     }
 
-    where += " AND i.issued_date >= date('now', ?)";
+    where += ' AND i.issued_date >= date(\'now\', ?)';
     params.push(`-${months} months`);
 
     const rows = await db.all(
@@ -956,33 +953,33 @@ router.post(
       assignedTo: assignedTo || undefined,
       dueDate: dueDate || undefined,
       estimatedHours: request.estimatedHours ?? undefined,
-      priority: priority ? mapTaskPriority(priority) : mapTaskPriority(request.priority),
+      priority: priority ? mapTaskPriority(priority) : mapTaskPriority(request.priority)
     });
 
     const createdSubtasks = Array.isArray(subtasks)
       ? await Promise.all(
-          subtasks
-            .filter((item) => item && typeof item.title === 'string' && item.title.trim())
-            .map((item) =>
-              projectService.createTask(request.projectId, {
-                title: item.title,
-                description: item.description || undefined,
-                milestoneId: milestoneId ? Number(milestoneId) : undefined,
-                assignedTo: item.assignedTo || assignedTo || undefined,
-                dueDate: item.dueDate || dueDate || undefined,
-                estimatedHours: item.estimatedHours ?? undefined,
-                priority: mapTaskPriority(item.priority || priority || request.priority),
-                parentTaskId: task.id,
-              })
-            )
-        )
+        subtasks
+          .filter((item) => item && typeof item.title === 'string' && item.title.trim())
+          .map((item) =>
+            projectService.createTask(request.projectId, {
+              title: item.title,
+              description: item.description || undefined,
+              milestoneId: milestoneId ? Number(milestoneId) : undefined,
+              assignedTo: item.assignedTo || assignedTo || undefined,
+              dueDate: item.dueDate || dueDate || undefined,
+              estimatedHours: item.estimatedHours ?? undefined,
+              priority: mapTaskPriority(item.priority || priority || request.priority),
+              parentTaskId: task.id
+            })
+          )
+      )
       : [];
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
       status: 'in_progress',
       taskId: task.id,
       convertedAt: new Date().toISOString(),
-      convertedBy: req.user?.email || String(req.user?.id || 'admin'),
+      convertedBy: req.user?.email || String(req.user?.id || 'admin')
     });
 
     sendCreated(

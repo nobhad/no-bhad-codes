@@ -13,7 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import {
   canAccessInvoice,
   canAccessProject,
-  isUserAdmin,
+  isUserAdmin
 } from '../../middleware/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
 import { emailService } from '../../services/email-service.js';
@@ -26,7 +26,7 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated,
+  sendCreated
 } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
@@ -60,26 +60,26 @@ const InvoiceValidationSchemas = {
             }
           }
           return true;
-        },
-      },
+        }
+      }
     ],
     notes: { type: 'string' as const, maxLength: 2000 },
     terms: { type: 'string' as const, maxLength: 2000 },
     dueDate: { type: 'string' as const, maxLength: 20 },
     invoiceType: {
       type: 'string' as const,
-      allowedValues: ['standard', 'deposit', 'recurring', 'credit'],
-    },
+      allowedValues: ['standard', 'deposit', 'recurring', 'credit']
+    }
   },
   updateStatus: {
     status: [
       { type: 'required' as const },
       {
         type: 'string' as const,
-        allowedValues: ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'],
-      },
+        allowedValues: ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled']
+      }
     ],
-    paymentData: { type: 'object' as const },
+    paymentData: { type: 'object' as const }
   },
   recordPayment: {
     amountPaid: [{ type: 'required' as const }, { type: 'number' as const, min: 0.01 }],
@@ -87,11 +87,11 @@ const InvoiceValidationSchemas = {
       { type: 'required' as const },
       {
         type: 'string' as const,
-        allowedValues: ['credit_card', 'bank_transfer', 'check', 'cash', 'stripe', 'other'],
-      },
+        allowedValues: ['credit_card', 'bank_transfer', 'check', 'cash', 'stripe', 'other']
+      }
     ],
-    paymentReference: { type: 'string' as const, maxLength: 255 },
-  },
+    paymentReference: { type: 'string' as const, maxLength: 255 }
+  }
 };
 
 // GET /api/invoices
@@ -162,7 +162,7 @@ router.get(
           minAmount,
           maxAmount,
           limit,
-          offset,
+          offset
         };
 
         const result = await getInvoiceService().searchInvoices(filters);
@@ -174,7 +174,7 @@ router.get(
       res.json(invoices.map(toSnakeCaseInvoice));
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -223,17 +223,17 @@ if (process.env.NODE_ENV === 'development') {
             description: 'Website Design & Development',
             quantity: 1,
             rate: 3500,
-            amount: 3500,
+            amount: 3500
           },
           {
             description: 'Content Management System Setup',
             quantity: 1,
             rate: 1000,
-            amount: 1000,
-          },
+            amount: 1000
+          }
         ],
         notes: 'Test invoice created for development testing',
-        terms: 'Payment due within 30 days',
+        terms: 'Payment due within 30 days'
       };
 
       try {
@@ -285,7 +285,7 @@ if (process.env.NODE_ENV === 'development') {
           return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
         errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     })
@@ -397,7 +397,7 @@ router.post(
 
     if (invalidLineItems.length > 0) {
       return errorResponseWithPayload(res, 'Invalid line items', 400, 'INVALID_LINE_ITEMS', {
-        message: 'Each line item must have description, quantity, rate, and amount',
+        message: 'Each line item must have description, quantity, rate, and amount'
       });
     }
 
@@ -411,14 +411,14 @@ router.post(
         invoiceNumber: invoice.invoiceNumber,
         clientId: invoice.clientId,
         projectId: invoice.projectId,
-        amountTotal: invoice.amountTotal,
+        amountTotal: invoice.amountTotal
       });
 
       sendCreated(res, { invoice }, 'Invoice created successfully');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
-        message,
+        message
       });
     }
   })
@@ -491,23 +491,23 @@ router.post(
         quantity: item.quantity || 1,
         rate: item.rate || 0,
         amount: item.amount || 0,
-        details: project ? [`Project: ${getString(project, 'project_name')}`] : undefined,
+        details: project ? [`Project: ${getString(project, 'project_name')}`] : undefined
       })),
       subtotal,
       total: subtotal,
       notes: notes || undefined,
-      terms: terms || undefined,
+      terms: terms || undefined
     };
 
     try {
       const pdfBytes = await generateInvoicePdf(pdfData);
       sendPdfResponse(res, pdfBytes, {
         filename: 'invoice-preview.pdf',
-        disposition: 'inline',
+        disposition: 'inline'
       });
     } catch (error) {
       logger.error('[Invoices] Preview PDF generation error:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
     }
@@ -571,7 +571,7 @@ router.get(
       'partial',
       'paid',
       'overdue',
-      'cancelled',
+      'cancelled'
     ];
 
     // Parse status - can be single value or comma-separated
@@ -605,7 +605,7 @@ router.get(
       minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
       maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
       limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
     };
 
     try {
@@ -615,11 +615,11 @@ router.get(
         invoices: result.invoices.map(toSnakeCaseInvoice),
         total: result.total,
         limit: filters.limit,
-        offset: filters.offset,
+        offset: filters.offset
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to search invoices', 500, 'SEARCH_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -649,11 +649,11 @@ router.get(
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
       sendSuccess(res, {
         invoices: transformedInvoices,
-        count: invoices.length,
+        count: invoices.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve client invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -683,7 +683,7 @@ router.get(
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
       sendSuccess(res, {
         invoices: transformedInvoices,
-        count: invoices.length,
+        count: invoices.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -692,7 +692,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -753,11 +753,11 @@ router.get(
 
       const lineItems: InvoicePdfData['lineItems'] = Array.isArray(invoice.lineItems)
         ? invoice.lineItems.map((item: InvoiceLineItem) => ({
-            description: item.description || '',
-            quantity: item.quantity || 1,
-            rate: item.rate || item.amount || 0,
-            amount: item.amount || 0,
-          }))
+          description: item.description || '',
+          quantity: item.quantity || 1,
+          rate: item.rate || item.amount || 0,
+          amount: item.amount || 0
+        }))
         : [];
 
       const invoiceCredits = await getInvoiceService().getInvoiceCredits(invoiceId);
@@ -768,13 +768,13 @@ router.get(
           return new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric',
+            day: 'numeric'
           });
         }
         return new Date(dateStr).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
-          day: 'numeric',
+          day: 'numeric'
         });
       };
 
@@ -799,9 +799,9 @@ router.get(
         depositPercentage: invoice.depositPercentage,
         credits: invoiceCredits.map((credit) => ({
           depositInvoiceNumber: credit.depositInvoiceNumber || `INV-${credit.depositInvoiceId}`,
-          amount: credit.amount,
+          amount: credit.amount
         })),
-        totalCredits,
+        totalCredits
       };
 
       const pdfBytes = await generateInvoicePdf(pdfData);
@@ -814,7 +814,7 @@ router.get(
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to generate invoice PDF', 500, 'PDF_FAILED', {
-        message,
+        message
       });
     }
   })
@@ -851,7 +851,7 @@ router.put(
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to update invoice status', 500, 'UPDATE_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -885,7 +885,7 @@ router.post(
         logger.info(`[Invoices] Scheduled reminders for invoice #${invoiceId}`);
       } catch (reminderError) {
         logger.error('[Invoices] Failed to schedule reminders:', {
-          error: reminderError instanceof Error ? reminderError : undefined,
+          error: reminderError instanceof Error ? reminderError : undefined
         });
         // Don't fail the send operation if reminders fail
       }
@@ -961,13 +961,13 @@ router.post(
               </div>
             </body>
             </html>
-          `,
+          `
         });
 
         logger.info(`Invoice email sent to ${client.email} for invoice #${invoiceId}`);
       } catch (emailError) {
         logger.error('Failed to send invoice email:', {
-          error: emailError instanceof Error ? emailError : undefined,
+          error: emailError instanceof Error ? emailError : undefined
         });
         // Don't fail the request if email fails
       }
@@ -978,7 +978,7 @@ router.post(
         triggeredBy: req.user?.email || 'system',
         invoiceNumber: invoice.invoiceNumber,
         clientId: invoice.clientId,
-        amountTotal: invoice.amountTotal,
+        amountTotal: invoice.amountTotal
       });
 
       sendSuccess(res, { invoice }, 'Invoice sent successfully');
@@ -988,7 +988,7 @@ router.post(
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to send invoice', 500, 'SEND_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -1024,7 +1024,7 @@ router.post(
       const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
         amountPaid: parseFloat(amountPaid),
         paymentMethod,
-        paymentReference,
+        paymentReference
       });
 
       // Auto-generate receipt for the payment
@@ -1036,7 +1036,7 @@ router.post(
           parseFloat(amountPaid),
           {
             paymentMethod,
-            paymentReference,
+            paymentReference
           }
         );
         logger.info(
@@ -1044,7 +1044,7 @@ router.post(
         );
       } catch (receiptError) {
         logger.error('[Invoices] Failed to generate receipt:', {
-          error: receiptError instanceof Error ? receiptError : undefined,
+          error: receiptError instanceof Error ? receiptError : undefined
         });
         // Don't fail the payment if receipt generation fails
       }
@@ -1056,7 +1056,7 @@ router.post(
         invoiceNumber: invoice.invoiceNumber,
         clientId: invoice.clientId,
         amountPaid: parseFloat(amountPaid),
-        paymentMethod,
+        paymentMethod
       });
 
       sendSuccess(
@@ -1065,11 +1065,11 @@ router.post(
           invoice,
           receipt: receipt
             ? {
-                id: receipt.id,
-                receipt_number: receipt.receiptNumber,
-                amount: receipt.amount,
-              }
-            : null,
+              id: receipt.id,
+              receipt_number: receipt.receiptNumber,
+              amount: receipt.amount
+            }
+            : null
         },
         'Invoice marked as paid'
       );
@@ -1079,7 +1079,7 @@ router.post(
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to process payment', 500, 'PAYMENT_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })
@@ -1104,7 +1104,7 @@ router.get(
       sendSuccess(res, { stats });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, 'STATS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   })

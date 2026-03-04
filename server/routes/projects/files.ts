@@ -44,8 +44,8 @@ router.get(
     sendSuccess(res, {
       files: files.map((f: any) => ({
         ...f,
-        size: f.file_size,
-      })),
+        size: f.file_size
+      }))
     });
   })
 );
@@ -95,7 +95,7 @@ router.post(
           file.size,
           file.mimetype,
           req.user!.email || req.user!.type,
-          label,
+          label
         ]
       );
 
@@ -105,7 +105,7 @@ router.post(
         originalName: file.originalname,
         size: file.size,
         mimeType: file.mimetype,
-        description: label,
+        description: label
       });
     }
 
@@ -411,7 +411,7 @@ router.put(
       'asset',
       'document',
       'contract',
-      'invoice',
+      'invoice'
     ];
     if (!category || !validCategories.includes(category)) {
       return errorResponse(res, 'Invalid category', 400, 'INVALID_CATEGORY');
@@ -492,7 +492,7 @@ router.get(
       folder_id: req.query.folder_id ? parseInt(req.query.folder_id as string) : undefined,
       category: req.query.category as any,
       include_archived: req.query.include_archived === 'true',
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 50
     });
 
     sendSuccess(res, { files, count: files.length });

@@ -107,21 +107,12 @@ export interface NotificationConfig {
   updated_at?: string;
 }
 
-// Color mapping for notification types
-const COLORS = {
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6',
-  primary: '#6366f1',
-};
-
 const DISCORD_COLORS = {
   success: 0x22c55e,
   warning: 0xf59e0b,
   error: 0xef4444,
   info: 0x3b82f6,
-  primary: 0x6366f1,
+  primary: 0x6366f1
 };
 
 // Emoji mapping for event types
@@ -140,7 +131,7 @@ const EVENT_EMOJIS: Record<string, string> = {
   'lead.created': ':sparkles:',
   'task.completed': ':ballot_box_with_check:',
   'task.overdue': ':alarm_clock:',
-  'milestone.completed': ':trophy:',
+  'milestone.completed': ':trophy:'
 };
 
 /**
@@ -161,9 +152,9 @@ export function formatSlackMessage(
       text: {
         type: 'plain_text',
         text: title,
-        emoji: true,
-      },
-    },
+        emoji: true
+      }
+    }
   ];
 
   // Add main content section based on event type
@@ -177,7 +168,7 @@ export function formatSlackMessage(
   if (fields.length > 0) {
     blocks.push({
       type: 'section',
-      fields: fields.slice(0, 10), // Slack limit
+      fields: fields.slice(0, 10) // Slack limit
     });
   }
 
@@ -190,12 +181,12 @@ export function formatSlackMessage(
           type: 'button',
           text: {
             type: 'plain_text',
-            text: 'View Details',
+            text: 'View Details'
           },
           url: options.includeLink,
-          action_id: `view_${eventType}`,
-        },
-      ],
+          action_id: `view_${eventType}`
+        }
+      ]
     } as unknown as SlackBlock);
   }
 
@@ -205,15 +196,15 @@ export function formatSlackMessage(
     elements: [
       {
         type: 'mrkdwn',
-        text: `Sent from No Bhad Codes • ${new Date().toLocaleString()}`,
-      },
-    ],
+        text: `Sent from No Bhad Codes • ${new Date().toLocaleString()}`
+      }
+    ]
   });
 
   return {
     text: `${title} - ${getEventSummary(eventType, data)}`,
     blocks,
-    channel: options.channel,
+    channel: options.channel
   };
 }
 
@@ -237,9 +228,9 @@ export function formatDiscordMessage(
     color: DISCORD_COLORS[color as keyof typeof DISCORD_COLORS] || DISCORD_COLORS.info,
     fields: fields.slice(0, 25), // Discord limit
     footer: {
-      text: 'No Bhad Codes',
+      text: 'No Bhad Codes'
     },
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   };
 
   if (options.includeLink) {
@@ -248,7 +239,7 @@ export function formatDiscordMessage(
 
   return {
     content: `**${title}**`,
-    embeds: [embed],
+    embeds: [embed]
   };
 }
 
@@ -265,8 +256,8 @@ function buildSlackContentBlock(
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: summary,
-    },
+      text: summary
+    }
   };
 }
 
@@ -292,7 +283,7 @@ function buildSlackFields(
     due_date: 'Due Date',
     assigned_to: 'Assigned To',
     number: 'Number',
-    title: 'Title',
+    title: 'Title'
   };
 
   for (const [key, label] of Object.entries(fieldMappings)) {
@@ -306,7 +297,7 @@ function buildSlackFields(
 
       fields.push({
         type: 'mrkdwn',
-        text: `*${label}:*\n${value}`,
+        text: `*${label}:*\n${value}`
       });
     }
   }
@@ -335,7 +326,7 @@ function buildDiscordFields(
     due_date: 'Due Date',
     assigned_to: 'Assigned To',
     number: 'Number',
-    title: 'Title',
+    title: 'Title'
   };
 
   for (const [key, label] of Object.entries(fieldMappings)) {
@@ -349,7 +340,7 @@ function buildDiscordFields(
       fields.push({
         name: label,
         value,
-        inline: true,
+        inline: true
       });
     }
   }
@@ -386,7 +377,7 @@ function getEventSummary(eventType: string, data: Record<string, unknown>): stri
     'task.completed': () => `Task "${entityData.title}" completed`,
     'task.overdue': () => `Task "${entityData.title}" is overdue`,
     'milestone.completed': () =>
-      `Milestone "${entityData.title}" completed for ${entityData.project_name}`,
+      `Milestone "${entityData.title}" completed for ${entityData.project_name}`
   };
 
   return summaries[eventType]?.() || `${eventType} event occurred`;
@@ -405,7 +396,7 @@ function getColorForEvent(eventType: string): string {
     'milestone.completed': 'success',
     'invoice.overdue': 'warning',
     'task.overdue': 'warning',
-    'proposal.rejected': 'error',
+    'proposal.rejected': 'error'
   };
 
   return colorMap[eventType] || 'info';
@@ -422,9 +413,9 @@ export async function sendSlackNotification(
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(message),
+      body: JSON.stringify(message)
     });
 
     if (!response.ok) {
@@ -449,9 +440,9 @@ export async function sendDiscordNotification(
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(message),
+      body: JSON.stringify(message)
     });
 
     if (!response.ok) {
@@ -486,7 +477,7 @@ export async function saveNotificationConfig(
         config.channel || null,
         config.events.join(','),
         config.is_active ? 1 : 0,
-        config.id,
+        config.id
       ]
     );
     return config;
@@ -501,7 +492,7 @@ export async function saveNotificationConfig(
       config.webhook_url,
       config.channel || null,
       config.events.join(','),
-      config.is_active ? 1 : 0,
+      config.is_active ? 1 : 0
     ]
   );
   return { ...config, id: result.lastID };
@@ -523,7 +514,7 @@ export async function getNotificationConfigs(): Promise<NotificationConfig[]> {
     events: (row.events as string).split(',').filter(Boolean),
     is_active: Boolean(row.is_active),
     created_at: row.created_at as string,
-    updated_at: row.updated_at as string,
+    updated_at: row.updated_at as string
   }));
 }
 
@@ -547,8 +538,8 @@ export async function testNotification(
       number: 'INV-TEST-001',
       client_name: 'Test Client',
       client_email: 'test@example.com',
-      amount: 1000.0,
-    },
+      amount: 1000.0
+    }
   };
 
   if (config.platform === 'slack') {
@@ -567,7 +558,7 @@ function capitalize(str: string): string {
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'USD'
   }).format(amount);
 }
 
@@ -579,5 +570,5 @@ export default {
   saveNotificationConfig,
   getNotificationConfigs,
   deleteNotificationConfig,
-  testNotification,
+  testNotification
 };

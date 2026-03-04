@@ -17,7 +17,7 @@ import {
   ensureSpace,
   addPageNumbers,
   setPdfMetadata,
-  type PdfPageContext,
+  type PdfPageContext
 } from '../utils/pdf-utils.js';
 
 // ============================================
@@ -163,12 +163,12 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
       projectType: project.project_type || 'web-app',
       description: project.description,
       startDate: project.start_date,
-      deadline: project.deadline,
+      deadline: project.deadline
     },
     client: {
       name: project.client_name || 'Client',
       email: project.client_email || '',
-      company: project.client_company,
+      company: project.client_company
     },
     proposal: {
       id: proposal.id,
@@ -182,14 +182,14 @@ export async function fetchSowData(projectId: number): Promise<SowData | null> {
         name: f.feature_name,
         price: f.feature_price,
         isIncluded: f.is_included_in_tier === 1,
-        isAddon: f.is_addon === 1,
-      })),
+        isAddon: f.is_addon === 1
+      }))
     },
     milestones: milestones.map((m) => ({
       title: m.title,
       description: m.description,
-      dueDate: m.due_date,
-    })),
+      dueDate: m.due_date
+    }))
   };
 }
 
@@ -208,7 +208,7 @@ export async function generateSowPdf(data: SowData): Promise<Uint8Array> {
     author: BUSINESS_INFO.name,
     subject: 'Statement of Work',
     creator: 'NoBhadCodes',
-    creationDate: new Date(),
+    creationDate: new Date()
   });
 
   const ctx = await createPdfContext(pdfDoc);
@@ -274,7 +274,7 @@ function drawPageHeader(ctx: PdfPageContext, projectName: string): void {
     y: ctx.height - 30,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.5, 0.5, 0.5),
+    color: rgb(0.5, 0.5, 0.5)
   });
   ctx.y = ctx.height - ctx.topMargin - 20;
 }
@@ -293,7 +293,7 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
       x: ctx.rightMargin - logoWidth,
       y: y - logoHeight + 5,
       width: logoWidth,
-      height: logoHeight,
+      height: logoHeight
     });
   }
 
@@ -303,7 +303,7 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
     y,
     size: 22,
     font: fonts.bold,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   y -= 28;
 
@@ -313,7 +313,7 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
     y,
     size: 14,
     font: fonts.bold,
-    color: rgb(0.2, 0.2, 0.2),
+    color: rgb(0.2, 0.2, 0.2)
   });
   y -= 20;
 
@@ -323,7 +323,7 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
     y,
     size: 10,
     font: fonts.regular,
-    color: rgb(0.4, 0.4, 0.4),
+    color: rgb(0.4, 0.4, 0.4)
   });
   y -= 15;
 
@@ -332,7 +332,7 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
     start: { x: leftMargin, y },
     end: { x: ctx.rightMargin, y },
     thickness: 1,
-    color: rgb(0.8, 0.8, 0.8),
+    color: rgb(0.8, 0.8, 0.8)
   });
 
   ctx.y = y - 10;
@@ -344,7 +344,7 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
     y: ctx.y,
     size: 12,
     font: ctx.fonts.bold,
-    color: rgb(0.15, 0.15, 0.15),
+    color: rgb(0.15, 0.15, 0.15)
   });
   ctx.y -= 5;
 
@@ -353,7 +353,7 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
     start: { x: ctx.leftMargin, y: ctx.y },
     end: { x: ctx.leftMargin + 200, y: ctx.y },
     thickness: 2,
-    color: rgb(0.5, 0.99, 0.04), // Brand green
+    color: rgb(0.5, 0.99, 0.04) // Brand green
   });
   ctx.y -= 15;
 }
@@ -367,7 +367,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
     y: ctx.y,
     size: 10,
     font: ctx.fonts.bold,
-    color: rgb(0.3, 0.3, 0.3),
+    color: rgb(0.3, 0.3, 0.3)
   });
   ctx.y -= lineHeight;
 
@@ -376,7 +376,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.y -= lineHeight;
 
@@ -385,7 +385,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.3, 0.3, 0.3),
+    color: rgb(0.3, 0.3, 0.3)
   });
   ctx.y -= lineHeight + 8;
 
@@ -395,7 +395,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
     y: ctx.y,
     size: 10,
     font: ctx.fonts.bold,
-    color: rgb(0.3, 0.3, 0.3),
+    color: rgb(0.3, 0.3, 0.3)
   });
   ctx.y -= lineHeight;
 
@@ -404,7 +404,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.y -= lineHeight;
 
@@ -414,7 +414,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.y -= lineHeight;
   }
@@ -424,7 +424,7 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.3, 0.3, 0.3),
+    color: rgb(0.3, 0.3, 0.3)
   });
   ctx.y -= lineHeight;
 }
@@ -442,7 +442,7 @@ function drawProjectScope(
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.y -= lineHeight;
 
@@ -451,7 +451,7 @@ function drawProjectScope(
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.y -= lineHeight + 8;
 
@@ -462,7 +462,7 @@ function drawProjectScope(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.y -= lineHeight;
 
@@ -470,7 +470,7 @@ function drawProjectScope(
       fontSize: 10,
       color: rgb(0.2, 0.2, 0.2),
       lineHeight: 14,
-      onNewPage,
+      onNewPage
     });
   }
 }
@@ -490,7 +490,7 @@ function drawDeliverables(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.y -= 14;
 
@@ -501,7 +501,7 @@ function drawDeliverables(
         y: ctx.y,
         size: 10,
         font: ctx.fonts.regular,
-        color: rgb(0.1, 0.1, 0.1),
+        color: rgb(0.1, 0.1, 0.1)
       });
       ctx.y -= 14;
     }
@@ -514,7 +514,7 @@ function drawDeliverables(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.y -= 14;
 
@@ -525,7 +525,7 @@ function drawDeliverables(
         y: ctx.y,
         size: 10,
         font: ctx.fonts.regular,
-        color: rgb(0.1, 0.1, 0.1),
+        color: rgb(0.1, 0.1, 0.1)
       });
 
       ctx.currentPage.drawText(`+${formatCurrency(feature.price)}`, {
@@ -533,7 +533,7 @@ function drawDeliverables(
         y: ctx.y,
         size: 10,
         font: ctx.fonts.regular,
-        color: rgb(0.4, 0.4, 0.4),
+        color: rgb(0.4, 0.4, 0.4)
       });
       ctx.y -= 14;
     }
@@ -552,7 +552,7 @@ function drawTimeline(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     ctx.y -= 14;
   }
@@ -563,7 +563,7 @@ function drawTimeline(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     ctx.y -= 20;
   }
@@ -575,7 +575,7 @@ function drawTimeline(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.y -= 14;
 
@@ -588,7 +588,7 @@ function drawTimeline(
         y: ctx.y,
         size: 10,
         font: ctx.fonts.bold,
-        color: rgb(0.1, 0.1, 0.1),
+        color: rgb(0.1, 0.1, 0.1)
       });
 
       if (milestone.dueDate) {
@@ -597,7 +597,7 @@ function drawTimeline(
           y: ctx.y,
           size: 9,
           font: ctx.fonts.regular,
-          color: rgb(0.5, 0.5, 0.5),
+          color: rgb(0.5, 0.5, 0.5)
         });
       }
       ctx.y -= 14;
@@ -609,7 +609,7 @@ function drawTimeline(
           color: rgb(0.3, 0.3, 0.3),
           lineHeight: 12,
           maxWidth: ctx.contentWidth - 20,
-          onNewPage,
+          onNewPage
         });
         ctx.y -= 4;
       }
@@ -632,14 +632,14 @@ function drawPricing(
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.3, 0.3, 0.3),
+    color: rgb(0.3, 0.3, 0.3)
   });
   ctx.currentPage.drawText(formatCurrency(data.proposal.basePrice), {
     x: valueX,
     y: ctx.y,
     size: 10,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.y -= lineHeight;
 
@@ -654,14 +654,14 @@ function drawPricing(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.currentPage.drawText(formatCurrency(addonsTotal), {
       x: valueX,
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     ctx.y -= lineHeight;
   }
@@ -673,14 +673,14 @@ function drawPricing(
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
     ctx.currentPage.drawText(formatMaintenanceOption(data.proposal.maintenanceOption), {
       x: valueX,
       y: ctx.y,
       size: 10,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     ctx.y -= lineHeight;
   }
@@ -691,7 +691,7 @@ function drawPricing(
     start: { x: labelX, y: ctx.y },
     end: { x: valueX + 80, y: ctx.y },
     thickness: 1,
-    color: rgb(0.7, 0.7, 0.7),
+    color: rgb(0.7, 0.7, 0.7)
   });
   ctx.y -= lineHeight;
 
@@ -701,14 +701,14 @@ function drawPricing(
     y: ctx.y,
     size: 12,
     font: ctx.fonts.bold,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.currentPage.drawText(formatCurrency(data.proposal.finalPrice), {
     x: valueX,
     y: ctx.y,
     size: 12,
     font: ctx.fonts.bold,
-    color: rgb(0.1, 0.1, 0.1),
+    color: rgb(0.1, 0.1, 0.1)
   });
   ctx.y -= lineHeight + 10;
 
@@ -719,14 +719,14 @@ function drawPricing(
     y: ctx.y,
     size: 10,
     font: ctx.fonts.bold,
-    color: rgb(0.3, 0.3, 0.3),
+    color: rgb(0.3, 0.3, 0.3)
   });
   ctx.y -= 14;
 
   const paymentTerms = [
     '- 50% deposit required before work begins',
     '- 25% due at midpoint milestone',
-    '- 25% due upon project completion',
+    '- 25% due upon project completion'
   ];
 
   for (const term of paymentTerms) {
@@ -735,7 +735,7 @@ function drawPricing(
       y: ctx.y,
       size: 9,
       font: ctx.fonts.regular,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     ctx.y -= 12;
   }
@@ -754,7 +754,7 @@ function drawTerms(ctx: PdfPageContext, onNewPage: (ctx: PdfPageContext) => void
         fontSize: 9,
         color: rgb(0.3, 0.3, 0.3),
         lineHeight: 11,
-        onNewPage,
+        onNewPage
       });
       ctx.y -= 8;
     }
@@ -768,7 +768,7 @@ function drawTerms(ctx: PdfPageContext, onNewPage: (ctx: PdfPageContext) => void
         y: ctx.y,
         size: 10,
         font: ctx.fonts.bold,
-        color: rgb(0.3, 0.3, 0.3),
+        color: rgb(0.3, 0.3, 0.3)
       });
       ctx.y -= 12;
 
@@ -776,7 +776,7 @@ function drawTerms(ctx: PdfPageContext, onNewPage: (ctx: PdfPageContext) => void
         fontSize: 9,
         color: rgb(0.3, 0.3, 0.3),
         lineHeight: 11,
-        onNewPage,
+        onNewPage
       });
       ctx.y -= 8;
     }
@@ -794,7 +794,7 @@ function formatDate(dateStr: string | null | undefined): string {
     return date.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
-      year: 'numeric',
+      year: 'numeric'
     });
   } catch {
     return 'TBD';
@@ -804,7 +804,7 @@ function formatDate(dateStr: string | null | undefined): string {
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'USD'
   }).format(amount);
 }
 
@@ -812,7 +812,7 @@ function getTierName(tier: string): string {
   const names: Record<string, string> = {
     good: 'Good Package',
     better: 'Better Package',
-    best: 'Best Package',
+    best: 'Best Package'
   };
   return names[tier] || tier;
 }
@@ -826,7 +826,7 @@ function formatProjectType(type: string): string {
     ecommerce: 'E-Commerce',
     'web-app': 'Web Application',
     'browser-extension': 'Browser Extension',
-    other: 'Other',
+    other: 'Other'
   };
   return names[type] || type;
 }
@@ -836,7 +836,7 @@ function formatMaintenanceOption(option: string): string {
     diy: 'DIY (No Maintenance)',
     essential: 'Essential',
     standard: 'Standard',
-    premium: 'Premium',
+    premium: 'Premium'
   };
   return names[option] || option;
 }
@@ -846,27 +846,27 @@ function getDefaultTerms(): Array<{ title: string; content: string }> {
     {
       title: 'Intellectual Property',
       content:
-        'Upon full payment, all intellectual property rights for deliverables transfer to the client.',
+        'Upon full payment, all intellectual property rights for deliverables transfer to the client.'
     },
     {
       title: 'Revisions',
       content:
-        'Two rounds of revisions are included per deliverable. Additional revisions will be billed at the hourly rate.',
+        'Two rounds of revisions are included per deliverable. Additional revisions will be billed at the hourly rate.'
     },
     {
       title: 'Confidentiality',
       content:
-        'Both parties agree to keep confidential information private and not disclose to third parties.',
+        'Both parties agree to keep confidential information private and not disclose to third parties.'
     },
     {
       title: 'Cancellation',
       content:
-        'Either party may cancel with 14 days written notice. Fees for completed work are non-refundable.',
+        'Either party may cancel with 14 days written notice. Fees for completed work are non-refundable.'
     },
     {
       title: 'Liability',
       content:
-        'Liability is limited to the total project value. Neither party is liable for indirect damages.',
-    },
+        'Liability is limited to the total project value. Neither party is liable for indirect damages.'
+    }
   ];
 }

@@ -14,7 +14,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import { safeJsonParseArray, safeJsonParseObject, parseIfString } from '../utils/safe-json.js';
+import { parseIfString } from '../utils/safe-json.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -132,7 +132,7 @@ class QuestionnaireService {
         data.auto_send_on_project_create ? 1 : 0,
         data.display_order || 0,
         data.created_by || null,
-        createdByUserId,
+        createdByUserId
       ]
     );
 
@@ -213,7 +213,7 @@ class QuestionnaireService {
             ? 1
             : 0,
         data.display_order ?? existing.display_order,
-        id,
+        id
       ]
     );
 
@@ -269,7 +269,7 @@ class QuestionnaireService {
       const response = await this.sendQuestionnaire({
         questionnaire_id: questionnaire.id,
         client_id: clientId,
-        project_id: projectId,
+        project_id: projectId
       });
 
       responses.push(response);
@@ -511,7 +511,7 @@ class QuestionnaireService {
       total: stats?.total || 0,
       pending: stats?.pending || 0,
       in_progress: stats?.in_progress || 0,
-      completed: stats?.completed || 0,
+      completed: stats?.completed || 0
     };
   }
 
@@ -534,7 +534,7 @@ class QuestionnaireService {
       display_order: row.display_order as number,
       created_by: row.created_by as string | undefined,
       created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      updated_at: row.updated_at as string
     };
   }
 
@@ -564,7 +564,7 @@ class QuestionnaireService {
       questionnaire_name: row.questionnaire_name as string | undefined,
       questionnaire_description: row.questionnaire_description as string | undefined,
       client_name: row.client_name as string | undefined,
-      project_name: row.project_name as string | undefined,
+      project_name: row.project_name as string | undefined
     };
   }
 
@@ -630,7 +630,7 @@ class QuestionnaireService {
       y: y - 20,
       size: 24,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15),
+      color: rgb(0.15, 0.15, 0.15)
     });
 
     // Logo and business info on right
@@ -645,7 +645,7 @@ class QuestionnaireService {
           x: logoX,
           y: y - logoHeight + 10,
           width: logoWidth,
-          height: logoHeight,
+          height: logoHeight
         });
         textStartX = logoX + logoWidth + 18;
       } catch {
@@ -659,35 +659,35 @@ class QuestionnaireService {
       y: y - 11,
       size: 15,
       font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     page.drawText(BUSINESS_INFO.owner, {
       x: textStartX,
       y: y - 34,
       size: 10,
       font: helvetica,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page.drawText(BUSINESS_INFO.tagline, {
       x: textStartX,
       y: y - 54,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page.drawText(BUSINESS_INFO.email, {
       x: textStartX,
       y: y - 70,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page.drawText(BUSINESS_INFO.website, {
       x: textStartX,
       y: y - 86,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
 
     y -= 120;
@@ -697,7 +697,7 @@ class QuestionnaireService {
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 1,
-      color: lineGray,
+      color: lineGray
     });
     y -= 25;
 
@@ -708,7 +708,7 @@ class QuestionnaireService {
       y: y,
       size: 12,
       font: helveticaBold,
-      color: black,
+      color: black
     });
     y -= 18;
 
@@ -718,7 +718,7 @@ class QuestionnaireService {
         y: y,
         size: 10,
         font: helvetica,
-        color: lightGray,
+        color: lightGray
       });
       y -= 16;
     }
@@ -730,22 +730,22 @@ class QuestionnaireService {
       y: y,
       size: 10,
       font: helvetica,
-      color: black,
+      color: black
     });
 
     const completedDate = response.completed_at
       ? new Date(response.completed_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
       : 'In Progress';
     page.drawText(`Completed: ${completedDate}`, {
       x: leftMargin + 200,
       y: y,
       size: 10,
       font: helvetica,
-      color: black,
+      color: black
     });
 
     if (response.project_name) {
@@ -755,7 +755,7 @@ class QuestionnaireService {
         y: y,
         size: 10,
         font: helvetica,
-        color: black,
+        color: black
       });
     }
 
@@ -766,7 +766,7 @@ class QuestionnaireService {
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 0.5,
-      color: rgb(0.9, 0.9, 0.9),
+      color: rgb(0.9, 0.9, 0.9)
     });
     y -= 25;
 
@@ -837,7 +837,7 @@ class QuestionnaireService {
         y: y,
         size: 10,
         font: helveticaBold,
-        color: questionColor,
+        color: questionColor
       });
 
       const prefixWidth = helveticaBold.widthOfTextAtSize(questionPrefix, 10);
@@ -873,7 +873,7 @@ class QuestionnaireService {
         start: { x: leftMargin, y: bottomMargin },
         end: { x: rightMargin, y: bottomMargin },
         thickness: 0.5,
-        color: rgb(0.8, 0.8, 0.8),
+        color: rgb(0.8, 0.8, 0.8)
       });
 
       // Footer text
@@ -884,7 +884,7 @@ class QuestionnaireService {
         y: bottomMargin - 18,
         size: 7,
         font: helvetica,
-        color: lightGray,
+        color: lightGray
       });
 
       // Page numbers
@@ -896,7 +896,7 @@ class QuestionnaireService {
           y: bottomMargin - 18,
           size: 8,
           font: helvetica,
-          color: lightGray,
+          color: lightGray
         });
       }
     }
@@ -951,7 +951,7 @@ class QuestionnaireService {
 
     // Get or create Forms folder for the project
     const formsFolderRow = (await db.get(
-      "SELECT id FROM file_folders WHERE project_id = ? AND name = 'Forms'",
+      'SELECT id FROM file_folders WHERE project_id = ? AND name = \'Forms\'',
       [response.project_id]
     )) as { id: number } | undefined;
 
@@ -980,7 +980,7 @@ class QuestionnaireService {
         originalFilename,
         filePath,
         pdfBytes.length,
-        `Questionnaire response: ${questionnaire.name}`,
+        `Questionnaire response: ${questionnaire.name}`
       ]
     );
 
@@ -1016,7 +1016,7 @@ class QuestionnaireService {
         id: questionnaire.id,
         name: questionnaire.name,
         description: questionnaire.description,
-        project_type: questionnaire.project_type,
+        project_type: questionnaire.project_type
       },
       response: {
         id: response.id,
@@ -1026,7 +1026,7 @@ class QuestionnaireService {
         project_name: response.project_name,
         status: response.status,
         started_at: response.started_at,
-        completed_at: response.completed_at,
+        completed_at: response.completed_at
       },
       questions_and_answers: questionnaire.questions.map((q) => ({
         question_id: q.id,
@@ -1034,9 +1034,9 @@ class QuestionnaireService {
         question_text: q.question,
         required: q.required || false,
         options: q.options,
-        answer: response.answers[q.id] ?? null,
+        answer: response.answers[q.id] ?? null
       })),
-      exported_at: new Date().toISOString(),
+      exported_at: new Date().toISOString()
     };
 
     return JSON.stringify(exportData, null, 2);

@@ -18,7 +18,7 @@ import {
   getFeaturesForRole,
   type UserRole,
   type UnifiedNavItem,
-  type UnifiedSubtabGroup,
+  type UnifiedSubtabGroup
 } from './unified-navigation.js';
 
 // ============================================
@@ -116,7 +116,7 @@ export const ICONS: Record<string, string> = {
   helpCircle:
     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>',
   settingsClient:
-    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>'
 };
 
 // ============================================
@@ -140,7 +140,7 @@ const PORTAL_METADATA: Record<
     authTitle: 'Admin Access',
     authDescription: 'Enter your admin password to continue',
     dashboardId: 'admin-dashboard',
-    pageTitleId: 'admin-page-title',
+    pageTitleId: 'admin-page-title'
   },
   client: {
     title: 'Client Portal - No Bhad Codes',
@@ -148,8 +148,8 @@ const PORTAL_METADATA: Record<
     authTitle: 'Client Portal',
     authDescription: 'Sign in to access your projects and documents',
     dashboardId: 'client-dashboard',
-    pageTitleId: 'portal-page-title',
-  },
+    pageTitleId: 'portal-page-title'
+  }
 };
 
 // ============================================
@@ -169,7 +169,7 @@ function toNavItem(item: UnifiedNavItem): NavItem {
     badge: item.badge,
     dataTab: item.dataTab,
     active: item.activeForRole !== undefined,
-    ariaLabel: item.ariaLabel,
+    ariaLabel: item.ariaLabel
   };
 }
 
@@ -185,8 +185,8 @@ function toSubtabGroup(group: UnifiedSubtabGroup): SubtabGroup {
       id: subtab.id,
       label: subtab.label,
       active: subtab.active,
-      dataAttr: subtab.dataAttr,
-    })),
+      dataAttr: subtab.dataAttr
+    }))
   };
 }
 
@@ -209,12 +209,12 @@ export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
   const topLevelNavItems =
     role === 'admin'
       ? navItems.filter(
-          (item) =>
-            !item.group ||
+        (item) =>
+          !item.group ||
             ['work', 'crm', 'documents', 'workflows', 'analytics', 'support', 'system'].includes(
               item.id
             )
-        )
+      )
       : navItems;
 
   return {
@@ -227,8 +227,8 @@ export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
       subtabs: features.subtabs,
       notificationBell: features.notificationBell,
       mobileMenuToggle: features.mobileMenuToggle,
-      themeToggle: features.themeToggle,
-    },
+      themeToggle: features.themeToggle
+    }
   };
 }
 
@@ -241,7 +241,7 @@ export const PORTAL_CONFIGS = {
   },
   get client() {
     return getPortalConfig('client');
-  },
+  }
 } as const;
 
 /**
@@ -271,7 +271,7 @@ export const ADMIN_TAB_IDS = [
   'invoices',
   'contracts',
   'document-requests',
-  'email-templates',
+  'email-templates'
 ];
 
 /**
@@ -294,7 +294,7 @@ export const CLIENT_TAB_IDS = [
   'help',
   'settings',
   'new-project',
-  'onboarding',
+  'onboarding'
 ];
 
 // Re-export from unified-navigation for TypeScript usage
@@ -310,7 +310,7 @@ export {
   UNIFIED_NAVIGATION,
   UNIFIED_SUBTAB_GROUPS,
   UNIFIED_TAB_TITLES,
-  UNIFIED_TAB_GROUPS,
+  UNIFIED_TAB_GROUPS
 } from './unified-navigation.js';
 
 export type { UserRole, UnifiedNavItem, UnifiedSubtabGroup } from './unified-navigation.js';

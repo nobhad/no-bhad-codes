@@ -62,7 +62,7 @@ async function canAccessProject(req: AuthenticatedRequest, projectId: number): P
   const db = getDatabase();
   const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
     projectId,
-    req.user?.id,
+    req.user?.id
   ]);
 
   return !!row;
@@ -76,7 +76,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
+  }
 });
 
 // MIME type to extension mapping for validation
@@ -90,7 +90,7 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
   'application/vnd.ms-excel': ['xls'],
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
   'text/plain': ['txt'],
-  'application/zip': ['zip'],
+  'application/zip': ['zip']
 };
 
 // Allowed extensions whitelist
@@ -105,14 +105,14 @@ const ALLOWED_EXTENSIONS = new Set([
   'xls',
   'xlsx',
   'txt',
-  'zip',
+  'zip'
 ]);
 
 const upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit for message attachments
-    files: 5, // Max 5 files per message
+    files: 5 // Max 5 files per message
   },
   fileFilter: (req, file, cb) => {
     const fileName = file.originalname.toLowerCase();
@@ -145,7 +145,7 @@ const upload = multer({
     }
 
     cb(null, true);
-  },
+  }
 });
 
 // ===================================
@@ -223,7 +223,7 @@ router.post(
       } else {
         project = await db.get('SELECT id FROM projects WHERE id = ? AND client_id = ?', [
           project_id,
-          req.user!.id,
+          req.user!.id
         ]);
       }
 
@@ -286,7 +286,7 @@ router.post(
     } else {
       thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
@@ -303,14 +303,14 @@ router.post(
           originalName: file.originalname,
           path: file.path,
           size: file.size,
-          mimeType: file.mimetype,
+          mimeType: file.mimetype
         }))
       );
     }
 
     // Get the actual sender name from the clients table
     const senderClient = (await db.get('SELECT contact_name, email FROM clients WHERE id = ?', [
-      req.user!.id,
+      req.user!.id
     ])) as { contact_name: string | null; email: string } | undefined;
     const sender_name: string =
       senderClient?.contact_name || senderClient?.email || req.user!.email;
@@ -338,7 +338,7 @@ router.post(
         priority,
         reply_to || null,
         attachmentData,
-        threadId,
+        threadId
       ]
     );
 
@@ -365,7 +365,7 @@ router.post(
         // Notify client
         const clientId = getNumber(thread, 'client_id');
         const client = await db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
-          clientId,
+          clientId
         ]);
 
         if (client) {
@@ -377,7 +377,7 @@ router.post(
           if (!clientEmail || !emailRegex.test(clientEmail)) {
             logger.warn('Invalid client email, skipping notification', {
               category: 'email',
-              metadata: { clientId, threadId },
+              metadata: { clientId, threadId }
             });
           } else {
             await emailService.sendMessageNotification(clientEmail, {
@@ -387,7 +387,7 @@ router.post(
               message: message.trim(),
               threadId: threadId,
               portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?thread=${threadId}`,
-              hasAttachments: attachments && attachments.length > 0,
+              hasAttachments: attachments && attachments.length > 0
             });
           }
         }
@@ -401,15 +401,15 @@ router.post(
             subject: thread.subject,
             clientId: thread.client_id,
             message: message.trim(),
-            hasAttachments: attachments && attachments.length > 0,
+            hasAttachments: attachments && attachments.length > 0
           },
-          timestamp: new Date(),
+          timestamp: new Date()
         });
       }
     } catch (emailError) {
       logger.error('Failed to send message notification', {
         category: 'email',
-        metadata: { error: emailError, threadId, subject: thread.subject },
+        metadata: { error: emailError, threadId, subject: thread.subject }
       });
       // Continue - don't fail message sending due to email issues
     }
@@ -434,7 +434,7 @@ router.get(
     } else {
       thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
@@ -460,7 +460,7 @@ router.get(
 
     // Batch fetch all reactions for all messages in this thread (fixes N+1 query)
     const messageIds = messages.map((m) => m.id as number);
-    let reactionsMap: Map<number, Array<Record<string, unknown>>> = new Map();
+    const reactionsMap: Map<number, Array<Record<string, unknown>>> = new Map();
 
     if (messageIds.length > 0) {
       const placeholders = messageIds.map(() => '?').join(',');
@@ -518,7 +518,7 @@ router.put(
     } else {
       thread = await db.get(`SELECT ${MESSAGE_THREAD_COLUMNS} FROM message_threads WHERE id = ? AND client_id = ?`, [
         threadId,
-        req.user!.id,
+        req.user!.id
       ]);
     }
 
@@ -580,14 +580,14 @@ router.post(
           originalName: file.originalname,
           path: file.path,
           size: file.size,
-          mimeType: file.mimetype,
+          mimeType: file.mimetype
         }))
       );
     }
 
     // Get the actual sender name from the clients table
     const inquirySender = await db.get('SELECT contact_name, email FROM clients WHERE id = ?', [
-      req.user!.id,
+      req.user!.id
     ]);
     const inquirySenderName =
       inquirySender?.contact_name || inquirySender?.email || req.user!.email;
@@ -610,7 +610,7 @@ router.post(
         message_type,
         priority,
         attachmentData,
-        threadId,
+        threadId
       ]
     );
 
@@ -625,14 +625,14 @@ router.post(
           clientId: req.user!.id,
           threadId: threadId,
           priority: priority,
-          hasAttachments: attachments && attachments.length > 0,
+          hasAttachments: attachments && attachments.length > 0
         },
-        timestamp: new Date(),
+        timestamp: new Date()
       });
     } catch (emailError) {
       await logger.error('Failed to send admin notification:', {
         error: emailError instanceof Error ? emailError : undefined,
-        category: 'MESSAGES',
+        category: 'MESSAGES'
       });
     }
 
@@ -653,18 +653,18 @@ router.get(
     const db = getDatabase();
 
     let preferences = await db.get(`SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE client_id = ?`, [
-      req.user!.id,
+      req.user!.id
     ]);
 
     if (!preferences) {
       // Create default preferences
       const result = await db.run(
-        `INSERT INTO notification_preferences (client_id) VALUES (?)`,
+        'INSERT INTO notification_preferences (client_id) VALUES (?)',
         [req.user!.id]
       );
 
       preferences = await db.get(`SELECT ${NOTIFICATION_PREF_COLUMNS} FROM notification_preferences WHERE id = ?`, [
-        result.lastID,
+        result.lastID
       ]);
     }
 
@@ -689,7 +689,7 @@ router.put(
       'milestone_updates',
       'invoice_notifications',
       'marketing_emails',
-      'notification_frequency',
+      'notification_frequency'
     ];
 
     for (const field of allowedFields) {
@@ -886,7 +886,7 @@ router.put(
     const subscription = await messageService.updateSubscription(projectId, req.user!.email, {
       notifyAll: notify_all,
       notifyMentions: notify_mentions,
-      notifyReplies: notify_replies,
+      notifyReplies: notify_replies
     });
     sendSuccess(res, { subscription });
   })
@@ -1161,7 +1161,7 @@ router.get(
       threadId,
       limit,
       userEmail: req.user!.type === 'client' ? req.user!.email : undefined,
-      includeInternal: req.user!.type === 'admin',
+      includeInternal: req.user!.type === 'admin'
     });
 
     sendSuccess(res, { results, count: results.length });
@@ -1318,7 +1318,7 @@ router.get(
     // First, find the message containing this attachment and verify access
     // Use exact JSON match to prevent substring attacks
     const messageQuery = req.user!.type === 'admin'
-      ? `SELECT m.id, m.attachments, m.thread_id FROM messages m WHERE m.attachments LIKE ? ESCAPE '\\'`
+      ? 'SELECT m.id, m.attachments, m.thread_id FROM messages m WHERE m.attachments LIKE ? ESCAPE \'\\\''
       : `SELECT m.id, m.attachments, m.thread_id FROM messages m
          JOIN message_threads mt ON m.thread_id = mt.id
          WHERE m.attachments LIKE ? ESCAPE '\\' AND mt.client_id = ?`;

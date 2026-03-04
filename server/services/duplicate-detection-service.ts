@@ -22,7 +22,7 @@ const FIELD_WEIGHTS = {
   company: 0.25, // Company name is important
   name: 0.2, // Full name matters
   phone: 0.15, // Phone can be secondary contact
-  domain: 0.05, // Website domain as tie-breaker
+  domain: 0.05 // Website domain as tie-breaker
 };
 
 // Duplicate detection result
@@ -99,14 +99,14 @@ export async function checkForDuplicates(
         name: normalizedName,
         company: normalizedCompany,
         phone: normalizedPhone,
-        domain,
+        domain
       },
       {
         email: normalizeEmail(intake.email),
         name: normalizeName(`${intake.first_name} ${intake.last_name}`),
         company: normalizeCompany(intake.company_name),
         phone: normalizePhone(intake.phone),
-        domain: extractDomain(intake.email),
+        domain: extractDomain(intake.email)
       }
     );
 
@@ -120,7 +120,7 @@ export async function checkForDuplicates(
         similarityScore: score.total,
         matchedFields: score.matchedFields,
         confidence: getConfidenceLevel(score.total),
-        createdAt: intake.created_at,
+        createdAt: intake.created_at
       });
     }
   }
@@ -149,14 +149,14 @@ export async function checkForDuplicates(
         name: normalizedName,
         company: normalizedCompany,
         phone: normalizedPhone,
-        domain,
+        domain
       },
       {
         email: normalizeEmail(client.email),
         name: normalizeName(client.name),
         company: normalizeCompany(client.company),
         phone: normalizePhone(client.phone),
-        domain: extractDomain(client.email),
+        domain: extractDomain(client.email)
       }
     );
 
@@ -170,7 +170,7 @@ export async function checkForDuplicates(
         similarityScore: score.total,
         matchedFields: score.matchedFields,
         confidence: getConfidenceLevel(score.total),
-        createdAt: client.created_at,
+        createdAt: client.created_at
       });
     }
   }
@@ -203,14 +203,14 @@ export async function checkForDuplicates(
         name: normalizedName,
         company: normalizedCompany,
         phone: normalizedPhone,
-        domain,
+        domain
       },
       {
         email: normalizeEmail(lead.email),
         name: normalizeName(lead.client_name || ''),
         company: normalizeCompany(lead.company),
         phone: '',
-        domain: extractDomain(lead.email),
+        domain: extractDomain(lead.email)
       }
     );
 
@@ -224,7 +224,7 @@ export async function checkForDuplicates(
         similarityScore: score.total,
         matchedFields: score.matchedFields,
         confidence: getConfidenceLevel(score.total),
-        createdAt: lead.created_at,
+        createdAt: lead.created_at
       });
     }
   }
@@ -425,7 +425,7 @@ function extractDomain(input: string | null | undefined): string {
       'hotmail.com',
       'outlook.com',
       'aol.com',
-      'icloud.com',
+      'icloud.com'
     ];
     if (commonProviders.includes(domain?.toLowerCase())) {
       return '';
@@ -473,7 +473,7 @@ export async function logDuplicateCheck(
       JSON.stringify(sourceData),
       matches.length,
       matches[0]?.similarityScore || 0,
-      action,
+      action
     ]
   );
 }
@@ -511,7 +511,7 @@ export async function getDuplicateStats(): Promise<{
     duplicatesFound: stats.duplicates_found || 0,
     duplicatesBlocked: stats.duplicates_blocked || 0,
     duplicatesMerged: stats.duplicates_merged || 0,
-    averageMatchScore: stats.avg_score || 0,
+    averageMatchScore: stats.avg_score || 0
   };
 }
 
@@ -540,11 +540,11 @@ export async function mergeDuplicates(
         // Soft delete duplicate client, reassign relationships
         await db.run('UPDATE projects SET client_id = ? WHERE client_id = ?', [
           request.keepId,
-          mergeItem.id,
+          mergeItem.id
         ]);
         await db.run('UPDATE invoices SET client_id = ? WHERE client_id = ?', [
           request.keepId,
-          mergeItem.id,
+          mergeItem.id
         ]);
         await db.run(
           `UPDATE clients SET deleted_at = datetime('now'), deleted_by = 'duplicate_merge'
@@ -566,7 +566,7 @@ export async function mergeDuplicates(
 
     return {
       success: true,
-      message: `Merged ${request.mergeIds.length} duplicate(s) into record ${request.keepId}`,
+      message: `Merged ${request.mergeIds.length} duplicate(s) into record ${request.keepId}`
     };
   } catch (error) {
     await db.run('ROLLBACK');
@@ -584,6 +584,6 @@ export default {
     exact: EXACT_MATCH_THRESHOLD,
     high: HIGH_SIMILARITY_THRESHOLD,
     medium: MEDIUM_SIMILARITY_THRESHOLD,
-    low: LOW_SIMILARITY_THRESHOLD,
-  },
+    low: LOW_SIMILARITY_THRESHOLD
+  }
 };

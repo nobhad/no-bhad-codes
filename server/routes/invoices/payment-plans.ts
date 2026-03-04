@@ -42,11 +42,11 @@ const PaymentPlanValidationSchemas = {
             return 'Payment percentages must total 100%';
           }
           return true;
-        },
-      },
+        }
+      }
     ],
-    isDefault: { type: 'boolean' as const },
-  },
+    isDefault: { type: 'boolean' as const }
+  }
 };
 
 /**
@@ -65,7 +65,7 @@ router.get(
       const templates = await getInvoiceService().getPaymentPlanTemplates();
       sendSuccess(res, {
         templates: templates.map(toSnakeCasePaymentPlan),
-        count: templates.length,
+        count: templates.length
       });
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -74,7 +74,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -103,7 +103,7 @@ router.post(
         name,
         description,
         payments,
-        isDefault: isDefault || false,
+        isDefault: isDefault || false
       });
 
       sendCreated(res, { template: toSnakeCasePaymentPlan(template) }, 'Payment plan template created');
@@ -114,7 +114,7 @@ router.post(
         500,
         'CREATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -150,7 +150,7 @@ router.delete(
         500,
         'DELETION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }
@@ -174,7 +174,7 @@ router.post(
 
     if (!projectId || !clientId || !templateId || !totalAmount) {
       return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
-        required: ['projectId', 'clientId', 'templateId', 'totalAmount'],
+        required: ['projectId', 'clientId', 'templateId', 'totalAmount']
       });
     }
 
@@ -188,7 +188,7 @@ router.post(
 
       sendCreated(res, {
         invoices: invoices.map(toSnakeCaseInvoice),
-        count: invoices.length,
+        count: invoices.length
       }, `Generated ${invoices.length} invoices from payment plan`);
     } catch (error: unknown) {
       errorResponseWithPayload(
@@ -197,7 +197,7 @@ router.post(
         500,
         'GENERATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         }
       );
     }

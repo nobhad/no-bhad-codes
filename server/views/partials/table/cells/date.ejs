@@ -1,0 +1,9 @@
+<%# Date Cell %>
+<%# Locals: value, col, row %>
+<% if (value) {
+  var d = new Date(value);
+  if (!isNaN(d.getTime())) {
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    %><%= months[d.getMonth()] %> <%= d.getDate() %>, <%= d.getFullYear() %><%
+  } else { %>—<% }
+} else { %>—<% } %>

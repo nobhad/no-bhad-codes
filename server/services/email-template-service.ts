@@ -183,7 +183,7 @@ class EmailTemplateService {
         data.body_html,
         data.body_text || null,
         JSON.stringify(data.variables || []),
-        data.is_active !== false,
+        data.is_active !== false
       ]
     );
 
@@ -346,7 +346,7 @@ class EmailTemplateService {
       {
         subject: v.subject,
         body_html: v.body_html,
-        body_text: v.body_text || undefined,
+        body_text: v.body_text || undefined
       },
       changedBy,
       `Restored from version ${version}`
@@ -382,7 +382,7 @@ class EmailTemplateService {
         template.body_html,
         template.body_text,
         changedBy || null,
-        changeReason || null,
+        changeReason || null
       ]
     );
   }
@@ -404,7 +404,7 @@ class EmailTemplateService {
     return {
       subject: this.interpolate(template.subject, sampleData),
       body_html: this.interpolate(template.body_html, sampleData),
-      body_text: template.body_text ? this.interpolate(template.body_text, sampleData) : null,
+      body_text: template.body_text ? this.interpolate(template.body_text, sampleData) : null
     };
   }
 
@@ -420,7 +420,7 @@ class EmailTemplateService {
     return {
       subject: this.interpolate(subject, sampleData),
       body_html: this.interpolate(bodyHtml, sampleData),
-      body_text: bodyText ? this.interpolate(bodyText, sampleData) : null,
+      body_text: bodyText ? this.interpolate(bodyText, sampleData) : null
     };
   }
 
@@ -433,7 +433,7 @@ class EmailTemplateService {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&#x27;',
+      '\'': '&#x27;'
     };
     return text.replace(/[&<>"']/g, (m) => entities[m] || m);
   }
@@ -546,7 +546,7 @@ class EmailTemplateService {
         status,
         errorMessage || null,
         metadata ? JSON.stringify(metadata) : null,
-        status === 'sent' ? new Date().toISOString() : null,
+        status === 'sent' ? new Date().toISOString() : null
       ]
     );
 
@@ -615,7 +615,7 @@ class EmailTemplateService {
       const l = log as Record<string, unknown>;
       return {
         ...l,
-        metadata: safeJsonParseOrNull(l.metadata as string, 'email send log metadata'),
+        metadata: safeJsonParseOrNull(l.metadata as string, 'email send log metadata')
       } as EmailSendLog;
     });
   }
@@ -640,7 +640,7 @@ class EmailTemplateService {
       is_active: Boolean(row.is_active),
       is_system: Boolean(row.is_system),
       created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      updated_at: row.updated_at as string
     };
   }
 
@@ -654,7 +654,7 @@ class EmailTemplateService {
       { value: 'contract', label: 'Contract' },
       { value: 'project', label: 'Project' },
       { value: 'reminder', label: 'Reminder' },
-      { value: 'general', label: 'General' },
+      { value: 'general', label: 'General' }
     ];
   }
 }

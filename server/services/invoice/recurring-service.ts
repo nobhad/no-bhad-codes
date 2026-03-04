@@ -18,7 +18,7 @@ import type {
   RecurringInvoice,
   RecurringInvoiceRow,
   InvoiceReminder,
-  InvoiceReminderRow,
+  InvoiceReminderRow
 } from '../../types/invoice-types.js';
 import { logger } from '../logger.js';
 import type { Database } from '../../database/init.js';
@@ -79,7 +79,7 @@ export class InvoiceRecurringService {
       data.triggerMilestoneId || null,
       JSON.stringify(data.lineItems),
       data.notes || null,
-      data.terms || null,
+      data.terms || null
     ]);
 
     return this.getScheduledInvoiceById(result.lastID!);
@@ -133,7 +133,7 @@ export class InvoiceRecurringService {
           clientId: scheduled.client_id,
           lineItems: safeJsonParseArray<InvoiceLineItem>(scheduled.line_items, 'scheduled invoice line_items'),
           notes: scheduled.notes,
-          terms: scheduled.terms,
+          terms: scheduled.terms
         });
 
         await this.db.run(
@@ -182,7 +182,7 @@ export class InvoiceRecurringService {
       data.terms || null,
       data.startDate,
       data.endDate || null,
-      nextDate,
+      nextDate
     ]);
 
     return this.getRecurringInvoiceById(result.lastID!);
@@ -320,7 +320,7 @@ export class InvoiceRecurringService {
           clientId: recurring.client_id,
           lineItems: safeJsonParseArray<InvoiceLineItem>(recurring.line_items, 'recurring invoice line_items'),
           notes: recurring.notes,
-          terms: recurring.terms,
+          terms: recurring.terms
         });
 
         const nextDate = this.calculateNextGenerationDate(
@@ -381,7 +381,7 @@ export class InvoiceRecurringService {
       { type: 'overdue_3', daysFromDue: 3 },
       { type: 'overdue_7', daysFromDue: 7 },
       { type: 'overdue_14', daysFromDue: 14 },
-      { type: 'overdue_30', daysFromDue: 30 },
+      { type: 'overdue_30', daysFromDue: 30 }
     ];
 
     // Collect all valid reminders that are in the future
@@ -394,7 +394,7 @@ export class InvoiceRecurringService {
       if (scheduledDate >= now) {
         remindersToInsert.push({
           type: reminder.type,
-          scheduledDate: scheduledDate.toISOString().split('T')[0],
+          scheduledDate: scheduledDate.toISOString().split('T')[0]
         });
       }
     }
@@ -429,7 +429,7 @@ export class InvoiceRecurringService {
       scheduledDate: row.scheduled_date,
       sentAt: row.sent_at,
       status: row.status as InvoiceReminder['status'],
-      createdAt: row.created_at,
+      createdAt: row.created_at
     }));
   }
 
@@ -449,7 +449,7 @@ export class InvoiceRecurringService {
   async skipReminder(reminderId: number): Promise<void> {
     await this.db.run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
       'skipped',
-      reminderId,
+      reminderId
     ]);
   }
 
@@ -477,7 +477,7 @@ export class InvoiceRecurringService {
       scheduledDate: row.scheduled_date,
       sentAt: row.sent_at,
       status: row.status as InvoiceReminder['status'],
-      createdAt: row.created_at,
+      createdAt: row.created_at
     }));
   }
 
@@ -487,7 +487,7 @@ export class InvoiceRecurringService {
   async markReminderFailed(reminderId: number): Promise<void> {
     await this.db.run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
       'failed',
-      reminderId,
+      reminderId
     ]);
   }
 
@@ -516,7 +516,7 @@ export class InvoiceRecurringService {
       terms: row.terms,
       status: row.status as ScheduledInvoice['status'],
       generatedInvoiceId: row.generated_invoice_id,
-      createdAt: row.created_at,
+      createdAt: row.created_at
     };
   }
 
@@ -542,39 +542,39 @@ export class InvoiceRecurringService {
     const next = new Date(from);
 
     switch (frequency) {
-      case 'weekly':
-        next.setDate(next.getDate() + 7);
-        if (dayOfWeek !== undefined && dayOfWeek !== null) {
-          const currentDay = next.getDay();
-          const diff = dayOfWeek - currentDay;
-          next.setDate(next.getDate() + (diff >= 0 ? diff : diff + 7));
-        }
-        break;
+    case 'weekly':
+      next.setDate(next.getDate() + 7);
+      if (dayOfWeek !== undefined && dayOfWeek !== null) {
+        const currentDay = next.getDay();
+        const diff = dayOfWeek - currentDay;
+        next.setDate(next.getDate() + (diff >= 0 ? diff : diff + 7));
+      }
+      break;
 
-      case 'monthly':
-        next.setMonth(next.getMonth() + 1);
-        if (dayOfMonth !== undefined && dayOfMonth !== null) {
-          const targetDay = Math.min(
-            dayOfMonth,
-            new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
-          );
-          next.setDate(targetDay);
-        }
-        break;
+    case 'monthly':
+      next.setMonth(next.getMonth() + 1);
+      if (dayOfMonth !== undefined && dayOfMonth !== null) {
+        const targetDay = Math.min(
+          dayOfMonth,
+          new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
+        );
+        next.setDate(targetDay);
+      }
+      break;
 
-      case 'quarterly':
-        next.setMonth(next.getMonth() + 3);
-        if (dayOfMonth !== undefined && dayOfMonth !== null) {
-          const targetDay = Math.min(
-            dayOfMonth,
-            new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
-          );
-          next.setDate(targetDay);
-        }
-        break;
+    case 'quarterly':
+      next.setMonth(next.getMonth() + 3);
+      if (dayOfMonth !== undefined && dayOfMonth !== null) {
+        const targetDay = Math.min(
+          dayOfMonth,
+          new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
+        );
+        next.setDate(targetDay);
+      }
+      break;
 
-      default:
-        next.setMonth(next.getMonth() + 1);
+    default:
+      next.setMonth(next.getMonth() + 1);
     }
 
     return next.toISOString().split('T')[0];
@@ -596,7 +596,7 @@ export class InvoiceRecurringService {
       nextGenerationDate: row.next_generation_date,
       lastGeneratedAt: row.last_generated_at,
       isActive: Boolean(row.is_active),
-      createdAt: row.created_at,
+      createdAt: row.created_at
     };
   }
 }

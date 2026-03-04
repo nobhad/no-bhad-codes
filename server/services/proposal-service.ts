@@ -22,13 +22,13 @@ import { logger } from './logger.js';
 import {
   validateJsonSchema,
   validateLineItems,
-  tierStructureSchema,
+  tierStructureSchema
 } from '../../shared/validation/validators.js';
 import {
   emailService,
   isClientActivated,
   type ProposalSignedData,
-  type ProposalSignedClientData,
+  type ProposalSignedClientData
 } from './email-service.js';
 import {
   type ProposalTemplate,
@@ -51,7 +51,7 @@ import {
   toProposalComment,
   toProposalActivity,
   toProposalCustomItem,
-  toSignatureRequest,
+  toSignatureRequest
 } from '../database/entities/index.js';
 
 interface TemplateCreateData {
@@ -183,7 +183,7 @@ class ProposalService {
     // If setting as default, unset other defaults
     if (data.isDefault) {
       await db.run('UPDATE proposal_templates SET is_default = FALSE WHERE project_type = ?', [
-        data.projectType,
+        data.projectType
       ]);
     }
 
@@ -200,7 +200,7 @@ class ProposalService {
         data.defaultLineItems ? JSON.stringify(data.defaultLineItems) : null,
         data.termsAndConditions || null,
         data.validityDays || 30,
-        data.isDefault ? 1 : 0,
+        data.isDefault ? 1 : 0
       ]
     );
 
@@ -286,14 +286,14 @@ class ProposalService {
       if (data.isDefault) {
         const template = await this.getTemplate(templateId);
         await db.run('UPDATE proposal_templates SET is_default = FALSE WHERE project_type = ?', [
-          template.projectType,
+          template.projectType
         ]);
       }
       updates.push('is_default = ?');
       params.push(data.isDefault ? 1 : 0);
     }
 
-    updates.push("updated_at = datetime('now')");
+    updates.push('updated_at = datetime(\'now\')');
     params.push(templateId);
 
     await db.run(`UPDATE proposal_templates SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -307,7 +307,7 @@ class ProposalService {
   async deleteTemplate(templateId: number): Promise<void> {
     const db = getDatabase();
     await db.run(
-      "UPDATE proposal_templates SET is_active = FALSE, updated_at = datetime('now') WHERE id = ?",
+      'UPDATE proposal_templates SET is_active = FALSE, updated_at = datetime(\'now\') WHERE id = ?',
       [templateId]
     );
   }
@@ -357,7 +357,7 @@ class ProposalService {
         newVersionNumber,
         JSON.stringify({
           selectedTier: getString(p, 'selected_tier'),
-          maintenanceOption: p.maintenance_option,
+          maintenanceOption: p.maintenance_option
         }),
         JSON.stringify(features),
         JSON.stringify({
@@ -367,17 +367,17 @@ class ProposalService {
           discountValue: p.discount_value,
           taxRate: p.tax_rate,
           subtotal: p.subtotal,
-          taxAmount: p.tax_amount,
+          taxAmount: p.tax_amount
         }),
         notes || null,
-        createdBy || null,
+        createdBy || null
       ]
     );
 
     // Update proposal version number
     await db.run('UPDATE proposal_requests SET version_number = ? WHERE id = ?', [
       newVersionNumber,
-      proposalId,
+      proposalId
     ]);
 
     return this.getVersion(result.lastID!);
@@ -447,13 +447,13 @@ class ProposalService {
           pricing.taxRate as number | null,
           pricing.subtotal as number | null,
           pricing.taxAmount as number | null,
-          proposalId,
+          proposalId
         ]
       );
 
       // Restore features
       await ctx.run('DELETE FROM proposal_feature_selections WHERE proposal_request_id = ?', [
-        proposalId,
+        proposalId
       ]);
 
       if (version.featuresData && Array.isArray(version.featuresData)) {
@@ -471,7 +471,7 @@ class ProposalService {
               f.feature_price as number | null,
               f.feature_category as string | null,
               f.is_included_in_tier as number | boolean | null,
-              f.is_addon as number | boolean | null,
+              f.is_addon as number | boolean | null
             ]
           );
         }
@@ -481,7 +481,7 @@ class ProposalService {
     // Log activity
     await this.logActivity(proposalId, 'version_restored', 'system', 'system', {
       restoredVersionId: versionId,
-      restoredVersionNumber: version.versionNumber,
+      restoredVersionNumber: version.versionNumber
     });
   }
 
@@ -559,13 +559,13 @@ class ProposalService {
 
     // Update proposal to require signature
     await db.run('UPDATE proposal_requests SET requires_signature = TRUE WHERE id = ?', [
-      proposalId,
+      proposalId
     ]);
 
     // Log activity
     await this.logActivity(proposalId, 'signature_requested', 'system', 'system', {
       signerEmail,
-      requestId: result.lastID,
+      requestId: result.lastID
     });
 
     return this.getSignatureRequest(result.lastID!);
@@ -619,7 +619,7 @@ class ProposalService {
         data.signatureMethod,
         data.signatureData,
         data.ipAddress || null,
-        data.userAgent || null,
+        data.userAgent || null
       ]
     );
 
@@ -650,7 +650,7 @@ class ProposalService {
       'client',
       {
         signatureMethod: data.signatureMethod,
-        signerEmail: data.signerEmail,
+        signerEmail: data.signerEmail
       },
       data.ipAddress,
       data.userAgent
@@ -711,7 +711,7 @@ class ProposalService {
       const tierNames: Record<string, string> = {
         good: 'Good',
         better: 'Better',
-        best: 'Best',
+        best: 'Best'
       };
 
       const selectedTier = getString(p, 'selected_tier') as 'good' | 'better' | 'best';
@@ -721,7 +721,7 @@ class ProposalService {
       const finalPrice = getNumber(p, 'final_price') || 0;
       const formattedPrice = finalPrice.toLocaleString('en-US', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 0
       });
 
       // Format signed timestamp
@@ -732,7 +732,7 @@ class ProposalService {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        timeZoneName: 'short',
+        timeZoneName: 'short'
       });
 
       // Build notification data
@@ -748,12 +748,12 @@ class ProposalService {
         maintenanceOption: p.maintenance_option as string | undefined,
         addedFeatures: features.map((f) => ({
           name: getString(f as Record<string, unknown>, 'feature_name'),
-          price: (getNumber(f as Record<string, unknown>, 'feature_price') || 0).toLocaleString(),
+          price: (getNumber(f as Record<string, unknown>, 'feature_price') || 0).toLocaleString()
         })),
         signerName: signatureData.signerName,
         signerEmail: signatureData.signerEmail,
         signedAt,
-        ipAddress: signatureData.ipAddress || 'Unknown',
+        ipAddress: signatureData.ipAddress || 'Unknown'
       };
 
       // Send admin notification
@@ -775,7 +775,7 @@ class ProposalService {
           ...notificationData,
           portalUrl: `${baseUrl}/client/portal`,
           supportEmail:
-            process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com',
+            process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com'
         };
 
         const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
@@ -792,7 +792,7 @@ class ProposalService {
       }
     } catch (error) {
       logger.error('[PROPOSAL] Error sending proposal signed notifications:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
     }
   }
@@ -843,7 +843,7 @@ class ProposalService {
     const signatures = await this.getProposalSignatures(proposalId);
 
     const pendingRows = await db.all(
-      "`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE proposal_id = ? AND status IN ('pending', 'viewed')`",
+      '`SELECT ${SIGNATURE_REQUEST_COLUMNS} FROM signature_requests WHERE proposal_id = ? AND status IN (\'pending\', \'viewed\')`',
       [proposalId]
     );
     const pendingRequests = pendingRows.map((row) =>
@@ -854,7 +854,7 @@ class ProposalService {
       requiresSignature: Boolean(p.requires_signature),
       isSigned: p.signed_at !== null,
       signatures,
-      pendingRequests,
+      pendingRequests
     };
   }
 
@@ -897,7 +897,7 @@ class ProposalService {
       request.signerName || request.signerEmail,
       'client',
       {
-        reason,
+        reason
       }
     );
   }
@@ -932,14 +932,14 @@ class ProposalService {
         authorEmail || null,
         content,
         isInternal ? 1 : 0,
-        parentCommentId || null,
+        parentCommentId || null
       ]
     );
 
     // Log activity
     await this.logActivity(proposalId, 'commented', authorName, authorType, {
       commentId: result.lastID,
-      isInternal,
+      isInternal
     });
 
     return this.getComment(result.lastID!);
@@ -1035,7 +1035,7 @@ class ProposalService {
         actorType || null,
         metadata ? JSON.stringify(metadata) : null,
         ipAddress || null,
-        userAgent || null,
+        userAgent || null
       ]
     );
   }
@@ -1097,7 +1097,7 @@ class ProposalService {
         data.category || null,
         data.isTaxable !== false ? 1 : 0,
         data.isOptional ? 1 : 0,
-        data.sortOrder || 0,
+        data.sortOrder || 0
       ]
     );
 
@@ -1182,7 +1182,7 @@ class ProposalService {
       params.push(data.sortOrder);
     }
 
-    updates.push("updated_at = datetime('now')");
+    updates.push('updated_at = datetime(\'now\')');
     params.push(itemId);
 
     await db.run(`UPDATE proposal_custom_items SET ${updates.join(', ')} WHERE id = ?`, params);
@@ -1240,7 +1240,7 @@ class ProposalService {
     await this.logActivity(proposalId, 'discount_applied', 'system', 'admin', {
       discountType: type,
       discountValue: value,
-      reason,
+      reason
     });
   }
 
@@ -1347,7 +1347,7 @@ class ProposalService {
 
     await db.run('UPDATE proposal_requests SET expiration_date = ? WHERE id = ?', [
       expirationDate,
-      proposalId,
+      proposalId
     ]);
   }
 
@@ -1397,8 +1397,8 @@ class ProposalService {
   async markReminderSent(proposalId: number): Promise<void> {
     const db = getDatabase();
 
-    await db.run("UPDATE proposal_requests SET reminder_sent_at = datetime('now') WHERE id = ?", [
-      proposalId,
+    await db.run('UPDATE proposal_requests SET reminder_sent_at = datetime(\'now\') WHERE id = ?', [
+      proposalId
     ]);
 
     await this.logActivity(proposalId, 'reminder_sent', 'system', 'system');
@@ -1412,7 +1412,7 @@ class ProposalService {
 
     // Get proposal for validity days
     const proposal = await db.get('SELECT validity_days FROM proposal_requests WHERE id = ?', [
-      proposalId,
+      proposalId
     ]);
     const validityDays = (proposal as Record<string, unknown>)?.validity_days || 30;
 

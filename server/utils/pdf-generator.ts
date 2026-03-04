@@ -28,7 +28,7 @@ export function sendPdfResponse(
     filename,
     disposition = 'attachment',
     cacheStatus,
-    contentType = 'application/pdf',
+    contentType = 'application/pdf'
   } = options;
 
   res.setHeader('Content-Type', contentType);

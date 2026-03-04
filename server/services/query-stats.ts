@@ -76,7 +76,7 @@ class QueryStatsService {
       executionTime,
       timestamp,
       sql: isSlow ? sql : undefined, // Only store SQL for slow queries
-      slow: isSlow,
+      slow: isSlow
     });
 
     // Log slow queries
@@ -86,7 +86,7 @@ class QueryStatsService {
         table,
         executionTime,
         timestamp: new Date(timestamp).toISOString(),
-        sql: sql?.substring(0, 200), // Truncate for logging
+        sql: sql?.substring(0, 200) // Truncate for logging
       };
 
       this.slowQueries.push(record);
@@ -105,8 +105,8 @@ class QueryStatsService {
             type,
             table,
             executionTime,
-            threshold: SLOW_QUERY_THRESHOLD_MS,
-          },
+            threshold: SLOW_QUERY_THRESHOLD_MS
+          }
         }
       );
     }
@@ -134,7 +134,7 @@ class QueryStatsService {
       insert: { count: 0, avgTime: 0, totalTime: 0 },
       update: { count: 0, avgTime: 0, totalTime: 0 },
       delete: { count: 0, avgTime: 0, totalTime: 0 },
-      raw: { count: 0, avgTime: 0, totalTime: 0 },
+      raw: { count: 0, avgTime: 0, totalTime: 0 }
     };
 
     for (const metric of relevantMetrics) {
@@ -161,7 +161,7 @@ class QueryStatsService {
       maxExecutionTime: maxTime,
       byType,
       recentSlowQueries: [...this.slowQueries].reverse().slice(0, 10),
-      uptimeSeconds: Math.floor((now - this.startTime) / 1000),
+      uptimeSeconds: Math.floor((now - this.startTime) / 1000)
     };
   }
 

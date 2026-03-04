@@ -129,7 +129,7 @@ class KnowledgeBaseService {
         data.description || null,
         data.icon || 'book',
         data.color || '#6b7280',
-        data.sort_order || 0,
+        data.sort_order || 0
       ]
     );
 
@@ -169,7 +169,7 @@ class KnowledgeBaseService {
         data.color || category.color,
         data.sort_order !== undefined ? data.sort_order : category.sort_order,
         data.is_active !== undefined ? (data.is_active ? 1 : 0) : category.is_active ? 1 : 0,
-        id,
+        id
       ]
     );
 
@@ -300,7 +300,7 @@ class KnowledgeBaseService {
         isPublished ? 1 : 0,
         data.author_email || null,
         authorUserId,
-        isPublished ? new Date().toISOString() : null,
+        isPublished ? new Date().toISOString() : null
       ]
     );
 
@@ -341,7 +341,7 @@ class KnowledgeBaseService {
         willPublish ? 1 : 0,
         data.sort_order !== undefined ? data.sort_order : article.sort_order,
         publishedAt,
-        id,
+        id
       ]
     );
 
@@ -458,18 +458,18 @@ class KnowledgeBaseService {
         data.userId || null,
         data.userType || 'anonymous',
         data.isHelpful ? 1 : 0,
-        data.comment || null,
+        data.comment || null
       ]
     );
 
     // Update article counts - use parameterized increment to avoid SQL injection
     if (data.isHelpful) {
       await db.run('UPDATE kb_articles SET helpful_count = helpful_count + 1 WHERE id = ?', [
-        data.articleId,
+        data.articleId
       ]);
     } else {
       await db.run('UPDATE kb_articles SET not_helpful_count = not_helpful_count + 1 WHERE id = ?', [
-        data.articleId,
+        data.articleId
       ]);
     }
   }
@@ -521,7 +521,7 @@ class KnowledgeBaseService {
       totalCategories: categoryCount?.count || 0,
       totalViews: articleStats?.views || 0,
       recentSearches: recentSearches as { query: string; count: number }[],
-      topArticles: topArticles as unknown as KBArticle[],
+      topArticles: topArticles as unknown as KBArticle[]
     };
   }
 }

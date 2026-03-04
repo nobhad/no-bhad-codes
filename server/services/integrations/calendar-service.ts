@@ -125,7 +125,7 @@ export function getGoogleAuthUrl(state?: string): string {
     response_type: 'code',
     scope: 'https://www.googleapis.com/auth/calendar.events',
     access_type: 'offline',
-    prompt: 'consent',
+    prompt: 'consent'
   });
 
   if (state) {
@@ -146,15 +146,15 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleCalenda
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       client_secret: GOOGLE_CLIENT_SECRET,
       code,
       grant_type: 'authorization_code',
-      redirect_uri: GOOGLE_REDIRECT_URI,
-    }).toString(),
+      redirect_uri: GOOGLE_REDIRECT_URI
+    }).toString()
   });
 
   if (!response.ok) {
@@ -173,7 +173,7 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleCalenda
     access_token: data.access_token,
     refresh_token: data.refresh_token,
     expires_at: Date.now() + data.expires_in * 1000,
-    token_type: data.token_type,
+    token_type: data.token_type
   };
 }
 
@@ -188,14 +188,14 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleCa
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
       client_secret: GOOGLE_CLIENT_SECRET,
       refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }).toString(),
+      grant_type: 'refresh_token'
+    }).toString()
   });
 
   if (!response.ok) {
@@ -213,7 +213,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<GoogleCa
     access_token: data.access_token,
     refresh_token: refreshToken, // Refresh token doesn't change
     expires_at: Date.now() + data.expires_in * 1000,
-    token_type: data.token_type,
+    token_type: data.token_type
   };
 }
 
@@ -231,9 +231,9 @@ export async function createGoogleCalendarEvent(
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(event),
+      body: JSON.stringify(event)
     }
   );
 
@@ -260,9 +260,9 @@ export async function updateGoogleCalendarEvent(
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(event),
+      body: JSON.stringify(event)
     }
   );
 
@@ -287,8 +287,8 @@ export async function deleteGoogleCalendarEvent(
     {
       method: 'DELETE',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+        Authorization: `Bearer ${accessToken}`
+      }
     }
   );
 
@@ -311,27 +311,27 @@ export function milestoneToCalendarEvent(
     summary: `[Milestone] ${milestone.title}`,
     description: `Project: ${projectName}\n\n${milestone.description || ''}\n\nStatus: ${milestone.status}`,
     start: {
-      date: dueDate.split('T')[0], // All-day event
+      date: dueDate.split('T')[0] // All-day event
     },
     end: {
-      date: dueDate.split('T')[0],
+      date: dueDate.split('T')[0]
     },
     colorId: getColorIdForStatus(milestone.status as string),
     reminders: {
       useDefault: false,
       overrides: [
         { method: 'email', minutes: 1440 }, // 1 day before
-        { method: 'popup', minutes: 60 }, // 1 hour before
-      ],
+        { method: 'popup', minutes: 60 } // 1 hour before
+      ]
     },
     extendedProperties: {
       private: {
         source: 'no-bhad-codes',
         type: 'milestone',
         milestoneId: String(milestone.id),
-        projectId: String(milestone.project_id),
-      },
-    },
+        projectId: String(milestone.project_id)
+      }
+    }
   };
 }
 
@@ -348,32 +348,32 @@ export function taskToCalendarEvent(
     summary: `[Task] ${task.title}`,
     description: `Project: ${projectName}\nPriority: ${task.priority || 'normal'}\n\n${task.description || ''}\n\nStatus: ${task.status}`,
     start: {
-      date: dueDate.split('T')[0],
+      date: dueDate.split('T')[0]
     },
     end: {
-      date: dueDate.split('T')[0],
+      date: dueDate.split('T')[0]
     },
     attendees: task.assigned_to
       ? [
-          {
-            email: task.assigned_to as string,
-            responseStatus: 'needsAction',
-          },
-        ]
+        {
+          email: task.assigned_to as string,
+          responseStatus: 'needsAction'
+        }
+      ]
       : undefined,
     colorId: getColorIdForPriority(task.priority as string),
     reminders: {
       useDefault: false,
-      overrides: [{ method: 'popup', minutes: 60 }],
+      overrides: [{ method: 'popup', minutes: 60 }]
     },
     extendedProperties: {
       private: {
         source: 'no-bhad-codes',
         type: 'task',
         taskId: String(task.id),
-        projectId: String(task.project_id),
-      },
-    },
+        projectId: String(task.project_id)
+      }
+    }
   };
 }
 
@@ -390,10 +390,10 @@ export function invoiceToCalendarEvent(invoice: Record<string, unknown>): Calend
     summary: `[Invoice Due] ${invoice.invoice_number} - ${amount}`,
     description: `Client: ${invoice.client_name}\nAmount: ${amount}\n\nInvoice #${invoice.invoice_number}`,
     start: {
-      date: dueDate.split('T')[0],
+      date: dueDate.split('T')[0]
     },
     end: {
-      date: dueDate.split('T')[0],
+      date: dueDate.split('T')[0]
     },
     colorId: '11', // Red for payment due
     reminders: {
@@ -401,16 +401,16 @@ export function invoiceToCalendarEvent(invoice: Record<string, unknown>): Calend
       overrides: [
         { method: 'email', minutes: 4320 }, // 3 days before
         { method: 'email', minutes: 1440 }, // 1 day before
-        { method: 'popup', minutes: 60 },
-      ],
+        { method: 'popup', minutes: 60 }
+      ]
     },
     extendedProperties: {
       private: {
         source: 'no-bhad-codes',
         type: 'invoice',
-        invoiceId: String(invoice.id),
-      },
-    },
+        invoiceId: String(invoice.id)
+      }
+    }
   };
 }
 
@@ -422,7 +422,7 @@ function getColorIdForStatus(status: string): string {
     pending: '5', // Yellow
     in_progress: '9', // Blue
     completed: '10', // Green
-    blocked: '11', // Red
+    blocked: '11' // Red
   };
   return colors[status] || '8'; // Gray default
 }
@@ -435,7 +435,7 @@ function getColorIdForPriority(priority: string): string {
     low: '8', // Gray
     medium: '5', // Yellow
     high: '6', // Orange
-    urgent: '11', // Red
+    urgent: '11' // Red
   };
   return colors[priority] || '8';
 }
@@ -449,7 +449,7 @@ export function generateICalExport(events: CalendarEvent[]): string {
     `PRODID:${ICAL_PRODID}`,
     `VERSION:${ICAL_VERSION}`,
     'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    'METHOD:PUBLISH'
   ];
 
   for (const event of events) {
@@ -635,7 +635,7 @@ export async function saveCalendarSyncConfig(
         config.syncTasks ? 1 : 0,
         config.syncInvoiceDueDates ? 1 : 0,
         config.isActive ? 1 : 0,
-        config.id,
+        config.id
       ]
     );
     return config;
@@ -653,7 +653,7 @@ export async function saveCalendarSyncConfig(
       config.syncMilestones ? 1 : 0,
       config.syncTasks ? 1 : 0,
       config.syncInvoiceDueDates ? 1 : 0,
-      config.isActive ? 1 : 0,
+      config.isActive ? 1 : 0
     ]
   );
   return { ...config, id: result.lastID };
@@ -683,7 +683,7 @@ export async function getCalendarSyncConfig(userId: number): Promise<CalendarSyn
     syncTasks: Boolean(row.sync_tasks),
     syncInvoiceDueDates: Boolean(row.sync_invoice_due_dates),
     lastSyncAt: row.last_sync_at as string | undefined,
-    isActive: Boolean(row.is_active),
+    isActive: Boolean(row.is_active)
   };
 }
 
@@ -702,5 +702,5 @@ export default {
   exportProjectToICal,
   exportUpcomingToICal,
   saveCalendarSyncConfig,
-  getCalendarSyncConfig,
+  getCalendarSyncConfig
 };

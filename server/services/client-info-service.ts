@@ -199,7 +199,7 @@ class ClientInfoService {
 
     // Upsert completeness record
     const existing = await db.get('SELECT id FROM client_info_completeness WHERE client_id = ?', [
-      clientId,
+      clientId
     ]);
 
     if (existing) {
@@ -226,7 +226,7 @@ class ClientInfoService {
           qStats?.completed || 0,
           qStats?.total || 0,
           onboarding?.status === 'completed' ? 1 : 0,
-          clientId,
+          clientId
         ]
       );
     } else {
@@ -247,7 +247,7 @@ class ClientInfoService {
           qStats?.pending || 0,
           qStats?.completed || 0,
           qStats?.total || 0,
-          onboarding?.status === 'completed' ? 1 : 0,
+          onboarding?.status === 'completed' ? 1 : 0
         ]
       );
     }
@@ -262,7 +262,7 @@ class ClientInfoService {
     const db = await getDatabase();
 
     const row = await db.get(`SELECT ${CLIENT_INFO_COMPLETENESS_COLUMNS} FROM client_info_completeness WHERE client_id = ?`, [
-      clientId,
+      clientId
     ]);
 
     if (!row) return null;
@@ -293,7 +293,7 @@ class ClientInfoService {
       client_name: client.company_name || client.contact_name || 'Unknown',
       client_email: client.email,
       completeness,
-      onboarding,
+      onboarding
     };
   }
 
@@ -374,21 +374,21 @@ class ClientInfoService {
         items.push({
           type: 'profile',
           title: 'Company Name',
-          description: 'Please add your company or business name',
+          description: 'Please add your company or business name'
         });
       }
       if (!client.phone) {
         items.push({
           type: 'profile',
           title: 'Phone Number',
-          description: 'Please add a contact phone number',
+          description: 'Please add a contact phone number'
         });
       }
       if (!client.address) {
         items.push({
           type: 'profile',
           title: 'Business Address',
-          description: 'Please add your business address',
+          description: 'Please add your business address'
         });
       }
     }
@@ -399,7 +399,7 @@ class ClientInfoService {
       items.push({
         type: 'onboarding',
         title: 'Complete Onboarding Wizard',
-        description: 'Complete the onboarding wizard to help us understand your project needs',
+        description: 'Complete the onboarding wizard to help us understand your project needs'
       });
     }
 
@@ -425,7 +425,7 @@ class ClientInfoService {
         title: doc.title,
         description: doc.description,
         due_date: doc.due_date,
-        priority: doc.priority,
+        priority: doc.priority
       });
     }
 
@@ -445,7 +445,7 @@ class ClientInfoService {
         id: q.id,
         title: q.title,
         description: q.description,
-        due_date: q.due_date,
+        due_date: q.due_date
       });
     }
 
@@ -578,7 +578,7 @@ class ClientInfoService {
       questionnaires_completed: row.questionnaires_completed as number,
       questionnaires_total: row.questionnaires_total as number,
       onboarding_complete: Boolean(row.onboarding_complete),
-      last_calculated_at: row.last_calculated_at as string,
+      last_calculated_at: row.last_calculated_at as string
     };
   }
 
@@ -599,7 +599,7 @@ class ClientInfoService {
       status: row.status as OnboardingStatus,
       completed_at: row.completed_at as string | undefined,
       created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      updated_at: row.updated_at as string
     };
   }
 }

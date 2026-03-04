@@ -189,7 +189,7 @@ class FileService {
         versionData.file_size || null,
         versionData.mime_type || null,
         versionData.uploaded_by || null,
-        versionData.comment || null,
+        versionData.comment || null
       ]
     );
 
@@ -210,7 +210,7 @@ class FileService {
         versionData.file_path,
         versionData.file_size || null,
         versionData.mime_type || null,
-        fileId,
+        fileId
       ]
     );
 
@@ -251,7 +251,7 @@ class FileService {
 
     const version = await db.get(`SELECT ${FILE_VERSION_COLUMNS} FROM file_versions WHERE id = ? AND file_id = ?`, [
       versionId,
-      fileId,
+      fileId
     ]);
     if (!version) {
       throw new Error('Version not found');
@@ -265,7 +265,7 @@ class FileService {
       file_size: version.file_size as number | undefined,
       mime_type: version.mime_type as string | undefined,
       uploaded_by: version.uploaded_by as string | undefined,
-      comment: `Restored from version ${version.version_number}`,
+      comment: `Restored from version ${version.version_number}`
     });
   }
 
@@ -318,7 +318,7 @@ class FileService {
         data.color || '#6b7280',
         data.icon || 'folder',
         (Number(maxOrder?.max_order) || 0) + 1,
-        data.created_by || null,
+        data.created_by || null
       ]
     );
 
@@ -428,7 +428,7 @@ class FileService {
     if (moveFilesTo !== undefined) {
       await db.run('UPDATE files SET folder_id = ? WHERE folder_id = ?', [
         moveFilesTo || null,
-        folderId,
+        folderId
       ]);
     }
 
@@ -482,7 +482,7 @@ class FileService {
     const db = getDatabase();
     await db.run('INSERT OR IGNORE INTO file_tags (file_id, tag_id) VALUES (?, ?)', [
       fileId,
-      tagId,
+      tagId
     ]);
   }
 
@@ -595,7 +595,7 @@ class FileService {
       total_views: Number(stats?.total_views ?? 0),
       total_downloads: Number(stats?.total_downloads ?? 0),
       unique_viewers: Number(stats?.unique_viewers ?? 0),
-      last_accessed: (stats?.last_accessed as string | null) ?? null,
+      last_accessed: (stats?.last_accessed as string | null) ?? null
     };
   }
 
@@ -631,7 +631,7 @@ class FileService {
         authorName || null,
         content,
         isInternal,
-        parentCommentId || null,
+        parentCommentId || null
       ]
     );
 
@@ -877,7 +877,7 @@ class FileService {
       by_type: byType,
       recent_uploads: Number(stats?.recent_uploads ?? 0),
       archived_count: Number(stats?.archived_count ?? 0),
-      expiring_soon: Number(stats?.expiring_soon ?? 0),
+      expiring_soon: Number(stats?.expiring_soon ?? 0)
     };
   }
 
@@ -939,7 +939,7 @@ class FileService {
     'in_review',
     'changes_requested',
     'approved',
-    'rejected',
+    'rejected'
   ] as const;
 
   /**
@@ -954,7 +954,7 @@ class FileService {
     if (!workflow) {
       // Create new workflow
       const result = await db.run(
-        "INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, 'draft')",
+        'INSERT INTO deliverable_workflows (file_id, project_id, status) VALUES (?, ?, \'draft\')',
         [fileId, projectId]
       );
       workflow = await db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE id = ?`, [result.lastID]);
@@ -1289,7 +1289,7 @@ class FileService {
       in_review: 0,
       changes_requested: 0,
       approved: 0,
-      rejected: 0,
+      rejected: 0
     };
 
     for (const row of stats) {
@@ -1350,7 +1350,7 @@ class FileService {
         fileTypeCategory,
         `Approved deliverable: ${options.deliverableTitle}`,
         options.uploadedBy,
-        options.uploadedBy,
+        options.uploadedBy
       ]
     );
 

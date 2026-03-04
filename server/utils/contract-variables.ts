@@ -45,7 +45,7 @@ const DEFAULT_VARIABLES = [
   'business.contact',
   'business.email',
   'business.website',
-  'date.today',
+  'date.today'
 ];
 
 export function getDefaultContractVariables(): string[] {
@@ -77,7 +77,7 @@ export function resolveContractVariables(source: ContractVariableSource): Record
     'business.contact': source.business?.contact || '',
     'business.email': source.business?.email || '',
     'business.website': source.business?.website || '',
-    'date.today': today,
+    'date.today': today
   };
 }
 

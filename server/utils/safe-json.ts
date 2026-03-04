@@ -28,8 +28,8 @@ export function safeJsonParse<T>(
       logger.warn(`[SafeJSON] Failed to parse ${context}`, {
         metadata: {
           errorMessage: error instanceof Error ? error.message : String(error),
-          valuePreview: value.substring(0, 100),
-        },
+          valuePreview: value.substring(0, 100)
+        }
       });
     }
     return fallback;
@@ -58,8 +58,8 @@ export function safeJsonParseOrNull<T>(
       logger.warn(`[SafeJSON] Failed to parse ${context}`, {
         metadata: {
           errorMessage: error instanceof Error ? error.message : String(error),
-          valuePreview: value.substring(0, 100),
-        },
+          valuePreview: value.substring(0, 100)
+        }
       });
     }
     return null;

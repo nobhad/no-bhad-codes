@@ -8,7 +8,7 @@
  */
 
 import { getDatabase, Database } from '../database/init.js';
-import { getFloat, getFloatOrNull, getBoolean } from '../database/row-helpers.js';
+import { getFloat, getFloatOrNull } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { logger } from './logger.js';
 import { settingsService } from './settings-service.js';
@@ -35,7 +35,7 @@ import type {
   InvoiceCredit,
   InvoiceCreditRow,
   DepositSummary,
-  InvoiceCreateData,
+  InvoiceCreateData
 } from '../types/invoice-types.js';
 
 export type {
@@ -54,7 +54,7 @@ export type {
   Invoice,
   InvoiceCredit,
   DepositSummary,
-  InvoiceCreateData,
+  InvoiceCreateData
 } from '../types/invoice-types.js';
 
 // Type definitions for database operations
@@ -95,14 +95,14 @@ export class InvoiceService {
     this.db = getDatabase();
     this.paymentService = new InvoicePaymentService(this.db, {
       getInvoiceById: this.getInvoiceById.bind(this),
-      updateInvoiceStatus: this.updateInvoiceStatus.bind(this),
+      updateInvoiceStatus: this.updateInvoiceStatus.bind(this)
     });
     this.recurringService = new InvoiceRecurringService(this.db, {
       createInvoice: async (data) => this.createInvoice(data),
-      getInvoiceById: async (id) => this.getInvoiceById(id),
+      getInvoiceById: async (id) => this.getInvoiceById(id)
     });
     this.reportingService = new InvoiceReportingService(this.db, {
-      mapRowToInvoice: this.mapRowToInvoice.bind(this),
+      mapRowToInvoice: this.mapRowToInvoice.bind(this)
     });
   }
 
@@ -159,7 +159,7 @@ export class InvoiceService {
       issuedDate,
       data.notes || null,
       data.terms || 'Payment due within 14 days of receipt.',
-      amountTotal,
+      amountTotal
     ]);
 
     const invoiceId = result.lastID!;
@@ -427,7 +427,7 @@ export class InvoiceService {
       clientId: intake.client_id,
       lineItems,
       notes: `Generated from intake: ${intake.project_description}`,
-      terms: 'Payment due within 30 days. 50% upfront, 50% on completion.',
+      terms: 'Payment due within 30 days. 50% upfront, 50% on completion.'
     });
   }
 
@@ -453,127 +453,127 @@ export class InvoiceService {
 
     // Generate line items based on project type
     switch (projectType.toLowerCase()) {
-      case 'website':
-      case 'business site':
-        lineItems.push(
-          {
-            description: 'Website Design & Development',
-            quantity: 1,
-            rate: baseAmount * 0.7,
-            amount: baseAmount * 0.7,
-          },
-          {
-            description: 'Content Management System Setup',
-            quantity: 1,
-            rate: baseAmount * 0.2,
-            amount: baseAmount * 0.2,
-          },
-          {
-            description: 'SEO Optimization & Testing',
-            quantity: 1,
-            rate: baseAmount * 0.1,
-            amount: baseAmount * 0.1,
-          }
-        );
-        break;
+    case 'website':
+    case 'business site':
+      lineItems.push(
+        {
+          description: 'Website Design & Development',
+          quantity: 1,
+          rate: baseAmount * 0.7,
+          amount: baseAmount * 0.7
+        },
+        {
+          description: 'Content Management System Setup',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'SEO Optimization & Testing',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      case 'web app':
-      case 'application':
-        lineItems.push(
-          {
-            description: 'Application Development',
-            quantity: 1,
-            rate: baseAmount * 0.6,
-            amount: baseAmount * 0.6,
-          },
-          {
-            description: 'Database Design & Setup',
-            quantity: 1,
-            rate: baseAmount * 0.2,
-            amount: baseAmount * 0.2,
-          },
-          {
-            description: 'API Development',
-            quantity: 1,
-            rate: baseAmount * 0.1,
-            amount: baseAmount * 0.1,
-          },
-          {
-            description: 'Testing & Deployment',
-            quantity: 1,
-            rate: baseAmount * 0.1,
-            amount: baseAmount * 0.1,
-          }
-        );
-        break;
+    case 'web app':
+    case 'application':
+      lineItems.push(
+        {
+          description: 'Application Development',
+          quantity: 1,
+          rate: baseAmount * 0.6,
+          amount: baseAmount * 0.6
+        },
+        {
+          description: 'Database Design & Setup',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'API Development',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        },
+        {
+          description: 'Testing & Deployment',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      case 'e-commerce':
-        lineItems.push(
-          {
-            description: 'E-commerce Platform Development',
-            quantity: 1,
-            rate: baseAmount * 0.5,
-            amount: baseAmount * 0.5,
-          },
-          {
-            description: 'Payment Integration',
-            quantity: 1,
-            rate: baseAmount * 0.2,
-            amount: baseAmount * 0.2,
-          },
-          {
-            description: 'Product Catalog Setup',
-            quantity: 1,
-            rate: baseAmount * 0.2,
-            amount: baseAmount * 0.2,
-          },
-          {
-            description: 'Security & Testing',
-            quantity: 1,
-            rate: baseAmount * 0.1,
-            amount: baseAmount * 0.1,
-          }
-        );
-        break;
+    case 'e-commerce':
+      lineItems.push(
+        {
+          description: 'E-commerce Platform Development',
+          quantity: 1,
+          rate: baseAmount * 0.5,
+          amount: baseAmount * 0.5
+        },
+        {
+          description: 'Payment Integration',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'Product Catalog Setup',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        },
+        {
+          description: 'Security & Testing',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      case 'browser extension':
-        lineItems.push(
-          {
-            description: 'Browser Extension Development',
-            quantity: 1,
-            rate: baseAmount * 0.8,
-            amount: baseAmount * 0.8,
-          },
-          {
-            description: 'Cross-browser Compatibility',
-            quantity: 1,
-            rate: baseAmount * 0.1,
-            amount: baseAmount * 0.1,
-          },
-          {
-            description: 'Store Submission & Review',
-            quantity: 1,
-            rate: baseAmount * 0.1,
-            amount: baseAmount * 0.1,
-          }
-        );
-        break;
+    case 'browser extension':
+      lineItems.push(
+        {
+          description: 'Browser Extension Development',
+          quantity: 1,
+          rate: baseAmount * 0.8,
+          amount: baseAmount * 0.8
+        },
+        {
+          description: 'Cross-browser Compatibility',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        },
+        {
+          description: 'Store Submission & Review',
+          quantity: 1,
+          rate: baseAmount * 0.1,
+          amount: baseAmount * 0.1
+        }
+      );
+      break;
 
-      default:
-        lineItems.push(
-          {
-            description: `${projectType} Development`,
-            quantity: 1,
-            rate: baseAmount * 0.8,
-            amount: baseAmount * 0.8,
-          },
-          {
-            description: 'Testing & Deployment',
-            quantity: 1,
-            rate: baseAmount * 0.2,
-            amount: baseAmount * 0.2,
-          }
-        );
+    default:
+      lineItems.push(
+        {
+          description: `${projectType} Development`,
+          quantity: 1,
+          rate: baseAmount * 0.8,
+          amount: baseAmount * 0.8
+        },
+        {
+          description: 'Testing & Deployment',
+          quantity: 1,
+          rate: baseAmount * 0.2,
+          amount: baseAmount * 0.2
+        }
+      );
     }
 
     return lineItems;
@@ -645,7 +645,7 @@ export class InvoiceService {
       internalNotes: row.internal_notes,
       // Advanced features - Invoice number customization
       invoicePrefix: row.invoice_prefix,
-      invoiceSequence: row.invoice_sequence,
+      invoiceSequence: row.invoice_sequence
     };
   }
 
@@ -671,7 +671,7 @@ export class InvoiceService {
       taxAmount: getFloatOrNull(row, 'tax_amount') ?? undefined,
       discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
       discountValue: getFloatOrNull(row, 'discount_value') ?? undefined,
-      discountAmount: getFloatOrNull(row, 'discount_amount') ?? undefined,
+      discountAmount: getFloatOrNull(row, 'discount_amount') ?? undefined
     }));
   }
 
@@ -704,7 +704,7 @@ export class InvoiceService {
         taxAmount: getFloatOrNull(row, 'tax_amount') ?? undefined,
         discountType: row.discount_type as 'percentage' | 'fixed' | undefined,
         discountValue: getFloatOrNull(row, 'discount_value') ?? undefined,
-        discountAmount: getFloatOrNull(row, 'discount_amount') ?? undefined,
+        discountAmount: getFloatOrNull(row, 'discount_amount') ?? undefined
       };
 
       if (!lineItemsMap.has(invoiceId)) {
@@ -722,7 +722,7 @@ export class InvoiceService {
   private async attachLineItemsToInvoices(invoices: Invoice[]): Promise<void> {
     if (invoices.length === 0) return;
 
-    const invoiceIds = invoices.map((inv) => inv.id!).filter((id) => id != null);
+    const invoiceIds = invoices.map((inv) => inv.id!).filter((id) => id !== null);
     const lineItemsMap = await this.getLineItemsForInvoices(invoiceIds);
 
     for (const invoice of invoices) {
@@ -757,7 +757,7 @@ export class InvoiceService {
           item.discountType ?? null,
           item.discountValue ?? null,
           item.discountAmount ?? null,
-          i,
+          i
         ]
       );
     }
@@ -778,7 +778,7 @@ export class InvoiceService {
     try {
       const [businessInfo, paymentSettings] = await Promise.all([
         settingsService.getBusinessInfo(),
-        settingsService.getPaymentSettings(),
+        settingsService.getPaymentSettings()
       ]);
 
       return {
@@ -787,7 +787,7 @@ export class InvoiceService {
         email: businessInfo.email || BUSINESS_INFO.email,
         website: businessInfo.website || BUSINESS_INFO.website,
         venmoHandle: paymentSettings.venmoHandle || BUSINESS_INFO.venmoHandle,
-        paypalEmail: paymentSettings.paypalEmail || BUSINESS_INFO.paypalEmail,
+        paypalEmail: paymentSettings.paypalEmail || BUSINESS_INFO.paypalEmail
       };
     } catch {
       // Fall back to constants if settings table doesn't exist yet
@@ -797,7 +797,7 @@ export class InvoiceService {
         email: BUSINESS_INFO.email,
         website: BUSINESS_INFO.website,
         venmoHandle: BUSINESS_INFO.venmoHandle,
-        paypalEmail: BUSINESS_INFO.paypalEmail,
+        paypalEmail: BUSINESS_INFO.paypalEmail
       };
     }
   }
@@ -821,8 +821,8 @@ export class InvoiceService {
         description: description || 'Project Deposit',
         quantity: 1,
         rate: amount,
-        amount: amount,
-      },
+        amount: amount
+      }
     ];
 
     const sql = `
@@ -844,7 +844,7 @@ export class InvoiceService {
       'Payment due within 14 days. This deposit secures your project slot.',
       projectId,
       percentage || null,
-      amount,
+      amount
     ]);
 
     const invoiceId = result.lastID!;
@@ -898,7 +898,7 @@ export class InvoiceService {
           totalAmount,
           amountApplied: totalApplied,
           availableAmount,
-          paidDate: deposit.paid_date,
+          paidDate: deposit.paid_date
         });
       }
     }
@@ -950,7 +950,7 @@ export class InvoiceService {
       invoiceId,
       depositInvoiceId,
       amount,
-      appliedBy || null,
+      appliedBy || null
     ]);
 
     // Update the target invoice's amount_paid
@@ -974,7 +974,7 @@ export class InvoiceService {
       depositInvoiceNumber: depositInvoice.invoiceNumber,
       amount,
       appliedAt: new Date().toISOString(),
-      appliedBy,
+      appliedBy
     };
   }
 
@@ -999,7 +999,7 @@ export class InvoiceService {
       depositInvoiceNumber: row.deposit_invoice_number,
       amount: typeof row.amount === 'string' ? parseFloat(row.amount) : row.amount,
       appliedAt: row.applied_at,
-      appliedBy: row.applied_by,
+      appliedBy: row.applied_by
     }));
   }
 
@@ -1038,7 +1038,7 @@ export class InvoiceService {
       data.name,
       data.description || null,
       JSON.stringify(data.payments),
-      data.isDefault ? 1 : 0,
+      data.isDefault ? 1 : 0
     ]);
 
     return this.getPaymentPlanTemplate(result.lastID!);
@@ -1057,7 +1057,7 @@ export class InvoiceService {
       description: row.description,
       payments: safeJsonParseArray(row.payments, 'payment plan payments'),
       isDefault: Boolean(row.is_default),
-      createdAt: row.created_at,
+      createdAt: row.created_at
     }));
   }
 
@@ -1078,7 +1078,7 @@ export class InvoiceService {
       description: row.description,
       payments: safeJsonParseArray(row.payments, 'payment plan payments'),
       isDefault: Boolean(row.is_default),
-      createdAt: row.created_at,
+      createdAt: row.created_at
     };
   }
 
@@ -1109,8 +1109,8 @@ export class InvoiceService {
           description: payment.label || `Payment (${payment.percentage}%)`,
           quantity: 1,
           rate: amount,
-          amount: amount,
-        },
+          amount: amount
+        }
       ];
 
       // Determine due date based on trigger
@@ -1118,23 +1118,23 @@ export class InvoiceService {
       const today = new Date();
 
       switch (payment.trigger) {
-        case 'upfront':
-          dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-          break;
-        case 'midpoint':
-          dueDate = new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split('T')[0];
-          break;
-        case 'completion':
-          dueDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split('T')[0];
-          break;
-        default:
-          dueDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split('T')[0];
+      case 'upfront':
+        dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        break;
+      case 'midpoint':
+        dueDate = new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
+        break;
+      case 'completion':
+        dueDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
+        break;
+      default:
+        dueDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
       }
 
       const invoice = await this.createInvoice({
@@ -1143,13 +1143,13 @@ export class InvoiceService {
         lineItems,
         dueDate,
         notes: `Generated from payment plan: ${template.name}`,
-        terms: 'Payment due by the date specified above.',
+        terms: 'Payment due by the date specified above.'
       });
 
       // Link invoice to payment plan
       await this.db.run('UPDATE invoices SET payment_plan_id = ? WHERE id = ?', [
         templateId,
-        invoice.id,
+        invoice.id
       ]);
 
       invoices.push(invoice);
@@ -1171,7 +1171,7 @@ export class InvoiceService {
     // Link invoice to milestone
     await this.db.run('UPDATE invoices SET milestone_id = ? WHERE id = ?', [
       milestoneId,
-      invoice.id,
+      invoice.id
     ]);
 
     return this.getInvoiceById(invoice.id!);
@@ -1434,7 +1434,7 @@ export class InvoiceService {
         ? `Copy of ${original.invoiceNumber}: ${original.notes}`
         : `Copy of ${original.invoiceNumber}`,
       original.terms,
-      original.amountTotal,
+      original.amountTotal
     ]);
 
     const invoiceId = result.lastID!;
@@ -1649,7 +1649,7 @@ export class InvoiceService {
       lateFeeFlatAmount: row.late_fee_flat_amount,
       gracePeriodDays: row.grace_period_days || 0,
       isDefault: Boolean(row.is_default),
-      createdAt: row.created_at,
+      createdAt: row.created_at
     }));
   }
 
@@ -1674,7 +1674,7 @@ export class InvoiceService {
       lateFeeFlatAmount: row.late_fee_flat_amount,
       gracePeriodDays: row.grace_period_days || 0,
       isDefault: Boolean(row.is_default),
-      createdAt: row.created_at,
+      createdAt: row.created_at
     };
   }
 
@@ -1706,7 +1706,7 @@ export class InvoiceService {
       data.lateFeeType || 'none',
       data.lateFeeFlatAmount || null,
       data.gracePeriodDays || 0,
-      data.isDefault ? 1 : 0,
+      data.isDefault ? 1 : 0
     ]);
 
     return this.getPaymentTermsPreset(result.lastID!);
@@ -1737,7 +1737,7 @@ export class InvoiceService {
         dueDate.toISOString().split('T')[0],
         terms.lateFeeRate || 0,
         terms.lateFeeType || 'none',
-        invoiceId,
+        invoiceId
       ]
     );
 
@@ -1801,7 +1801,7 @@ export class InvoiceService {
       subtotal,
       taxAmount: totalTax,
       discountAmount: totalDiscount,
-      total: Math.max(0, total), // Ensure non-negative
+      total: Math.max(0, total) // Ensure non-negative
     };
   }
 
@@ -1846,7 +1846,7 @@ export class InvoiceService {
         discountValue ?? invoice.discountValue ?? 0,
         totals.discountAmount,
         totals.total,
-        invoiceId,
+        invoiceId
       ]
     );
 
@@ -1878,14 +1878,14 @@ export class InvoiceService {
     const feeType = invoice.lateFeeType || 'none';
 
     switch (feeType) {
-      case 'flat':
-        return feeRate; // Flat fee amount
-      case 'percentage':
-        return outstanding * (feeRate / 100);
-      case 'daily_percentage':
-        return outstanding * (feeRate / 100) * daysOverdue;
-      default:
-        return 0;
+    case 'flat':
+      return feeRate; // Flat fee amount
+    case 'percentage':
+      return outstanding * (feeRate / 100);
+    case 'daily_percentage':
+      return outstanding * (feeRate / 100) * daysOverdue;
+    default:
+      return 0;
     }
   }
 
@@ -1955,7 +1955,7 @@ export class InvoiceService {
         }
       } catch (error) {
         logger.error(`[InvoiceService] Failed to apply late fee to invoice ${row.id}`, {
-          error: error instanceof Error ? error : undefined,
+          error: error instanceof Error ? error : undefined
         });
       }
     }
@@ -2040,7 +2040,7 @@ export class InvoiceService {
 
     return {
       number: `${usePrefix}-${year}${month}-${seqStr}`,
-      sequence: nextSeq,
+      sequence: nextSeq
     };
   }
 
@@ -2076,7 +2076,7 @@ export class InvoiceService {
       issuedDate,
       data.notes || null,
       data.terms || 'Payment due within 14 days of receipt.',
-      amountTotal,
+      amountTotal
     ]);
 
     const invoiceId = result.lastID!;

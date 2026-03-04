@@ -640,7 +640,7 @@ export const auditLogger = {
       old_value: safeJsonParseOrNull(log.old_value, 'audit log old_value'),
       new_value: safeJsonParseOrNull(log.new_value, 'audit log new_value'),
       changes: safeJsonParseOrNull(log.changes, 'audit log changes'),
-      metadata: safeJsonParseOrNull(log.metadata, 'audit log metadata'),
+      metadata: safeJsonParseOrNull(log.metadata, 'audit log metadata')
     }));
   }
 };

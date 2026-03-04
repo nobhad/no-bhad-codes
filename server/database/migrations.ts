@@ -97,7 +97,7 @@ export class MigrationManager {
         name,
         filename,
         up,
-        down,
+        down
       };
     });
   }
@@ -259,7 +259,7 @@ export class MigrationManager {
     return {
       executed,
       pending,
-      total,
+      total
     };
   }
 

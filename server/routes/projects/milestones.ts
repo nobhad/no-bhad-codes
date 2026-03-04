@@ -175,7 +175,7 @@ router.put(
     // Verify milestone belongs to project
     const milestone = await db.get(`SELECT ${MILESTONE_COLUMNS} FROM milestones WHERE id = ? AND project_id = ?`, [
       milestoneId,
-      projectId,
+      projectId
     ]);
 
     if (!milestone) {
@@ -215,7 +215,7 @@ router.put(
           entityId: milestoneId,
           triggeredBy: 'admin',
           projectId,
-          milestoneTitle: title || milestone.title,
+          milestoneTitle: title || milestone.title
         });
       } else if (!is_completed && milestone.is_completed) {
         // Mark as incomplete
@@ -286,7 +286,7 @@ router.delete(
     // Verify milestone belongs to project
     const milestone = await db.get('SELECT id FROM milestones WHERE id = ? AND project_id = ?', [
       milestoneId,
-      projectId,
+      projectId
     ]);
 
     if (!milestone) {

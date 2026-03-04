@@ -1,0 +1,13 @@
+<%# File Size Cell %>
+<%# Locals: value, col, row %>
+<%
+if (value != null && !isNaN(Number(value))) {
+  var bytes = Number(value);
+  if (bytes === 0) { %>0 B<%
+  } else {
+    var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    var i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(1024));
+    var size = bytes / Math.pow(1024, i);
+    %><%= size.toFixed(i > 0 ? 2 : 0) %> <%= units[i] %><%
+  }
+} else { %>—<% } %>

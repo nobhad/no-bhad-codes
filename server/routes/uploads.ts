@@ -19,16 +19,16 @@ import {
   getUploadsDir,
   getUploadsSubdir,
   UPLOAD_DIRS,
-  sanitizeFilename,
+  sanitizeFilename
 } from '../config/uploads.js';
-import { getString, getNumber } from '../database/row-helpers.js';
+import { getString } from '../database/row-helpers.js';
 import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated,
+  sendCreated
 } from '../utils/api-response.js';
-import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
+import { validateRequest } from '../middleware/validation.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
 
 /** Database row type for file records */
@@ -77,7 +77,7 @@ const UploadValidationSchemas = {
           return 'Filename contains invalid characters';
         }
         return true;
-      },
+      }
     },
     fileType: {
       type: 'string' as const,
@@ -111,27 +111,27 @@ const UploadValidationSchemas = {
         // Data
         'application/json',
         'text/xml',
-        'application/xml',
-      ],
+        'application/xml'
+      ]
     },
     fileSize: {
       type: 'number' as const,
       min: 1,
-      max: 10 * 1024 * 1024, // 10MB max
+      max: 10 * 1024 * 1024 // 10MB max
     },
     description: { type: 'string' as const, maxLength: 1000 },
     category: {
       type: 'string' as const,
-      allowedValues: ['general', 'avatar', 'project_file', 'invoice_attachment', 'message_attachment'],
-    },
+      allowedValues: ['general', 'avatar', 'project_file', 'invoice_attachment', 'message_attachment']
+    }
   },
   // For deliverable workflow actions
   deliverableAction: {
     notes: { type: 'string' as const, maxLength: 2000 },
     feedback: { type: 'string' as const, maxLength: 5000 },
     reason: { type: 'string' as const, maxLength: 2000 },
-    comment: { type: 'string' as const, maxLength: 2000 },
-  },
+    comment: { type: 'string' as const, maxLength: 2000 }
+  }
 };
 
 // Get uploads directory from centralized config (uses persistent storage on Railway)
@@ -171,7 +171,7 @@ async function canAccessProject(req: AuthenticatedRequest, projectId: number): P
   const db = getDatabase();
   const row = await db.get('SELECT 1 FROM projects WHERE id = ? AND client_id = ?', [
     projectId,
-    req.user?.id,
+    req.user?.id
   ]);
 
   return !!row;
@@ -231,7 +231,7 @@ const storage = multer.diskStorage({
     // Generate descriptive filename with sanitized original name and timestamp
     const filename = sanitizeFilename(file.originalname);
     cb(null, filename);
-  },
+  }
 });
 
 // MIME type to extension mapping for validation
@@ -265,7 +265,7 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
   // Data
   'application/json': ['json'],
   'text/xml': ['xml'],
-  'application/xml': ['xml'],
+  'application/xml': ['xml']
 };
 
 // File filter for security
@@ -279,7 +279,7 @@ const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.
     spreadsheets: /\.(xls|xlsx|csv)$/i,
     presentations: /\.(ppt|pptx)$/i,
     archives: /\.(zip|rar|tar|gz|7z)$/i,
-    data: /\.(json|xml)$/i,
+    data: /\.(json|xml)$/i
   };
 
   const fileName = file.originalname.toLowerCase();
@@ -310,8 +310,8 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 5, // Maximum 5 files per request
-  },
+    files: 5 // Maximum 5 files per request
+  }
 });
 
 /**
@@ -355,7 +355,7 @@ router.post(
       path: req.file.path,
       url: `/uploads/${req.file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString(),
+      uploadedAt: new Date().toISOString()
     };
 
     sendCreated(res, { file: fileInfo }, 'File uploaded successfully');
@@ -430,7 +430,7 @@ router.post(
           file.mimetype,
           file.size,
           filePath,
-          req.user?.email || `${req.user?.type || 'unknown'}`,
+          req.user?.email || `${req.user?.type || 'unknown'}`
         ]
       );
 
@@ -443,7 +443,7 @@ router.post(
         path: file.path,
         url: `/${filePath}`,
         uploadedBy: req.user?.id,
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: new Date().toISOString()
       });
     }
 
@@ -497,7 +497,7 @@ router.post(
       size: req.file.size,
       url: `/uploads/avatars/${req.file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString(),
+      uploadedAt: new Date().toISOString()
     };
 
     // Update client avatar URL in database
@@ -511,7 +511,7 @@ router.post(
       } catch (dbError) {
         await logger.error('Failed to update avatar in database:', {
           error: dbError instanceof Error ? dbError : undefined,
-          category: 'UPLOAD',
+          category: 'UPLOAD'
         });
         // Non-blocking - file is already uploaded
       }
@@ -571,7 +571,7 @@ router.post(
       size: req.file.size,
       url: `/uploads/projects/${req.file.filename}`,
       uploadedBy: req.user?.id,
-      uploadedAt: new Date().toISOString(),
+      uploadedAt: new Date().toISOString()
     };
 
     // Save project file info to database
@@ -588,14 +588,14 @@ router.post(
           req.file.mimetype,
           req.file.size,
           projectFile.url,
-          req.user?.email || `${req.user?.type || 'unknown'}`,
+          req.user?.email || `${req.user?.type || 'unknown'}`
         ]
       );
       fileId = result.lastID;
     } catch (dbError) {
       await logger.error('Failed to save file info to database:', {
         error: dbError instanceof Error ? dbError : undefined,
-        category: 'UPLOAD',
+        category: 'UPLOAD'
       });
       // Non-blocking - file is already uploaded
     }
@@ -658,13 +658,13 @@ router.get(
           description: file.description,
           sharedWithClient: !!file.shared_with_client,
           sharedAt: file.shared_at,
-          sharedBy: file.shared_by,
-        })),
+          sharedBy: file.shared_by
+        }))
       });
     } catch (dbError) {
       await logger.error('Failed to fetch files:', {
         error: dbError instanceof Error ? dbError : undefined,
-        category: 'UPLOAD',
+        category: 'UPLOAD'
       });
       return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
     }
@@ -767,17 +767,17 @@ router.get(
           fileType: file.file_type,
           category: file.category,
           sharedWithClient: file.shared_with_client,
-          sharedAt: file.shared_at,
+          sharedAt: file.shared_at
         })),
         projects: (projects as ProjectRow[]).map((p) => ({
           id: p.id,
-          name: p.project_name,
-        })),
+          name: p.project_name
+        }))
       });
     } catch (dbError) {
       await logger.error('Failed to fetch client files:', {
         error: dbError instanceof Error ? dbError : undefined,
-        category: 'UPLOAD',
+        category: 'UPLOAD'
       });
       return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
     }
@@ -843,7 +843,7 @@ router.get(
         await logger.error('Path traversal attempt detected:', {
           error: new Error('Path traversal'),
           category: 'UPLOAD',
-          metadata: { filePath: filePathStr },
+          metadata: { filePath: filePathStr }
         });
         return errorResponse(res, 'Invalid file path', 403, 'PATH_TRAVERSAL_DETECTED');
       }
@@ -869,7 +869,7 @@ router.get(
     } catch (dbError) {
       await logger.error('Failed to fetch file:', {
         error: dbError instanceof Error ? dbError : undefined,
-        category: 'UPLOAD',
+        category: 'UPLOAD'
       });
       return errorResponse(res, 'Failed to fetch file', 500, 'DB_ERROR');
     }
@@ -958,7 +958,7 @@ router.delete(
         await logger.error('Path traversal attempt detected during delete:', {
           error: new Error('Path traversal'),
           category: 'UPLOAD',
-          metadata: { filePath: file.file_path },
+          metadata: { filePath: file.file_path }
         });
       }
 
@@ -966,7 +966,7 @@ router.delete(
     } catch (dbError) {
       await logger.error('Failed to delete file:', {
         error: dbError instanceof Error ? dbError : undefined,
-        category: 'UPLOAD',
+        category: 'UPLOAD'
       });
       return errorResponse(res, 'Failed to delete file', 500, 'DB_ERROR');
     }
@@ -992,7 +992,7 @@ router.get('/test', (req: express.Request, res: express.Response) => {
       uploadDir: uploadDir,
       limits: {
         fileSize: '10MB',
-        maxFiles: 5,
+        maxFiles: 5
       },
       allowedTypes: [
         'Images: jpg, jpeg, png, gif, webp',
@@ -1000,8 +1000,8 @@ router.get('/test', (req: express.Request, res: express.Response) => {
         'Spreadsheets: xls, xlsx, csv',
         'Presentations: ppt, pptx',
         'Archives: zip, rar, tar, gz',
-        'Code: js, ts, html, css, json, xml',
-      ],
+        'Code: js, ts, html, css, json, xml'
+      ]
     },
     'Upload system is operational'
   );
@@ -1168,8 +1168,8 @@ router.post(
   validateRequest({
     feedback: [
       { type: 'required' as const },
-      { type: 'string' as const, minLength: 1, maxLength: 5000 },
-    ],
+      { type: 'string' as const, minLength: 1, maxLength: 5000 }
+    ]
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
@@ -1245,8 +1245,8 @@ router.post(
   validateRequest({
     reason: [
       { type: 'required' as const },
-      { type: 'string' as const, minLength: 1, maxLength: 2000 },
-    ],
+      { type: 'string' as const, minLength: 1, maxLength: 2000 }
+    ]
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
@@ -1313,8 +1313,8 @@ router.post(
   validateRequest({
     comment: [
       { type: 'required' as const },
-      { type: 'string' as const, minLength: 1, maxLength: 2000 },
-    ],
+      { type: 'string' as const, minLength: 1, maxLength: 2000 }
+    ]
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId);
@@ -1445,25 +1445,25 @@ router.use(
       const multerError = error as multer.MulterError;
       if (multerError.code === 'LIMIT_FILE_SIZE') {
         return errorResponseWithPayload(res, 'File too large', 400, 'FILE_TOO_LARGE', {
-          message: 'File size cannot exceed 10MB',
+          message: 'File size cannot exceed 10MB'
         });
       }
 
       if (multerError.code === 'LIMIT_FILE_COUNT') {
         return errorResponseWithPayload(res, 'Too many files', 400, 'TOO_MANY_FILES', {
-          message: 'Cannot upload more than 5 files at once',
+          message: 'Cannot upload more than 5 files at once'
         });
       }
 
       return errorResponseWithPayload(res, 'Upload error', 400, 'UPLOAD_ERROR', {
-        message: multerError.message,
+        message: multerError.message
       });
     }
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     if (errorMessage.includes('File type not allowed')) {
       return errorResponseWithPayload(res, 'File type not allowed', 400, 'INVALID_FILE_TYPE', {
-        message: errorMessage,
+        message: errorMessage
       });
     }
 

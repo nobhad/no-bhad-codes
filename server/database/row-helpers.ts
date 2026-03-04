@@ -296,7 +296,7 @@ const BOOLEAN_FIELDS = new Set([
   'sendReminders',
   'allowComments',
   'allowUploads',
-  'includeInReports',
+  'includeInReports'
 ]);
 
 /**
@@ -319,7 +319,7 @@ const JSON_FIELDS = new Set([
   'variables',
   'attachments',
   'recipients',
-  'schedule',
+  'schedule'
 ]);
 
 /**

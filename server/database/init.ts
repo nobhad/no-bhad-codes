@@ -22,9 +22,9 @@ export type SqlParam = string | number | boolean | null | undefined;
 type SqlParams = SqlParam[];
 
 interface TransactionContext {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   get<T = any>(sql: string, params?: SqlParams): Promise<T | undefined>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   all<T = any>(sql: string, params?: SqlParams): Promise<T[]>;
   run(sql: string, params?: SqlParams): Promise<{ lastID?: number; changes?: number }>;
 }
@@ -35,14 +35,14 @@ export interface Database {
    * @template T The expected row type (defaults to any for backward compatibility)
    * @example db.get<UserRow>('SELECT * FROM users WHERE id = ?', [id])
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   get<T = any>(sql: string, params?: SqlParams): Promise<T | undefined>;
   /**
    * Query multiple rows from the database
    * @template T The expected row type (defaults to any for backward compatibility)
    * @example db.all<InvoiceRow>('SELECT * FROM invoices WHERE client_id = ?', [clientId])
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   all<T = any>(sql: string, params?: SqlParams): Promise<T[]>;
   /**
    * Execute a statement that modifies data
@@ -119,7 +119,7 @@ class DatabaseConnectionPool implements Database {
           db,
           inUse: false,
           lastUsed: Date.now(),
-          id: crypto.randomBytes(4).toString('hex'),
+          id: crypto.randomBytes(4).toString('hex')
         };
 
         resolve(connection);
@@ -263,7 +263,7 @@ class DatabaseConnectionPool implements Database {
             else resolve({ lastID: this.lastID, changes: this.changes });
           });
         });
-      },
+      }
     };
 
     try {
@@ -283,7 +283,7 @@ class DatabaseConnectionPool implements Database {
         await ctx.run('ROLLBACK');
       } catch (rollbackError) {
         logger.error('Rollback failed:', {
-          error: rollbackError instanceof Error ? rollbackError : undefined,
+          error: rollbackError instanceof Error ? rollbackError : undefined
         });
       }
       throw error;
@@ -325,7 +325,7 @@ class DatabaseConnectionPool implements Database {
       idleConnections,
       totalConnections: this.connections.length,
       maxConnections: this.maxConnections,
-      queuedRequests: this.waitingQueue.length,
+      queuedRequests: this.waitingQueue.length
     };
   }
 }
@@ -370,7 +370,7 @@ export async function initializeDatabase(): Promise<void> {
     logger.info(`Pool stats: ${stats.activeConnections} active, ${stats.totalConnections} total`);
   } catch (error: unknown) {
     logger.error('Failed to initialize database:', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     throw error;
   }

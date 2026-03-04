@@ -25,7 +25,7 @@ const router = express.Router();
 const settingsModifyRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
   maxRequests: 10,
-  message: 'Too many settings modifications, please try again later',
+  message: 'Too many settings modifications, please try again later'
 });
 
 /**
@@ -59,7 +59,7 @@ router.get(
     // Filter out sensitive values for non-superadmin users
     const filtered = settings.map((s) => ({
       ...s,
-      value: s.isSensitive ? '********' : s.value,
+      value: s.isSensitive ? '********' : s.value
     }));
 
     res.json(filtered);
@@ -100,7 +100,7 @@ router.get(
 
     res.json({
       ...setting,
-      value: setting.isSensitive ? '********' : setting.value,
+      value: setting.isSensitive ? '********' : setting.value
     });
   })
 );
@@ -152,7 +152,7 @@ router.put(
 
     const setting = await settingsService.setSetting(req.params.key, value, {
       type,
-      description,
+      description
     });
 
     await auditLogger.log({
@@ -160,7 +160,7 @@ router.put(
       entityType: 'system_settings',
       entityId: String(setting.id),
       userId: req.user?.id,
-      changes: { key: req.params.key, newValue: value },
+      changes: { key: req.params.key, newValue: value }
     });
 
     res.json(setting);
@@ -205,7 +205,7 @@ router.delete(
       entityType: 'system_settings',
       entityId: req.params.key,
       userId: req.user?.id,
-      changes: { key: req.params.key },
+      changes: { key: req.params.key }
     });
 
     res.json({ success: true, message: 'Setting deleted' });
@@ -280,7 +280,7 @@ router.put(
       entityType: 'system_settings',
       entityId: req.params.key,
       userId: req.user?.id,
-      changes: req.body,
+      changes: req.body
     });
 
     res.json(businessInfo);
@@ -348,7 +348,7 @@ router.put(
       entityType: 'system_settings',
       entityId: req.params.key,
       userId: req.user?.id,
-      changes: req.body,
+      changes: req.body
     });
 
     res.json(paymentSettings);

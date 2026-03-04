@@ -1,0 +1,27 @@
+<%# Main Table Partial - Renders full table card with header, body, pagination %>
+<%# Locals: tableDef, rows, stats, icons %>
+
+<div class="data-table-card"
+  data-table-id="<%= tableDef.id %>"
+  data-table-config="<%- JSON.stringify(tableDef) %>"
+  data-table-rows="<%- JSON.stringify(rows) %>"
+  data-initialized="false">
+
+  <%- include('table-header', { tableDef, stats }) %>
+
+  <% if (rows.length === 0) { %>
+    <div class="table-empty-state">
+      <div class="empty-state-icon">
+        <svg class="lucide-icon" width="48" height="48"><use href="#icon-<%= (tableDef.emptyIcon || 'inbox').toLowerCase() %>"></use></svg>
+      </div>
+      <p class="empty-state-text"><%= tableDef.emptyMessage || 'No data found' %></p>
+    </div>
+  <% } else { %>
+    <div class="table-scroll-wrapper">
+      <%- include('table-body', { tableDef, rows }) %>
+    </div>
+    <% if (tableDef.features.paginate) { %>
+      <%- include('table-pagination', { tableDef, totalRows: rows.length }) %>
+    <% } %>
+  <% } %>
+</div>

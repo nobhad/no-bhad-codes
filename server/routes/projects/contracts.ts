@@ -11,9 +11,9 @@ import {
   getUploadsSubdir,
   getRelativePath,
   UPLOAD_DIRS,
-  sanitizeFilename,
+  sanitizeFilename
 } from '../../config/uploads.js';
-import { getString, getNumber } from '../../database/row-helpers.js';
+import { getString } from '../../database/row-helpers.js';
 import { getSchedulerService } from '../../services/scheduler-service.js';
 import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../../config/business.js';
 import {
@@ -23,7 +23,7 @@ import {
   ensureSpace,
   drawWrappedText,
   addPageNumbers,
-  PAGE_MARGINS,
+  PAGE_MARGINS
 } from '../../utils/pdf-utils.js';
 import { errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
@@ -96,7 +96,7 @@ router.get(
         const projectName = getString(project, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
         return sendPdfResponse(res, pdfBytes, {
           filename: `contract-${projectName}-${projectId}.pdf`,
-          cacheStatus: 'SIGNED',
+          cacheStatus: 'SIGNED'
         });
       }
     }
@@ -112,22 +112,23 @@ router.get(
       const projectName = getString(project, 'project_name').replace(/[^a-zA-Z0-9]/g, '-');
       return sendPdfResponse(res, cachedPdf, {
         filename: `contract-${projectName}-${projectId}.pdf`,
-        cacheStatus: 'HIT',
+        cacheStatus: 'HIT'
       });
     }
 
     // Helper function to format date
     const formatDate = (dateStr: string | undefined): string => {
-      if (!dateStr)
+      if (!dateStr) {
         return new Date().toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
-          day: 'numeric',
+          day: 'numeric'
         });
+      }
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
+        day: 'numeric'
       });
     };
 
@@ -167,7 +168,7 @@ router.get(
         size: fontSize,
         font: helveticaBold,
         color: rgb(0.88, 0.88, 0.88),
-        rotate: degrees(-20),
+        rotate: degrees(-20)
       });
     };
 
@@ -190,7 +191,7 @@ router.get(
       y: y - 20,
       size: 28,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15),
+      color: rgb(0.15, 0.15, 0.15)
     });
 
     // Logo and business info on right (logo left of text, text left-aligned)
@@ -204,7 +205,7 @@ router.get(
         x: logoX,
         y: y - logoHeight + 10,
         width: logoWidth,
-        height: logoHeight,
+        height: logoHeight
       });
       textStartX = logoX + logoWidth + 18;
     }
@@ -215,35 +216,35 @@ router.get(
       y: y - 11,
       size: 15,
       font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.1, 0.1, 0.1)
     });
     page.drawText(BUSINESS_INFO.owner, {
       x: textStartX,
       y: y - 34,
       size: 10,
       font: helvetica,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page.drawText(BUSINESS_INFO.tagline, {
       x: textStartX,
       y: y - 54,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page.drawText(BUSINESS_INFO.email, {
       x: textStartX,
       y: y - 70,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
     page.drawText(BUSINESS_INFO.website, {
       x: textStartX,
       y: y - 86,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(0.4, 0.4, 0.4)
     });
 
     y -= 120; // Account for 100pt logo height
@@ -253,7 +254,7 @@ router.get(
       start: { x: leftMargin, y: y },
       end: { x: rightMargin, y: y },
       thickness: 1,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(0.7, 0.7, 0.7)
     });
     y -= 21;
 
@@ -266,14 +267,14 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page.drawText(getString(p, 'client_name') || 'Client', {
       x: leftMargin,
       y: y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     let clientLineY = y - 30;
     if (p.company_name) {
@@ -282,7 +283,7 @@ router.get(
         y: clientLineY,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0),
+        color: rgb(0, 0, 0)
       });
       clientLineY -= 15;
     }
@@ -291,7 +292,7 @@ router.get(
       y: clientLineY,
       size: 10,
       font: helvetica,
-      color: rgb(0.3, 0.3, 0.3),
+      color: rgb(0.3, 0.3, 0.3)
     });
 
     // Right side - Service Provider
@@ -300,28 +301,28 @@ router.get(
       y: y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page.drawText(BUSINESS_INFO.name, {
       x: rightCol,
       y: y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     page.drawText('Contract Date:', {
       x: rightCol,
       y: y - 45,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(0.2, 0.2, 0.2)
     });
     page.drawText(formatDate(getString(p, 'contract_signed_at') || getString(p, 'created_at')), {
       x: rightCol,
       y: y - 60,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
 
     y -= 90;
@@ -373,7 +374,7 @@ router.get(
       '',
       `Client: ${getString(p, 'client_name') || 'Client'}`,
       `Email: ${getString(p, 'client_email') || ''}`,
-      `Company: ${getString(p, 'company_name') || ''}`,
+      `Company: ${getString(p, 'company_name') || ''}`
     ].join('\n');
 
     const contentSource =
@@ -394,8 +395,8 @@ router.get(
       contentWidth,
       fonts: {
         regular: helvetica,
-        bold: helveticaBold,
-      },
+        bold: helveticaBold
+      }
     };
 
     const onNewPage = (nextCtx: typeof ctx): void => {
@@ -435,7 +436,7 @@ router.get(
         fontSize,
         font,
         maxWidth: contentWidth - indent,
-        onNewPage,
+        onNewPage
       });
 
       ctx.y -= isTitle || isSection ? 6 : 2;
@@ -448,7 +449,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.y -= 22;
 
@@ -456,8 +457,8 @@ router.get(
     const signatureLineY = ctx.y - 30;
     const signedDate = isSigned
       ? formatDate(
-          getString(p, 'contract_signed_at') || (contract?.signed_at as string | undefined)
-        )
+        getString(p, 'contract_signed_at') || (contract?.signed_at as string | undefined)
+      )
       : '______________';
     const countersignedAt =
       getString(p, 'contract_countersigned_at') ||
@@ -481,13 +482,13 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.currentPage.drawLine({
       start: { x: leftMargin, y: signatureLineY },
       end: { x: leftMargin + signatureWidth, y: signatureLineY },
       thickness: 1,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     if (clientSignatureBytes) {
       const clientSignatureImage = await pdfDoc.embedPng(clientSignatureBytes);
@@ -495,7 +496,7 @@ router.get(
         x: leftMargin + 8,
         y: signatureLineY + 6,
         width: signatureImageWidth,
-        height: signatureImageHeight,
+        height: signatureImageHeight
       });
     }
     ctx.currentPage.drawText(getString(p, 'client_name') || 'Client Name', {
@@ -503,14 +504,14 @@ router.get(
       y: signatureLineY - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.currentPage.drawText(`Date: ${signedDate}`, {
       x: leftMargin,
       y: signatureLineY - 30,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
 
     ctx.currentPage.drawText('Service Provider:', {
@@ -518,13 +519,13 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.currentPage.drawLine({
       start: { x: rightCol, y: signatureLineY },
       end: { x: rightCol + signatureWidth, y: signatureLineY },
       thickness: 1,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     if (countersignatureBytes) {
       const countersignatureImage = await pdfDoc.embedPng(countersignatureBytes);
@@ -532,7 +533,7 @@ router.get(
         x: rightCol + 8,
         y: signatureLineY + 6,
         width: signatureImageWidth,
-        height: signatureImageHeight,
+        height: signatureImageHeight
       });
     }
     ctx.currentPage.drawText(BUSINESS_INFO.name, {
@@ -540,14 +541,14 @@ router.get(
       y: signatureLineY - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
     ctx.currentPage.drawText(`Date: ${countersignedDate}`, {
       x: rightCol,
       y: signatureLineY - 30,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0),
+      color: rgb(0, 0, 0)
     });
 
     // === FOOTERS ===
@@ -562,14 +563,14 @@ router.get(
         y: 52,
         size: 8,
         font: helvetica,
-        color: rgb(0.5, 0.5, 0.5),
+        color: rgb(0.5, 0.5, 0.5)
       });
       footerPage.drawText(footerContact, {
         x: (footerWidth - contactWidth) / 2,
         y: 40,
         size: 9,
         font: helvetica,
-        color: rgb(0.4, 0.4, 0.4),
+        color: rgb(0.4, 0.4, 0.4)
       });
     }
 
@@ -591,7 +592,7 @@ router.get(
 
       await db.run('UPDATE projects SET contract_signed_pdf_path = ? WHERE id = ?', [
         relativePath,
-        projectId,
+        projectId
       ]);
 
       const latestContract = await db.get(
@@ -602,7 +603,7 @@ router.get(
 
       if (latestContract) {
         await db.run(
-          "UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime('now') WHERE id = ?",
+          'UPDATE contracts SET signed_pdf_path = ?, updated_at = datetime(\'now\') WHERE id = ?',
           [relativePath, (latestContract as Record<string, unknown>).id as number]
         );
       }
@@ -613,7 +614,7 @@ router.get(
 
     sendPdfResponse(res, pdfBytes, {
       filename: `contract-${projectName}-${projectId}.pdf`,
-      cacheStatus: 'MISS',
+      cacheStatus: 'MISS'
     });
   })
 );
@@ -694,7 +695,7 @@ router.post(
           signatureToken,
           expiresAt.toISOString(),
           expiresAt.toISOString(),
-          (latestContract as Record<string, unknown>).id as number,
+          (latestContract as Record<string, unknown>).id as number
         ]
       );
     }
@@ -706,7 +707,7 @@ router.post(
       [
         projectId,
         req.user?.email || 'admin',
-        JSON.stringify({ clientEmail, expiresAt: expiresAt.toISOString() }),
+        JSON.stringify({ clientEmail, expiresAt: expiresAt.toISOString() })
       ]
     );
 
@@ -779,7 +780,7 @@ ${BUSINESS_INFO.email}
   </div>
 </body>
 </html>
-      `.trim(),
+      `.trim()
     });
 
     logger.info(`[CONTRACT] Signature request sent for project ${projectId} to ${clientEmail}`);
@@ -790,7 +791,7 @@ ${BUSINESS_INFO.email}
       await scheduler.scheduleContractReminders(projectId);
     } catch (reminderError) {
       logger.error('[CONTRACT] Failed to schedule contract reminders:', {
-        error: reminderError instanceof Error ? reminderError : undefined,
+        error: reminderError instanceof Error ? reminderError : undefined
       });
       // Continue - don't fail the request if reminder scheduling fails
     }
@@ -800,7 +801,7 @@ ${BUSINESS_INFO.email}
       message: 'Signature request sent',
       clientEmail,
       expiresAt: expiresAt.toISOString(),
-      emailSent: emailResult.success,
+      emailSent: emailResult.success
     });
   })
 );
@@ -868,7 +869,7 @@ router.get(
 
     if (latestContract && (latestContract as Record<string, unknown>).status !== 'signed') {
       await db.run(
-        "UPDATE contracts SET status = 'viewed', updated_at = datetime('now') WHERE id = ?",
+        'UPDATE contracts SET status = \'viewed\', updated_at = datetime(\'now\') WHERE id = ?',
         [(latestContract as Record<string, unknown>).id as number]
       );
     }
@@ -880,7 +881,7 @@ router.get(
       clientName: p.client_name,
       clientEmail: p.client_email,
       expiresAt: expiresAt,
-      contractPdfUrl: `/api/projects/${projectId}/contract/pdf`,
+      contractPdfUrl: `/api/projects/${projectId}/contract/pdf`
     });
   })
 );
@@ -1003,7 +1004,7 @@ router.post(
         clientEmail,
         signerIp,
         signerUserAgent,
-        JSON.stringify({ signerName, signedAt }),
+        JSON.stringify({ signerName, signedAt })
       ]
     );
 
@@ -1082,7 +1083,7 @@ ${BUSINESS_INFO.email}
   </div>
 </body>
 </html>
-      `.trim(),
+      `.trim()
     });
 
     // Send notification to admin
@@ -1090,7 +1091,7 @@ ${BUSINESS_INFO.email}
       to: BUSINESS_INFO.email,
       subject: `[Signed] Contract for ${projectName}`,
       text: `Contract signed for "${projectName}" by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.`,
-      html: `<p>Contract signed for <strong>"${projectName}"</strong> by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.</p>`,
+      html: `<p>Contract signed for <strong>"${projectName}"</strong> by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.</p>`
     });
 
     logger.info(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
@@ -1101,7 +1102,7 @@ ${BUSINESS_INFO.email}
       triggeredBy: clientEmail,
       projectId,
       signerName,
-      signerEmail: clientEmail,
+      signerEmail: clientEmail
     });
 
     // Cancel pending contract reminders since contract is now signed
@@ -1110,7 +1111,7 @@ ${BUSINESS_INFO.email}
       await scheduler.cancelContractReminders(projectId);
     } catch (reminderError) {
       logger.error('[CONTRACT] Failed to cancel contract reminders:', {
-        error: reminderError instanceof Error ? reminderError : undefined,
+        error: reminderError instanceof Error ? reminderError : undefined
       });
       // Continue - don't fail the signing if reminder cancellation fails
     }
@@ -1119,7 +1120,7 @@ ${BUSINESS_INFO.email}
       success: true,
       message: 'Contract signed successfully',
       signedAt,
-      signerName,
+      signerName
     });
   })
 );
@@ -1184,7 +1185,7 @@ router.post(
         countersignerIp,
         countersignerUserAgent,
         signatureData || null,
-        projectId,
+        projectId
       ]
     );
 
@@ -1213,7 +1214,7 @@ router.post(
           countersignerIp,
           countersignerUserAgent,
           signatureData || null,
-          (latestContract as Record<string, unknown>).id,
+          (latestContract as Record<string, unknown>).id
         ]
       );
     }
@@ -1226,7 +1227,7 @@ router.post(
         countersignerEmail,
         countersignerIp,
         countersignerUserAgent,
-        JSON.stringify({ signerName, countersignedAt }),
+        JSON.stringify({ signerName, countersignedAt })
       ]
     );
 
@@ -1234,7 +1235,7 @@ router.post(
       success: true,
       message: 'Contract countersigned successfully',
       countersignedAt,
-      signerName,
+      signerName
     });
   })
 );
@@ -1277,7 +1278,7 @@ router.get(
       countersignerName: p.contract_countersigner_name,
       countersignerEmail: p.contract_countersigner_email,
       countersignerIp: p.contract_countersigner_ip,
-      signedPdfPath: p.contract_signed_pdf_path,
+      signedPdfPath: p.contract_signed_pdf_path
     });
   })
 );

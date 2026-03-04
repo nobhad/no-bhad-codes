@@ -4,7 +4,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import {
   canAccessProject,
   canAccessFolder,
-  canAccessFile,
+  canAccessFile
 } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
@@ -57,7 +57,7 @@ router.post(
       parent_folder_id,
       color,
       icon,
-      created_by: req.user!.email,
+      created_by: req.user!.email
     });
 
     sendCreated(res, { folder });
@@ -84,7 +84,7 @@ router.put(
       description,
       color,
       icon,
-      sort_order,
+      sort_order
     });
     sendSuccess(res, { folder });
   })

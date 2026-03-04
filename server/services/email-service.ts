@@ -62,7 +62,7 @@ function escapeHtml(text: string | undefined | null): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#x27;',
+    '\'': '&#x27;'
   };
   return String(text).replace(/[&<>"']/g, (m) => entities[m] || m);
 }
@@ -175,14 +175,14 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
       subject: emailContent.subject,
       text: emailContent.text,
       html: emailContent.html,
-      replyTo: emailConfig.replyTo,
+      replyTo: emailConfig.replyTo
     });
 
     logger.info(`[EMAIL] Message sent successfully: ${info.messageId}`);
     return { success: true, message: `Email sent: ${info.messageId}` };
   } catch (error) {
     logger.error('[EMAIL] Failed to send email:', {
-      error: error instanceof Error ? error : undefined,
+      error: error instanceof Error ? error : undefined
     });
     // Fall back to logging if send fails
     logger.info('[EMAIL] Email content (send failed):');
@@ -190,7 +190,7 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
     logger.info(`Subject: ${emailContent.subject}`);
     return {
       success: false,
-      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }
@@ -235,7 +235,7 @@ export async function sendWelcomeEmail(
       Best regards,
       No Bhad Codes Team
     `,
-    html: generateWelcomeEmailHTML(name, portalUrl),
+    html: generateWelcomeEmailHTML(name, portalUrl)
   };
 
   return sendEmail(emailContent);
@@ -286,7 +286,7 @@ export async function sendNewIntakeNotification(
 
       Review the full details in the admin dashboard.
     `,
-    html: generateIntakeNotificationHTML(intakeData, projectId),
+    html: generateIntakeNotificationHTML(intakeData, projectId)
   };
 
   return sendEmail(emailContent);
@@ -448,8 +448,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               </tr>
 
               ${
-                safeFeatures.length > 0
-                  ? `
+  safeFeatures.length > 0
+    ? `
               <!-- Features -->
               <tr>
                 <td style="padding: 15px 20px;">
@@ -460,8 +460,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                 </td>
               </tr>
               `
-                  : ''
-              }
+    : ''
+}
 
               <!-- Design & Notes -->
               <tr>
@@ -471,15 +471,15 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
                     ${infoRow('Design Level', safeDesignLevel)}
                   </table>
                   ${
-                    safeAdditionalInfo
-                      ? `
+  safeAdditionalInfo
+    ? `
                   <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
                     <strong style="display: block; margin-bottom: 8px; color: #555;">Additional Info:</strong>
                     <span style="color: #222;">${safeAdditionalInfo}</span>
                   </div>
                   `
-                      : ''
-                  }
+    : ''
+}
                 </td>
               </tr>
 
@@ -514,8 +514,8 @@ export const emailService = {
       secure: config.secure,
       auth: {
         user: config.auth.user,
-        pass: config.auth.pass,
-      },
+        pass: config.auth.pass
+      }
     });
 
     logger.info('[EMAIL] Email service initialized successfully');
@@ -535,7 +535,7 @@ export const emailService = {
       return true;
     } catch (error) {
       logger.error('[EMAIL] Email connection test failed:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       return false;
     }
@@ -546,7 +546,7 @@ export const emailService = {
       initialized: transporter !== null,
       queueSize: 0,
       templatesLoaded: 4,
-      isProcessingQueue: false,
+      isProcessingQueue: false
     };
   },
 
@@ -622,7 +622,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `,
+      `
     };
 
     return sendEmail(emailContent);
@@ -792,7 +792,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `,
+      `
     };
 
     return sendEmail(emailContent);
@@ -867,7 +867,7 @@ export const emailService = {
           </div>
         </body>
         </html>
-      `,
+      `
     };
 
     return sendEmail(emailContent);
@@ -895,7 +895,7 @@ export const emailService = {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZoneName: 'short',
+      timeZoneName: 'short'
     });
 
     try {
@@ -903,7 +903,7 @@ export const emailService = {
       const templateDir = path.join(__dirname, '../templates/email');
       const [subjectTemplate, htmlTemplate] = await Promise.all([
         fs.readFile(path.join(templateDir, 'proposal-signed.subject.txt'), 'utf-8'),
-        fs.readFile(path.join(templateDir, 'proposal-signed.html'), 'utf-8'),
+        fs.readFile(path.join(templateDir, 'proposal-signed.html'), 'utf-8')
       ]);
 
       // Replace template variables
@@ -922,7 +922,7 @@ export const emailService = {
         signedAt: data.signedAt,
         ipAddress: data.ipAddress,
         adminUrl: adminUrl,
-        timestamp: timestamp,
+        timestamp: timestamp
       };
 
       let subject = subjectTemplate.trim();
@@ -991,17 +991,17 @@ View project: ${adminUrl}/projects/${data.projectId}
         to: adminEmail,
         subject,
         text,
-        html,
+        html
       };
 
       return sendEmail(emailContent);
     } catch (error) {
       logger.error('[EMAIL] Failed to load proposal signed templates:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       return {
         success: false,
-        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   },
@@ -1020,7 +1020,7 @@ View project: ${adminUrl}/projects/${data.projectId}
       const templateDir = path.join(__dirname, '../templates/email');
       const [subjectTemplate, htmlTemplate] = await Promise.all([
         fs.readFile(path.join(templateDir, 'proposal-signed-client.subject.txt'), 'utf-8'),
-        fs.readFile(path.join(templateDir, 'proposal-signed-client.html'), 'utf-8'),
+        fs.readFile(path.join(templateDir, 'proposal-signed-client.html'), 'utf-8')
       ]);
 
       // Replace template variables
@@ -1039,7 +1039,7 @@ View project: ${adminUrl}/projects/${data.projectId}
         signedAt: data.signedAt,
         ipAddress: data.ipAddress,
         portalUrl: data.portalUrl,
-        supportEmail: data.supportEmail,
+        supportEmail: data.supportEmail
       };
 
       let subject = subjectTemplate.trim();
@@ -1114,18 +1114,18 @@ This email confirms your legally binding agreement. Please keep it for your reco
         to: data.signerEmail,
         subject,
         text,
-        html,
+        html
       };
 
       return sendEmail(emailContent);
     } catch (error) {
       logger.error('[EMAIL] Failed to load proposal signed client templates:', {
-        error: error instanceof Error ? error : undefined,
+        error: error instanceof Error ? error : undefined
       });
       return {
         success: false,
-        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
-  },
+  }
 };

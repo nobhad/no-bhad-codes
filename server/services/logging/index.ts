@@ -20,7 +20,7 @@ import {
   type LogOptions,
   LogLevel,
   parseLogLevel,
-  DEFAULT_LOGGER_CONFIG,
+  DEFAULT_LOGGER_CONFIG
 } from '../../../shared/logging/types.js';
 
 import { createConsoleTransport } from './console-transport.js';
@@ -56,7 +56,7 @@ export class UnifiedLoggerService implements ServerLogger {
       this.transports.push(
         createConsoleTransport({
           level: this.config.level,
-          enableColors: this.config.enableColors,
+          enableColors: this.config.enableColors
         })
       );
     }
@@ -68,7 +68,7 @@ export class UnifiedLoggerService implements ServerLogger {
           level: this.config.level,
           filePath: this.config.filePath,
           maxFileSize: this.config.maxFileSize,
-          maxFiles: this.config.maxFiles,
+          maxFiles: this.config.maxFiles
         })
       );
 
@@ -77,7 +77,7 @@ export class UnifiedLoggerService implements ServerLogger {
         this.transports.push(
           createErrorFileTransport(this.config.errorFilePath, {
             maxFileSize: this.config.maxFileSize,
-            maxFiles: this.config.maxFiles,
+            maxFiles: this.config.maxFiles
           })
         );
       }
@@ -121,8 +121,8 @@ export class UnifiedLoggerService implements ServerLogger {
         ...(options.requestId && { requestId: options.requestId }),
         ...(options.userId && { userId: options.userId }),
         ...(options.ip && { ip: options.ip }),
-        ...(options.userAgent && { userAgent: options.userAgent }),
-      },
+        ...(options.userAgent && { userAgent: options.userAgent })
+      }
     };
   }
 
@@ -198,14 +198,14 @@ export class UnifiedLoggerService implements ServerLogger {
       metadata: {
         ...this.config.defaultContext,
         ...this.context,
-        ...context.metadata,
+        ...context.metadata
       },
       error: {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        code: (error as NodeJS.ErrnoException).code,
-      },
+        code: (error as NodeJS.ErrnoException).code
+      }
     };
 
     this.writeToTransports(entry);
@@ -240,11 +240,11 @@ export class UnifiedLoggerService implements ServerLogger {
         ip: req.ip,
         userAgent: req.get?.('user-agent'),
         contentLength: parseInt(req.get?.('content-length') || '0'),
-        contentType: req.get?.('content-type'),
+        contentType: req.get?.('content-type')
       },
       response: {
         statusCode,
-        duration,
+        duration
       },
       requestId: req.id,
       userId:
@@ -252,8 +252,8 @@ export class UnifiedLoggerService implements ServerLogger {
           ? String(req.user.id)
           : undefined,
       metadata: {
-        ...this.context,
-      },
+        ...this.context
+      }
     };
 
     this.writeToTransports(entry);
@@ -288,8 +288,8 @@ export class UnifiedLoggerService implements ServerLogger {
       details,
       metadata: {
         ...this.context,
-        ...details,
-      },
+        ...details
+      }
     };
 
     this.writeToTransports(entry);
@@ -311,8 +311,8 @@ export class UnifiedLoggerService implements ServerLogger {
       rowCount: details.rowCount as number,
       metadata: {
         ...this.context,
-        ...details,
-      },
+        ...details
+      }
     };
 
     this.writeToTransports(entry);
@@ -371,7 +371,7 @@ export function createLogger(config?: Partial<LoggerConfig>): UnifiedLoggerServi
     maxFileSize: process.env.LOG_MAX_SIZE || '10m',
     maxFiles: process.env.LOG_MAX_FILES || '14',
     enableColors: isDev,
-    ...config,
+    ...config
   });
 }
 
