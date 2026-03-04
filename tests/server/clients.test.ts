@@ -21,7 +21,7 @@ describe('Client Routes - Authentication', () => {
 
     it('blocks unauthenticated profile updates', async () => {
       const res = await request(app).put('/api/clients/me').send({
-        name: 'Test Client',
+        name: 'Test Client'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -29,7 +29,7 @@ describe('Client Routes - Authentication', () => {
     it('blocks unauthenticated password changes', async () => {
       const res = await request(app).put('/api/clients/me/password').send({
         currentPassword: 'old',
-        newPassword: 'new',
+        newPassword: 'new'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -55,14 +55,14 @@ describe('Client Routes - Authentication', () => {
     it('blocks unauthenticated client creation', async () => {
       const res = await request(app).post('/api/clients').send({
         name: 'New Client',
-        email: 'new@example.com',
+        email: 'new@example.com'
       });
       expect([401, 403]).toContain(res.status);
     });
 
     it('blocks unauthenticated client updates', async () => {
       const res = await request(app).put('/api/clients/1').send({
-        name: 'Updated Name',
+        name: 'Updated Name'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -82,14 +82,14 @@ describe('Client Routes - Authentication', () => {
     it('blocks unauthenticated contact creation', async () => {
       const res = await request(app).post('/api/clients/1/contacts').send({
         name: 'John Doe',
-        email: 'john@example.com',
+        email: 'john@example.com'
       });
       expect([401, 403]).toContain(res.status);
     });
 
     it('blocks unauthenticated contact updates', async () => {
       const res = await request(app).put('/api/clients/1/contacts/1').send({
-        name: 'Jane Doe',
+        name: 'Jane Doe'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -108,7 +108,7 @@ describe('Client Routes - Authentication', () => {
 
     it('blocks unauthenticated note creation', async () => {
       const res = await request(app).post('/api/clients/1/notes').send({
-        content: 'Test note',
+        content: 'Test note'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -128,7 +128,7 @@ describe('Client Routes - Authentication', () => {
     it('blocks unauthenticated custom field creation', async () => {
       const res = await request(app).post('/api/clients/1/custom-fields').send({
         fieldName: 'industry',
-        fieldValue: 'Technology',
+        fieldValue: 'Technology'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -142,7 +142,7 @@ describe('Client Routes - Authentication', () => {
 
     it('blocks unauthenticated tag assignment', async () => {
       const res = await request(app).post('/api/clients/1/tags').send({
-        tagId: 1,
+        tagId: 1
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -218,7 +218,7 @@ describe('Client Routes - With Admin Token', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Client',
-          email: 'invalid-email',
+          email: 'invalid-email'
         });
 
       expect([400, 422]).toContain(res.status);
@@ -258,7 +258,7 @@ describe('Client Routes - With Admin Token', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'John Doe',
-          email: 'invalid-email',
+          email: 'invalid-email'
         });
 
       expect([400, 404, 422]).toContain(res.status);
@@ -273,7 +273,7 @@ describe('Client Routes - With Admin Token', () => {
         .send({
           name: 'John Doe',
           email: 'john@example.com',
-          phone: 'not-a-phone',
+          phone: 'not-a-phone'
         });
 
       // May accept or reject depending on validation rules
@@ -301,7 +301,7 @@ describe('Client Routes - Input Sanitization', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         name: '<script>alert("xss")</script>',
-        email: 'test@example.com',
+        email: 'test@example.com'
       });
 
     // Should either sanitize or reject
@@ -315,7 +315,7 @@ describe('Client Routes - Input Sanitization', () => {
 
     const res = await request(app)
       .get('/api/clients')
-      .query({ search: "'; DROP TABLE clients; --" })
+      .query({ search: '\'; DROP TABLE clients; --' })
       .set('Authorization', `Bearer ${adminToken}`);
 
     // Should not crash
@@ -329,7 +329,7 @@ describe('Client Routes - Input Sanitization', () => {
       .post('/api/clients/1/notes')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        content: '<img src=x onerror=alert("xss")>',
+        content: '<img src=x onerror=alert("xss")>'
       });
 
     // Should sanitize or reject

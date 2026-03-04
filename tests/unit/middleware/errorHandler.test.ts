@@ -7,7 +7,7 @@
  * Unit tests for error handling middleware.
  */
 
-import { describe, it, expect, beforeEach, vi, waitFor } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { errorHandler, asyncHandler } from '../../../server/middleware/errorHandler';
 import { logger } from '../../../server/services/logger';
@@ -17,8 +17,8 @@ vi.mock('../../../server/services/logger', () => ({
   logger: {
     logError: vi.fn(),
     error: vi.fn(),
-    info: vi.fn(),
-  },
+    info: vi.fn()
+  }
 }));
 
 describe('Error Handler Middleware', () => {
@@ -36,12 +36,12 @@ describe('Error Handler Middleware', () => {
       headers: {},
       ip: '127.0.0.1',
       get: vi.fn().mockReturnValue('test-agent'),
-      id: 'test-request-id',
+      id: 'test-request-id'
     };
 
     mockRes = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis()
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -61,7 +61,7 @@ describe('Error Handler Middleware', () => {
         expect.objectContaining({
           error: 'Test error',
           code: 'INTERNAL_ERROR',
-          timestamp: expect.any(String),
+          timestamp: expect.any(String)
         })
       );
     });
@@ -77,7 +77,7 @@ describe('Error Handler Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Not found',
-          code: 'NOT_FOUND',
+          code: 'NOT_FOUND'
         })
       );
     });
@@ -91,7 +91,7 @@ describe('Error Handler Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'VALIDATION_ERROR',
+          code: 'VALIDATION_ERROR'
         })
       );
     });
@@ -106,7 +106,7 @@ describe('Error Handler Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Invalid data format',
-          code: 'INVALID_FORMAT',
+          code: 'INVALID_FORMAT'
         })
       );
     });
@@ -121,7 +121,7 @@ describe('Error Handler Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Resource already exists',
-          code: 'DUPLICATE_RESOURCE',
+          code: 'DUPLICATE_RESOURCE'
         })
       );
     });
@@ -136,7 +136,7 @@ describe('Error Handler Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Invalid reference',
-          code: 'INVALID_REFERENCE',
+          code: 'INVALID_REFERENCE'
         })
       );
     });
@@ -150,12 +150,12 @@ describe('Error Handler Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Internal server error',
-          code: 'INTERNAL_ERROR',
+          code: 'INTERNAL_ERROR'
         })
       );
       expect(mockRes.json).not.toHaveBeenCalledWith(
         expect.objectContaining({
-          stack: expect.any(String),
+          stack: expect.any(String)
         })
       );
     });
@@ -169,14 +169,14 @@ describe('Error Handler Middleware', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          stack: 'Error stack trace',
+          stack: 'Error stack trace'
         })
       );
     });
 
     it('should use request logger if available', () => {
       const requestLogger = {
-        logError: vi.fn(),
+        logError: vi.fn()
       };
       (mockReq as any).logger = requestLogger;
       const error = new Error('Test error');

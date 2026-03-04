@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../../server/app';
 
@@ -31,7 +31,7 @@ describe('Invoice endpoints auth guard', () => {
       request(app).get('/api/invoices/search'),
       request(app).get('/api/invoices/aging-report'),
       request(app).get('/api/invoices/all-payments'),
-      request(app).get('/api/invoices/payment-terms'),
+      request(app).get('/api/invoices/payment-terms')
     ]);
 
     expect(searchRes.status).toBe(401);
@@ -43,7 +43,7 @@ describe('Invoice endpoints auth guard', () => {
   it('blocks unauthenticated access to PDF endpoints', async () => {
     const [previewRes, pdfRes] = await Promise.all([
       request(app).post('/api/invoices/preview').send({}),
-      request(app).get('/api/invoices/999999/pdf'),
+      request(app).get('/api/invoices/999999/pdf')
     ]);
 
     // 401 = no auth, 403 = CSRF blocked
@@ -54,7 +54,7 @@ describe('Invoice endpoints auth guard', () => {
   it('blocks unauthenticated access to client invoice endpoints', async () => {
     const [meRes, numberRes] = await Promise.all([
       request(app).get('/api/invoices/me'),
-      request(app).get('/api/invoices/number/INV-TEST-001'),
+      request(app).get('/api/invoices/number/INV-TEST-001')
     ]);
 
     expect(meRes.status).toBe(401);

@@ -24,7 +24,7 @@ test.describe('Client Portal Flow', () => {
     // 1. Login via API to set HttpOnly cookie (use page context so cookies are shared)
     const loginRes = await page.request.post('/api/auth/login', {
       data: { email: CLIENT_EMAIL, password: CLIENT_PASSWORD },
-      failOnStatusCode: false,
+      failOnStatusCode: false
     });
 
     if (!loginRes.ok) {
@@ -58,7 +58,7 @@ test.describe('Client Portal Flow', () => {
   test('portal dashboard shows welcome and navigation', async ({ page }) => {
     const loginRes = await page.request.post('/api/auth/login', {
       data: { email: CLIENT_EMAIL, password: CLIENT_PASSWORD },
-      failOnStatusCode: false,
+      failOnStatusCode: false
     });
 
     if (!loginRes.ok) {

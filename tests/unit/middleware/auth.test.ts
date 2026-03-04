@@ -8,13 +8,13 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import {
   authenticateToken,
   requireAdmin,
   requireClient,
-  AuthenticatedRequest,
+  AuthenticatedRequest
 } from '../../../server/middleware/auth';
 
 // Mock JWT
@@ -23,8 +23,8 @@ vi.mock('jsonwebtoken');
 // Mock environment
 vi.mock('../../../server/config/environment', () => ({
   default: {
-    JWT_SECRET: 'test-secret-key',
-  },
+    JWT_SECRET: 'test-secret-key'
+  }
 }));
 
 describe('Authentication Middleware', () => {
@@ -36,12 +36,12 @@ describe('Authentication Middleware', () => {
     mockReq = {
       headers: {},
       cookies: {},
-      ip: '127.0.0.1',
+      ip: '127.0.0.1'
     };
 
     mockRes = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis()
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -55,7 +55,7 @@ describe('Authentication Middleware', () => {
       vi.mocked(jwt.verify).mockReturnValue(mockDecoded as any);
 
       mockReq.headers = {
-        authorization: 'Bearer valid-token',
+        authorization: 'Bearer valid-token'
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -64,7 +64,7 @@ describe('Authentication Middleware', () => {
       expect(mockReq.user).toEqual({
         id: 1,
         email: 'test@example.com',
-        type: 'client',
+        type: 'client'
       });
       expect(mockNext).toHaveBeenCalled();
     });
@@ -74,7 +74,7 @@ describe('Authentication Middleware', () => {
       vi.mocked(jwt.verify).mockImplementation(() => mockDecoded as any);
 
       mockReq.cookies = {
-        auth_token: 'cookie-token', // Use correct cookie name from COOKIE_CONFIG
+        auth_token: 'cookie-token' // Use correct cookie name from COOKIE_CONFIG
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -83,7 +83,7 @@ describe('Authentication Middleware', () => {
       expect(mockReq.user).toEqual({
         id: 2,
         email: 'admin@example.com',
-        type: 'admin',
+        type: 'admin'
       });
       expect(mockNext).toHaveBeenCalled();
     });
@@ -93,10 +93,10 @@ describe('Authentication Middleware', () => {
       vi.mocked(jwt.verify).mockReturnValue(mockDecoded as any);
 
       mockReq.headers = {
-        authorization: 'Bearer header-token',
+        authorization: 'Bearer header-token'
       };
       mockReq.cookies = {
-        auth_token: 'cookie-token', // Use correct cookie name
+        auth_token: 'cookie-token' // Use correct cookie name
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -112,7 +112,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Access token required',
-        code: 'TOKEN_MISSING',
+        code: 'TOKEN_MISSING'
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -121,7 +121,7 @@ describe('Authentication Middleware', () => {
       delete process.env.JWT_SECRET;
 
       mockReq.headers = {
-        authorization: 'Bearer token',
+        authorization: 'Bearer token'
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -130,7 +130,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Server configuration error',
-        code: 'CONFIG_ERROR',
+        code: 'CONFIG_ERROR'
       });
     });
 
@@ -141,7 +141,7 @@ describe('Authentication Middleware', () => {
       });
 
       mockReq.headers = {
-        authorization: 'Bearer expired-token',
+        authorization: 'Bearer expired-token'
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -150,7 +150,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Token expired',
-        code: 'TOKEN_EXPIRED',
+        code: 'TOKEN_EXPIRED'
       });
     });
 
@@ -161,7 +161,7 @@ describe('Authentication Middleware', () => {
       });
 
       mockReq.headers = {
-        authorization: 'Bearer invalid-token',
+        authorization: 'Bearer invalid-token'
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -170,7 +170,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Invalid token',
-        code: 'TOKEN_INVALID',
+        code: 'TOKEN_INVALID'
       });
     });
 
@@ -179,7 +179,7 @@ describe('Authentication Middleware', () => {
       vi.mocked(jwt.verify).mockReturnValue(mockDecoded as any);
 
       mockReq.headers = {
-        authorization: 'Bearer token',
+        authorization: 'Bearer token'
       };
 
       authenticateToken(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -193,7 +193,7 @@ describe('Authentication Middleware', () => {
       mockReq.user = {
         id: 1,
         email: 'admin@example.com',
-        type: 'admin',
+        type: 'admin'
       };
 
       requireAdmin(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -206,7 +206,7 @@ describe('Authentication Middleware', () => {
       mockReq.user = {
         id: 1,
         email: 'client@example.com',
-        type: 'client',
+        type: 'client'
       };
 
       requireAdmin(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -215,7 +215,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Admin access required',
-        code: 'ADMIN_REQUIRED',
+        code: 'ADMIN_REQUIRED'
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -227,7 +227,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Authentication required',
-        code: 'AUTH_REQUIRED',
+        code: 'AUTH_REQUIRED'
       });
     });
   });
@@ -237,7 +237,7 @@ describe('Authentication Middleware', () => {
       mockReq.user = {
         id: 1,
         email: 'client@example.com',
-        type: 'client',
+        type: 'client'
       };
 
       requireClient(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -250,7 +250,7 @@ describe('Authentication Middleware', () => {
       mockReq.user = {
         id: 1,
         email: 'admin@example.com',
-        type: 'admin',
+        type: 'admin'
       };
 
       requireClient(mockReq as AuthenticatedRequest, mockRes as Response, mockNext);
@@ -259,7 +259,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Client access required',
-        code: 'CLIENT_REQUIRED',
+        code: 'CLIENT_REQUIRED'
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -271,7 +271,7 @@ describe('Authentication Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: 'Authentication required',
-        code: 'AUTH_REQUIRED',
+        code: 'AUTH_REQUIRED'
       });
     });
   });

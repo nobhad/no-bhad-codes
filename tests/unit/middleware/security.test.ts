@@ -16,16 +16,14 @@ import {
   requestSizeLimit,
   suspiciousActivityDetector,
   requestFingerprint,
-  cleanupSecurityMiddleware,
+  cleanupSecurityMiddleware
 } from '../../../server/middleware/security';
-import { logger } from '../../../server/services/logger';
-
 // Mock logger service
 vi.mock('../../../server/services/logger', () => ({
   logger: {
     logSecurity: vi.fn().mockResolvedValue(undefined),
-    error: vi.fn().mockResolvedValue(undefined),
-  },
+    error: vi.fn().mockResolvedValue(undefined)
+  }
 }));
 
 // Mock database (used by rate-limiter.ts)
@@ -33,8 +31,8 @@ vi.mock('../../../server/database/init', () => ({
   getDatabase: vi.fn(() => ({
     get: vi.fn().mockResolvedValue(null), // No blocked IPs
     run: vi.fn().mockResolvedValue({ lastID: 1 }),
-    all: vi.fn().mockResolvedValue([]),
-  })),
+    all: vi.fn().mockResolvedValue([])
+  }))
 }));
 
 describe('Security Middleware', () => {
@@ -55,8 +53,8 @@ describe('Security Middleware', () => {
       get: vi.fn(),
       cookies: {},
       connection: {
-        remoteAddress: '127.0.0.1',
-      } as any,
+        remoteAddress: '127.0.0.1'
+      } as any
     };
 
     mockRes = {
@@ -64,7 +62,7 @@ describe('Security Middleware', () => {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
       set: vi.fn().mockReturnThis(),
-      setHeader: vi.fn().mockReturnThis(),
+      setHeader: vi.fn().mockReturnThis()
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -98,7 +96,7 @@ describe('Security Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Too Many Requests',
-          code: 'RATE_LIMIT_EXCEEDED',
+          code: 'RATE_LIMIT_EXCEEDED'
         })
       );
     });
@@ -126,7 +124,7 @@ describe('Security Middleware', () => {
     it('should skip rate limiting when skipIf returns true', async () => {
       const middleware = rateLimit({
         skipIf: (req) => req.path === '/api/test',
-        maxRequests: 1,
+        maxRequests: 1
       });
 
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -150,7 +148,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(429);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'RATE_LIMIT_EXCEEDED',
+          code: 'RATE_LIMIT_EXCEEDED'
         })
       );
     });
@@ -161,7 +159,7 @@ describe('Security Middleware', () => {
       const customKey = 'custom-key-123';
       const middleware = rateLimit({
         keyGenerator: () => customKey,
-        maxRequests: 1,
+        maxRequests: 1
       });
 
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -208,7 +206,7 @@ describe('Security Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Invalid CSRF token',
-          code: 'CSRF_TOKEN_INVALID',
+          code: 'CSRF_TOKEN_INVALID'
         })
       );
     });
@@ -253,7 +251,7 @@ describe('Security Middleware', () => {
 
     it('should skip CSRF check when skipIf returns true', async () => {
       const middleware = csrfProtection({
-        skipIf: (req) => req.path === '/api/test',
+        skipIf: (req) => req.path === '/api/test'
       });
 
       mockReq.method = 'POST';
@@ -290,7 +288,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'IP_BLACKLISTED',
+          code: 'IP_BLACKLISTED'
         })
       );
     });
@@ -309,7 +307,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'IP_NOT_WHITELISTED',
+          code: 'IP_NOT_WHITELISTED'
         })
       );
     });
@@ -324,7 +322,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'IP_UNKNOWN',
+          code: 'IP_UNKNOWN'
         })
       );
     });
@@ -358,7 +356,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(414);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'URL_TOO_LONG',
+          code: 'URL_TOO_LONG'
         })
       );
     });
@@ -366,7 +364,7 @@ describe('Security Middleware', () => {
     it('should reject requests with headers that are too large', async () => {
       const middleware = requestSizeLimit({ maxHeaderSize: 100 });
       mockReq.headers = {
-        'x-large-header': 'a'.repeat(200),
+        'x-large-header': 'a'.repeat(200)
       };
 
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -374,7 +372,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(431);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'HEADERS_TOO_LARGE',
+          code: 'HEADERS_TOO_LARGE'
         })
       );
     });
@@ -388,7 +386,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(413);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'BODY_TOO_LARGE',
+          code: 'BODY_TOO_LARGE'
         })
       );
     });
@@ -422,14 +420,14 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'SUSPICIOUS_ACTIVITY_DETECTED',
+          code: 'SUSPICIOUS_ACTIVITY_DETECTED'
         })
       );
     });
 
     it('should detect SQL injection attempts', async () => {
       const middleware = suspiciousActivityDetector({ maxSqlInjectionAttempts: 2 });
-      mockReq.url = "/api/test?id=1' OR '1'='1";
+      mockReq.url = '/api/test?id=1\' OR \'1\'=\'1';
 
       await middleware(mockReq as Request, mockRes as Response, mockNext);
       await middleware(mockReq as Request, mockRes as Response, mockNext);
@@ -468,7 +466,7 @@ describe('Security Middleware', () => {
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: 'SUSPICIOUS_ACTIVITY_DETECTED',
+          code: 'SUSPICIOUS_ACTIVITY_DETECTED'
         })
       );
     });

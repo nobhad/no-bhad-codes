@@ -10,16 +10,15 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Request } from 'express';
 import { auditLogger } from '../../../server/services/audit-logger';
-import { getDatabase } from '../../../server/database/init';
 
 // Mock database
 const mockDb = {
   run: vi.fn().mockResolvedValue({ lastID: 1 }),
-  all: vi.fn().mockResolvedValue([]),
+  all: vi.fn().mockResolvedValue([])
 };
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: vi.fn(() => mockDb),
+  getDatabase: vi.fn(() => mockDb)
 }));
 
 // Mock console methods
@@ -35,7 +34,7 @@ describe('Audit Logger Service', () => {
       path: '/api/test',
       method: 'POST',
       get: vi.fn().mockReturnValue('test-agent'),
-      socket: { remoteAddress: '127.0.0.1' },
+      socket: { remoteAddress: '127.0.0.1' }
     };
     vi.clearAllMocks();
   });
@@ -303,7 +302,7 @@ describe('Audit Logger Service', () => {
         action: 'custom_action',
         entityType: 'custom',
         entityId: '123',
-        entityName: 'Custom Entity',
+        entityName: 'Custom Entity'
       };
 
       await auditLogger.log(entry);
@@ -323,8 +322,8 @@ describe('Audit Logger Service', () => {
           old_value: '{}',
           new_value: '{}',
           changes: null,
-          metadata: null,
-        },
+          metadata: null
+        }
       ]);
 
       const result = await auditLogger.query({});
@@ -396,8 +395,8 @@ describe('Audit Logger Service', () => {
           old_value: '{"name":"Old"}',
           new_value: '{"name":"New"}',
           changes: '{"name":{"from":"Old","to":"New"}}',
-          metadata: '{"key":"value"}',
-        },
+          metadata: '{"key":"value"}'
+        }
       ]);
 
       const result = await auditLogger.query({});
@@ -410,7 +409,7 @@ describe('Audit Logger Service', () => {
 
     it('should handle null JSON fields', async () => {
       mockDb.all.mockResolvedValue([
-        { id: 1, old_value: null, new_value: null, changes: null, metadata: null },
+        { id: 1, old_value: null, new_value: null, changes: null, metadata: null }
       ]);
 
       const result = await auditLogger.query({});

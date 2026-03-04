@@ -27,14 +27,14 @@ describe('Project Routes - Authentication', () => {
     it('blocks unauthenticated project creation', async () => {
       const res = await request(app).post('/api/projects').send({
         name: 'New Project',
-        clientId: 1,
+        clientId: 1
       });
       expect([401, 403]).toContain(res.status);
     });
 
     it('blocks unauthenticated project updates', async () => {
       const res = await request(app).put('/api/projects/1').send({
-        name: 'Updated Project',
+        name: 'Updated Project'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -53,14 +53,14 @@ describe('Project Routes - Authentication', () => {
 
     it('blocks unauthenticated task creation', async () => {
       const res = await request(app).post('/api/projects/1/tasks').send({
-        title: 'New Task',
+        title: 'New Task'
       });
       expect([401, 403]).toContain(res.status);
     });
 
     it('blocks unauthenticated task updates', async () => {
       const res = await request(app).put('/api/projects/1/tasks/1').send({
-        status: 'completed',
+        status: 'completed'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -74,7 +74,7 @@ describe('Project Routes - Authentication', () => {
 
     it('blocks unauthenticated milestone creation', async () => {
       const res = await request(app).post('/api/projects/1/milestones').send({
-        title: 'New Milestone',
+        title: 'New Milestone'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -110,7 +110,7 @@ describe('Project Routes - Authentication', () => {
     it('blocks unauthenticated time entry creation', async () => {
       const res = await request(app).post('/api/projects/1/time-entries').send({
         duration: 3600,
-        description: 'Work done',
+        description: 'Work done'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -124,7 +124,7 @@ describe('Project Routes - Authentication', () => {
 
     it('blocks unauthenticated message posting', async () => {
       const res = await request(app).post('/api/projects/1/messages').send({
-        content: 'Hello',
+        content: 'Hello'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -146,7 +146,7 @@ describe('Project Routes - Authentication', () => {
 
     it('blocks unauthenticated template creation', async () => {
       const res = await request(app).post('/api/projects/templates').send({
-        name: 'New Template',
+        name: 'New Template'
       });
       expect([401, 403]).toContain(res.status);
     });
@@ -232,7 +232,7 @@ describe('Project Routes - With Admin Token', () => {
         .post('/api/projects')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          clientId: 1,
+          clientId: 1
         });
 
       expect([400, 422]).toContain(res.status);
@@ -245,7 +245,7 @@ describe('Project Routes - With Admin Token', () => {
         .post('/api/projects')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          name: 'Test Project',
+          name: 'Test Project'
         });
 
       expect([400, 422]).toContain(res.status);
@@ -260,7 +260,7 @@ describe('Project Routes - With Admin Token', () => {
         .send({
           name: 'Test Project',
           clientId: 1,
-          status: 'invalid-status',
+          status: 'invalid-status'
         });
 
       expect([400, 422]).toContain(res.status);
@@ -321,7 +321,7 @@ describe('Project Routes - With Admin Token', () => {
         .post('/api/projects/1/time-entries')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          description: 'Work done',
+          description: 'Work done'
         });
 
       expect([400, 404, 422]).toContain(res.status);
@@ -335,7 +335,7 @@ describe('Project Routes - With Admin Token', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           duration: -3600,
-          description: 'Work done',
+          description: 'Work done'
         });
 
       expect([400, 404, 422]).toContain(res.status);
@@ -385,7 +385,7 @@ describe('Project Routes - Input Sanitization', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         name: '<script>alert("xss")</script>',
-        clientId: 1,
+        clientId: 1
       });
 
     if (res.status === 201 && res.body.data) {
@@ -398,7 +398,7 @@ describe('Project Routes - Input Sanitization', () => {
 
     const res = await request(app)
       .get('/api/projects')
-      .query({ search: "'; DROP TABLE projects; --" })
+      .query({ search: '\'; DROP TABLE projects; --' })
       .set('Authorization', `Bearer ${adminToken}`);
 
     expect([200, 204, 400]).toContain(res.status);
@@ -411,7 +411,7 @@ describe('Project Routes - Input Sanitization', () => {
       .post('/api/projects/1/tasks')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        title: '<img src=x onerror=alert("xss")>',
+        title: '<img src=x onerror=alert("xss")>'
       });
 
     if (res.status === 201 && res.body.data) {
@@ -426,7 +426,7 @@ describe('Project Routes - Input Sanitization', () => {
       .post('/api/projects/1/messages')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        content: '<a href="javascript:alert(1)">click</a>',
+        content: '<a href="javascript:alert(1)">click</a>'
       });
 
     if (res.status === 201 && res.body.data) {
@@ -465,7 +465,7 @@ describe('Project Routes - Authorization', () => {
         .set('Authorization', `Bearer ${clientToken}`)
         .send({
           name: 'New Project',
-          clientId: 999,
+          clientId: 999
         });
 
       expect([403]).toContain(res.status);

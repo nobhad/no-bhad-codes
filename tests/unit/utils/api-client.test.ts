@@ -7,7 +7,7 @@
  * Unit tests for API client utility functions.
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   apiFetch,
   apiGet,
@@ -16,7 +16,7 @@ import {
   apiDelete,
   parseJsonResponse,
   configureApiClient,
-  API_ERROR_CODES,
+  API_ERROR_CODES
 } from '../../../src/utils/api-client';
 
 // Mock fetch
@@ -25,31 +25,31 @@ global.fetch = vi.fn();
 // Mock window.location
 const mockLocation = {
   pathname: '/',
-  href: 'http://localhost/',
+  href: 'http://localhost/'
 };
 
 Object.defineProperty(window, 'location', {
   value: mockLocation,
-  writable: true,
+  writable: true
 });
 
 // Mock sessionStorage and localStorage
 const sessionStorageMock = {
-  clear: vi.fn(),
+  clear: vi.fn()
 };
 
 const localStorageMock = {
-  removeItem: vi.fn(),
+  removeItem: vi.fn()
 };
 
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock,
-  writable: true,
+  writable: true
 });
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
-  writable: true,
+  writable: true
 });
 
 describe('API Client', () => {
@@ -63,7 +63,7 @@ describe('API Client', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: vi.fn().mockResolvedValue({ data: 'test' }),
+        json: vi.fn().mockResolvedValue({ data: 'test' })
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -73,7 +73,7 @@ describe('API Client', () => {
       expect(fetch).toHaveBeenCalledWith(
         '/api/test',
         expect.objectContaining({
-          credentials: 'include',
+          credentials: 'include'
         })
       );
     });
@@ -81,23 +81,23 @@ describe('API Client', () => {
     it('should preserve custom headers', async () => {
       const mockResponse = {
         ok: true,
-        status: 200,
+        status: 200
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
 
       await apiFetch('/api/test', {
         headers: {
-          'Custom-Header': 'value',
-        },
+          'Custom-Header': 'value'
+        }
       });
 
       expect(fetch).toHaveBeenCalledWith(
         '/api/test',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Custom-Header': 'value',
-          }),
+            'Custom-Header': 'value'
+          })
         })
       );
     });
@@ -109,9 +109,9 @@ describe('API Client', () => {
         clone: vi.fn().mockReturnValue({
           json: vi.fn().mockResolvedValue({
             error: 'Token expired',
-            code: API_ERROR_CODES.TOKEN_EXPIRED,
-          }),
-        }),
+            code: API_ERROR_CODES.TOKEN_EXPIRED
+          })
+        })
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -131,9 +131,9 @@ describe('API Client', () => {
         clone: vi.fn().mockReturnValue({
           json: vi.fn().mockResolvedValue({
             error: 'Token missing',
-            code: API_ERROR_CODES.TOKEN_MISSING,
-          }),
-        }),
+            code: API_ERROR_CODES.TOKEN_MISSING
+          })
+        })
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -148,7 +148,7 @@ describe('API Client', () => {
     it('should make GET request', async () => {
       const mockResponse = {
         ok: true,
-        status: 200,
+        status: 200
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -158,7 +158,7 @@ describe('API Client', () => {
       expect(fetch).toHaveBeenCalledWith(
         '/api/test',
         expect.objectContaining({
-          method: 'GET',
+          method: 'GET'
         })
       );
     });
@@ -168,7 +168,7 @@ describe('API Client', () => {
     it('should make POST request with JSON body', async () => {
       const mockResponse = {
         ok: true,
-        status: 200,
+        status: 200
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -180,9 +180,9 @@ describe('API Client', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           }),
-          body: JSON.stringify({ key: 'value' }),
+          body: JSON.stringify({ key: 'value' })
         })
       );
     });
@@ -190,7 +190,7 @@ describe('API Client', () => {
     it('should handle POST without body', async () => {
       const mockResponse = {
         ok: true,
-        status: 200,
+        status: 200
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -201,7 +201,7 @@ describe('API Client', () => {
         '/api/test',
         expect.objectContaining({
           method: 'POST',
-          body: undefined,
+          body: undefined
         })
       );
     });
@@ -211,7 +211,7 @@ describe('API Client', () => {
     it('should make PUT request with JSON body', async () => {
       const mockResponse = {
         ok: true,
-        status: 200,
+        status: 200
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -223,9 +223,9 @@ describe('API Client', () => {
         expect.objectContaining({
           method: 'PUT',
           headers: expect.objectContaining({
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           }),
-          body: JSON.stringify({ key: 'value' }),
+          body: JSON.stringify({ key: 'value' })
         })
       );
     });
@@ -235,7 +235,7 @@ describe('API Client', () => {
     it('should make DELETE request', async () => {
       const mockResponse = {
         ok: true,
-        status: 200,
+        status: 200
       };
 
       vi.mocked(fetch).mockResolvedValue(mockResponse as any);
@@ -245,7 +245,7 @@ describe('API Client', () => {
       expect(fetch).toHaveBeenCalledWith(
         '/api/test',
         expect.objectContaining({
-          method: 'DELETE',
+          method: 'DELETE'
         })
       );
     });
@@ -256,7 +256,7 @@ describe('API Client', () => {
       const mockData = { data: 'test' };
       const mockResponse = {
         ok: true,
-        json: vi.fn().mockResolvedValue(mockData),
+        json: vi.fn().mockResolvedValue(mockData)
       };
 
       const result = await parseJsonResponse(mockResponse as any);
@@ -270,8 +270,8 @@ describe('API Client', () => {
         status: 400,
         json: vi.fn().mockResolvedValue({
           error: 'Bad request',
-          message: 'Invalid input',
-        }),
+          message: 'Invalid input'
+        })
       };
 
       await expect(parseJsonResponse(mockResponse as any)).rejects.toThrow();
@@ -281,7 +281,7 @@ describe('API Client', () => {
       const mockResponse = {
         ok: false,
         status: 500,
-        json: vi.fn().mockRejectedValue(new Error('Parse error')),
+        json: vi.fn().mockRejectedValue(new Error('Parse error'))
       };
 
       await expect(parseJsonResponse(mockResponse as any)).rejects.toThrow();
@@ -295,7 +295,7 @@ describe('API Client', () => {
 
       configureApiClient({
         onSessionExpired,
-        showNotification,
+        showNotification
       });
 
       // Configuration is stored internally, so we test by using it

@@ -16,7 +16,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getDatabase } from '../../../server/database/init';
 
 vi.mock('../../../server/database/init', () => ({
-  getDatabase: vi.fn(),
+  getDatabase: vi.fn()
 }));
 
 describe('Proposal System - Templates', () => {
@@ -26,7 +26,7 @@ describe('Proposal System - Templates', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -40,7 +40,7 @@ describe('Proposal System - Templates', () => {
           project_type: 'web',
           description: 'Standard web design template',
           is_default: 1,
-          created_at: '2026-02-01T10:00:00Z',
+          created_at: '2026-02-01T10:00:00Z'
         },
         {
           id: 2,
@@ -48,8 +48,8 @@ describe('Proposal System - Templates', () => {
           project_type: 'mobile',
           description: 'Mobile app development template',
           is_default: 0,
-          created_at: '2026-02-02T10:00:00Z',
-        },
+          created_at: '2026-02-02T10:00:00Z'
+        }
       ];
 
       mockDb.all.mockResolvedValue(mockTemplates);
@@ -71,12 +71,12 @@ describe('Proposal System - Templates', () => {
         tiers: [
           { id: 1, name: 'Basic', base_price: 3000 },
           { id: 2, name: 'Standard', base_price: 5000 },
-          { id: 3, name: 'Premium', base_price: 8000 },
+          { id: 3, name: 'Premium', base_price: 8000 }
         ],
         features: [
           { id: 1, name: 'Home Page', pricing: {} },
-          { id: 2, name: 'Contact Form', pricing: {} },
-        ],
+          { id: 2, name: 'Contact Form', pricing: {} }
+        ]
       };
 
       mockDb.get.mockResolvedValue(mockTemplate);
@@ -94,7 +94,7 @@ describe('Proposal System - Templates', () => {
       const templateData = {
         name: 'E-Commerce',
         project_type: 'ecommerce',
-        description: 'Full e-commerce solution template',
+        description: 'Full e-commerce solution template'
       };
 
       mockDb.run.mockResolvedValue({ lastID: 3 });
@@ -113,7 +113,7 @@ describe('Proposal System - Templates', () => {
     it('should require name and project_type fields', async () => {
       const invalidTemplate = {
         name: '',
-        project_type: null,
+        project_type: null
       };
 
       expect(invalidTemplate.name).toBeFalsy();
@@ -125,7 +125,7 @@ describe('Proposal System - Templates', () => {
     it('should update proposal template', async () => {
       const updateData = {
         name: 'Web Design Pro',
-        description: 'Updated web design template',
+        description: 'Updated web design template'
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -133,7 +133,7 @@ describe('Proposal System - Templates', () => {
       await mockDb.run('UPDATE proposal_templates SET name = ?, description = ? WHERE id = ?', [
         updateData.name,
         updateData.description,
-        1,
+        1
       ]);
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -161,7 +161,7 @@ describe('Proposal System - Tiers and Features', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -172,7 +172,7 @@ describe('Proposal System - Tiers and Features', () => {
         template_id: 1,
         name: 'Enterprise',
         base_price: 15000,
-        description: 'Enterprise features',
+        description: 'Enterprise features'
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
@@ -188,7 +188,7 @@ describe('Proposal System - Tiers and Features', () => {
     it('should fetch all tiers for template', async () => {
       const mockTiers = [
         { id: 1, name: 'Basic', base_price: 3000, created_at: '2026-02-01' },
-        { id: 2, name: 'Standard', base_price: 5000, created_at: '2026-02-01' },
+        { id: 2, name: 'Standard', base_price: 5000, created_at: '2026-02-01' }
       ];
 
       mockDb.all.mockResolvedValue(mockTiers);
@@ -205,7 +205,7 @@ describe('Proposal System - Tiers and Features', () => {
       const featureData = {
         name: 'Analytics Dashboard',
         description: 'Real-time analytics',
-        category: 'analytics',
+        category: 'analytics'
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
@@ -222,7 +222,7 @@ describe('Proposal System - Tiers and Features', () => {
       const featureTierData = {
         feature_id: 1,
         tier_id: 1,
-        additional_price: 500,
+        additional_price: 500
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
@@ -239,7 +239,7 @@ describe('Proposal System - Tiers and Features', () => {
       const mockFeatures = [
         { id: 1, name: 'Home Page', additional_price: 0 },
         { id: 2, name: 'Contact Form', additional_price: 300 },
-        { id: 3, name: 'Blog', additional_price: 500 },
+        { id: 3, name: 'Blog', additional_price: 500 }
       ];
 
       mockDb.all.mockResolvedValue(mockFeatures);
@@ -262,7 +262,7 @@ describe('Proposal System - Proposal Builder', () => {
     mockDb = {
       get: vi.fn(),
       all: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -274,7 +274,7 @@ describe('Proposal System - Proposal Builder', () => {
         client_id: 5,
         template_id: 1,
         selected_tier_id: 2,
-        status: 'draft',
+        status: 'draft'
       };
 
       mockDb.run.mockResolvedValue({ lastID: 100 });
@@ -286,7 +286,7 @@ describe('Proposal System - Proposal Builder', () => {
           proposalData.client_id,
           proposalData.template_id,
           proposalData.selected_tier_id,
-          proposalData.status,
+          proposalData.status
         ]
       );
 
@@ -333,7 +333,7 @@ describe('Proposal System - Proposal Builder', () => {
     it('should add custom line items to proposal', async () => {
       const customItems = [
         { description: 'Hosting Setup', amount: 100 },
-        { description: 'Custom Development', amount: 1500 },
+        { description: 'Custom Development', amount: 1500 }
       ];
 
       const customTotal = customItems.reduce((sum, item) => sum + item.amount, 0);
@@ -352,7 +352,7 @@ describe('Proposal System - Proposal Builder', () => {
     it('should save proposal as draft without sending', async () => {
       const proposal = {
         status: 'draft',
-        sent_at: null,
+        sent_at: null
       };
 
       expect(proposal.status).toBe('draft');
@@ -364,7 +364,7 @@ describe('Proposal System - Proposal Builder', () => {
     it('should update draft proposal', async () => {
       const updateData = {
         selected_tier_id: 3,
-        status: 'draft',
+        status: 'draft'
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -372,7 +372,7 @@ describe('Proposal System - Proposal Builder', () => {
       await mockDb.run('UPDATE proposals SET selected_tier_id = ? WHERE id = ? AND status = ?', [
         updateData.selected_tier_id,
         100,
-        'draft',
+        'draft'
       ]);
 
       expect(mockDb.run).toHaveBeenCalled();
@@ -381,7 +381,7 @@ describe('Proposal System - Proposal Builder', () => {
     it('should prevent updating sent proposals', async () => {
       const proposal = {
         id: 100,
-        status: 'sent',
+        status: 'sent'
       };
 
       const canUpdate = proposal.status === 'draft';
@@ -396,7 +396,7 @@ describe('Proposal System - PDF Generation', () => {
 
   beforeEach(() => {
     mockDb = {
-      get: vi.fn(),
+      get: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -408,7 +408,7 @@ describe('Proposal System - PDF Generation', () => {
         title: 'Web Design Proposal',
         client_name: 'Acme Corp',
         total: 5800,
-        status: 'draft',
+        status: 'draft'
       };
 
       mockDb.get.mockResolvedValue(mockProposal);
@@ -423,8 +423,8 @@ describe('Proposal System - PDF Generation', () => {
       const pdfContent = {
         header: {
           companyName: 'My Agency',
-          logo: 'path/to/logo.png',
-        },
+          logo: 'path/to/logo.png'
+        }
       };
 
       expect(pdfContent.header.companyName).toBeTruthy();
@@ -436,8 +436,8 @@ describe('Proposal System - PDF Generation', () => {
         footer: {
           signatureBlock: true,
           signerName: '_____________________',
-          signerTitle: '_____________________',
-        },
+          signerTitle: '_____________________'
+        }
       };
 
       expect(pdfContent.footer.signatureBlock).toBe(true);
@@ -446,7 +446,7 @@ describe('Proposal System - PDF Generation', () => {
     it('should add Draft watermark if unsigned', async () => {
       const proposal = {
         status: 'draft',
-        signed_at: null,
+        signed_at: null
       };
 
       const hasDraftWatermark = !proposal.signed_at;
@@ -457,7 +457,7 @@ describe('Proposal System - PDF Generation', () => {
     it('should add Signed watermark if signed', async () => {
       const proposal = {
         status: 'signed',
-        signed_at: '2026-02-10T10:00:00Z',
+        signed_at: '2026-02-10T10:00:00Z'
       };
 
       const hasSignedWatermark = !!proposal.signed_at;
@@ -473,7 +473,7 @@ describe('Proposal System - E-Signature', () => {
   beforeEach(() => {
     mockDb = {
       get: vi.fn(),
-      run: vi.fn(),
+      run: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -481,7 +481,7 @@ describe('Proposal System - E-Signature', () => {
   describe('POST /api/proposals/:id/send', () => {
     it('should send proposal for signature to client', async () => {
       const proposalId = 100;
-      const clientEmail = 'contact@acmecorp.com';
+      const _clientEmail = 'contact@acmecorp.com';
       const signatureToken = 'abc123xyz';
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -495,7 +495,7 @@ describe('Proposal System - E-Signature', () => {
     });
 
     it('should create unique signature token for proposal', async () => {
-      const token = 'unique_token_' + Date.now();
+      const token = `unique_token_${  Date.now()}`;
 
       expect(token).toMatch(/^unique_token_\d+$/);
       expect(token.length).toBeGreaterThan(15);
@@ -509,7 +509,7 @@ describe('Proposal System - E-Signature', () => {
         signer_name: 'John Client',
         signer_email: 'john@acmecorp.com',
         ip_address: '192.168.1.1',
-        timestamp: '2026-02-10T14:30:00Z',
+        timestamp: '2026-02-10T14:30:00Z'
       };
 
       mockDb.run.mockResolvedValue({ changes: 1 });
@@ -522,7 +522,7 @@ describe('Proposal System - E-Signature', () => {
           signatureData.signer_name,
           signatureData.signer_email,
           signatureData.ip_address,
-          signatureData.timestamp,
+          signatureData.timestamp
         ]
       );
 
@@ -547,7 +547,7 @@ describe('Proposal System - E-Signature', () => {
       await mockDb.run('UPDATE proposals SET status = ?, signed_at = ? WHERE id = ?', [
         'signed',
         new Date().toISOString(),
-        100,
+        100
       ]);
 
       expect(mockDb.run).toHaveBeenCalledWith(
@@ -559,7 +559,7 @@ describe('Proposal System - E-Signature', () => {
     it('should allow admin countersign', async () => {
       const adminSignature = {
         signer_name: 'Admin User',
-        signature_type: 'countersign',
+        signature_type: 'countersign'
       };
 
       expect(adminSignature.signer_name).toBeTruthy();
@@ -571,7 +571,7 @@ describe('Proposal System - E-Signature', () => {
     it('should return signature status unsigned', async () => {
       const proposal = {
         status: 'sent',
-        signed_at: null,
+        signed_at: null
       };
 
       const isUnsigned = !proposal.signed_at;
@@ -583,7 +583,7 @@ describe('Proposal System - E-Signature', () => {
     it('should return signature status signed', async () => {
       const proposal = {
         status: 'signed',
-        signed_at: '2026-02-10T14:30:00Z',
+        signed_at: '2026-02-10T14:30:00Z'
       };
 
       const isSigned = !!proposal.signed_at;
@@ -600,7 +600,7 @@ describe('Proposal System - Versions and Comments', () => {
     mockDb = {
       all: vi.fn(),
       run: vi.fn(),
-      get: vi.fn(),
+      get: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -621,7 +621,7 @@ describe('Proposal System - Versions and Comments', () => {
       const mockVersions = [
         { version: 3, created_at: '2026-02-10', created_by: 'user' },
         { version: 2, created_at: '2026-02-05', created_by: 'user' },
-        { version: 1, created_at: '2026-02-01', created_by: 'user' },
+        { version: 1, created_at: '2026-02-01', created_by: 'user' }
       ];
 
       mockDb.all.mockResolvedValue(mockVersions);
@@ -651,7 +651,7 @@ describe('Proposal System - Versions and Comments', () => {
         user_id: 1,
         comment_text: 'Need to add hosting setup',
         is_internal: 1,
-        created_at: new Date().toISOString(),
+        created_at: new Date().toISOString()
       };
 
       mockDb.run.mockResolvedValue({ lastID: 1 });
@@ -663,7 +663,7 @@ describe('Proposal System - Versions and Comments', () => {
           commentData.user_id,
           commentData.comment_text,
           commentData.is_internal,
-          commentData.created_at,
+          commentData.created_at
         ]
       );
 
@@ -672,7 +672,7 @@ describe('Proposal System - Versions and Comments', () => {
 
     it('should add client-visible comment', async () => {
       const commentData = {
-        is_internal: 0,
+        is_internal: 0
       };
 
       expect(commentData.is_internal).toBe(0);
@@ -681,7 +681,7 @@ describe('Proposal System - Versions and Comments', () => {
     it('should fetch comments with visibility filtering', async () => {
       const mockComments = [
         { id: 1, text: 'Public comment', is_internal: 0 },
-        { id: 2, text: 'Internal note', is_internal: 1 },
+        { id: 2, text: 'Internal note', is_internal: 1 }
       ];
 
       mockDb.all.mockResolvedValue(mockComments);
@@ -697,7 +697,7 @@ describe('Proposal System - Versions and Comments', () => {
         { action: 'created', timestamp: '2026-02-01T10:00:00Z' },
         { action: 'viewed', timestamp: '2026-02-05T14:00:00Z' },
         { action: 'commented', timestamp: '2026-02-08T09:00:00Z' },
-        { action: 'signed', timestamp: '2026-02-10T16:00:00Z' },
+        { action: 'signed', timestamp: '2026-02-10T16:00:00Z' }
       ];
 
       expect(activities).toHaveLength(4);
@@ -711,7 +711,7 @@ describe('Proposal System - Error Handling', () => {
 
   beforeEach(() => {
     mockDb = {
-      get: vi.fn(),
+      get: vi.fn()
     };
     vi.mocked(getDatabase).mockReturnValue(mockDb);
   });
@@ -728,7 +728,7 @@ describe('Proposal System - Error Handling', () => {
     const invalidProposal = {
       project_id: null,
       client_id: null,
-      template_id: null,
+      template_id: null
     };
 
     const isValid =
@@ -739,7 +739,7 @@ describe('Proposal System - Error Handling', () => {
 
   it('should prevent signature on draft proposal', async () => {
     const proposal = {
-      status: 'draft',
+      status: 'draft'
     };
 
     const canSign = proposal.status === 'sent';

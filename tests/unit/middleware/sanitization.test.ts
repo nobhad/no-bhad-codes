@@ -14,7 +14,7 @@ import {
   sanitizeObject,
   sanitizeInputs,
   sanitize,
-  stripDangerousPatterns,
+  stripDangerousPatterns
 } from '../../../server/middleware/sanitization';
 
 describe('Sanitization Functions', () => {
@@ -31,7 +31,7 @@ describe('Sanitization Functions', () => {
 
     it('should handle quotes', () => {
       expect(sanitizeString('"quoted"')).toBe('&quot;quoted&quot;');
-      expect(sanitizeString("'single'")).toBe('&#x27;single&#x27;');
+      expect(sanitizeString('\'single\'')).toBe('&#x27;single&#x27;');
     });
 
     it('should handle equals signs', () => {
@@ -49,7 +49,7 @@ describe('Sanitization Functions', () => {
     it('should sanitize string values in objects', () => {
       const input = {
         name: '<script>alert("xss")</script>',
-        email: 'test@example.com',
+        email: 'test@example.com'
       };
       const result = sanitizeObject(input);
       expect(result.name).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;');
@@ -67,9 +67,9 @@ describe('Sanitization Functions', () => {
         user: {
           name: '<script>',
           profile: {
-            bio: '<img src=x>',
-          },
-        },
+            bio: '<img src=x>'
+          }
+        }
       };
       const result = sanitizeObject(input);
       expect(result.user.name).toBe('&lt;script&gt;');
@@ -81,7 +81,7 @@ describe('Sanitization Functions', () => {
         password: '<script>alert("xss")</script>',
         password_hash: '<hash>',
         token: '<token>',
-        normal: '<script>',
+        normal: '<script>'
       };
       const result = sanitizeObject(input);
       expect(result.password).toBe('<script>alert("xss")</script>');
@@ -99,7 +99,7 @@ describe('Sanitization Functions', () => {
       const input = {
         count: 42,
         active: true,
-        name: '<script>',
+        name: '<script>'
       };
       const result = sanitizeObject(input);
       expect(result.count).toBe(42);
@@ -118,7 +118,7 @@ describe('Sanitization Functions', () => {
         body: {},
         query: {},
         params: {},
-        path: '/test',
+        path: '/test'
       };
       mockRes = {};
       mockNext = vi.fn() as unknown as NextFunction;
@@ -127,7 +127,7 @@ describe('Sanitization Functions', () => {
     it('should sanitize request body', () => {
       mockReq.body = {
         name: '<script>alert("xss")</script>',
-        email: 'test@example.com',
+        email: 'test@example.com'
       };
 
       const middleware = sanitizeInputs();
@@ -140,7 +140,7 @@ describe('Sanitization Functions', () => {
     it('should sanitize query parameters', () => {
       mockReq.query = {
         search: '<script>',
-        page: '1',
+        page: '1'
       };
 
       const middleware = sanitizeInputs();
@@ -152,7 +152,7 @@ describe('Sanitization Functions', () => {
 
     it('should sanitize URL parameters', () => {
       mockReq.params = {
-        id: '<script>',
+        id: '<script>'
       };
 
       const middleware = sanitizeInputs();
@@ -165,7 +165,7 @@ describe('Sanitization Functions', () => {
     it('should skip sanitization for specified paths', () => {
       mockReq.path = '/api/upload';
       mockReq.body = {
-        name: '<script>',
+        name: '<script>'
       };
 
       const middleware = sanitizeInputs({ skipPaths: ['/api/upload'] });

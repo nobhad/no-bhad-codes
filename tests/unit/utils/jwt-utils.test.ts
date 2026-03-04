@@ -7,7 +7,7 @@
  * Unit tests for JWT utility functions.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   decodeJwtPayload,
   isTokenExpired,
@@ -15,7 +15,7 @@ import {
   isAdminToken,
   getTokenTimeRemaining,
   validateToken,
-  JwtPayload,
+  JwtPayload
 } from '../../../src/utils/jwt-utils';
 
 describe('JWT Utils', () => {
@@ -25,7 +25,7 @@ describe('JWT Utils', () => {
       const payload = {
         id: 1,
         email: 'test@example.com',
-        exp: Math.floor(Date.now() / 1000) + 3600,
+        exp: Math.floor(Date.now() / 1000) + 3600
       };
       const encodedPayload = btoa(JSON.stringify(payload));
       const token = `header.${encodedPayload}.signature`;

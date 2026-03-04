@@ -19,8 +19,8 @@ vi.mock('../../../server/services/cache-service', () => ({
     get: vi.fn().mockResolvedValue(null),
     set: vi.fn().mockResolvedValue(undefined),
     getOrSet: vi.fn(),
-    invalidateByTag: vi.fn().mockResolvedValue(0),
-  },
+    invalidateByTag: vi.fn().mockResolvedValue(0)
+  }
 }));
 
 // Mock console methods
@@ -38,7 +38,7 @@ describe('Cache Middleware', () => {
       url: '/api/test',
       originalUrl: '/api/test',
       query: {},
-      get: vi.fn(),
+      get: vi.fn()
     };
 
     mockRes = {
@@ -46,7 +46,7 @@ describe('Cache Middleware', () => {
       set: vi.fn().mockReturnThis(),
       get: vi.fn(),
       json: vi.fn().mockReturnThis(),
-      send: vi.fn().mockReturnThis(),
+      send: vi.fn().mockReturnThis()
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -79,7 +79,7 @@ describe('Cache Middleware', () => {
 
     it('should skip caching when skipCache returns true', async () => {
       const middleware = cache({
-        skipCache: () => true,
+        skipCache: () => true
       });
       await middleware(mockReq as Request, mockRes as Response, mockNext);
 
@@ -91,7 +91,7 @@ describe('Cache Middleware', () => {
       const cachedResponse = {
         status: 200,
         headers: { 'content-type': 'application/json' },
-        body: { data: 'cached' },
+        body: { data: 'cached' }
       };
 
       vi.mocked(cacheService.get).mockResolvedValue(cachedResponse);
@@ -229,7 +229,7 @@ describe('Cache Middleware', () => {
       await new Promise((resolve) => setTimeout(resolve, 20));
 
       // Verify error was logged (the middleware catches and logs errors)
-      const wasErrorLogged = consoleErrorSpy.mock.calls.some(
+      const _wasErrorLogged = consoleErrorSpy.mock.calls.some(
         (call) =>
           call[0] && typeof call[0] === 'string' && call[0].includes('Cache middleware error')
       );
@@ -254,7 +254,7 @@ describe('Cache Middleware', () => {
         expect.any(String),
         expect.any(Object),
         expect.objectContaining({
-          tags: ['tag1', 'tag2'],
+          tags: ['tag1', 'tag2']
         })
       );
     });
@@ -273,7 +273,7 @@ describe('Cache Middleware', () => {
         expect.any(String),
         expect.any(Object),
         expect.objectContaining({
-          tags: ['static-tag'],
+          tags: ['static-tag']
         })
       );
     });
@@ -340,7 +340,7 @@ describe('Cache Middleware', () => {
 
       // The error should be caught and logged
       // Check if console.error was called with error message
-      const wasErrorLogged = consoleErrorSpy.mock.calls.some(
+      const _wasErrorLogged = consoleErrorSpy.mock.calls.some(
         (call) =>
           call[0] && typeof call[0] === 'string' && call[0].includes('Error invalidating cache tag')
       );
@@ -377,7 +377,7 @@ describe('Cache Middleware', () => {
 
       expect(cacheService.getOrSet).toHaveBeenCalledWith('query:test-query', queryFn, {
         ttl: 300,
-        tags: [],
+        tags: []
       });
       expect(result).toEqual({ data: 'result' });
     });

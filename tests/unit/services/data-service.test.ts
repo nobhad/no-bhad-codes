@@ -9,7 +9,6 @@
 
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 import { DataService } from '../../../src/services/data-service';
-import portfolioData from '../../mocks/portfolio.json';
 
 // Mock fetch
 global.fetch = vi.fn() as Mock;
@@ -22,7 +21,7 @@ const mockPortfolioData = {
       description: 'Custom portfolio',
       technologies: ['React', 'TypeScript'],
       featured: true,
-      category: 'codes',
+      category: 'codes'
     },
     {
       id: 'ecommerce',
@@ -30,7 +29,7 @@ const mockPortfolioData = {
       description: 'Online store',
       technologies: ['Node.js', 'MongoDB'],
       featured: false,
-      category: 'codes',
+      category: 'codes'
     },
     {
       id: 'branding',
@@ -38,8 +37,8 @@ const mockPortfolioData = {
       description: 'Logo design',
       technologies: ['Illustrator', 'Photoshop'],
       featured: true,
-      category: 'art',
-    },
+      category: 'art'
+    }
   ],
   categories: [
     {
@@ -48,7 +47,7 @@ const mockPortfolioData = {
       description: 'Web development',
       fullDescription: 'Full-stack development',
       color: '#00ff41',
-      icon: '💻',
+      icon: '💻'
     },
     {
       id: 'art',
@@ -56,12 +55,12 @@ const mockPortfolioData = {
       description: 'Creative design',
       fullDescription: 'Visual artwork',
       color: '#ff6b6b',
-      icon: '🎨',
-    },
+      icon: '🎨'
+    }
   ],
   navigation: {
-    main: [{ id: 'home', title: 'home', path: '/', eyebrow: '00' }],
-  },
+    main: [{ id: 'home', title: 'home', path: '/', eyebrow: '00' }]
+  }
 };
 
 describe('DataService', () => {
@@ -74,7 +73,7 @@ describe('DataService', () => {
     // Mock successful fetch response
     (fetch as Mock).mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue(mockPortfolioData),
+      json: vi.fn().mockResolvedValue(mockPortfolioData)
     });
   });
 
@@ -90,7 +89,7 @@ describe('DataService', () => {
       (fetch as Mock).mockResolvedValue({
         ok: false,
         status: 404,
-        statusText: 'Not Found',
+        statusText: 'Not Found'
       });
 
       await dataService.init();

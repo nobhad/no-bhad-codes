@@ -7,7 +7,7 @@
  * Unit tests for invoice generator service.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { generateInvoice, IntakeData } from '../../../server/services/invoice-generator';
 
 describe('Invoice Generator Service', () => {
@@ -19,7 +19,7 @@ describe('Invoice Generator Service', () => {
       projectType: 'business-site',
       projectDescription: 'A test project',
       timeline: '1-3-months',
-      budget: '5000-10000',
+      budget: '5000-10000'
     };
   });
 
@@ -95,7 +95,7 @@ describe('Invoice Generator Service', () => {
         'e-commerce',
         'web-app',
         'browser-extension',
-        'other',
+        'other'
       ];
 
       for (const type of types) {
@@ -116,7 +116,7 @@ describe('Invoice Generator Service', () => {
     it('should handle features as array', async () => {
       const intakeData = {
         ...mockIntakeData,
-        features: ['contact-form', 'analytics', 'blog'],
+        features: ['contact-form', 'analytics', 'blog']
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -127,7 +127,7 @@ describe('Invoice Generator Service', () => {
     it('should handle features as string', async () => {
       const intakeData = {
         ...mockIntakeData,
-        features: 'contact-form',
+        features: 'contact-form'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -138,7 +138,7 @@ describe('Invoice Generator Service', () => {
     it('should handle addons as array', async () => {
       const intakeData = {
         ...mockIntakeData,
-        addons: ['seo-setup', 'copywriting'],
+        addons: ['seo-setup', 'copywriting']
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -149,7 +149,7 @@ describe('Invoice Generator Service', () => {
     it('should handle addons as string', async () => {
       const intakeData = {
         ...mockIntakeData,
-        addons: 'seo-setup',
+        addons: 'seo-setup'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -160,7 +160,7 @@ describe('Invoice Generator Service', () => {
     it('should add design complexity adjustment for full-design', async () => {
       const intakeData = {
         ...mockIntakeData,
-        designLevel: 'full-design',
+        designLevel: 'full-design'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -175,7 +175,7 @@ describe('Invoice Generator Service', () => {
     it('should add design complexity adjustment for partial-design', async () => {
       const intakeData = {
         ...mockIntakeData,
-        designLevel: 'partial-design',
+        designLevel: 'partial-design'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -190,7 +190,7 @@ describe('Invoice Generator Service', () => {
     it('should add content creation adjustment for need-help', async () => {
       const intakeData = {
         ...mockIntakeData,
-        contentStatus: 'need-help',
+        contentStatus: 'need-help'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -205,7 +205,7 @@ describe('Invoice Generator Service', () => {
     it('should add content optimization adjustment for partial content', async () => {
       const intakeData = {
         ...mockIntakeData,
-        contentStatus: 'partial',
+        contentStatus: 'partial'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -220,7 +220,7 @@ describe('Invoice Generator Service', () => {
     it('should add integration adjustment for multiple integrations', async () => {
       const intakeData = {
         ...mockIntakeData,
-        integrations: 'stripe,mailchimp,analytics',
+        integrations: 'stripe,mailchimp,analytics'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -236,7 +236,7 @@ describe('Invoice Generator Service', () => {
     it('should cap integration adjustment at 5', async () => {
       const intakeData = {
         ...mockIntakeData,
-        integrations: 'api1,api2,api3,api4,api5,api6,api7',
+        integrations: 'api1,api2,api3,api4,api5,api6,api7'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -251,7 +251,7 @@ describe('Invoice Generator Service', () => {
     it('should not add integration adjustment for none', async () => {
       const intakeData = {
         ...mockIntakeData,
-        integrations: 'none',
+        integrations: 'none'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -265,7 +265,7 @@ describe('Invoice Generator Service', () => {
     it('should add page adjustment for 11-20 pages', async () => {
       const intakeData = {
         ...mockIntakeData,
-        pages: '11-20',
+        pages: '11-20'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -278,7 +278,7 @@ describe('Invoice Generator Service', () => {
     it('should add page adjustment for 20+ pages', async () => {
       const intakeData = {
         ...mockIntakeData,
-        pages: '20-plus',
+        pages: '20-plus'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -291,7 +291,7 @@ describe('Invoice Generator Service', () => {
     it('should add rush delivery fee for asap timeline', async () => {
       const intakeData = {
         ...mockIntakeData,
-        timeline: 'asap',
+        timeline: 'asap'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -305,7 +305,7 @@ describe('Invoice Generator Service', () => {
     it('should generate 2 payment terms for small projects (<3000)', async () => {
       const intakeData = {
         ...mockIntakeData,
-        projectType: 'simple-site', // Base price 1500
+        projectType: 'simple-site' // Base price 1500
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -317,7 +317,7 @@ describe('Invoice Generator Service', () => {
     it('should generate 3 payment terms for medium projects (3000-10000)', async () => {
       const intakeData = {
         ...mockIntakeData,
-        projectType: 'business-site', // Base price 4000
+        projectType: 'business-site' // Base price 4000
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -330,7 +330,7 @@ describe('Invoice Generator Service', () => {
     it('should generate 4 payment terms for large projects (>=10000)', async () => {
       const intakeData = {
         ...mockIntakeData,
-        projectType: 'web-app', // Base price 15000
+        projectType: 'web-app' // Base price 15000
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -341,7 +341,7 @@ describe('Invoice Generator Service', () => {
     it('should calculate payment term amounts correctly', async () => {
       const intakeData = {
         ...mockIntakeData,
-        projectType: 'business-site',
+        projectType: 'business-site'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -352,7 +352,7 @@ describe('Invoice Generator Service', () => {
     it('should include rush delivery note for asap timeline', async () => {
       const intakeData = {
         ...mockIntakeData,
-        timeline: 'asap',
+        timeline: 'asap'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -363,7 +363,7 @@ describe('Invoice Generator Service', () => {
     it('should include content creation note for need-help content status', async () => {
       const intakeData = {
         ...mockIntakeData,
-        contentStatus: 'need-help',
+        contentStatus: 'need-help'
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -375,7 +375,7 @@ describe('Invoice Generator Service', () => {
       const intakeData = {
         ...mockIntakeData,
         features: ['contact-form', 'analytics'],
-        addons: ['seo-setup'],
+        addons: ['seo-setup']
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -391,7 +391,7 @@ describe('Invoice Generator Service', () => {
       const intakeData = {
         ...mockIntakeData,
         features: [],
-        addons: [],
+        addons: []
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -406,7 +406,7 @@ describe('Invoice Generator Service', () => {
       const intakeData = {
         ...mockIntakeData,
         features: undefined,
-        addons: undefined,
+        addons: undefined
       };
       const invoice = await generateInvoice(intakeData, 1, 1);
 
@@ -442,7 +442,7 @@ describe('Invoice Generator Service', () => {
         designLevel: 'full-design',
         contentStatus: 'need-help',
         integrations: 'stripe,mailchimp,analytics,shopify',
-        pages: '20-plus',
+        pages: '20-plus'
       };
 
       const invoice = await generateInvoice(intakeData, 1, 1);

@@ -19,63 +19,61 @@ import {
   sendSuccess,
   sendBadRequest,
   sendUnauthorized,
-  sendServerError,
-  sendNotFound,
+  sendServerError
 } from '../../../server/utils/api-response';
-import { AuthenticatedRequest } from '../../../server/middleware/auth';
 
 // Mock dependencies
 vi.mock('../../../server/database/init');
 vi.mock('../../../server/services/audit-logger');
 vi.mock('../../../server/utils/api-response');
 vi.mock('../../../server/middleware/security', () => ({
-  rateLimit: () => (req: Request, res: Response, next: NextFunction) => next(),
+  rateLimit: () => (req: Request, res: Response, next: NextFunction) => next()
 }));
 
 // Mock bcrypt
 vi.mock('bcryptjs', () => ({
   default: {
     compare: vi.fn(),
-    hash: vi.fn(),
+    hash: vi.fn()
   },
   compare: vi.fn(),
-  hash: vi.fn(),
+  hash: vi.fn()
 }));
 
 // Mock JWT
 vi.mock('jsonwebtoken', () => ({
   default: {
     sign: vi.fn(),
-    verify: vi.fn(),
+    verify: vi.fn()
   },
   sign: vi.fn(),
-  verify: vi.fn(),
+  verify: vi.fn()
 }));
 
 describe('Auth Routes - Login Handler', () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
-  let mockNext: NextFunction;
+  let _mockNext: NextFunction;
   let mockDb: any;
 
   beforeEach(() => {
     mockReq = {
       body: {},
-      ip: '127.0.0.1',
+      ip: '127.0.0.1'
     };
 
     mockRes = {
-      cookie: vi.fn(),
+      cookie: vi.fn()
     };
 
-    mockNext = vi.fn() as unknown as NextFunction;
+    _mockNext = vi.fn() as unknown as NextFunction;
 
     // Setup mock database
     mockDb = {
       get: vi.fn((sql: string, params: any[], callback: any) => {
         // Default: no user found
         callback(null, undefined);
-      }),
+      })
     };
 
     vi.mocked(getDatabase).mockReturnValue(mockDb as any);
@@ -136,7 +134,7 @@ describe('Auth Routes - Login Handler', () => {
         id: clientData.id,
         email: clientData.email,
         type: clientData.is_admin ? 'admin' : 'client',
-        isAdmin: Boolean(clientData.is_admin),
+        isAdmin: Boolean(clientData.is_admin)
       },
       secret,
       { expiresIn: '7d' }
@@ -153,7 +151,7 @@ describe('Auth Routes - Login Handler', () => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     return sendSuccess(
@@ -166,9 +164,9 @@ describe('Auth Routes - Login Handler', () => {
           companyName: clientData.company_name,
           contactName: clientData.contact_name,
           status: clientData.status,
-          isAdmin: Boolean(clientData.is_admin),
+          isAdmin: Boolean(clientData.is_admin)
         },
-        expiresIn: '7d',
+        expiresIn: '7d'
       },
       'Login successful'
     );
@@ -182,7 +180,7 @@ describe('Auth Routes - Login Handler', () => {
       company_name: 'Test Company',
       contact_name: 'Test User',
       status: 'active',
-      is_admin: 0,
+      is_admin: 0
     };
 
     mockDb.get.mockImplementation((sql: string, params: any[], callback: any) => {
@@ -238,7 +236,7 @@ describe('Auth Routes - Login Handler', () => {
       email: 'test@example.com',
       password_hash: 'hashed-password',
       status: 'inactive',
-      is_admin: 0,
+      is_admin: 0
     };
 
     mockDb.get.mockImplementation((sql: string, params: any[], callback: any) => {
@@ -259,7 +257,7 @@ describe('Auth Routes - Login Handler', () => {
       email: 'test@example.com',
       password_hash: 'hashed-password',
       status: 'active',
-      is_admin: 0,
+      is_admin: 0
     };
 
     mockDb.get.mockImplementation((sql: string, params: any[], callback: any) => {
@@ -283,7 +281,7 @@ describe('Auth Routes - Login Handler', () => {
       email: 'test@example.com',
       password_hash: 'hashed-password',
       status: 'active',
-      is_admin: 0,
+      is_admin: 0
     };
 
     mockDb.get.mockImplementation((sql: string, params: any[], callback: any) => {

@@ -18,8 +18,8 @@ vi.mock('../../../src/utils/sanitization-utils', () => ({
     sanitizeEmail: vi.fn((email: string) => email?.toLowerCase().trim() || ''),
     sanitizeMessage: vi.fn((message: string) => message?.trim() || ''),
     checkRateLimit: vi.fn(() => true),
-    logSecurityViolation: vi.fn(),
-  },
+    logSecurityViolation: vi.fn()
+  }
 }));
 
 describe('ContactService', () => {
@@ -29,7 +29,7 @@ describe('ContactService', () => {
     name: 'John Doe',
     email: 'john@example.com',
     companyName: 'Test Company',
-    message: 'This is a test message with enough characters.',
+    message: 'This is a test message with enough characters.'
   };
 
   beforeEach(async () => {
@@ -56,7 +56,7 @@ describe('ContactService', () => {
     it('should accept custom backend with endpoint', async () => {
       const customService = new ContactService({
         backend: 'custom',
-        endpoint: '/api/contact',
+        endpoint: '/api/contact'
       });
       await customService.init();
       expect(customService).toBeInstanceOf(ContactService);
@@ -84,7 +84,7 @@ describe('ContactService', () => {
     it('should require name', () => {
       const result = service.validateFormData({
         ...validFormData,
-        name: '',
+        name: ''
       });
 
       expect(result.valid).toBe(false);
@@ -94,7 +94,7 @@ describe('ContactService', () => {
     it('should require email', () => {
       const result = service.validateFormData({
         ...validFormData,
-        email: '',
+        email: ''
       });
 
       expect(result.valid).toBe(false);
@@ -104,7 +104,7 @@ describe('ContactService', () => {
     it('should validate email format', () => {
       const result = service.validateFormData({
         ...validFormData,
-        email: 'invalid-email',
+        email: 'invalid-email'
       });
 
       expect(result.valid).toBe(false);
@@ -114,7 +114,7 @@ describe('ContactService', () => {
     it('should require message', () => {
       const result = service.validateFormData({
         ...validFormData,
-        message: '',
+        message: ''
       });
 
       expect(result.valid).toBe(false);
@@ -124,7 +124,7 @@ describe('ContactService', () => {
     it('should require minimum message length', () => {
       const result = service.validateFormData({
         ...validFormData,
-        message: 'Short',
+        message: 'Short'
       });
 
       expect(result.valid).toBe(false);
@@ -135,7 +135,7 @@ describe('ContactService', () => {
       const result = service.validateFormData({
         name: '',
         email: '',
-        message: '',
+        message: ''
       });
 
       expect(result.valid).toBe(false);
@@ -152,7 +152,7 @@ describe('ContactService', () => {
       // Mock fetch to return success
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ success: true }),
+        json: () => Promise.resolve({ success: true })
       });
 
       const result = await service.submitForm(validFormData);
@@ -164,7 +164,7 @@ describe('ContactService', () => {
     it('should return error for invalid data', async () => {
       const result = await service.submitForm({
         ...validFormData,
-        email: '',
+        email: ''
       });
 
       expect(result.success).toBe(false);
@@ -176,7 +176,7 @@ describe('ContactService', () => {
     it('should allow custom endpoint configuration', async () => {
       const customService = new ContactService({
         backend: 'custom',
-        endpoint: '/custom/api',
+        endpoint: '/custom/api'
       });
       await customService.init();
 
@@ -186,7 +186,7 @@ describe('ContactService', () => {
     it('should allow formspree with formId', async () => {
       const formspreeService = new ContactService({
         backend: 'formspree',
-        formId: 'test123',
+        formId: 'test123'
       });
       await formspreeService.init();
 

@@ -13,7 +13,7 @@ import {
   getCachedPdf,
   cachePdf,
   invalidatePdfCache,
-  clearPdfCache,
+  clearPdfCache
 } from '../../../server/utils/pdf-utils';
 
 describe('PDF Utils', () => {

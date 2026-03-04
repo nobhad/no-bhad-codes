@@ -15,9 +15,9 @@ vi.mock('../../../server/services/receipt-service', () => ({
   receiptService: {
     createReceipt: vi.fn().mockResolvedValue({
       id: 1,
-      receiptNumber: 'REC-001',
-    }),
-  },
+      receiptNumber: 'REC-001'
+    })
+  }
 }));
 
 describe('InvoicePaymentService', () => {
@@ -42,14 +42,14 @@ describe('InvoicePaymentService', () => {
     issueDate: '2026-02-01',
     createdAt: '2026-02-01T00:00:00Z',
     updatedAt: '2026-02-01T00:00:00Z',
-    ...overrides,
+    ...overrides
   });
 
   beforeEach(() => {
     mockDb = {
       run: vi.fn().mockResolvedValue({ lastID: 1 }),
       get: vi.fn(),
-      all: vi.fn().mockResolvedValue([]),
+      all: vi.fn().mockResolvedValue([])
     };
 
     mockGetInvoiceById = vi.fn();
@@ -57,7 +57,7 @@ describe('InvoicePaymentService', () => {
 
     service = new InvoicePaymentService(mockDb, {
       getInvoiceById: mockGetInvoiceById,
-      updateInvoiceStatus: mockUpdateInvoiceStatus,
+      updateInvoiceStatus: mockUpdateInvoiceStatus
     });
   });
 
@@ -69,7 +69,7 @@ describe('InvoicePaymentService', () => {
       const result = await service.markInvoiceAsPaid(1, {
         amountPaid: 1000,
         paymentMethod: 'credit_card',
-        paymentReference: 'ch_123',
+        paymentReference: 'ch_123'
       });
 
       expect(mockUpdateInvoiceStatus).toHaveBeenCalledWith(
@@ -79,7 +79,7 @@ describe('InvoicePaymentService', () => {
           amountPaid: 1000,
           paymentMethod: 'credit_card',
           paymentReference: 'ch_123',
-          paidDate: expect.any(String),
+          paidDate: expect.any(String)
         })
       );
       expect(result.status).toBe('paid');
@@ -91,7 +91,7 @@ describe('InvoicePaymentService', () => {
 
       await service.markInvoiceAsPaid(1, {
         amountPaid: 1000,
-        paymentMethod: 'bank_transfer',
+        paymentMethod: 'bank_transfer'
       });
 
       const call = mockUpdateInvoiceStatus.mock.calls[0];
@@ -189,7 +189,7 @@ describe('InvoicePaymentService', () => {
       expect(mockDb.run).toHaveBeenCalledWith(expect.stringContaining('UPDATE invoice_reminders'), [
         'skipped',
         1,
-        'pending',
+        'pending'
       ]);
     });
 
@@ -260,7 +260,7 @@ describe('InvoicePaymentService', () => {
         1, // paymentId (from lastID)
         500, // amount
         expect.objectContaining({
-          paymentMethod: 'credit_card',
+          paymentMethod: 'credit_card'
         })
       );
       expect(result.receipt).toBeDefined();
@@ -310,7 +310,7 @@ describe('InvoicePaymentService', () => {
           payment_reference: 'ref_123',
           payment_date: '2026-02-01',
           notes: 'First payment',
-          created_at: '2026-02-01T10:00:00Z',
+          created_at: '2026-02-01T10:00:00Z'
         },
         {
           id: 2,
@@ -320,8 +320,8 @@ describe('InvoicePaymentService', () => {
           payment_reference: null,
           payment_date: '2026-02-15',
           notes: null,
-          created_at: '2026-02-15T10:00:00Z',
-        },
+          created_at: '2026-02-15T10:00:00Z'
+        }
       ]);
 
       const result = await service.getPaymentHistory(1);
@@ -335,7 +335,7 @@ describe('InvoicePaymentService', () => {
         paymentReference: 'ref_123',
         paymentDate: '2026-02-01',
         notes: 'First payment',
-        createdAt: '2026-02-01T10:00:00Z',
+        createdAt: '2026-02-01T10:00:00Z'
       });
       expect(result[1].amount).toBe(300); // Already a number
     });
@@ -350,8 +350,8 @@ describe('InvoicePaymentService', () => {
           payment_reference: null,
           payment_date: '2026-02-01',
           notes: null,
-          created_at: '2026-02-01T10:00:00Z',
-        },
+          created_at: '2026-02-01T10:00:00Z'
+        }
       ]);
 
       const result = await service.getPaymentHistory(1);
@@ -372,7 +372,7 @@ describe('InvoicePaymentService', () => {
           payment_reference: 'ref_1',
           payment_date: '2026-01-15',
           notes: null,
-          created_at: '2026-01-15T10:00:00Z',
+          created_at: '2026-01-15T10:00:00Z'
         },
         {
           id: 2,
@@ -382,8 +382,8 @@ describe('InvoicePaymentService', () => {
           payment_reference: 'ref_2',
           payment_date: '2026-02-01',
           notes: 'Monthly payment',
-          created_at: '2026-02-01T10:00:00Z',
-        },
+          created_at: '2026-02-01T10:00:00Z'
+        }
       ]);
 
       const result = await service.getAllPayments();
@@ -402,11 +402,11 @@ describe('InvoicePaymentService', () => {
 
       expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('payment_date >= ?'), [
         '2026-01-01',
-        '2026-01-31',
+        '2026-01-31'
       ]);
       expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('payment_date <= ?'), [
         '2026-01-01',
-        '2026-01-31',
+        '2026-01-31'
       ]);
     });
 
@@ -416,7 +416,7 @@ describe('InvoicePaymentService', () => {
       await service.getAllPayments('2026-01-01');
 
       expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('payment_date >= ?'), [
-        '2026-01-01',
+        '2026-01-01'
       ]);
     });
 
@@ -426,7 +426,7 @@ describe('InvoicePaymentService', () => {
       await service.getAllPayments(undefined, '2026-01-31');
 
       expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('payment_date <= ?'), [
-        '2026-01-31',
+        '2026-01-31'
       ]);
     });
 

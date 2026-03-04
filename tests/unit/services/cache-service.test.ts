@@ -9,7 +9,6 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { CacheService } from '../../../server/services/cache-service';
-import { errorTracker } from '../../../server/services/error-tracking';
 
 // Create mock Redis client factory
 const createMockRedisClient = () => {
@@ -19,7 +18,7 @@ const createMockRedisClient = () => {
     sadd: vi.fn().mockReturnThis(),
     expire: vi.fn().mockReturnThis(),
     del: vi.fn().mockReturnThis(),
-    exec: vi.fn().mockResolvedValue([['OK', 'value']]),
+    exec: vi.fn().mockResolvedValue([['OK', 'value']])
   };
 
   const on = vi.fn((event: string, fn: (...args: unknown[]) => void) => {
@@ -49,7 +48,7 @@ const createMockRedisClient = () => {
     dbsize: vi.fn().mockResolvedValue(100),
     incrby: vi.fn().mockResolvedValue(1),
     disconnect: vi.fn().mockResolvedValue(undefined),
-    on,
+    on
   };
 };
 
@@ -61,15 +60,15 @@ vi.mock('ioredis', () => {
     return mockRedisClient;
   }
   return {
-    default: MockRedis,
+    default: MockRedis
   };
 });
 
 // Mock error tracker
 vi.mock('../../../server/services/error-tracking', () => ({
   errorTracker: {
-    captureException: vi.fn(),
-  },
+    captureException: vi.fn()
+  }
 }));
 
 // Mock console methods
@@ -94,7 +93,7 @@ describe('Cache Service', () => {
       misses: 0,
       sets: 0,
       deletes: 0,
-      errors: 0,
+      errors: 0
     };
   });
 
@@ -116,7 +115,7 @@ describe('Cache Service', () => {
     it('should initialize Redis connection', async () => {
       await cacheService.init({
         host: 'localhost',
-        port: 6379,
+        port: 6379
       });
 
       expect(mockRedisClient.connect).toHaveBeenCalled();
@@ -127,7 +126,7 @@ describe('Cache Service', () => {
     it('should set up event listeners', async () => {
       await cacheService.init({
         host: 'localhost',
-        port: 6379,
+        port: 6379
       });
 
       expect(mockRedisClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
@@ -142,7 +141,7 @@ describe('Cache Service', () => {
       await expect(
         cacheService.init({
           host: 'localhost',
-          port: 6379,
+          port: 6379
         })
       ).rejects.toThrow('Cache service initialization failed');
     });
@@ -153,7 +152,7 @@ describe('Cache Service', () => {
         port: 6380,
         password: 'secret',
         db: 1,
-        keyPrefix: 'custom:',
+        keyPrefix: 'custom:'
       });
 
       expect(mockRedisClient.connect).toHaveBeenCalled();
@@ -336,7 +335,7 @@ describe('Cache Service', () => {
       mockRedisClient.mget.mockResolvedValueOnce([
         JSON.stringify({ data: 'value1' }),
         null,
-        'plain-string',
+        'plain-string'
       ]);
 
       const result = await cacheService.mget(['key1', 'key2', 'key3']);
@@ -385,7 +384,7 @@ describe('Cache Service', () => {
       await cacheService.init({ host: 'localhost', port: 6379 });
       mockRedisClient.incrby.mockResolvedValueOnce(2);
 
-      const result = await cacheService.increment('counter');
+      const _result = await cacheService.increment('counter');
 
       expect(mockRedisClient.incrby).toHaveBeenCalledWith('counter', 1);
     });
