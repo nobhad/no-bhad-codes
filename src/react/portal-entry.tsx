@@ -27,6 +27,9 @@ import { mountPortalNavigation, unmountPortalNavigation } from './features/porta
 import { mountOnboardingWizard, unmountOnboardingWizard } from './features/portal/onboarding';
 import { mountPortalDashboard, unmountPortalDashboard } from './features/portal/dashboard/mount';
 import { mountPortalProjectDetail, unmountPortalProjectDetail } from './features/portal/projects';
+import { mountPortalProposals, unmountPortalProposals } from './features/portal/proposals';
+import { mountPortalContracts, unmountPortalContracts } from './features/portal/contracts';
+import { mountPortalDeliverables, unmountPortalDeliverables } from './features/portal/deliverables';
 
 // Register all portal components
 registerReactComponent('portalInvoices', {
@@ -97,4 +100,19 @@ registerReactComponent('portalProjectDetail', {
   unmount: unmountPortalProjectDetail
 });
 
-logger.info('Portal components registered (13 modules)');
+registerReactComponent('portalProposals', {
+  mount: mountPortalProposals,
+  unmount: unmountPortalProposals
+});
+
+registerReactComponent('portalContracts', {
+  mount: mountPortalContracts,
+  unmount: unmountPortalContracts
+});
+
+registerReactComponent('portalDeliverables', {
+  mount: mountPortalDeliverables,
+  unmount: unmountPortalDeliverables
+});
+
+logger.info('Portal components registered (16 modules)');

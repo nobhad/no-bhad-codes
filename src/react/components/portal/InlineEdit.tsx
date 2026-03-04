@@ -3,6 +3,75 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Check, X, Pencil } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 
+// ============================================================================
+// Shared Hook — DRY state management for all inline-edit variants
+// ============================================================================
+
+interface UseInlineEditStateOptions {
+  value: string;
+  disabled: boolean;
+  onSave: (value: string) => Promise<boolean> | boolean;
+}
+
+function useInlineEditState({ value, disabled, onSave }: UseInlineEditStateOptions) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValue(value);
+    }
+  }, [value, isEditing]);
+
+  const startEditing = useCallback(() => {
+    if (disabled) return;
+    setEditValue(value);
+    setIsEditing(true);
+  }, [disabled, value]);
+
+  const cancelEditing = useCallback(() => {
+    setEditValue(value);
+    setIsEditing(false);
+  }, [value]);
+
+  const saveValue = useCallback(
+    async (overrideValue?: string) => {
+      const valueToSave = overrideValue ?? editValue;
+
+      if (valueToSave === value) {
+        setIsEditing(false);
+        return;
+      }
+
+      setIsSaving(true);
+      try {
+        const success = await onSave(valueToSave);
+        if (success) {
+          setIsEditing(false);
+        }
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [editValue, value, onSave]
+  );
+
+  return {
+    isEditing,
+    editValue,
+    setEditValue,
+    isSaving,
+    startEditing,
+    cancelEditing,
+    saveValue
+  };
+}
+
+// ============================================================================
+// InlineEdit
+// ============================================================================
+
 interface InlineEditProps {
   /** Current value */
   value: string;
@@ -30,7 +99,7 @@ interface InlineEditProps {
  */
 export function InlineEdit({
   value,
-  onSave,
+  onSave: onSaveProp,
   formatDisplay,
   parseInput,
   placeholder = '-',
@@ -39,9 +108,25 @@ export function InlineEdit({
   disabled = false,
   showEditIcon = true
 }: InlineEditProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
-  const [isSaving, setIsSaving] = useState(false);
+  // Wrap onSave to apply parseInput before saving
+  const onSave = useCallback(
+    (val: string) => {
+      const parsed = parseInput ? parseInput(val) : val;
+      return onSaveProp(parsed);
+    },
+    [onSaveProp, parseInput]
+  );
+
+  const {
+    isEditing,
+    editValue,
+    setEditValue,
+    isSaving,
+    startEditing,
+    cancelEditing,
+    saveValue
+  } = useInlineEditState({ value, disabled, onSave });
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Format display value
@@ -59,13 +144,6 @@ export function InlineEdit({
     return editValue;
   }, [type, editValue]);
 
-  // Reset edit value when value prop changes
-  useEffect(() => {
-    if (!isEditing) {
-      setEditValue(value);
-    }
-  }, [value, isEditing]);
-
   // Focus input when entering edit mode
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -73,40 +151,6 @@ export function InlineEdit({
       inputRef.current.select();
     }
   }, [isEditing]);
-
-  // Start editing
-  const startEditing = useCallback(() => {
-    if (disabled) return;
-    setEditValue(value);
-    setIsEditing(true);
-  }, [disabled, value]);
-
-  // Cancel editing
-  const cancelEditing = useCallback(() => {
-    setEditValue(value);
-    setIsEditing(false);
-  }, [value]);
-
-  // Save value
-  const saveValue = useCallback(async () => {
-    const newValue = parseInput ? parseInput(editValue) : editValue;
-
-    // Skip if value hasn't changed
-    if (newValue === value) {
-      setIsEditing(false);
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const success = await onSave(newValue);
-      if (success) {
-        setIsEditing(false);
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  }, [editValue, parseInput, value, onSave]);
 
   // Handle key events
   const handleKeyDown = useCallback(
@@ -156,7 +200,7 @@ export function InlineEdit({
 
       setEditValue(newValue);
     },
-    [type]
+    [type, setEditValue]
   );
 
   if (isEditing) {
@@ -177,7 +221,7 @@ export function InlineEdit({
         />
         <button
           type="button"
-          onClick={saveValue}
+          onClick={() => saveValue()}
           disabled={isSaving}
           className="inline-edit-btn inline-edit-btn-save"
           title="Save"
@@ -288,4 +332,293 @@ export function parseDateInput(value: string): string {
   } catch {
     return '';
   }
+}
+
+// ============================================================================
+// InlineSelect
+// ============================================================================
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface InlineSelectProps {
+  /** Current value */
+  value: string;
+  /** Callback when value is saved */
+  onSave: (value: string) => Promise<boolean> | boolean;
+  /** Dropdown options */
+  options: SelectOption[];
+  /** Optional formatter for display */
+  formatDisplay?: (value: string) => string;
+  /** Placeholder when empty */
+  placeholder?: string;
+  /** Additional class names */
+  className?: string;
+  /** Disable editing */
+  disabled?: boolean;
+  /** Show edit icon on hover */
+  showEditIcon?: boolean;
+}
+
+/**
+ * InlineSelect
+ * Click-to-edit dropdown component
+ */
+export function InlineSelect({
+  value,
+  onSave,
+  options,
+  formatDisplay,
+  placeholder = '-',
+  className,
+  disabled = false,
+  showEditIcon = true
+}: InlineSelectProps) {
+  const {
+    isEditing,
+    editValue,
+    isSaving,
+    startEditing,
+    cancelEditing,
+    saveValue
+  } = useInlineEditState({ value, disabled, onSave });
+
+  const selectRef = useRef<HTMLSelectElement>(null);
+
+  const displayValue = formatDisplay
+    ? formatDisplay(value)
+    : options.find((o) => o.value === value)?.label || value || placeholder;
+
+  useEffect(() => {
+    if (isEditing && selectRef.current) {
+      selectRef.current.focus();
+    }
+  }, [isEditing]);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      saveValue(e.target.value);
+    },
+    [saveValue]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelEditing();
+      }
+    },
+    [cancelEditing]
+  );
+
+  if (isEditing) {
+    return (
+      <div
+        className={cn('inline-edit-wrapper', className)}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <select
+          ref={selectRef}
+          value={editValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onBlur={cancelEditing}
+          disabled={isSaving}
+          className="inline-edit-input-compact"
+        >
+          <option value="">{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={cancelEditing}
+          disabled={isSaving}
+          className="inline-edit-btn inline-edit-btn-cancel"
+          title="Cancel"
+        >
+          <X />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'inline-edit-display',
+        disabled && 'is-disabled',
+        className
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        startEditing();
+      }}
+      title={disabled ? undefined : 'Click to edit'}
+    >
+      <span className={cn('inline-edit-value', !value && 'is-placeholder')}>
+        {displayValue}
+      </span>
+      {showEditIcon && !disabled && (
+        <Pencil className="inline-edit-icon" />
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// InlineTextarea
+// ============================================================================
+
+interface InlineTextareaProps {
+  /** Current value */
+  value: string;
+  /** Callback when value is saved */
+  onSave: (value: string) => Promise<boolean> | boolean;
+  /** Placeholder when empty */
+  placeholder?: string;
+  /** Additional class names */
+  className?: string;
+  /** Disable editing */
+  disabled?: boolean;
+  /** Show edit icon on hover */
+  showEditIcon?: boolean;
+  /** Minimum rows */
+  minRows?: number;
+}
+
+/**
+ * InlineTextarea
+ * Click-to-edit multiline text component
+ */
+export function InlineTextarea({
+  value,
+  onSave,
+  placeholder = '-',
+  className,
+  disabled = false,
+  showEditIcon = true,
+  minRows = 3
+}: InlineTextareaProps) {
+  const {
+    isEditing,
+    editValue,
+    setEditValue,
+    isSaving,
+    startEditing,
+    cancelEditing,
+    saveValue
+  } = useInlineEditState({ value, disabled, onSave });
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const displayValue = value || placeholder;
+
+  const autoGrow = useCallback((el: HTMLTextAreaElement) => {
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
+      autoGrow(textareaRef.current);
+    }
+  }, [isEditing, autoGrow]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelEditing();
+      }
+      // Ctrl/Cmd + Enter to save
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        saveValue();
+      }
+    },
+    [saveValue, cancelEditing]
+  );
+
+  // Save on blur with delay to allow button clicks
+  const handleBlur = useCallback(() => {
+    setTimeout(() => {
+      if (isEditing && !isSaving) {
+        saveValue();
+      }
+    }, 150);
+  }, [isEditing, isSaving, saveValue]);
+
+  if (isEditing) {
+    return (
+      <div
+        className={cn('inline-edit-wrapper inline-edit-wrapper--textarea', className)}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <textarea
+          ref={textareaRef}
+          value={editValue}
+          onChange={(e) => {
+            setEditValue(e.target.value);
+            autoGrow(e.target);
+          }}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          disabled={isSaving}
+          className="inline-edit-input-compact inline-edit-textarea"
+          rows={minRows}
+        />
+        <div className="inline-edit-actions">
+          <button
+            type="button"
+            onClick={() => saveValue()}
+            disabled={isSaving}
+            className="inline-edit-btn inline-edit-btn-save"
+            title="Save"
+          >
+            <Check />
+          </button>
+          <button
+            type="button"
+            onClick={cancelEditing}
+            disabled={isSaving}
+            className="inline-edit-btn inline-edit-btn-cancel"
+            title="Cancel"
+          >
+            <X />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'inline-edit-display inline-edit-display--multiline',
+        disabled && 'is-disabled',
+        className
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        startEditing();
+      }}
+      title={disabled ? undefined : 'Click to edit'}
+    >
+      <span className={cn('inline-edit-value inline-edit-value--multiline', !value && 'is-placeholder')}>
+        {displayValue}
+      </span>
+      {showEditIcon && !disabled && (
+        <Pencil className="inline-edit-icon" />
+      )}
+    </div>
+  );
 }

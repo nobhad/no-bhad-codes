@@ -179,7 +179,7 @@ export class InvoiceService {
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
-      JOIN active_projects p ON i.project_id = p.id
+      LEFT JOIN active_projects p ON i.project_id = p.id
       WHERE i.id = ?
     `;
 
@@ -203,7 +203,7 @@ export class InvoiceService {
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
-      JOIN active_projects p ON i.project_id = p.id
+      LEFT JOIN active_projects p ON i.project_id = p.id
       WHERE i.invoice_number = ?
     `;
 
@@ -227,7 +227,7 @@ export class InvoiceService {
              p.project_name, p.description as project_description
       FROM active_invoices i
       JOIN active_clients c ON i.client_id = c.id
-      JOIN active_projects p ON i.project_id = p.id
+      LEFT JOIN active_projects p ON i.project_id = p.id
       WHERE i.client_id = ?
       ORDER BY i.created_at DESC
     `;

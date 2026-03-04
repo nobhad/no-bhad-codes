@@ -829,19 +829,6 @@ class AdminDashboard {
       });
     }
 
-    // Mobile sidebar overlay - close on click
-    const overlay = document.getElementById('sidebar-overlay');
-    overlay?.addEventListener('click', () => this.closeMobileSidebar());
-
-    // Close mobile drawer on nav to any tab
-    document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if (window.innerWidth < 768) {
-          this.closeMobileSidebar();
-        }
-      });
-    });
-
     // Theme toggle in global header
     const headerThemeToggle = document.getElementById('header-toggle-theme');
     if (headerThemeToggle) {
@@ -949,28 +936,11 @@ class AdminDashboard {
 
   private toggleSidebar(): void {
     const sidebar = this.domCache.get('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
     const page = document.querySelector('[data-page="admin"]');
-    const isMobile = window.innerWidth < 768;
 
-    if (isMobile) {
-      // Mobile: toggle drawer open/close
-      sidebar?.classList.toggle('mobile-open');
-      overlay?.classList.toggle('open');
-    } else {
-      // Desktop: collapse/expand
-      sidebar?.classList.toggle('collapsed');
-      // Update data attribute for CSS icon flip
-      const isCollapsed = sidebar?.classList.contains('collapsed');
-      page?.setAttribute('data-sidebar-collapsed', isCollapsed ? 'true' : 'false');
-    }
-  }
-
-  private closeMobileSidebar(): void {
-    const sidebar = this.domCache.get('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    sidebar?.classList.remove('mobile-open');
-    overlay?.classList.remove('open');
+    sidebar?.classList.toggle('collapsed');
+    const isCollapsed = sidebar?.classList.contains('collapsed');
+    page?.setAttribute('data-sidebar-collapsed', isCollapsed ? 'true' : 'false');
   }
 
   private async loadLeads(): Promise<void> {

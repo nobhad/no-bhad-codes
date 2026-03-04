@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
-import { InlineEdit, formatCurrencyDisplay, parseCurrencyInput } from '@react/components/portal/InlineEdit';
+import { InlineEdit, InlineSelect, InlineTextarea, formatCurrencyDisplay, parseCurrencyInput } from '@react/components/portal/InlineEdit';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Project, ProjectMilestone } from '../../types';
 import { PROJECT_TYPE_LABELS } from '../../types';
@@ -49,6 +49,16 @@ function formatDate(date: string | undefined): string {
   const year = d.getFullYear();
   return `${month}/${day}/${year}`;
 }
+
+/** Project type options for InlineSelect */
+const PROJECT_TYPE_OPTIONS = [
+  { value: 'simple-site', label: 'Simple Site' },
+  { value: 'business-site', label: 'Business Site' },
+  { value: 'portfolio', label: 'Portfolio' },
+  { value: 'e-commerce', label: 'E-Commerce' },
+  { value: 'web-app', label: 'Web App' },
+  { value: 'browser-extension', label: 'Browser Extension' }
+];
 
 /**
  * OverviewTab
@@ -148,21 +158,35 @@ export function OverviewTab({
           <div className="project-info-grid">
             <div className="project-info-field">
               <span className="label">Type</span>
-              <span className="text-primary">
-                {PROJECT_TYPE_LABELS[project.project_type || ''] || project.project_type || ''}
-              </span>
+              <InlineSelect
+                value={project.project_type || ''}
+                options={PROJECT_TYPE_OPTIONS}
+                placeholder="Select type"
+                formatDisplay={(val) => PROJECT_TYPE_LABELS[val] || val || 'Select type'}
+                onSave={(value) => handleSaveField('project_type', value)}
+              />
             </div>
 
             <div className="project-info-field">
               <span className="label">Timeline</span>
-              <span className="text-primary">{project.timeline || ''}</span>
+              <InlineEdit
+                value={project.timeline || ''}
+                type="text"
+                placeholder="Set timeline"
+                onSave={(value) => handleSaveField('timeline', value)}
+              />
             </div>
 
             <div className="project-info-field">
               <span className="label">Start Date</span>
               <div className="project-info-field-value">
                 <Calendar className="icon-xs" />
-                <span>{formatDate(project.start_date)}</span>
+                <InlineEdit
+                  value={project.start_date || ''}
+                  type="date"
+                  placeholder="Set start date"
+                  onSave={(value) => handleSaveField('start_date', value)}
+                />
               </div>
             </div>
 
@@ -170,7 +194,12 @@ export function OverviewTab({
               <span className="label">Target End Date</span>
               <div className="project-info-field-value">
                 <Calendar className="icon-xs" />
-                <span>{formatDate(project.end_date)}</span>
+                <InlineEdit
+                  value={project.end_date || ''}
+                  type="date"
+                  placeholder="Set end date"
+                  onSave={(value) => handleSaveField('end_date', value)}
+                />
               </div>
             </div>
 
@@ -205,58 +234,72 @@ export function OverviewTab({
             </div>
           </div>
 
-          {project.description && (
-            <div className="panel-description">
-              <span className="label">Description</span>
-              <p className="text-muted">{project.description}</p>
-            </div>
-          )}
+          <div className="panel-description">
+            <span className="label">Description</span>
+            <InlineTextarea
+              value={project.description || ''}
+              placeholder="Add description"
+              onSave={(value) => handleSaveField('description', value)}
+            />
+          </div>
         </div>
 
         {/* URLs Card */}
-        {(project.preview_url || project.repo_url || project.production_url) && (
-          <div className="tw-panel">
-            <h3 className="section-title">Links</h3>
-            <div className="link-list">
-              {project.preview_url && (
-                <a
-                  href={project.preview_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-list-item"
-                >
-                  <LinkIcon className="icon-md" />
-                  <span>Preview URL</span>
-                  <ExternalLink className="icon-xs" />
-                </a>
-              )}
-              {project.repo_url && (
-                <a
-                  href={project.repo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-list-item"
-                >
-                  <LinkIcon className="icon-md" />
-                  <span>Repository</span>
-                  <ExternalLink className="icon-xs" />
-                </a>
-              )}
-              {project.production_url && (
-                <a
-                  href={project.production_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-list-item"
-                >
-                  <LinkIcon className="icon-md" />
-                  <span>Production URL</span>
-                  <ExternalLink className="icon-xs" />
-                </a>
-              )}
+        <div className="tw-panel">
+          <h3 className="section-title">Links</h3>
+          <div className="project-info-grid">
+            <div className="project-info-field">
+              <div className="label">
+                <LinkIcon className="icon-xs" /> Preview URL
+                {project.preview_url && (
+                  <a href={project.preview_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open preview URL">
+                    <ExternalLink className="icon-xs" />
+                  </a>
+                )}
+              </div>
+              <InlineEdit
+                value={project.preview_url || ''}
+                type="text"
+                placeholder="Set preview URL"
+                onSave={(value) => handleSaveField('preview_url', value)}
+              />
+            </div>
+
+            <div className="project-info-field">
+              <div className="label">
+                <LinkIcon className="icon-xs" /> Repository
+                {project.repo_url && (
+                  <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open repository URL">
+                    <ExternalLink className="icon-xs" />
+                  </a>
+                )}
+              </div>
+              <InlineEdit
+                value={project.repo_url || ''}
+                type="text"
+                placeholder="Set repository URL"
+                onSave={(value) => handleSaveField('repo_url', value)}
+              />
+            </div>
+
+            <div className="project-info-field">
+              <div className="label">
+                <LinkIcon className="icon-xs" /> Production URL
+                {project.production_url && (
+                  <a href={project.production_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open production URL">
+                    <ExternalLink className="icon-xs" />
+                  </a>
+                )}
+              </div>
+              <InlineEdit
+                value={project.production_url || ''}
+                type="text"
+                placeholder="Set production URL"
+                onSave={(value) => handleSaveField('production_url', value)}
+              />
             </div>
           </div>
-        )}
+        </div>
 
         {/* Milestones Card */}
         <div className="tw-panel">

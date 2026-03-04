@@ -9,6 +9,7 @@ import {
   CheckSquare,
   FileSignature,
   StickyNote,
+  ClipboardList,
   MoreHorizontal,
   Pencil,
   Copy,
@@ -36,6 +37,7 @@ import { InvoicesTab } from './tabs/InvoicesTab';
 import { TasksTab } from './tabs/TasksTab';
 import { ContractTab } from './tabs/ContractTab';
 import { NotesTab } from './tabs/NotesTab';
+import { IntakeTab } from './tabs/IntakeTab';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
@@ -62,7 +64,8 @@ const TAB_ICONS: Record<ProjectDetailTab, React.ElementType> = {
   invoices: Receipt,
   tasks: CheckSquare,
   contract: FileSignature,
-  notes: StickyNote
+  notes: StickyNote,
+  intake: ClipboardList
 };
 
 // Tab configuration
@@ -74,7 +77,8 @@ const TABS: Array<{ id: ProjectDetailTab; label: string }> = [
   { id: 'invoices', label: 'Invoices' },
   { id: 'tasks', label: 'Tasks' },
   { id: 'contract', label: 'Contract' },
-  { id: 'notes', label: 'Notes' }
+  { id: 'notes', label: 'Notes' },
+  { id: 'intake', label: 'Intake' }
 ];
 
 /**
@@ -403,6 +407,14 @@ export function ProjectDetail({
 
       <TabPanel tabId="notes" isActive={activeTab === 'notes'}>
         <NotesTab
+          project={project}
+          onUpdateProject={updateProject}
+          showNotification={showNotification}
+        />
+      </TabPanel>
+
+      <TabPanel tabId="intake" isActive={activeTab === 'intake'}>
+        <IntakeTab
           project={project}
           onUpdateProject={updateProject}
           showNotification={showNotification}

@@ -74,7 +74,7 @@
 
 .kpi-cards-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--portal-section-gap);
 }
 
@@ -576,11 +576,15 @@
 
   .analytics-card-grid,
   .analytics-grid,
-  .kpi-cards-row,
-  .kpi-cards-row--2,
-  .kpi-cards-row--3,
   .health-check-grid {
     grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .kpi-cards-row,
+  .kpi-cards-row--2,
+  .kpi-cards-row--3 {
+    grid-template-columns: repeat(2, 1fr);
     max-width: 100%;
   }
 

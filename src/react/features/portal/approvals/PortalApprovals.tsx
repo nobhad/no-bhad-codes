@@ -18,6 +18,7 @@ import { ApprovalCard } from './ApprovalCard';
 import type { PendingApproval, PendingApprovalsResponse } from './types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('PortalApprovals');
 
@@ -106,8 +107,7 @@ export function PortalApprovals({
 
       if (!response.ok) throw new Error('Failed to fetch approvals');
 
-      const json = await response.json();
-      const data: PendingApprovalsResponse = json.data || json;
+      const data = unwrapApiData<PendingApprovalsResponse>(await response.json());
       setApprovals(data.approvals || []);
     } catch (err) {
       logger.error('Error fetching approvals:', err);

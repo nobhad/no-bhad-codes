@@ -2229,64 +2229,6 @@ export class ClientPortalModule extends BaseModule {
   // NAVIGATION - Delegates to portal-navigation module
   // =====================================================
 
-  private async showSettings(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showSettings(() => this.loadUserSettings());
-  }
-
-  private async showBillingView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    // React component handles data loading
-    navModule.showBillingView(() => {});
-  }
-
-  private async showContactView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    // React component handles data loading
-    navModule.showContactView(() => {});
-  }
-
-  private async showNotificationsView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    // React component handles data loading
-    navModule.showNotificationsView(() => {});
-  }
-
-  private async showUpdatesView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showUpdatesView();
-  }
-
-  private async showFilesView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showFilesView();
-  }
-
-  private async showMessagesView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showMessagesView();
-  }
-
-  private async showContentView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showContentView();
-  }
-
-  private async showProjectDetailView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showProjectDetailView(() => this.showWelcomeView());
-  }
-
-  private async showWelcomeView(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.showWelcomeView();
-  }
-
-  private async hideAllViews(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.hideAllViews();
-  }
-
   private async toggleSidebar(): Promise<void> {
     const navModule = await loadNavigationModule();
     navModule.toggleSidebar();
@@ -2371,11 +2313,6 @@ export class ClientPortalModule extends BaseModule {
   private async loadApprovals(): Promise<void> {
     const approvalsModule = await loadApprovalsModule();
     await approvalsModule.loadClientApprovals();
-  }
-
-  private async toggleAccountFolder(): Promise<void> {
-    const navModule = await loadNavigationModule();
-    navModule.toggleAccountFolder();
   }
 
   /**

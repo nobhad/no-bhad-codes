@@ -1180,7 +1180,7 @@
   }
 }
 
-/* 1100px: Hide source, reduce padding more */
+/* 1100px: Hide source, project, priority, date — combine into primary cell */
 @media (--laptop-wide) {
   .data-table th,
   .data-table td {
@@ -1191,8 +1191,33 @@
     display: none;
   }
 
-  /* Show source stacked in primary cell */
   .data-table .cell-content .source-stacked {
+    display: block;
+  }
+
+  /* Combine project, priority, due date into primary cell */
+  .data-table :is(
+    .project-col, .project-cell,
+    .priority-col, .priority-cell,
+    .date-col, .date-cell,
+    .created-col, .created-cell
+  ):not(.primary-cell) {
+    display: none;
+  }
+
+  .data-table .cell-content .project-stacked {
+    display: block;
+    order: -1;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+  }
+
+  .data-table .cell-content .priority-stacked {
+    display: inline-flex;
+  }
+
+  .data-table .cell-content .date-stacked {
     display: block;
   }
 }
@@ -1281,9 +1306,10 @@
     display: none;
   }
 
-  /* Un-hide ALL cells that progressive column hiding above set to display:none.
-     Uses the same :is() selector pattern at equal specificity but comes LATER in
-     the cascade, so it wins. This ensures every cell is visible as a card row. */
+  /* Un-hide ALL cells that progressive column hiding set to display:none.
+     Must match or exceed the specificity of hiding rules (which use :not(.primary-cell)).
+     Using :where() on the exclusion keeps base specificity while the extra :is() on
+     column classes gives this rule equal weight. */
   .data-table :is(
     .source-col, .source-cell,
     .timeline-col, .timeline-cell,
@@ -1301,13 +1327,14 @@
     .priority-col, .priority-cell,
     .invoice-col, .invoice-cell,
     .status-col, .status-cell
-  ) {
+  ):not(.primary-cell) {
     display: flex;
   }
 
   /* Each row becomes a card */
   .data-table tbody tr {
-    background: var(--portal-bg-medium, rgba(255, 255, 255, 0.03));
+    height: auto;
+    background: transparent;
     padding: var(--table-mobile-card-padding);
     margin-bottom: var(--table-mobile-card-gap);
     border: var(--border-width) solid var(--portal-border-color);
@@ -1319,28 +1346,75 @@
   }
 
   /* Each cell: label on left, value on right */
-  .data-table td {
+  .data-table td,
+  .data-table td.status-cell,
+  .data-table td.status-col,
+  .data-table td.amount-cell,
+  .data-table td.amount-col,
+  .data-table td.actions-cell,
+  .data-table td.actions-col,
+  .data-table td.priority-cell,
+  .data-table td.priority-col,
+  .data-table td.date-cell,
+  .data-table td.date-col,
+  .data-table td.created-cell,
+  .data-table td.created-col {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: var(--space-2);
     padding: var(--space-1) 0;
     min-height: auto;
+    height: auto;
     border: none;
-    word-break: break-word;
+    word-break: normal;
     max-width: 100%;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    text-align: left;
+  }
+
+  /* Non-primary cells: collapse multi-line content to single inline row */
+  .data-table td:not(.primary-cell) .cell-content,
+  .data-table td:not(.primary-cell) .cell-content .cell-title,
+  .data-table td:not(.primary-cell) .cell-content .cell-subtitle {
+    display: inline;
+    white-space: nowrap;
+  }
+
+  /* Separator between title and subtitle when inline (non-primary only) */
+  .data-table td:not(.primary-cell) .cell-content .cell-title + .cell-subtitle::before {
+    content: " · ";
+  }
+
+  /* Primary cell keeps stacked layout */
+  .data-table .primary-cell .cell-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .data-table .primary-cell,
+  .data-table .primary-cell .cell-title,
+  .data-table .primary-cell .cell-subtitle {
+    overflow: visible;
+    text-overflow: clip;
     white-space: normal;
+    -webkit-line-clamp: unset;
+    text-align: left;
   }
 
-  /* Thin separator between cells within a card */
+  /* No separators between cells within a card */
   .data-table td + td {
-    border-top: var(--border-width) solid var(--portal-border-color);
+    border-top: none;
   }
 
-  /* Label pseudo-element */
+  /* Label pseudo-element — fixed width so values align */
   .data-table td:before {
     content: attr(data-label);
     flex-shrink: 0;
-    margin-right: var(--space-2);
+    min-width: 5rem;
     color: var(--table-header-color);
     font-size: var(--table-header-font-size);
     font-weight: var(--font-weight-semibold);
@@ -1379,12 +1453,16 @@
     display: none;
   }
 
+  /* Status cell needs center alignment for badges */
+  .data-table td.status-cell,
+  .data-table td.status-col {
+    align-items: center;
+  }
+
   /* Hide actions column label and style as footer */
   .data-table td.actions-cell {
     justify-content: flex-end;
-    border-top: var(--border-width) solid var(--portal-border-color);
-    margin-top: var(--space-0-5);
-    padding-top: var(--space-1-5);
+    align-items: center;
   }
 
   .data-table td.actions-cell:before {
@@ -1446,6 +1524,27 @@
   .data-table td.bulk-select-cell,
   .data-table th.checkbox-col {
     display: none;
+  }
+
+  /* Table header: title + actions on row 1, stats on row 2 */
+  .data-table-header {
+    flex-wrap: wrap;
+  }
+
+  .data-table-header h3 {
+    flex: 0 0 auto;
+    order: 0;
+  }
+
+  .data-table-actions {
+    flex: 0 0 auto;
+    order: 1;
+    margin-left: auto;
+  }
+
+  .data-table-header .table-stats {
+    flex: 0 0 100%;
+    order: 2;
   }
 }
 

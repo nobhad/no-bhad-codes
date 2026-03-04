@@ -121,6 +121,22 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
     unmountFn: 'unmountOnboardingWizard'
   },
 
+  proposals: {
+    import: () => import('../../react/features/portal/proposals/mount'),
+    mountFn: 'mountPortalProposals',
+    unmountFn: 'unmountPortalProposals'
+  },
+  contracts: {
+    import: () => import('../../react/features/portal/contracts/mount'),
+    mountFn: 'mountPortalContracts',
+    unmountFn: 'unmountPortalContracts'
+  },
+  deliverables: {
+    import: () => import('../../react/features/portal/deliverables/mount'),
+    mountFn: 'mountPortalDeliverables',
+    unmountFn: 'unmountPortalDeliverables'
+  },
+
   // Navigation (sidebar, header)
   navigation: {
     import: () => import('../../react/features/portal/navigation/mount'),

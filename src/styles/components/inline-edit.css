@@ -206,6 +206,54 @@
   color-scheme: dark;
 }
 
+/* Textarea wrapper — stacks input and actions vertically */
+.portal .inline-edit-wrapper--textarea {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Multiline display — allows text wrapping */
+.portal .inline-edit-display--multiline {
+  align-items: flex-start;
+}
+
+.portal .inline-edit-value--multiline {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: var(--line-height-normal, 1.5);
+}
+
+/* Textarea input (standalone, not scoped to pd-header-card) */
+.portal .inline-edit-textarea {
+  height: auto;
+  min-height: 60px;
+  padding: var(--space-1) var(--space-2, 6px);
+  resize: vertical;
+  font-family: inherit;
+  line-height: var(--line-height-normal, 1.5);
+}
+
+/* Actions row for textarea (standalone, not scoped to inline-edit-row) */
+.portal .inline-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-xs, 4px);
+  margin-top: var(--space-0-5, 2px);
+}
+
+/* External link icon next to URL labels */
+.portal .inline-link-external {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--icon-gap-xs, 4px);
+  color: var(--portal-text-muted);
+  transition: color var(--transition-faster, 0.1s) ease;
+}
+
+.portal .inline-link-external:hover {
+  color: var(--color-brand-primary, var(--color-primary));
+}
+
 /* ===============================================
  * PROJECT DETAIL INLINE EDITING
  * Styles for the project overview inline editing

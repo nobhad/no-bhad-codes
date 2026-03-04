@@ -132,3 +132,54 @@ export const PORTAL_APPROVAL_TYPE_OPTIONS = [
 export const PORTAL_APPROVALS_FILTER_CONFIG: FilterConfig[] = [
   { key: 'entityType', label: 'TYPE', options: PORTAL_APPROVAL_TYPE_OPTIONS }
 ];
+
+// ============================================
+// PROPOSAL FILTERS
+// ============================================
+
+export const PORTAL_PROPOSAL_STATUS_OPTIONS = [
+  STATUS_ALL_OPTION,
+  { value: 'sent', label: 'Sent' },
+  { value: 'viewed', label: 'Viewed' },
+  { value: 'accepted', label: 'Accepted' },
+  { value: 'declined', label: 'Declined' },
+  { value: 'expired', label: 'Expired' }
+];
+
+export const PORTAL_PROPOSALS_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: PORTAL_PROPOSAL_STATUS_OPTIONS }
+];
+
+// ============================================
+// DELIVERABLE FILTERS
+// ============================================
+
+export const PORTAL_DELIVERABLE_STATUS_OPTIONS = [
+  STATUS_ALL_OPTION,
+  { value: 'draft', label: 'Draft' },
+  { value: 'in_review', label: 'In Review' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'revision_requested', label: 'Revision Requested' },
+  { value: 'locked', label: 'Locked' }
+];
+
+export const PORTAL_DELIVERABLES_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: PORTAL_DELIVERABLE_STATUS_OPTIONS }
+];
+
+// ============================================
+// CONTRACT FILTERS
+// ============================================
+
+export const PORTAL_CONTRACT_STATUS_OPTIONS = [
+  STATUS_ALL_OPTION,
+  { value: 'draft', label: 'Draft' },
+  { value: 'sent', label: 'Sent' },
+  { value: 'signed', label: 'Signed' },
+  { value: 'active', label: 'Active' },
+  { value: 'expired', label: 'Expired' }
+];
+
+export const PORTAL_CONTRACTS_FILTER_CONFIG: FilterConfig[] = [
+  { key: 'status', label: 'STATUS', options: PORTAL_CONTRACT_STATUS_OPTIONS }
+];

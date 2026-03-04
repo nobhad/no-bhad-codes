@@ -6,8 +6,11 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  LineController,
   BarElement,
+  BarController,
   ArcElement,
+  PieController,
   Tooltip,
   Legend,
   Filler,
@@ -35,14 +38,17 @@ import { formatCurrencyCompact as formatCurrency } from '../../../../utils/forma
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
-// Register Chart.js components once
+// Register Chart.js components + controllers
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  LineController,
   BarElement,
+  BarController,
   ArcElement,
+  PieController,
   Tooltip,
   Legend,
   Filler
@@ -102,7 +108,24 @@ type ChartType = 'line' | 'bar' | 'pie';
 function resolveCssVar(value: string): string {
   if (!value.startsWith('var(')) return value;
   const name = value.slice(4, -1).trim();
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || value;
+  const resolved = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return resolved || value;
+}
+
+/** Create a color with alpha from a resolved CSS color (hex or rgb). */
+function colorWithAlpha(color: string, alpha: number): string {
+  // Hex format: append 2-digit hex alpha
+  if (color.startsWith('#') && (color.length === 7 || color.length === 4)) {
+    const hex = Math.round(alpha * 255).toString(16).padStart(2, '0');
+    return `${color}${hex}`;
+  }
+  // RGB format: convert to rgba
+  const rgbMatch = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+  if (rgbMatch) {
+    return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${alpha})`;
+  }
+  // Fallback
+  return color;
 }
 
 // ============================================
@@ -159,7 +182,7 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
           label: ds.label,
           data: ds.data,
           borderColor: color,
-          backgroundColor: `${color  }18`, // ~10% opacity fill
+          backgroundColor: colorWithAlpha(color, 0.1),
           pointBackgroundColor: color,
           pointRadius: 3,
           pointHoverRadius: 5,
@@ -172,7 +195,7 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
       return {
         label: ds.label,
         data: ds.data,
-        backgroundColor: `${color  }99`, // ~60% opacity
+        backgroundColor: colorWithAlpha(color, 0.6),
         borderColor: color,
         borderWidth: 1
       };
@@ -205,12 +228,12 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
         ? {
           x: {
             ticks: { color: textMuted, font: { size: 10 } },
-            grid: { color: `${borderColor  }40` },
+            grid: { color: colorWithAlpha(borderColor, 0.25) },
             border: { color: borderColor }
           },
           y: {
             ticks: { color: textMuted, font: { size: 10 } },
-            grid: { color: `${borderColor  }40` },
+            grid: { color: colorWithAlpha(borderColor, 0.25) },
             border: { color: borderColor }
           }
         }
@@ -286,7 +309,10 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     return headers;
   }, [getAuthToken]);
 
-  const loadAnalytics = useCallback(async () => {
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 2000;
+
+  const loadAnalytics = useCallback(async (retryCount = 0) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -294,7 +320,17 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
         headers: getHeaders(),
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('Failed to load analytics');
+
+      // Retry on 503 (backend still starting up)
+      if (response.status === 503 && retryCount < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        return loadAnalytics(retryCount + 1);
+      }
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.error || `Failed to load analytics (${response.status})`);
+      }
       const analyticsData = unwrapApiData<AnalyticsData>(await response.json());
       setData(analyticsData);
     } catch (err) {
@@ -383,7 +419,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
             </button>
           ))}
         </div>
-        <button className="btn-secondary" onClick={loadAnalytics} disabled={isLoading}>
+        <button className="btn-secondary" onClick={() => loadAnalytics()} disabled={isLoading}>
           <RefreshCw className={cn('icon-sm', isLoading && 'animate-spin')} />
           Refresh
         </button>

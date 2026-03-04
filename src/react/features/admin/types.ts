@@ -57,6 +57,20 @@ export interface Project {
   preview_url?: string;
   repo_url?: string;
   production_url?: string;
+  // Intake fields (migration 008)
+  design_level?: string;
+  content_status?: string;
+  tech_comfort?: string;
+  hosting_preference?: string;
+  page_count?: string;
+  integrations?: string;
+  brand_assets?: string;
+  inspiration?: string;
+  current_site?: string;
+  challenges?: string;
+  additional_info?: string;
+  addons?: string;
+  referral_source?: string;
   // Computed fields from API
   file_count?: number;
   message_count?: number;
@@ -513,7 +527,8 @@ export type ProjectDetailTab =
   | 'invoices'
   | 'tasks'
   | 'contract'
-  | 'notes';
+  | 'notes'
+  | 'intake';
 
 /**
  * Tab configuration for project detail
@@ -530,7 +545,8 @@ export const PROJECT_DETAIL_TABS: Array<{
   { id: 'invoices', label: 'Invoices', icon: 'Receipt' },
   { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
   { id: 'contract', label: 'Contract', icon: 'FileSignature' },
-  { id: 'notes', label: 'Notes', icon: 'StickyNote' }
+  { id: 'notes', label: 'Notes', icon: 'StickyNote' },
+  { id: 'intake', label: 'Intake', icon: 'ClipboardList' }
 ];
 
 // ============================================================================

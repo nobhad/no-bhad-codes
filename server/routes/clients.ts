@@ -1857,5 +1857,164 @@ router.put(
   })
 );
 
+// ===================================
+// CLIENT CONTACT MANAGEMENT (/me/contacts)
+// ===================================
+
+const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
+
+/**
+ * GET /me/contacts - List client's own contacts
+ */
+router.get(
+  '/me/contacts',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+    if (!clientId) {
+      return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
+    }
+
+    const db = getDatabase();
+    const contacts = await db.all(
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE client_id = ? ORDER BY is_primary DESC, first_name ASC`,
+      [clientId]
+    );
+
+    sendSuccess(res, { contacts });
+  })
+);
+
+/**
+ * POST /me/contacts - Add a new contact
+ */
+router.post(
+  '/me/contacts',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+    if (!clientId) {
+      return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
+    }
+
+    const { first_name, last_name, email, phone, title, department, role, notes } = req.body;
+
+    if (!first_name || !last_name) {
+      return errorResponse(res, 'First name and last name are required', 400, 'VALIDATION_ERROR');
+    }
+
+    const db = getDatabase();
+    const result = await db.run(
+      `INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, title, department, role, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [clientId, first_name, last_name, email || null, phone || null, title || null, department || null, role || 'general', notes || null]
+    );
+
+    const contact = await db.get(
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [result.lastID]
+    );
+
+    sendCreated(res, { contact });
+  })
+);
+
+/**
+ * PUT /me/contacts/:id - Update a contact
+ */
+router.put(
+  '/me/contacts/:id',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+    if (!clientId) {
+      return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
+    }
+
+    const contactId = parseInt(req.params.id);
+    if (isNaN(contactId)) {
+      return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
+    }
+
+    const db = getDatabase();
+
+    // Verify ownership
+    const existing = await db.get(
+      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ?',
+      [contactId, clientId]
+    );
+    if (!existing) {
+      return errorResponse(res, 'Contact not found', 404, 'NOT_FOUND');
+    }
+
+    const { first_name, last_name, email, phone, title, department, role, notes } = req.body;
+
+    const updates: string[] = [];
+    const values: (string | number | boolean | null | undefined)[] = [];
+
+    if (first_name !== undefined) { updates.push('first_name = ?'); values.push(first_name); }
+    if (last_name !== undefined) { updates.push('last_name = ?'); values.push(last_name); }
+    if (email !== undefined) { updates.push('email = ?'); values.push(email || null); }
+    if (phone !== undefined) { updates.push('phone = ?'); values.push(phone || null); }
+    if (title !== undefined) { updates.push('title = ?'); values.push(title || null); }
+    if (department !== undefined) { updates.push('department = ?'); values.push(department || null); }
+    if (role !== undefined) { updates.push('role = ?'); values.push(role); }
+    if (notes !== undefined) { updates.push('notes = ?'); values.push(notes || null); }
+
+    if (updates.length === 0) {
+      return errorResponse(res, 'No fields to update', 400, 'VALIDATION_ERROR');
+    }
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(contactId, clientId);
+
+    await db.run(
+      `UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ? AND client_id = ?`,
+      values
+    );
+
+    const contact = await db.get(
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`,
+      [contactId]
+    );
+
+    sendSuccess(res, { contact });
+  })
+);
+
+/**
+ * DELETE /me/contacts/:id - Remove a contact
+ */
+router.delete(
+  '/me/contacts/:id',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.user?.id;
+    if (!clientId) {
+      return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
+    }
+
+    const contactId = parseInt(req.params.id);
+    if (isNaN(contactId)) {
+      return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
+    }
+
+    const db = getDatabase();
+
+    // Verify ownership
+    const existing = await db.get(
+      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ?',
+      [contactId, clientId]
+    );
+    if (!existing) {
+      return errorResponse(res, 'Contact not found', 404, 'NOT_FOUND');
+    }
+
+    await db.run('DELETE FROM client_contacts WHERE id = ? AND client_id = ?', [contactId, clientId]);
+
+    sendSuccess(res, undefined, 'Contact deleted');
+  })
+);
+
 export { router as clientsRouter };
 export default router;
