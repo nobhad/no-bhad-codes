@@ -61,7 +61,7 @@ input[type="radio"] {
 .login-form input::placeholder,
 .form-container textarea::placeholder,
 .login-form textarea::placeholder {
-  font-weight: normal;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-muted);
   opacity: 1;
 }

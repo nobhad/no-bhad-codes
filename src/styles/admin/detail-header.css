@@ -21,7 +21,7 @@
   margin-bottom: var(--space-3);
   overflow: visible;
   position: relative;
-  z-index: 10;
+  z-index: var(--z-index-10);
 }
 
 .detail-title-group {

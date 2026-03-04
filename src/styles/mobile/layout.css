@@ -97,7 +97,7 @@
 
   /* Ensure business card section stays on top during exit animation */
   .business-card-section.page-active {
-    z-index: 50;
+    z-index: var(--z-index-50);
   }
 
   /* Intro nav positioned absolutely below centered card */
@@ -271,7 +271,7 @@
     font-weight: var(--font-weight-bold);
     text-transform: uppercase;
     margin: 0;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--letter-spacing-widest);
   }
 
   /* Hide separate mobile tech-stack section - show inside about like desktop */
@@ -468,7 +468,7 @@
   .about-section h2,
   .projects-section h2,
   .portfolio-section h2 {
-    font-size: 2rem;
+    font-size: var(--font-size-2xl);
     margin-top: 1rem;
   }
 }

@@ -9,27 +9,17 @@
 
 :root {
   /* ============================================
-   * DURATION TOKENS
-   * ============================================ */
-
-  --duration-instant: 0ms;
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --duration-slower: 600ms;
-  --duration-slowest: 800ms;
-
-  /* ============================================
-   * SEMANTIC TIMING TOKENS
+   * DURATION & TRANSITION TOKENS
    * ============================================
-   * Provides semantic timing for different use cases
+   * Base durations defined in variables.css:
+   *   --duration-faster/fast/medium/slow/slower
+   *   --transition-faster/fast/medium/slow/slower
+   *
+   * Semantic timing tokens below for specific use cases.
    */
 
   /* Theme color transitions (slower for smooth color changes) */
   --transition-theme: 0.4s;
-
-  /* Quick micro-interactions (buttons, icons) */
-  --transition-fast: 0.15s;
 
   /* Mouse/hover interactions (fast for responsive feel) */
   --transition-mouse: 0.2s;
@@ -80,67 +70,37 @@
    * ============================================ */
 
   /* Button animations */
-  --animation-button-hover: --duration-fast var(--easing-smooth);
-  --animation-button-press: --duration-fast var(--easing-sharp);
+  --animation-button-hover: var(--duration-fast) var(--easing-smooth);
+  --animation-button-press: var(--duration-fast) var(--easing-sharp);
 
   /* Card animations */
-  --animation-card-hover: --duration-normal var(--easing-smooth);
-  --animation-card-enter: --duration-slow var(--easing-decelerated);
-  --animation-card-exit: --duration-normal var(--easing-accelerated);
+  --animation-card-hover: var(--duration-normal) var(--easing-smooth);
+  --animation-card-enter: var(--duration-slow) var(--easing-decelerated);
+  --animation-card-exit: var(--duration-normal) var(--easing-accelerated);
 
   /* Modal animations */
-  --animation-modal-enter: --duration-slow var(--easing-decelerated);
-  --animation-modal-exit: --duration-normal var(--easing-accelerated);
-  --animation-modal-backdrop: --duration-normal var(--easing-smooth);
+  --animation-modal-enter: var(--duration-slow) var(--easing-decelerated);
+  --animation-modal-exit: var(--duration-normal) var(--easing-accelerated);
+  --animation-modal-backdrop: var(--duration-normal) var(--easing-smooth);
 
   /* Navigation animations */
-  --animation-nav-slide: --duration-slow var(--easing-emphasized);
-  --animation-nav-fade: --duration-normal var(--easing-smooth);
+  --animation-nav-slide: var(--duration-slow) var(--easing-emphasized);
+  --animation-nav-fade: var(--duration-normal) var(--easing-smooth);
 
   /* Form animations */
-  --animation-input-focus: --duration-fast var(--easing-smooth);
-  --animation-input-error: --duration-normal var(--easing-bounce);
+  --animation-input-focus: var(--duration-fast) var(--easing-smooth);
+  --animation-input-error: var(--duration-normal) var(--easing-bounce);
 
   /* Loading animations */
   --animation-spinner: 1s var(--easing-linear) infinite;
   --animation-pulse: 2s var(--easing-smooth) infinite alternate;
-  --animation-fade-in: --duration-slow var(--easing-decelerated);
-  --animation-fade-out: --duration-normal var(--easing-accelerated);
+  --animation-fade-in: var(--duration-slow) var(--easing-decelerated);
+  --animation-fade-out: var(--duration-normal) var(--easing-accelerated);
 
   /* Business card specific */
   --animation-card-flip: 0.8s var(--easing-smooth);
-  --animation-card-scale: --duration-normal var(--easing-bounce);
+  --animation-card-scale: var(--duration-normal) var(--easing-bounce);
 
-  /* ============================================
-   * KEYFRAME ANIMATIONS
-   * ============================================ */
-
-  /* Rotation angles */
-  --rotate-0: 0deg;
-  --rotate-45: 45deg;
-  --rotate-90: 90deg;
-  --rotate-180: 180deg;
-  --rotate-270: 270deg;
-  --rotate-360: 360deg;
-
-  /* Scale values */
-  --scale-0: 0;
-  --scale-50: 0.5;
-  --scale-75: 0.75;
-  --scale-90: 0.9;
-  --scale-95: 0.95;
-  --scale-100: 1;
-  --scale-105: 1.05;
-  --scale-110: 1.1;
-  --scale-125: 1.25;
-  --scale-150: 1.5;
-
-  /* Opacity values */
-  --opacity-0: 0;
-  --opacity-25: 0.25;
-  --opacity-50: 0.5;
-  --opacity-75: 0.75;
-  --opacity-100: 1;
 }
 
 /* ============================================

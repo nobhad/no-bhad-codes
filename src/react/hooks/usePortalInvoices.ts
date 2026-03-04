@@ -23,10 +23,14 @@ interface UsePortalInvoicesReturn {
   refetch: () => Promise<void>;
 }
 
-interface ApiResponse {
-  success?: boolean;
+interface ApiResponsePayload {
   invoices?: PortalInvoice[];
   summary?: PortalInvoiceSummary;
+}
+
+interface ApiResponse {
+  success?: boolean;
+  data?: ApiResponsePayload;
   error?: string;
 }
 
@@ -65,13 +69,14 @@ export function usePortalInvoices(options: UsePortalInvoicesOptions = {}): UsePo
       }
 
       const data: ApiResponse = await response.json();
+      const payload = data.data;
 
-      if (data.invoices) {
-        setInvoices(data.invoices);
+      if (payload?.invoices) {
+        setInvoices(payload.invoices);
       }
 
-      if (data.summary) {
-        setSummary(data.summary);
+      if (payload?.summary) {
+        setSummary(payload.summary);
       }
     } catch (err) {
       logger.error('[usePortalInvoices] Error:', err);

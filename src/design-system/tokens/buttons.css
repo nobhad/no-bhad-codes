@@ -45,26 +45,6 @@
   --btn-portal-hover-color: var(--portal-bg-pitch);
   --btn-portal-hover-border: var(--portal-text-light);
 
-  /* Button colors - secondary (same as base) */
-  --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: var(--portal-text-light);
-  --btn-portal-secondary-border: var(--portal-text-light);
-
-  /* Button colors - secondary hover */
-  --btn-portal-secondary-hover-bg: var(--portal-text-light);
-  --btn-portal-secondary-hover-color: var(--portal-bg-pitch);
-  --btn-portal-secondary-hover-border: var(--portal-text-light);
-
-  /* Button colors - primary (same as base) */
-  --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: var(--portal-text-light);
-  --btn-portal-primary-border: var(--portal-text-light);
-
-  /* Button colors - primary hover */
-  --btn-portal-primary-hover-bg: var(--portal-text-light);
-  --btn-portal-primary-hover-color: var(--portal-bg-pitch);
-  --btn-portal-primary-hover-border: var(--portal-text-light);
-
   /* Button colors - danger (transparent bg, red text/border) */
   --btn-portal-danger-bg: transparent;
   --btn-portal-danger-color: var(--color-error-500);
@@ -119,26 +99,6 @@ html[data-theme="light"] [data-page="admin"] {
   --btn-portal-hover-bg: var(--portal-text-primary);
   --btn-portal-hover-color: var(--portal-bg-pitch);
   --btn-portal-hover-border: var(--portal-text-primary);
-
-  /* Button colors - secondary (same as base) */
-  --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: var(--portal-text-primary);
-  --btn-portal-secondary-border: var(--portal-text-primary);
-
-  /* Button colors - secondary hover */
-  --btn-portal-secondary-hover-bg: var(--portal-text-primary);
-  --btn-portal-secondary-hover-color: var(--portal-bg-pitch);
-  --btn-portal-secondary-hover-border: var(--portal-text-primary);
-
-  /* Button colors - primary (same as base) */
-  --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: var(--portal-text-primary);
-  --btn-portal-primary-border: var(--portal-text-primary);
-
-  /* Button colors - primary hover */
-  --btn-portal-primary-hover-bg: var(--portal-text-primary);
-  --btn-portal-primary-hover-color: var(--portal-bg-pitch);
-  --btn-portal-primary-hover-border: var(--portal-text-primary);
 
   /* Button colors - danger (transparent bg, red text/border) */
   --btn-portal-danger-bg: transparent;

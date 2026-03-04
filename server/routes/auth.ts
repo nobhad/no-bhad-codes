@@ -164,7 +164,7 @@ router.post(
 
     // Find user in database (include lockout columns)
     const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ?',
+      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ? AND deleted_at IS NULL',
       [email.toLowerCase()]
     );
 
@@ -1625,7 +1625,7 @@ router.post(
     // ── Client path ───────────────────────────────────────────────────────────
     const db = getDatabase();
     const client = await db.get(
-      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ?',
+      'SELECT id, email, password_hash, company_name, contact_name, status, is_admin, last_login, failed_login_attempts, locked_until FROM clients WHERE email = ? AND deleted_at IS NULL',
       [normalizedEmail]
     );
 

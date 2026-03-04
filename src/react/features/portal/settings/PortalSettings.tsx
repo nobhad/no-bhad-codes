@@ -110,19 +110,25 @@ export function PortalSettings({
         throw new Error('Failed to load profile');
       }
 
-      const data = await response.json();
-      setProfile(data.client || data);
+      const json = await response.json();
+      // Server wraps response: { success, data: { client: {...} } }
+      const payload = json.data || json;
+      const clientData = payload.client || payload;
+      setProfile(clientData);
 
       // Set billing if available
-      if (data.billing_address) {
-        setBilling(data.billing_address);
+      if (clientData.billing_address) {
+        setBilling(clientData.billing_address);
+      } else if (payload.billing_address) {
+        setBilling(payload.billing_address);
       }
 
       // Set notification preferences if available
-      if (data.notification_preferences) {
+      const notifPrefs = clientData.notification_preferences || payload.notification_preferences;
+      if (notifPrefs) {
         setNotifications(prev => ({
           ...prev,
-          ...data.notification_preferences
+          ...notifPrefs
         }));
       }
     } catch (err) {

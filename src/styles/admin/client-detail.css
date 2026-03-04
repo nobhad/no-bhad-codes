@@ -184,7 +184,7 @@
 .health-score-value {
   font-size: var(--font-size-3xl);
   line-height: 1;
-  margin-bottom: 2px;
+  margin-bottom: var(--space-px);
 }
 
 .health-factors {
@@ -247,7 +247,7 @@
 }
 
 .stats-compact .field-label {
-  margin-top: 2px;
+  margin-top: var(--space-px);
 }
 
 /* ==============================================

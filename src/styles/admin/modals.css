@@ -257,7 +257,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   padding: 0 0 var(--space-2) 0;
   margin-bottom: var(--space-3);
   border-bottom: var(--border-width) solid var(--portal-border-dark);
@@ -581,7 +581,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--letter-spacing-wider);
   margin-bottom: 0;
 }
 
@@ -645,7 +645,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   margin: 0;
 }
 
@@ -667,7 +667,7 @@
   color: var(--portal-text-secondary);
   text-transform: uppercase;
   font-size: var(--font-size-xs);
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .invoice-line-items td {
@@ -852,7 +852,7 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--letter-spacing-wider);
 }
 .dr-detail-dl dd {
   margin: 0;

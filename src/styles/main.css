@@ -144,7 +144,7 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: var(--z-index-portal-confirm, 9900);
-    padding: 12px 24px;
+    padding: var(--space-3) var(--space-6);
     background-color: var(--color-dark);
     color: var(--color-light);
     text-decoration: none;
@@ -251,7 +251,7 @@ body {
     margin-bottom: 1.5rem;
     text-align: left;
     width: 100%;
-    letter-spacing: 0.1em;
+    letter-spacing: var(--letter-spacing-widest);
   }
 }
 
@@ -276,7 +276,7 @@ html[data-theme="dark"] .tech-stack {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
   text-align: left;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
 }
 
 .tech-list {

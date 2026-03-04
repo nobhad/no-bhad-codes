@@ -17,7 +17,7 @@
 .files-browser {
   display: grid;
   grid-template-columns: 220px 1fr;
-  gap: 1px;
+  gap: var(--space-px);
   background: var(--portal-border);
   overflow: hidden;
   min-height: 400px;
@@ -81,11 +81,11 @@
 }
 
 .folder-item.nested {
-  padding-left: 28px;
+  padding-left: var(--space-3-5);
 }
 
 .folder-item.nested-2 {
-  padding-left: 44px;
+  padding-left: calc(var(--space-3-5) + var(--space-2));
 }
 
 .folder-item-actions {

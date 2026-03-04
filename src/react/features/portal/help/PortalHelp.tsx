@@ -375,7 +375,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
               {/* CSS controls display via .help-accordion-item.expanded .help-accordion-content */}
               <div className="help-accordion-content">
                 {category.isLoading ? (
-                  <span className="loading-spinner loading-spinner--sm" />
+                  <span className="loading-spinner loading-spinner--small" />
                 ) : (
                   <div className="help-accordion-articles">
                     {category.articles.map((article) => (

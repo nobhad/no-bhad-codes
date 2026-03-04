@@ -281,7 +281,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 :root {
   --portal-header-top: 20px;
   --portal-header-height-line: 32px;
-  --portal-nav-gap: 24px;
+  --portal-nav-gap: var(--space-6);
   --sidebar-icon-indent: 18px;
 }
 
@@ -546,7 +546,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   font-weight: var(--font-weight-medium);
   color: var(--portal-text-primary);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
+  letter-spacing: var(--letter-spacing-wider);
   margin: 0 0 var(--space-2) 0;
 }
 
@@ -781,7 +781,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .sidebar-nav .sidebar-toggle-btn .btn-text {
   display: inline;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--letter-spacing-wider);
   font-weight: var(--font-weight-medium);
 }
 
@@ -1123,7 +1123,7 @@ td {
 .portal {
   overflow-x: hidden;
   font-family: var(--font-family-mono);
-  font-size: 15px;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-light);
 
   /* Override base font size for all portal elements */
@@ -1408,12 +1408,7 @@ html[data-theme="light"] .portal .funnel-value {
    Migrated from brutalist.css for consolidation
    ===================================================== */
 
-/* Container and section layout */
-.tw-container {
-  background: transparent;
-  padding: var(--space-4, 1rem);
-}
-
+/* Section layout */
 .tw-section {
   display: flex;
   flex-direction: column;
@@ -1429,13 +1424,6 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .tw-panel {
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  padding: var(--space-4);
-}
-
-/* tw-card alias kept for migration safety */
-.tw-card {
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-4);
@@ -1674,7 +1662,7 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-right-1 { right: var(--space-0-5, 0.25rem); }
 .tw-bottom-0 { bottom: 0; }
 .tw-inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-.tw-z-50 { z-index: 50; }
+.tw-z-50 { z-index: var(--z-index-50); }
 .tw--left-5 { left: -1.25rem; }
 
 /* Misc layout */
@@ -1711,12 +1699,11 @@ html[data-theme="light"] .portal .funnel-value {
    PORTAL TYPOGRAPHY - GENERIC CLASSES
    Use these names directly; tw-* aliases kept for migration only.
    ===================================================== */
-.heading,
-.tw-heading {
+.heading {
   font-family: var(--font-family-mono, monospace);
   color: var(--portal-text-light);
   font-weight: var(--font-weight-regular);
-  letter-spacing: 0.025em;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 /* Category/group label — small caps, muted */
@@ -1725,14 +1712,13 @@ html[data-theme="light"] .portal .funnel-value {
   font-size: var(--font-size-2xs, 11px);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
   color: var(--portal-text-muted);
   margin: 0;
 }
 
 /* Uppercase filter/form label */
-.label,
-.tw-label {
+.label {
   font-size: var(--font-size-xs, 12px);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
@@ -1777,7 +1763,6 @@ html[data-theme="light"] .portal .funnel-value {
 /* Text transforms */
 .tw-capitalize { text-transform: capitalize; }
 .tw-uppercase { text-transform: uppercase; }
-.tw-lowercase { text-transform: lowercase; }
 
 /* Text wrapping */
 .tw-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1830,9 +1815,6 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-ring-1 { box-shadow: 0 0 0 1px var(--portal-alpha-white-30); }
 .tw-ring-2 { box-shadow: 0 0 0 2px var(--ring); }
 .tw-ring-white { --ring: var(--portal-border-color); }
-
-/* Shadows - disabled for brutalist */
-.tw-shadow { box-shadow: none; }
 
 /* =====================================================
    TW-* SIZING UTILITY CLASSES

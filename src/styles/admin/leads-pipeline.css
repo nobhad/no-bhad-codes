@@ -683,7 +683,7 @@
   font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
   margin-top: -0.5rem;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
   padding-top: 0;
 }
 

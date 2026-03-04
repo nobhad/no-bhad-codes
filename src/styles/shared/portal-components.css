@@ -4,11 +4,16 @@
  * ===============================================
  * @file src/styles/shared/portal-components.css
  *
- * Styles for reusable components:
- * - Kanban Board
- * - Tag Input
- * - Timeline
- * - Simple Charts
+ * Miscellaneous shared component styles, utilities,
+ * auto-layouts, and feature-specific component helpers.
+ *
+ * Extracted to separate files:
+ * - portal-kanban.css: Kanban board
+ * - portal-tags.css: Tag input
+ * - portal-timeline.css: Timeline
+ * - portal-charts.css: Charts + KPI cards
+ * - portal-tooltips.css: CSS-only tooltips
+ * - portal-progress.css: Progress bars
  */
 
 /* ============================================
@@ -29,527 +34,10 @@ svg.lucide,
   color: currentColor;
 }
 
-/* ============================================
-   KANBAN BOARD COMPONENT
-   ============================================ */
-
-.kanban-board {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto;
-  padding: 0;
-  min-height: 400px;
-  width: 100%;
-}
-
-.kanban-column {
-  flex: 1 1 0;
-  min-width: 200px;
-  background: transparent;
-  border-left: var(--border-width) solid var(--portal-border-color);
-  display: flex;
-  flex-direction: column;
-  max-height: 600px;
-  box-shadow: none;
-}
-
-.kanban-column:first-child {
-  border-left: none;
-}
-
-.kanban-column-header {
-  padding: var(--space-2) var(--space-3);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: transparent;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
-  border-left: var(--border-width-thick) solid transparent;
-  padding-left: calc(var(--space-3) - var(--border-width-thick));
-}
-
-/* Status-based column left accent */
-.kanban-column[data-status="todo"] .kanban-column-header,
-.kanban-column[data-status="pending"] .kanban-column-header {
-  border-left-color: var(--color-neutral-500);
-}
-
-.kanban-column[data-status="in_progress"] .kanban-column-header,
-.kanban-column[data-status="in-progress"] .kanban-column-header {
-  border-left-color: var(--app-color-primary);
-}
-
-.kanban-column[data-status="blocked"] .kanban-column-header {
-  border-left-color: var(--color-warning-500);
-}
-
-.kanban-column[data-status="done"] .kanban-column-header,
-.kanban-column[data-status="completed"] .kanban-column-header {
-  border-left-color: var(--status-active);
-}
-
-.kanban-column-title {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
-
-.kanban-column-count {
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  min-width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kanban-column-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-height: 120px;
-}
-
-.kanban-column-content.drag-over {
-  background: var(--portal-alpha-primary-08);
-}
-
-.kanban-card {
-  background: transparent;
-  padding: var(--space-2) var(--space-3);
-  cursor: grab;
-  transition: border-color var(--transition-fast) ease;
-  border: var(--border-width) solid var(--portal-border-color);
-  box-shadow: none;
-}
-
-.kanban-card:hover {
-  border-color: var(--portal-border-color);
-  transform: translateY(-2px);
-}
-
-.kanban-card.dragging {
-  opacity: 0.6;
-  cursor: grabbing;
-  transform: rotate(2deg);
-}
-
-/* Task type label */
-.kanban-card-type {
-  font-size: var(--label-font-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-muted);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  margin-bottom: var(--space-1);
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-}
-
-.kanban-card-type svg {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
-  opacity: 0.7;
-}
-
-.kanban-card-title {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base);
-  color: var(--portal-text-light);
-  margin-bottom: var(--space-1);
-  line-height: var(--line-height-snug);
-}
-
-.kanban-card-subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.kanban-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--portal-border-color);
-}
-
-.kanban-card-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.kanban-badge {
-  font-size: var(--label-font-size);
-  font-weight: var(--font-weight-bold);
-  padding: var(--space-0-5) var(--space-1-5);
-  color: var(--color-white);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
-
-@media (--mobile) {
-  .kanban-board {
-    flex-direction: column;
-  }
-
-  .kanban-column {
-    flex: 0 0 auto;
-    min-width: 100%;
-    max-height: none;
-  }
-}
-
-/* ============================================
-   TAG INPUT COMPONENT
-   ============================================ */
-
-.tag-input-container {
-  position: relative;
-}
-
-.tag-input-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--icon-gap-sm);
-  padding: var(--space-2);
-  background: var(--portal-bg-dark);
-  border: var(--portal-border);
-  min-height: 42px;
-  align-items: center;
-}
-
-.tag-input-wrapper:focus-within {
-  border-color: var(--color-primary);
-}
-
-.tag-input-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--icon-gap-sm);
-}
-
-.tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap-xs);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.tag-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.7;
-  transition: opacity var(--transition-fast);
-}
-
-.tag-remove:hover {
-  opacity: 1;
-}
-
-.tag-input-field {
-  flex: 1;
-  min-width: 100px;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-sm);
-}
-
-.tag-input-field::placeholder {
-  color: var(--portal-text-secondary);
-}
-
-.tag-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: var(--space-1);
-  background: var(--portal-bg-medium);
-  border: var(--portal-border);
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 100;
-  box-shadow: none;
-}
-
-.tag-dropdown.hidden {
-  display: none;
-}
-
-.tag-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-md);
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-sm);
-  transition: background-color var(--transition-fast);
-}
-
-.tag-dropdown-item:hover {
-  background: var(--portal-bg-light);
-}
-
-.tag-dropdown-color {
-  width: 12px;
-  height: 12px;
-  border-radius: var(--portal-radius-full);
-}
-
-.tag-create-item {
-  border-top: var(--portal-border);
-  color: var(--color-primary);
-}
-
-/* ============================================
-   TIMELINE COMPONENT
-   ============================================ */
-
-.timeline-container {
-  padding: var(--space-1-5) 0;
-}
-
-.timeline-events {
-  position: relative;
-  padding-left: var(--space-7);
-}
-
-.timeline-events::before {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--portal-border);
-}
-
-.timeline-event {
-  position: relative;
-  padding-bottom: var(--space-1-5);
-  display: flex;
-  gap: var(--space-1);
-}
-
-.timeline-event:last-child {
-  padding-bottom: 0;
-}
-
-.timeline-event-icon {
-  position: absolute;
-  left: -28px;
-  width: 16px;
-  height: 16px;
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-secondary);
-  z-index: 1;
-}
-
-.timeline-event-content {
-  flex: 1;
-  background: var(--portal-bg-dark);
-  padding: var(--space-1) var(--space-1-5);
-  border: var(--portal-border);
-}
-
-.timeline-event-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-1);
-  margin-bottom: var(--space-1);
-}
-
-.timeline-event-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary);
-}
-
-.timeline-event-time {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  white-space: nowrap;
-}
-
-.timeline-event-description {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  margin-top: var(--space-1);
-}
-
-.timeline-event-user {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-  margin-top: var(--space-1);
-}
-
-.timeline-load-more {
-  text-align: center;
-  margin-top: var(--space-1-5);
-}
-
-@media (--mobile) {
-  .timeline-events {
-    padding-left: var(--space-6);
-  }
-
-  .timeline-event-icon {
-    left: calc(-1 * var(--space-6));
-  }
-}
-
-/* ============================================
-   SIMPLE CHARTS COMPONENT
-   ============================================ */
-
-/* Bar Chart */
-.bar-chart-item {
-  margin-bottom: var(--space-1);
-}
-
-.bar-chart-label {
-  margin-bottom: var(--space-1);
-}
-
-.bar-chart-bar-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-}
-
-.bar-chart-bar {
-  border-radius: var(--portal-radius-sm);
-  transition: width var(--transition-normal) ease;
-}
-
-.bar-chart-value {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
-  min-width: 40px;
-}
-
-/* Pie Chart */
-.pie-chart-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.pie-chart-svg {
-  flex-shrink: 0;
-}
-
-.pie-chart-legend {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
-
-.pie-chart-legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-}
-
-.pie-chart-legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: var(--portal-radius-xs);
-  flex-shrink: 0;
-}
-
-.pie-chart-legend-label {
-  flex: 1;
-}
-
-.pie-chart-legend-value {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
-}
-
-/* Sparkline */
-.sparkline-svg {
-  display: block;
-}
-
-/* KPI Card */
-.kpi-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  padding: var(--space-1-5);
-  background: var(--portal-bg-dark);
-  border-top: var(--border-width-thick) solid var(--color-primary);
-}
-
-.kpi-card-icon {
-  font-size: 1.5rem;
-  color: var(--portal-text-secondary);
-}
-
-.kpi-card-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.kpi-card-change {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-xs);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-}
-
-.kpi-card-change.positive {
-  color: var(--status-active);
-}
-
-.kpi-card-change.negative {
-  color: var(--status-cancelled);
-}
-
-@media (--mobile) {
-  .pie-chart-wrapper {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+/* Kanban: extracted to portal-kanban.css */
+/* Tag Input: extracted to portal-tags.css */
+/* Timeline: extracted to portal-timeline.css */
+/* Charts: extracted to portal-charts.css */
 
 /* =====================================================
    :HAS() AUTOMATIC STYLING
@@ -655,13 +143,6 @@ svg.lucide,
    LIST UTILITIES
    ===================================================== */
 
-/* Reset list styles */
-.list-reset {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
 /* Universal list reset for portal contexts */
 .portal
   :is(
@@ -739,38 +220,9 @@ svg.lucide,
 }
 
 /* =====================================================
-   PADDING UTILITIES
-   ===================================================== */
-
-.pad-compact {
-  padding: var(--space-1) var(--space-1-5);
-}
-
-.pad-standard {
-  padding: var(--space-2) var(--space-3);
-}
-
-.pad-card {
-  padding: var(--space-3);
-}
-
-.pad-section {
-  padding: var(--space-4);
-}
-
-/* =====================================================
    BORDER RADIUS UTILITIES
    ===================================================== */
 
-.rounded-sm {
-  border-radius: 0;
-}
-.rounded-md {
-  border-radius: 0;
-}
-.rounded-lg {
-  border-radius: 0;
-}
 .rounded-full {
   border-radius: var(--portal-radius-pill);
 }
@@ -793,59 +245,8 @@ svg.lucide,
 }
 
 /* =====================================================
-   SPACING UTILITIES
+   SPACING UTILITIES (Gap)
    ===================================================== */
-.mt-0 {
-  margin-top: 0;
-}
-.mt-sm {
-  margin-top: var(--space-2);
-}
-.mt-md {
-  margin-top: var(--space-3);
-}
-.mt-lg {
-  margin-top: var(--space-4);
-}
-
-.mb-0 {
-  margin-bottom: 0;
-}
-.mb-sm {
-  margin-bottom: var(--space-2);
-}
-.mb-md {
-  margin-bottom: var(--space-3);
-}
-.mb-lg {
-  margin-bottom: var(--space-4);
-}
-
-.pt-0 {
-  padding-top: 0;
-}
-.pt-sm {
-  padding-top: var(--space-2);
-}
-.pt-md {
-  padding-top: var(--space-3);
-}
-.pt-lg {
-  padding-top: var(--space-4);
-}
-
-.pb-0 {
-  padding-bottom: 0;
-}
-.pb-sm {
-  padding-bottom: var(--space-2);
-}
-.pb-md {
-  padding-bottom: var(--space-3);
-}
-.pb-lg {
-  padding-bottom: var(--space-4);
-}
 
 /* Gap utilities - for use with flex/grid containers */
 .gap-0 {
@@ -960,14 +361,6 @@ a.text-danger:hover {
   border-bottom: var(--portal-border);
 }
 
-.border-bottom-dark {
-  border-bottom: var(--portal-border);
-}
-
-.border-bottom-light {
-  border-bottom: var(--portal-border);
-}
-
 .border-top {
   border-top: var(--portal-border);
 }
@@ -1016,33 +409,8 @@ a.text-danger:hover {
 }
 
 /* =====================================================
-   FOCUS & INTERACTIVE UTILITIES
+   INTERACTIVE UTILITIES
    ===================================================== */
-
-.focus-primary:focus,
-.focus-primary:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.focus-ring:focus,
-.focus-ring:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-/* Hover state utilities */
-.hover-primary:hover {
-  color: var(--color-primary);
-}
-
-.hover-bg-light:hover {
-  background: var(--portal-bg-light);
-}
-
-.hover-bg-medium:hover {
-  background: var(--portal-bg-medium);
-}
 
 /* Interactive element (combines common patterns) */
 .interactive {
@@ -1068,124 +436,7 @@ a.text-danger:hover {
   pointer-events: none;
 }
 
-/* =====================================================
-   TOOLTIPS (CSS-only)
-   Consolidated from admin/tooltips.css
-   ===================================================== */
-
-/* Info icons */
-.portal .info-icon-wrapper {
-  display: inline-block;
-  position: relative;
-  vertical-align: middle;
-  margin-left: var(--space-0-5);
-  cursor: default;
-}
-
-.portal .info-icon {
-  display: inline-block;
-  vertical-align: middle;
-  opacity: 0.6;
-  transition: opacity var(--transition-fast);
-}
-
-.portal .info-icon-wrapper:hover .info-icon {
-  opacity: 1;
-}
-
-.portal .vital-card h4 {
-  display: flex;
-  align-items: center;
-  gap: var(--space-0-5);
-}
-
-/* Tooltip container - elements with data-tooltip attribute */
-.portal [data-tooltip] {
-  position: relative;
-}
-
-/* Tooltip pseudo-element */
-.portal [data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: var(--space-1) var(--space-1-5);
-  background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
-  font-family: var(
-    --font-family-system,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif
-  );
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-snug);
-  text-transform: none;
-  letter-spacing: normal;
-  white-space: pre-line;
-  width: max-content;
-  max-width: 280px;
-  text-align: left;
-  box-shadow: none;
-  z-index: var(--z-index-portal-dropdown);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity var(--transition-fast),
-    visibility var(--transition-fast);
-}
-
-/* Show tooltip on hover */
-.portal [data-tooltip]:hover::after {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Tooltip arrow */
-.portal [data-tooltip]::before {
-  content: "";
-  position: absolute;
-  bottom: calc(100% + 2px);
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--portal-bg-darker);
-  z-index: var(--z-index-portal-dropdown);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity var(--transition-fast),
-    visibility var(--transition-fast);
-}
-
-.portal [data-tooltip]:hover::before {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Table cell tooltips - avoid overflow */
-.portal td[data-tooltip]::after,
-.portal .table-cell[data-tooltip]::after {
-  left: 0;
-  transform: none;
-  white-space: normal;
-  max-width: 250px;
-}
-
-.portal td[data-tooltip]::before,
-.portal .table-cell[data-tooltip]::before {
-  left: 20px;
-  transform: none;
-}
+/* Tooltips: extracted to portal-tooltips.css */
 
 /* =====================================================
    COPY EMAIL PATTERN
@@ -1215,7 +466,7 @@ a.text-danger:hover {
   min-height: 1.15em;
   padding: 0;
   box-sizing: border-box;
-  font-size: 1em;
+  font-size: var(--font-size-sm);
   line-height: 1;
   vertical-align: middle;
   color: var(--portal-text-muted);
@@ -1234,62 +485,7 @@ a.text-danger:hover {
   color: var(--color-primary);
 }
 
-/* =====================================================
-   PROGRESS BAR COMPONENT
-   (Merged from shared/progress.css)
-   Reusable progress bar component for admin and portal.
-   ===================================================== */
-
-.progress-bar {
-  height: 12px;
-  background: var(--portal-bg-light);
-  overflow: hidden;
-  box-shadow: var(--shadow-inset-light);
-  margin: var(--space-2) 0;
-}
-
-/* Progress overview container */
-.progress-overview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.progress-overview .progress-bar {
-  margin: 0;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  transition: width var(--transition-normal) ease;
-  border-radius: inherit;
-}
-
-/* Small progress bar */
-.progress-bar.progress-sm {
-  height: 8px;
-}
-
-/* Large progress bar */
-.progress-bar.progress-lg {
-  height: 16px;
-}
-
-/* Success state */
-.progress-fill.progress-success {
-  background: var(--color-success);
-}
-
-/* Warning state */
-.progress-fill.progress-warning {
-  background: var(--color-warning);
-}
-
-/* Danger state */
-.progress-fill.progress-danger {
-  background: var(--color-danger);
-}
+/* Progress bar: extracted to portal-progress.css */
 
 /* ============================================
    ERROR BOUNDARY COMPONENT
@@ -1382,36 +578,6 @@ a.text-danger:hover {
    These classes are used by React components
    ===================================================== */
 
-/* States - Loading, empty, error */
-.tw-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-16) 0;
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-base);
-}
-
-.tw-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-8) 0;
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-base);
-}
-
-.tw-error {
-  padding: var(--space-4);
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-primary);
-  font-size: var(--font-size-base);
-}
-
 /* Progress bars */
 .tw-progress-track {
   height: 4px;
@@ -1456,7 +622,7 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: var(--z-index-50);
 }
 
 .tw-modal {
@@ -2252,7 +1418,7 @@ a.text-danger:hover {
 
 /* Warning card with white border */
 .contract-warning {
-  border-color: white;
+  border-color: var(--color-white);
 }
 
 /* ============================================
@@ -2596,7 +1762,7 @@ a.text-danger:hover {
 /* Keyboard shortcut badge */
 .msgtab-kbd {
   font-size: var(--label-font-size);
-  padding: 2px 6px;
+  padding: var(--space-px) var(--icon-gap-xs);
 }
 
 /* ============================================

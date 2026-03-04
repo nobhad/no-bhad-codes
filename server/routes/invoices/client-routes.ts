@@ -14,7 +14,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessInvoice } from '../../middleware/access-control.js';
-import { errorResponse, errorResponseWithPayload } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -66,8 +66,7 @@ router.get(
       // Transform invoices to snake_case for frontend compatibility
       const transformedInvoices = invoices.map(toSnakeCaseInvoice);
 
-      res.json({
-        success: true,
+      sendSuccess(res, {
         invoices: transformedInvoices,
         count: invoices.length,
         summary: {

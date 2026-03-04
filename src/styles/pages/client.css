@@ -429,13 +429,13 @@ body[data-page="client-landing"] .client-login .client-content {
 
 @media (--mobile) {
   .login-title {
-    font-size: 2rem;
+    font-size: var(--font-size-2xl);
   }
 }
 
 @media (--small-mobile) {
   .login-title {
-    font-size: 1.8rem;
+    font-size: var(--font-size-2xl);
   }
 }
 
@@ -481,7 +481,7 @@ body[data-page="client-landing"] .client-login .client-content {
 .close-content {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   cursor: pointer;
   color: var(--color-text-primary);
   padding: 0.25rem 0.5rem;
@@ -511,7 +511,7 @@ body[data-page="client-landing"] .dynamic-content .contact-form {
 .login-footer {
   margin-top: 0.5rem;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   opacity: 0.8;
   border: none;
@@ -524,7 +524,7 @@ body[data-page="client-landing"] .dynamic-content .contact-form {
 /* Error messages */
 .error-message {
   color: var(--color-danger-dark);
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   margin-top: 0.25rem;
   display: none;
 }

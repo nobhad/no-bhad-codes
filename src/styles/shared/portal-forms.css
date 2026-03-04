@@ -544,27 +544,6 @@ input.search-bar-input {
   border-color: var(--color-error) !important;
 }
 
-/* Input with icon - ensure placeholder never overlaps icon */
-.input-with-icon {
-  position: relative;
-}
-
-.input-with-icon .input-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
-  color: var(--portal-text-muted);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.input-with-icon .tw-input,
-.input-with-icon input {
-  padding-left: 2.5rem !important;
-}
 
 /* Select dropdown */
 .tw-select {
@@ -620,7 +599,6 @@ input.search-bar-input {
 }
 
 /* Checkbox - all checkbox variants use same border */
-.tw-checkbox,
 .data-table-checkbox {
   width: 1rem;
   height: 1rem;
@@ -770,7 +748,7 @@ input.search-bar-input {
 
 .qform-select-dropdown {
   position: absolute;
-  z-index: 50;
+  z-index: var(--z-index-50);
   width: 100%;
   margin-top: 0.25rem;
   max-height: 192px;
@@ -1141,7 +1119,7 @@ html[data-theme="light"] .form-field-select {
   flex-shrink: 0;
   width: 1rem;
   height: 1rem;
-  margin-top: 2px;
+  margin-top: var(--space-px);
   accent-color: var(--color-primary);
   cursor: pointer;
 }

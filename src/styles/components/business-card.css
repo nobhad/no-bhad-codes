@@ -411,9 +411,9 @@
    ========================================== */
 .card-logo {
   font-size: var(--font-size-xl);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-fluid-xs);
-  letter-spacing: 2px;
+  letter-spacing: var(--letter-spacing-widest);
   color: var(--color-card-text); /* Always dark text for light card */
 }
 

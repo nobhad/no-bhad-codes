@@ -43,6 +43,10 @@
   --z-index-nav-backdrop: 90;
   --z-index-nav: 100;
   --z-index-nav-dropdown: 110;
+  --z-index-nav-overlay: 115;   /* Blur overlay between header and nav menu */
+  --z-index-nav-menu: 120;      /* Nav menu above overlay */
+  --z-index-nav-menu-content: 125; /* Menu content above overlay */
+  --z-index-nav-header: 130;    /* Header above all nav layers */
 
   /* Business card layers */
   --z-index-business-card: 50;

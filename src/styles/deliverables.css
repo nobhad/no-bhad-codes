@@ -348,7 +348,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .tool-buttons {
@@ -511,7 +511,7 @@
 
 .approval-btn {
   flex: 1;
-  padding: 4px 8px;
+  padding: var(--space-1) var(--space-2);
   border: var(--portal-border);
   background: var(--portal-bg-dark);
   border-radius: var(--portal-radius-xs);

@@ -26,7 +26,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   color: inherit;
   text-transform: uppercase;
   flex-shrink: 0;
@@ -181,7 +181,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   border: none;
   font-family: var(--font-family-acme);
   font-size: var(--font-size-sm);
-  font-weight: normal;
+  font-weight: var(--font-weight-regular);
   line-height: 40px;
   text-transform: uppercase;
   color: var(--color-text-primary);
@@ -484,7 +484,7 @@ html[data-theme="dark"] .portal-dropdown-header {
   font-size: var(--font-size-base);
   font-family: inherit;
   outline: none;
-  transition: border-width 0.1s ease;
+  transition: border-width var(--transition-fast) ease;
   box-sizing: border-box;
 }
 

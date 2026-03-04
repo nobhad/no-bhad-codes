@@ -40,7 +40,7 @@
   color: var(--color-error-500);
   font-size: var(--font-size-sm);
   min-height: 1.2em;
-  margin-top: 4px;
+  margin-top: var(--space-0-5);
   display: none; /* Hidden by default */
 }
 

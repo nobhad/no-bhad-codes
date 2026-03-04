@@ -50,17 +50,19 @@
   --font-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem); /* 36px → 48px */
   --font-size-5xl: clamp(3rem, 2rem + 5vw, 4rem); /* 48px → 64px */
 
+  /* Alias for backwards compatibility */
+  --font-size-base: var(--font-size-md);
+
   /* ============================================
    * FONT WEIGHTS
    * ============================================ */
 
-  --font-weight-thin: 100;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  --font-weight-black: 900;
+  --font-weight-extrabold: 800;
 
   /* ============================================
    * LINE HEIGHTS
@@ -71,7 +73,6 @@
   --line-height-snug: 1.375;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.625;
-  --line-height-loose: 2;
 
   /* ============================================
    * LETTER SPACING
@@ -87,65 +88,10 @@
   --letter-spacing-wider: 0.05em;
   --letter-spacing-widest: 0.1em;
 
-  /* ============================================
-   * TEXT STYLES - COMPOSED TOKENS
-   * ============================================
-   * DISCOTHÈQUE: Tight tracking, bold monospace
-   */
+  /* Semantic aliases */
+  --letter-spacing-label: var(--letter-spacing-wider); /* 0.05em */
+  --letter-spacing-title: var(--letter-spacing-wide);  /* 0.025em */
 
-  /* Display Styles - Serif with tight tracking */
-  --text-display-large: var(--font-weight-bold) var(--font-size-5xl) / var(--line-height-tight)
-    var(--font-family-serif);
-  --text-display-medium: var(--font-weight-bold) var(--font-size-4xl) / var(--line-height-tight)
-    var(--font-family-serif);
-  --text-display-small: var(--font-weight-bold) var(--font-size-3xl) / var(--line-height-tight)
-    var(--font-family-serif);
-
-  /* Heading Styles - All headings use serif for visual hierarchy */
-  --text-heading-1: var(--font-weight-bold) var(--font-size-3xl) / var(--line-height-tight)
-    var(--font-family-serif);
-  --text-heading-2: var(--font-weight-semibold) var(--font-size-2xl) / var(--line-height-tight)
-    var(--font-family-serif);
-  --text-heading-3: var(--font-weight-semibold) var(--font-size-xl) / var(--line-height-snug)
-    var(--font-family-serif);
-  --text-heading-4: var(--font-weight-medium) var(--font-size-lg) / var(--line-height-snug)
-    var(--font-family-serif);
-  --text-heading-5: var(--font-weight-medium) var(--font-size-md) / var(--line-height-normal)
-    var(--font-family-serif);
-  --text-heading-6: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
-    var(--font-family-serif);
-
-  /* Heading letter spacing token */
-  --heading-letter-spacing: var(--letter-spacing-tightest);
-
-  /* Body Styles */
-  --text-body-large: var(--font-weight-regular) var(--font-size-lg) / var(--line-height-relaxed)
-    var(--font-family-sans);
-  --text-body-medium: var(--font-weight-regular) var(--font-size-md) / var(--line-height-normal)
-    var(--font-family-sans);
-  --text-body-small: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal)
-    var(--font-family-sans);
-
-  /* Caption & Label Styles */
-  --text-caption: var(--font-weight-regular) var(--font-size-xs) / var(--line-height-normal)
-    var(--font-family-sans);
-  --text-label: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
-    var(--font-family-sans);
-  --text-button: var(--font-weight-medium) var(--font-size-md) / var(--line-height-normal)
-    var(--font-family-sans);
-
-  /* Code Styles */
-  --text-code-inline: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal)
-    var(--font-family-mono);
-  --text-code-block: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-relaxed)
-    var(--font-family-mono);
-
-  /* ============================================
-   * TEXT DECORATION
-   * ============================================ */
-
-  --text-decoration-underline-offset: 0.125em;
-  --text-decoration-thickness: 0.0625em;
 }
 
 /* ============================================

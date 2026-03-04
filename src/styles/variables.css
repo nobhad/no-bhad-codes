@@ -107,15 +107,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
 
   /* Container and Layout - defined in base/layout.css */
 
-  /* Responsive Typography */
-  --font-size-2xs: 0.625rem; /* 10px - smallest, badges/tags */
-  --font-size-xs: 0.75rem; /* 12px - table cells, secondary text */
-  --font-size-sm: 0.875rem; /* 14px - body text, buttons */
-  --font-size-base: 1rem; /* 16px - default body */
-  --font-size-lg: 1.125rem; /* 18px - headings */
-  --font-size-xl: 1.25rem; /* 20px - large headings */
-  --font-size-2xl: 1.5rem; /* 24px - page titles */
-  --font-size-3xl: 2rem; /* 32px - hero text */
+  /* Font sizes defined in design-system/tokens/typography.css (fluid clamp values) */
 
   /* Border Width - DISCOTHÈQUE uses 2px borders consistently */
   --border-width: 2px;
@@ -161,10 +153,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --status-dot-size: 8px;
   --status-dot-gap: var(--space-2); /* Gap between dot and text */
 
-  /* Letter Spacing - standardized tracking */
-  --letter-spacing-label: 0.05em;
-  --letter-spacing-title: 0.02em;
-  --letter-spacing-wide: 0.08em;
+  /* Letter spacing defined in design-system/tokens/typography.css */
 
   /* Responsive (fluid) spacing - use for layout that should scale with viewport.
      Fixed scale (--space-0, --space-1, ...) is in design-system/tokens/spacing.css */
@@ -193,10 +182,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --duration-slow: 0.4s;
   --duration-slower: 0.5s;
 
-  /* Z-index */
-  --z-header: 10;
-  --z-nav: 100;
-  --z-modal: 1000;
+  /* Z-index defined in design-system/tokens/z-index.css */
 
   /* Modal sizes */
   --modal-width-sm: 400px;

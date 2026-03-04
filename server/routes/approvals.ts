@@ -12,7 +12,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
 import { getDatabase } from '../database/init.js';
-import { errorResponse } from '../utils/api-response.js';
+import { errorResponse, sendSuccess } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -215,7 +215,7 @@ router.get(
     }
 
     const approvals = await approvalService.getPendingApprovalsForUser(email);
-    res.json({ approvals });
+    sendSuccess(res, { approvals });
   })
 );
 

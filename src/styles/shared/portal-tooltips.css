@@ -1,0 +1,123 @@
+/**
+ * ===============================================
+ * TOOLTIPS (CSS-only)
+ * ===============================================
+ * @file src/styles/shared/portal-tooltips.css
+ *
+ * CSS-only tooltips using data-tooltip attribute,
+ * plus info icon wrapper pattern.
+ */
+
+/* Info icons */
+.portal .info-icon-wrapper {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  margin-left: var(--space-0-5);
+  cursor: default;
+}
+
+.portal .info-icon {
+  display: inline-block;
+  vertical-align: middle;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.portal .info-icon-wrapper:hover .info-icon {
+  opacity: 1;
+}
+
+.portal .vital-card h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+/* Tooltip container - elements with data-tooltip attribute */
+.portal [data-tooltip] {
+  position: relative;
+}
+
+/* Tooltip pseudo-element */
+.portal [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-1) var(--space-1-5);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
+  font-family: var(
+    --font-family-system,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif
+  );
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-snug);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: pre-line;
+  width: max-content;
+  max-width: 280px;
+  text-align: left;
+  box-shadow: none;
+  z-index: var(--z-index-portal-dropdown);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
+}
+
+/* Show tooltip on hover */
+.portal [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip arrow */
+.portal [data-tooltip]::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--portal-bg-darker);
+  z-index: var(--z-index-portal-dropdown);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
+}
+
+.portal [data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Table cell tooltips - avoid overflow */
+.portal td[data-tooltip]::after,
+.portal .table-cell[data-tooltip]::after {
+  left: 0;
+  transform: none;
+  white-space: normal;
+  max-width: 250px;
+}
+
+.portal td[data-tooltip]::before,
+.portal .table-cell[data-tooltip]::before {
+  left: 20px;
+  transform: none;
+}

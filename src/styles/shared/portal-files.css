@@ -113,7 +113,7 @@
 .portal .files-browser {
   display: grid;
   grid-template-columns: 220px 1fr;
-  gap: 1px;
+  gap: var(--space-px);
   background: var(--portal-border);
   overflow: hidden;
   min-height: 300px;
@@ -160,7 +160,7 @@
   cursor: pointer;
   transition: all var(--transition-fast) ease;
   font-size: var(--font-size-sm);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-px);
 }
 
 .portal .folder-item:hover {

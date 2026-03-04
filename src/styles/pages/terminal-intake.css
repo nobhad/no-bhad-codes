@@ -16,7 +16,7 @@
   /* Terminal font stack */
   --terminal-font-family:
     "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --terminal-font-size: 16px;
+  --terminal-font-size: var(--terminal-font-size);
   --terminal-line-height: 1.7;
 }
 
@@ -178,7 +178,7 @@
 
 .terminal-prompt {
   color: var(--color-terminal-blue);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   white-space: nowrap;
 }
 
@@ -193,7 +193,7 @@ input.terminal-input,
   color: var(--color-terminal-text);
   font-family: var(--terminal-font-family);
   font-size: var(--terminal-font-size);
-  font-weight: normal;
+  font-weight: var(--font-weight-regular);
   outline: none;
   caret-color: transparent;
   box-shadow: none;
@@ -203,7 +203,7 @@ input.terminal-input,
 input.terminal-input::placeholder,
 .terminal-input::placeholder {
   color: var(--color-terminal-text-dimmer);
-  font-weight: normal;
+  font-weight: var(--font-weight-regular);
 }
 
 /* All states - transparent background, no outline */
@@ -281,7 +281,7 @@ input.terminal-input:-webkit-autofill,
   border: none;
   padding: var(--space-2) var(--space-4);
   font-family: inherit;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: all var(--transition-mouse);
   border-radius: var(--portal-radius-sm);
@@ -306,7 +306,7 @@ input.terminal-input:-webkit-autofill,
 /* Cursor animation - controlled by GSAP */
 .terminal-cursor {
   color: var(--color-terminal-green);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .typing-cursor {
@@ -327,14 +327,14 @@ input.terminal-input:-webkit-autofill,
 .typing-indicator::before {
   content: "❯ ";
   color: var(--color-terminal-green);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .typing-indicator::after {
   content: "█";
   color: var(--color-terminal-green);
-  font-size: 1.2em;
-  font-weight: bold;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   /* Animation controlled by GSAP */
 }
 
@@ -480,7 +480,7 @@ body[data-page="client-intake"] .terminal-window {
 .terminal-login-info {
   padding: 0 0 var(--space-3) 0;
   color: var(--color-terminal-text-muted);
-  font-size: 16px;
+  font-size: var(--terminal-font-size);
   line-height: var(--line-height-relaxed);
   background: transparent;
 }
@@ -554,7 +554,7 @@ body[data-page="client-intake"] .terminal-window {
 .chat-message.clickable-message:hover::after {
   content: " [click to edit]";
   color: var(--color-terminal-text-dim);
-  font-size: 0.85em;
+  font-size: var(--font-size-sm);
   font-style: italic;
 }
 
@@ -594,7 +594,7 @@ body[data-page="client-intake"] .terminal-window {
 .chat-message.ai .message-content::before {
   content: "❯ ";
   color: var(--color-terminal-green);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 /* User Messages - light text with $ prompt */
@@ -609,7 +609,7 @@ body[data-page="client-intake"] .terminal-window {
 .chat-message.user .message-content::before {
   content: "$ ";
   color: var(--color-terminal-blue);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 /* System Messages - summary/review styling */
@@ -660,7 +660,7 @@ body[data-page="client-intake"] .terminal-window {
 
 .boot-line {
   color: var(--color-terminal-text-muted);
-  font-size: 16px;
+  font-size: var(--terminal-font-size);
   line-height: var(--line-height-relaxed);
 }
 
@@ -687,7 +687,7 @@ body[data-page="client-intake"] .terminal-window {
   color: var(--color-terminal-blue);
   padding: var(--space-0-5) 0;
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--terminal-font-size);
   cursor: pointer;
   transition: color var(--transition-mouse);
   text-align: left;
@@ -724,8 +724,8 @@ body[data-page="client-intake"] .terminal-window {
   color: var(--color-terminal-bg);
   padding: var(--space-2) var(--space-4);
   font-family: inherit;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: var(--terminal-font-size);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   text-align: left;
   border-radius: var(--portal-radius-sm);

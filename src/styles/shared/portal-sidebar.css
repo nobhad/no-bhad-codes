@@ -100,7 +100,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 .sidebar-buttons {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-px);
   overflow: visible;
   padding: var(--space-2) 0;
   flex: 1;
@@ -201,7 +201,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 .client-name {
   font-family: var(--font-family-mono);
-  font-size: 1.4rem;
+  font-size: var(--font-size-xl);
   color: var(--portal-text-light);
   margin: 0;
   text-transform: uppercase;
