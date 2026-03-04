@@ -129,7 +129,7 @@ section.contact-section h2 {
   width: 100%;
   overflow: visible;
   position: relative;
-  font-size: 4.5rem;
+  font-size: var(--font-size-5xl);
 }
 
 /* Divider — full width of content */
@@ -219,7 +219,7 @@ p.contact-options {
    Mobile override (2.5rem) in mobile/contact.css (responsive layer) takes precedence. */
 @media (--laptop-wide) {
   section.contact-section h2 {
-    font-size: 3rem;
+    font-size: var(--font-size-4xl);
   }
 
   .contact-section {
@@ -262,7 +262,7 @@ p.contact-options {
 /* Contact text on card - always black on white card background */
 .contact-card-text {
   color: var(--color-black);
-  font-size: 1.625rem;
+  font-size: var(--font-size-xl);
   line-height: var(--line-height-relaxed);
   text-align: left;
   margin: 0;
@@ -270,7 +270,7 @@ p.contact-options {
 
 /* Links on card - always black on white card background */
 .contact-card-link {
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   text-decoration: underline;
   color: var(--color-black);
   transition: color var(--transition-mouse) ease;
@@ -283,7 +283,7 @@ p.contact-options {
 
 /* Contact options links - extra bold and underlined */
 .contact-option-link {
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   text-decoration: underline;
 }
 
@@ -414,11 +414,11 @@ p.contact-options {
   gap: 0.55rem;
   background: transparent;
   border: var(--contact-field-border-width) solid var(--contact-field-border-color);
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: none;
   padding: 0.9375rem 1.875rem;
   font-family: var(--font-family-body, inherit);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   cursor: pointer;
@@ -554,7 +554,7 @@ html[data-theme="dark"] .input-item textarea {
   border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  margin-top: 4px;
+  margin-top: var(--space-0-5);
   pointer-events: none;
   line-height: var(--line-height-snug);
 }

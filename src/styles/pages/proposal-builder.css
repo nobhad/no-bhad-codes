@@ -212,7 +212,7 @@
   transform: translateX(-50%);
   background: var(--proposal-accent);
   color: var(--proposal-text);
-  padding: 4px 16px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--portal-radius-pill);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -386,7 +386,7 @@
   display: block;
   font-size: var(--font-size-xs);
   color: var(--proposal-text-muted);
-  margin-top: 2px;
+  margin-top: var(--space-px);
 }
 
 .check-included {
@@ -502,7 +502,7 @@
   display: block;
   font-weight: var(--font-weight-medium);
   color: var(--proposal-text);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-px);
 }
 
 .feature-info .feature-description {
@@ -544,7 +544,7 @@
   transform: translateX(-50%);
   background: var(--proposal-accent);
   color: var(--proposal-text);
-  padding: 4px 16px;
+  padding: var(--space-1) var(--space-4);
   border-radius: var(--portal-radius-pill);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -601,7 +601,7 @@
 }
 
 .maintenance-feature .feature-check {
-  margin-top: 2px;
+  margin-top: var(--space-px);
 }
 
 /* maintenance-select-btn styles consolidated above with tier-select-btn */
@@ -724,7 +724,7 @@
 
 .summary-input {
   width: 100%;
-  padding: 8px 10px;
+  padding: var(--space-1) var(--icon-gap-md);
   border: var(--border-width) solid var(--proposal-card-border);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
@@ -766,7 +766,7 @@
 .summary-label {
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--letter-spacing-wider);
   color: var(--proposal-text-muted);
 }
 

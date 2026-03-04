@@ -315,7 +315,7 @@
 .preview-label {
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--letter-spacing-wider);
   color: var(--portal-text-muted);
 }
 

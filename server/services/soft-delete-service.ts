@@ -20,7 +20,7 @@ import { logger } from './logger.js';
 // TYPES
 // =====================================================
 
-export type SoftDeleteEntityType = 'client' | 'project' | 'invoice' | 'lead' | 'proposal';
+export type SoftDeleteEntityType = 'client' | 'project' | 'invoice' | 'lead' | 'proposal' | 'message_thread' | 'document_request' | 'contract' | 'deliverable';
 
 export interface DeletedItem {
   id: number;
@@ -39,6 +39,10 @@ export interface DeletedItemStats {
   invoices: number;
   leads: number;
   proposals: number;
+  message_threads: number;
+  document_requests: number;
+  contracts: number;
+  deliverables: number;
   total: number;
 }
 
@@ -66,7 +70,11 @@ const TABLE_MAP: Record<SoftDeleteEntityType, string> = {
   project: 'projects',
   invoice: 'invoices',
   lead: 'projects', // Leads are projects with status IN ('pending', 'new')
-  proposal: 'proposal_requests'
+  proposal: 'proposal_requests',
+  message_thread: 'message_threads',
+  document_request: 'document_requests',
+  contract: 'contracts',
+  deliverable: 'deliverables'
 };
 
 // =====================================================
@@ -567,7 +575,7 @@ class SoftDeleteService {
 
     const types = entityType
       ? [entityType]
-      : (['client', 'project', 'invoice', 'lead', 'proposal'] as SoftDeleteEntityType[]);
+      : (['client', 'project', 'invoice', 'lead', 'proposal', 'message_thread', 'document_request', 'contract', 'deliverable'] as SoftDeleteEntityType[]);
 
     for (const type of types) {
       const table = TABLE_MAP[type];
@@ -589,6 +597,18 @@ class SoftDeleteService {
         break;
       case 'proposal':
         nameColumn = 'COALESCE(title, \'Unnamed Proposal\')';
+        break;
+      case 'message_thread':
+        nameColumn = 'COALESCE(subject, \'Thread #\' || id)';
+        break;
+      case 'document_request':
+        nameColumn = 'COALESCE(title, \'Document Request #\' || id)';
+        break;
+      case 'contract':
+        nameColumn = 'COALESCE(title, \'Contract #\' || id)';
+        break;
+      case 'deliverable':
+        nameColumn = 'COALESCE(title, name, \'Deliverable #\' || id)';
         break;
       default:
         nameColumn = '\'Unknown\'';
@@ -643,6 +663,10 @@ class SoftDeleteService {
       invoices: 0,
       leads: 0,
       proposals: 0,
+      message_threads: 0,
+      document_requests: 0,
+      contracts: 0,
+      deliverables: 0,
       total: 0
     };
 
@@ -674,7 +698,28 @@ class SoftDeleteService {
     )) as { count: number };
     stats.proposals = proposalCount.count;
 
-    stats.total = stats.clients + stats.projects + stats.invoices + stats.leads + stats.proposals;
+    const threadCount = (await db.get(
+      'SELECT COUNT(*) as count FROM message_threads WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.message_threads = threadCount.count;
+
+    const docRequestCount = (await db.get(
+      'SELECT COUNT(*) as count FROM document_requests WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.document_requests = docRequestCount.count;
+
+    const contractCount = (await db.get(
+      'SELECT COUNT(*) as count FROM contracts WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.contracts = contractCount.count;
+
+    const deliverableCount = (await db.get(
+      'SELECT COUNT(*) as count FROM deliverables WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.deliverables = deliverableCount.count;
+
+    stats.total = stats.clients + stats.projects + stats.invoices + stats.leads + stats.proposals
+      + stats.message_threads + stats.document_requests + stats.contracts + stats.deliverables;
 
     return stats;
   }
@@ -702,6 +747,10 @@ class SoftDeleteService {
       invoices: 0,
       leads: 0,
       proposals: 0,
+      message_threads: 0,
+      document_requests: 0,
+      contracts: 0,
+      deliverables: 0,
       total: 0
     };
     const errors: string[] = [];
@@ -793,6 +842,34 @@ class SoftDeleteService {
         [cutoffDateStr]
       );
 
+      // 5b. Delete expired message threads
+      const threadResult = await db.run(
+        'DELETE FROM message_threads WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.message_threads = threadResult.changes || 0;
+
+      // 5c. Delete expired document requests
+      const docRequestResult = await db.run(
+        'DELETE FROM document_requests WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.document_requests = docRequestResult.changes || 0;
+
+      // 5d. Delete expired contracts
+      const contractResult = await db.run(
+        'DELETE FROM contracts WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.contracts = contractResult.changes || 0;
+
+      // 5e. Delete expired deliverables
+      const deliverableResult = await db.run(
+        'DELETE FROM deliverables WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.deliverables = deliverableResult.changes || 0;
+
       // 6. Delete projects
       const projectResult = await db.run(
         'DELETE FROM projects WHERE deleted_at IS NOT NULL AND deleted_at < ?',
@@ -871,7 +948,8 @@ class SoftDeleteService {
       deleted.clients = clientResult.changes || 0;
 
       deleted.total =
-        deleted.clients + deleted.projects + deleted.invoices + deleted.leads + deleted.proposals;
+        deleted.clients + deleted.projects + deleted.invoices + deleted.leads + deleted.proposals
+        + deleted.message_threads + deleted.document_requests + deleted.contracts + deleted.deliverables;
 
       if (deleted.total > 0) {
         await auditLogger.log({

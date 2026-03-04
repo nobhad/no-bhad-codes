@@ -627,7 +627,7 @@ html[data-theme="light"] .portal :is(
 .portal .summary-card .summary-value {
   display: block;
   font-family: var(--font-family-sans);
-  font-size: 1.8rem;
+  font-size: var(--font-size-2xl);
   color: var(--portal-text-light);
 }
 
@@ -674,7 +674,7 @@ html[data-theme="light"] .portal :is(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 14px;
+  padding: var(--space-1) var(--portal-panel-padding-x);
   background: transparent;
   border: var(--portal-border);
   color: var(--portal-text-light);
@@ -748,7 +748,7 @@ html[data-theme="light"] .portal :is(
 
 .portal .content-section-card .section-title {
   font-family: var(--font-family-sans);
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label, 0.05em);

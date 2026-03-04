@@ -178,7 +178,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
   text-align: left;
   white-space: nowrap;
@@ -295,7 +295,7 @@
   font-size: var(--font-size-sm);
   font-family: var(--font-family-sans);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
@@ -356,7 +356,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
   white-space: nowrap;
   transition:

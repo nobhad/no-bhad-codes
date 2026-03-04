@@ -365,7 +365,7 @@
   color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
 }
 
 .vital-status {
@@ -437,7 +437,7 @@
   border: var(--portal-border);
   min-width: 110px;
   text-align: center;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .funnel-stage:hover {

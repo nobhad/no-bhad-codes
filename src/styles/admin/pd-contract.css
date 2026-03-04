@@ -47,13 +47,13 @@
   font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--letter-spacing-widest);
   margin-bottom: 0.125rem;
 }
 
 /* Status badge in contract block: align with overview meta-value prominence */
 .contract-status-info .status-badge {
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
 }
 

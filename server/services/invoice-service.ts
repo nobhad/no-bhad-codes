@@ -177,9 +177,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE i.id = ?
     `;
 
@@ -201,9 +201,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE i.invoice_number = ?
     `;
 
@@ -225,9 +225,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE i.client_id = ?
       ORDER BY i.created_at DESC
     `;
@@ -248,9 +248,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE i.project_id = ?
       ORDER BY i.created_at DESC
     `;
@@ -403,8 +403,8 @@ export class InvoiceService {
     const intakeSql = `
       SELECT ci.*, p.id as project_id, c.id as client_id
       FROM client_intakes ci
-      LEFT JOIN projects p ON ci.project_id = p.id
-      LEFT JOIN clients c ON ci.client_id = c.id
+      LEFT JOIN active_projects p ON ci.project_id = p.id
+      LEFT JOIN active_clients c ON ci.client_id = c.id
       WHERE ci.id = ?
     `;
 
@@ -862,7 +862,7 @@ export class InvoiceService {
     // Get all paid deposit invoices for this project
     const depositsSql = `
       SELECT i.id, i.invoice_number, i.amount_total, i.paid_date
-      FROM invoices i
+      FROM active_invoices i
       WHERE i.deposit_for_project_id = ?
         AND i.invoice_type = 'deposit'
         AND i.status = 'paid'
@@ -985,7 +985,7 @@ export class InvoiceService {
     const sql = `
       SELECT ic.*, i.invoice_number as deposit_invoice_number
       FROM invoice_credits ic
-      JOIN invoices i ON ic.deposit_invoice_id = i.id
+      JOIN active_invoices i ON ic.deposit_invoice_id = i.id
       WHERE ic.invoice_id = ?
       ORDER BY ic.applied_at ASC
     `;
@@ -1184,9 +1184,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE i.milestone_id = ?
       ORDER BY i.created_at DESC
     `;
@@ -1573,7 +1573,7 @@ export class InvoiceService {
     const whereClause = conditions.join(' AND ');
 
     // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM invoices i WHERE ${whereClause}`;
+    const countSql = `SELECT COUNT(*) as total FROM active_invoices i WHERE ${whereClause}`;
     const countResult = await this.db.get(countSql, params);
     const total = countResult?.total || 0;
 
@@ -1584,9 +1584,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE ${whereClause}
       ORDER BY i.created_at DESC
       LIMIT ? OFFSET ?
@@ -1612,9 +1612,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       ORDER BY i.created_at DESC
       LIMIT ? OFFSET ?
     `;
@@ -1931,9 +1931,9 @@ export class InvoiceService {
     const sql = `
       SELECT i.*, c.company_name, c.contact_name, c.email as client_email,
              p.project_name, p.description as project_description
-      FROM invoices i
-      JOIN clients c ON i.client_id = c.id
-      JOIN projects p ON i.project_id = p.id
+      FROM active_invoices i
+      JOIN active_clients c ON i.client_id = c.id
+      JOIN active_projects p ON i.project_id = p.id
       WHERE i.status = 'overdue'
         AND i.late_fee_type != 'none'
         AND i.late_fee_rate > 0
@@ -2026,7 +2026,7 @@ export class InvoiceService {
     // Get the next sequence number for this prefix
     const sql = `
       SELECT MAX(invoice_sequence) as max_seq
-      FROM invoices
+      FROM active_invoices
       WHERE invoice_prefix = ?
     `;
 

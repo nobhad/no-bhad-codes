@@ -77,9 +77,6 @@
 .flex-none {
   flex: none;
 }
-.grow {
-  flex-grow: 1;
-}
 .grow-0 {
   flex-grow: 0;
 }
@@ -137,12 +134,6 @@
    ALIGN SELF
    ============================================ */
 
-.self-start {
-  align-self: flex-start;
-}
-.self-center {
-  align-self: center;
-}
 .self-end {
   align-self: flex-end;
 }
@@ -379,9 +370,6 @@
    FONT WEIGHT
    ============================================ */
 
-.font-normal {
-  font-weight: var(--font-weight-regular);
-}
 .font-medium {
   font-weight: var(--font-weight-medium);
 }
@@ -549,9 +537,6 @@
 .pointer-events-none {
   pointer-events: none;
 }
-.pointer-events-auto {
-  pointer-events: auto;
-}
 
 /* ============================================
    OPACITY
@@ -574,12 +559,6 @@
    TRANSITIONS
    ============================================ */
 
-.transition-fast {
-  transition: all var(--transition-fast) ease;
-}
-.transition-base {
-  transition: all var(--transition-base) ease;
-}
 .transition-none {
   transition: none;
 }
@@ -617,7 +596,7 @@ html[data-wireframe="true"] *:focus-visible {
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-index-portal-confirm, 9900);
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-6);
   background-color: var(--color-dark);
   color: var(--color-light);
   text-decoration: none;

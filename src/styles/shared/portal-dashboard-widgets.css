@@ -286,7 +286,7 @@
   font-size: var(--font-size-xs);  /* 12px */
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--letter-spacing-wider);
   padding: var(--space-0-5) var(--space-1);
   background: transparent;
   border: var(--portal-border);
@@ -413,7 +413,7 @@
 
 .portal .attention-count {
   font-family: var(--font-family-sans);
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   line-height: 1;
   color: var(--color-primary);
@@ -485,6 +485,6 @@
   }
 
   .portal .attention-count {
-    font-size: 1.25rem;
+    font-size: var(--font-size-lg);
   }
 }

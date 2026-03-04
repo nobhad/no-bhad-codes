@@ -471,7 +471,7 @@
 
 .portal-tab.active .portal-tab-badge {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-white);
 }
 
 /* =====================================================
@@ -519,7 +519,7 @@
 .portal-tabs--pills .portal-tab.active,
 .portal-tabs--pills button.active {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-white);
   border-bottom: none;
 }
 
@@ -614,7 +614,7 @@
 
 .portal-subtab.active .portal-subtab-badge {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-white);
 }
 
 .portal-subtab-content {

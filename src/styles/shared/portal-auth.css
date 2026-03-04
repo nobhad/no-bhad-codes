@@ -231,7 +231,7 @@
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
   font-family: var(--font-family-mono);
-  letter-spacing: 1px;
+  letter-spacing: var(--letter-spacing-wider);
   transition: all var(--transition-fast);
   text-transform: uppercase;
   background-color: transparent;

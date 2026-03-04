@@ -226,7 +226,7 @@
 }
 
 .worksub-intro h1 {
-  font-size: 3rem;
+  font-size: var(--font-size-4xl);
   font-family: var(--font-family-acme);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
@@ -290,7 +290,7 @@
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
 }
 
 [data-theme="dark"] .intro-left-group .round-label {
@@ -324,7 +324,7 @@
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
 }
 
 [data-theme="dark"] .tools-section .round-label {
@@ -431,7 +431,7 @@
 }
 
 .section-heading-wrapper h2 {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
@@ -585,13 +585,13 @@
   }
 
   .worksub-intro h1 {
-    font-size: 1.4rem;
+    font-size: var(--font-size-xl);
     margin-bottom: 0;
   }
 
   .project-status-badge {
     padding: 2px var(--space-2);
-    font-size: 0.6rem;
+    font-size: var(--font-size-2xs);
   }
 
   .project-tagline {
@@ -620,7 +620,7 @@
   }
 
   .intro-left-group .round-label {
-    font-size: 0.55rem;
+    font-size: var(--font-size-2xs);
     min-width: max-content;
   }
 
@@ -642,7 +642,7 @@
   }
 
   .tools-section .round-label {
-    font-size: 0.55rem;
+    font-size: var(--font-size-2xs);
   }
 
   .tools-list { gap: var(--space-1); }
@@ -790,7 +790,7 @@
 }
 
 .case-study-heading {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
@@ -826,7 +826,7 @@
 .case-study-list li {
   position: relative;
   padding-left: var(--space-6);
-  font-size: 1.05rem;
+  font-size: var(--font-size-md);
   line-height: var(--line-height-relaxed);
   color: var(--color-dark);
 }
@@ -1009,7 +1009,7 @@
 .project-nav-label {
   font-size: var(--font-size-2xs);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
   font-weight: var(--font-weight-semibold);
   color: var(--portal-alpha-black-50);
 }

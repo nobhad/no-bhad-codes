@@ -314,7 +314,7 @@ export function NewRequestForm({
                 className="tw-list-item tw-justify-between"
               >
                 <div className="tw-flex tw-items-center tw-gap-2 card-content-truncate">
-                  <Paperclip className="icon-xs flex-shrink-0" />
+                  <Paperclip className="icon-xs tw-flex-shrink-0" />
                   <span className="tw-text-primary tw-text-xs">
                     {file.name}
                   </span>

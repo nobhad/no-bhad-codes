@@ -473,7 +473,7 @@ body[data-page="client-portal"] {
 /* Toggle Icon */
 .toggle-icon {
   font-size: var(--font-size-base);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   transition: transform var(--transition-medium);
 }
 

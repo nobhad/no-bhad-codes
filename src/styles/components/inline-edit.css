@@ -47,7 +47,7 @@
 /* Input field styling */
 [data-page="admin"] .inline-edit-input {
   width: 100%;
-  padding: 6px 8px;
+  padding: var(--space-0-5) var(--space-1);
   border: var(--border-width) solid var(--color-primary);
   border-radius: var(--portal-radius-sm);
   background: var(--portal-bg-darker);
@@ -110,7 +110,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;
+  padding: var(--space-px);
   border: none;
   border-radius: var(--portal-radius-sm, 4px);
   background: transparent;

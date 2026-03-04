@@ -28,7 +28,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
   color: var(--portal-text-light);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--letter-spacing-normal);
   line-height: var(--portal-header-height-line, 32px);
   padding-top: var(--space-3);
   margin-bottom: var(--space-2);
@@ -702,7 +702,7 @@
   text-anchor: middle;
   dominant-baseline: hanging;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .health-legend {

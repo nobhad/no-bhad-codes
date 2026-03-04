@@ -592,7 +592,7 @@ p.empty-state {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   background: transparent;
   color: var(--portal-text-primary, var(--color-text));
   border: var(--border-width) solid var(--portal-border, var(--color-border));
@@ -640,7 +640,7 @@ p.empty-state {
 }
 
 .error-notification .error-icon {
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
 }
 
 .error-notification .error-message {
@@ -651,7 +651,7 @@ p.empty-state {
   background: none;
   border: none;
   color: var(--color-text-muted);
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   cursor: pointer;
   padding: 0 0.25rem;
   line-height: 1;
@@ -715,7 +715,7 @@ p.empty-state {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   background: transparent;
   color: var(--portal-text-primary, var(--color-text));
   border: var(--border-width) solid var(--portal-border, var(--color-border));
@@ -794,7 +794,8 @@ p.empty-state {
 }
 
 /* Spinning animation class - applied to SVG icons (e.g., IconButton loading) */
-.spinning {
+.spinning,
+.loading-spin {
   animation: spin 0.8s linear infinite;
 }
 
@@ -805,7 +806,8 @@ p.empty-state {
     background: var(--color-skeleton-base);
   }
 
-  .spinning {
+  .spinning,
+  .loading-spin {
     animation: none;
     opacity: 0.7;
   }

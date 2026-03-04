@@ -382,7 +382,7 @@ div.page-hero-desktop {
   }
 
   .hero-title {
-    font-size: 2.5rem;
+    font-size: var(--font-size-3xl);
     margin-bottom: 1rem;
   }
 
@@ -421,7 +421,7 @@ div.page-hero-desktop {
 
 @media (--small-mobile) {
   .hero-title {
-    font-size: 2rem;
+    font-size: var(--font-size-2xl);
   }
 
   .hero-description {
@@ -672,7 +672,7 @@ div.page-hero-desktop {
 
 /* Title text */
 .card-container .project-card-title h3 {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
@@ -715,7 +715,7 @@ div.page-hero-desktop {
 
 .round-label {
   background-color: var(--color-dark);
-  padding: 6px 12px;
+  padding: var(--icon-gap-xs) var(--space-1-5);
   border-radius: var(--portal-radius-xl);
   box-shadow: var(--shadow-elevated-sm);
   color: var(--color-light);
@@ -868,7 +868,7 @@ div.page-hero-desktop {
   }
 
   .round-label {
-    padding: 4px 10px;
+    padding: var(--space-0-5) var(--icon-gap-md);
     font-size: var(--font-size-xs);
   }
 
@@ -896,7 +896,7 @@ div.page-hero-desktop {
 /* Mobile: match about section h2 size from mobile/layout.css */
 @media (--mobile) {
   section.projects-section h2 {
-    font-size: 2.5rem;
+    font-size: var(--font-size-3xl);
     font-family: var(--font-family-acme);
     font-weight: var(--font-weight-bold);
     text-transform: uppercase;
@@ -905,7 +905,7 @@ div.page-hero-desktop {
 
 @media (--small-mobile) {
   section.projects-section h2 {
-    font-size: 2rem;
+    font-size: var(--font-size-2xl);
   }
 
   .projects-content {
@@ -981,7 +981,7 @@ div.page-hero-desktop {
 
 /* Portfolio heading */
 .portfolio-section h2 {
-  font-size: 5rem;
+  font-size: var(--font-size-5xl);
   text-align: center;
   margin: 0;
   flex-shrink: 0;
@@ -1002,14 +1002,14 @@ div.page-hero-desktop {
   }
 
   .portfolio-section h2 {
-    font-size: 3rem;
+    font-size: var(--font-size-4xl);
     text-align: left;
   }
 }
 
 @media (--small-mobile) {
   .portfolio-section h2 {
-    font-size: 2.5rem;
+    font-size: var(--font-size-3xl);
   }
 
   .portfolio-content {

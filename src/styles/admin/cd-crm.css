@@ -140,7 +140,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-xs);
-  padding: 4px 10px;
+  padding: var(--space-0-5) var(--icon-gap-md);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 }
@@ -155,7 +155,7 @@
   padding: 0;
   opacity: 0.7;
   transition: opacity var(--transition-fast);
-  margin-left: 2px;
+  margin-left: var(--space-px);
 }
 
 .client-tag-remove:hover {
@@ -187,7 +187,7 @@
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-0-5);
 }
 
 .contact-name .primary-badge {
@@ -424,7 +424,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--icon-gap-xs);
-  margin-top: 4px;
+  margin-top: var(--space-0-5);
 }
 
 .table-tag-mini {

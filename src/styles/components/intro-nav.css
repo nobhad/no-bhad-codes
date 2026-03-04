@@ -38,7 +38,7 @@
   /* Initial state - GSAP handles animation */
   opacity: 0;
   text-shadow: 0 2px 4px var(--color-shadow);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
   color: var(--color-dark);
   text-decoration: none;
   padding: 1.5rem 0;
@@ -93,6 +93,6 @@
 
   .intro-nav-link {
     font-size: clamp(1.125rem, 6vw, 1.75rem);
-    letter-spacing: 0.12em;
+    letter-spacing: var(--letter-spacing-widest);
   }
 }

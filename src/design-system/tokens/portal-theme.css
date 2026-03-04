@@ -51,7 +51,7 @@
   --portal-border: var(--border-width) solid var(--portal-border-color);
   --portal-border-subtle: rgba(255, 255, 255, 0.08);
 
-  /* Border aliases for backwards compatibility */
+  /* Border weight aliases — all map to --portal-border-color (DISCOTHÈQUE: uniform borders) */
   --portal-border-dark: var(--portal-border-color);
   --portal-border-medium: var(--portal-border-color);
   --portal-border-light: var(--portal-border-color);
@@ -214,7 +214,6 @@
 
   /* App-level aliases for portal */
   --app-color-primary: #ffffff;
-  --app-color-primary-hover: #000000;
 
   /* Form variables */
   --form-input-border: #ffffff;
@@ -238,7 +237,7 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --portal-text-light: #000000;
   --portal-text-primary: #000000;
   --portal-text-secondary: #000000;
-  --portal-text-muted: #000000;   /* No grey - same as primary, differentiate by weight */
+  --portal-text-muted: #000000;   /* All black — differentiate by weight only */
   --portal-text-dark: #ffffff;
   --portal-placeholder-color: rgba(0, 0, 0, 0.45);  /* Placeholder only */
 
@@ -294,20 +293,6 @@ html[data-theme="light"] body[data-page="client-portal"] {
   /* ----------------------------------------
    * BUTTON COLORS (Light Mode)
    * ---------------------------------------- */
-  --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: #000000;
-  --btn-portal-primary-border: #000000;
-  --btn-portal-primary-hover-bg: #000000;
-  --btn-portal-primary-hover-color: #ffffff;
-  --btn-portal-primary-hover-border: #000000;
-
-  --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: #000000;
-  --btn-portal-secondary-border: #000000;
-  --btn-portal-secondary-hover-bg: #000000;
-  --btn-portal-secondary-hover-color: #ffffff;
-  --btn-portal-secondary-hover-border: #000000;
-
   --btn-portal-border-color: #000000;
   --btn-portal-color: #000000;
   --btn-portal-hover-bg: #000000;
@@ -347,7 +332,6 @@ html[data-theme="light"] body[data-page="client-portal"] {
 
   /* App-level aliases for portal light mode */
   --app-color-primary: #000000;
-  --app-color-primary-hover: #ffffff;
 
   /* Form variables for portal light mode */
   --form-input-border: #000000;

@@ -113,6 +113,29 @@ export { StatCard, StatsRow, type StatCardProps, type StatsRowProps } from './St
 // View Layout
 export { PortalViewLayout, type PortalViewLayoutProps } from './PortalViewLayout';
 
+// Table Layout
+export {
+  TableLayout,
+  TableStats,
+  TableActions,
+  type TableLayoutProps,
+  type StatItem as TableStatItem,
+  type TableStatsProps,
+  type TableActionsProps
+} from './TableLayout';
+
+// Table Filters
+export {
+  SearchFilter,
+  FilterDropdown,
+  ExportButton,
+  type SearchFilterProps,
+  type FilterOption as TableFilterOption,
+  type FilterSection,
+  type FilterDropdownProps,
+  type ExportButtonProps
+} from './TableFilters';
+
 // Empty State (re-exports from factories)
 export {
   EmptyState,

@@ -195,7 +195,7 @@ export function initHashRouter(_callbacks?: Record<string, unknown>): void {
 const PORTAL_TAB_GROUPS = {
   work: {
     label: 'Work',
-    tabs: ['requests', 'preview', 'new-project'],
+    tabs: ['requests', 'review', 'new-project'],
     defaultTab: 'requests'
   },
   docs: {

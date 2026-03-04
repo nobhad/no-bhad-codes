@@ -142,7 +142,8 @@ export class ClientPortalModule extends BaseModule {
   /** Create module context for passing to child modules */
   private createModuleContext(): ClientPortalContext {
     return {
-      getAuthToken: () => sessionStorage.getItem('client_auth_token'),
+      // Auth is cookie-based via credentials: 'include'; token getter is unused
+      getAuthToken: () => null,
       showNotification: (
         message: string,
         type: 'success' | 'error' | 'info' | 'warning' = 'success'
@@ -1990,7 +1991,8 @@ export class ClientPortalModule extends BaseModule {
         user,
         badges: {}, // Will be updated when counts are loaded
         onLogout: () => this.logout(),
-        getAuthToken: () => sessionStorage.getItem('client_auth_token')
+        // Auth is cookie-based via credentials: 'include'; token getter is unused
+      getAuthToken: () => null
       });
 
       this.reactNavigationMounted = true;

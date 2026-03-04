@@ -81,7 +81,7 @@
   border: var(--border-width) solid var(--portal-border-color);
   max-height: 300px;
   overflow-y: auto;
-  z-index: 100;
+  z-index: var(--z-index-dropdown);
 }
 
 .help-suggestion-item {
@@ -155,7 +155,7 @@
   gap: var(--icon-gap);
   margin: 0 0 var(--space-2);
   font-family: var(--font-family-mono);
-  font-size: 1.1rem;
+  font-size: var(--font-size-md);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-light);
@@ -471,7 +471,7 @@
 .help-article-body code {
   padding: var(--space-0-5) var(--space-1);
   font-family: monospace;
-  font-size: 0.9em;
+  font-size: var(--font-size-sm);
 }
 
 .help-article-body pre {

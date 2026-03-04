@@ -61,7 +61,7 @@
 
 .round-selector select {
   font-size: var(--font-size-sm);
-  padding: 6px 12px;
+  padding: var(--icon-gap-xs) var(--space-1-5);
 }
 
 .view-controls {
@@ -136,7 +136,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   color: var(--portal-text-secondary);
 }
 
@@ -146,7 +146,7 @@
 
 #design-clear-annotations {
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
 }
 
@@ -167,7 +167,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wider);
   color: var(--portal-text-secondary);
 }
 

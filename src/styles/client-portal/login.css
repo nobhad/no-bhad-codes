@@ -79,7 +79,7 @@ body[data-page="client-portal"]:not(.portal-logged-in) .client-footer {
   font-size: var(--font-size-sm);
   color: var(--color-nav-text);
   text-align: center;
-  z-index: 50;
+  z-index: var(--z-index-50);
   align-items: center;
   justify-content: center;
 }

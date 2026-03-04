@@ -21,11 +21,13 @@ const TYPE_ALL_OPTION = { value: 'all', label: 'All Types' };
 
 export const PORTAL_INVOICE_STATUS_OPTIONS = [
   STATUS_ALL_OPTION,
+  { value: 'draft', label: 'Draft' },
   { value: 'sent', label: 'Sent' },
   { value: 'viewed', label: 'Viewed' },
   { value: 'partial', label: 'Partial' },
   { value: 'paid', label: 'Paid' },
-  { value: 'overdue', label: 'Overdue' }
+  { value: 'overdue', label: 'Overdue' },
+  { value: 'cancelled', label: 'Cancelled' }
 ];
 
 export const PORTAL_INVOICES_FILTER_CONFIG: FilterConfig[] = [

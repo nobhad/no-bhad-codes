@@ -22,6 +22,12 @@
 @import "../shared/portal-files.css";
 @import "../shared/portal-dropdown.css";
 @import "../shared/portal-badges.css";
+@import "../shared/portal-kanban.css";
+@import "../shared/portal-tags.css";
+@import "../shared/portal-timeline.css";
+@import "../shared/portal-charts.css";
+@import "../shared/portal-tooltips.css";
+@import "../shared/portal-progress.css";
 @import "../shared/portal-components.css";
 @import "../shared/portal-tabs.css";
 @import "../shared/confirm-dialog.css";

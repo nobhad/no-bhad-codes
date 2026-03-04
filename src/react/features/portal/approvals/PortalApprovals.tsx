@@ -106,7 +106,8 @@ export function PortalApprovals({
 
       if (!response.ok) throw new Error('Failed to fetch approvals');
 
-      const data: PendingApprovalsResponse = await response.json();
+      const json = await response.json();
+      const data: PendingApprovalsResponse = json.data || json;
       setApprovals(data.approvals || []);
     } catch (err) {
       logger.error('Error fetching approvals:', err);

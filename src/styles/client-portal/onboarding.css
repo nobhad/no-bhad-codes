@@ -30,14 +30,14 @@
 }
 
 .onboarding-title {
-  font-size: 1.75rem;
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-1);
   color: var(--portal-text-light);
 }
 
 .onboarding-subtitle {
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-muted);
   margin: 0;
 }
@@ -127,7 +127,7 @@
 }
 
 .onboarding-step-title {
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-1);
   color: var(--portal-text-light);
@@ -536,7 +536,7 @@
   }
 
   .onboarding-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-xl);
   }
 
   .onboarding-actions {

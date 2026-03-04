@@ -91,7 +91,8 @@ export class PortalShell extends BaseModule {
       showNotification: this.showNotification.bind(this),
       refreshData: this.refreshCurrentModule.bind(this),
       switchTab: this.switchTab.bind(this),
-      getAuthToken: () => sessionStorage.getItem('auth_token')
+      // Auth is cookie-based via credentials: 'include'; token getter is unused
+      getAuthToken: () => null
     };
 
     // Create module loader

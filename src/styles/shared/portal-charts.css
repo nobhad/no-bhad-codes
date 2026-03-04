@@ -1,0 +1,125 @@
+/**
+ * ===============================================
+ * SIMPLE CHARTS COMPONENT
+ * ===============================================
+ * @file src/styles/shared/portal-charts.css
+ *
+ * Bar charts, pie charts, sparklines, and KPI cards.
+ * Lightweight chart styling for dashboard widgets.
+ */
+
+/* Bar Chart */
+.bar-chart-item {
+  margin-bottom: var(--space-1);
+}
+
+.bar-chart-label {
+  margin-bottom: var(--space-1);
+}
+
+.bar-chart-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+.bar-chart-bar {
+  border-radius: var(--portal-radius-sm);
+  transition: width var(--transition-normal) ease;
+}
+
+.bar-chart-value {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+  min-width: 40px;
+}
+
+/* Pie Chart */
+.pie-chart-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pie-chart-svg {
+  flex-shrink: 0;
+}
+
+.pie-chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.pie-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+.pie-chart-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--portal-radius-xs);
+  flex-shrink: 0;
+}
+
+.pie-chart-legend-label {
+  flex: 1;
+}
+
+.pie-chart-legend-value {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+}
+
+/* Sparkline */
+.sparkline-svg {
+  display: block;
+}
+
+/* KPI Card */
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5);
+  background: var(--portal-bg-dark);
+  border-top: var(--border-width-thick) solid var(--color-primary);
+}
+
+.kpi-card-icon {
+  font-size: var(--font-size-xl);
+  color: var(--portal-text-secondary);
+}
+
+.kpi-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-card-change {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.kpi-card-change.positive {
+  color: var(--status-active);
+}
+
+.kpi-card-change.negative {
+  color: var(--status-cancelled);
+}
+
+@media (--mobile) {
+  .pie-chart-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

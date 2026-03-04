@@ -1,0 +1,122 @@
+/**
+ * ===============================================
+ * TAG INPUT COMPONENT
+ * ===============================================
+ * @file src/styles/shared/portal-tags.css
+ *
+ * Tag input with autocomplete dropdown, pill badges,
+ * and create-new functionality.
+ */
+
+.tag-input-container {
+  position: relative;
+}
+
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--icon-gap-sm);
+  padding: var(--space-2);
+  background: var(--portal-bg-dark);
+  border: var(--portal-border);
+  min-height: 42px;
+  align-items: center;
+}
+
+.tag-input-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+.tag-input-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--icon-gap-sm);
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap-xs);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--portal-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.tag-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+.tag-input-field {
+  flex: 1;
+  min-width: 100px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.tag-input-field::placeholder {
+  color: var(--portal-text-secondary);
+}
+
+.tag-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: var(--space-1);
+  background: var(--portal-bg-medium);
+  border: var(--portal-border);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: var(--z-index-dropdown);
+  box-shadow: none;
+}
+
+.tag-dropdown.hidden {
+  display: none;
+}
+
+.tag-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.tag-dropdown-item:hover {
+  background: var(--portal-bg-light);
+}
+
+.tag-dropdown-color {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--portal-radius-full);
+}
+
+.tag-create-item {
+  border-top: var(--portal-border);
+  color: var(--color-primary);
+}

@@ -41,7 +41,7 @@
   padding: var(--space-1);
   box-shadow: none;
   font-family: var(--font-family-mono);
-  font-size: 15px;
+  font-size: var(--font-size-sm);
   color: var(--portal-text-light);
 }
 
@@ -388,7 +388,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal-dropdown-shortcut {
   margin-left: auto;
   font-size: var(--font-size-2xs);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--letter-spacing-widest);
   color: var(--portal-text-muted);
 }
 
