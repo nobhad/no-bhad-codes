@@ -1,14 +1,553 @@
 # Current Work
 
-**Last Updated:** March 3, 2026
+**Last Updated:** March 4, 2026
 
 This file tracks active development work and TODOs. Completed items are archived in `archive/ARCHIVED_WORK_2026-03.md`.
 
 ---
 
-## Active TODOs
+## CONCERNS - Requiring User Testing
 
-### Client Portal Security Audit & Fixes - March 3, 2026
+### EJS Hybrid Tables - New Architecture
+
+**Status:** AWAITING USER TESTING
+
+**What Changed:** Tables can now render server-side via EJS instead of requiring full React. Both patterns coexist — migration is per-table.
+
+**New Architecture:**
+
+- Server fetches data + renders HTML table via EJS partials
+- Client-side `TableManager` enhances with sort, filter, pagination, selection, export
+- Progressive enhancement: tables are readable before JS loads
+- GSAP animations for sort reorder, page transitions, initial row fade-in
+
+**Phase 1 Tables (active):**
+
+- [x] `admin-clients` — Full features (sort, filter, paginate, select, export, row click)
+- [x] `admin-contacts` — Standard table (sort, paginate, select, export)
+- [x] `portal-invoices` — Read-only client table (sort, paginate, search)
+- [x] `admin-invoices` — Admin invoice table with filter
+- [x] `admin-projects` — Admin projects with row click navigation
+- [x] `admin-leads` — Admin leads with status filter
+
+**New Files:**
+
+- `src/config/status-configs.ts` — Shared status configurations (pure TS)
+- `src/config/table-definitions.ts` — Client-side table column definitions
+- `server/services/tab-data-service.ts` — Server-side data fetching + server table defs
+- `server/views/partials/table/*.ejs` — 16 EJS partials (table, header, body, row, pagination, 11 cell types)
+- `src/features/shared/table-manager/` — 11 files (TableManager, Sorter, Filter, Paginator, Selector, Exporter, Animator, loader, types, constants, index)
+
+**Modified Files:**
+
+- `server/routes/portal.ts` — Added `GET /dashboard/tab/:tabId` route
+- `src/features/admin/admin-dashboard.ts` — Added `hasEjsTable()` check before React mount
+- `src/features/client/modules/portal-navigation.ts` — Added EJS table check in tab switching
+- `src/styles/shared/portal-tables.css` — Added progressive enhancement CSS rules
+
+---
+
+### Portal Unification - Complete Architecture Overhaul - JUST IMPLEMENTED
+
+**Status:** AWAITING USER TESTING
+
+**What Changed:** Client portal now uses identical architecture to admin portal.
+
+**Architecture Changes:**
+
+- Client portal now uses EJS-rendered `.tab-content` divs (same as admin)
+- Tab switching uses CSS class toggle (`.tab-content.active`) instead of single-container innerHTML swap
+- All client views are React components — zero vanilla JS rendering
+- `portal-views.ts` deleted entirely (13 vanilla renderers replaced)
+- `#portal-view-content` container removed from EJS template
+- 3 new React components: `PortalDashboard`, `PortalHelp`, `PortalPreview`
+- Client project-detail subtabs added (Overview, Milestones, Updates, Files, Messages, Invoices)
+- Subtab gap fix: `margin-top` moved to visible subtab show-rules only
+
+**New Files:**
+
+- `src/react/features/portal/dashboard/PortalDashboard.tsx` + `mount.tsx`
+- `src/react/features/portal/help/PortalHelp.tsx` + `mount.tsx`
+- `src/react/features/portal/preview/PortalPreview.tsx` + `mount.tsx`
+
+**Deleted Files:**
+
+- `src/features/client/modules/portal-views.ts`
+
+**Key Modified Files:**
+
+- `server/config/navigation.ts` - Added `CLIENT_TAB_IDS`
+- `server/routes/portal.ts` - Passes `CLIENT_TAB_IDS` to EJS
+- `server/views/layouts/portal.ejs` - Both portals render `.tab-content` divs
+- `server/config/unified-navigation.ts` - Added client project-detail subtabs
+- `src/features/client/modules/portal-navigation.ts` - Rewrote to `.tab-content.active` toggle
+- `src/features/client/ReactModuleLoader.ts` - Registered dashboard, help, review, new-project modules
+- `src/features/client/client-portal.ts` - Removed vanilla callbacks, simplified navigation
+- `src/styles/shared/portal-layout.css` - Fixed subtab gap, added client project-detail CSS
+- `src/styles/client-portal/layout.css` - Removed `#portal-view-content` rules
+
+**Testing Required:**
+
+- [ ] Every client tab has a `.tab-content` div in DOM (inspect element)
+- [ ] Tab switching toggles `.active` class (no full re-render)
+- [ ] Dashboard renders stats, recent activity
+- [ ] Projects list loads correctly
+- [ ] Project detail loads when clicking a project
+- [ ] Project detail subtabs work (Overview, Milestones, etc.)
+- [ ] Messages tab loads thread list
+- [ ] Files tab loads file browser
+- [ ] Invoices tab loads invoice list
+- [ ] Help tab renders search, categories, articles
+- [ ] Preview/Review tab renders iframe with toolbar
+- [ ] Settings subtabs work (Profile, Billing, Notifications)
+- [ ] All tabs have identical top spacing (no double gap)
+- [ ] Browser back/forward navigation works
+- [ ] Hash-based routing works (#/dashboard, #/projects, etc.)
+
+---
+
+### 0. Unified /portal Login + /dashboard Routing - JUST IMPLEMENTED
+
+**Status:** AWAITING USER TESTING
+
+**What Changed:** Consolidated two separate login pages into one and unified the dashboard URL.
+
+**New Architecture:**
+
+- `/portal` - Single login page for all users (admin + client). Shows "PORTAL" heading, email + password + magic link.
+- `/dashboard` - Role-based dashboard. Server reads JWT, renders admin portal or client portal accordingly.
+- `/admin/login`, `/client/login` - 301 redirect to `/portal`
+- `/admin`, `/client` - 301 redirect to `/dashboard`
+
+**Files Modified:**
+
+- `server/routes/portal.ts` - Replaced all routes; added `/portal`, `/dashboard`, redirects
+- `server/routes/auth.ts` - Added `POST /api/auth/portal-login` unified login endpoint
+- `src/constants/api-endpoints.ts` - Added `ROUTES.PORTAL`, updated `ROUTES.ADMIN.LOGIN` and `ROUTES.CLIENT.LOGIN` to `/portal`
+- `src/config/api.ts` - Updated `authEndpoints.login` to use `/api/auth/portal-login`
+- `src/features/client/modules/portal-auth.ts` - Admin redirect now uses `ROUTES.PORTAL.DASHBOARD`
+- `src/features/client/client-portal.ts` - Non-portal-page redirect now uses `ROUTES.PORTAL.DASHBOARD`
+
+**Login Flow:**
+
+1. Visit `localhost:4000/portal` → see unified login titled "PORTAL"
+2. Enter admin email + password → lands at `/dashboard` showing admin portal
+3. Enter client email + password → lands at `/dashboard` showing client portal
+4. Logout from either → redirects to `/portal`
+5. Session expires from either → redirects to `/portal?session=expired`
+
+**Testing Required:**
+
+- [ ] Visit `/portal` - see login page with "PORTAL" heading
+- [ ] `/admin/login` redirects to `/portal`
+- [ ] `/client/login` redirects to `/portal`
+- [ ] Login as admin → `/dashboard` shows admin portal
+- [ ] Login as client → `/dashboard` shows client portal
+- [ ] `/admin` redirects to `/dashboard`
+- [ ] `/client` redirects to `/dashboard`
+- [ ] Admin logout → redirects to `/portal`
+- [ ] Client logout → redirects to `/portal`
+- [ ] Session expiry → redirects to `/portal?session=expired`
+
+---
+
+### 1. Table Icon/Action Button Sizing - JUST FIXED
+
+**Status:** AWAITING USER TESTING
+
+**Issue:** Icons and action buttons in table rows were different sizes:
+
+- Row icons (`.cell-icon`) = 16px (`--icon-size-md`)
+- Status icons (`.cell-icon-sm`) = 14px (`--icon-size-sm`)
+- Action button SVGs = 14px (`--font-size-sm` with `!important` overrides)
+
+**Fix Applied:** Unified ALL table icons to use single variable `--table-action-icon-size` = 16px
+
+**Root Level Variables Added (portal-tables.css):**
+
+```css
+--table-icon-size: var(--icon-size-md); /* 16px */
+--table-cell-icon-size: var(--table-icon-size); /* Alias for clarity */
+--table-action-icon-size: var(--table-icon-size); /* Action button SVGs */
+```
+
+**Files Modified:**
+
+- `src/styles/shared/portal-tables.css` - Unified `.cell-icon` and `.cell-icon-sm` to same size, action button SVGs use `--table-action-icon-size`
+- `src/styles/shared/portal-buttons.css` - Removed `!important` overrides, now uses `--table-action-icon-size` variable
+- `src/styles/pages/admin.css` - Replaced hardcoded `16px` with `--table-action-icon-size` variable
+
+**Testing Required:**
+
+- [ ] Verify all table row icons are same size (16px)
+- [ ] Verify action button icons match row icons
+- [ ] Verify status icons (checkmarks, etc.) match other icons
+- [ ] Test in admin portal
+- [ ] Test in client portal (uses same shared CSS)
+
+### 2. Admin Light Mode Borders/Text - FIXED (Awaiting Confirmation)
+
+**Status:** User confirmed "i can see the borders and text correctly now"
+
+**Issue:** After cache clear, borders and text were invisible in admin light mode.
+
+**Root Cause:** `admin.css` was using `var(--portal-text-dark)` for black text, but in light mode `--portal-text-dark` = `#ffffff` (white).
+
+**Fix:** Changed all variable references to explicit hex values in light mode override.
+
+### 3. Client Portal Login Header/Footer - FIXED (Awaiting Testing)
+
+**Status:** CSS added, needs browser testing
+
+**Issue:** Client portal login page missing header and footer from main site.
+
+**Fix:** Added CSS to `src/styles/client-portal/login.css` matching admin pattern:
+
+- Header z-index above auth-gate overlay
+- Footer visible on login page
+- Both hidden after login
+
+### 4. Admin/Client Data Sync - FIXED
+
+**Status:** FIXED - Awaiting User Testing
+
+**Issue:** "INFO DISPLAYED ON ADMIN END IS NOT DISPLAYING IN CLIENT PORTAL - THEY SHOULD BE SYNCED"
+
+**Root Cause:** `getAuthToken()` returned wrong sessionStorage key (`client_auth_mode` flag instead of `client_auth_token` JWT).
+
+**Fix:** Changed `getAuthToken()` in `createModuleContext()` to return actual JWT token. Server now correctly filters by authenticated client ID.
+
+### 5. Client Portal React Mounting Fix - March 3, 2026
+
+**Status:** AWAITING USER TESTING
+
+**Issues Fixed:**
+
+1. **Data Filtering Bug (Projects showing all clients' data)**
+   - Root cause: `getAuthToken()` was returning flag string instead of JWT token
+   - Fixed: Returns `sessionStorage.getItem('client_auth_token')`
+
+2. **Tab Switching Not Working (Vanilla JS vs React)**
+   - Root cause: Client portal used vanilla JS while React modules existed
+   - Fixed: Refactored to use `mountReactModule()` pattern (same as admin)
+
+3. **Context Wiring**
+   - Added `setModuleContext()` call to wire up React mounting
+
+**Files Modified:**
+
+- `src/features/client/client-portal.ts` - Fixed `getAuthToken`, added `setModuleContext()` call
+- `src/features/client/modules/portal-navigation.ts` - Major refactor for React mounting
+
+**Testing Required:**
+
+- [ ] Log in as client - verify only YOUR projects appear
+- [ ] Switch between all tabs - verify each loads correctly
+- [ ] Test messages, files, invoices, questionnaires tabs
+
+### 6. SVG Icon Colors in Loading/Empty States - March 3, 2026
+
+**Status:** AWAITING USER TESTING
+
+**Issue:** SVG icons displayed gray instead of white in dark mode.
+
+**Fix:** Changed color inheritance from `currentColor` to `inherit`, added portal-specific rules.
+
+---
+
+### 7. Comprehensive CSS Audit - Phase 1 + 2 - March 3, 2026
+
+**Status:** AWAITING USER TESTING
+
+**Root-Level Token Changes (portal-theme.css - apply to both admin + client portal):**
+
+- `--portal-text-muted: #999999` → `#ffffff` — eliminates all grey text; visual distinction now weight-only
+- `--portal-placeholder-color: rgba(255,255,255,0.45)` — new token for placeholder (dark mode)
+- `--font-size-2xs/xs/sm: 0.9375rem` — 15px minimum everywhere in portal
+- `--font-weight-base: 500` — primary text is medium weight
+- `--font-weight-muted: 400` — muted/secondary text is normal weight
+- Light mode mirrors all of the above with inverted values
+
+**Issues Fixed:**
+
+1. **Grey text/SVGs** - `--portal-text-muted` now `#ffffff`; stacked cell `color: inherit`
+2. **Text smaller than 15px** - `--font-size-xs/sm/2xs` all 15px minimum in portal
+3. **Sort icon grey** - `color: var(--portal-text-primary)` on sort icons
+4. **Table responsiveness** - `min-width: 0` on `.data-table`; scroll wrapper `overflow-x: auto`
+5. **Table th font-weight** - `400` → `500`
+6. **Workflow + Trigger combine** - `trigger-stacked` in primary cell (hides at 1000px)
+7. **Email Templates column combining** - `category-stacked` (1000px) + `status-stacked` (800px)
+8. **Loading/empty state opacity** - All `opacity: 0.7` removed from icons and SVG rules
+9. **Error inline font size** - `--font-size-xs` → `--font-size-base`
+10. **Form input font-weight** - `400` → `500`
+11. **Form placeholder** - Uses `--portal-placeholder-color`; removed double opacity
+12. **Select dropdown SVG** - `%23f5f5f5` (grey) → `%23ffffff` (white); light mode override added
+13. **Stat card value weight** - `300` → `700` (large prominent number)
+14. **Muted elements weight** - `stat-card-delta`, `project-client`, `progress-pct`, `due-cell`, `overview-panel-action`, `detail-meta`, `breadcrumbs`, `cell-subtitle`, `portal-subtab`, `tw-tab`, `view-toggle` all use `--font-weight-muted: 400`
+15. **Section title** - `font-weight: 400; color: muted` → `font-weight: 500; color: primary`
+16. **system-status.css** - `status-unknown` and `no-status` now use `--portal-text-secondary`; removed italic style
+17. **Tab/subtab spacing** - `.portal-tabs` and `.portal-subtabs` `margin-bottom` → `--portal-section-gap`
+18. **Client portal body** - Added `font-weight: 500; color: var(--portal-text-primary)` defaults
+19. **Empty state italic** - Removed from `onboarding-review-value--empty`
+20. **Admin/client portal** `body` defaults both set to `font-weight: 500; color: primary`
+
+**Files Modified:**
+
+- `src/design-system/tokens/portal-theme.css` - All root-level token changes
+- `src/styles/components/loading.css` - Opacity removals, error-inline font-size
+- `src/styles/shared/portal-tables.css` - th weight, cell-subtitle weight, scroll wrapper
+- `src/styles/shared/portal-forms.css` - Placeholder, input weight, SVG arrow
+- `src/styles/shared/portal-layout.css` - Section title weight/color, breadcrumb weight
+- `src/styles/shared/portal-tabs.css` - Tab/subtab spacing, muted weights
+- `src/styles/admin/overview-layout.css` - Stat card weight, muted element weights
+- `src/styles/admin/system-status.css` - Muted color → secondary, remove italic
+- `src/styles/admin/detail-header.css` - detail-meta muted weight
+- `src/styles/shared/portal-sidebar.css` - sidebar-shortcut muted weight
+- `src/styles/client-portal/layout.css` - Body defaults
+- `src/styles/client-portal/onboarding.css` - Remove italic from empty value state
+
+**Testing Required:**
+
+- [ ] No grey text anywhere in admin or client portal (dark mode)
+- [ ] No text smaller than 15px anywhere in portal
+- [ ] Primary content at 500 weight; secondary/muted at 400 weight
+- [ ] Loading states and empty states — no opacity dimming on icons
+- [ ] Form placeholders are semi-transparent white (not grey)
+- [ ] Select dropdown arrows are white (dark) / black (light)
+- [ ] Tab/subtab strips have consistent 24px gap to content below
+- [ ] Tables narrow responsively without overflow at all viewport widths
+- [ ] Workflows: Trigger stacks into Workflow cell at ~1000px
+- [ ] Email Templates: Category at ~1000px, Status at ~800px
+- [ ] System status page — no italic text, correct colors
+- [ ] Client portal looks identical to admin portal in terms of typography
+
+### 8. Overview Subtab Spacing Audit - March 4, 2026
+
+**Status:** COMPLETE
+
+**Issue:** Massive empty space between subtab row and overview tables on Work, Documents, CRM tabs. Tables appeared pushed to the bottom of the viewport instead of immediately below the subtabs. Individual subtabs (Projects, Tasks, etc.) rendered correctly.
+
+**Root Cause:** Nested flex-column chain (`.content-wrapper` flex:1 -> `.tab-content.active` flex column -> `.overview-tables` flex column) caused browser-specific layout resolution where overview tables resolved heights against the viewport-height container instead of flowing naturally. Single-table subtabs were unaffected because they lacked the intermediate flex-column wrapper.
+
+**Fix Applied:**
+
+1. Changed `.portal .tab-content.active` from `display: flex; flex-direction: column` to `display: block` — breaks the problematic nested flex chain
+2. Added `height: auto` override for `.loading-state` inside `.overview-tables` — prevents Suspense fallbacks from inheriting percentage heights during lazy-load
+3. Added `margin-bottom: 0` to header subtab group show rules — prevents double spacing
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css` — Changed `.tab-content.active` to `display: block`
+- `src/styles/pages/admin.css` — Added `height: auto` for overview loading states
+
+**Testing Passed:**
+
+- [x] Work tab Overview: tables appear immediately below subtabs
+- [x] Individual subtabs (Projects, Tasks, etc.) still render correctly
+- [ ] Single table subtabs (Projects, Tasks, etc.) still display correctly
+- [ ] Messaging panel still fills viewport height properly
+- [ ] Project Detail view still renders correctly
+- [ ] Client Detail view still renders correctly
+- [ ] Client portal tabs unaffected
+
+---
+
+### 8. Client Portal Post-Login Bugs - JUST FIXED
+
+**Status:** AWAITING USER TESTING
+
+**Issues Fixed:**
+
+1. **Missing bordered containers on all portal views** — `portal-main-container` CSS was in `layout.css`
+   but `layout.css` was not imported in `client-portal/index.css`. All views were unstyled (no border/padding).
+   - Fixed: Added `@import "./layout.css"` to `src/styles/client-portal/index.css`
+
+2. **"Failed to load PortalMessagesView" (React error boundary triggered)** — `usePortalMessages` read
+   `data.threads` from the response but server uses `sendSuccess()` which wraps to `{ success, data: { threads } }`.
+   `data.threads` = undefined → `threads.map()` threw at render → error boundary.
+   - Fixed: Updated `usePortalMessages.ts` to unwrap `raw.data ?? raw` for all fetch responses.
+
+3. **"Failed to fetch invoices" (400 response)** — Route ordering bug: `GET /:id` was registered
+   BEFORE `GET /me` in `client-routes.ts`. Express matched `/me` as `/:id` with `id = 'me'`,
+   `parseInt('me')` = NaN → returned 400 immediately.
+   - Fixed: Moved `GET /me` and `GET /number/:n` BEFORE `GET /:id` in `server/routes/invoices/client-routes.ts`
+
+4. **Files page broken layout / no data** — `PortalFilesManager` read `data.files` but server returns
+   `sendSuccess(res, { files, projects })` which wraps → `data.files` was undefined.
+   - Fixed: Updated `PortalFilesManager.tsx` to unwrap `raw.data ?? raw`
+
+5. **Ad-hoc Requests, Questionnaires, Document Requests showing empty** — Same `sendSuccess` wrapper issue.
+   - Fixed: Updated `PortalAdHocRequests.tsx`, `PortalQuestionnairesView.tsx`, `PortalDocumentRequests.tsx`
+
+6. **`portal-header-subtabs` alignment** — Container had no explicit `display` so defaulted to `block`.
+   Mobile toggle button and subtab groups were not properly in a flex row.
+   - Fixed: Added `display: flex; align-items: center; width: 100%` to `.portal .portal-header-subtabs`
+
+7. **TypeScript error in `AnalyticsDashboard.tsx`** — `config as Parameters<typeof ChartJS>[1]` fails
+   because `Parameters<>` doesn't work on class constructors.
+   - Fixed: Imported `ChartConfiguration` from `chart.js`, typed `config: ChartConfiguration`, removed cast.
+
+**Files Modified:**
+
+- `src/styles/client-portal/index.css` — Added `@import "./layout.css"`
+- `src/styles/shared/portal-layout.css` — Added flex layout for `.portal .portal-header-subtabs`
+- `src/react/features/portal/messages/usePortalMessages.ts` — Unwrap `sendSuccess` wrapper in all fetches
+- `src/react/features/portal/files/PortalFilesManager.tsx` — Unwrap `sendSuccess` wrapper
+- `src/react/features/portal/ad-hoc-requests/PortalAdHocRequests.tsx` — Unwrap `sendSuccess` wrapper
+- `src/react/features/portal/questionnaires/PortalQuestionnairesView.tsx` — Unwrap `sendSuccess` wrapper
+- `src/react/features/portal/document-requests/PortalDocumentRequests.tsx` — Unwrap `sendSuccess` wrapper
+- `server/routes/invoices/client-routes.ts` — Moved `/me` before `/:id`
+- `src/react/features/admin/analytics/AnalyticsDashboard.tsx` — Fixed `ChartConfiguration` type
+
+**Testing Required:**
+
+- [ ] Client portal: all tabs show bordered card containers
+- [ ] Messages: threads load correctly, can open and reply to a thread
+- [ ] Invoices: list loads (no "Failed to fetch" error)
+- [ ] Files: file list loads with folder sidebar visible
+- [ ] Requests (Ad-Hoc): list loads correctly
+- [ ] Questionnaires: list loads correctly
+- [ ] Document Requests: list loads correctly
+- [ ] Admin dashboard: header subtabs row is properly aligned (no "fucked" alignment)
+- [ ] Analytics chart renders without TypeScript/runtime errors
+
+### 9. Mobile Admin Sidebar Overlay - JUST FIXED
+
+**Status:** AWAITING USER TESTING
+
+**Issue:** On mobile, opening the admin sidebar (via the header toggle button) showed sidebar icons
+overlapping the content area — but WITHOUT the expected dark backdrop overlay, making it look like
+the sidebar was bleeding into the content rather than appearing as a modal drawer.
+
+**Root Cause:** `#sidebar-overlay` is rendered OUTSIDE the `.portal` div in `portal.ejs` (placed
+after `</div>` that closes `dashboard-container portal`). The CSS rule used `.portal .sidebar-overlay`
+as the selector — which requires the overlay to be a DESCENDANT of `.portal`. Since it isn't, the
+rule never matched and the overlay was always invisible.
+
+- Default state: overlay has `display: block` (browser default, no CSS hiding it) but zero height and
+  transparent background → invisible but non-functional
+- Open state: `open` class added but `.portal .sidebar-overlay.open { display: block }` still doesn't
+  match → no dark backdrop appears
+
+**Fix:** Changed CSS selector from `.portal .sidebar-overlay` / `.portal .sidebar-overlay.open`
+to `#sidebar-overlay` / `#sidebar-overlay.open` — ID selector matches the element regardless of DOM
+position.
+
+**Files Modified:**
+
+- `src/styles/shared/portal-layout.css` — Changed sidebar overlay selectors to `#sidebar-overlay`
+
+**Testing Required:**
+
+- [ ] On mobile (< 768px wide), tap the header toggle button — sidebar slides in from left
+- [ ] Dark overlay appears behind the sidebar, dimming the content
+- [ ] Tapping the overlay closes the sidebar
+- [ ] Tapping a nav item in the sidebar also closes it
+
+---
+
+## Completed Work - March 3, 2026
+
+### AdminTable Renamed to PortalTable + Logout/Session Expiry Consistency
+
+**Status:** COMPLETE
+
+**Issues Fixed:**
+
+1. **`AdminTable` renamed to `PortalTable`** - Component was used in both admin and client portals but had an admin-specific name. Now generic across the full portal system.
+   - Created `src/react/components/portal/PortalTable.tsx` with all components renamed
+   - Deleted `src/react/components/portal/AdminTable.tsx`
+   - Updated `src/react/components/portal/index.ts` exports
+   - Updated `src/styles/shared/portal-buttons.css` comment
+   - Global sed updated all 30+ consumer files (`PortalTable`, `PortalTableHeader`, `PortalTableBody`, `PortalTableFooter`, `PortalTableHead`, `PortalTableRow`, `PortalTableCell`, `PortalTableCaption`, `PortalTableEmpty`, `PortalTableLoading`, `PortalTableError`)
+
+2. **Logout/session expiry now redirects to login consistently from both portals**
+   - `ROUTES.CLIENT.LOGIN` was stale (`/client/login.html`) — fixed to `/client/login`
+   - `ROUTES.CLIENT.PORTAL` was stale (`/client/portal.html`) — fixed to `/client`
+   - Admin logout redirected to `/admin` (dashboard) — fixed to `ROUTES.ADMIN.LOGIN`
+   - Client logout redirected to `/` (main site) — fixed to `ROUTES.CLIENT.LOGIN`
+   - Client session expiry redirected to `/client/?session=expired` — fixed to use `ROUTES.CLIENT.LOGIN`
+   - `isAdminPage` check in `api-client.ts` used `includes(ROUTES.ADMIN.LOGIN)` which failed when admin was on `/admin` dashboard — fixed to `startsWith('/admin')`
+   - Admin session expiry now also appends `?session=expired` for consistent UX
+
+**Files Modified:**
+
+- `src/react/components/portal/PortalTable.tsx` - New file (renamed from AdminTable)
+- `src/react/components/portal/AdminTable.tsx` - Deleted
+- `src/react/components/portal/index.ts` - Updated exports
+- `src/styles/shared/portal-buttons.css` - Updated comment
+- `src/constants/api-endpoints.ts` - Fixed ROUTES.CLIENT constants
+- `src/features/admin/admin-auth.ts` - Added ROUTES import, fixed logout redirect
+- `src/features/client/modules/portal-auth.ts` - Added ROUTES import, fixed logout redirect
+- `src/features/client/client-portal.ts` - Added ROUTES import, fixed session expiry redirect
+- `src/utils/api-client.ts` - Fixed isAdminPage check, added session=expired to both redirects
+- All 30+ tables in `src/react/features/admin/**` and `src/react/features/portal/**` - Updated import names
+
+**Verification:** TypeScript passes with zero errors
+
+---
+
+### Full Portal Audit: API Centralization, Data Isolation & Structure Consistency
+
+**Status:** COMPLETE
+
+**Scope:** Full audit of both admin + client portals covering API endpoint centralization, data isolation, structural consistency, and CSS violations.
+
+#### Critical Bug Fixes
+
+1. **ROUTES constant was swapped** - `api-endpoints.ts` had `LOGIN: '/admin'` and `DASHBOARD: '/admin/login'` backwards, breaking auth redirects
+   - Fixed: `LOGIN: '/admin/login'`, `DASHBOARD: '/admin'`
+
+2. **Data isolation violation** - `PortalProjectsList.tsx` fetched from `/api/projects` (general endpoint) instead of `/api/portal/projects` (client-filtered)
+   - Fixed: Changed to `API_ENDPOINTS.PORTAL.PROJECTS`
+
+3. **Inline `<style>` tag in JSX** - `PortalFilesManager.tsx` injected `#folder-sidebar` CSS via `<style>` tag in JSX (CSP violation)
+   - Fixed: Moved to `src/styles/client-portal/layout.css`
+
+#### API Endpoint Centralization
+
+Removed all hardcoded strings. Added missing endpoints and builders:
+
+**New constants in `api-endpoints.ts`:**
+
+- `AD_HOC_REQUESTS_MY: '/api/ad-hoc-requests/my-requests'`
+- `FILES_CLIENT: '/api/uploads/client'`
+- `FILES_MULTIPLE: '/api/uploads/multiple'`
+
+**New `buildEndpoint` builders:**
+
+- `fileView(id)`, `fileDownload(id)`, `fileDelete(id)`
+- `adHocRequestApprove(id)`, `adHocRequestDecline(id)`
+
+**Removed hardcoded locals:**
+
+- `PortalAdHocRequests.tsx` - Removed `const API_BASE = '/api/ad-hoc-requests/my-requests'`
+- `PortalFilesManager.tsx` - Removed `const FILES_API_BASE = '/api/uploads'`
+
+#### Structural Consistency
+
+All portal React components now use the same patterns:
+
+- `PortalInvoicesTable.tsx` - Replaced raw `<table>` with `AdminTable` component system (matching `PortalFilesManager`)
+- `PortalApprovals.tsx` - Replaced custom `tw-tab-list`/`tw-tab` buttons with `SubtabList` from `@react/factories`
+- `PortalSettings.tsx` - Replaced `<span className="loading-spinner"></span>` with `<RefreshCw className="tw-h-5 tw-w-5 tw-animate-spin" />` (matches all other portal components)
+
+**Files Modified:**
+
+- `src/constants/api-endpoints.ts` - Fixed ROUTES, added 3 endpoints, 5 buildEndpoint builders
+- `src/react/features/portal/projects/PortalProjectsList.tsx` - Data isolation fix
+- `src/react/features/portal/ad-hoc-requests/PortalAdHocRequests.tsx` - API centralization
+- `src/react/features/portal/files/PortalFilesManager.tsx` - API centralization, removed inline style
+- `src/react/features/portal/invoices/PortalInvoicesTable.tsx` - AdminTable structure
+- `src/react/features/portal/approvals/PortalApprovals.tsx` - SubtabList factory
+- `src/react/features/portal/settings/PortalSettings.tsx` - Loading state consistency
+- `src/styles/client-portal/layout.css` - Added folder-sidebar media queries
+
+**Verification:** TypeScript passes with zero errors
+
+---
+
+### Client Portal Security Audit & Fixes
 
 **Status:** CRITICAL FIXES COMPLETE
 
@@ -152,7 +691,7 @@ This file tracks active development work and TODOs. Completed items are archived
 
 ### Root-Level UI Consistency Fixes - March 3, 2026
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 **Issues:**
 
@@ -554,30 +1093,20 @@ Fixed Chart.js "Canvas is already in use" errors by implementing proper chart cl
 
 ### Portal Architecture Consolidation - Phase 4 Cleanup
 
-**Status:** BLOCKED - Awaiting User Testing
+**Status:** AWAITING USER TESTING
 
-Phase 4 cleanup tasks remaining:
+PortalShell.ts is fully implemented. Deprecated modules remain in `modules-config.ts` alongside the new system as a safety net until testing confirms PortalShell works correctly.
 
 - [ ] Test new PortalShell architecture in browser
-- [ ] Delete deprecated modules (after testing confirms PortalShell works)
-- [ ] Remove old navigation configs
-- [ ] Update tests
-- [ ] Update documentation
-
-**Note:** The deprecated modules (`admin-dashboard.ts`, `client-portal.ts`) are still actively imported in `modules-config.ts`. They cannot be deleted until the new PortalShell system is fully tested and confirmed working.
+- [ ] Delete deprecated modules after testing
+- [ ] Update tests and documentation
 
 ---
 
 ### Brutalist Design System - Pending User Testing
 
 - [ ] Test React Overview on admin dashboard
-- [ ] Verify brutalist styling applies correctly
-
-**Feature Flag:**
-
-- `localStorage.setItem('feature_react_overview', 'true')` - Enable React Overview
-- `localStorage.setItem('feature_react_overview', 'false')` - Use vanilla fallback
-- `?vanilla_overview=true` URL param - Force vanilla fallback
+- [ ] Verify styling applies correctly across both portals
 
 ---
 

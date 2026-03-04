@@ -49,7 +49,7 @@ async function main() {
   for (const project of projects) {
     // Check if file already exists for this project
     const existingFile = await dbGet(
-      `SELECT id FROM files WHERE project_id = ? AND description LIKE '%intake%'`,
+      'SELECT id FROM files WHERE project_id = ? AND description LIKE \'%intake%\'',
       [project.id]
     );
 

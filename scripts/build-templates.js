@@ -19,28 +19,28 @@ const templates = [
   {
     input: resolve(projectRoot, 'index.html'),
     output: resolve(projectRoot, 'dist-temp/index.html'),
-    data: 'home',
+    data: 'home'
   },
   {
     input: resolve(projectRoot, 'projects/index.html'),
     output: resolve(projectRoot, 'dist-temp/projects/index.html'),
-    data: 'projects',
+    data: 'projects'
   },
   {
     input: resolve(projectRoot, 'admin/index.html'),
     output: resolve(projectRoot, 'dist-temp/admin/index.html'),
-    data: 'admin',
+    data: 'admin'
   },
   {
     input: resolve(projectRoot, 'client/intake.html'),
     output: resolve(projectRoot, 'dist-temp/client/intake.html'),
-    data: 'clientIntake',
+    data: 'clientIntake'
   },
   {
     input: resolve(projectRoot, 'client/portal.html'),
     output: resolve(projectRoot, 'dist-temp/client/portal.html'),
-    data: 'clientPortal',
-  },
+    data: 'clientPortal'
+  }
 ];
 
 // Load template data
@@ -57,7 +57,7 @@ const ejsOptions = {
   root: projectRoot,
   views: [resolve(projectRoot, 'templates'), projectRoot],
   filename: 'template',
-  cache: false,
+  cache: false
 };
 
 console.log('🔧 Pre-compiling EJS templates...');
@@ -76,7 +76,7 @@ templates.forEach((template) => {
     // Get page-specific data
     const pageData = templateData.pages?.[template.data] || {
       title: 'No Bhad Codes',
-      description: 'Professional web development services',
+      description: 'Professional web development services'
     };
 
     // Render the template
@@ -85,7 +85,7 @@ templates.forEach((template) => {
       {
         ...templateData,
         pageData,
-        pages: templateData.pages,
+        pages: templateData.pages
       },
       ejsOptions
     );
