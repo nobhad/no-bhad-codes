@@ -11,7 +11,7 @@ export default defineConfig({
       'server/**/*.{test,spec}.{js,ts}',
       'tests/server/**/*.{test,spec}.{js,ts}',
       'tests/unit/**/*.{test,spec}.{js,ts}',
-      'tests/integration/**/*.{test,spec}.{js,ts}',
+      'tests/integration/**/*.{test,spec}.{js,ts}'
     ],
     exclude: ['node_modules/**', 'dist/**', 'build/**', '**/*.d.ts'],
     coverage: {
@@ -33,7 +33,7 @@ export default defineConfig({
         'server/app.ts',
         '**/types/**',
         '**/*.type.ts',
-        '**/*.types.ts',
+        '**/*.types.ts'
       ],
       include: ['src/**/*.{js,ts}', 'server/**/*.{js,ts}'],
       thresholds: {
@@ -42,7 +42,7 @@ export default defineConfig({
           branches: 5,
           functions: 5,
           lines: 8,
-          statements: 8,
+          statements: 8
         },
         // Critical modules - higher standards for new code
         // Target: Increase by 5% each sprint
@@ -50,21 +50,21 @@ export default defineConfig({
           branches: 20,
           functions: 25,
           lines: 30,
-          statements: 30,
+          statements: 30
         },
         'src/services/**/*.ts': {
           branches: 15,
           functions: 15,
           lines: 20,
-          statements: 20,
+          statements: 20
         },
         'server/services/**/*.ts': {
           branches: 20,
           functions: 25,
           lines: 25,
-          statements: 25,
-        },
-      },
+          statements: 25
+        }
+      }
     },
     // Fail tests if coverage thresholds are not met
     testTimeout: 10000,
@@ -75,14 +75,14 @@ export default defineConfig({
     reporters: ['verbose', 'html', 'json'],
     outputFile: {
       html: './coverage/index.html',
-      json: './coverage/coverage.json',
-    },
+      json: './coverage/coverage.json'
+    }
     // Coverage reporting configuration
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@tests': resolve(__dirname, 'tests'),
-    },
-  },
+      '@tests': resolve(__dirname, 'tests')
+    }
+  }
 });

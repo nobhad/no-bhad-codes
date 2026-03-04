@@ -429,6 +429,31 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'articles', label: 'Articles', roles: ['admin'] },
     ],
   },
+  // Client: Settings subtabs
+  {
+    id: 'settings-subtabs',
+    forTab: 'settings',
+    roles: ['client'],
+    subtabs: [
+      { id: 'profile', label: 'Profile', roles: ['client'], active: true },
+      { id: 'billing', label: 'Billing', roles: ['client'] },
+      { id: 'notifications', label: 'Notifications', roles: ['client'] },
+    ],
+  },
+  // Client: Project detail subtabs
+  {
+    id: 'portal-project-detail-subtabs',
+    forTab: 'project-detail',
+    roles: ['client'],
+    subtabs: [
+      { id: 'overview', label: 'Overview', roles: ['client'], active: true, dataAttr: 'pd-tab' },
+      { id: 'milestones', label: 'Milestones', roles: ['client'], dataAttr: 'pd-tab' },
+      { id: 'updates', label: 'Updates', roles: ['client'], dataAttr: 'pd-tab' },
+      { id: 'files', label: 'Files', roles: ['client'], dataAttr: 'pd-tab' },
+      { id: 'messages', label: 'Messages', roles: ['client'], dataAttr: 'pd-tab' },
+      { id: 'invoices', label: 'Invoices', roles: ['client'], dataAttr: 'pd-tab' },
+    ],
+  },
   // Admin: Project detail subtabs
   {
     id: 'project-detail-subtabs',
@@ -578,8 +603,8 @@ export function getFeaturesForRole(role: UserRole): PortalFeatures {
     notificationBell: true, // Shared: both roles
     themeToggle: true, // Shared: both roles
     mobileMenuToggle: role === 'client', // Client only (admin has sidebar toggle)
-    subtabs: role === 'admin', // Admin only
-    secondarySidebar: role === 'admin', // Admin only
+    subtabs: true, // Both roles
+    secondarySidebar: false, // Removed — not used
   };
 }
 

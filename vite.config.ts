@@ -6,7 +6,7 @@ import { createObfuscationPlugin } from './src/utils/obfuscation-plugin';
 /**
  * Custom plugin to handle MPA routing in development
  * Rewrites URLs for static HTML pages (non-EJS routes)
- * Note: /admin and /client are now served by Express EJS
+ * Note: /portal, /dashboard, /admin and /client are served by Express EJS
  */
 function mpaRoutingPlugin(): Plugin {
   return {
@@ -18,15 +18,13 @@ function mpaRoutingPlugin(): Plugin {
         // Rewrite /client/intake to /client/intake.html (static page)
         if (url === '/client/intake' || url === '/client/intake/') {
           req.url = '/client/intake.html';
-        }
-        // Rewrite /client/set-password to /client/set-password.html (static page)
-        else if (url.startsWith('/client/set-password')) {
+        } else if (url.startsWith('/client/set-password')) {
           req.url = url.replace('/client/set-password', '/client/set-password.html');
         }
 
         next();
       });
-    },
+    }
   };
 }
 
@@ -49,13 +47,13 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         client: resolve(__dirname, 'client/index.html'),
         'client-intake': resolve(__dirname, 'client/intake.html'),
-        'client-set-password': resolve(__dirname, 'client/set-password.html'),
+        'client-set-password': resolve(__dirname, 'client/set-password.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
-      },
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
     },
 
     // Optimize chunk splitting
@@ -66,12 +64,12 @@ export default defineConfig({
         // Drop console.log, console.info, console.debug in production
         // Keep console.warn and console.error for important messages
         drop_console: false, // Don't drop all console
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
       },
       format: {
-        comments: false, // Remove comments in production
-      },
-    } as Terser.MinifyOptions,
+        comments: false // Remove comments in production
+      }
+    } as Terser.MinifyOptions
   },
 
   // Multi-page application mode
@@ -88,10 +86,20 @@ export default defineConfig({
     // Proxy API requests to backend server
     proxy: {
       // Portal routes - served by Express EJS
+      '/portal': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false
+      },
+      '/dashboard': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+        secure: false
+      },
       '/admin': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false,
+        secure: false
       },
       '/client': {
         target: 'http://localhost:4001',
@@ -105,7 +113,7 @@ export default defineConfig({
             return url;
           }
           return null; // Proxy to Express for EJS rendering
-        },
+        }
       },
       // API routes
       '/api': {
@@ -119,7 +127,7 @@ export default defineConfig({
         configure: (proxy) => {
           proxy.on('error', (err, _req, res) => {
             // Log the proxy error and return a friendly 503 when possible
-            // eslint-disable-next-line no-console
+
             console.warn(
               '[vite-proxy] proxy error:',
               err && (err as Error).message ? (err as Error).message : err
@@ -132,14 +140,14 @@ export default defineConfig({
               }
             }
           });
-        },
+        }
       },
       '/uploads': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false,
-      },
-    },
+        secure: false
+      }
+    }
   },
 
   // Preview server configuration
@@ -147,7 +155,7 @@ export default defineConfig({
     port: 4173,
     host: true,
     strictPort: false,
-    open: false,
+    open: false
   },
 
   // Resolve configuration
@@ -164,9 +172,9 @@ export default defineConfig({
       '@types': resolve(__dirname, 'src/types'),
       '@utils': resolve(__dirname, 'src/utils'),
       '@config': resolve(__dirname, 'src/config'),
-      '@styles': resolve(__dirname, 'src/styles'),
+      '@styles': resolve(__dirname, 'src/styles')
     },
-    extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
+    extensions: ['.tsx', '.ts', '.jsx', '.js', '.json']
   },
 
   // Plugin configuration
@@ -191,8 +199,8 @@ export default defineConfig({
           openDelimiter: '<',
           closeDelimiter: '>',
           cache: process.env.NODE_ENV === 'production',
-          rmWhitespace: process.env.NODE_ENV === 'production',
-        },
+          rmWhitespace: process.env.NODE_ENV === 'production'
+        }
       },
 
       // Data available to all EJS templates
@@ -204,8 +212,8 @@ export default defineConfig({
         siteUrl: process.env.WEBSITE_URL || 'https://nobhad.codes',
         year: new Date().getFullYear(),
         nodeEnv: process.env.NODE_ENV || 'development',
-        isDev: process.env.NODE_ENV !== 'production',
-      },
+        isDev: process.env.NODE_ENV !== 'production'
+      }
     }),
 
     // Code obfuscation for production builds (uses javascript-obfuscator)
@@ -221,9 +229,9 @@ export default defineConfig({
         encryptStrings: false, // DISABLED: breaks dynamic imports (visitor-tracking-!~{00f}~.js)
         antiDebugTraps: false, // Enable for anti-debugging protection
         fakeSourceMaps: false,
-        polymorphicCode: false,
-      },
-    }),
+        polymorphicCode: false
+      }
+    })
   ],
 
   // CSS configuration
@@ -231,19 +239,19 @@ export default defineConfig({
     devSourcemap: true,
     preprocessorOptions: {
       // Add any CSS preprocessor options here if needed
-    },
+    }
   },
 
   // Optimization configuration
   optimizeDeps: {
     include: ['gsap', 'gsap/all', 'react', 'react-dom', 'zustand'],
-    exclude: [],
+    exclude: []
   },
 
   // Define global constants
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString())
   },
 
   // ESBuild configuration
@@ -255,7 +263,7 @@ export default defineConfig({
     jsx: 'automatic',
     jsxImportSource: 'react',
     logOverride: {
-      'this-is-undefined-in-esm': 'silent',
-    },
-  },
+      'this-is-undefined-in-esm': 'silent'
+    }
+  }
 });

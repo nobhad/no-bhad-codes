@@ -10,6 +10,6 @@ export default {
     'postcss-custom-media': {
       // Custom media queries using our breakpoint system
     },
-    autoprefixer: {},
-  },
+    autoprefixer: {}
+  }
 };

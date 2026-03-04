@@ -274,6 +274,29 @@ export const ADMIN_TAB_IDS = [
   'email-templates',
 ];
 
+/**
+ * Tab content IDs for client portal.
+ * Each gets a pre-rendered `.tab-content` div in the EJS template,
+ * matching the admin architecture for consistent tab switching.
+ */
+export const CLIENT_TAB_IDS = [
+  'dashboard',
+  'projects',
+  'project-detail',
+  'messages',
+  'files',
+  'invoices',
+  'requests',
+  'questionnaires',
+  'documents',
+  'approvals',
+  'review',
+  'help',
+  'settings',
+  'new-project',
+  'onboarding',
+];
+
 // Re-export from unified-navigation for TypeScript usage
 export {
   getNavigationForRole,

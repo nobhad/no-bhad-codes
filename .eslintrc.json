@@ -32,7 +32,7 @@
     "object-curly-spacing": ["error", "always"],
     "array-bracket-spacing": ["error", "never"],
     "comma-dangle": ["error", "never"],
-    "eqeqeq": ["error", "always"],
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
     "no-multiple-empty-lines": ["error", { "max": 2 }],
     "no-trailing-spaces": "error",
     "space-before-function-paren": ["error", {
