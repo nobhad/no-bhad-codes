@@ -25,6 +25,7 @@
           else if (hash === '#/projects') pageId = 'projects';
           else if (hash.startsWith('#/projects/')) pageId = 'project-detail';
           else if (hash === '#/admin-login' || hash === '#admin-login') pageId = 'admin-login';
+          else if (hash === '#/portal' || hash.startsWith('#/portal?')) pageId = 'portal-login';
 
           // Store for CSS to use via data attribute
           document.documentElement.setAttribute('data-initial-page', pageId);
@@ -643,6 +644,13 @@
                 <div class="menu-link-bg"></div>
               </a>
             </li>
+            <li class="menu-list-item">
+              <a href="#/portal" class="menu-link">
+                <p class="menu-link-heading" data-text="portal">portal</p>
+                <p class="eyebrow">04</p>
+                <div class="menu-link-bg"></div>
+              </a>
+            </li>
           </ul>
           <!-- Social Links - GSAP animates container only -->
           <div class="menu-details" data-menu-fade>
@@ -1023,7 +1031,7 @@
                 >.</span
               >
             </p>
-            <!-- LEFT COLUMN: Contact Form -->
+            <!-- Contact Form -->
             <div class="contact-form-column">
               <form
                 class="contact-form"
@@ -1046,249 +1054,305 @@
                   autocomplete="off"
                 />
 
-                <!-- Top row: inputs + submit button -->
-                <div class="contact-row">
-                  <!-- Left column: name, company, email -->
-                  <div class="contact-left">
-                    <div class="input-wrapper">
-                      <div class="input-item">
-                        <input
-                          id="name"
-                          placeholder="..."
-                          required
-                          aria-required="true"
-                          aria-describedby="contact-name-error"
-                          autocomplete="name"
-                          type="text"
-                          name="Name"
-                          maxlength="256"
-                          aria-label="Name"
-                          data-1p-ignore
-                          data-lpignore="true"
-                          data-bwignore
-                        />
-                        <label class="text-small" for="name">Name</label>
-                        <p
-                          class="field-error"
-                          id="contact-name-error"
-                          role="alert"
-                          aria-live="polite"
-                        ></p>
-                      </div>
-                    </div>
-
-                    <div class="input-wrapper">
-                      <div class="input-item">
-                        <input
-                          id="company"
-                          placeholder="..."
-                          autocomplete="organization"
-                          type="text"
-                          name="Company-Name"
-                          maxlength="256"
-                          aria-label="Company (optional)"
-                          data-1p-ignore
-                          data-lpignore="true"
-                          data-bwignore
-                        />
-                        <label class="text-small" for="company">Company (optional)</label>
-                      </div>
-                    </div>
-
-                    <div class="input-wrapper">
-                      <div class="input-item">
-                        <input
-                          id="email"
-                          placeholder="..."
-                          required
-                          aria-required="true"
-                          aria-describedby="contact-email-error"
-                          autocomplete="email"
-                          type="email"
-                          name="Email"
-                          maxlength="256"
-                          aria-label="Email"
-                          data-1p-ignore
-                          data-lpignore="true"
-                          data-bwignore
-                        />
-                        <label class="text-small" for="email">Email</label>
-                        <p
-                          class="field-error"
-                          id="contact-email-error"
-                          role="alert"
-                          aria-live="polite"
-                        ></p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Right column: submit button -->
-                  <div class="contact-right">
-                    <button class="submit-button" type="submit" aria-label="Submit contact form">
-                      <span></span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="lucide lucide-bow-arrow-icon lucide-bow-arrow"
-                        aria-hidden="true"
-                      >
-                        <!-- Bow group (the two curves) -->
-                        <g class="bow-group">
-                          <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" />
-                          <path
-                            d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"
-                          />
-                        </g>
-                        <!-- Arrow group (will be animated on submit) -->
-                        <g class="arrow-group">
-                          <path d="M17 3h4v4" />
-                          <path d="M9.707 14.293 21 3" />
-                          <path
-                            d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"
-                          />
-                        </g>
-                      </svg>
-                    </button>
+                <div class="input-wrapper">
+                  <div class="input-item">
+                    <input
+                      id="name"
+                      placeholder="Name"
+                      required
+                      aria-required="true"
+                      aria-describedby="contact-name-error"
+                      autocomplete="name"
+                      type="text"
+                      name="Name"
+                      maxlength="256"
+                      aria-label="Name"
+                      data-1p-ignore
+                      data-lpignore="true"
+                      data-bwignore
+                    />
+                    <label class="text-small" for="name">Name</label>
+                    <p
+                      class="field-error"
+                      id="contact-name-error"
+                      role="alert"
+                      aria-live="polite"
+                    ></p>
                   </div>
                 </div>
 
-                <!-- Bottom row: message textarea spanning full width -->
-                <div class="contact-message-row">
-                  <div class="input-wrapper">
-                    <div class="input-item">
-                      <textarea
-                        id="message"
-                        name="Message"
-                        placeholder="..."
-                        required
-                        aria-required="true"
-                        aria-describedby="contact-message-error"
-                        rows="4"
-                        maxlength="1000"
-                        aria-label="Message"
-                        data-1p-ignore
-                        data-lpignore="true"
-                        data-bwignore
-                      ></textarea>
-                      <label class="text-small" for="message">Message</label>
-                      <p
-                        class="field-error"
-                        id="contact-message-error"
-                        role="alert"
-                        aria-live="polite"
-                      ></p>
-                    </div>
+                <div class="input-wrapper">
+                  <div class="input-item">
+                    <input
+                      id="company"
+                      placeholder="Company (optional)"
+                      autocomplete="organization"
+                      type="text"
+                      name="Company-Name"
+                      maxlength="256"
+                      aria-label="Company (optional)"
+                      data-1p-ignore
+                      data-lpignore="true"
+                      data-bwignore
+                    />
+                    <label class="text-small" for="company">Company (optional)</label>
                   </div>
+                </div>
+
+                <div class="input-wrapper">
+                  <div class="input-item">
+                    <input
+                      id="email"
+                      placeholder="Email"
+                      required
+                      aria-required="true"
+                      aria-describedby="contact-email-error"
+                      autocomplete="email"
+                      type="email"
+                      name="Email"
+                      maxlength="256"
+                      aria-label="Email"
+                      data-1p-ignore
+                      data-lpignore="true"
+                      data-bwignore
+                    />
+                    <label class="text-small" for="email">Email</label>
+                    <p
+                      class="field-error"
+                      id="contact-email-error"
+                      role="alert"
+                      aria-live="polite"
+                    ></p>
+                  </div>
+                </div>
+
+                <div class="input-wrapper">
+                  <div class="input-item">
+                    <textarea
+                      id="message"
+                      name="Message"
+                      placeholder="Message"
+                      required
+                      aria-required="true"
+                      aria-describedby="contact-message-error"
+                      rows="6"
+                      maxlength="1000"
+                      aria-label="Message"
+                      data-1p-ignore
+                      data-lpignore="true"
+                      data-bwignore
+                    ></textarea>
+                    <label class="text-small" for="message">Message</label>
+                    <p
+                      class="field-error"
+                      id="contact-message-error"
+                      role="alert"
+                      aria-live="polite"
+                    ></p>
+                  </div>
+                </div>
+
+                <div class="submit-row">
+                  <button class="submit-button" type="submit" aria-label="Submit contact form">
+                    <span>Send Message</span>
+                    <svg
+                      class="btn-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <g class="bow-group">
+                        <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" />
+                        <path
+                          d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"
+                        />
+                      </g>
+                      <g class="arrow-group">
+                        <path d="M17 3h4v4" />
+                        <path d="M9.707 14.293 21 3" />
+                        <path
+                          d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"
+                        />
+                      </g>
+                    </svg>
+                  </button>
                 </div>
               </form>
             </div>
 
-            <!-- RIGHT COLUMN: Avatar Blurb -->
-            <div class="contact-card-column">
-              <div class="avatar-blurb-container">
-                <svg
-                  id="AVATAR_BLURB"
-                  data-name="AVATAR + BLURB"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 514.67 487.98"
-                  class="avatar-blurb-svg"
-                  role="img"
-                  aria-label="Avatar with speech bubble"
-                >
-                  <defs>
-                    <style>
-                      .cls-1 {
-                        stroke: #000;
-                        stroke-miterlimit: 10;
-                        stroke-width: 6px;
-                      }
+          </div>
+        </div>
 
-                      .cls-1,
-                      .cls-2 {
-                        fill: #fff;
-                      }
-                    </style>
-                    <filter id="eye-glow">
-                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                      <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                    <filter id="star-glow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feGaussianBlur stdDeviation="6" result="coloredBlur" />
-                      <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <g id="_AVATAR_" data-name="&lt;AVATAR&gt;">
-                    <path
-                      id="MAIN"
-                      d="M483.84,302.88l-.11-.22c17.83-48.99,4.37-96.42-32.96-131.06l-21.19,96.19c-31.28,2.58-49.67,6.73-62.33,40.7l-61.66,21.19c2.58,17.83-1.35,26.35-15.02,35.76,18.05,12.89,43.5,12.33,55.16,9.87-2.47-1.57-10.43-6.73-12.67-10.65-8.18-14.46,5.94-35.32,28.03-.78,9.87,9.87,28.81,5.27,28.81,5.27-18.95,12.89-54.37,12.67-75.12,11.44,0,0,17.27,10.43,35.65,16.7,18.39,6.17,35.43-4.82,35.43-4.82,1.12,5.49-12.67,42.94-26.79,87.67,17.38,5.16,35.65,7.85,54.26,7.85,36.55,0,71.42-10.2,101.35-29.26-10.99-61.33-21.53-118.28-30.83-155.84Z"
-                    />
-                    <path
-                      id="NOSE"
-                      d="M301.88,331.02l-28.7,9.87c3.25,10.99,7.06,17.04,14.46,22.53,13.01-9.08,16.7-15.02,14.24-32.4h0Z"
-                    />
-                    <!-- Original eye -->
-                    <path
-                      id="EYE"
-                      class="cls-2"
-                      d="M390.7,307.37c2.6-6.01,7.08-9.98,12.2-9.98,8.07,0,14.57,9.87,14.57,22.09s-6.5,22.09-14.57,22.09c-5.51,0-10.29-4.61-12.77-11.42,0,0,0,0,0,0l.02.03c2.47,3.74,6.17,6.09,10.3,6.03,7.29-.11,13.01-7.85,12.78-17.15-.01-.45-.05-.89-.08-1.33-6.2,1.12-7.43,3.16-8.44,11.76-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.45,8.59,2.46,10.52,8.88,11.42-.74-8.65-6.44-15.34-13.37-15.23-3.57.05-6.76,1.94-9.06,4.94v-.02Z"
-                    />
-                    <!-- Star glow - overflows slightly beyond crescent -->
-                    <path
-                      id="STAR_GLOW"
-                      class="star-glow"
-                      d="M404.69,329.45c-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.46,8.63,2.47,10.54,8.97,11.44-6.28,1.12-7.51,3.14-8.52,11.77h0Z"
-                      fill="none"
-                      opacity="0"
-                    />
-                    <path
-                      id="EAR"
-                      d="M408.16,171.04l-1.01,5.61c-2.47,21.97-1.68,41.59-1.01,63.9.34,4.26,1.68,22.31,2.02,26.35,2.02-.34,4.26-.67,6.39-.9h0c.67,0,1.46-.22,2.24-.22h0c1.46-.22,2.91-.34,4.48-.45h.22c.67,0,1.46-.11,2.13-.22h.34c.67,0,1.46-.11,2.24-.22l13.57-61.33c-9.19-10.99-26.46-29.49-31.5-32.29h0l-.11-.22Z"
-                    />
-                  </g>
-                  <path
-                    id="_BLURB_"
-                    data-name="&lt;BLURB&gt;"
-                    class="cls-1"
-                    d="M288.11,285.53l-62.53,1.59s-5.36,42.28,19.01,69.03c-28.1-11.08-59.56-19.03-82.12-67.9-17.15,1.03-61.24-1.29-61.24-1.29-54.03,0-98.23-50.39-98.23-111.98v-59.98C3,53.39,47.2,3,101.23,3h182.57c54.03,0,98.23,50.39,98.23,111.98v59.98c0,61.59-39.89,110.57-93.92,110.57Z"
+        <!-- Background avatar watermark -->
+        <div class="contact-bg-avatar">
+          <div class="avatar-blurb-container">
+            <svg
+              id="AVATAR_BLURB"
+              data-name="AVATAR + BLURB"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 514.67 487.98"
+              class="avatar-blurb-svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <filter id="eye-glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="star-glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g id="_AVATAR_" data-name="&lt;AVATAR&gt;">
+                <path
+                  id="MAIN"
+                  d="M483.84,302.88l-.11-.22c17.83-48.99,4.37-96.42-32.96-131.06l-21.19,96.19c-31.28,2.58-49.67,6.73-62.33,40.7l-61.66,21.19c2.58,17.83-1.35,26.35-15.02,35.76,18.05,12.89,43.5,12.33,55.16,9.87-2.47-1.57-10.43-6.73-12.67-10.65-8.18-14.46,5.94-35.32,28.03-.78,9.87,9.87,28.81,5.27,28.81,5.27-18.95,12.89-54.37,12.67-75.12,11.44,0,0,17.27,10.43,35.65,16.7,18.39,6.17,35.43-4.82,35.43-4.82,1.12,5.49-12.67,42.94-26.79,87.67,17.38,5.16,35.65,7.85,54.26,7.85,36.55,0,71.42-10.2,101.35-29.26-10.99-61.33-21.53-118.28-30.83-155.84Z"
+                />
+                <path
+                  id="NOSE"
+                  d="M301.88,331.02l-28.7,9.87c3.25,10.99,7.06,17.04,14.46,22.53,13.01-9.08,16.7-15.02,14.24-32.4h0Z"
+                />
+                <path
+                  id="EYE"
+                  d="M390.7,307.37c2.6-6.01,7.08-9.98,12.2-9.98,8.07,0,14.57,9.87,14.57,22.09s-6.5,22.09-14.57,22.09c-5.51,0-10.29-4.61-12.77-11.42,0,0,0,0,0,0l.02.03c2.47,3.74,6.17,6.09,10.3,6.03,7.29-.11,13.01-7.85,12.78-17.15-.01-.45-.05-.89-.08-1.33-6.2,1.12-7.43,3.16-8.44,11.76-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.45,8.59,2.46,10.52,8.88,11.42-.74-8.65-6.44-15.34-13.37-15.23-3.57.05-6.76,1.94-9.06,4.94v-.02Z"
+                />
+                <path
+                  id="STAR_GLOW"
+                  class="star-glow"
+                  d="M404.69,329.45c-1.57-7.51-1.68-10.09-8.97-11.44,7.62-2.35,8.52-3.14,8.52-11.77,1.46,8.63,2.47,10.54,8.97,11.44-6.28,1.12-7.51,3.14-8.52,11.77h0Z"
+                  fill="none"
+                  opacity="0"
+                />
+                <path
+                  id="EAR"
+                  d="M408.16,171.04l-1.01,5.61c-2.47,21.97-1.68,41.59-1.01,63.9.34,4.26,1.68,22.31,2.02,26.35,2.02-.34,4.26-.67,6.39-.9h0c.67,0,1.46-.22,2.24-.22h0c1.46-.22,2.91-.34,4.48-.45h.22c.67,0,1.46-.11,2.13-.22h.34c.67,0,1.46-.11,2.24-.22l13.57-61.33c-9.19-10.99-26.46-29.49-31.5-32.29h0l-.11-.22Z"
+                />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- PORTAL LOGIN SECTION (order: 6) -->
+      <section id="portal-login" class="portal-login-section page-hidden" data-page="portal-login">
+        <div class="portal-login-content">
+          <div class="portal-login-card">
+            <div class="portal-login-header">
+              <img src="/images/avatar.svg" alt="No Bhad Codes" class="portal-login-logo" />
+              <h2>portal</h2>
+              <p class="portal-login-subtitle">Sign in to continue</p>
+            </div>
+
+            <!-- Password / Email Form -->
+            <form
+              id="portal-page-login-form"
+              class="portal-page-form"
+              method="post"
+              action="/api/auth/portal-login"
+              novalidate
+            >
+              <div class="portal-page-field">
+                <label for="portal-page-email" class="sr-only">Email</label>
+                <input
+                  type="email"
+                  id="portal-page-email"
+                  name="email"
+                  class="portal-page-input"
+                  placeholder="Email"
+                  required
+                  autocomplete="username"
+                />
+              </div>
+              <div class="portal-page-field">
+                <label for="portal-page-password" class="sr-only">Password</label>
+                <div class="portal-page-pw-wrapper">
+                  <input
+                    type="password"
+                    id="portal-page-password"
+                    name="password"
+                    class="portal-page-input"
+                    placeholder="Password"
+                    required
+                    autocomplete="current-password"
                   />
-                  <rect
-                    id="_ALIGN_TEXT_HERE_"
-                    data-name="&lt;ALIGN TEXT HERE&gt;"
-                    class="cls-2"
-                    x="39.86"
-                    y="32.23"
-                    width="301.38"
-                    height="223.4"
-                  />
-                </svg>
-                <div class="avatar-blurb-content">
-                  <p class="avatar-blurb-text">
-                    Message me here,<br />
-                    fill out an
-                    <a href="#" class="avatar-blurb-link" id="card-intake-link">intake form</a
-                    >,<br />
-                    or email me at
-                    <a href="mailto:nobhaduri@gmail.com" class="avatar-blurb-link"
-                      >nobhaduri@gmail.com</a
-                    >
-                  </p>
+                  <button
+                    type="button"
+                    id="portal-page-pw-toggle"
+                    class="portal-page-pw-toggle"
+                    aria-label="Show password"
+                  ></button>
                 </div>
               </div>
-            </div>
+              <p
+                class="portal-page-error"
+                id="portal-page-auth-error"
+                role="alert"
+                aria-live="polite"
+              ></p>
+              <button type="submit" class="portal-page-submit">
+                <span class="btn-text">Sign In</span>
+                <span class="btn-loading" style="display: none;">Signing in...</span>
+              </button>
+              <div class="portal-page-footer">
+                <a href="/client/forgot-password.html" class="portal-page-link">Forgot password?</a>
+                <span class="portal-page-divider">|</span>
+                <a href="#" id="portal-page-magic-toggle" class="portal-page-link">Use magic link instead</a>
+              </div>
+            </form>
+
+            <!-- Magic Link Form (hidden by default) -->
+            <form
+              id="portal-page-magic-form"
+              class="portal-page-form"
+              novalidate
+              style="display: none;"
+            >
+              <div class="portal-page-field">
+                <label for="portal-page-magic-email" class="sr-only">Email</label>
+                <input
+                  type="email"
+                  id="portal-page-magic-email"
+                  name="email"
+                  class="portal-page-input"
+                  placeholder="Email"
+                  required
+                  autocomplete="username"
+                />
+              </div>
+              <p
+                class="portal-page-error"
+                id="portal-page-magic-error"
+                role="alert"
+                aria-live="polite"
+              ></p>
+              <button type="submit" class="portal-page-submit portal-page-magic-submit">
+                <span class="btn-text">Send Magic Link</span>
+                <span class="btn-loading" style="display: none;">Sending...</span>
+              </button>
+              <div
+                id="portal-page-magic-success"
+                class="portal-page-success"
+                style="display: none;"
+              >
+                <p>A secure login link has been sent to your email.</p>
+              </div>
+              <div class="portal-page-footer">
+                <a href="#" id="portal-page-back-to-login" class="portal-page-link">
+                  Use password instead
+                </a>
+              </div>
+            </form>
           </div>
         </div>
       </section>
@@ -1333,12 +1397,11 @@
         }
 
         trigger.addEventListener('click', function (e) {
+          e.preventDefault();
           e.stopPropagation();
           dropdown.classList.toggle('open');
           backdrop.classList.toggle('open');
-          if (dropdown.classList.contains('open')) {
-            requestAnimationFrame(positionCaret);
-          }
+          positionCaret();
         });
 
         window.addEventListener('resize', function () {

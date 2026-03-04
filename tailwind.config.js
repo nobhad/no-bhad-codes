@@ -16,7 +16,7 @@ export default {
           'primary-hover': 'var(--color-interactive-primary-hover)',
           'primary-active': 'var(--color-interactive-primary-active)',
           secondary: 'var(--color-brand-secondary)',
-          accent: 'var(--color-brand-accent)',
+          accent: 'var(--color-brand-accent)'
         },
 
         // Portal background colors
@@ -42,7 +42,7 @@ export default {
           'border-dark': 'var(--portal-border-dark)',
           'border-medium': 'var(--portal-border-medium)',
           'border-light': 'var(--portal-border-light)',
-          'border-subtle': 'var(--portal-border-subtle)',
+          'border-subtle': 'var(--portal-border-subtle)'
         },
 
         // Status colors
@@ -68,7 +68,7 @@ export default {
           info: 'var(--status-info)',
           'info-bg': 'var(--status-info-bg)',
           danger: 'var(--status-danger)',
-          'danger-bg': 'var(--status-danger-bg)',
+          'danger-bg': 'var(--status-danger-bg)'
         },
 
         // Gray scale
@@ -83,35 +83,35 @@ export default {
           700: 'var(--color-gray-700)',
           800: 'var(--color-gray-800)',
           900: 'var(--color-gray-900)',
-          950: 'var(--color-gray-950)',
+          950: 'var(--color-gray-950)'
         },
 
         // Functional colors
         success: {
           DEFAULT: 'var(--color-success)',
           dark: 'var(--color-success-dark)',
-          light: 'var(--color-success-light)',
+          light: 'var(--color-success-light)'
         },
         warning: {
           DEFAULT: 'var(--color-warning)',
           dark: 'var(--color-warning-dark)',
-          light: 'var(--color-warning-light)',
+          light: 'var(--color-warning-light)'
         },
         error: {
           DEFAULT: 'var(--color-error)',
           dark: 'var(--color-error-dark)',
-          light: 'var(--color-error-light)',
+          light: 'var(--color-error-light)'
         },
         info: {
           DEFAULT: 'var(--color-info)',
           dark: 'var(--color-info-dark)',
-          light: 'var(--color-info-light)',
+          light: 'var(--color-info-light)'
         },
         danger: {
           DEFAULT: 'var(--color-danger)',
           dark: 'var(--color-danger-dark)',
           bg: 'var(--color-danger-bg)',
-          hover: 'var(--color-danger-hover)',
+          hover: 'var(--color-danger-hover)'
         },
 
         // Semantic background/surface colors
@@ -119,14 +119,14 @@ export default {
           primary: 'var(--color-surface-primary)',
           secondary: 'var(--color-surface-secondary)',
           tertiary: 'var(--color-surface-tertiary)',
-          elevated: 'var(--color-surface-elevated)',
+          elevated: 'var(--color-surface-elevated)'
         },
         background: {
           primary: 'var(--color-bg-primary)',
           secondary: 'var(--color-bg-secondary)',
           tertiary: 'var(--color-bg-tertiary)',
           inverse: 'var(--color-bg-inverse)',
-          overlay: 'var(--color-bg-overlay)',
+          overlay: 'var(--color-bg-overlay)'
         },
 
         // Text colors
@@ -136,7 +136,7 @@ export default {
           tertiary: 'var(--color-text-tertiary)',
           disabled: 'var(--color-text-disabled)',
           inverse: 'var(--color-text-inverse)',
-          brand: 'var(--color-text-brand)',
+          brand: 'var(--color-text-brand)'
         },
 
         // Border colors
@@ -145,8 +145,8 @@ export default {
           secondary: 'var(--color-border-secondary)',
           tertiary: 'var(--color-border-tertiary)',
           focus: 'var(--color-border-focus)',
-          error: 'var(--color-border-error)',
-        },
+          error: 'var(--color-border-error)'
+        }
       },
 
       // Border radius - minimal/portal design (squared edges)
@@ -158,7 +158,7 @@ export default {
         lg: '0',
         xl: '0',
         pill: '0',
-        full: '50%', // Only for circular elements like close buttons
+        full: '50%' // Only for circular elements like close buttons
       },
 
       // Use Tailwind's default spacing scale (rem-based)
@@ -172,9 +172,9 @@ export default {
           'Courier',
           '"Lucida Sans Typewriter"',
           '"Lucida Typewriter"',
-          'monospace',
+          'monospace'
         ],
-        sans: ['Inconsolata', 'monospace'],
+        sans: ['Inconsolata', 'monospace']
       },
 
       // Font sizes
@@ -185,7 +185,7 @@ export default {
         lg: ['16px', { lineHeight: '1.5' }],
         xl: ['18px', { lineHeight: '1.4' }],
         '2xl': ['24px', { lineHeight: '1.3' }],
-        '3xl': ['32px', { lineHeight: '1.2' }],
+        '3xl': ['32px', { lineHeight: '1.2' }]
       },
 
       // Box shadows - minimal/flat design (mostly none)
@@ -208,7 +208,7 @@ export default {
         'elevated-dark': 'none',
         button: 'none',
         'button-dark': 'none',
-        'button-pressed': 'none',
+        'button-pressed': 'none'
       },
 
       // Transitions using existing tokens
@@ -217,42 +217,42 @@ export default {
         fast: 'var(--duration-fast)',
         medium: 'var(--duration-medium)',
         slow: 'var(--duration-slow)',
-        slower: 'var(--duration-slower)',
+        slower: 'var(--duration-slower)'
       },
 
       // Z-index using existing tokens
       zIndex: {
         header: 'var(--z-header)',
         nav: 'var(--z-nav)',
-        modal: 'var(--z-modal)',
+        modal: 'var(--z-modal)'
       },
 
       // Animation for Shadcn components
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: 'var(--radix-accordion-content-height)' }
         },
         'accordion-up': {
           from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
+          to: { height: '0' }
         },
         'collapsible-down': {
           from: { height: '0' },
-          to: { height: 'var(--radix-collapsible-content-height)' },
+          to: { height: 'var(--radix-collapsible-content-height)' }
         },
         'collapsible-up': {
           from: { height: 'var(--radix-collapsible-content-height)' },
-          to: { height: '0' },
-        },
+          to: { height: '0' }
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'collapsible-down': 'collapsible-down 0.2s ease-out',
-        'collapsible-up': 'collapsible-up 0.2s ease-out',
-      },
-    },
+        'collapsible-up': 'collapsible-up 0.2s ease-out'
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 };
