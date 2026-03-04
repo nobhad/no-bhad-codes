@@ -165,7 +165,7 @@
   font-size: var(--font-size-xs, 11px);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .command-palette-section-items {

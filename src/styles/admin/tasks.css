@@ -257,7 +257,7 @@
 
 .task-detail-title {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -267,7 +267,7 @@
 
 .task-detail-section h4 {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-secondary);
   margin-bottom: var(--space-1);
   text-transform: uppercase;
@@ -371,7 +371,7 @@
 }
 
 .task-comment-author {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
   color: var(--portal-text-primary);
 }
@@ -418,7 +418,7 @@
 
 .time-summary-value {
   font-size: var(--font-size-2xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--portal-text-primary);
 }
 
@@ -455,7 +455,7 @@
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-2xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
 }
 
@@ -527,7 +527,7 @@
   align-items: center;
   gap: var(--space-0-5);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
   text-decoration: none;
   background: none;
@@ -551,7 +551,7 @@
   display: inline-block;
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin-top: var(--space-1);
   margin-bottom: var(--space-0-5);
 }
@@ -727,7 +727,7 @@
 
 .kanban-card-title {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-primary);
 }
 
@@ -743,113 +743,4 @@
   margin-left: var(--space-4);
 }
 
-/* ============================================
-   Task Board View (Alternative to table)
-   ============================================ */
-
-.board-view {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-4);
-  padding: var(--space-4);
-}
-
-.board-column {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
-  min-height: 384px;
-}
-
-.board-column-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.board-column-title {
-  font-weight: 500;
-  color: var(--portal-text-primary);
-  margin: 0;
-  font-size: var(--font-size-base);
-}
-
-.board-column-count {
-  font-size: var(--font-size-sm);
-  padding: 2px 8px;
-  background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
-  color: var(--portal-text-secondary);
-}
-
-.board-column-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.board-card {
-  padding: var(--space-3);
-  background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
-}
-
-.board-card:hover {
-  opacity: 0.9;
-}
-
-.board-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.board-card-header .priority-dot {
-  margin-top: 6px;
-}
-
-.board-card-title {
-  font-weight: 500;
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.board-card-due {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-}
-
-.board-card-assignee {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  margin-top: var(--space-1);
-}
-
-/* Board view responsive */
-@media (--desktop-wide) {
-  .board-view {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (--tablet-landscape) {
-  .board-view {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (--compact-mobile) {
-  .board-view {
-    grid-template-columns: 1fr;
-  }
-}
+/* Board view uses shared .kanban-* classes from portal-components.css */

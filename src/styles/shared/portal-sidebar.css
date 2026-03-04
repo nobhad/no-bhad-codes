@@ -16,8 +16,8 @@
   display: flex;
   flex-direction: column;
   transition:
-    width 0.15s ease-out,
-    transform 0.15s ease-out;
+    width var(--transition-fast) ease-out,
+    transform var(--transition-fast) ease-out;
   position: relative;
   height: 100vh;
   height: 100dvh;
@@ -200,7 +200,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .client-name {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: 1.4rem;
   color: var(--portal-text-light);
   margin: 0;
@@ -255,7 +255,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   border-bottom: var(--portal-border);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: left;
 }
 
@@ -281,7 +281,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   padding: var(--space-1) var(--space-2);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .logout-btn:hover {
@@ -601,10 +601,10 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   overflow: visible;
 }
 
-/* Base badge style */
+/* Base badge style - hidden by default, shown only with has-count */
 .portal .sidebar-badge {
   position: absolute;
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
   min-width: var(--icon-size-xl);
@@ -622,12 +622,17 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     sans-serif
   );
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 1;
   white-space: nowrap;
   pointer-events: none;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+/* Show badge only when it has a count */
+.portal .sidebar-badge.has-count {
+  display: inline-flex;
 }
 
 /* No pseudo-elements on badge */
@@ -661,7 +666,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   height: var(--icon-size-md);
   padding: 0;
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 1;
   transform: none;
   border-radius: var(--portal-radius-full);
@@ -687,7 +692,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     height: var(--icon-size-md);
     padding: 0;
     font-size: var(--font-size-xs);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     background: var(--color-danger);
     color: var(--color-white);
     box-shadow: 0 0 0 var(--border-width) var(--portal-bg-dark);
@@ -712,7 +717,6 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   color: var(--portal-text-muted);
   font-family: inherit;
   font-size: var(--font-size-2xs);
-  font-weight: 400;
   line-height: 1;
   opacity: 0;
   transition: opacity var(--transition-faster);

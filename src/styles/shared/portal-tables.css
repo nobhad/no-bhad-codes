@@ -40,17 +40,23 @@
   --table-name-max-width: calc(var(--space-base) * 31.25);
   --table-compact-max-width: calc(var(--space-base) * 15);
 
-  /* Table icon sizing */
-  --table-icon-size: var(--icon-size-md);
+  /* Table icon sizing - SINGLE SOURCE OF TRUTH for ALL table icons
+     ALL icons in table rows (cell icons, status icons, action button icons)
+     MUST use this variable for uniform sizing */
+  --table-icon-size: var(--icon-size-md); /* 16px */
+  --table-cell-icon-size: var(--table-icon-size); /* Alias for clarity */
+  --table-action-icon-size: var(--table-icon-size); /* Action button SVGs */
   --table-sort-indicator-size: calc(var(--icon-size-xs) - 2px);
 
   /* Pagination button sizing - SINGLE SOURCE OF TRUTH */
-  --table-pagination-btn-size: 32px;
+  --table-pagination-btn-size: 28px;
   --table-pagination-btn-size-touch: 44px;
 
   /* Table mobile layout */
   --table-mobile-label-width: 48%;
   --table-mobile-label-padding: 0.75em;
+  --table-mobile-card-gap: var(--space-2);
+  --table-mobile-card-padding: var(--space-2) var(--space-3);
 
   /* Table column width scale */
   --table-col-xs: calc(var(--space-base) * 7.5);
@@ -66,7 +72,7 @@
 
 .data-table {
   width: 100%;
-  min-width: 800px;
+  min-width: 0;
   border-collapse: collapse;
   border-spacing: 0;
   background: var(--table-bg);
@@ -86,9 +92,9 @@
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   color: var(--portal-text-light);
   font-size: inherit;
-  font-weight: 400;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
   border-bottom: var(--portal-border);
   vertical-align: middle;
@@ -140,7 +146,7 @@
 .data-table tbody tr:hover td.actions-cell,
 .data-table tbody tr:hover td:last-child,
 .data-table tbody tr:hover td[class*="actions"],
-[data-page="admin"] .data-table tbody tr:hover td {
+.portal .data-table tbody tr:hover td {
   background: var(--portal-bg-hover);
 }
 
@@ -277,11 +283,86 @@
   padding: 0;
 }
 
+/* Action button SVGs - use SAME size as cell icons for uniformity */
 .data-table .table-actions .icon-btn svg,
 .data-table .actions-cell .icon-btn svg,
 .table-actions .icon-btn svg {
-  width: var(--font-size-sm, 14px);
-  height: var(--font-size-sm, 14px);
+  width: var(--table-action-icon-size);
+  height: var(--table-action-icon-size);
+}
+
+/* ==============================================
+   TABLE HEADER
+   Shared between admin and client portal.
+   Used by .data-table-header class inside .data-table-card.
+   ============================================== */
+
+.data-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1-5) var(--table-cell-padding-x, 14px);
+  border-bottom: var(--portal-border);
+  background: transparent;
+}
+
+.data-table-header h3 {
+  order: 0;
+  margin: 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  white-space: nowrap;
+}
+
+.data-table-header h3 .title-mobile {
+  display: none;
+}
+
+.data-table-header h3 .title-full {
+  display: inline;
+}
+
+/* Stats summary — inline display next to title */
+.stats-summary {
+  order: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: var(--space-3);
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  flex-wrap: wrap;
+}
+
+.stats-summary-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.stats-summary-item:not(:last-child)::after {
+  content: "•";
+  margin-left: var(--space-2);
+  color: var(--portal-text-muted);
+}
+
+.stats-summary-item.stats-pending { color: var(--app-color-warning); }
+.stats-summary-item.stats-active { color: var(--app-color-info); }
+.stats-summary-item.stats-completed { color: var(--app-color-success); }
+.stats-summary-item.stats-overdue { color: var(--app-color-danger); }
+.stats-summary-item.stats-cancelled { color: var(--portal-text-muted); }
+
+/* Header actions — right side of header */
+.data-table-actions {
+  order: 2;
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* ==============================================
@@ -310,12 +391,13 @@
   min-width: 0;
 }
 
-/* Scroll wrapper - no border if inside card (card has the border) */
+/* Scroll wrapper - horizontal scroll when columns don't fit */
 .admin-table-scroll-wrapper,
 .table-scroll-wrapper,
 .data-table-scroll-wrapper {
   width: 100%;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: visible;
   background: var(--table-bg);
   border: none;
 }
@@ -338,7 +420,7 @@
 .table-pagination {
   display: flex;
   align-items: center;
-  padding: var(--space-3);
+  padding: var(--space-1-5) var(--table-cell-padding-x, 14px);
   color: inherit;
   font-size: inherit;
 }
@@ -397,7 +479,8 @@
 }
 
 .pagination-btn:disabled {
-  opacity: 0.4;
+  color: var(--portal-text-muted);
+  border-color: var(--portal-border-color);
   cursor: not-allowed;
 }
 
@@ -428,7 +511,7 @@
 }
 
 .pagination-page-btn.active {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* ==============================================
@@ -481,7 +564,7 @@
   font-weight: inherit;
   color: inherit;
   font-family: inherit;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 /* Layout helpers - flex/block display */
@@ -489,6 +572,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
+}
+
+/* Empty cell placeholder — muted dash across all tables */
+.data-table .cell-empty,
+.cell-empty {
+  color: var(--portal-text-muted);
 }
 
 /* ==============================================
@@ -503,18 +592,13 @@
   gap: var(--space-2);
 }
 
-.data-table .cell-icon {
-  flex-shrink: 0;
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
-  /* Inherit color from parent - no grey override */
-  color: inherit;
-}
-
+/* ALL table cell icons - UNIFORM SIZE
+   Both .cell-icon and .cell-icon-sm use the same size for consistency */
+.data-table .cell-icon,
 .data-table .cell-icon-sm {
   flex-shrink: 0;
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: var(--table-cell-icon-size);
+  height: var(--table-cell-icon-size);
   /* Inherit color from parent - no grey override */
   color: inherit;
 }
@@ -551,19 +635,13 @@
 .data-table .due-date-value,
 .data-table .expires-at-value,
 .data-table .budget-value,
-.data-table .timeline-value,
-.data-table .company-stacked {
+.data-table .timeline-value {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Stacked elements styled as secondary text */
-.data-table .company-stacked {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
-}
 
 /* Stacked content hidden on desktop, shown responsively */
 .data-table .type-stacked,
@@ -580,7 +658,10 @@
 .data-table .count-stacked,
 .data-table .invoice-stacked,
 .data-table .amount-stacked,
-.data-table .source-stacked {
+.data-table .source-stacked,
+.data-table .trigger-stacked,
+.data-table .category-stacked,
+.data-table .status-stacked {
   display: none;
 }
 
@@ -589,8 +670,8 @@
   display: none;
   align-items: center;
   gap: var(--icon-gap);
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
+  color: inherit;
+  font-size: inherit;
 }
 
 .data-table .priority-stacked .priority-indicator {
@@ -611,45 +692,52 @@
 
 /* Count stacked (projects count) */
 .data-table .count-stacked {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
+  color: inherit;
+  font-size: inherit;
 }
 
 /* Target stacked (target date) */
 .data-table .target-stacked {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
+  color: inherit;
+  font-size: inherit;
 }
 
 /* Invoice stacked (invoice number) */
 .data-table .invoice-stacked {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
-  font-family: var(--font-family-mono, "Inconsolata", monospace);
+  color: inherit;
+  font-size: inherit;
+  font-family: var(--font-family-mono);
 }
 
 /* Amount stacked */
 .data-table .amount-stacked {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-xs);
+  color: inherit;
+  font-size: inherit;
   font-weight: var(--font-weight-medium);
 }
 
 /* Source stacked */
 .data-table .source-stacked {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
+  color: inherit;
+  font-size: inherit;
 }
 
-@media (--mobile) {
-  .data-table .type-stacked,
-  .data-table .date-stacked,
-  .data-table .budget-stacked,
-  .data-table .last-active-stacked,
-  .data-table .type-budget-stacked,
-  .data-table .company-stacked {
-    display: block;
-  }
+/* Trigger stacked (workflow trigger type) */
+.data-table .trigger-stacked {
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Category stacked (template/content category) */
+.data-table .category-stacked {
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Status stacked (item status badge) */
+.data-table .status-stacked {
+  color: inherit;
+  font-size: inherit;
 }
 
 /* ==============================================
@@ -662,7 +750,7 @@
 .data-table .slug-cell code,
 .data-table .type-cell code,
 .data-table code {
-  font-family: var(--font-family-mono, "Inconsolata", monospace);
+  font-family: var(--font-family-mono);
   font-size: inherit;
 }
 
@@ -765,6 +853,13 @@
   max-width: var(--table-identity-max-width);
 }
 
+/* Monospace text — invoice numbers, IDs, codes */
+.data-table .mono-text {
+  font-family: var(--font-family-mono, 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace);
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-label);
+}
+
 .data-table
   :is(
     .type-col,
@@ -782,7 +877,9 @@
     .count-col,
     .count-cell,
     .slug-col,
-    .slug-cell
+    .slug-cell,
+    .size-col,
+    .size-cell
   ) {
   max-width: var(--table-compact-max-width);
 }
@@ -850,7 +947,7 @@
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
 }
 
 /* ==============================================
@@ -972,7 +1069,7 @@
 .data-table th.sortable .data-table-sort-icon svg {
   width: var(--table-icon-size);
   height: var(--table-icon-size);
-  color: var(--portal-text-muted);
+  color: var(--portal-text-primary);
   transition: color var(--duration-faster);
 }
 
@@ -1032,6 +1129,42 @@
   .data-table :is(.source-col, .source-cell, .timeline-col, .timeline-cell, .budget-col, .budget-cell) {
     display: none;
   }
+
+  /* Show stacked info for collapsed columns */
+  .data-table .type-stacked,
+  .data-table .date-stacked,
+  .data-table .budget-stacked,
+  .data-table .last-active-stacked,
+  .data-table .type-budget-stacked,
+  .data-table .company-stacked {
+    display: block;
+  }
+
+  /* Table header wraps on mobile */
+  .data-table-header {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-2);
+  }
+
+  .data-table-header h3 {
+    flex: 0 0 auto;
+  }
+
+  /* Stats wrap below title on mobile */
+  .stats-summary {
+    order: 2;
+    flex: 1 1 100%;
+    margin-left: 0;
+    gap: var(--space-1-5);
+    font-size: var(--font-size-xs);
+  }
+
+  /* Actions stay top-right */
+  .data-table-actions {
+    order: 1;
+    margin-left: auto;
+  }
 }
 
 /* ==============================================
@@ -1040,7 +1173,7 @@
    ============================================== */
 
 /* 1200px: Reduce cell padding slightly */
-@media (max-width: 1200px) {
+@media (--desktop-wide) {
   .data-table th,
   .data-table td {
     padding: var(--space-1) var(--space-1-5);
@@ -1048,7 +1181,7 @@
 }
 
 /* 1100px: Hide source, reduce padding more */
-@media (max-width: 1100px) {
+@media (--laptop-wide) {
   .data-table th,
   .data-table td {
     padding: var(--space-1) var(--space-1);
@@ -1065,12 +1198,12 @@
 }
 
 /* 1000px: Hide date, timeline, assigned, company, project, type columns */
-@media (max-width: 1000px) {
+@media (--laptop) {
   .data-table :is(.date-col, .date-cell, .created-col, .created-cell, .timeline-col, .timeline-cell, .assigned-col, .assigned-cell) {
     display: none;
   }
 
-  .data-table :is(.company-col, .company-cell, .project-col, .project-cell, .type-col, .type-cell, .projects-col, .projects-cell, .count-col, .count-cell):not(.primary-cell) {
+  .data-table :is(.company-col, .company-cell, .project-col, .project-cell, .type-col, .type-cell, .projects-col, .projects-cell, .count-col, .count-cell, .category-col, .category-cell):not(.primary-cell) {
     display: none;
   }
 
@@ -1091,16 +1224,19 @@
   .data-table .cell-content .count-stacked,
   .data-table .cell-content .target-stacked,
   .data-table .cell-content .project-stacked,
+  .data-table .cell-content .trigger-stacked,
+  .data-table .cell-content .category-stacked,
   .data-table .identity-cell .identity-company {
     display: block;
     color: inherit;
-    font-size: var(--font-size-xs);
+    font-size: inherit;
   }
 }
 
-/* 800px: Hide budget, priority, invoice, amount columns */
+/* 800px: Hide budget, priority, invoice, amount, status columns
+   Content-driven breakpoint — no exact custom media match */
 @media (max-width: 800px) {
-  .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell):not(.primary-cell) {
+  .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell, .status-col, .status-cell):not(.primary-cell) {
     display: none;
   }
 
@@ -1114,22 +1250,19 @@
   .data-table .cell-content .priority-stacked {
     display: inline-flex;
   }
-}
 
-/* 700px: Minimal table - only identity, status, actions */
-@media (max-width: 700px) {
-  .data-table th,
-  .data-table td {
-    padding: var(--space-0-5) var(--space-1);
-  }
-
-  /* Compact actions */
-  .data-table .actions-cell .table-actions {
-    gap: var(--space-0-5);
+  /* Show status stacked in primary cell */
+  .data-table .cell-content .status-stacked {
+    display: block;
   }
 }
 
+/* 700px: Card layout — each table row becomes a stacked card
+   IMPORTANT: This MUST override all progressive column-hiding rules above.
+   Those rules hide cells at 800px/1000px/1100px with high-specificity selectors,
+   but in card mode ALL cells should be visible as label:value rows. */
 @media (--mid-mobile) {
+  /* Convert table to block layout — card-per-row */
   .data-table,
   .data-table thead,
   .data-table tbody,
@@ -1148,59 +1281,237 @@
     display: none;
   }
 
-  .data-table tr {
-    margin-bottom: var(--table-mobile-card-gap);
-    border-bottom: var(--space-px) solid var(--portal-border-color);
-    border-bottom-width: calc(var(--space-px) * 2);
+  /* Un-hide ALL cells that progressive column hiding above set to display:none.
+     Uses the same :is() selector pattern at equal specificity but comes LATER in
+     the cascade, so it wins. This ensures every cell is visible as a card row. */
+  .data-table :is(
+    .source-col, .source-cell,
+    .timeline-col, .timeline-cell,
+    .budget-col, .budget-cell,
+    .date-col, .date-cell,
+    .created-col, .created-cell,
+    .assigned-col, .assigned-cell,
+    .company-col, .company-cell,
+    .project-col, .project-cell,
+    .type-col, .type-cell,
+    .projects-col, .projects-cell,
+    .count-col, .count-cell,
+    .category-col, .category-cell,
+    .amount-col, .amount-cell,
+    .priority-col, .priority-cell,
+    .invoice-col, .invoice-cell,
+    .status-col, .status-cell
+  ) {
+    display: flex;
   }
 
-  .data-table td {
-    position: relative;
-    padding-left: 50%;
-    min-height: 2.5em;
-    box-sizing: border-box;
-  }
-
-  .data-table td:before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: var(--table-mobile-label-width);
-    padding-left: var(--table-mobile-label-padding);
-    white-space: nowrap;
-    font-weight: var(--font-weight-semibold);
-    content: attr(data-label);
-    box-sizing: border-box;
-  }
-}
-
-@media (--small-mobile) {
+  /* Each row becomes a card */
   .data-table tbody tr {
-    background: var(--portal-bg-medium);
+    background: var(--portal-bg-medium, rgba(255, 255, 255, 0.03));
     padding: var(--table-mobile-card-padding);
     margin-bottom: var(--table-mobile-card-gap);
-    border: none;
+    border: var(--border-width) solid var(--portal-border-color);
+    border-radius: var(--radius-sm, 4px);
   }
 
   .data-table tbody tr:last-child {
     margin-bottom: 0;
   }
 
-  .data-table tbody td {
-    display: block;
+  /* Each cell: label on left, value on right */
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: var(--space-1) 0;
-    background: transparent;
-    text-align: left;
+    min-height: auto;
     border: none;
     word-break: break-word;
     max-width: 100%;
+    white-space: normal;
   }
 
-  .data-table tbody td:first-child,
-  .data-table tbody td:last-child {
-    padding-left: 0;
-    padding-right: 0;
+  /* Thin separator between cells within a card */
+  .data-table td + td {
+    border-top: 1px solid var(--portal-border-color);
   }
+
+  /* Label pseudo-element */
+  .data-table td:before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    margin-right: var(--space-2);
+    color: var(--table-header-color);
+    font-size: var(--table-header-font-size);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--table-header-letter-spacing);
+    white-space: nowrap;
+  }
+
+  /* Hide ALL stacked info in card mode — each cell has its own row now */
+  .data-table .cell-content .source-stacked,
+  .data-table .cell-content .company-stacked,
+  .data-table .cell-content .type-stacked,
+  .data-table .cell-content .date-stacked,
+  .data-table .cell-content .assigned-stacked,
+  .data-table .cell-content .count-stacked,
+  .data-table .cell-content .target-stacked,
+  .data-table .cell-content .project-stacked,
+  .data-table .cell-content .trigger-stacked,
+  .data-table .cell-content .category-stacked,
+  .data-table .cell-content .budget-stacked,
+  .data-table .cell-content .invoice-stacked,
+  .data-table .cell-content .amount-stacked,
+  .data-table .cell-content .priority-stacked,
+  .data-table .cell-content .status-stacked,
+  .data-table .cell-content .timeline-stacked,
+  .data-table .cell-content .last-active-stacked,
+  .data-table .cell-content .type-budget-stacked,
+  .data-table .identity-cell .identity-company {
+    display: none;
+  }
+
+  /* Also hide stacked elements NOT inside .cell-content (direct children of td) */
+  .data-table .timeline-stacked,
+  .data-table .last-active-stacked,
+  .data-table .type-budget-stacked {
+    display: none;
+  }
+
+  /* Hide actions column label and style as footer */
+  .data-table td.actions-cell {
+    justify-content: flex-end;
+    border-top: var(--border-width) solid var(--portal-border-color);
+    margin-top: var(--space-0-5);
+    padding-top: var(--space-1-5);
+  }
+
+  .data-table td.actions-cell:before {
+    display: none;
+  }
+
+  /* Compact actions */
+  .data-table .actions-cell .table-actions {
+    gap: var(--space-0-5);
+  }
+
+  /* CSS fallback labels for common column classes (when data-label not set).
+     Both -cell and -col suffixes are supported since admin tables use either. */
+  .data-table td.name-cell:not([data-label]):before,
+  .data-table td.name-col:not([data-label]):before { content: "Name"; }
+  .data-table td.primary-cell:not([data-label]):before { content: "Name"; }
+  .data-table td.invoice-cell:not([data-label]):before,
+  .data-table td.invoice-col:not([data-label]):before { content: "Invoice"; }
+  .data-table td.project-cell:not([data-label]):before,
+  .data-table td.project-col:not([data-label]):before { content: "Project"; }
+  .data-table td.client-cell:not([data-label]):before,
+  .data-table td.client-col:not([data-label]):before { content: "Client"; }
+  .data-table td.date-cell:not([data-label]):before,
+  .data-table td.date-col:not([data-label]):before { content: "Date"; }
+  .data-table td.amount-cell:not([data-label]):before,
+  .data-table td.amount-col:not([data-label]):before { content: "Amount"; }
+  .data-table td.status-cell:not([data-label]):before,
+  .data-table td.status-col:not([data-label]):before { content: "Status"; }
+  .data-table td.email-cell:not([data-label]):before,
+  .data-table td.email-col:not([data-label]):before { content: "Email"; }
+  .data-table td.phone-cell:not([data-label]):before,
+  .data-table td.phone-col:not([data-label]):before { content: "Phone"; }
+  .data-table td.type-cell:not([data-label]):before,
+  .data-table td.type-col:not([data-label]):before { content: "Type"; }
+  .data-table td.size-cell:not([data-label]):before,
+  .data-table td.size-col:not([data-label]):before { content: "Size"; }
+  .data-table td.priority-cell:not([data-label]):before,
+  .data-table td.priority-col:not([data-label]):before { content: "Priority"; }
+  .data-table td.count-cell:not([data-label]):before,
+  .data-table td.count-col:not([data-label]):before { content: "Count"; }
+  .data-table td.source-cell:not([data-label]):before,
+  .data-table td.source-col:not([data-label]):before { content: "Source"; }
+  .data-table td.assigned-cell:not([data-label]):before,
+  .data-table td.assigned-col:not([data-label]):before { content: "Assigned"; }
+  .data-table td.company-cell:not([data-label]):before,
+  .data-table td.company-col:not([data-label]):before { content: "Company"; }
+  .data-table td.budget-cell:not([data-label]):before,
+  .data-table td.budget-col:not([data-label]):before { content: "Budget"; }
+  .data-table td.timeline-cell:not([data-label]):before,
+  .data-table td.timeline-col:not([data-label]):before { content: "Timeline"; }
+  .data-table td.description-cell:not([data-label]):before,
+  .data-table td.description-col:not([data-label]):before { content: "Description"; }
+  .data-table td.category-cell:not([data-label]):before,
+  .data-table td.category-col:not([data-label]):before { content: "Category"; }
+  .data-table td.title-cell:not([data-label]):before,
+  .data-table td.title-col:not([data-label]):before { content: "Title"; }
+
+  /* Hide bulk-select cells on mobile card layout */
+  .data-table td.bulk-select-cell,
+  .data-table th.checkbox-col {
+    display: none;
+  }
+}
+
+/* 479px: Tighter card spacing for very small screens */
+@media (--small-mobile) {
+  .data-table tbody tr {
+    padding: var(--space-1-5) var(--space-2);
+  }
+
+  .data-table td {
+    font-size: var(--font-size-xs);
+  }
+
+  .data-table td:before {
+    font-size: calc(var(--font-size-xs) - 1px);
+  }
+}
+
+/* =====================================================
+   PROGRESSIVE ENHANCEMENT
+   Hide JS-only elements until TableManager initializes.
+   The data-initialized attribute is set to "true" by TableManager.init().
+   ===================================================== */
+
+[data-table-id]:not([data-initialized="true"]) .bulk-select-cell {
+  display: none;
+}
+
+[data-table-id]:not([data-initialized="true"]) [data-action="search"] {
+  display: none;
+}
+
+[data-table-id]:not([data-initialized="true"]) [data-action="export"] {
+  display: none;
+}
+
+[data-table-id]:not([data-initialized="true"]) [data-action="filter"] {
+  display: none;
+}
+
+/* Row hidden state (set by TableFilter/TablePaginator) */
+.table-row.row-hidden {
+  display: none;
+}
+
+/* Cell secondary text (below primary text in name columns) */
+.cell-secondary {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+  margin-top: 2px;
+}
+
+/* Cell name styling */
+.cell-name {
+  font-weight: var(--font-weight-medium, 500);
+}
+
+/* Cell link styling */
+.cell-link {
+  color: var(--portal-text-link, var(--app-color-primary));
+  text-decoration: none;
+}
+
+.cell-link:hover {
+  text-decoration: underline;
 }
 
 /* Small mobile layout overrides - utilities layer for override */
@@ -1227,4 +1538,290 @@
       margin-top: var(--space-2);
     }
   }
+}
+
+/* ==============================================
+   EJS TABLE HEADER PARTIAL CLASSES
+   Used by server/views/partials/table/table-header.ejs
+   ============================================== */
+
+/* Header left section - title + stats */
+.table-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Table title inside EJS header */
+.table-title {
+  margin: 0;
+  color: var(--portal-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  white-space: nowrap;
+}
+
+/* Stats badge in EJS header */
+.table-stats-badge {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+}
+
+/* Header right section - search, filters, actions */
+.table-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Search input in EJS header */
+.table-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.table-search-input {
+  width: 180px;
+  height: var(--space-5);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  background: transparent;
+  border: var(--border-width) solid var(--portal-border-color);
+  color: var(--portal-text-light);
+  transition: border-color var(--transition-fast);
+}
+
+.table-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.table-search-input::placeholder {
+  color: var(--portal-text-muted);
+}
+
+/* Filter select in EJS header */
+.table-filter-select {
+  height: var(--space-5);
+  padding: 0 var(--space-4) 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  background: transparent;
+  border: var(--border-width) solid var(--portal-border-color);
+  color: var(--portal-text-light);
+  cursor: pointer;
+  appearance: none;
+}
+
+/* Button label text */
+.btn-label {
+  font-size: var(--font-size-sm);
+}
+
+/* Bulk selected count text */
+.bulk-selected-count {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  white-space: nowrap;
+}
+
+/* Bulk actions toolbar */
+.bulk-actions-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--table-cell-padding-x, 14px);
+  border-bottom: var(--portal-border);
+  background: var(--portal-bg-medium);
+}
+
+/* ==============================================
+   EJS TABLE EMPTY STATE
+   Used by server/views/partials/table/table.ejs
+   ============================================== */
+
+.table-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 20px);
+  padding: clamp(var(--space-4), 5vw, var(--space-8));
+  text-align: center;
+  color: var(--portal-text-primary, inherit);
+}
+
+.empty-state-text {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-primary, inherit);
+  margin: 0;
+}
+
+/* ==============================================
+   EJS SORT BUTTON (alias for sort-header-btn)
+   Used by server/views/partials/table/table-body.ejs
+   ============================================== */
+
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sort-button:hover {
+  color: var(--portal-text-light);
+}
+
+/* Sort indicator in EJS sort buttons */
+.sort-indicator {
+  font-size: var(--table-sort-indicator-size);
+  color: var(--color-primary);
+}
+
+/* ==============================================
+   EJS PAGINATION CLASSES
+   Used by server/views/partials/table/table-pagination.ejs
+   ============================================== */
+
+.pagination-showing {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+.pagination-current {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  white-space: nowrap;
+  min-width: max-content;
+}
+
+/* ==============================================
+   EJS ROW CLASSES
+   Used by server/views/partials/table/table-row.ejs
+   ============================================== */
+
+/* Select column (alias for checkbox-col) */
+@layer utilities {
+  .data-table .select-col {
+    width: var(--table-checkbox-width);
+    min-width: var(--table-checkbox-width);
+    max-width: var(--table-checkbox-width);
+    text-align: center;
+    padding-left: var(--table-outer-padding);
+    padding-right: var(--space-1);
+  }
+}
+
+/* Row checkbox */
+.row-checkbox {
+  cursor: pointer;
+}
+
+/* Lucide SVG icon sizing for EJS templates */
+.lucide-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ==============================================
+   TABLE CELL FACTORY CLASSES
+   Used by createTableCells.tsx factory components
+   ============================================== */
+
+/* Table cell wrapper - inline display for cell content */
+.table-cell-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap, 0.25rem);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Specific cell type wrappers - contextual styling */
+.copy-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.copy-cell-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.copy-cell-button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-3, 24px);
+  height: var(--space-3, 24px);
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+/* Show copy button on row hover */
+.data-table tbody tr:hover .copy-cell-button,
+.copy-cell:hover .copy-cell-button {
+  opacity: 1;
+}
+
+.copy-cell-button:hover {
+  color: var(--color-primary);
+}
+
+.copy-cell-icon {
+  width: var(--table-icon-size);
+  height: var(--table-icon-size);
+}
+
+.copy-cell-icon--success {
+  color: var(--status-completed, var(--app-color-success));
+}
+
+/* Count label - text after number */
+.count-label {
+  color: var(--portal-text-muted);
+  font-size: inherit;
+}
+
+/* Cell type wrappers - no special styling needed, just for targeting */
+.currency-cell,
+.file-size-cell,
+.text-cell,
+.date-cell,
+.phone-cell,
+.email-cell,
+.link-cell,
+.count-cell,
+.contact-cell {
+  /* Inherit table cell styling */
 }

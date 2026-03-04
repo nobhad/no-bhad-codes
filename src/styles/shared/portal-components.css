@@ -16,13 +16,17 @@
    Match border thickness (2px) for visual consistency
    ============================================ */
 
-/* Global SVG stroke-width - matches border thickness
-   Use !important to override Lucide's inline stroke-width attributes */
-[data-page="admin"] svg,
-[data-page="client-portal"] svg,
-[data-page="admin"] .lucide,
-[data-page="client-portal"] .lucide {
+/* Global SVG stroke-width and color - class-controlled via CSS variables.
+   Applied globally to override Lucide's inline stroke-width="2" attribute.
+   Color inherits from parent via currentColor (set by icon class or parent). */
+svg.lucide,
+.icon-xs,
+.icon-sm,
+.icon-md,
+.icon-lg,
+.icon-xl {
   stroke-width: var(--svg-stroke-width, 2.5) !important;
+  color: currentColor;
 }
 
 /* ============================================
@@ -33,7 +37,7 @@
   display: flex;
   flex-direction: row;
   overflow-x: auto;
-  padding: var(--space-2) 0;
+  padding: 0;
   min-height: 400px;
   width: 100%;
 }
@@ -42,11 +46,15 @@
   flex: 1 1 0;
   min-width: 200px;
   background: transparent;
-  border: var(--portal-border);
+  border-left: var(--border-width) solid var(--portal-border-color);
   display: flex;
   flex-direction: column;
   max-height: 600px;
   box-shadow: none;
+}
+
+.kanban-column:first-child {
+  border-left: none;
 }
 
 .kanban-column-header {
@@ -55,7 +63,7 @@
   justify-content: space-between;
   align-items: center;
   background: transparent;
-  border-bottom: var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
   border-left: var(--border-width-thick) solid transparent;
   padding-left: calc(var(--space-3) - var(--border-width-thick));
 }
@@ -81,21 +89,21 @@
 }
 
 .kanban-column-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   color: var(--portal-text-light);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .kanban-column-count {
   background: transparent;
-  border: var(--portal-border);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
-  font-weight: 600;
-  min-width: 24px;
-  height: 24px;
+  font-weight: var(--font-weight-semibold);
+  min-width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,10 +125,10 @@
 
 .kanban-card {
   background: transparent;
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   cursor: grab;
   transition: border-color var(--transition-fast) ease;
-  border: var(--portal-border);
+  border: var(--border-width) solid var(--portal-border-color);
   box-shadow: none;
 }
 
@@ -138,10 +146,10 @@
 /* Task type label */
 .kanban-card-type {
   font-size: var(--label-font-size);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   margin-bottom: var(--space-1);
   display: flex;
   align-items: center;
@@ -149,17 +157,17 @@
 }
 
 .kanban-card-type svg {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
   opacity: 0.7;
 }
 
 .kanban-card-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-base);
   color: var(--portal-text-light);
   margin-bottom: var(--space-1);
-  line-height: 1.3;
+  line-height: var(--line-height-snug);
 }
 
 .kanban-card-subtitle {
@@ -174,7 +182,7 @@
   justify-content: space-between;
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: var(--portal-border);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 .kanban-card-badges {
@@ -185,11 +193,11 @@
 
 .kanban-badge {
   font-size: var(--label-font-size);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   padding: var(--space-0-5) var(--space-1-5);
   color: var(--color-white);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 @media (--mobile) {
@@ -240,7 +248,7 @@
   padding: var(--space-1) var(--space-2);
   border-radius: var(--portal-radius-sm);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .tag-remove {
@@ -386,7 +394,7 @@
 
 .timeline-event-title {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-primary);
 }
 
@@ -449,7 +457,7 @@
 
 .bar-chart-value {
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
   min-width: 40px;
 }
@@ -490,7 +498,7 @@
 
 .pie-chart-legend-value {
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-primary);
 }
 
@@ -525,7 +533,7 @@
   align-items: center;
   gap: var(--icon-gap-xs);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kpi-card-change.positive {
@@ -889,10 +897,6 @@ a.text-danger:hover {
   opacity: 0.8;
 }
 
-.text-muted {
-  color: var(--portal-text-muted);
-}
-
 .text-secondary {
   color: var(--portal-text-secondary);
 }
@@ -914,16 +918,16 @@ a.text-danger:hover {
    ===================================================== */
 
 .font-semibold {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .font-medium {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .font-bold {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 .font-normal {
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 /* =====================================================
@@ -1070,7 +1074,7 @@ a.text-danger:hover {
    ===================================================== */
 
 /* Info icons */
-[data-page="admin"] .info-icon-wrapper {
+.portal .info-icon-wrapper {
   display: inline-block;
   position: relative;
   vertical-align: middle;
@@ -1078,30 +1082,30 @@ a.text-danger:hover {
   cursor: default;
 }
 
-[data-page="admin"] .info-icon {
+.portal .info-icon {
   display: inline-block;
   vertical-align: middle;
   opacity: 0.6;
   transition: opacity var(--transition-fast);
 }
 
-[data-page="admin"] .info-icon-wrapper:hover .info-icon {
+.portal .info-icon-wrapper:hover .info-icon {
   opacity: 1;
 }
 
-[data-page="admin"] .vital-card h4 {
+.portal .vital-card h4 {
   display: flex;
   align-items: center;
   gap: var(--space-0-5);
 }
 
 /* Tooltip container - elements with data-tooltip attribute */
-[data-page="admin"] [data-tooltip] {
+.portal [data-tooltip] {
   position: relative;
 }
 
 /* Tooltip pseudo-element */
-[data-page="admin"] [data-tooltip]::after {
+.portal [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 8px);
@@ -1121,8 +1125,8 @@ a.text-danger:hover {
     sans-serif
   );
   font-size: var(--font-size-xs);
-  font-weight: 400;
-  line-height: 1.4;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-snug);
   text-transform: none;
   letter-spacing: normal;
   white-space: pre-line;
@@ -1140,13 +1144,13 @@ a.text-danger:hover {
 }
 
 /* Show tooltip on hover */
-[data-page="admin"] [data-tooltip]:hover::after {
+.portal [data-tooltip]:hover::after {
   opacity: 1;
   visibility: visible;
 }
 
 /* Tooltip arrow */
-[data-page="admin"] [data-tooltip]::before {
+.portal [data-tooltip]::before {
   content: "";
   position: absolute;
   bottom: calc(100% + 2px);
@@ -1163,22 +1167,22 @@ a.text-danger:hover {
     visibility var(--transition-fast);
 }
 
-[data-page="admin"] [data-tooltip]:hover::before {
+.portal [data-tooltip]:hover::before {
   opacity: 1;
   visibility: visible;
 }
 
 /* Table cell tooltips - avoid overflow */
-[data-page="admin"] td[data-tooltip]::after,
-[data-page="admin"] .table-cell[data-tooltip]::after {
+.portal td[data-tooltip]::after,
+.portal .table-cell[data-tooltip]::after {
   left: 0;
   transform: none;
   white-space: normal;
   max-width: 250px;
 }
 
-[data-page="admin"] td[data-tooltip]::before,
-[data-page="admin"] .table-cell[data-tooltip]::before {
+.portal td[data-tooltip]::before,
+.portal .table-cell[data-tooltip]::before {
   left: 20px;
   transform: none;
 }
@@ -1318,9 +1322,9 @@ a.text-danger:hover {
 }
 
 .error-boundary-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
   margin: 0;
   text-transform: none;
@@ -1356,9 +1360,9 @@ a.text-danger:hover {
   background: transparent;
   border: var(--border-width) solid var(--portal-text-light);
   color: var(--portal-text-light);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
@@ -1386,9 +1390,8 @@ a.text-danger:hover {
   justify-content: center;
   gap: var(--space-3);
   padding: var(--space-16) 0;
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm, 14px);
-  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-base);
 }
 
 .tw-loading {
@@ -1397,18 +1400,16 @@ a.text-danger:hover {
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-8) 0;
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm, 14px);
-  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-base);
 }
 
 .tw-error {
   padding: var(--space-4);
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm, 14px);
-  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-primary);
+  font-size: var(--font-size-base);
 }
 
 /* Progress bars */
@@ -1430,7 +1431,9 @@ a.text-danger:hover {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
+  width: 100%;
   background: transparent;
+  border: none;
   border-bottom: var(--border-width) solid var(--portal-border-color);
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -1476,7 +1479,7 @@ a.text-danger:hover {
   font-size: var(--btn-portal-font-size, 16px);
   font-family: var(--font-family-mono, monospace);
   color: var(--portal-text-light);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 /* Dropdown menus */
@@ -1512,9 +1515,9 @@ a.text-danger:hover {
   gap: var(--space-1-5);
   padding: var(--space-0-5) var(--space-2);
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   background: transparent;
   border: var(--border-width) solid currentColor;
   border-radius: 0;
@@ -1605,7 +1608,7 @@ a.text-danger:hover {
 }
 
 .status-service-name {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
 }
 
@@ -1672,7 +1675,7 @@ a.text-danger:hover {
 }
 
 .status-incident-title {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
 }
 
@@ -1819,7 +1822,7 @@ a.text-danger:hover {
   width: 1.5rem;
   text-align: center;
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .perf-member-info {
@@ -1827,7 +1830,7 @@ a.text-danger:hover {
 }
 
 .perf-member-name {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
 }
 
@@ -1840,7 +1843,7 @@ a.text-danger:hover {
 }
 
 .perf-member-revenue {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
 }
 
@@ -1863,7 +1866,7 @@ a.text-danger:hover {
 }
 
 .perf-project-name {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
 }
 
@@ -1928,7 +1931,7 @@ a.text-danger:hover {
 
 .analytics-query-name {
   font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .analytics-query-date {
@@ -2129,12 +2132,12 @@ a.text-danger:hover {
 /* Text with font weight */
 .tasks-text-semibold {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .tasks-text-medium {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Form heading */
@@ -2243,92 +2246,51 @@ a.text-danger:hover {
    QUESTIONNAIRE VIEW COMPONENT
    ============================================ */
 
-/* Status colors */
-.qview-status-completed {
-  color: var(--status-completed);
-}
+/* ============================================
+   SHARED PORTAL CARD LAYOUT CLASSES
+   ============================================ */
 
-.qview-status-active {
-  color: var(--status-active);
-}
-
-.qview-status-cancelled {
-  color: var(--status-cancelled);
-}
-
-/* Section without gap */
-.qview-no-gap {
-  gap: 0;
-}
-
-/* Card layout */
-.qview-card {
+/* Card header — flex row with title+status */
+.portal-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: 0.5rem;
 }
 
-/* Left section */
-.qview-left {
+/* Title group — icon + name, truncatable */
+.portal-card-title-group {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
 }
 
-/* Icon container */
-.qview-icon {
-  flex-shrink: 0;
-}
-
-/* Info column */
-.qview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: 0;
-}
-
-/* Title text */
-.qview-title {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-}
-
-/* Small text (10px) */
-.qview-text-xs {
-  font-size: var(--font-size-2xs);
-}
-
-/* Progress section */
-.qview-progress-section {
+/* Status group — badges + chevron, never truncated */
+.portal-card-status-group {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
 }
 
-/* Progress track fixed width */
-.qview-progress-track {
-  width: 64px;
+/* Description text below header */
+.portal-card-description {
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-xs);
 }
 
-/* Right section */
-.qview-right {
+/* Footer — date + actions */
+.portal-card-footer {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  flex-shrink: 0;
+  justify-content: space-between;
 }
 
-/* Status column */
-.qview-status-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.125rem;
+/* Progress section with bar */
+.portal-card-progress {
+  margin-bottom: 0.5rem;
 }
 
 /* ============================================
@@ -2527,19 +2489,19 @@ a.text-danger:hover {
    PORTAL MESSAGES COMPONENT
    ============================================ */
 
-/* Thread list item border */
-.msg-thread-item {
-  border-bottom: var(--border-width) solid var(--portal-border-subtle);
+/* Thread list item - border handled by .tw-list-item base class */
+.message-thread-item {
+  /* No additional border - .tw-list-item provides border-bottom */
 }
 
 /* Thread content flex */
-.msg-thread-content {
+.message-thread-content {
   flex: 1;
   min-width: 0;
 }
 
 /* Thread header/footer row */
-.msg-thread-row {
+.message-thread-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2547,7 +2509,7 @@ a.text-danger:hover {
 }
 
 /* Thread preview row with top margin */
-.msg-thread-preview-row {
+.message-thread-preview-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2556,19 +2518,19 @@ a.text-danger:hover {
 }
 
 /* Thread list no gap */
-.msg-thread-list {
+.message-thread-list {
   gap: 0;
 }
 
 /* Header flex layout */
-.msg-header-flex {
+.message-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Time text no shrink */
-.msg-time-noshrink {
+/* Timestamp no shrink */
+.message-timestamp {
   flex-shrink: 0;
 }
 
@@ -2652,61 +2614,7 @@ a.text-danger:hover {
    ============================================ */
 
 /* Card header row */
-.projlist-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Name container */
-.projlist-name-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-/* Project name text */
-.projlist-name {
-  font-size: var(--font-size-sm);
-  font-weight: 400;
-}
-
-/* Status container */
-.projlist-status-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-/* Description */
-.projlist-desc {
-  font-size: var(--font-size-xs);
-  margin-bottom: 0.5rem;
-}
-
-/* Progress section */
-.projlist-progress {
-  margin-bottom: 0.5rem;
-}
-
-/* Progress header row */
-.projlist-progress-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
-}
-
-/* Footer row */
-.projlist-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+/* projlist-* classes removed — migrated to portal-card-* shared classes */
 
 /* ============================================
    INVOICES TAB COMPONENT
@@ -2719,7 +2627,7 @@ a.text-danger:hover {
 
 /* Bold amount text */
 .invtab-amount-bold {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Filter select */
@@ -2746,7 +2654,7 @@ a.text-danger:hover {
 /* Cell bold text */
 .invtab-cell-bold {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* ============================================
@@ -2775,91 +2683,10 @@ a.text-danger:hover {
    ============================================ */
 
 /* Header row */
-.adhoc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-/* Description text */
-.adhoc-desc {
-  font-size: var(--label-font-size);
-  margin-top: 0.125rem;
-}
-
-/* Button with icon */
-.adhoc-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-/* Modal backdrop */
-.adhoc-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--portal-bg-overlay);
-}
-
-/* Modal content */
-.adhoc-modal-content {
-  width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
-  overflow: auto;
-}
-
-/* Modal header */
-.adhoc-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+/* adhoc-* classes removed — migrated to portal-card-header + PortalModal */
 
 /* ============================================
    PORTAL APPROVALS COMPONENT
    ============================================ */
 
-/* Header row */
-.approvals-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-/* Filter container */
-.approvals-filter {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Tab list no border */
-.approvals-tabs {
-  border-bottom: none;
-}
-
-/* Tab button compact */
-.approvals-tab {
-  padding: 0.25rem 0.5rem;
-  font-size: var(--font-size-xs);
-  border-bottom: none;
-}
-
-/* Count badge */
-.approvals-count {
-  margin-left: 0.25rem;
-  opacity: 0.6;
-}
-
-/* Summary divider */
-.approvals-summary {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
+/* approvals-* classes removed — migrated to portal-card-header shared classes */

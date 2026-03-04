@@ -92,9 +92,9 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 }
 
 .portal-global-header .header-logo-text {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
@@ -106,8 +106,8 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   align-items: center;
   text-decoration: none;
   color: var(--portal-text-light);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
-  font-weight: 400;
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-regular);
   font-size: var(--font-size-lg);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title);
@@ -147,9 +147,9 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 
 /* Page title in header */
 .portal-global-header .header-page-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-light);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -197,7 +197,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 
 .portal-global-header .breadcrumb-current {
   color: var(--portal-text-light);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .portal-global-header .breadcrumb-separator {
@@ -317,11 +317,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   gap: 0;
 }
 
+/* Header subtabs container - row layout for mobile toggle + subtab groups */
+.portal .portal-header-subtabs {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 /* Header subtabs - align with table content (14px padding to match table cells) */
+/* NOTE: margin-top is NOT set here — it's on the visible subtab group show-rules
+   so that solo-tab pages (without subtabs) don't get a double gap. */
 .portal .portal-header-subtabs .header-subtabs {
   display: flex;
   align-items: center;
-  margin-top: var(--portal-nav-gap, 16px);
   margin-left: 0;
   /* Align with table cell padding for visual consistency */
   padding-left: var(--table-cell-padding-x, 14px);
@@ -344,13 +352,18 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 [data-page="client-portal"][data-active-group="work"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="work"],
 [data-page="client-portal"][data-active-group="docs"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="docs"],
 [data-page="client-portal"][data-active-group="support"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="support"],
+[data-page="client-portal"][data-active-tab="settings"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="settings"],
 [data-page="admin"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
+[data-page="client-portal"][data-active-tab="project-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="project-detail"],
 [data-page="admin"][data-active-tab="client-detail"] .portal .portal-header-subtabs .header-subtabs .header-subtab-group[data-for-tab="client-detail"] {
   display: flex;
   gap: var(--space-1);
   align-items: center;
+  /* Gap only appears when subtabs are visible — prevents double spacing on solo tabs */
+  margin-top: var(--portal-nav-gap, 16px);
+  /* Override .portal-subtabs base margin-bottom — .tab-content.active handles the gap below */
+  margin-bottom: 0;
   padding: 0;
-  margin: 0;
   background: transparent;
   border: none;
   border-bottom: none;
@@ -434,15 +447,18 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   flex-direction: column;
   gap: 0;
   width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
-/* Tab content - UNIVERSAL layout for all tabs
-   NOTE: Use display: block, NOT flex with gap.
-   Gap on tab-content creates huge spacing between header subtabs and content.
-   Internal sections should control their own spacing. */
+/* Tab content - UNIVERSAL layout for all tabs.
+   Uses display:block so content flows naturally top-to-bottom.
+   Child components (overview-tables, table-layout, messaging-panel) manage their own
+   internal layout (flex, grid, etc.) independently.
+   margin-top uses --portal-section-gap for spacing below subtabs. */
 .portal .tab-content.active {
   display: block;
-  margin-top: var(--portal-nav-gap);
+  margin-top: var(--portal-section-gap);
 }
 
 /* Adjust dashboard container when using new layout */
@@ -525,10 +541,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Section title - secondary heading within a page */
 .portal .portal-section-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  font-weight: 400;
-  color: var(--portal-text-muted);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-primary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
   margin: 0 0 var(--space-2) 0;
@@ -554,7 +570,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Responsive: Stack on smaller screens */
-@media (max-width: 768px) {
+@media (--mobile) {
   .portal .portal-two-column {
     grid-template-columns: 1fr;
   }
@@ -585,9 +601,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-2xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-muted);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
@@ -630,7 +646,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 .portal .breadcrumb-current {
   color: var(--portal-text-light);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* =====================================================
@@ -651,9 +667,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border: none;
   border-bottom: var(--border-width) solid transparent;
   margin-bottom: -1px;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title);
   color: var(--portal-text-secondary);
@@ -707,7 +723,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   }
 }
 
-@media (max-width: 500px) {
+@media (--narrow-mobile) {
   .portal :is(.portal-grid-2, .portal-grid-3) {
     grid-template-columns: 1fr;
   }
@@ -766,7 +782,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: inline;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Collapsed toggle button */
@@ -800,9 +816,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   background: transparent;
   border: var(--portal-border);
   border-radius: var(--portal-radius-sm);
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-muted);
   letter-spacing: 0;
   text-transform: none;
@@ -858,9 +874,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   color: var(--portal-text-light);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--portal-radius-sm);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-2xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title);
   white-space: nowrap;
@@ -937,9 +953,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 .portal .sidebar-collapsed-logo::after {
   content: "NO BHAD CODES";
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-light);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title);
@@ -983,8 +999,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    Mobile drawer, tablet auto-collapse
    ===================================================== */
 
-@media (max-width: 767px) {
-  .portal .sidebar {
+@media (--mobile) {
+  /* Higher specificity than portal-sidebar.css (.portal .sidebar) to ensure
+     position: fixed wins on mobile regardless of import order */
+  .portal .portal-body .sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -996,29 +1014,31 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     min-width: 240px;
   }
 
-  .portal .sidebar.mobile-open {
+  .portal .portal-body .sidebar.mobile-open {
     transform: translateX(0);
   }
 
-  .portal .sidebar.collapsed {
+  .portal .portal-body .sidebar.collapsed {
     width: 240px;
     min-width: 240px;
   }
 
-  .portal .sidebar.collapsed .sidebar-buttons .btn {
+  .portal .portal-body .sidebar.collapsed .sidebar-buttons .btn {
     justify-content: flex-start;
     padding: var(--space-1-5) var(--space-3);
   }
 
-  .portal .sidebar.collapsed .sidebar-buttons .btn .btn-text {
+  .portal .portal-body .sidebar.collapsed .sidebar-buttons .btn .btn-text {
     display: inline;
   }
 
-  .portal .sidebar.collapsed .sidebar-shortcut {
+  .portal .portal-body .sidebar.collapsed .sidebar-shortcut {
     display: inline-flex;
   }
 
-  .portal .sidebar-overlay {
+  /* #sidebar-overlay is rendered outside .portal in the EJS template,
+     so we match by ID rather than .portal .sidebar-overlay */
+  #sidebar-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -1026,7 +1046,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     z-index: calc(var(--z-nav, 100) - 1);
   }
 
-  .portal .sidebar-overlay.open {
+  #sidebar-overlay.open {
     display: block;
   }
 
@@ -1039,7 +1059,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   }
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (--tablet-to-laptop) {
   .portal .sidebar:not(.collapsed) {
     width: 56px;
     min-width: 56px;
@@ -1066,7 +1086,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   }
 }
 
-@media (max-width: 1280px) {
+@media (--desktop-xl) {
   .portal .sidebar-collapsed-logo::after {
     display: none;
   }
@@ -1397,8 +1417,15 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4, 1rem);
+  gap: var(--portal-section-gap);
   background: transparent;
+}
+
+/* Loading/empty states inside tw-section should not stretch to fill viewport */
+.tw-section > .loading-state,
+.tw-section > .empty-state {
+  height: auto;
+  min-height: 120px;
 }
 
 .tw-panel {
@@ -1407,12 +1434,15 @@ html[data-theme="light"] .portal .funnel-value {
   padding: var(--space-4);
 }
 
+/* tw-card alias kept for migration safety */
 .tw-card {
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-4);
 }
 
+/* Clickable card variant — portal-card + card-clickable */
+.card-clickable,
 .tw-card-hover {
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
@@ -1421,6 +1451,7 @@ html[data-theme="light"] .portal .funnel-value {
   cursor: pointer;
 }
 
+.card-clickable:hover,
 .tw-card-hover:hover {
   border-color: var(--portal-text-light);
 }
@@ -1440,31 +1471,38 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* Grid layouts */
+/* 2→4 col stat summary grid */
+.stats-grid,
 .tw-grid-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4, 1rem);
+  gap: var(--portal-section-gap);
 }
 
 @media (min-width: 768px) {
+  .stats-grid,
   .tw-grid-stats {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
+/* 1→2→3 col card list grid */
+.cards-grid,
 .tw-grid-cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-4, 1rem);
+  gap: var(--portal-section-gap);
 }
 
 @media (min-width: 768px) {
+  .cards-grid,
   .tw-grid-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 1024px) {
+  .cards-grid,
   .tw-grid-cards {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -1670,38 +1708,47 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* =====================================================
-   TW-* TYPOGRAPHY CLASSES
+   PORTAL TYPOGRAPHY - GENERIC CLASSES
+   Use these names directly; tw-* aliases kept for migration only.
    ===================================================== */
+.heading,
 .tw-heading {
   font-family: var(--font-family-mono, monospace);
   color: var(--portal-text-light);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   letter-spacing: 0.025em;
 }
 
+/* Category/group label — small caps, muted */
+.section-title,
 .tw-section-title {
   font-size: var(--font-size-2xs, 11px);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--portal-text-muted);
+  margin: 0;
 }
 
+/* Uppercase filter/form label */
+.label,
 .tw-label {
   font-size: var(--font-size-xs, 12px);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
 }
 
+/* Inline form field label — field-label-spacing.css is canonical; this aligns */
 .tw-field-label {
   font-size: var(--font-size-sm, 14px);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--portal-text-secondary);
   margin-bottom: 0.25rem;
 }
 
+/* text-muted / text-primary — base/utilities.css is canonical */
 .tw-text-muted {
   color: var(--portal-text-muted) !important;
 }
@@ -1718,8 +1765,8 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-text-xl { font-size: var(--font-size-xl, 1.25rem); }
 
 /* Font weight */
-.tw-font-bold { font-weight: 700; }
-.tw-font-semibold { font-weight: 600; }
+.tw-font-bold { font-weight: var(--font-weight-bold); }
+.tw-font-semibold { font-weight: var(--font-weight-semibold); }
 .tw-font-mono { font-family: var(--font-family-mono, monospace); }
 
 /* Text alignment */
@@ -1810,6 +1857,213 @@ html[data-theme="light"] .portal .funnel-value {
   border-width: 0;
 }
 .tw-group { /* Group container for hover states */ }
+
+/* =====================================================
+   SECTION COMPONENT UTILITIES
+   For use with createSection.tsx factory components
+   ===================================================== */
+
+/* Gap utilities */
+.gap-0 { gap: 0; }
+.gap-sm { gap: var(--space-1); }
+.gap-md { gap: var(--portal-section-gap, var(--space-3)); }
+.gap-lg { gap: var(--space-4); }
+
+/* Section padding */
+.section-padding-sm { padding: var(--space-2); }
+.section-padding-md { padding: var(--space-3); }
+.section-padding-lg { padding: var(--space-4); }
+
+/* Section header */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--portal-border);
+}
+
+.section-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
+.section-icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--portal-text-secondary);
+}
+
+/* .section-title definition consolidated to TW-* TYPOGRAPHY section above */
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.section-content {
+  padding: var(--space-3);
+}
+
+/* Panel actions */
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Content stack (vertical flex) */
+.portal-content-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap, var(--space-3));
+}
+
+/* Content row (horizontal flex) */
+.portal-content-row {
+  display: flex;
+  align-items: center;
+}
+
+/* Flex alignment */
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+/* Flex justify */
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+/* Flex wrap */
+.flex-wrap { flex-wrap: wrap; }
+
+/* Grid columns */
+.portal-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.portal-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive grid */
+.grid-responsive {
+  /* Default stays as defined */
+}
+
+@media (--tablet-landscape) {
+  .grid-responsive.portal-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (--narrow-mobile) {
+  .grid-responsive:is(.portal-grid-3, .portal-grid-4) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-responsive.portal-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (--small-mobile) {
+  .grid-responsive:is(.portal-grid-2, .portal-grid-3, .portal-grid-4) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Two-column layout aside widths */
+.aside-narrow .overview-col-aside { width: 240px; }
+.aside-medium .overview-col-aside { width: 280px; }
+.aside-wide .overview-col-aside { width: 320px; }
+
+.aside-left {
+  grid-template-columns: auto 1fr;
+}
+
+/* Detail view container */
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap, var(--space-3));
+}
+
+.detail-view--compact {
+  gap: var(--space-2);
+}
+
+.detail-view--wide {
+  max-width: none;
+}
+
+/* Page header */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.page-breadcrumbs {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.page-header-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.page-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.page-title-icon {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  color: var(--color-primary);
+}
+
+.page-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.page-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-secondary);
+  margin: 0;
+  margin-top: var(--space-0-5);
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Tabs container */
+.tabs-container {
+  display: flex;
+  flex-direction: column;
+}
 
 /* GSAP animation targets */
 .gsap-fade-target {

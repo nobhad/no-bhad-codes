@@ -42,7 +42,7 @@
 .portal-tabs {
   display: flex;
   gap: var(--icon-gap);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--portal-section-gap);
   overflow: visible;
   position: relative;
   padding: 0;
@@ -124,7 +124,7 @@
 .portal-tab-panel {
   display: none;
   background: transparent;
-  padding: var(--space-1) 0;
+  padding: 0;
   position: relative;
   z-index: 2;
   margin-top: 0;
@@ -158,7 +158,7 @@
 }
 
 .tab-section-heading {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   font-weight: var(--label-font-weight, 500);
   text-transform: uppercase;
@@ -167,7 +167,7 @@
   margin: 0;
   /* Use same padding as admin-table-header for alignment */
   padding: var(--portal-section-heading-padding);
-  line-height: 1.25;
+  line-height: var(--line-height-tight);
 }
 
 /* Hide heading on first tab (overview) since it's the main content */
@@ -260,8 +260,9 @@
     padding: var(--space-2) 0;
   }
 
-  /* Mobile: tighter gap for all content panels */
-  .tab-content.active,
+  /* Mobile: tighter gap for sub-content panels */
+  /* NOTE: .tab-content.active is NOT included — its gap is 0 (set in portal-layout.css).
+     Internal sections control their own spacing. */
   .portal-tab-panel.active,
   .portal-subtab-content.active,
   .analytics-subtab-content.active,
@@ -464,7 +465,7 @@
   background: var(--portal-bg-light);
   color: var(--portal-text-secondary);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   border-radius: var(--portal-radius-full);
 }
 
@@ -484,8 +485,8 @@
 }
 
 .portal-tabs--sm .portal-tab-icon {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
 }
 
 .portal-tabs--lg .portal-tab,
@@ -554,9 +555,9 @@
 
 .portal-subtabs {
   display: flex;
-  gap: var(--space-0-5);
+  gap: var(--space-1);
   border-bottom: var(--border-width) solid var(--portal-border);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--portal-section-gap);
 }
 
 .portal-subtabs--sm {
@@ -606,8 +607,8 @@
   padding: 0 var(--space-0-25);
   background: var(--portal-bg-light);
   color: var(--portal-text-secondary);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
   border-radius: var(--portal-radius-full);
 }
 

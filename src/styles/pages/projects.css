@@ -274,7 +274,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   white-space: nowrap;
 }
 
@@ -491,10 +491,11 @@ div.page-hero-desktop {
     height: calc(100vh - var(--header-height) - var(--footer-height));
     display: grid;
     place-items: center;
-    padding: clamp(1rem, 4vw, 2rem);
+    padding: 2rem;
     width: 100%;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    overflow-y: auto;
   }
 }
 
@@ -808,6 +809,7 @@ div.page-hero-desktop {
   .projects-section {
     padding: 1rem;
     flex-direction: column;
+    align-items: stretch; /* Override flex-start so .projects-content fills full width */
     gap: 0;
   }
 
@@ -815,6 +817,21 @@ div.page-hero-desktop {
     flex-direction: column;
     gap: 0;
     padding: 0.5rem 0;
+    align-items: stretch; /* Reset flex-start so children fill full width */
+    width: 100%; /* Explicit to work around align-items: flex-start on parent */
+    max-width: 100%; /* Override 90vw cap so content fills full padding box */
+  }
+
+  /* Force single-column layout on mobile — prevents any tablet row rule bleed */
+  .projects-flex-row {
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+  }
+
+  .projects-list-column {
+    width: 100%;
+    flex-shrink: 0; /* Don't let it shrink below its natural width */
   }
 
   .projects-section h2 {
@@ -827,7 +844,7 @@ div.page-hero-desktop {
   }
 
   .card-container {
-    height: 70px;
+    height: 80px;
   }
 
   .project-card-title svg {
@@ -879,7 +896,7 @@ div.page-hero-desktop {
 /* Mobile: match about section h2 size from mobile/layout.css */
 @media (--mobile) {
   section.projects-section h2 {
-    font-size: clamp(2.5rem, 10vw, 4rem);
+    font-size: 2.5rem;
     font-family: var(--font-family-acme);
     font-weight: 700;
     text-transform: uppercase;
@@ -888,7 +905,7 @@ div.page-hero-desktop {
 
 @media (--small-mobile) {
   section.projects-section h2 {
-    font-size: clamp(2.5rem, 10vw, 4rem);
+    font-size: 2rem;
   }
 
   .projects-content {
@@ -897,7 +914,7 @@ div.page-hero-desktop {
   }
 
   .card-container {
-    height: 60px;
+    height: 70px;
   }
 
   .project-card-title svg {
@@ -910,7 +927,7 @@ div.page-hero-desktop {
   }
 
   .card-category {
-    display: none; /* Hide category on very small screens */
+    font-size: var(--font-size-xs);
   }
 
   .wip-sign-container {
@@ -964,7 +981,7 @@ div.page-hero-desktop {
 
 /* Portfolio heading */
 .portfolio-section h2 {
-  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-size: 5rem;
   text-align: center;
   margin: 0;
   flex-shrink: 0;
@@ -985,13 +1002,14 @@ div.page-hero-desktop {
   }
 
   .portfolio-section h2 {
+    font-size: 3rem;
     text-align: left;
   }
 }
 
 @media (--small-mobile) {
   .portfolio-section h2 {
-    font-size: clamp(2rem, 10vw, 3rem);
+    font-size: 2.5rem;
   }
 
   .portfolio-content {

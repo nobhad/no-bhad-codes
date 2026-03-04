@@ -107,61 +107,63 @@ html:has(body.admin-logged-in[data-page="admin"]) {
 /* ============================================
  * ADMIN LIGHT MODE - Direct overrides
  * DISCOTHÈQUE: Black text, black borders on white
- * Uses design tokens - DO NOT hardcode hex values here
+ * IMPORTANT: Use explicit colors, not portal-text-* vars
+ * (portal-text-dark in light mode = white, which is backwards)
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"] {
-  background-color: var(--color-light-bg);
-  color: var(--portal-text-dark);
+  background-color: #ffffff;
+  color: #000000;
 
-  /* Portal text colors - ALL BLACK (using design tokens) */
-  --portal-text-light: var(--portal-text-dark);
-  --portal-text-primary: var(--portal-text-dark);
-  --portal-text-secondary: var(--portal-text-dark);
-  --portal-text-muted: var(--portal-text-dark);
+  /* Portal text colors - ALL BLACK */
+  --portal-text-light: #000000;
+  --portal-text-primary: #000000;
+  --portal-text-secondary: #000000;
+  --portal-text-muted: #333333;
+  --portal-text-dark: #ffffff; /* For dark surfaces in light mode */
 
   /* Generic text colors - ALL BLACK */
-  --color-dark: var(--portal-text-dark);
-  --color-white: var(--color-light-bg);
-  --color-text-primary: var(--portal-text-dark);
-  --color-text-secondary: var(--portal-text-dark);
-  --color-text-tertiary: var(--portal-text-dark);
+  --color-dark: #000000;
+  --color-white: #ffffff;
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+  --color-text-tertiary: #333333;
 
-  /* Gray scale - ALL BLACK for text consistency */
-  --color-gray-100: var(--portal-text-dark);
-  --color-gray-200: var(--portal-text-dark);
-  --color-gray-300: var(--portal-text-dark);
-  --color-gray-400: var(--portal-text-dark);
-  --color-gray-500: var(--portal-text-dark);
-  --color-neutral-400: var(--portal-text-dark);
-  --color-neutral-500: var(--portal-text-dark);
-  --color-neutral-600: var(--portal-text-dark);
-  --color-neutral-700: var(--portal-text-dark);
-  --color-neutral-800: var(--portal-text-dark);
-  --color-neutral-900: var(--portal-text-dark);
+  /* Gray scale - for text use black, for backgrounds use grays */
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d5d5d5;
+  --color-gray-400: #c5c5c5;
+  --color-gray-500: #b5b5b5;
+  --color-neutral-400: #000000;
+  --color-neutral-500: #000000;
+  --color-neutral-600: #000000;
+  --color-neutral-700: #000000;
+  --color-neutral-800: #000000;
+  --color-neutral-900: #000000;
 
-  /* Portal backgrounds - white base (using design tokens) */
-  --portal-bg-pitch: var(--color-light-bg);
-  --portal-bg-darkest: var(--color-light-bg);
-  --portal-bg-darker: var(--color-gray-100);
-  --portal-bg-dark: var(--color-gray-200);
-  --portal-bg-medium: var(--color-gray-300);
-  --portal-bg-light: var(--color-gray-400);
-  --portal-bg-hover: var(--color-gray-200);
-  --portal-bg-readonly: var(--color-gray-100);
+  /* Portal backgrounds - white base */
+  --portal-bg-pitch: #ffffff;
+  --portal-bg-darkest: #ffffff;
+  --portal-bg-darker: #f5f5f5;
+  --portal-bg-dark: #e5e5e5;
+  --portal-bg-medium: #d5d5d5;
+  --portal-bg-light: #c5c5c5;
+  --portal-bg-hover: #e5e5e5;
+  --portal-bg-readonly: #f5f5f5;
 
   /* Portal borders - BLACK for DISCOTHÈQUE consistency */
-  --portal-border-color: var(--portal-text-dark);
-  --portal-border: var(--border-width) solid var(--portal-text-dark);
-  --table-border-color: var(--portal-text-dark);
-  --color-border: var(--portal-text-dark);
+  --portal-border-color: #000000;
+  --portal-border: var(--border-width) solid #000000;
+  --table-border-color: #000000;
+  --color-border: #000000;
 
   /* Alpha overlays - use black for light mode */
-  --portal-alpha-white-08: var(--portal-alpha-black-10);
-  --portal-alpha-white-10: var(--portal-alpha-black-10);
-  --portal-alpha-white-15: var(--portal-alpha-black-15);
-  --portal-alpha-white-20: var(--portal-alpha-black-20);
-  --portal-alpha-white-30: var(--portal-alpha-black-30);
-  --portal-border-subtle: var(--portal-alpha-black-10);
+  --portal-alpha-white-08: rgba(0, 0, 0, 0.08);
+  --portal-alpha-white-10: rgba(0, 0, 0, 0.1);
+  --portal-alpha-white-15: rgba(0, 0, 0, 0.15);
+  --portal-alpha-white-20: rgba(0, 0, 0, 0.2);
+  --portal-alpha-white-30: rgba(0, 0, 0, 0.3);
+  --portal-border-subtle: rgba(0, 0, 0, 0.1);
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {

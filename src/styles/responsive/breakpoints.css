@@ -201,6 +201,40 @@
     }
   }
 
+  /* Sidebar off-screen on mobile — responsive layer overrides pages layer rules
+     regardless of specificity. Matches the --mobile breakpoint used in portal-layout.css. */
+  @media (--mobile) {
+    .portal .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      z-index: var(--z-nav, 100);
+      transform: translateX(-100%);
+      transition: transform var(--transition-medium);
+    }
+
+    .portal .sidebar.mobile-open {
+      transform: translateX(0);
+    }
+
+    /* Collapsed sidebar still shows full-width when swiped open on mobile */
+    .portal .sidebar.collapsed {
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+    }
+
+    /* Dashboard content always fills full width when sidebar is off-screen */
+    .portal .portal-body .dashboard-content {
+      width: 100%;
+      flex: 1;
+    }
+  }
+
   /* ============================================
    * PRINT STYLES
    * ============================================ */

@@ -327,7 +327,7 @@
 }
 
 .project-title-section h1 {
-  font-family: "Inconsolata", "JetBrains Mono", monospace;
+  font-family: var(--font-family-mono);
   font-size: 2rem;
   color: var(--portal-text-light);
   margin: 0;

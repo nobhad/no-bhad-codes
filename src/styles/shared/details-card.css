@@ -76,8 +76,8 @@
   font-size: var(--font-size-sm);
 }
 
-/* Admin portal: same transparent background */
-[data-page="admin"] :is(.details-card-row, .system-info-row) {
+/* Both portals: transparent row background */
+.portal :is(.details-card-row, .system-info-row) {
   background: transparent;
 }
 
@@ -87,7 +87,7 @@
 
 .portal :is(.details-card-row, .system-info-row) span:last-child {
   color: var(--portal-text-primary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Focus styles: border wraps entire card on keyboard focus */

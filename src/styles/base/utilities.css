@@ -369,6 +369,7 @@
 }
 .text-muted {
   color: var(--portal-text-muted);
+  font-weight: var(--font-weight-muted, 400);
 }
 .text-light {
   color: var(--portal-text-light);
@@ -379,7 +380,7 @@
    ============================================ */
 
 .font-normal {
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--font-weight-regular);
 }
 .font-medium {
   font-weight: var(--font-weight-medium);

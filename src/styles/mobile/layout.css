@@ -44,8 +44,11 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Virtual pages - positioned absolutely like desktop */
-  section {
+  /* Virtual pages - positioned absolutely like desktop.
+     Scoped to DIRECT children of main only — nested <section> elements
+     inside project detail content (worksub-info, case-study) must NOT
+     be absolutely positioned or they will stack on top of each other. */
+  main > section {
     position: absolute;
     top: 0;
     left: 0;
@@ -113,6 +116,22 @@
   .projects-hero-desktop,
   .portfolio-hero-desktop {
     display: none;
+  }
+
+  /* Project detail section - SCROLLABLE SECTION
+     Tall content (hero, metadata, case study, screenshots) — must scroll internally */
+  .project-detail-section {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-sizing: border-box;
   }
 
   /* About section - SCROLLABLE SECTION
@@ -358,11 +377,63 @@
 }
 
 /* ============================================
+ * PROJECTS SECTION — MOBILE LAYOUT FIX
+ * Responsive layer (higher priority than pages/states).
+ * Forces flex-column layout, hides CRT TV, centers
+ * content vertically, and shows full card details.
+ * ============================================ */
+
+@media (--mobile) {
+  /* Override any grid/block display — flex column, centered */
+  .projects-section {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+  }
+
+  /* Hide CRT TV — definitive override */
+  .projects-section .crt-tv {
+    display: none !important;
+  }
+
+  /* Force single-column flex row */
+  .projects-section .projects-flex-row {
+    flex-direction: column !important;
+    width: 100%;
+    gap: 0;
+  }
+
+  /* Content wrapper stretches full width */
+  .projects-section .projects-content {
+    align-self: stretch;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* List column fills parent */
+  .projects-section .projects-list-column {
+    width: 100%;
+  }
+
+  /* Center the heading */
+  .projects-section h2 {
+    text-align: center;
+  }
+
+  /* Show card category on mobile — override pages-layer hide */
+  .projects-section .card-category {
+    display: inline;
+  }
+}
+
+/* ============================================
  * SMALL MOBILE (max-width: 479px)
  * ============================================ */
 
 @media (--small-mobile) {
-  section {
+  main > section {
     padding: 0.75rem;
   }
 
@@ -380,5 +451,24 @@
    * Nav calculation: 50% + (177px / 2) + 0.5rem */
   .business-card-section .intro-nav {
     top: calc(50% + 177px / 2 + 0.5rem);
+  }
+}
+
+/* ============================================
+ * XS MOBILE (max-width: 400px) — iPhone SE and similar
+ * Must come AFTER small-mobile to override at 375px
+ * ============================================ */
+
+@media (--xs-mobile) {
+  main > section {
+    padding: 0.5rem;
+  }
+
+  /* Section headings on XS — tighter than small-mobile */
+  .about-section h2,
+  .projects-section h2,
+  .portfolio-section h2 {
+    font-size: 2rem;
+    margin-top: 1rem;
   }
 }

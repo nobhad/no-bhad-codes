@@ -46,7 +46,7 @@
 
 .portal .activity-title {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
@@ -66,8 +66,6 @@
 
 .portal .activity-item.empty {
   justify-content: center;
-  color: var(--portal-text-muted);
-  font-style: italic;
 }
 
 /* =====================================================
@@ -124,6 +122,16 @@
   padding: var(--space-2);
 }
 
+/* Mobile: Stack kanban columns vertically to prevent horizontal overflow */
+@media (--mobile) {
+  .portal .dashboard-tasks-kanban .kanban-board {
+    flex-direction: column !important;
+  }
+  .portal .dashboard-tasks-kanban .kanban-column {
+    min-width: 100%;
+  }
+}
+
 .portal .dashboard-tasks-kanban .task-card-header {
   display: flex;
   flex-direction: column;
@@ -133,7 +141,7 @@
 
 .portal .dashboard-tasks-kanban .task-card-title {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
@@ -154,7 +162,7 @@
 
 .portal .dashboard-tasks-kanban .task-priority {
   font-size: var(--font-size-xs);  /* 12px */
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   padding: var(--space-0-5) var(--space-1);
   background: transparent;
@@ -239,7 +247,7 @@
 .portal .task-item .task-title {
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -276,7 +284,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--font-size-xs);  /* 12px */
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   padding: var(--space-0-5) var(--space-1);
@@ -311,8 +319,6 @@
 
 .portal .upcoming-tasks-list .loading-row {
   padding: var(--space-2) var(--space-3);
-  color: var(--portal-text-muted);
-  font-style: italic;
 }
 
 /* =====================================================
@@ -339,12 +345,12 @@
 }
 
 .portal .dashboard-section-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);  /* 16px - matches h3 */
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
   margin: 0 0 var(--space-1-5) 0;
 }
 
@@ -406,9 +412,9 @@
 }
 
 .portal .attention-count {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 1;
   color: var(--color-primary);
   margin-bottom: var(--space-0-5);

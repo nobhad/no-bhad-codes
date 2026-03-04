@@ -18,13 +18,24 @@
    ===================================================== */
 .portal h3 {
   margin: 0;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.25;
+  letter-spacing: var(--letter-spacing-label);
+  line-height: var(--line-height-tight);
+}
+
+/* =====================================================
+   PORTAL CARDS LIST
+   Padded flex column container for lists of cards (approvals, requests, etc.)
+   ===================================================== */
+.portal-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
 }
 
 /* =====================================================
@@ -93,7 +104,7 @@
 
 /* Primary semantic label classes */
 .portal :is(.field-label, .section-label, .stat-label) {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--label-font-size);
   font-weight: var(--label-font-weight);
   color: var(--portal-text-secondary);
@@ -145,7 +156,7 @@ html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) 
   .payment-plans-section h4,
   .project-notes h4
 ) {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--label-font-size);
   font-weight: var(--label-font-weight);
   color: var(--portal-text-secondary);
@@ -195,7 +206,7 @@ html[data-theme="light"] .portal :is(
 .portal .modal-body label:not(.portal-checkbox-label):not([class*="checkbox"]) {
   display: block;
   margin-bottom: var(--space-1);
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--label-font-size);
   font-weight: var(--label-font-weight);
   color: var(--portal-text-secondary);
@@ -305,9 +316,9 @@ html[data-theme="light"] .portal :is(
 
 /* Card header - Sans-serif font, uppercase */
 .portal .portal-card-header {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);  /* 18px - card titles */
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: var(--portal-text-light);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -420,7 +431,7 @@ html[data-theme="light"] .portal :is(
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .portal .overview-card h3 {
@@ -443,7 +454,7 @@ html[data-theme="light"] .portal :is(
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .portal
@@ -470,7 +481,7 @@ html[data-theme="light"] .portal :is(
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .portal .portal-project-card h3 {
@@ -605,7 +616,7 @@ html[data-theme="light"] .portal :is(
   border: var(--portal-border);
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .portal .summary-card .summary-label {
@@ -615,7 +626,7 @@ html[data-theme="light"] .portal :is(
 
 .portal .summary-card .summary-value {
   display: block;
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: 1.8rem;
   color: var(--portal-text-light);
 }
@@ -668,7 +679,7 @@ html[data-theme="light"] .portal :is(
   border: var(--portal-border);
   color: var(--portal-text-light);
   font-size: inherit;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .portal
@@ -693,7 +704,7 @@ html[data-theme="light"] .portal :is(
   padding: var(--portal-card-padding);
   color: var(--portal-text-light);
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-fast);
 }
 
 .portal .invoices-list h3 {
@@ -719,7 +730,7 @@ html[data-theme="light"] .portal :is(
 }
 
 .portal .progress-card .progress-text {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
 }
 
@@ -736,9 +747,9 @@ html[data-theme="light"] .portal :is(
 }
 
 .portal .content-section-card .section-title {
-  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-family: var(--font-family-sans);
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label, 0.05em);
   color: var(--portal-text-light);

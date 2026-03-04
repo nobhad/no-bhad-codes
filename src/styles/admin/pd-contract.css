@@ -44,7 +44,7 @@
 
 .contract-status-info .field-label {
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -54,7 +54,7 @@
 /* Status badge in contract block: align with overview meta-value prominence */
 .contract-status-info .status-badge {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .contract-description {

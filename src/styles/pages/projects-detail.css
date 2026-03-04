@@ -27,7 +27,7 @@
 
 @media (--tablet) {
   .project-detail-section {
-    padding: clamp(1rem, 4vw, 2rem) clamp(2rem, 10vw, 10%);
+    padding: 2rem 8%;
   }
 }
 
@@ -66,9 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translate(-170%, -50%);
-  opacity: 0;
-  animation: back-button-slide-in var(--transition-long, 0.8s) 0.8s forwards;
+  animation: back-button-slide-in var(--transition-long, 0.8s) 0.8s both;
   transition:
     background-color var(--transition-theme, 0.4s),
     box-shadow var(--transition-theme, 0.4s);
@@ -171,9 +169,7 @@
 
 .worksub-header {
   width: 100%;
-  opacity: 0;
-  transform: translateY(-30%);
-  animation: header-img-fade-in var(--transition-length, 0.5s) 0.3s forwards;
+  animation: header-img-fade-in var(--transition-length, 0.5s) 0.3s both;
 }
 
 .worksub-header figure {
@@ -226,13 +222,11 @@
    =============================================== */
 
 .worksub-intro {
-  opacity: 0;
-  transform: translateY(100px);
-  animation: worksub-fade-in var(--transition-length, 0.5s) 0.5s forwards;
+  animation: worksub-fade-in var(--transition-length, 0.5s) 0.5s both;
 }
 
 .worksub-intro h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: 3rem;
   font-family: var(--font-family-acme);
   font-weight: 700;
   text-transform: uppercase;
@@ -362,6 +356,13 @@
   line-height: 1.7;
   margin: 0;
   flex: 1;
+}
+
+@media (--mobile) {
+  .intro-content > p {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
 }
 
 /* Divider */
@@ -528,61 +529,200 @@
 }
 
 /* ===============================================
-   PROJECT DETAIL RESPONSIVE
+   PROJECT DETAIL RESPONSIVE — MOBILE
+   Consolidated into one block for clarity.
    =============================================== */
 
-@media (--mobile) {
-  .worksub-header figure {
-    border-radius: var(--portal-radius-xl) var(--portal-radius-xl) var(--portal-radius-sm) var(--portal-radius-sm);
-  }
-
-  .worksub-intro h1 {
-    font-size: clamp(1.75rem, 6vw, 2.5rem);
-  }
-
-  .worksub-info {
-    gap: var(--space-8);
-    margin: var(--space-6) 0;
-  }
-
-  .worksub-info section {
-    gap: var(--space-4);
-  }
-}
+/* -----------------------------------------------
+   MOBILE
+   Hierarchy: title > body > metadata > labels
+   Section gap: space-6 (24px)
+   Inner gap: space-3 (12px)
+   Tight group: space-1 (4px)
+   ----------------------------------------------- */
 
 @media (--mobile) {
   .project-detail-section {
-    padding: var(--space-4);
+    padding: var(--space-4) var(--space-6);
   }
 
   .worksub-wrapper {
-    padding-top: var(--space-4);
+    padding-top: var(--space-3);
     gap: var(--space-6);
   }
 
+  .worksub-divider { display: none; }
+  .back-link { margin-bottom: 0; }
+
+  /* Hero */
   .worksub-header figure {
-    border-radius: var(--portal-radius-xl) var(--portal-radius-xl) var(--portal-radius-sm) var(--portal-radius-sm);
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 2 / 1;
+    border-radius: var(--portal-radius-lg);
+    box-shadow: var(--shadow-elevated-sm);
+  }
+
+  /* --- Intro block ---
+     title+badge  (tight)
+     tagline      (tight)
+     ---gap---
+     metadata
+     description
+     ---gap---
+     tools
+  */
+  .worksub-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .title-row {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+
+  .worksub-intro h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0;
+  }
+
+  .project-status-badge {
+    padding: 2px var(--space-2);
+    font-size: 0.6rem;
+  }
+
+  .project-tagline {
+    margin: var(--space-1) 0 var(--space-4);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
+
+  /* Metadata row */
+  .intro-content {
+    gap: var(--space-3);
+  }
+
+  .intro-left {
+    gap: var(--space-1);
+  }
+
+  .intro-left-row {
+    gap: var(--space-4);
+  }
+
+  .intro-left-group {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
   }
 
   .intro-left-group .round-label {
-    font-size: 0.65rem;
-    /* Padding already 0 from base override */
+    font-size: 0.55rem;
+    min-width: max-content;
+  }
+
+  .intro-left-group .text-medium {
+    font-size: var(--font-size-sm);
+  }
+
+  /* Description — same size as all body text */
+  .intro-content > p,
+  .intro-content > .text-medium {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  /* Tools */
+  .tools-section {
+    margin-top: var(--space-3);
+    gap: var(--space-1);
+  }
+
+  .tools-section .round-label {
+    font-size: 0.55rem;
+  }
+
+  .tools-list { gap: var(--space-1); }
+
+  .tools-list .tool-tag {
+    font-size: var(--font-size-xs);
+    padding: 2px var(--space-2);
+  }
+
+  /* --- Case study --- */
+  .worksub-case-study {
+    gap: var(--space-6);
+    margin: 0;
+  }
+
+  .case-study-section { gap: var(--space-2); }
+
+  .case-study-heading {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+    padding-bottom: var(--space-1);
+  }
+
+  .case-study-text {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .case-study-list li {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    padding-left: var(--space-4);
+  }
+
+  /* Screenshots */
+  .worksub-info {
+    gap: var(--space-6);
+    margin: 0;
+  }
+
+  .worksub-info section { gap: var(--space-3); }
+
+  /* Action links */
+  .worksub-links {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    gap: var(--space-2);
+    flex-wrap: nowrap;
   }
 
   .worksub-links a {
-    padding: var(--space-2-5) var(--space-5);
-    font-size: 0.9rem;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+    flex: 1;
+    justify-content: center;
+  }
+
+  .worksub-links a svg { width: 16px; height: 16px; }
+
+  /* Prev/Next nav */
+  .project-nav {
+    border-top: none;
+    margin-top: 0;
+    padding: 0 0 var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .project-nav-next {
+    margin-left: auto;
+    align-items: flex-end;
+    text-align: right;
   }
 }
 
-@media (--small-mobile) {
-  .worksub-intro h1 {
-    font-size: 1.5rem;
-  }
-
-  .intro-content > p {
-    font-size: var(--font-size-base);
+@media (--xs-mobile) {
+  .project-detail-section {
+    padding: var(--space-3) var(--space-5);
   }
 
   .worksub-info figure img.phone-screen,
@@ -724,25 +864,24 @@
   background-color: var(--color-dark);
 }
 
-/* Responsive */
+/* Mobile overrides — must be after base rules to win cascade */
 @media (--mobile) {
-  .worksub-case-study {
-    gap: var(--space-8);
-    margin: var(--space-6) 0;
+  .case-study-list {
+    gap: 0;
   }
 
-  .case-study-heading {
-    font-size: var(--font-size-xl);
-  }
-
-  .case-study-text {
-    font-size: var(--font-size-base);
+  .case-study-text,
+  #project-description {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
   }
 
   .case-study-list li {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
   }
 }
+
+
 
 /* ===============================================
    TAGLINE & STATUS BADGE
@@ -782,7 +921,7 @@
   font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .project-status-badge.status-in-progress {
@@ -900,29 +1039,45 @@
   color: var(--color-dark);
 }
 
-/* Responsive */
+/* Responsive — nav + title row */
 @media (--mobile) {
   .project-nav {
-    flex-direction: column;
-    gap: var(--space-4);
+    border-top: none;
   }
 
   .project-nav-link {
-    max-width: 100%;
+    padding: var(--space-1-5) var(--space-2-5);
+    border-radius: var(--portal-radius-md);
+    gap: var(--space-1);
   }
 
-  .project-nav-next {
-    align-items: flex-start;
-    text-align: left;
+  .project-nav-link svg {
+    width: 14px;
+    height: 14px;
+    margin-bottom: 0;
   }
 
-  .project-tagline {
-    font-size: var(--font-size-lg);
+  /* Both cards: label → title → arrow */
+  .project-nav-prev .project-nav-label { order: 1; }
+  .project-nav-prev .project-nav-title { order: 2; }
+  .project-nav-prev svg { order: 3; }
+
+  .project-nav-prev svg,
+  .project-nav-next svg {
+    margin-bottom: 0;
+  }
+
+  .project-nav-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .project-nav-label {
+    font-size: var(--font-size-2xs);
   }
 
   .title-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
 }

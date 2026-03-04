@@ -3,13 +3,14 @@
  * CONTACT SECTION STYLES
  * ===============================================
  * @file contact.css
- * @description Contact form styles for desktop (min-width: 768px)
+ * @description Contact form styles — all breakpoints base here,
+ *   mobile overrides in /src/styles/mobile/contact.css
  *
  * Related files:
  * - Mobile: /src/styles/mobile/contact.css
  * - Animation: /src/modules/animation/contact-animation.ts
  *
- * Layout: Two-column grid (form left, business card right)
+ * Layout: Single column, centered
  * Animation: GSAP-controlled field expansion sequence
  **/
 
@@ -18,20 +19,22 @@
    ========================================== */
 
 :root {
-  /* Contact form field dimensions - responsive */
-  --contact-input-height: 72px;
-  --contact-input-width: min(460px, 100%);
-  --contact-textarea-height: 155px;
-  --contact-textarea-width: min(640px, 100%);
-  --contact-field-gap: 0.75rem;
-  --contact-row-gap: 0.75rem;
-  /* Total layout height: 3 inputs + gaps + textarea + row gap + buffer */
-  --contact-layout-height: 456px;
+  /* Contact form field dimensions — responsive, read by GSAP via sentinel */
+  --contact-input-height: clamp(52px, 14vw, 60px);
+  --contact-input-width: min(520px, 100%);
+  --contact-textarea-height: 175px;
+  --contact-textarea-width: min(520px, 100%);
+  --contact-field-gap: 0;
+  --contact-row-gap: 0;
+  /* Layout height kept for animation compat */
+  --contact-layout-height: 480px;
+  /* Contact form border - thicker, same color as text, themes with dark/light toggle */
+  --contact-field-border-width: var(--border-width-thick);
+  --contact-field-border-color: var(--color-text-primary);
 }
 
 /* ==========================================
-   CONTACT HERO - DESKTOP ONLY
-   Same animation as about hero (page-hero.ts)
+   CONTACT HERO - DISABLED
    ========================================== */
 
 /* contact-hero-desktop - DISABLED - hero animations removed */
@@ -40,7 +43,6 @@ section.contact-section .contact-hero-desktop {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  /* Mobile: Show hero overlay - same as desktop */
   position: absolute;
   top: 0;
   left: 0;
@@ -54,8 +56,6 @@ section.contact-section .contact-hero-desktop {
 }
 
 @media (--tablet) {
-  /* Hero overlay - fills entire viewport, shows first */
-  /* Note: No CSS transitions - GSAP handles all animations for reliability */
   .contact-hero-desktop {
     position: absolute;
     top: 0;
@@ -68,19 +68,16 @@ section.contact-section .contact-hero-desktop {
     background: var(--color-neutral-300);
     z-index: 10;
     cursor: default;
-    /* Initially hidden - PageHeroModule will show it when ready */
     opacity: 0;
     visibility: hidden;
   }
 
-  /* Hero revealed state - hidden after animation */
   .contact-hero-desktop.hero-revealed {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
   }
 
-  /* Text animation SVG - large and centered */
   .contact-hero-desktop .text-animation-svg {
     width: 90%;
     max-width: 1200px;
@@ -88,262 +85,153 @@ section.contact-section .contact-hero-desktop {
     max-height: 80vh;
     will-change: transform;
   }
-
-  /* Contact content wrapper - GSAP controls visibility */
-  /* NOTE: Main layout defined below in desktop section - this is for hero overlay */
 }
 
 /* ==========================================
-   DESKTOP LAYOUT (min-width: 768px)
-   Mobile layout in /src/styles/mobile/contact.css
+   CONTACT SECTION LAYOUT - BASE (all screens)
+
+   .contact-content uses explicit max-width (not fit-content)
+   so GSAP can reliably read formColumn.offsetWidth at any viewport.
    ========================================== */
 
-@media (--tablet) {
-  /* Contact Section - full viewport height, content centered */
-  .contact-section {
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: calc(100vh - var(--header-height) - var(--footer-height));
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: clamp(1rem, 4vw, 2rem);
-    box-sizing: border-box;
-    position: relative;
-    overflow: visible;
-  }
+/* Section: full viewport height, content centered */
+.contact-section {
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  height: calc(100vh - var(--header-height) - var(--footer-height));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+}
 
-  /* Contact content wrapper */
-  /* Uses grid to ensure h2/hr span full width of layout below */
-  .contact-content {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: fit-content; /* Size to content (layout width) */
-    max-width: calc(100% - 2rem);
-    margin: 0 auto;
-    padding: 0;
-    box-sizing: border-box;
-    gap: 0;
-    overflow: visible;
-  }
+/* Content wrapper: flex column, max-width constrains form width.
+   This is the layout source of truth for GSAP formColumn.offsetWidth. */
+.contact-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  /* Position h2 - consistent with other sections */
+/* Heading */
+section.contact-section h2 {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  overflow: visible;
+  position: relative;
+  font-size: 4.5rem;
+}
+
+/* Divider — full width of content */
+.contact-section hr {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 1rem;
+  height: 6px;
+}
+
+/* Contact layout — single column */
+.contact-layout {
+  display: block;
+  width: 100%;
+  margin-top: 0;
+  overflow: visible;
+}
+
+/* Form column */
+.contact-form-column {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Contact options */
+p.contact-options {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  text-align: left;
+  overflow-wrap: break-word; /* prevents long email/URLs from overflowing narrow containers */
+}
+
+/* Avatar SVG */
+.avatar-blurb-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Eye */
+.avatar-blurb-svg #EYE {
+  fill: var(--color-gray-100);
+}
+
+/* Star glow */
+.avatar-blurb-svg .star-glow,
+.avatar-blurb-svg #STAR_GLOW {
+  fill: var(--color-text-primary);
+  stroke: none;
+  filter: url(#star-glow);
+  transform-origin: center center;
+}
+
+/* Form container */
+.contact-form {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  box-sizing: border-box;
+  box-shadow: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Submit row */
+.submit-row {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+/* ==========================================
+   DESKTOP (min-width: 1100px)
+   Tighter padding — avatar has more space
+   ========================================== */
+
+/* Below large desktop (≤1099px): scale down heading, use medium padding.
+   Mobile override (2.5rem) in mobile/contact.css (responsive layer) takes precedence. */
+@media (--laptop-wide) {
   section.contact-section h2 {
-    margin: 0;
-    margin-bottom: 0;
-    padding: 0;
-    text-align: left;
-    width: 100%;
-    overflow: visible;
-    position: relative;
-    left: 0;
-    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-size: 3rem;
   }
 
-  /* hr - width matches top form field width (460px) */
-  .contact-section hr {
-    width: var(--contact-input-width, 460px);
-    max-width: 100%;
-    margin: 0;
-    margin-bottom: 1rem;
-    margin-left: 0;
-    margin-right: auto;
-    height: 6px;
-  }
-
-  /* Gap between hr and contact-layout */
-  .contact-layout {
-    margin-top: 0;
-  }
-
-  /* ==========================================
-     TWO-COLUMN LAYOUT - DESKTOP ONLY
-     ========================================== */
-
-  /* Contact layout - two-column container using CSS Grid (NO FLEX) */
-  /* Explicit width calculation ensures h2/hr above match this width */
-  .contact-layout {
-    --layout-form-width: 640px;
-    --layout-gap: clamp(1rem, 2vw, 2rem);
-    --layout-card-width: 525px; /* Matches .business-card-container base width */
-    display: grid;
-    grid-template-columns: var(--layout-form-width) var(--layout-card-width);
-    gap: var(--layout-gap);
-    align-items: start;
-    /* Explicit width = form + gap + card */
-    width: calc(var(--layout-form-width) + var(--layout-gap) + var(--layout-card-width));
-    padding-top: 0;
-    /* Fixed height prevents layout shifts during animation */
-    min-height: var(--contact-layout-height);
-    height: var(--contact-layout-height);
-    overflow: visible;
-  }
-
-  /* Left column - contact form */
-  .contact-form-column {
-    width: var(--layout-form-width); /* Match grid column width */
-    position: relative;
-    z-index: 1; /* Form behind card */
-  }
-
-  /* Right column - avatar blurb */
-  .contact-card-column {
-    width: 525px;
-    padding-top: 1rem; /* Align with Name field (matches .contact-row margin-top) */
-    justify-self: start;
-    overflow: visible;
-    position: relative;
-    z-index: 10;
-    transform: translate(-8rem, -7.5rem);
-  }
-
-  /* Contact options paragraph - hidden on desktop (info is in blurb instead) */
-  p.contact-options {
-    display: none;
-  }
-
-  /* ==========================================
-     AVATAR BLURB - DESKTOP ONLY
-     ========================================== */
-
-  .avatar-blurb-container {
-    position: relative;
-    width: 100%;
-    max-width: 650px;
-  }
-
-  .avatar-blurb-svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* Crescent eye - less bright white fill */
-  .avatar-blurb-svg #EYE {
-    fill: var(--color-gray-100);
-  }
-
-  /* Star glow - white fill with glow that overflows slightly */
-  .avatar-blurb-svg .star-glow,
-  .avatar-blurb-svg #STAR_GLOW {
-    fill: var(--color-white);
-    stroke: none;
-    filter: url(#star-glow);
-    transform-origin: center center;
-  }
-
-  .avatar-blurb-content {
-    position: absolute;
-    top: 30%;
-    left: 35%;
-    transform: translate(-50%, -50%);
-    max-width: 55%;
-    text-align: center;
-  }
-
-  .avatar-blurb-text {
-    font-family: var(--font-family-acme), sans-serif;
-    font-size: clamp(1.4rem, 2.6vw, 1.75rem);
-    line-height: 1.35;
-    color: var(--color-black); /* Always black - blurb bg is white */
-    text-align: center;
-    margin: 0;
-  }
-
-  .avatar-blurb-link {
-    color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  .avatar-blurb-link:hover {
-    color: var(--color-primary-hover);
-  }
-
-  /* Form Container - CSS Grid to position message row and button side by side */
-  .contact-form {
-    width: 100%;
-    align-self: stretch;
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    background-color: transparent;
-    box-sizing: border-box;
-    box-shadow: none;
-    overflow: visible;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    gap: var(--contact-row-gap) 1rem;
-    align-items: start;
-  }
-
-  /* Form fields row - use contents to flatten structure for ordering */
-  .contact-row {
-    display: contents;
-  }
-
-  /* Input fields container: name, company, email - Flexbox column */
-  .contact-left {
-    display: flex;
-    flex-direction: column;
-    gap: var(--contact-field-gap);
-    box-sizing: border-box;
-    padding: 0;
-    overflow: visible;
-    width: 100%;
-    margin-top: 1rem;
-    grid-row: 1;
-    grid-column: 1 / -1;
-  }
-
-  /* Input items in contact-left - use variable width (460px on desktop) */
-  .contact-left .input-item {
-    width: var(--contact-input-width);
-  }
-
-  /* Message textarea row - appears after inputs, positioned in grid */
-  .contact-message-row {
-    width: 100%;
-    box-sizing: border-box;
-    grid-row: 2;
-    grid-column: 1;
-  }
-
-  /* Submit button container - to the right of message field, centered vertically */
-  .contact-right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    margin: 0;
-    box-sizing: border-box;
-    grid-row: 2;
-    grid-column: 2;
-    align-self: center;
-  }
-
-  /* Submit button - positioned to right of message field */
-  .contact-form .submit-button {
-    display: flex;
-    margin: 0;
-    width: 120px;
-    height: 120px;
-  }
-
-  /* Message input item - fixed width */
-  .contact-message-row .input-item {
-    width: var(--contact-textarea-width);
-    flex-shrink: 0;
+  .contact-section {
+    padding: 2rem;
   }
 }
 
-/* Contact options links - extra bold and underlined (shared) */
-.contact-option-link {
-  font-weight: 800;
-  text-decoration: underline;
+/* Large desktop (≥1100px): tighter padding */
+@media (--desktop-l) {
+  .contact-section {
+    padding: 2rem;
+  }
 }
 
 /* ==========================================
@@ -393,69 +281,73 @@ section.contact-section .contact-hero-desktop {
   color: var(--color-primary);
 }
 
-/* Input wrapper - contains input + label */
+/* Contact options links - extra bold and underlined */
+.contact-option-link {
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+/* ==========================================
+   FORM ELEMENT STYLES
+   ========================================== */
+
+/* Input wrapper - contains input-item + border lives here */
+/* Border on the wrapper (not the field itself) creates unified container feel */
 .input-wrapper {
-  overflow: visible;
+  overflow: hidden;
   position: relative;
-  padding: 2px;
+  padding: 0;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
 
-/* Input item - GSAP handles all animations (no CSS animations) */
-.input-item {
+/* First wrapper: full outer border
+   :first-of-type used (not :first-child) since a hidden honeypot <input> is the actual first child */
+.contact-form .input-wrapper:first-of-type {
+  border: var(--contact-field-border-width) solid var(--contact-field-border-color);
+}
+
+/* Subsequent wrappers: skip top border so adjacent borders share one line — no gaps */
+.contact-form .input-wrapper + .input-wrapper {
+  border: var(--contact-field-border-width) solid var(--contact-field-border-color);
+  border-top: none;
+}
+
+/* Input item - GSAP handles all animations (height/width), no visual border */
+/* max-width: 100% caps GSAP inline pixel widths so form stays within viewport on resize */
+.contact-form .input-item {
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: visible;
-  /* Initial state set by GSAP in contact-animation.ts */
+  max-width: 100%;
 }
 
-/* Error toast - positioned to the right of input fields (desktop) */
-.input-item .field-error,
-.input-item .error-message {
-  position: absolute;
-  right: -180px;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: var(--color-danger);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  white-space: nowrap;
-  z-index: 10;
+/* Label - visually hidden, kept for accessibility */
+.contact-form label.text-small {
+  display: none;
 }
 
-/* LEGACY CSS ANIMATION CLASSES REMOVED - GSAP handles all animations
- * .input-item.leaving and stagger delays now controlled by contact-animation.ts */
-
-/* Label styling - use inverse text color for proper contrast */
-label.text-small {
-  margin: 0.25rem 0 0 1rem;
-  position: absolute;
-  z-index: 3;
-  transform: translate(0);
-  color: var(--color-text-inverse);
-  opacity: 1;
-  pointer-events: none;
-  font-size: var(--font-size-base);
-}
-
-/* Inputs and Textareas */
+/* Inputs and Textareas - no border (border is on .input-wrapper container) */
+/* Transparent so inputs always match the page background regardless of theme */
 .input-item input,
 .input-item textarea {
+  background: transparent;
   border: none;
-  background-color: var(--color-bg-inverse);
-  caret-color: var(--color-text-inverse);
-  color: var(--color-text-inverse);
+  border-radius: 0;
+  color: var(--color-text-primary);
+  caret-color: var(--color-primary);
   font-family: inherit;
-  font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: 400;
   box-sizing: border-box;
+  outline: none;
+  box-shadow: none;
+  position: relative;
+  z-index: 0;
+  -webkit-appearance: none;
   --placeholder-opacity: 0;
 }
 
@@ -463,8 +355,7 @@ label.text-small {
 .input-item input {
   width: 100%;
   height: var(--contact-input-height);
-  border-radius: 0 var(--portal-radius-xl) var(--portal-radius-xl) var(--portal-radius-xl);
-  padding: 1.75rem 1rem 0.5rem 1.5rem;
+  padding: 0.78rem 0.85rem;
   line-height: 1.4;
 }
 
@@ -472,128 +363,86 @@ label.text-small {
 .input-item textarea {
   width: 100%;
   max-width: 100%;
-  min-height: 130px;
+  min-height: var(--contact-textarea-height, 175px);
   height: auto;
   resize: none;
   overflow: hidden;
-  border-radius: 0 var(--portal-radius-xl) var(--portal-radius-xl) var(--portal-radius-xl);
-  padding: 1.5rem 1rem 0.5rem 1.5rem;
+  padding: 0.78rem 0.85rem;
+  line-height: 1.5;
 }
 
-/* Placeholder styling - use same color as input text for proper contrast */
+/* Placeholder styling */
 .input-item input::placeholder,
 .input-item textarea::placeholder {
-  color: var(--color-text-inverse);
+  color: var(--color-text-tertiary);
   opacity: var(--placeholder-opacity, 0);
+  font-style: normal;
 }
 
-/* Hover/Focus behavior - label opacity only (no transform) */
-
-/* Label opacity on hover/focus - keep at animated value (1) or default to 0.5 if not animated */
-input:hover + label,
-input:focus + label,
-input:focus-visible + label,
-textarea:hover + label,
-textarea:focus + label,
-textarea:focus-visible + label {
-  opacity: 1;
+/* Focus state - raise z-index so border shows over adjacent field */
+.contact-form .input-wrapper:focus-within {
+  z-index: 1;
+  position: relative;
 }
 
-/* Placeholder opacity - respect animated value (defaults to 0.5 on hover if not animated) */
-.input-item input:hover::placeholder,
-.input-item input:focus::placeholder,
-.input-item input:focus-visible::placeholder,
-.input-item textarea:hover::placeholder,
-.input-item textarea:focus::placeholder,
-.input-item textarea:focus-visible::placeholder {
-  opacity: var(--placeholder-opacity, 0.5);
-}
-
-/* Focus outline - follows border-radius using box-shadow */
 .contact-form .input-item input:focus,
 .contact-form .input-item input:focus-visible,
 .contact-form .input-item textarea:focus,
 .contact-form .input-item textarea:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow: none;
 }
 
-/* Autofill styling */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:focus-visible,
-input:-webkit-autofill:active {
-  color: var(--color-text-inverse) !important;
-  -webkit-text-fill-color: var(--color-text-inverse) !important;
-  box-shadow: 0 0 0 100px var(--color-bg-inverse) inset !important;
-  -webkit-box-shadow: 0 0 0px 100px var(--color-bg-inverse) inset !important;
+/* Autofill - keep transparent feel */
+.contact-form input:-webkit-autofill,
+.contact-form input:-webkit-autofill:hover,
+.contact-form input:-webkit-autofill:focus,
+.contact-form input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  box-shadow: 0 0 0 100px var(--color-bg-primary) inset !important;
+  -webkit-box-shadow: 0 0 0px 100px var(--color-bg-primary) inset !important;
 }
 
-/* Submit button - circular design */
+/* ==========================================
+   SUBMIT BUTTON
+   ========================================== */
+
+/* Submit button - transparent rectangular outline */
 .submit-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  z-index: 17;
-  width: 120px;
-  height: 120px;
-  border-radius: var(--portal-radius-full);
-  border: none;
-  box-shadow: var(--shadow-elevated-lg);
-  background-color: var(--color-primary);
+  gap: 0.55rem;
+  background: transparent;
+  border: var(--contact-field-border-width) solid var(--contact-field-border-color);
+  border-radius: 2px;
+  box-shadow: none;
+  padding: 0.9375rem 1.875rem;
+  font-family: var(--font-family-body, inherit);
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
   cursor: pointer;
-  opacity: 1;
-  transform: translate(0);
-  transition:
-    background-color 0.4s,
-    box-shadow 0.4s;
+  z-index: 17;
+  overflow: visible;
 }
 
 .submit-button:focus,
 .submit-button:focus-visible {
-  outline: 3px solid var(--color-black);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
 }
 
-/* .submit-button.leaving animation removed - GSAP handles this in contact-animation.ts */
-
-/* Submit button text - hidden by default */
+/* Submit button text - always visible */
 .submit-button span {
-  display: none;
-  color: var(--bg);
-  font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
 }
 
-/* Valid form state - green background */
-.submit-button.form-valid {
-  background-color: var(--color-primary);
-}
-
-.submit-button.form-valid span {
-  color: var(--color-black);
-}
-
-.submit-button.form-valid svg {
-  stroke: var(--color-black);
-}
-
-/* Sent state - show SENT! text */
-.submit-button.form-sent {
-  background-color: var(--color-primary);
-}
-
+/* Sent state */
 .contact-form .submit-button.form-sent span {
-  display: block;
-  color: var(--color-black);
-  font-family: var(--font-family-display, "Acme", sans-serif);
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .contact-form .submit-button.form-sent svg {
@@ -605,70 +454,60 @@ input:-webkit-autofill:active {
   pointer-events: none;
 }
 
-.submit-button svg {
-  width: 64px;
-  height: 64px;
-  transform: rotate(0deg);
+/* Button icon */
+.submit-button .btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
   fill: none;
-  stroke: var(--color-black);
-  transition:
-    transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 3.5),
-    stroke 0.4s;
+  stroke: currentColor;
   overflow: visible;
 }
 
-/* Arrow group for fly animation */
-.submit-button svg .arrow-group {
+.submit-button .btn-icon .arrow-group {
   transform-origin: center center;
 }
 
-.submit-button svg .bow-group {
+.submit-button .btn-icon .bow-group {
   transform-origin: center center;
 }
 
-/* No spin on hover - arrow animation handled by GSAP on submit */
-
-/* Arrow pointing to invalid fields */
-.submit-button.point-to-name svg,
-.submit-button.point-to-email svg {
-  transform: rotate(180deg); /* Point left toward input fields */
-}
-
-.submit-button.point-to-message svg {
-  transform: rotate(135deg); /* Point down-left toward message textarea */
-}
-
-/* Dark mode overrides for form text and SVG - use page background color */
+/* Dark mode input color overrides */
 html[data-theme="dark"] .input-item input,
 html[data-theme="dark"] .input-item textarea {
-  color: var(--color-neutral-300);
-  caret-color: var(--color-neutral-300);
-  -webkit-text-fill-color: var(--color-neutral-300);
+  color: var(--color-text-primary);
+  caret-color: var(--color-primary);
+  -webkit-text-fill-color: var(--color-text-primary);
 }
 
-html[data-theme="dark"] .submit-button svg {
-  stroke: var(--color-black);
+/* ==========================================
+   BACKGROUND AVATAR WATERMARK
+   ========================================== */
+
+.contact-bg-avatar {
+  position: absolute;
+  bottom: 6%;
+  right: 5%;
+  width: min(55vw, 520px);
+  opacity: 0.09;
+  pointer-events: none;
+  z-index: 0;
 }
 
-html[data-theme="dark"] .submit-button {
-  box-shadow: var(--shadow-elevated-dark);
+.contact-bg-avatar .avatar-blurb-container {
+  width: 100%;
 }
 
-html[data-theme="dark"] .submit-button:focus,
-html[data-theme="dark"] .submit-button:focus-visible {
-  outline: 3px solid var(--color-white);
-  outline-offset: 3px;
-}
+/* ==========================================
+   EMAIL ALTERNATIVE BOX
+   ========================================== */
 
-/* Dark mode label and placeholder color overrides removed - using --color-text-inverse for automatic theme adaptation */
-
-/* Email alternative box - opacity controlled by GSAP */
+/* Email box - opacity controlled by GSAP */
 .email-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  /* Initial state - GSAP handles animation */
   opacity: 0;
 }
 
@@ -696,61 +535,47 @@ html[data-theme="dark"] .submit-button:focus-visible {
   color: var(--color-primary);
 }
 
-/* Form Validation Styles */
-/* Hidden by default - shown via .field-error--visible or :not(:empty) */
+/* ==========================================
+   FORM VALIDATION STYLES
+   ========================================== */
+
+/* Field error - hidden by default when empty */
 .contact-form .field-error {
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
-  min-height: 1.2em;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  display: none; /* Hidden when empty */
-  text-align: left;
-  order: 999;
-  width: 100%;
+  display: none;
+  min-height: 0;
 }
 
-/* Show error when it has content or visibility class */
-.contact-form .field-error:not(:empty),
-.contact-form .field-error.field-error--visible {
-  display: block;
-}
-
-/* Temporary field error popup - fixed position, outside layout */
-/* Z-index: Above content but below nav (nav is 100) */
-.field-error-popup {
-  position: fixed;
-  background-color: var(--color-danger);
-  color: var(--color-white);
-  padding: 0.5rem 1rem;
+/* Tooltip bubble — shown when JS populates the element with an error message */
+.contact-form .field-error:not(:empty) {
+  display: inline-block;
+  background-color: var(--color-dark);
+  color: var(--color-neutral-100);
+  padding: 0.2rem 0.6rem;
   border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  z-index: 50; /* Above main content (1) but below nav (100) */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  margin-top: 4px;
   pointer-events: none;
-  white-space: nowrap;
-  box-shadow: var(--shadow-elevated-sm);
-  /* GSAP handles popup fade animations - see contact-animation.ts */
+  line-height: 1.4;
 }
 
-.field-error-popup.fade-out {
-  /* GSAP handles fade-out - see contact-animation.ts */
-}
-
-/* Field with error - red outline */
-.contact-form .field-has-error {
-  outline: 2px solid var(--color-danger);
+/* Dark theme: invert so tooltip remains readable */
+html[data-theme="dark"] .contact-form .field-error:not(:empty) {
+  background-color: var(--color-neutral-100);
+  color: var(--color-dark);
 }
 
 section.contact-section .contact-form .form-input.error,
 section.contact-section .contact-form .form-textarea.error,
 section.contact-section .contact-form input.error,
 section.contact-section .contact-form textarea.error {
-  border-color: var(--color-danger);
-  background-color: rgba(239, 68, 68, 0.05);
+  background-color: transparent;
 }
 
-/* Form Message Styles */
+/* ==========================================
+   FORM MESSAGE STYLES
+   ========================================== */
+
 .form-message {
   padding: clamp(12px, 3vw, 20px);
   margin-bottom: clamp(12px, 2vw, 16px);
@@ -773,214 +598,7 @@ section.contact-section .contact-form textarea.error {
   border: none;
 }
 
-/* LEGACY KEYFRAMES REMOVED - All animations now handled by GSAP in contact-animation.ts
- * Removed: drop-in, drop-out, blur-in, blur-out, submit-button-slide-in, submit-button-slide-out
- * GSAP provides better performance and control for complex animations */
-
-/* ==========================================
-   RESPONSIVE - TABLET PORTRAIT (768px - 1100px)
-   Single-column layout - form only, no business card
-   Two-column requires ~1200px minimum
-   ========================================== */
-
-@media (--tablet-to-desktop) {
-  /* Single column centered layout */
-  .contact-section .contact-content {
-    width: 90vw;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  /* h2/hr spacing */
-  section.contact-section h2 {
-    margin: 0;
-    margin-bottom: 0;
-    font-size: clamp(2.5rem, 8vw, 4rem);
-  }
-
-  /* hr spans full width */
-  section.contact-section hr {
-    width: 100%;
-    margin: 0;
-    margin-bottom: 1rem;
-  }
-
-  /* Single column layout - no grid */
-  .contact-section .contact-layout {
-    display: block;
-    width: 100%;
-    height: auto;
-    min-height: auto;
-  }
-
-  /* Form column - full width */
-  .contact-section .contact-form-column {
-    width: 100%;
-  }
-
-  /* HIDE business card on tablet portrait - doesn't fit */
-  .contact-section .contact-card-column {
-    display: none;
-  }
-
-  /* SHOW contact options text - constrained to match form width */
-  .contact-section p.contact-options {
-    display: block;
-    width: 100%;
-    margin-bottom: 1rem;
-    font-size: var(--font-size-base);
-    line-height: 1.6;
-    color: var(--color-text-primary);
-    text-align: left;
-  }
-
-  /* Remove top margin on form inputs */
-  .contact-section .contact-left {
-    margin-top: 0;
-  }
-
-  /* ALL input fields - same full width */
-  .contact-section .contact-left .input-item,
-  .contact-section .contact-message-row .input-item {
-    width: 100%;
-  }
-
-  /* Message row - full width */
-  .contact-section .contact-message-row {
-    width: 100%;
-  }
-
-  /* Input heights */
-  .contact-section .input-item input {
-    height: 65px;
-  }
-
-  .contact-section .input-item textarea {
-    min-height: 130px;
-  }
-
-  /* Form - flex column for stacked layout */
-  .contact-section .contact-form {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Contact row - contents to flatten */
-  .contact-section .contact-row {
-    display: contents;
-  }
-
-  /* Input fields container */
-  .contact-section .contact-left {
-    order: 1;
-    width: 100%;
-  }
-
-  /* Message field - after inputs */
-  .contact-section .contact-message-row {
-    order: 2;
-    width: 100%;
-  }
-
-  /* Submit button - below message, right-aligned */
-  .contact-section .contact-right {
-    order: 3;
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .contact-section .submit-button {
-    width: 90px;
-    height: 90px;
-  }
-}
-
-/* ==========================================
-   RESPONSIVE - WIDE TABLETS (1100px - 1300px)
-   Still single-column - two-column needs 1300px+
-   ========================================== */
-
-@media (min-width: 1100px) and (max-width: 1300px) {
-  /* Single column centered layout */
-  .contact-section .contact-content {
-    width: 80vw;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  /* Single column layout - no grid */
-  .contact-section .contact-layout {
-    display: block;
-    width: 100%;
-    height: auto;
-    min-height: auto;
-  }
-
-  /* Form column - full width */
-  .contact-section .contact-form-column {
-    width: 100%;
-  }
-
-  /* HIDE business card - doesn't fit until 1300px */
-  .contact-section .contact-card-column {
-    display: none;
-  }
-
-  /* SHOW contact options text since card is hidden */
-  .contact-section p.contact-options {
-    display: block;
-    margin-bottom: 1rem;
-    font-size: var(--font-size-base);
-    line-height: 1.6;
-  }
-
-  /* Form - flex column for stacked layout */
-  .contact-section .contact-form {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Contact row - contents to flatten */
-  .contact-section .contact-row {
-    display: contents;
-  }
-
-  /* Input fields container */
-  .contact-section .contact-left {
-    order: 1;
-    width: 100%;
-  }
-
-  /* ALL input fields - same full width */
-  .contact-section .contact-left .input-item,
-  .contact-section .contact-message-row .input-item {
-    width: 100%;
-  }
-
-  /* Message field - full width, after inputs */
-  .contact-section .contact-message-row {
-    order: 2;
-    width: 100%;
-  }
-
-  /* Submit button - below message, right-aligned */
-  .contact-section .contact-right {
-    order: 3;
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  /* hr width full */
-  section.contact-section hr {
-    width: 100%;
-  }
-}
-
-/* Mobile styles moved to /src/styles/mobile/contact.css */
+/* Mobile overrides in /src/styles/mobile/contact.css */
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {

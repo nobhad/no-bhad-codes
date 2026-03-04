@@ -409,7 +409,202 @@ html[data-theme="dark"] .portal-dropdown-header {
 }
 
 /* =====================================================
-   24. INTAKE FORM MODAL
+   24. PORTAL LOGIN SECTION (#/portal hash page)
+   ===================================================== */
+
+.portal-login-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-height, 60px));
+  padding: 2rem 1rem;
+}
+
+.portal-login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.portal-login-card {
+  width: 100%;
+  border: var(--border-width-heavy) solid var(--color-dark);
+  padding: 2.5rem 2rem;
+  background: transparent;
+}
+
+.portal-login-header {
+  margin-bottom: 2rem;
+}
+
+.portal-login-logo {
+  display: block;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1.25rem;
+}
+
+.portal-login-header h2 {
+  font-family: var(--font-family-acme);
+  font-size: var(--font-size-3xl);
+  text-transform: uppercase;
+  color: var(--color-dark);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: var(--letter-spacing-label);
+  text-align: center;
+}
+
+.portal-login-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-dark);
+  margin: 0;
+  opacity: 0.7;
+  text-align: center;
+}
+
+.portal-page-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.portal-page-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-page-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: var(--border-width) solid var(--color-dark);
+  background: transparent;
+  color: var(--color-dark);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  outline: none;
+  transition: border-width 0.1s ease;
+  box-sizing: border-box;
+}
+
+.portal-page-input::placeholder {
+  color: var(--color-dark);
+  opacity: 0.5;
+}
+
+/* Prevent browser autofill from overriding the transparent background */
+.portal-page-input:-webkit-autofill,
+.portal-page-input:-webkit-autofill:hover,
+.portal-page-input:-webkit-autofill:focus,
+.portal-page-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: var(--color-dark) !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: var(--color-dark);
+}
+
+.portal-page-input:focus {
+  border-width: var(--border-width-thick);
+}
+
+.portal-page-pw-wrapper {
+  position: relative;
+}
+
+.portal-page-pw-wrapper .portal-page-input {
+  padding-right: 2.75rem;
+}
+
+.portal-page-pw-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-dark);
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-page-pw-toggle:hover {
+  opacity: 0.7;
+}
+
+.portal-page-error {
+  min-height: 1.2em;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger, #e74c3c);
+  margin: 0;
+}
+
+.portal-page-submit {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--color-dark);
+  color: var(--color-neutral-300);
+  border: var(--border-width) solid var(--color-dark);
+  font-family: var(--font-family-acme);
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.portal-page-submit:hover:not(:disabled) {
+  background: transparent;
+  color: var(--color-dark);
+}
+
+.portal-page-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.portal-page-success {
+  border: var(--border-width) solid var(--color-dark);
+  padding: 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-dark);
+  text-align: center;
+}
+
+.portal-page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.portal-page-divider {
+  font-size: var(--font-size-sm);
+  color: var(--color-dark);
+  opacity: 0.4;
+}
+
+.portal-page-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-dark);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.portal-page-link:hover {
+  opacity: 0.7;
+}
+
+/* =====================================================
+   25. INTAKE FORM MODAL
    ===================================================== */
 
 /* Intake Modal Backdrop */
