@@ -157,6 +157,7 @@ export function BulkActionsToolbar({
           className="icon-btn"
           onClick={onClearSelection}
           title="Clear selection"
+          aria-label="Clear selection"
         >
           <X className="icon-sm" />
         </button>

@@ -17,8 +17,26 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { getPortalConfig, ADMIN_TAB_IDS, CLIENT_TAB_IDS, ICONS } from '../config/navigation.js';
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
-import { sendUnauthorized, sendNotFound, sendForbidden, sendServerError } from '../utils/api-response.js';
+import { sendUnauthorized, sendNotFound, sendServerError } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import { createRateLimiter } from '../middleware/rate-limiter.js';
+
+// Rate limiter for tab data endpoint: 30 req/min per authenticated user
+const TAB_DATA_MAX_REQUESTS = 30;
+const TAB_DATA_WINDOW_MS = 60 * 1000;
+const TAB_DATA_BLOCK_DURATION_MS = 60 * 1000;
+
+const tabDataRateLimiter = createRateLimiter({
+  windowMs: TAB_DATA_WINDOW_MS,
+  maxRequests: TAB_DATA_MAX_REQUESTS,
+  blockDurationMs: TAB_DATA_BLOCK_DURATION_MS,
+  keyGenerator: (req) => {
+    // Key by IP + userId from JWT for per-user limiting
+    const token = req.cookies?.auth_token;
+    const ip = req.ip || 'unknown';
+    return `tab-data:${ip}:${token ? token.slice(-16) : 'anon'}`;
+  }
+});
 
 const router = Router();
 
@@ -108,7 +126,7 @@ router.get('/dashboard', (req: Request, res: Response) => {
  * Returns an HTML fragment for a specific tab's table.
  * Used by the client-side TableManager to lazy-load tab content.
  */
-router.get('/dashboard/tab/:tabId', async (req: Request, res: Response) => {
+router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res: Response) => {
   const decoded = decodePortalJwt(req);
 
   if (!decoded) {
@@ -121,26 +139,19 @@ router.get('/dashboard/tab/:tabId', async (req: Request, res: Response) => {
     // Dynamic import to avoid circular dependencies at startup
     const { fetchTabData, hasTabDataFetcher, getServerTableDef } = await import('../services/tab-data-service.js');
 
-    if (!hasTabDataFetcher(tabId)) {
-      return sendNotFound(res, `Unknown tab: ${tabId}`);
-    }
-
-    const tableDef = getServerTableDef(tabId);
-    if (!tableDef) {
-      return sendNotFound(res, `No table definition for: ${tabId}`);
-    }
-
-    // Enforce role-based tab access: tab's portal must match user's role
-    if (tableDef.portal !== decoded.type) {
-      return sendForbidden(res, 'Access denied for this tab');
-    }
-
-    // Extract user ID from JWT (admin uses 'id', client uses 'clientId')
+    // Extract and validate user ID from JWT (admin uses 'id', client uses 'clientId')
     const decodedPayload = decoded as Record<string, unknown>;
     const userId = (decodedPayload.id as number) ?? (decodedPayload.clientId as number);
 
-    if (!userId) {
+    if (!userId || typeof userId !== 'number' || userId <= 0) {
       return sendUnauthorized(res, 'Invalid token: missing user ID');
+    }
+
+    // Validate tab exists, has a table definition for this portal, and user role matches.
+    // All checks return the same generic "not found" to prevent tab enumeration.
+    const tableDef = getServerTableDef(tabId);
+    if (!hasTabDataFetcher(tabId) || !tableDef || tableDef.portal !== decoded.type) {
+      return sendNotFound(res, 'Tab not found');
     }
 
     const data = await fetchTabData(tabId, decoded.type as 'admin' | 'client', userId);

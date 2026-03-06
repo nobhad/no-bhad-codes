@@ -63,7 +63,7 @@ export function DateCell({
   value,
   includeTime = false,
   relative = false,
-  fallback = '—',
+  fallback = '',
   className
 }: DateCellProps) {
   if (!value) {
@@ -113,7 +113,7 @@ export function CurrencyCell({
   value,
   currency = 'USD',
   compact = false,
-  fallback = '—',
+  fallback = '',
   className
 }: CurrencyCellProps) {
   if (value === null || value === undefined) {
@@ -154,7 +154,7 @@ export interface FileSizeCellProps {
  */
 export function FileSizeCell({
   value,
-  fallback = '—',
+  fallback = '',
   className
 }: FileSizeCellProps) {
   if (value === null || value === undefined) {
@@ -209,7 +209,7 @@ export function ContactCell({
   secondary,
   tertiary,
   emailLink = false,
-  fallback = '—',
+  fallback = '',
   className
 }: ContactCellProps) {
   const displayName = name?.trim() || fallback;
@@ -263,7 +263,7 @@ export interface PhoneCellProps {
 export function PhoneCell({
   value,
   callLink = false,
-  fallback = '—',
+  fallback = '',
   className
 }: PhoneCellProps) {
   if (!value) {
@@ -321,7 +321,7 @@ export function EmailCell({
   value,
   mailLink = true,
   maxLength,
-  fallback = '—',
+  fallback = '',
   className
 }: EmailCellProps) {
   if (!value) {
@@ -383,7 +383,7 @@ export function LinkCell({
   label,
   external = true,
   maxLength = 30,
-  fallback = '—',
+  fallback = '',
   className
 }: LinkCellProps) {
   if (!href) {
@@ -440,7 +440,7 @@ export function CountCell({
   value,
   label,
   showZero = true,
-  fallback = '—',
+  fallback = '',
   className
 }: CountCellProps) {
   if (value === null || value === undefined) {
@@ -496,7 +496,7 @@ export function CopyCell({
   value,
   displayValue,
   maxLength,
-  fallback = '—',
+  fallback = '',
   className
 }: CopyCellProps) {
   const [copied, setCopied] = useState(false);
@@ -580,7 +580,7 @@ export interface TextCellProps {
 export function TextCell({
   value,
   maxLength,
-  fallback = '—',
+  fallback = '',
   className,
   primary = false
 }: TextCellProps) {

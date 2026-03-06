@@ -1015,11 +1015,35 @@
   width: 500px;
   max-width: 90vw;
   height: 100vh;
-  background: var(--portal-bg-readonly);
+  background: var(--portal-bg-darker);
+  color: var(--portal-text-light);
   box-shadow: var(--shadow-2xl);
   z-index: var(--z-index-portal-modal, 9600);
   overflow-y: auto;
   padding: var(--space-4) var(--space-6) var(--space-6);
+  border-left: var(--portal-border);
+}
+
+.details-panel .details-header h3 {
+  color: var(--portal-text-light);
+}
+
+.details-panel .field-label {
+  color: var(--portal-text-secondary);
+}
+
+.details-panel .meta-value {
+  color: var(--portal-text-light);
+}
+
+.details-panel .status-dropdown-trigger {
+  background: transparent;
+  border: var(--portal-border);
+}
+
+/* Radix popper wrappers must sit above the details-panel (z-index 9600) */
+[data-radix-popper-content-wrapper] {
+  z-index: calc(var(--z-index-portal-modal, 9600) + 10) !important;
 }
 
 .details-panel.hidden {

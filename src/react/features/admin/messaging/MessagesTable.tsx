@@ -278,7 +278,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                 <PortalTableCell className="message-preview-cell">
                   {conversation.lastMessage
                     ? <span className="text-truncate">{conversation.lastMessage}</span>
-                    : <span className="cell-empty">—</span>
+                    : null
                   }
                 </PortalTableCell>
                 <PortalTableCell className="text-center">
@@ -289,7 +289,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                 <PortalTableCell className="date-cell">
                   {conversation.lastMessageAt
                     ? formatDate(conversation.lastMessageAt)
-                    : <span className="cell-empty">—</span>
+                    : null
                   }
                 </PortalTableCell>
                 <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>

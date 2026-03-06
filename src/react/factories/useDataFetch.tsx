@@ -197,12 +197,14 @@ export function useDataFetch<T, P = void>(
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-      debounceTimerRef.current = setTimeout(() => {
-        doFetch();
-      }, debounceMs);
-    } else {
-      await doFetch();
+      return new Promise<void>((resolve) => {
+        debounceTimerRef.current = setTimeout(async () => {
+          await doFetch();
+          resolve();
+        }, debounceMs);
+      });
     }
+    return doFetch();
   }, [doFetch, debounceMs]);
 
   /**

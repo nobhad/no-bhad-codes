@@ -123,7 +123,13 @@ export const API_ENDPOINTS = {
 
     // Email & Communication
     EMAIL_TEMPLATES: '/api/admin/email-templates',
+    TEST_EMAIL: '/api/admin/test-email',
     NOTIFICATIONS: '/api/admin/notifications',
+
+    // Cache Management
+    CACHE_STATS: '/api/admin/cache/stats',
+    CACHE_CLEAR: '/api/admin/cache/clear',
+    CACHE_INVALIDATE: '/api/admin/cache/invalidate',
 
     // Knowledge Base
     KB_CATEGORIES: '/api/kb/admin/categories',

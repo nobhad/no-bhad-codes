@@ -106,6 +106,13 @@
   --portal-radius-full: 50%; /* Exception for circular avatars/indicators */
 
   /* ----------------------------------------
+   * ACCENT COLORS - Portal interactive accent
+   * Aliases interactive primary for portal use
+   * ---------------------------------------- */
+  --portal-accent: var(--color-interactive-primary);
+  --portal-accent-hover: var(--color-interactive-primary-hover);
+
+  /* ----------------------------------------
    * HOVER STATE COLORS - SEMANTIC CONTRAST
    * Dark bg = light text/icons
    * Light bg = dark text/icons
@@ -273,6 +280,12 @@ html[data-theme="light"] body[data-page="client-portal"] {
    * ---------------------------------------- */
   --font-weight-base: 500;   /* Portal default: medium weight for primary text */
   --font-weight-muted: 400;  /* Muted/secondary/label text */
+
+  /* ----------------------------------------
+   * ACCENT COLORS - Portal interactive accent (Light Mode)
+   * ---------------------------------------- */
+  --portal-accent: var(--color-interactive-primary);
+  --portal-accent-hover: var(--color-interactive-primary-hover);
 
   /* ----------------------------------------
    * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)

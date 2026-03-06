@@ -496,9 +496,6 @@ export function PortalFilesManager({
     setSelectedFileType('all');
   }, []);
 
-  // Get client email for delete permission check
-  const clientEmail = typeof window !== 'undefined' ? sessionStorage.getItem('clientEmail') : null;
-
   return (
     <div className="tw-section">
       {/* Upload dropzone */}
@@ -607,8 +604,8 @@ export function PortalFilesManager({
                     />
                   ) : (
                     paginatedFiles.map((file) => {
-                      const canDelete =
-                            file.uploadedBy === clientEmail || file.uploadedBy === 'client';
+                      // Always show delete button - server enforces permissions (returns 403 if unauthorized)
+                      const canDelete = true;
                       const displayName = file.originalName || file.filename || 'File';
 
                       return (

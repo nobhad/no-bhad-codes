@@ -132,10 +132,12 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification }: SystemStatusPanelProps) {
+export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showNotification }: SystemStatusPanelProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
   const [data, setData] = useState<SystemStatusData>({
     services: [],
     metrics: [],
@@ -180,6 +182,41 @@ export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showN
     }
   }, [getHeaders]);
 
+  const handleClearCache = useCallback(async () => {
+    setIsClearingCache(true);
+    try {
+      const response = await fetch(API_ENDPOINTS.ADMIN.CACHE_CLEAR, {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to clear cache');
+      showNotification?.('Cache cleared successfully', 'success');
+    } catch (err) {
+      showNotification?.(err instanceof Error ? err.message : 'Failed to clear cache', 'error');
+    } finally {
+      setIsClearingCache(false);
+    }
+  }, [getHeaders, showNotification]);
+
+  const handleTestEmail = useCallback(async () => {
+    setIsSendingTestEmail(true);
+    try {
+      const response = await fetch(API_ENDPOINTS.ADMIN.TEST_EMAIL, {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to send test email');
+      const payload = unwrapApiData<{ to: string }>(await response.json());
+      showNotification?.(`Test email sent to ${payload.to}`, 'success');
+    } catch (err) {
+      showNotification?.(err instanceof Error ? err.message : 'Failed to send test email', 'error');
+    } finally {
+      setIsSendingTestEmail(false);
+    }
+  }, [getHeaders, showNotification]);
+
   useEffect(() => {
     loadStatus();
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -208,6 +245,20 @@ export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showN
       }
       actions={
         <>
+          <IconButton
+            icon="trash-2"
+            onClick={handleClearCache}
+            title="Clear Cache"
+            loading={isClearingCache}
+            disabled={isClearingCache}
+          />
+          <IconButton
+            icon="send"
+            onClick={handleTestEmail}
+            title="Test Email"
+            loading={isSendingTestEmail}
+            disabled={isSendingTestEmail}
+          />
           <label className="status-auto-refresh-label">
             <Checkbox
               checked={autoRefresh}

@@ -75,7 +75,7 @@
   right: 0;
   display: none;
   width: var(--table-col-xl);
-  z-index: var(--z-index-portal-dropdown, 100);
+  z-index: var(--z-index-portal-dropdown, 9700);
   box-shadow: var(--shadow-elevated-md);
 }
 
@@ -137,7 +137,7 @@
   position: absolute;
   top: calc(100% + var(--space-0-5));
   right: 0;
-  z-index: var(--z-index-portal-dropdown, 1000);
+  z-index: var(--z-index-portal-dropdown, 9700);
   min-width: var(--table-col-lg);
   padding: var(--space-3) var(--space-1-5) var(--space-1-5) var(--space-1-5);
   background: var(--portal-bg-dark);

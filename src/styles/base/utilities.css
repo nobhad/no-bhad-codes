@@ -620,42 +620,44 @@ html[data-wireframe="true"] *:focus-visible {
 
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"] {
-  /* ALL portal text colors → BLACK (using color-black token) */
-  --portal-text-light: var(--color-black);
-  --portal-text-primary: var(--color-black);
-  --portal-text-secondary: var(--color-black);
-  --portal-text-muted: var(--color-black);
+  /* ALL portal text colors → BLACK
+     NOTE: Use literal #000000, NOT var(--color-black).
+     portal-theme.css inverts --color-black to #ffffff in light mode. */
+  --portal-text-light: #000000;
+  --portal-text-primary: #000000;
+  --portal-text-secondary: #000000;
+  --portal-text-muted: #000000;
 
   /* ALL generic text colors → BLACK */
-  --color-dark: var(--color-black);
-  --color-white: var(--color-black);
-  --color-text-primary: var(--color-black);
-  --color-text-secondary: var(--color-black);
-  --color-text-tertiary: var(--color-black);
+  --color-dark: #000000;
+  --color-white: #000000;
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+  --color-text-tertiary: #000000;
 
   /* ALL gray colors → BLACK (for text) */
-  --color-gray-100: var(--color-black);
-  --color-gray-200: var(--color-black);
-  --color-gray-300: var(--color-black);
-  --color-gray-400: var(--color-black);
-  --color-gray-500: var(--color-black);
-  --color-neutral-400: var(--color-black);
-  --color-neutral-500: var(--color-black);
-  --color-neutral-600: var(--color-black);
-  --color-neutral-700: var(--color-black);
-  --color-neutral-800: var(--color-black);
-  --color-neutral-900: var(--color-black);
+  --color-gray-100: #000000;
+  --color-gray-200: #000000;
+  --color-gray-300: #000000;
+  --color-gray-400: #000000;
+  --color-gray-500: #000000;
+  --color-neutral-400: #000000;
+  --color-neutral-500: #000000;
+  --color-neutral-600: #000000;
+  --color-neutral-700: #000000;
+  --color-neutral-800: #000000;
+  --color-neutral-900: #000000;
 
-  /* Portal backgrounds → WHITE (using gray tokens) */
-  --portal-bg-pitch: var(--color-light-bg);
-  --portal-bg-darkest: var(--color-light-bg);
-  --portal-bg-darker: var(--color-gray-100);
-  --portal-bg-dark: var(--color-gray-200);
-  --portal-bg-medium: var(--color-gray-300);
-  --portal-bg-light: var(--color-gray-400);
-  --portal-bg-hover: var(--color-gray-200);
-  --portal-bg-readonly: var(--color-gray-100);
+  /* Portal backgrounds → WHITE */
+  --portal-bg-pitch: #ffffff;
+  --portal-bg-darkest: #ffffff;
+  --portal-bg-darker: #f5f5f5;
+  --portal-bg-dark: #e5e5e5;
+  --portal-bg-medium: #d5d5d5;
+  --portal-bg-light: #c5c5c5;
+  --portal-bg-hover: #e5e5e5;
+  --portal-bg-readonly: #f5f5f5;
 
   /* Portal borders → BLACK */
-  --portal-border-color: var(--color-black);
+  --portal-border-color: #000000;
 }

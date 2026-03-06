@@ -3,8 +3,8 @@
 
 <div class="data-table-card"
   data-table-id="<%= tableDef.id %>"
-  data-table-config="<%- JSON.stringify(tableDef) %>"
-  data-table-rows="<%- JSON.stringify(rows) %>"
+  data-table-config="<%= JSON.stringify(tableDef) %>"
+  data-table-rows="<%= JSON.stringify(rows) %>"
   data-initialized="false">
 
   <%- include('table-header', { tableDef, stats }) %>

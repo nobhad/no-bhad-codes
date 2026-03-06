@@ -47,11 +47,13 @@
 
 .confirm-dialog {
   background: var(--portal-bg-darker);
+  border: var(--border-width) solid var(--portal-border-color);
   box-shadow: none;
   width: 100%;
   max-width: var(--modal-width-sm, 400px);
   padding: var(--space-6);
   text-align: left;
+  font-family: var(--font-family-mono);
   animation: confirmDialogSlideUp 0.15s ease;
 }
 
@@ -59,6 +61,7 @@
 .confirm-dialog-header {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
 
@@ -88,24 +91,19 @@
   }
 }
 
+/* Icon proportional to title text — matches .heading-icon pattern in modals */
 .confirm-dialog-icon {
-  width: 32px;
-  height: 32px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
+  color: var(--portal-text-light);
 }
 
 .confirm-dialog-icon svg {
-  width: var(--icon-size-2xl);
-  height: var(--icon-size-2xl);
-}
-
-/* All icons use same color as title text */
-.confirm-dialog-icon {
-  color: var(--portal-text-light);
+  width: 1.25em;
+  height: 1.25em;
 }
 
 .confirm-dialog-title {
@@ -128,6 +126,7 @@
 .confirm-dialog-actions {
   display: flex;
   justify-content: flex-end;
+  gap: var(--space-2);
 }
 
 /* Base button styles - match portal buttons (same shadow as .btn elsewhere) */
@@ -136,7 +135,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-1-5) var(--space-3);
-  font-family: var(--font-family-sans);
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-label);

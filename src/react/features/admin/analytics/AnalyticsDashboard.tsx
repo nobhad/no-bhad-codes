@@ -108,7 +108,8 @@ type ChartType = 'line' | 'bar' | 'pie';
 function resolveCssVar(value: string): string {
   if (!value.startsWith('var(')) return value;
   const name = value.slice(4, -1).trim();
-  const resolved = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  // Read from document.body to pick up [data-page="admin"] scoped theme variables
+  const resolved = getComputedStyle(document.body).getPropertyValue(name).trim();
   return resolved || value;
 }
 

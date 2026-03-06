@@ -46,6 +46,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
         className={cn('icon-btn filter-search-trigger', value && 'has-value')}
         onClick={() => setIsOpen(!isOpen)}
         title="Search"
+        aria-label={placeholder || 'Search'}
       >
         <Search />
       </button>
@@ -128,6 +129,7 @@ export function FilterDropdown({ sections, values, onChange }: FilterDropdownPro
         className={cn('icon-btn filter-dropdown-trigger', activeCount > 0 && 'has-value')}
         onClick={() => setIsOpen(!isOpen)}
         title="Filter"
+        aria-label="Filter options"
       >
         <Filter />
         {activeCount > 0 && (

@@ -187,22 +187,28 @@ export function DataTable<T extends { id: number }>({
     if (selection.selectedCount === 0 || !onBulkDelete) return;
 
     const ids = selection.selectedItems.map((item) => item.id);
-    const result = await onBulkDelete(ids);
 
-    selection.clearSelection();
+    try {
+      const result = await onBulkDelete(ids);
 
-    if (result.failed === 0) {
-      showNotification?.(
-        `Deleted ${result.success} item${result.success !== 1 ? 's' : ''}`,
-        'success'
-      );
-    } else if (result.success > 0) {
-      showNotification?.(`Deleted ${result.success}, failed ${result.failed}`, 'warning');
-    } else {
-      showNotification?.('Failed to delete items', 'error');
+      selection.clearSelection();
+
+      if (result.failed === 0) {
+        showNotification?.(
+          `Deleted ${result.success} item${result.success !== 1 ? 's' : ''}`,
+          'success'
+        );
+      } else if (result.success > 0) {
+        showNotification?.(`Deleted ${result.success}, failed ${result.failed}`, 'warning');
+      } else {
+        showNotification?.('Failed to delete items', 'error');
+      }
+
+      onRefetch();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Delete operation failed';
+      showNotification?.(message, 'error');
     }
-
-    onRefetch();
   }, [selection, onBulkDelete, showNotification, onRefetch]);
 
   // Handle row click

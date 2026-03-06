@@ -203,6 +203,69 @@ export function ModalDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, handleClose]);
 
+  // Focus trap: keep focus within modal when open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const FOCUSABLE_SELECTOR = 'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const handleTrapFocus = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      const modal = dropdownRef.current;
+      if (!modal) return;
+
+      const focusableElements = Array.from(
+        modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      );
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    // Auto-focus the first interactive element
+    const modal = dropdownRef.current;
+    if (modal) {
+      // Delay to allow animation / search focus effect to complete
+      const timer = setTimeout(() => {
+        // If searchable, the search input useEffect handles focus.
+        // Otherwise, focus the first focusable element in the modal.
+        if (!searchable) {
+          const firstFocusable = modal.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+          firstFocusable?.focus();
+        }
+      }, SEARCH_FOCUS_DELAY_MS);
+
+      document.addEventListener('keydown', handleTrapFocus);
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('keydown', handleTrapFocus);
+      };
+    }
+
+    document.addEventListener('keydown', handleTrapFocus);
+    return () => document.removeEventListener('keydown', handleTrapFocus);
+  }, [isOpen, handleClose, searchable]);
+
   return (
     <div className={cn('modal-dropdown-container', className)}>
       {label && (

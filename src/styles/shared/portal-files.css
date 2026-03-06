@@ -638,7 +638,7 @@
   border-right: var(--portal-border);
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .portal-files-sidebar {
     display: block;
   }
@@ -667,7 +667,7 @@
   margin-bottom: var(--space-3);
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .files-mobile-select {
     display: none;
   }

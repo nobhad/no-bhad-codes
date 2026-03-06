@@ -795,6 +795,12 @@
 }
 
 /* Status cells need visible overflow for dropdowns, centered content */
+.data-table :is(th, td).status-col,
+.data-table :is(th, td).status-cell {
+  min-width: 10rem;
+  width: 10rem;
+}
+
 .data-table td.status-cell {
   overflow: visible;
   text-overflow: clip;
@@ -1258,9 +1264,8 @@
   }
 }
 
-/* 800px: Hide budget, priority, invoice, amount, status columns
-   Content-driven breakpoint — no exact custom media match */
-@media (max-width: 800px) {
+/* Hide budget, priority, invoice, amount, status columns on narrow viewports */
+@media (--tablet-landscape) {
   .data-table :is(.budget-col, .budget-cell, .amount-col, .amount-cell, .priority-col, .priority-cell, .invoice-col, .invoice-cell, .status-col, .status-cell):not(.primary-cell) {
     display: none;
   }

@@ -313,6 +313,17 @@ let cachedMobileHeaderTitle: HTMLElement | null | undefined;
 let cachedBreadcrumbList: HTMLElement | null | undefined;
 let cachedPortalPageTitle: HTMLElement | null | undefined;
 
+/**
+ * Reset all cached DOM references.
+ * Call when DOM elements may have been re-rendered (e.g., tab switching).
+ */
+export function resetDOMCache(): void {
+  cachedSidebar = undefined;
+  cachedMobileHeaderTitle = undefined;
+  cachedBreadcrumbList = undefined;
+  cachedPortalPageTitle = undefined;
+}
+
 /** Get cached sidebar */
 function getSidebar(): HTMLElement | null {
   if (cachedSidebar === undefined) {
@@ -482,6 +493,9 @@ let previousActiveTab: string | null = null;
  * This is the same pattern as the admin portal's tab switching.
  */
 function switchTabContent(activeTab: string): void {
+  // Invalidate cached DOM refs since tab switching may re-render elements
+  resetDOMCache();
+
   // 1. Unmount the previous tab's React module (if any) before switching
   if (previousActiveTab && previousActiveTab !== activeTab && mountedTabs.has(previousActiveTab)) {
     const prevReactModuleId = TAB_TO_REACT_MODULE[previousActiveTab];
