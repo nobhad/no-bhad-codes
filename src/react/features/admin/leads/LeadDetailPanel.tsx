@@ -345,16 +345,24 @@ export function LeadDetailPanel({
             <div className="lead-tab-content active">
               <div className="project-detail-meta">
                 {lead.project_name && (
-                  <MetaItem label="Project" value={decodeHtmlEntities(lead.project_name)} />
+                  <MetaItem
+                    label="Project"
+                    value={decodeHtmlEntities(lead.project_name)}
+                    onClick={() => { onClose(); onNavigate?.('project-detail', String(lead.id)); }}
+                  />
                 )}
                 {decodedCompany && (
                   <MetaItem
                     label="Company"
                     value={decodedCompany}
-                    onClick={lead.client_id ? () => onNavigate?.('clients', String(lead.client_id)) : undefined}
+                    onClick={lead.client_id ? () => { onClose(); onNavigate?.('client-detail', String(lead.client_id)); } : undefined}
                   />
                 )}
-                <MetaItem label="Name" value={decodedName} />
+                <MetaItem
+                  label="Name"
+                  value={decodedName}
+                  onClick={lead.client_id ? () => { onClose(); onNavigate?.('client-detail', String(lead.client_id)); } : undefined}
+                />
                 <MetaItem label="Email">
                   <span className="meta-value meta-value-with-copy">
                     {lead.email}
@@ -519,7 +527,7 @@ function MetaItem({
             {value}
           </a>
         ) : (
-          <span className="meta-value">{value || '—'}</span>
+          <span className="meta-value">{value}</span>
         )
       )}
     </div>

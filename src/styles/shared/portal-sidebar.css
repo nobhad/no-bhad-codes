@@ -358,7 +358,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 /* Logout button hover - red color for destructive action */
 .portal .sidebar-btn.btn-logout:hover,
 .portal .sidebar-btn.btn-logout:hover .btn-icon {
-  color: var(--color-error-400);
+  color: var(--color-error-500);
 }
 
 /* =====================================================

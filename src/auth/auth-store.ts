@@ -36,6 +36,30 @@ import { createLogger } from '../utils/logger';
 const logger = createLogger('AuthStore');
 
 // ============================================
+// Module-level guards
+// ============================================
+
+/** AbortController for in-flight refresh requests */
+let refreshAbortController: AbortController | null = null;
+
+/** Deduplication guard for concurrent refresh calls */
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * Runtime type guard for parsed user objects from storage.
+ * Validates the parsed JSON has the minimum required fields.
+ */
+function isValidUser(obj: unknown): obj is AnyUser {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'email' in obj &&
+    'role' in obj
+  );
+}
+
+// ============================================
 // Auth Store Implementation
 // ============================================
 
@@ -104,7 +128,12 @@ function createAuthStore(): AuthStore {
         return null;
       }
 
-      const user = JSON.parse(userStr) as AnyUser;
+      const parsed: unknown = JSON.parse(userStr);
+      if (!isValidUser(parsed)) {
+        logger.warn('Invalid user data in session storage');
+        return null;
+      }
+      const user: AnyUser = parsed;
       const expiresAt = parseInt(expiryStr, 10);
 
       return {
@@ -145,29 +174,40 @@ function createAuthStore(): AuthStore {
       return false;
     }
 
-    try {
-      const refreshEndpoint =
-        state.role === 'admin' ? adminAuthEndpoints.validate : authEndpoints.refresh;
-
-      await fetchWithAuth(refreshEndpoint, { method: 'POST' });
-
-      const newExpiresAt =
-        Date.now() +
-        (state.role === 'admin'
-          ? AUTH_TIMING.ADMIN_SESSION_TIMEOUT_MS
-          : AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS);
-
-      sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, newExpiresAt.toString());
-
-      setState({ expiresAt: newExpiresAt });
-      startRefreshTimer();
-      emitEvent(AUTH_EVENTS.TOKEN_REFRESHED);
-
-      return true;
-    } catch (_error) {
-      handleSessionExpired();
-      return false;
+    // Deduplicate concurrent refresh calls
+    if (refreshPromise) {
+      return refreshPromise;
     }
+
+    refreshPromise = (async () => {
+      try {
+        const refreshEndpoint =
+          state.role === 'admin' ? adminAuthEndpoints.validate : authEndpoints.refresh;
+
+        await fetchWithAuth(refreshEndpoint, { method: 'POST' });
+
+        const newExpiresAt =
+          Date.now() +
+          (state.role === 'admin'
+            ? AUTH_TIMING.ADMIN_SESSION_TIMEOUT_MS
+            : AUTH_TIMING.CLIENT_SESSION_TIMEOUT_MS);
+
+        sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, newExpiresAt.toString());
+
+        setState({ expiresAt: newExpiresAt });
+        startRefreshTimer();
+        emitEvent(AUTH_EVENTS.TOKEN_REFRESHED);
+
+        return true;
+      } catch (_error) {
+        handleSessionExpired();
+        return false;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
   }
 
   function startRefreshTimer(): void {
@@ -210,6 +250,12 @@ function createAuthStore(): AuthStore {
   }
 
   function handleSessionExpired(): void {
+    // Abort any in-flight refresh request
+    if (refreshAbortController) {
+      refreshAbortController.abort();
+      refreshAbortController = null;
+    }
+
     clearSession();
     stopRefreshTimer();
     stopInactivityTimer();
@@ -235,9 +281,14 @@ function createAuthStore(): AuthStore {
     const needsCsrf = !['GET', 'HEAD', 'OPTIONS'].includes(method);
     const csrfToken = needsCsrf ? getCsrfToken() : null;
 
+    // Create an AbortController so in-flight requests can be cancelled on logout/expiry
+    refreshAbortController = new AbortController();
+    const { signal } = refreshAbortController;
+
     const response = await fetch(url, {
       ...options,
       credentials: 'include',
+      signal,
       headers: {
         'Content-Type': 'application/json',
         ...(csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {}),
@@ -398,6 +449,12 @@ function createAuthStore(): AuthStore {
           });
         }
       } finally {
+        // Abort any in-flight refresh request
+        if (refreshAbortController) {
+          refreshAbortController.abort();
+          refreshAbortController = null;
+        }
+
         clearSession();
         stopRefreshTimer();
         stopInactivityTimer();
@@ -521,7 +578,7 @@ function createAuthStore(): AuthStore {
     // ----------------------------------------
 
     isAuthenticated(): boolean {
-      return state.isAuthenticated && !isSessionExpired(state.expiresAt);
+      return state.isAuthenticated && state.expiresAt != null && !isSessionExpired(state.expiresAt);
     },
 
     isAdmin(): boolean {
@@ -587,8 +644,10 @@ function createAuthStore(): AuthStore {
       startRefreshTimer();
       startInactivityTimer();
 
-      // Validate with server
-      store.validateSession();
+      // Validate with server (fire-and-forget with graceful error handling)
+      store.validateSession().catch(() => {
+        handleSessionExpired();
+      });
     } else {
       clearSession();
       sessionStorage.removeItem('nbw_auth_is_first_login');
@@ -633,6 +692,14 @@ function createAuthStore(): AuthStore {
         window.removeEventListener(eventType, handleActivity);
       });
     };
+
+    // Clean up all listeners on page unload to prevent leaks
+    window.addEventListener('beforeunload', () => {
+      activityListenerCleanup?.();
+      storageListenerCleanup?.();
+      stopRefreshTimer();
+      stopInactivityTimer();
+    });
   }
 
   initialize();

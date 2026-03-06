@@ -186,11 +186,126 @@ describe('Portal Routes', () => {
       expect(res.redirect).toHaveBeenCalledWith(301, '/dashboard');
     });
   });
+
+  describe('GET /dashboard/tab/:tabId', () => {
+    const mockFetchTabData = vi.fn();
+    const mockHasTabDataFetcher = vi.fn();
+    const mockGetServerTableDef = vi.fn();
+
+    beforeEach(() => {
+      vi.doMock('../../../server/services/tab-data-service', () => ({
+        fetchTabData: mockFetchTabData,
+        hasTabDataFetcher: mockHasTabDataFetcher,
+        getServerTableDef: mockGetServerTableDef
+      }));
+      mockFetchTabData.mockReset();
+      mockHasTabDataFetcher.mockReset();
+      mockGetServerTableDef.mockReset();
+    });
+
+    it('should return 401 when no auth cookie', async () => {
+      mockVerify.mockImplementation(() => { throw new Error('invalid'); });
+
+      const { portalRoutes } = await import('../../../server/routes/portal');
+      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
+
+      const req = createMockReq({}, { tabId: 'admin-clients' });
+      const res = createMockRes();
+      await handler(req, res);
+
+      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Authentication required');
+    });
+
+    it('should return 401 when JWT has no userId', async () => {
+      mockVerify.mockReturnValue({ type: 'admin' });
+
+      mockHasTabDataFetcher.mockReturnValue(true);
+      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
+
+      const { portalRoutes } = await import('../../../server/routes/portal');
+      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
+
+      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
+      const res = createMockRes();
+      await handler(req, res);
+
+      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Invalid token: missing user ID');
+    });
+
+    it('should return 404 when tab does not exist', async () => {
+      mockVerify.mockReturnValue({ type: 'admin', id: 1 });
+
+      mockHasTabDataFetcher.mockReturnValue(false);
+      mockGetServerTableDef.mockReturnValue(undefined);
+
+      const { portalRoutes } = await import('../../../server/routes/portal');
+      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
+
+      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'nonexistent' });
+      const res = createMockRes();
+      await handler(req, res);
+
+      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found');
+    });
+
+    it('should return 404 when client tries to access admin tab (no enumeration)', async () => {
+      mockVerify.mockReturnValue({ type: 'client', clientId: 42 });
+
+      mockHasTabDataFetcher.mockReturnValue(true);
+      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
+
+      const { portalRoutes } = await import('../../../server/routes/portal');
+      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
+
+      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
+      const res = createMockRes();
+      await handler(req, res);
+
+      // Should return 404, not 403 — prevents tab enumeration
+      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found');
+      expect(mockSendUnauthorized).not.toHaveBeenCalled();
+    });
+
+    it('should return 500 when fetchTabData returns null', async () => {
+      mockVerify.mockReturnValue({ type: 'admin', id: 1 });
+
+      mockHasTabDataFetcher.mockReturnValue(true);
+      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
+      mockFetchTabData.mockResolvedValue(null);
+
+      const { portalRoutes } = await import('../../../server/routes/portal');
+      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
+
+      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
+      const res = createMockRes();
+      await handler(req, res);
+
+      expect(mockSendServerError).toHaveBeenCalledWith(res, 'Failed to fetch tab data');
+    });
+
+    it('should return 500 on unexpected errors', async () => {
+      mockVerify.mockReturnValue({ type: 'admin', id: 1 });
+
+      mockHasTabDataFetcher.mockReturnValue(true);
+      mockGetServerTableDef.mockReturnValue({ id: 'admin-clients', portal: 'admin' });
+      mockFetchTabData.mockRejectedValue(new Error('DB down'));
+
+      const { portalRoutes } = await import('../../../server/routes/portal');
+      const handler = getRouteHandler(portalRoutes, 'get', '/dashboard/tab/:tabId');
+
+      const req = createMockReq({ auth_token: 'valid-token' }, { tabId: 'admin-clients' });
+      const res = createMockRes();
+      await handler(req, res);
+
+      expect(mockSendServerError).toHaveBeenCalled();
+    });
+  });
 });
 
 /**
  * Helper to extract a route handler from an Express router
  * by matching method + path. Works with Express 4.x layer stack.
+ * For routes with middleware (e.g., rate limiter), returns the last handler.
  */
 function getRouteHandler(router: any, method: string, path: string) {
   const layer = router.stack.find((l: any) => {
@@ -198,5 +313,7 @@ function getRouteHandler(router: any, method: string, path: string) {
     return l.route.path === path && l.route.methods[method];
   });
   if (!layer) throw new Error(`No route found for ${method.toUpperCase()} ${path}`);
-  return layer.route.stack[0].handle;
+  // Return the last handler in the stack (after middleware)
+  const handlers = layer.route.stack;
+  return handlers[handlers.length - 1].handle;
 }

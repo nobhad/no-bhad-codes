@@ -1459,7 +1459,7 @@ html[data-theme="light"] .portal .funnel-value {
   gap: var(--portal-section-gap);
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .stats-grid,
   .tw-grid-stats {
     grid-template-columns: repeat(4, 1fr);
@@ -1474,14 +1474,14 @@ html[data-theme="light"] .portal .funnel-value {
   gap: var(--portal-section-gap);
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .cards-grid,
   .tw-grid-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 1024px) {
+@media (--laptop-up) {
   .cards-grid,
   .tw-grid-cards {
     grid-template-columns: repeat(3, 1fr);
@@ -1541,7 +1541,7 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .tw-col-span-2 { grid-column: span 2 / span 2; }
 
-@media (min-width: 1024px) {
+@media (--laptop-up) {
   .lg\:tw-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lg\:tw-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lg\:tw-col-span-2 { grid-column: span 2 / span 2; }

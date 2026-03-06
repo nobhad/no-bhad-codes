@@ -211,12 +211,12 @@ export async function mountReactModule(
       onSelectProject: context.onSelectProject
     };
 
-    // Mount the React component
-    const _cleanup = mountFn(container, mountOptions);
+    // Mount the React component and capture cleanup function
+    const cleanup = mountFn(container, mountOptions);
 
-    // Store mount state for cleanup
+    // Store mount state for cleanup - prefer mount's returned cleanup, fall back to module's unmount export
     mountedModules.set(viewId, {
-      unmountFn: typeof unmountFnRef === 'function' ? unmountFnRef : null,
+      unmountFn: typeof cleanup === 'function' ? cleanup : (typeof unmountFnRef === 'function' ? unmountFnRef : null),
       container
     });
 

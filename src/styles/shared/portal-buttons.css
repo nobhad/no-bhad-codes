@@ -173,7 +173,7 @@ button.dropdown-trigger > svg.dropdown-caret,
   border: none;
 }
 .btn-filled:hover {
-  background: var(--color-brand-hover, var(--color-primary-hover));
+  background: var(--color-brand-hover, var(--color-interactive-primary-hover));
   color: var(--color-white);
   border: none;
 }

@@ -636,7 +636,7 @@
 .lead-tab {
   position: relative;
   padding: var(--space-0-5) var(--space-1-5);
-  background: var(--portal-bg-light);
+  background: transparent;
   border: none;
   color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
@@ -645,11 +645,11 @@
 }
 
 .lead-tab:hover {
-  color: var(--portal-text-primary);
+  color: var(--portal-text-light);
 }
 
 .lead-tab.active {
-  background: var(--portal-bg-readonly);
+  background: transparent;
   color: var(--color-primary);
   font-weight: var(--font-weight-medium);
 }
