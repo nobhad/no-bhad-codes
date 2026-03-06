@@ -108,6 +108,7 @@
 
 /* Projects page */
 @import "./pages/projects.css" layer(pages);
+@import "./pages/projects-detail.css" layer(pages);
 
 /* Terminal intake form */
 @import "./pages/terminal-intake.css" layer(pages);
@@ -247,11 +248,8 @@ body {
     visibility: visible;
   }
 
-  .contact-section h2 {
+  .contact-section .section-heading {
     margin-bottom: 1.5rem;
-    text-align: left;
-    width: 100%;
-    letter-spacing: var(--letter-spacing-widest);
   }
 }
 

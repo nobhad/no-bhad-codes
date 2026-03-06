@@ -163,7 +163,7 @@
   .about-section .about-content {
     display: flex;
     flex-direction: column;
-    padding: 1.5rem 1rem 2rem 1rem;
+    padding: 4rem 1rem 6rem 1rem;
     gap: 1rem;
     max-width: 100%;
     width: 100%;
@@ -216,20 +216,15 @@
     text-align: left;
   }
 
-  /* Heading - uppercase with letter-spacing */
-  .about-text-column h2 {
-    text-transform: uppercase;
+  /* About heading - tighter letter-spacing on mobile */
+  .about-text-column .section-heading {
     letter-spacing: 0.2em;
     margin-bottom: 0.25rem;
   }
 
-  /* Divider - thick dark line */
-  .about-divider {
+  /* About divider - full width on mobile */
+  .about-section .section-divider {
     width: 100%;
-    height: 4px;
-    background: var(--color-dark);
-    border: none;
-    margin: 0 0 1rem 0;
   }
 
   .about-text-column p {
@@ -246,10 +241,7 @@
      Matches contact page: tight h2-to-hr gap
      ========================================== */
 
-  .about-section h2,
-  .contact-section h2,
-  .projects-section h2,
-  .portfolio-section h2 {
+  .section-heading {
     font-size: clamp(2.5rem, 10vw, 4rem);
     line-height: 1.1;
     margin-top: 1.5rem;
@@ -257,9 +249,8 @@
     text-align: left;
   }
 
-  /* HR spacing on mobile - matches contact page */
-  .about-divider,
-  .projects-section hr {
+  /* Divider spacing on mobile */
+  .section-divider {
     margin-top: 0;
     margin-bottom: 1rem;
   }
@@ -417,10 +408,7 @@
     width: 100%;
   }
 
-  /* Center the heading */
-  .projects-section h2 {
-    text-align: center;
-  }
+  /* Heading inherits shared section h2 styles — no per-page override */
 
   /* Show card category on mobile — override pages-layer hide */
   .projects-section .card-category {
@@ -465,9 +453,7 @@
   }
 
   /* Section headings on XS — tighter than small-mobile */
-  .about-section h2,
-  .projects-section h2,
-  .portfolio-section h2 {
+  .section-heading {
     font-size: var(--font-size-2xl);
     margin-top: 1rem;
   }

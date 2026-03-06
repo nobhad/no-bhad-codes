@@ -4,6 +4,7 @@
     <p>&copy; <span id="<%= portalType %>-copyright-year"></span> No Bhad Codes. All rights reserved.</p>
   </div>
 </footer>
-<script>
-  document.getElementById('<%= portalType %>-copyright-year').textContent = new Date().getFullYear();
+<script type="module">
+  import { setCopyrightYear } from '/src/utils/set-copyright-year.ts';
+  setCopyrightYear('<%= portalType %>-copyright-year');
 </script>

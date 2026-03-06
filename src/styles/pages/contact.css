@@ -121,23 +121,11 @@ section.contact-section .contact-hero-desktop {
   box-sizing: border-box;
 }
 
-/* Heading */
-section.contact-section h2 {
-  margin: 0;
-  padding: 0;
-  text-align: left;
-  width: 100%;
+/* Heading - extends .section-heading from layout.css */
+section.contact-section .section-heading {
+  font-size: var(--font-size-5xl);
   overflow: visible;
   position: relative;
-  font-size: var(--font-size-5xl);
-}
-
-/* Divider — full width of content */
-.contact-section hr {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 0 1rem;
-  height: 6px;
 }
 
 /* Contact layout — single column */
@@ -218,7 +206,7 @@ p.contact-options {
 /* Below large desktop (≤1099px): scale down heading, use medium padding.
    Mobile override (2.5rem) in mobile/contact.css (responsive layer) takes precedence. */
 @media (--laptop-wide) {
-  section.contact-section h2 {
+  section.contact-section .section-heading {
     font-size: var(--font-size-4xl);
   }
 

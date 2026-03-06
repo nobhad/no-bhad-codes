@@ -378,4 +378,51 @@ router.get(
   })
 );
 
+/**
+ * @swagger
+ * /api/settings/invoice:
+ *   put:
+ *     tags:
+ *       - Settings
+ *     summary: Update invoice settings
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               defaultCurrency:
+ *                 type: string
+ *               defaultTerms:
+ *                 type: string
+ *               prefix:
+ *                 type: string
+ *               nextSequence:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Invoice settings updated successfully
+ */
+router.put(
+  '/invoice',
+  settingsModifyRateLimit,
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const invoiceSettings = await settingsService.updateInvoiceSettings(req.body);
+
+    await auditLogger.log({
+      action: 'invoice_settings_updated',
+      entityType: 'system_settings',
+      entityId: req.params.key,
+      userId: req.user?.id,
+      changes: req.body
+    });
+
+    sendSuccess(res, invoiceSettings);
+  })
+);
+
 export default router;

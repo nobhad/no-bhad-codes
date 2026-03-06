@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** March 2, 2026
+**Last Updated:** March 6, 2026
 
 This document defines the CSS architecture, naming conventions, and design token system used throughout the application.
 
@@ -234,6 +234,64 @@ src/
 2. **No `!important`** - Fix specificity instead
 3. **No hardcoded pixels for spacing** - Use variables
 4. **No color names in variables** - Use semantic names
+
+---
+
+## Tailwind (`tw-`) vs Portal CSS Classes
+
+The codebase uses **two CSS systems** with clear boundaries:
+
+### Portal CSS Classes (Primary)
+
+Used in EJS templates and vanilla TS orchestrators. These are the standard:
+
+```css
+/* Forms */
+.form-group, .field-label, .form-input, .form-textarea, .form-row, .form-select
+
+/* Buttons */
+.btn, .btn-primary, .btn-secondary, .btn-danger, .btn-sm, .btn-icon
+
+/* Tables */
+.data-table, .data-table th, .data-table td
+
+/* Layout */
+.portal-card, .portal-container, .portal-section, .detail-grid, .detail-row
+
+/* Modals */
+.admin-modal-overlay, .admin-modal-content, .admin-modal-header, .admin-modal-body
+
+/* Status */
+.status-badge, .status-badge-active, .status-badge-completed
+```
+
+### Tailwind (`tw-` prefix) - React Only
+
+All Tailwind classes are prefixed with `tw-` to avoid collisions. Used **only inside React components** for layout utilities:
+
+```tsx
+// Correct: tw- prefix in React components
+<div className="tw-flex tw-items-center tw-gap-2">
+
+// WRONG: Unprefixed Tailwind
+<div className="flex items-center gap-2">
+
+// WRONG: Tailwind in EJS or vanilla TS
+```
+
+### When to Use Which
+
+| Context | System | Example |
+|---------|--------|---------|
+| EJS templates | Portal CSS | `class="form-input"` |
+| Vanilla TS (DOM creation) | Portal CSS | `el.className = 'btn btn-primary'` |
+| React component layout | Tailwind (`tw-`) | `className="tw-flex tw-gap-2"` |
+| React component semantics | Portal CSS | `className="portal-card"` |
+| React forms | Portal CSS | `className="form-group"` |
+
+### Rule
+
+**Portal CSS classes take priority.** Only use `tw-` utilities for flex/grid layout, spacing, and positioning within React components. All semantic styling (buttons, forms, tables, cards, badges) must use portal CSS classes.
 
 ---
 

@@ -40,10 +40,7 @@
     --contact-textarea-height: clamp(120px, 32vw, 240px);
   }
 
-  /* Mobile heading: snap to fixed size, no fluid scaling */
-  section.contact-section h2 {
-    font-size: var(--font-size-3xl);
-  }
+  /* Heading inherits shared section h2 styles from mobile/layout.css */
 
   /* Allow section to scroll vertically; block horizontal scroll.
      overflow-x must be explicitly hidden — setting overflow-y: auto
@@ -72,10 +69,7 @@
  * ============================================ */
 
 @media (--xs-mobile) {
-  section.contact-section h2 {
-    font-size: var(--font-size-2xl);
-    margin-top: 0.75rem;
-  }
+  /* Heading inherits shared section h2 styles from mobile/layout.css */
 
   .contact-section {
     padding-top: 0.5rem;

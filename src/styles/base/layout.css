@@ -185,6 +185,37 @@ section.about-section.page-active {
 }
 
 /* ============================================
+ * SHARED SECTION ELEMENTS
+ * ============================================
+ * Consistent heading + divider pattern used across
+ * all main site sections (about, contact, projects).
+ * Page-specific files can extend these with overrides.
+ */
+
+/* Section heading - uppercase, large, left-aligned */
+.section-heading {
+  font-family: var(--font-family-acme);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-widest);
+  color: var(--color-dark);
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  text-align: left;
+  width: 100%;
+}
+
+/* Section divider - thick dark line below heading */
+.section-divider {
+  width: 100%;
+  height: 4px;
+  background: var(--color-dark);
+  border: none;
+  margin: 0 0 1rem;
+}
+
+/* ============================================
  * CONTAINER SYSTEM
  * ============================================ */
 

@@ -8,8 +8,7 @@
  * Includes hero section, filters, and project grid.
  */
 
-/* Split modules */
-@import "./projects-detail.css";
+/* Split modules — no bare import; projects-detail.css imported directly in main.css */
 
 /* ===============================================
    PROJECTS MAIN LAYOUT
@@ -514,22 +513,15 @@ div.page-hero-desktop {
   align-self: center;
 }
 
-/* Projects heading - minimal top margin */
-.projects-section h2 {
-  margin: 0;
+/* Projects heading - extends .section-heading from layout.css */
+.projects-section .section-heading {
   margin-top: 3rem;
   margin-bottom: 0.25rem;
-  padding: 0;
-  text-align: left;
-  width: 100%;
 }
 
-/* hr - space below for project list */
-.projects-section hr {
-  margin-top: 0;
+/* Divider - extends .section-divider, space below for project list */
+.projects-section .section-divider {
   margin-bottom: 2rem;
-  margin-left: 0;
-  margin-right: auto;
 }
 
 /* WIP sign container - only shown when not enough documented projects */
@@ -779,13 +771,12 @@ div.page-hero-desktop {
 
 /* Medium viewport adjustments (600px - 1100px) */
 @media (--tablet-to-desktop) {
-  .projects-section h2 {
+  .projects-section .section-heading {
     margin-top: 0;
     margin-bottom: 0.25rem;
   }
 
-  .projects-section hr {
-    margin-top: 0;
+  .projects-section .section-divider {
     margin-bottom: 2rem;
   }
 
@@ -807,7 +798,7 @@ div.page-hero-desktop {
 /* Mobile adjustments for projects section */
 @media (--mobile) {
   .projects-section {
-    padding: 1rem;
+    padding: 0;
     flex-direction: column;
     align-items: stretch; /* Override flex-start so .projects-content fills full width */
     gap: 0;
@@ -816,7 +807,7 @@ div.page-hero-desktop {
   .projects-content {
     flex-direction: column;
     gap: 0;
-    padding: 0.5rem 0;
+    padding: 4rem 1rem 6rem;
     align-items: stretch; /* Reset flex-start so children fill full width */
     width: 100%; /* Explicit to work around align-items: flex-start on parent */
     max-width: 100%; /* Override 90vw cap so content fills full padding box */
@@ -834,9 +825,7 @@ div.page-hero-desktop {
     flex-shrink: 0; /* Don't let it shrink below its natural width */
   }
 
-  .projects-section h2 {
-    text-align: left;
-  }
+  /* Heading inherits shared section h2 styles from mobile/layout.css */
 
   /* Work cards full width on mobile */
   .work-half-wrapper {
@@ -893,20 +882,10 @@ div.page-hero-desktop {
   }
 }
 
-/* Mobile: match about section h2 size from mobile/layout.css */
-@media (--mobile) {
-  section.projects-section h2 {
-    font-size: var(--font-size-3xl);
-    font-family: var(--font-family-acme);
-    font-weight: var(--font-weight-bold);
-    text-transform: uppercase;
-  }
-}
+/* Mobile: inherits from mobile/layout.css shared rule — clamp(2.5rem, 10vw, 4rem) */
+/* No override needed; font-family + text-transform come from base typography */
 
 @media (--small-mobile) {
-  section.projects-section h2 {
-    font-size: var(--font-size-2xl);
-  }
 
   .projects-content {
     gap: 0;
@@ -1026,7 +1005,7 @@ div.page-hero-desktop {
   display: none;
 }
 
-@media (--tablet) {
+@media (--desktop-l) {
   .crt-tv {
     display: block;
     position: sticky;
@@ -1062,7 +1041,7 @@ div.page-hero-desktop {
   margin: 0 0 2rem 0;
 }
 
-@media (--tablet) {
+@media (--desktop-l) {
   .projects-flex-row {
     flex-direction: row;
     gap: 8rem;
