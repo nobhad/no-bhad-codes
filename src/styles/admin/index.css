@@ -58,6 +58,8 @@
 @import "./workflows.css";
 @import "./questionnaires.css";
 @import "./system-status.css";
+@import "./configuration.css";
+@import "./audit-log.css";
 @import "../deliverables.css";
 
 /* Layout refinements */

@@ -1,5 +1,20 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  BarElement,
+  BarController,
+  ArcElement,
+  PieController,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
 import {
   Play,
   Save,
@@ -9,6 +24,12 @@ import {
   Code,
   Trash2
 } from 'lucide-react';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale, LinearScale, PointElement, LineElement, LineController,
+  BarElement, BarController, ArcElement, PieController, Tooltip, Legend, Filler
+);
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { createLogger } from '../../../../utils/logger';
@@ -347,15 +368,145 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                   )}
                 </div>
               ) : (
-                <div className="empty-state analytics-chart-empty">
-                  <BarChart3 className="analytics-chart-icon" />
-                  <p>Chart visualization</p>
-                  <p className="text-muted analytics-chart-hint">Select numeric columns to visualize</p>
-                </div>
+                <QueryChart result={result} />
               )}
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Chart colors using CSS variable fallbacks */
+const CHART_COLORS = [
+  'rgba(0, 175, 240, 0.8)',
+  'rgba(75, 192, 192, 0.8)',
+  'rgba(255, 159, 64, 0.8)',
+  'rgba(153, 102, 255, 0.8)',
+  'rgba(255, 99, 132, 0.8)',
+  'rgba(54, 162, 235, 0.8)',
+  'rgba(255, 206, 86, 0.8)',
+  'rgba(231, 76, 60, 0.8)'
+];
+
+/** Detect which columns are numeric */
+function getNumericColumns(result: QueryResult): string[] {
+  return result.columns.filter((col) => {
+    const sample = result.rows.slice(0, 10).map(r => r[col]);
+    return sample.some(v => v !== null && v !== undefined && !isNaN(Number(v)));
+  });
+}
+
+/** Get best label column (first non-numeric string column) */
+function getLabelColumn(result: QueryResult, numericCols: string[]): string | null {
+  return result.columns.find(c => !numericCols.includes(c)) || null;
+}
+
+/** Chart component for query results */
+function QueryChart({ result }: { result: QueryResult }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<ChartJS | null>(null);
+  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('bar');
+
+  const numericCols = getNumericColumns(result);
+  const labelCol = getLabelColumn(result, numericCols);
+
+  useEffect(() => {
+    if (!canvasRef.current || numericCols.length === 0) return;
+
+    if (chartRef.current) {
+      chartRef.current.destroy();
+      chartRef.current = null;
+    }
+
+    const maxRows = chartType === 'pie' ? 20 : 50;
+    const rows = result.rows.slice(0, maxRows);
+    const labels = labelCol
+      ? rows.map(r => String(r[labelCol] ?? ''))
+      : rows.map((_, i) => String(i + 1));
+
+    const datasets = numericCols.slice(0, 5).map((col, idx) => ({
+      label: col,
+      data: rows.map(r => Number(r[col]) || 0),
+      backgroundColor: chartType === 'pie'
+        ? rows.map((_, i) => CHART_COLORS[i % CHART_COLORS.length])
+        : CHART_COLORS[idx % CHART_COLORS.length],
+      borderColor: chartType === 'line'
+        ? CHART_COLORS[idx % CHART_COLORS.length]
+        : 'transparent',
+      borderWidth: chartType === 'line' ? 2 : 0,
+      tension: 0.3,
+      fill: chartType === 'line'
+    }));
+
+    // For pie charts, only use the first numeric column
+    const pieDatasets = chartType === 'pie' ? [datasets[0]] : datasets;
+
+    const computedStyle = getComputedStyle(document.documentElement);
+    const textColor = computedStyle.getPropertyValue('--portal-text-secondary').trim() || '#999';
+    const gridColor = computedStyle.getPropertyValue('--portal-border-color').trim() || '#333';
+
+    chartRef.current = new ChartJS(canvasRef.current, {
+      type: chartType,
+      data: { labels, datasets: pieDatasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: numericCols.length > 1 || chartType === 'pie',
+            labels: { color: textColor, font: { size: 11 } }
+          },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        ...(chartType !== 'pie' && {
+          scales: {
+            x: {
+              ticks: { color: textColor, font: { size: 10 }, maxRotation: 45 },
+              grid: { color: gridColor }
+            },
+            y: {
+              ticks: { color: textColor, font: { size: 10 } },
+              grid: { color: gridColor },
+              beginAtZero: true
+            }
+          }
+        })
+      }
+    });
+
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, [result, chartType, numericCols, labelCol]);
+
+  if (numericCols.length === 0) {
+    return (
+      <div className="empty-state analytics-chart-empty">
+        <BarChart3 className="analytics-chart-icon" />
+        <p>No numeric columns to chart</p>
+        <p className="text-muted analytics-chart-hint">Query must return at least one numeric column</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="analytics-chart-container">
+      <div className="analytics-chart-type-toggle">
+        {(['bar', 'line', 'pie'] as const).map((type) => (
+          <button
+            key={type}
+            className={`config-section-tab ${chartType === type ? 'is-active' : ''}`}
+            onClick={() => setChartType(type)}
+          >
+            {type.charAt(0).toUpperCase() + type.slice(1)}
+          </button>
+        ))}
+      </div>
+      <div className="analytics-chart-canvas-wrapper">
+        <canvas ref={canvasRef} />
       </div>
     </div>
   );

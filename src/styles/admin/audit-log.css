@@ -1,0 +1,219 @@
+/**
+ * ===============================================
+ * AUDIT LOG VIEWER COMPONENT
+ * ===============================================
+ * @file src/styles/admin/audit-log.css
+ *
+ * Styles for the audit log viewer under Settings.
+ */
+
+/* ================================================
+   Content wrapper
+   ================================================ */
+.audit-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ================================================
+   Filters
+   ================================================ */
+.audit-filters {
+  padding: var(--space-3);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+.audit-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.audit-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 160px;
+}
+
+.audit-filter-actions {
+  display: flex;
+  gap: var(--space-1);
+  align-self: flex-end;
+  padding-bottom: 1px;
+}
+
+/* ================================================
+   Table
+   ================================================ */
+.audit-table-wrapper {
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.audit-th {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--portal-text-secondary);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+  white-space: nowrap;
+}
+
+.audit-tr {
+  transition: background-color var(--transition-fast);
+}
+
+.audit-tr:hover {
+  background: var(--portal-bg-medium);
+}
+
+.audit-td {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-primary);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+  vertical-align: top;
+}
+
+.audit-td-time {
+  white-space: nowrap;
+  color: var(--portal-text-muted);
+}
+
+.audit-td-user {
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audit-td-details {
+  max-width: 240px;
+}
+
+/* ================================================
+   Action badges
+   ================================================ */
+.audit-action-badge {
+  display: inline-block;
+  padding: var(--space-0-5) var(--space-1-5);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: var(--border-width) solid var(--portal-border-color);
+  white-space: nowrap;
+}
+
+.audit-action-create {
+  color: var(--status-completed);
+  border-color: var(--status-completed);
+}
+
+.audit-action-update,
+.audit-action-setting {
+  color: var(--status-active);
+  border-color: var(--status-active);
+}
+
+.audit-action-delete {
+  color: var(--status-cancelled);
+  border-color: var(--status-cancelled);
+}
+
+.audit-action-login {
+  color: var(--app-color-primary);
+  border-color: var(--app-color-primary);
+}
+
+/* ================================================
+   Entity & details
+   ================================================ */
+.audit-entity-type {
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+.audit-entity-name {
+  color: var(--portal-text-muted);
+}
+
+.audit-changes-summary {
+  color: var(--portal-text-secondary);
+  font-style: italic;
+}
+
+.audit-request-info {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.audit-no-details {
+  color: var(--portal-text-muted);
+}
+
+/* ================================================
+   Pagination
+   ================================================ */
+.audit-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.audit-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: var(--border-width) solid var(--portal-border-color);
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.audit-page-btn:hover:not(:disabled) {
+  border-color: var(--app-color-primary);
+  color: var(--app-color-primary);
+}
+
+.audit-page-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.audit-page-info {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-secondary);
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+@media (--mobile) {
+  .audit-filter-row {
+    flex-direction: column;
+  }
+
+  .audit-filter-field {
+    width: 100%;
+  }
+
+  .audit-td-details {
+    display: none;
+  }
+}

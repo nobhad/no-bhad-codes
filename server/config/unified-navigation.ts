@@ -221,14 +221,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     shortcut: '2',
     dataTab: 'work'
   },
-  {
-    id: 'workflows',
-    label: 'Workflows',
-    icon: 'lineChart',
-    roles: ['admin'],
-    order: 3,
-    shortcut: '3'
-  },
+  // Workflows moved under Settings as a subtab (no longer top-level)
   {
     id: 'crm',
     label: 'CRM',
@@ -318,7 +311,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin'],
     order: 16,
     shortcut: '8',
-    ariaLabel: 'System Status'
+    ariaLabel: 'Settings & Configuration'
   },
 
   // ========== CLIENT-ONLY TABS ==========
@@ -429,17 +422,19 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
       { id: 'projects', label: 'Projects', roles: ['admin'] }
     ]
   },
-  // Admin: Workflows subtabs
+  // Admin: Settings subtabs (system tab)
   {
-    id: 'workflows-subtabs',
-    forTab: 'workflows',
+    id: 'settings-admin-subtabs',
+    forTab: 'system',
     roles: ['admin'],
     mode: 'primary',
     subtabs: [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
-      { id: 'approvals', label: 'Approvals', roles: ['admin'] },
-      { id: 'triggers', label: 'Triggers', roles: ['admin'] },
-      { id: 'email-templates', label: 'Email Templates', roles: ['admin'] }
+      { id: 'configuration', label: 'Configuration', roles: ['admin'] },
+      { id: 'workflows', label: 'Workflows', roles: ['admin'] },
+      { id: 'email-templates', label: 'Email Templates', roles: ['admin'] },
+      { id: 'audit-log', label: 'Audit Log', roles: ['admin'] },
+      { id: 'system-health', label: 'System Health', roles: ['admin'] }
     ]
   },
   // Admin: Knowledge subtabs
@@ -496,7 +491,7 @@ export const UNIFIED_TAB_TITLES: Record<string, string> = {
   analytics: 'Analytics',
   workflows: 'Workflows',
   support: 'Knowledge Base',
-  system: 'System Status',
+  system: 'Settings',
   work: 'Work',
   crm: 'CRM',
   documents: 'Documents',

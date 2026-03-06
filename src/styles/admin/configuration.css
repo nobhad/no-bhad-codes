@@ -1,0 +1,207 @@
+/**
+ * ===============================================
+ * BUSINESS CONFIGURATION COMPONENT
+ * ===============================================
+ * @file src/styles/admin/configuration.css
+ *
+ * Styles for the business configuration panel used in
+ * the admin settings tab. Uses TableLayout for consistent
+ * layout with other admin tabs.
+ */
+
+/* ================================================
+   Content wrapper
+   ================================================ */
+.config-content {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ================================================
+   Section tabs (Business / Payment / Invoice)
+   ================================================ */
+.config-section-tabs {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+  padding-bottom: var(--space-2);
+}
+
+.config-section-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1-5) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-secondary);
+  background: none;
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.config-section-tab:hover {
+  color: var(--portal-text-primary);
+}
+
+.config-section-tab.is-active {
+  color: var(--app-color-primary);
+  border-color: var(--app-color-primary);
+}
+
+/* ================================================
+   Form sections
+   ================================================ */
+.config-form-section {
+  padding: var(--space-1) 0;
+}
+
+.config-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.config-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.config-form-field--wide {
+  grid-column: 1 / -1;
+}
+
+.config-form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+}
+
+.config-textarea {
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+}
+
+.config-readonly-value {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--portal-text-primary);
+  background: var(--portal-bg-medium);
+  border: var(--border-width) solid var(--portal-border-color);
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+/* ================================================
+   Save bar (sticky bottom)
+   ================================================ */
+.config-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) 0 0;
+  border-top: var(--border-width) solid var(--portal-border-color);
+}
+
+.config-save-hint {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.config-save-bar .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.config-spinner {
+  animation: config-spin 1s linear infinite;
+}
+
+@keyframes config-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ================================================
+   Overview (compact) mode
+   ================================================ */
+.config-overview {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.config-overview-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.config-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--portal-text-secondary);
+  margin: 0;
+}
+
+.config-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-2);
+}
+
+.config-overview-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.config-overview-label {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+}
+
+.config-overview-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--portal-text-primary);
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+@media (--mobile) {
+  .config-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-section-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .config-overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
