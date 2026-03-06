@@ -131,6 +131,15 @@ export const API_ENDPOINTS = {
     CACHE_CLEAR: '/api/admin/cache/clear',
     CACHE_INVALIDATE: '/api/admin/cache/invalidate',
 
+    // Audit
+    AUDIT_LOG: '/api/admin/audit-log',
+
+    // Settings / Configuration
+    SETTINGS: '/api/settings',
+    SETTINGS_BUSINESS_INFO: '/api/settings/business/info',
+    SETTINGS_PAYMENT: '/api/settings/payment',
+    SETTINGS_INVOICE: '/api/settings/invoice',
+
     // Knowledge Base
     KB_CATEGORIES: '/api/kb/admin/categories',
     KB_ARTICLES: '/api/kb/admin/articles',
@@ -233,7 +242,8 @@ export const buildEndpoint = {
   adminAdHocQuery: (id: number | string) => `${API_ENDPOINTS.ADMIN.AD_HOC_ANALYTICS_QUERIES}/${id}`,
 
   // Approvals
-  approvalRespond: (id: number | string) => `${API_ENDPOINTS.APPROVALS}/requests/${id}/respond`
+  approvalRespond: (id: number | string) => `${API_ENDPOINTS.APPROVALS}/requests/${id}/respond`,
+
 } as const;
 
 /**

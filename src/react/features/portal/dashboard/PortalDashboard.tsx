@@ -42,6 +42,8 @@ const DEFAULT_ACTIVITY_ICON = 'A';
 const NAV_TAB_PROJECTS = 'projects';
 const NAV_TAB_INVOICES = 'invoices';
 const NAV_TAB_MESSAGES = 'messages';
+const NAV_TAB_CONTRACTS = 'contracts';
+const NAV_TAB_DOC_REQUESTS = 'files';
 
 // ============================================================================
 // TYPES
@@ -323,6 +325,46 @@ export function PortalDashboard({
                 variant={stats?.unreadMessages ? 'alert' : 'default'}
               />
             </div>
+            {(stats?.pendingContracts ?? 0) > 0 && (
+              <div
+                className="stat-card-clickable"
+                onClick={() => handleStatClick(NAV_TAB_CONTRACTS)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleStatClick(NAV_TAB_CONTRACTS);
+                  }
+                }}
+              >
+                <StatCard
+                  label="Pending Contracts"
+                  value={stats?.pendingContracts ?? 0}
+                  variant="warning"
+                />
+              </div>
+            )}
+            {(stats?.pendingDocRequests ?? 0) > 0 && (
+              <div
+                className="stat-card-clickable"
+                onClick={() => handleStatClick(NAV_TAB_DOC_REQUESTS)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleStatClick(NAV_TAB_DOC_REQUESTS);
+                  }
+                }}
+              >
+                <StatCard
+                  label="Document Requests"
+                  value={stats?.pendingDocRequests ?? 0}
+                  variant="warning"
+                />
+              </div>
+            )}
           </div>
 
           {/* Recent Activity */}

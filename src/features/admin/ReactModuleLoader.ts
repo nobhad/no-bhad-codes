@@ -163,14 +163,9 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
     unmountFn: 'unmountKnowledgeBase'
   },
   system: {
-    import: () => import('../../react/features/admin/system-status/mount'),
-    mountFn: 'mountSystemStatusPanel',
-    unmountFn: 'unmountSystemStatusPanel'
-  },
-  workflows: {
-    import: () => import('../../react/features/admin/workflows/mount'),
-    mountFn: 'mountWorkflowsManager',
-    unmountFn: 'unmountWorkflowsManager'
+    import: () => import('../../react/features/admin/settings/mount'),
+    mountFn: 'mountSettingsManager',
+    unmountFn: 'unmountSettingsManager'
   },
   'email-templates': {
     import: () => import('../../react/features/admin/email-templates/mount'),

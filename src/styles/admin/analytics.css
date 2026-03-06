@@ -632,4 +632,25 @@
   }
 }
 
+/* ============================================
+   Ad-Hoc Analytics: Chart Container
+   ============================================ */
+
+.analytics-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.analytics-chart-type-toggle {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.analytics-chart-canvas-wrapper {
+  position: relative;
+  height: 320px;
+}
+
 /* .truncate-text styling in project-detail.css */

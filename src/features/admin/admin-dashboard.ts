@@ -117,8 +117,7 @@ const ADMIN_TAB_TITLES: Record<string, string> = {
   'ad-hoc-requests': 'Ad Hoc Requests',
   questionnaires: 'Questionnaires',
   support: 'Knowledge Base',
-  system: 'System Status',
-  workflows: 'Workflows',
+  system: 'Settings',
   work: 'Work',
   crm: 'CRM',
   documents: 'Documents',
@@ -144,9 +143,9 @@ const ADMIN_TAB_GROUPS = {
     tabs: ['overview', 'invoices', 'contracts', 'document-requests', 'questionnaires'],
     defaultTab: 'overview'
   },
-  workflows: {
-    label: 'Workflows',
-    tabs: ['overview', 'approvals', 'triggers', 'email-templates'],
+  system: {
+    label: 'Settings',
+    tabs: ['overview', 'configuration', 'workflows', 'email-templates', 'audit-log', 'system-health'],
     defaultTab: 'overview'
   },
   support: {
@@ -175,7 +174,7 @@ function getAdminGroupForTab(tabName: string): AdminTabGroup | null {
 }
 
 // Groups that have a parent dashboard component (mount the group, not the defaultTab)
-const GROUPS_WITH_PARENT_COMPONENT = ['analytics', 'workflows', 'support', 'work', 'crm', 'documents'] as const;
+const GROUPS_WITH_PARENT_COMPONENT = ['analytics', 'system', 'support', 'work', 'crm', 'documents'] as const;
 
 function resolveAdminTab(tabName: string): { group: AdminTabGroup | null; tab: string } {
   if (tabName in ADMIN_TAB_GROUPS) {
@@ -1899,15 +1898,7 @@ class AdminDashboard {
       break;
     case 'system':
       items.push({ label: 'Dashboard', href: true, onClick: goOverview });
-      items.push({ label: 'System', href: false });
-      break;
-    case 'workflows':
-      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
-      items.push({ label: 'Workflows', href: false });
-      break;
-    case 'email-templates':
-      items.push({ label: 'Dashboard', href: true, onClick: goOverview });
-      items.push({ label: 'Email Templates', href: false });
+      items.push({ label: 'Settings', href: false });
       break;
     default:
       items.push({ label: 'Dashboard', href: false });
