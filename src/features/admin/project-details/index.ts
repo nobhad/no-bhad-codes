@@ -96,3 +96,31 @@ export {
   saveSowToFiles,
   showDocumentGenerationModal
 } from './documents';
+
+// Render Icons & Tab
+export { RENDER_ICONS } from './render-icons';
+export { renderProjectDetailTab } from './render-tab';
+
+// Inline Editing
+export {
+  setupInlineEditing,
+  showTypeDropdown,
+  showStatusDropdown,
+  showSelectDropdown,
+  showTextareaEdit
+} from './inline-editing';
+
+// Populate Sections
+export {
+  populateUrlSection,
+  populateContractSection,
+  populateFeatures,
+  populateSettingsForm
+} from './populate-sections';
+
+// Event Handlers
+export {
+  setupEventHandlers,
+  setupMoreMenuDelegation,
+  type EventHandlerContext
+} from './event-handlers';

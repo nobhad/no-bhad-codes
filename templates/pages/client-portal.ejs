@@ -404,68 +404,8 @@
 
             <link rel="stylesheet" href="/src/styles/pages/terminal-intake.css">
             <script type="module">
-                // Initialize terminal intake when the new project tab is shown
-                document.addEventListener('DOMContentLoaded', () => {
-                    const newProjectBtn = document.getElementById('btn-new-project');
-                    const intakeContainer = document.querySelector('#tab-new-project .terminal-intake-container');
-                    let intakeInitialized = false;
-
-                    // Helper to get client data from logged-in user
-                    function getClientDataForIntake() {
-                        const token = localStorage.getItem('client_auth_token');
-
-                        // If demo mode (token starts with demo_token_), return empty data
-                        if (!token || token.startsWith('demo_token_')) {
-                            return undefined;
-                        }
-
-                        // Get data from the client name element and email from localStorage
-                        const clientNameEl = document.getElementById('client-name');
-                        const settingsNameEl = document.getElementById('settings-name');
-                        const settingsEmailEl = document.getElementById('settings-email');
-                        const settingsCompanyEl = document.getElementById('settings-company');
-
-                        const clientData = {
-                            name: settingsNameEl?.value || clientNameEl?.textContent || undefined,
-                            email: settingsEmailEl?.value || localStorage.getItem('clientEmail') || undefined,
-                            company: settingsCompanyEl?.value || undefined
-                        };
-
-                        // Only return data if we have at least name or email
-                        const hasClientData = clientData.name && clientData.name !== 'Client';
-                        return hasClientData ? clientData : undefined;
-                    }
-
-                    // Initialize when tab is clicked
-                    newProjectBtn?.addEventListener('click', () => {
-                        if (!intakeInitialized && intakeContainer) {
-                            import('/src/features/client/terminal-intake.ts').then(module => {
-                                const clientData = getClientDataForIntake();
-
-                                const intake = new module.TerminalIntakeModule(intakeContainer, {
-                                    isModal: false, // Not a popup
-                                    clientData: clientData
-                                });
-                                intake.init();
-                                intakeInitialized = true;
-                            });
-                        }
-                    });
-
-                    // Also initialize if tab is already active on page load
-                    if (intakeContainer && intakeContainer.closest('.tab-content.active')) {
-                        import('/src/features/client/terminal-intake.ts').then(module => {
-                            const clientData = getClientDataForIntake();
-
-                            const intake = new module.TerminalIntakeModule(intakeContainer, {
-                                isModal: false,
-                                clientData: clientData
-                            });
-                            intake.init();
-                            intakeInitialized = true;
-                        });
-                    }
-                });
+                import { initPortalIntakeLoader } from '/src/features/client/portal-intake-loader.ts';
+                document.addEventListener('DOMContentLoaded', () => initPortalIntakeLoader());
             </script>
 
             <!-- Project Preview View -->

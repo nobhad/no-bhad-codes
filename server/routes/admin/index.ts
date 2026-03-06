@@ -22,6 +22,7 @@ import designReviewsRouter from './design-reviews.js';
 import timeEntriesRouter from './time-entries.js';
 import proposalsRouter from './proposals.js';
 import emailTemplatesRouter from './email-templates.js';
+import performanceRouter from './performance.js';
 
 // Split from misc.ts into dedicated route files
 import analyticsRouter from './analytics.js';
@@ -48,6 +49,7 @@ router.use(designReviewsRouter);
 router.use(timeEntriesRouter);
 router.use(proposalsRouter);
 router.use(emailTemplatesRouter);
+router.use(performanceRouter);
 
 // Dedicated route modules (formerly misc.ts)
 router.use(analyticsRouter);

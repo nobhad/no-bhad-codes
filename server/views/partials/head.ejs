@@ -72,42 +72,22 @@
 <link rel="manifest" href="/site.webmanifest" />
 <meta name="theme-color" content="#e0e0e0" />
 <% if (portalType === 'client') { %>
-<!-- Inline script to prevent flash of login form when already authenticated -->
+<!-- Inline: sync auth check prevents flash of login form -->
 <script>
   (function() {
-    var params = new URLSearchParams(window.location.search);
-    var sessionExpired = params.get('session') === 'expired';
-
-    // If session expired, clear any stale auth data and show login
-    if (sessionExpired) {
-      sessionStorage.removeItem('nbw_auth_user');
-      sessionStorage.removeItem('nbw_auth_expiry');
-      sessionStorage.removeItem('nbw_auth_role');
-      sessionStorage.removeItem('nbw_auth_session_id');
-      // Show session expired message after DOM loads
-      document.addEventListener('DOMContentLoaded', function() {
-        var errorEl = document.getElementById('auth-error');
-        if (errorEl) {
-          errorEl.textContent = 'Your session has expired. Please sign in again.';
-          errorEl.style.display = 'block';
-        }
-        // Clean up URL
-        params.delete('session');
-        var newUrl = window.location.pathname;
-        var query = params.toString();
-        if (query) newUrl += '?' + query;
-        window.history.replaceState({}, '', newUrl);
-      });
-      return; // Don't check auth if session expired
-    }
-
-    var authUser = sessionStorage.getItem('nbw_auth_user');
-    var authExpiry = sessionStorage.getItem('nbw_auth_expiry');
-    var isAuthenticated = authUser && authExpiry && Date.now() < parseInt(authExpiry, 10);
-    if (isAuthenticated) {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('session') === 'expired') return;
+    var u = sessionStorage.getItem('nbw_auth_user');
+    var e = sessionStorage.getItem('nbw_auth_expiry');
+    if (u && e && Date.now() < parseInt(e, 10)) {
       document.documentElement.classList.add('auth-checked');
     }
   })();
+</script>
+<!-- Module: session expiry handling (runs on DOMContentLoaded) -->
+<script type="module">
+  import { handleSessionExpiry } from '/src/features/auth/session-expiry-handler.ts';
+  document.addEventListener('DOMContentLoaded', function() { handleSessionExpiry(); });
 </script>
 <style>
   /* Hide auth gate when authenticated, show dashboard */

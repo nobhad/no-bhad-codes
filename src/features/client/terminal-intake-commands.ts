@@ -140,3 +140,44 @@ export function parseCommand(input: string): { command: string; args: string } {
 export function commandExists(command: string): boolean {
   return command in TERMINAL_COMMANDS;
 }
+
+/**
+ * Result of resolving a command.
+ * - `message`: a ChatMessage to display (type + content)
+ * - `signal`: a signal requiring side-effects from the caller
+ */
+export interface CommandResult {
+  message?: { type: 'system' | 'error'; content: string };
+  signal?: CommandSignal;
+}
+
+/**
+ * Resolve a validated command into either a displayable message
+ * or a signal that requires caller-side effects (clear, restart, back).
+ */
+export function resolveCommand(
+  command: string,
+  currentQuestionIndex: number,
+  totalQuestions: number,
+  answeredFields: string[]
+): CommandResult {
+  switch (command) {
+  case 'help':
+    return { message: { type: 'system', content: formatHelpText() } };
+  case 'clear':
+    return { signal: COMMAND_SIGNALS.CLEAR };
+  case 'restart':
+    return { signal: COMMAND_SIGNALS.RESTART };
+  case 'back':
+    if (currentQuestionIndex > 0) return { signal: COMMAND_SIGNALS.BACK };
+    return { message: { type: 'error', content: 'Already at the first question.' } };
+  case 'skip':
+    return { message: { type: 'error', content: 'This question is required and cannot be skipped.' } };
+  case 'status': {
+    const content = formatStatusText(currentQuestionIndex, totalQuestions, answeredFields);
+    return { message: { type: 'system', content } };
+  }
+  default:
+    return { message: { type: 'error', content: `Unknown command: /${command}` } };
+  }
+}

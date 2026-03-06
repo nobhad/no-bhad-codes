@@ -343,15 +343,18 @@ export class ProjectsModule extends BaseModule {
     // CRT channel change effect
     const tl = gsap.timeline();
 
+    const STATIC_FLASH_OPACITY = 0.8;
+    const STATIC_GRAIN_OPACITY = 0.25;
+
     tl.to(image, { opacity: 0, duration: 0.05 })
-      .to(staticOverlay, { opacity: 0.8, duration: 0.05 }, '<')
+      .to(staticOverlay, { opacity: STATIC_FLASH_OPACITY, duration: 0.05 }, '<')
       .call(() => {
         image.src = imageSrc;
       })
       .to(
         staticOverlay,
         {
-          opacity: 0,
+          opacity: STATIC_GRAIN_OPACITY,
           duration: 0.3,
           ease: 'power2.out'
         },
@@ -380,7 +383,8 @@ export class ProjectsModule extends BaseModule {
     gsap.killTweensOf([image, staticOverlay]);
 
     // CRT turn-off effect
-    gsap.to(image, {
+    const tl = gsap.timeline();
+    tl.to(image, {
       opacity: 0,
       scaleY: 0.01,
       duration: 0.15,
@@ -388,7 +392,7 @@ export class ProjectsModule extends BaseModule {
       onComplete: () => {
         gsap.set(image, { scaleY: 1 });
       }
-    });
+    }).to(staticOverlay, { opacity: 0, duration: 0.2, ease: 'power2.out' }, '<');
   }
 
   /**

@@ -570,6 +570,21 @@ p.empty-state {
   margin: 0;
 }
 
+/* Module error state - shown when a tab module fails to load */
+.module-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(var(--space-2), 3vw, var(--space-4));
+  min-height: 150px;
+  text-align: center;
+}
+
+.module-error-state p {
+  margin-bottom: var(--space-1);
+}
+
 /* Error container for non-table content */
 .error-container {
   display: flex;

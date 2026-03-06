@@ -556,6 +556,26 @@
 }
 
 /* ============================================
+   FOCUS RING
+   Reusable focus ring pattern using --focus-ring token
+   from portal-theme.css (0 0 0 2px with primary alpha).
+   Apply via class or reference the --focus-ring variable directly.
+   ============================================ */
+
+.focus-ring:focus,
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Danger variant - red ring for destructive actions */
+.focus-ring-danger:focus,
+.focus-ring-danger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--color-danger);
+}
+
+/* ============================================
    TRANSITIONS
    ============================================ */
 

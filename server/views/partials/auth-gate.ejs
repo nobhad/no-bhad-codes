@@ -45,21 +45,9 @@
           <span class="btn-loading" style="display: none;">Signing in...</span>
         </button>
       </form>
-      <script>
-        // Toggle auth button state based on input
-        document.addEventListener('DOMContentLoaded', function() {
-          const passwordInput = document.getElementById('admin-password');
-          const submitBtn = document.querySelector('.auth-submit');
-          if (passwordInput && submitBtn) {
-            passwordInput.addEventListener('input', function() {
-              if (this.value.trim().length > 0) {
-                submitBtn.classList.add('active');
-              } else {
-                submitBtn.classList.remove('active');
-              }
-            });
-          }
-        });
+      <script type="module">
+        import { initAdminAuthForm } from '/src/features/auth/admin-auth-form.ts';
+        document.addEventListener('DOMContentLoaded', () => initAdminAuthForm());
       </script>
     <% } else { %>
       <!-- Client Portal Login Form -->

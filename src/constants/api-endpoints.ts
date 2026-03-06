@@ -143,8 +143,33 @@ export const API_ENDPOINTS = {
     // Knowledge Base
     KB_CATEGORIES: '/api/kb/admin/categories',
     KB_ARTICLES: '/api/kb/admin/articles',
-    KB_STATS: '/api/kb/admin/stats'
+    KB_STATS: '/api/kb/admin/stats',
+
+    // Webhooks
+    WEBHOOKS: '/api/v1/webhooks',
+
+    // Data Quality
+    DATA_QUALITY: '/api/data-quality',
+    DATA_QUALITY_DUPLICATES_SCAN: '/api/data-quality/duplicates/scan',
+    DATA_QUALITY_DUPLICATES_MERGE: '/api/data-quality/duplicates/merge',
+    DATA_QUALITY_DUPLICATES_DISMISS: '/api/data-quality/duplicates/dismiss',
+    DATA_QUALITY_DUPLICATES_HISTORY: '/api/data-quality/duplicates/history',
+    DATA_QUALITY_METRICS: '/api/data-quality/metrics',
+    DATA_QUALITY_METRICS_CALCULATE: '/api/data-quality/metrics/calculate',
+    DATA_QUALITY_METRICS_HISTORY: '/api/data-quality/metrics/history',
+    DATA_QUALITY_VALIDATION_ERRORS: '/api/data-quality/validation-errors',
+    DATA_QUALITY_RATE_LIMITS_STATS: '/api/data-quality/rate-limits/stats',
+    DATA_QUALITY_RATE_LIMITS_BLOCK: '/api/data-quality/rate-limits/block',
+    DATA_QUALITY_RATE_LIMITS_UNBLOCK: '/api/data-quality/rate-limits/unblock'
   },
+
+  // Integrations
+  INTEGRATIONS: '/api/integrations',
+  INTEGRATIONS_STATUS: '/api/integrations/status',
+  INTEGRATIONS_NOTIFICATIONS: '/api/integrations/notifications',
+  INTEGRATIONS_STRIPE_STATUS: '/api/integrations/stripe/status',
+  INTEGRATIONS_CALENDAR_STATUS: '/api/integrations/calendar/status',
+  INTEGRATIONS_CALENDAR_SETTINGS: '/api/integrations/calendar/settings',
 
   // Client contacts (nested under clients)
   CLIENT_CONTACTS: '/api/clients/contacts',
@@ -243,6 +268,15 @@ export const buildEndpoint = {
 
   // Approvals
   approvalRespond: (id: number | string) => `${API_ENDPOINTS.APPROVALS}/requests/${id}/respond`,
+
+  // Webhooks
+  webhook: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}`,
+  webhookDeliveries: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/deliveries`,
+  webhookStats: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/stats`,
+  webhookTest: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/test`,
+  webhookRetry: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/retry`,
+  webhookToggle: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/toggle`,
+  webhookSecret: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}/secret/regenerate`
 
 } as const;
 

@@ -49,23 +49,23 @@
    Width constraints for different modal sizes.
    ===================================================== */
 
-.modal-size-sm {
+.modal-size--sm {
   max-width: 400px;
 }
 
-.modal-size-md {
+.modal-size--md {
   max-width: 560px;
 }
 
-.modal-size-lg {
+.modal-size--lg {
   max-width: 860px;
 }
 
-.modal-size-xl {
+.modal-size--xl {
   max-width: 1000px;
 }
 
-.modal-size-full {
+.modal-size--full {
   max-width: calc(100vw - 2rem);
 }
 

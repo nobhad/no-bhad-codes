@@ -310,6 +310,29 @@ class SettingsService {
   }
 
   /**
+   * Update invoice settings
+   */
+  async updateInvoiceSettings(settings: Partial<InvoiceSettings>): Promise<InvoiceSettings> {
+    const updates: Promise<SystemSetting>[] = [];
+
+    if (settings.defaultCurrency !== undefined) {
+      updates.push(this.setSetting('invoice.default_currency', settings.defaultCurrency));
+    }
+    if (settings.defaultTerms !== undefined) {
+      updates.push(this.setSetting('invoice.default_terms', settings.defaultTerms));
+    }
+    if (settings.prefix !== undefined) {
+      updates.push(this.setSetting('invoice.prefix', settings.prefix));
+    }
+    if (settings.nextSequence !== undefined) {
+      updates.push(this.setSetting('invoice.next_sequence', settings.nextSequence, { type: 'number' }));
+    }
+
+    await Promise.all(updates);
+    return this.getInvoiceSettings();
+  }
+
+  /**
    * Get and increment invoice sequence number
    */
   async getNextInvoiceNumber(): Promise<string> {

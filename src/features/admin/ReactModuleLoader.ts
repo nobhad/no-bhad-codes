@@ -192,6 +192,43 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
     mountFn: 'mountAdHocAnalytics',
     unmountFn: 'unmountAdHocAnalytics'
   },
+  'data-quality': {
+    import: () => import('../../react/features/admin/data-quality/mount'),
+    mountFn: 'mountDataQualityPanel',
+    unmountFn: 'unmountDataQualityPanel'
+  },
+  integrations: {
+    import: () => import('../../react/features/admin/integrations/mount'),
+    mountFn: 'mountIntegrationsPanel',
+    unmountFn: 'unmountIntegrationsPanel'
+  },
+  webhooks: {
+    import: () => import('../../react/features/admin/webhooks/mount'),
+    mountFn: 'mountWebhooksPanel',
+    unmountFn: 'unmountWebhooksPanel'
+  },
+  workflows: {
+    import: () => import('../../react/features/admin/workflows/mount'),
+    mountFn: 'mountWorkflowsManager',
+    unmountFn: 'unmountWorkflowsManager'
+  },
+
+  // Client Portal Modules
+  approvals: {
+    import: () => import('../../react/features/admin/approvals/mount'),
+    mountFn: 'mountApprovalsPanel',
+    unmountFn: 'unmountApprovalsPanel'
+  },
+  review: {
+    import: () => import('../../react/features/admin/review/mount'),
+    mountFn: 'mountReviewPanel',
+    unmountFn: 'unmountReviewPanel'
+  },
+  help: {
+    import: () => import('../../react/features/admin/help/mount'),
+    mountFn: 'mountHelpPanel',
+    unmountFn: 'unmountHelpPanel'
+  },
 
   // Detail Views
   'client-detail': {
@@ -203,6 +240,13 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
     import: () => import('../../react/features/admin/project-detail/mount'),
     mountFn: 'mountProjectDetail',
     unmountFn: 'unmountProjectDetail'
+  },
+
+  // Global (mounted on init, not on tab switch)
+  'admin-modals': {
+    import: () => import('../../react/features/admin/modals/mount'),
+    mountFn: 'mountAdminModals',
+    unmountFn: 'unmountAdminModals'
   }
 };
 

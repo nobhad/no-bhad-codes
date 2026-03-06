@@ -8,93 +8,39 @@
  * - Search with live suggestions
  * - Collapsible accordion categories
  * - Featured article cards
+ *
+ * Article rendering: ./portal-help-renderer.ts
+ * Search logic: ./portal-help-search.ts
  */
 
 import type { ClientPortalContext } from '../portal-types';
-import { ICONS } from '../../../constants/icons';
-import { API_ENDPOINTS } from '../../../constants/api-endpoints';
-import { apiFetch } from '../../../utils/api-client';
 import { getCachedElement, clearDOMCache } from '../../../utils/dom-helpers';
 import { TIMING } from '../../../constants/timing';
+import {
+  renderFeatured,
+  renderCategoriesAccordion,
+  renderAccordionArticles,
+  openArticle,
+  showFeatured,
+  hideArticleView,
+  kbFetch,
+  type KBCategory,
+  type KBArticle
+} from './portal-help-renderer';
+import {
+  showSearchSuggestions,
+  navigateSuggestions,
+  selectCurrentSuggestion,
+  hideSuggestions,
+  runSearch
+} from './portal-help-search';
 
 // ---------------------------------------------------------------------------
-// Types (match API responses)
+// DOM cache helper
 // ---------------------------------------------------------------------------
 
-interface KBCategory {
-  id: number;
-  name: string;
-  slug: string;
-  description?: string;
-  article_count?: number;
-}
-
-interface KBArticle {
-  id: number;
-  category_id: number;
-  category_name?: string;
-  category_slug?: string;
-  title: string;
-  slug: string;
-  summary?: string;
-  content: string;
-  is_featured?: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// Category icon mapping
-// ---------------------------------------------------------------------------
-
-const CATEGORY_ICONS: Record<string, string> = {
-  'getting-started': ICONS.ROCKET,
-  'account-billing': ICONS.FILE_TEXT,
-  account: ICONS.FILE_TEXT,
-  billing: ICONS.FILE_TEXT,
-  projects: ICONS.CLIPBOARD,
-  files: ICONS.FOLDER,
-  'files-documents': ICONS.FOLDER,
-  documents: ICONS.DOCUMENT,
-  communication: ICONS.MAIL,
-  messages: ICONS.MAIL,
-  faq: ICONS.SEARCH,
-  general: ICONS.FILE
-};
-
-function getCategoryIcon(slug: string): string {
-  // Normalize slug and check for matches
-  const normalized = slug.toLowerCase().replace(/[_\s]/g, '-');
-  if (CATEGORY_ICONS[normalized]) {
-    return CATEGORY_ICONS[normalized];
-  }
-  // Check partial matches
-  for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
-    if (normalized.includes(key) || key.includes(normalized)) {
-      return icon;
-    }
-  }
-  return ICONS.FILE; // Default icon
-}
-
-// ---------------------------------------------------------------------------
-// DOM cache - Using shared dom-helpers utility
-// ---------------------------------------------------------------------------
-
-/** Get cached element by ID - wrapper for shared utility */
 function el(id: string): HTMLElement | null {
   return getCachedElement(id);
-}
-
-// ---------------------------------------------------------------------------
-// Fetch helpers - Using shared api-client utility
-// ---------------------------------------------------------------------------
-
-async function kbFetch<T>(path: string): Promise<T> {
-  const res = await apiFetch(`${API_ENDPOINTS.KNOWLEDGE_BASE}${path}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error?: string }).error || res.statusText);
-  }
-  return res.json() as Promise<T>;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,81 +49,6 @@ async function kbFetch<T>(path: string): Promise<T> {
 
 const categoryArticlesCache: Map<string, KBArticle[]> = new Map();
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
-let selectedSuggestionIndex = -1;
-
-// ---------------------------------------------------------------------------
-// Render: Featured articles grid
-// ---------------------------------------------------------------------------
-
-function renderFeatured(articles: KBArticle[], _ctx: ClientPortalContext): void {
-  const list = el('help-featured-list');
-  const empty = el('help-featured-empty');
-  if (!list || !empty) return;
-
-  list.innerHTML = '';
-  if (!articles.length) {
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-
-  for (const a of articles) {
-    const catSlug = a.category_slug || 'general';
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'help-featured-card';
-    card.setAttribute('data-category-slug', catSlug);
-    card.setAttribute('data-article-slug', a.slug);
-    card.innerHTML = `
-      <span class="help-featured-card-icon">${ICONS.FILE_TEXT}</span>
-      <div class="help-featured-card-content">
-        <h4 class="help-featured-card-title">${escapeHtml(a.title)}</h4>
-        ${a.summary ? `<p class="help-featured-card-summary">${escapeHtml(a.summary)}</p>` : ''}
-      </div>
-    `;
-    list.appendChild(card);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Render: Categories accordion
-// ---------------------------------------------------------------------------
-
-function renderCategoriesAccordion(categories: KBCategory[], _ctx: ClientPortalContext): void {
-  const accordion = el('help-categories-accordion');
-  const empty = el('help-categories-empty');
-  if (!accordion || !empty) return;
-
-  accordion.innerHTML = '';
-  if (!categories.length) {
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-
-  for (const c of categories) {
-    const count = c.article_count !== null && c.article_count !== undefined ? c.article_count : 0;
-    const icon = getCategoryIcon(c.slug);
-
-    const item = document.createElement('div');
-    item.className = 'help-accordion-item';
-    item.setAttribute('data-category-slug', c.slug);
-    item.innerHTML = `
-      <button type="button" class="help-accordion-header" aria-expanded="false" aria-controls="accordion-content-${c.slug}">
-        <span class="help-accordion-icon">${icon}</span>
-        <span class="help-accordion-title">${escapeHtml(c.name)}</span>
-        <span class="help-accordion-count">${count}</span>
-        <span class="help-accordion-chevron">${ICONS.CARET_DOWN}</span>
-      </button>
-      <div class="help-accordion-content" id="accordion-content-${c.slug}">
-        <div class="help-accordion-articles">
-          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span><span class="loading-message">Loading articles...</span></div>
-        </div>
-      </div>
-    `;
-    accordion.appendChild(item);
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Toggle accordion item (only one open at a time)
@@ -200,10 +71,7 @@ async function toggleAccordion(slug: string, ctx: ClientPortalContext): Promise<
     if (hdr) hdr.setAttribute('aria-expanded', 'false');
   });
 
-  // If it was already expanded, we're done (it's now collapsed)
-  if (isExpanded) {
-    return;
-  }
+  if (isExpanded) return;
 
   // Expand the clicked item
   const header = item.querySelector('.help-accordion-header');
@@ -212,7 +80,6 @@ async function toggleAccordion(slug: string, ctx: ClientPortalContext): Promise<
   item.classList.add('expanded');
   if (header) header.setAttribute('aria-expanded', 'true');
 
-  // Load articles if not cached
   if (articlesContainer && !categoryArticlesCache.has(slug)) {
     try {
       const data = await kbFetch<{ category: KBCategory; articles: KBArticle[] }>(
@@ -233,298 +100,6 @@ async function toggleAccordion(slug: string, ctx: ClientPortalContext): Promise<
   }
 }
 
-function renderAccordionArticles(
-  container: HTMLElement,
-  articles: KBArticle[],
-  categorySlug: string
-): void {
-  container.innerHTML = '';
-
-  if (!articles.length) {
-    container.innerHTML = '<p class="help-accordion-empty">No articles in this category.</p>';
-    return;
-  }
-
-  for (const a of articles) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'help-accordion-article';
-    btn.setAttribute('data-category-slug', categorySlug);
-    btn.setAttribute('data-article-slug', a.slug);
-    btn.innerHTML = `
-      <span class="help-accordion-article-icon">${ICONS.FILE_TEXT}</span>
-      <span>${escapeHtml(a.title)}</span>
-    `;
-    container.appendChild(btn);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Search suggestions
-// ---------------------------------------------------------------------------
-
-async function showSearchSuggestions(query: string, ctx: ClientPortalContext): Promise<void> {
-  const suggestionsEl = el('help-search-suggestions');
-  const hintEl = el('help-search-hint');
-  const clearBtn = el('help-search-clear');
-
-  if (!suggestionsEl) return;
-
-  // Show/hide clear button
-  if (clearBtn) {
-    clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
-  }
-
-  // Hide hint when typing
-  if (hintEl) {
-    hintEl.style.display = query.length > 0 ? 'none' : 'block';
-  }
-
-  if (query.length < 2) {
-    suggestionsEl.style.display = 'none';
-    selectedSuggestionIndex = -1;
-    return;
-  }
-
-  try {
-    const data = await kbFetch<{ articles: KBArticle[]; query: string }>(
-      `/search?q=${encodeURIComponent(query)}&limit=5`
-    );
-    renderSearchSuggestions(data.articles, suggestionsEl);
-  } catch (err) {
-    ctx.showNotification((err as Error).message, 'error');
-    suggestionsEl.style.display = 'none';
-  }
-}
-
-function renderSearchSuggestions(articles: KBArticle[], container: HTMLElement): void {
-  container.innerHTML = '';
-  selectedSuggestionIndex = -1;
-
-  if (!articles.length) {
-    container.innerHTML = '<p class="help-suggestions-empty">No articles found</p>';
-    container.style.display = 'block';
-    return;
-  }
-
-  for (const a of articles) {
-    const item = document.createElement('div');
-    item.className = 'help-suggestion-item';
-    item.setAttribute('role', 'option');
-    item.setAttribute('data-category-slug', a.category_slug || 'general');
-    item.setAttribute('data-article-slug', a.slug);
-    item.innerHTML = `
-      <span class="help-suggestion-icon">${ICONS.FILE_TEXT}</span>
-      <div class="help-suggestion-content">
-        <p class="help-suggestion-title">${escapeHtml(a.title)}</p>
-        ${a.category_name ? `<p class="help-suggestion-category">${escapeHtml(a.category_name)}</p>` : ''}
-      </div>
-    `;
-    container.appendChild(item);
-  }
-
-  container.style.display = 'block';
-}
-
-function navigateSuggestions(direction: 'up' | 'down'): void {
-  const suggestionsEl = el('help-search-suggestions');
-  if (!suggestionsEl || suggestionsEl.style.display === 'none') return;
-
-  const items = suggestionsEl.querySelectorAll('.help-suggestion-item');
-  if (!items.length) return;
-
-  // Remove current selection
-  if (selectedSuggestionIndex >= 0 && items[selectedSuggestionIndex]) {
-    items[selectedSuggestionIndex].setAttribute('aria-selected', 'false');
-  }
-
-  // Update index
-  if (direction === 'down') {
-    selectedSuggestionIndex = (selectedSuggestionIndex + 1) % items.length;
-  } else {
-    selectedSuggestionIndex =
-      selectedSuggestionIndex <= 0 ? items.length - 1 : selectedSuggestionIndex - 1;
-  }
-
-  // Apply new selection
-  items[selectedSuggestionIndex].setAttribute('aria-selected', 'true');
-  (items[selectedSuggestionIndex] as HTMLElement).scrollIntoView({ block: 'nearest' });
-}
-
-function selectCurrentSuggestion(ctx: ClientPortalContext): boolean {
-  const suggestionsEl = el('help-search-suggestions');
-  if (!suggestionsEl || suggestionsEl.style.display === 'none') return false;
-
-  const items = suggestionsEl.querySelectorAll('.help-suggestion-item');
-  if (selectedSuggestionIndex >= 0 && items[selectedSuggestionIndex]) {
-    const item = items[selectedSuggestionIndex] as HTMLElement;
-    const categorySlug = item.getAttribute('data-category-slug');
-    const articleSlug = item.getAttribute('data-article-slug');
-    if (categorySlug && articleSlug) {
-      openArticle(categorySlug, articleSlug, ctx);
-      hideSuggestions();
-      return true;
-    }
-  }
-  return false;
-}
-
-function hideSuggestions(): void {
-  const suggestionsEl = el('help-search-suggestions');
-  if (suggestionsEl) {
-    suggestionsEl.style.display = 'none';
-  }
-  selectedSuggestionIndex = -1;
-}
-
-// ---------------------------------------------------------------------------
-// Render: Search results (full page)
-// ---------------------------------------------------------------------------
-
-function renderSearchResults(
-  articles: KBArticle[],
-  query: string,
-  _ctx: ClientPortalContext
-): void {
-  const titleEl = el('help-search-results-title');
-  const listEl = el('help-search-results-list');
-  if (!listEl) return;
-
-  showSearchResults();
-  if (titleEl) titleEl.textContent = `Results for "${query}"`;
-
-  listEl.innerHTML = '';
-  if (!articles.length) {
-    listEl.innerHTML = '<p class="help-empty">No articles found. Try a different search term.</p>';
-    return;
-  }
-
-  for (const a of articles) {
-    const item = document.createElement('a');
-    item.href = '#';
-    item.className = 'help-result-item';
-    item.setAttribute('data-category-slug', a.category_slug || 'general');
-    item.setAttribute('data-article-slug', a.slug);
-    item.innerHTML = `
-      <span class="help-result-icon">${ICONS.FILE_TEXT}</span>
-      <div class="help-result-content">
-        <h4 class="help-result-title">${escapeHtml(a.title)}</h4>
-        ${a.category_name ? `<p class="help-result-category">${escapeHtml(a.category_name)}</p>` : ''}
-      </div>
-    `;
-    listEl.appendChild(item);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Show/hide views (within the right column)
-// ---------------------------------------------------------------------------
-
-function showArticleView(): void {
-  const articleView = el('help-article-view');
-  const featured = el('help-featured-section');
-  const searchResults = el('help-search-results');
-  if (articleView) articleView.style.display = 'block';
-  if (featured) featured.style.display = 'none';
-  if (searchResults) searchResults.style.display = 'none';
-}
-
-function hideArticleView(): void {
-  const articleView = el('help-article-view');
-  const featured = el('help-featured-section');
-  const searchResults = el('help-search-results');
-  if (articleView) articleView.style.display = 'none';
-  if (featured) featured.style.display = 'block';
-  if (searchResults) searchResults.style.display = 'none';
-}
-
-function showSearchResults(): void {
-  const articleView = el('help-article-view');
-  const featured = el('help-featured-section');
-  const searchResults = el('help-search-results');
-  if (articleView) articleView.style.display = 'none';
-  if (featured) featured.style.display = 'none';
-  if (searchResults) searchResults.style.display = 'block';
-}
-
-function showFeatured(): void {
-  const articleView = el('help-article-view');
-  const featured = el('help-featured-section');
-  const searchResults = el('help-search-results');
-  if (articleView) articleView.style.display = 'none';
-  if (featured) featured.style.display = 'block';
-  if (searchResults) searchResults.style.display = 'none';
-}
-
-// ---------------------------------------------------------------------------
-// Load and show single article
-// ---------------------------------------------------------------------------
-
-async function openArticle(
-  categorySlug: string,
-  articleSlug: string,
-  ctx: ClientPortalContext
-): Promise<void> {
-  const titleEl = el('help-article-title');
-  const bodyEl = el('help-article-body');
-  const categoryBadge = el('help-article-category');
-  if (!titleEl || !bodyEl) return;
-
-  titleEl.textContent = 'Loading...';
-  bodyEl.innerHTML = '';
-  if (categoryBadge) categoryBadge.textContent = '';
-  showArticleView();
-
-  try {
-    const data = await kbFetch<{ article: KBArticle }>(
-      `/articles/${encodeURIComponent(categorySlug)}/${encodeURIComponent(articleSlug)}`
-    );
-    const article = data.article;
-    titleEl.textContent = article.title;
-    bodyEl.innerHTML = article.content || '';
-    if (categoryBadge && article.category_name) {
-      categoryBadge.textContent = article.category_name;
-    }
-  } catch (err) {
-    ctx.showNotification((err as Error).message, 'error');
-    titleEl.textContent = 'Error loading article';
-    bodyEl.textContent = (err as Error).message;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Search
-// ---------------------------------------------------------------------------
-
-async function runSearch(query: string, ctx: ClientPortalContext): Promise<void> {
-  const q = query.trim();
-  if (q.length < 2) {
-    ctx.showNotification('Enter at least 2 characters to search.', 'info');
-    return;
-  }
-
-  hideSuggestions();
-
-  try {
-    const data = await kbFetch<{ articles: KBArticle[]; query: string }>(
-      `/search?q=${encodeURIComponent(q)}&limit=20`
-    );
-    renderSearchResults(data.articles, data.query, ctx);
-  } catch (err) {
-    ctx.showNotification((err as Error).message, 'error');
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Escape HTML
-// ---------------------------------------------------------------------------
-
-function escapeHtml(str: string): string {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 // ---------------------------------------------------------------------------
 // One-time setup: delegated listeners
 // ---------------------------------------------------------------------------
@@ -539,7 +114,6 @@ function setupListeners(ctx: ClientPortalContext): void {
   const browse = el('help-browse');
   if (browse) {
     browse.addEventListener('click', (e) => {
-      // Featured card click
       const card = (e.target as HTMLElement).closest(
         '.help-featured-card[data-category-slug][data-article-slug]'
       );
@@ -553,7 +127,6 @@ function setupListeners(ctx: ClientPortalContext): void {
         return;
       }
 
-      // Accordion header click
       const header = (e.target as HTMLElement).closest('.help-accordion-header');
       if (header) {
         const item = header.closest('.help-accordion-item');
@@ -564,7 +137,6 @@ function setupListeners(ctx: ClientPortalContext): void {
         return;
       }
 
-      // Accordion article click
       const artLink = (e.target as HTMLElement).closest(
         '.help-accordion-article[data-category-slug][data-article-slug]'
       );
@@ -591,7 +163,6 @@ function setupListeners(ctx: ClientPortalContext): void {
         openArticle(categorySlug, articleSlug, ctx);
         hideSuggestions();
 
-        // Clear search input
         const searchInput = document.getElementById('help-search-input') as HTMLInputElement | null;
         if (searchInput) searchInput.value = '';
       }
@@ -637,7 +208,6 @@ function setupListeners(ctx: ClientPortalContext): void {
   // Search input with suggestions
   const searchInput = document.getElementById('help-search-input') as HTMLInputElement | null;
   if (searchInput) {
-    // Debounced search suggestions
     searchInput.addEventListener('input', () => {
       if (searchTimeout) clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
@@ -645,7 +215,6 @@ function setupListeners(ctx: ClientPortalContext): void {
       }, 200);
     });
 
-    // Keyboard navigation
     searchInput.addEventListener('keydown', (e) => {
       const suggestionsDropdown = el('help-search-suggestions');
       const isOpen = suggestionsDropdown && suggestionsDropdown.style.display !== 'none';
@@ -661,7 +230,6 @@ function setupListeners(ctx: ClientPortalContext): void {
         if (isOpen && selectCurrentSuggestion(ctx)) {
           // Selected a suggestion
         } else {
-          // Run full search
           runSearch(searchInput.value, ctx);
         }
       } else if (e.key === 'Escape' && isOpen) {
@@ -670,12 +238,10 @@ function setupListeners(ctx: ClientPortalContext): void {
       }
     });
 
-    // Hide suggestions on blur (with delay for click handling)
     searchInput.addEventListener('blur', () => {
       setTimeout(hideSuggestions, TIMING.SUGGESTION_HIDE_DELAY);
     });
 
-    // Show suggestions on focus if has value
     searchInput.addEventListener('focus', () => {
       if (searchInput.value.length >= 2) {
         showSearchSuggestions(searchInput.value, ctx);
@@ -713,7 +279,6 @@ function setupListeners(ctx: ClientPortalContext): void {
 // ---------------------------------------------------------------------------
 
 export async function loadHelp(ctx: ClientPortalContext): Promise<void> {
-  // Clear cache on load to ensure fresh DOM references
   clearDOMCache();
   categoryArticlesCache.clear();
 

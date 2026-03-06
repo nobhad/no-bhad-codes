@@ -18,13 +18,13 @@
   justify-content: center;
   z-index: var(--z-index-portal-confirm); /* Above all modals and overlays */
   padding: var(--space-4);
-  animation: confirmFadeIn 0.15s ease;
+  animation: confirmFadeIn var(--animation-modal-backdrop);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
 .confirm-dialog-overlay.closing {
-  animation: confirmFadeOut 0.15s ease forwards;
+  animation: confirmFadeOut var(--animation-modal-exit) forwards;
 }
 
 @keyframes confirmFadeIn {
@@ -54,7 +54,7 @@
   padding: var(--space-6);
   text-align: left;
   font-family: var(--font-family-mono);
-  animation: confirmDialogSlideUp 0.15s ease;
+  animation: confirmDialogSlideUp var(--animation-modal-enter);
 }
 
 /* Icon and title on same line, left-aligned at top */
@@ -66,7 +66,7 @@
 }
 
 .confirm-dialog-overlay.closing .confirm-dialog {
-  animation: confirmDialogSlideDown 0.15s ease forwards;
+  animation: confirmDialogSlideDown var(--animation-modal-exit) forwards;
 }
 
 @keyframes confirmDialogSlideUp {
