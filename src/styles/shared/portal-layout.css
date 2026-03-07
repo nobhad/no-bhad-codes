@@ -213,8 +213,8 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--btn-portal-icon-size);
-  height: var(--btn-portal-icon-size);
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
   padding: 0;
   background: transparent;
   border: none;
@@ -288,15 +288,16 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   --sidebar-icon-indent: 18px;
 }
 
-/* Dashboard content - top padding matches sidebar branding position */
-/* GAP APPLIED AT BASE LEVEL - not at tab-content level */
+/* Dashboard content - scroll container next to sidebar.
+   Block flow prevents content-wrapper from stretching to fill viewport
+   (flex column caused children to grow into available space).
+   flex: 1 / min-width: 0 are flex-CHILD properties for the portal-body layout. */
 .portal .dashboard-content {
-  display: flex;
-  flex-direction: column;
+  display: block;
   flex: 1;
   min-width: 0;
   padding: var(--portal-header-top, 20px) 24px var(--space-3) 24px;
-  gap: 0;
+  overflow-y: auto;
   background: var(--portal-bg-pitch);
 }
 
@@ -364,11 +365,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: flex;
   gap: var(--space-1);
   align-items: center;
-  /* Gap only appears when subtabs are visible — prevents double spacing on solo tabs */
-  margin-top: var(--portal-nav-gap, 16px);
-  /* Override .portal-subtabs base margin-bottom — .tab-content.active handles the gap below */
-  margin-bottom: 0;
-  padding: 0;
+  /* No spacing overrides — base .portal-subtabs margin-bottom provides gap below.
+     Only reset visual properties (border, bg, shadow). */
   background: transparent;
   border: none;
   border-bottom: none;
@@ -384,11 +382,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: flex;
 }
 
-/* Header subtab groups - shared container styling */
+/* Header subtab groups - visual resets only (no spacing overrides) */
 .portal .portal-header-subtabs .header-subtab-group {
   gap: var(--space-1);
-  padding: 0;
-  margin: 0;
   background: transparent;
   border: none;
   border-bottom: none;
@@ -396,45 +392,16 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   box-shadow: none;
 }
 
-/* Header subtab buttons - UNIVERSAL styling for ALL subtab types */
-/* Uses root-level subtab variables from portal-theme.css */
+/* Header subtab buttons - context resets only.
+   Base styling (font, color, padding, hover, active) comes from portal-tabs.css shared :is() rules.
+   This rule only handles header-specific overrides. */
 .portal
   .portal-header-subtabs
   .header-subtab-group
   :is(> button, .portal-subtab, .view-toggle button) {
-  padding: var(--space-0-5) var(--space-1-5);
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: var(--portal-text-secondary);
-  /* Use subtab font variables from root */
-  font-family: var(--subtab-font-family);
-  font-size: var(--subtab-font-size);
-  font-weight: var(--subtab-font-weight);
-  text-transform: var(--subtab-text-transform);
-  letter-spacing: var(--subtab-letter-spacing);
-  cursor: pointer;
-  transition: color var(--transition-fast);
   margin: 0;
-  margin-bottom: 0;
   box-shadow: none;
-}
-
-.portal
-  .portal-header-subtabs
-  .header-subtab-group
-  :is(> button, .portal-subtab, .view-toggle button):hover {
-  background: transparent;
-  color: var(--portal-text-primary);
-}
-
-.portal
-  .portal-header-subtabs
-  .header-subtab-group
-  :is(> button, .portal-subtab, .view-toggle button).active {
-  background: transparent;
-  border-bottom: var(--border-width) solid var(--color-primary);
-  color: var(--color-primary);
+  border-radius: 0;
 }
 
 /* View toggle in header - reset container styling */
@@ -444,26 +411,19 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border-bottom: none;
 }
 
-/* Content wrapper - contains header + tab content.
-   NOTE: NO gap here - gap between header and content causes huge spacing.
-   Individual content sections should control their own internal spacing. */
+/* Content wrapper - contains subtab nav + tab content panels.
+   padding-top provides uniform spacing from the top of the content area
+   for ALL tabs (with and without subtabs). This is the SINGLE source
+   of the gap between the global header area and portal content. */
 .portal .content-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: block;
   width: 100%;
-  flex: 1;
-  min-height: 0;
+  padding-top: var(--portal-section-gap);
 }
 
-/* Tab content - UNIVERSAL layout for all tabs.
-   Uses display:block so content flows naturally top-to-bottom.
-   Child components (overview-tables, table-layout, messaging-panel) manage their own
-   internal layout (flex, grid, etc.) independently.
-   margin-top uses --portal-section-gap for spacing below subtabs. */
+/* Tab content - shown when active, hidden otherwise. */
 .portal .tab-content.active {
   display: block;
-  margin-top: var(--portal-section-gap);
   padding-bottom: var(--space-8);
 }
 
@@ -590,13 +550,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     flex-wrap: wrap;
   }
 
-  .portal
-    .portal-header-subtabs
-    .header-subtab-group
-    :is(> button, .portal-subtab, .view-toggle button) {
-    font-size: var(--font-size-sm);  /* 14px on mobile - matches tabs */
-    padding: var(--space-0-5) var(--space-1-5);
-  }
+  /* Header subtab font/padding responsive sizing handled by portal-tabs.css shared rules */
 }
 
 /* =====================================================
@@ -609,7 +563,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   gap: var(--icon-gap);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-muted);
+  font-weight: var(--portal-font-weight-muted);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   color: var(--portal-text-muted);
@@ -668,26 +622,24 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-2);
   background: transparent;
   border: none;
   border-bottom: var(--border-width) solid transparent;
   margin-bottom: -1px;
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-title);
+  font-family: var(--portal-subtab-family);
+  font-size: var(--portal-subtab-size);
+  font-weight: var(--portal-subtab-weight);
+  text-transform: var(--portal-subtab-transform);
+  letter-spacing: var(--portal-subtab-spacing);
   color: var(--portal-text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: color var(--transition-fast);
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn:hover {
-  color: var(--portal-text-light);
+  color: var(--portal-text-primary);
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn.active {
@@ -758,7 +710,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal .sidebar-nav .sidebar-toggle-btn {
   padding: var(--space-1-5) var(--space-2);
   margin-bottom: var(--space-3);
-  min-height: var(--btn-portal-icon-size-sm);
+  min-height: var(--portal-btn-icon-size-sm);
   color: var(--portal-text-secondary);
   opacity: 0.7;
   justify-content: flex-start;
@@ -1041,10 +993,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     display: flex;
   }
 
-  .portal .dashboard-container {
-    flex-direction: column;
-  }
-
   .portal .dashboard-content {
     width: 100%;
   }
@@ -1122,85 +1070,15 @@ td {
   --font-size-base: 15px;
 }
 
-/* Portal Main Container */
-.portal-main,
-.client-portal-main {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  height: 100dvh;
-  min-height: auto;
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
-.portal-main .dashboard-container,
-.client-portal-main .dashboard-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-}
-
-/* Dashboard Base - no background, inherits from body */
-.portal-dashboard,
-.client-dashboard {
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-  margin: 0;
-  padding: 0;
-}
-
-/* Dashboard Layout - Flex Container */
+/* Dashboard Layout - used by PortalDashboard.ts tab content */
 .dashboard-layout {
   display: flex;
   width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-/* Dashboard Container */
-.dashboard-container {
-  display: flex;
-  width: 100%;
-  max-width: 100vw;
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-  overflow-x: hidden;
-}
-
-/* Dashboard Content Area (right side) */
-.dashboard-content {
-  flex: 1;
-  padding: 0 clamp(0.75rem, 2vw, 1.5rem) var(--space-10) clamp(0.75rem, 2vw, 1.5rem);
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  min-width: 0;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
 }
 
 /* Reduced padding on smallest screens */
 @media (--xs-mobile) {
-  .dashboard-content {
-    padding-left: var(--space-1);
-    padding-right: var(--space-1);
-  }
-
-  .portal-header-subtabs {
+  .portal .portal-header-subtabs {
     padding-left: 0;
     padding-right: 0;
   }

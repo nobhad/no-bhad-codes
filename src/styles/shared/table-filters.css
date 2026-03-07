@@ -46,7 +46,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: var(--btn-portal-icon-size, 36px);
+  height: var(--portal-btn-icon-size, 36px);
 }
 
 /* Search trigger button */

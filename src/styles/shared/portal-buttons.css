@@ -54,14 +54,14 @@ button.dropdown-trigger > svg.dropdown-caret,
 
 /* Danger button */
 .btn-danger {
-  background: var(--btn-portal-danger-bg);
-  color: var(--btn-portal-danger-color);
-  border-color: var(--btn-portal-danger-border);
+  background: var(--portal-btn-danger-bg);
+  color: var(--portal-btn-danger-color);
+  border-color: var(--portal-btn-danger-border);
 }
 .btn-danger:hover {
-  background: var(--btn-portal-danger-hover-bg);
-  color: var(--btn-portal-danger-hover-color);
-  border-color: var(--btn-portal-danger-hover-border);
+  background: var(--portal-btn-danger-hover-bg);
+  color: var(--portal-btn-danger-hover-color);
+  border-color: var(--portal-btn-danger-hover-border);
 }
 
 /* Warning button */
@@ -111,9 +111,9 @@ button.dropdown-trigger > svg.dropdown-caret,
 
 /* Small button */
 .btn-sm {
-  padding: var(--btn-portal-sm-padding-y) var(--btn-portal-sm-padding-x);
-  font-size: var(--btn-portal-sm-font-size);
-  min-height: var(--btn-portal-sm-min-height);
+  padding: var(--portal-btn-sm-padding-y) var(--portal-btn-sm-padding-x);
+  font-size: var(--portal-btn-sm-font-size);
+  min-height: var(--portal-btn-sm-min-height);
 }
 
 /* Extra small button - for table actions */
@@ -126,13 +126,13 @@ button.dropdown-trigger > svg.dropdown-caret,
 /* Outline button - transparent with border, uses button border tokens */
 .btn-outline {
   background: transparent;
-  color: var(--btn-portal-color);
-  border: var(--btn-portal-border-width) solid var(--btn-portal-border-color);
+  color: var(--portal-btn-color);
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
 }
 .btn-outline:hover {
-  background: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
 }
 
 /* Ghost button - transparent, minimal */
@@ -156,7 +156,7 @@ button.dropdown-trigger > svg.dropdown-caret,
 .btn-lg {
   height: var(--space-7);
   padding: 0 var(--space-3);
-  font-size: var(--btn-portal-font-size);
+  font-size: var(--portal-btn-font-size);
   line-height: var(--space-7);
 }
 
@@ -166,16 +166,19 @@ button.dropdown-trigger > svg.dropdown-caret,
   overflow: hidden;
 }
 
-/* Filled primary button - solid background */
+/* Filled primary button - solid background with thick bottom border */
 .btn-filled {
   background: var(--color-primary);
   color: var(--color-white);
-  border: none;
+  border: var(--portal-btn-border-width, 2px) solid var(--color-primary);
+  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-bottom-color: var(--portal-btn-border-color, var(--color-white));
 }
 .btn-filled:hover {
   background: var(--color-brand-hover, var(--color-interactive-primary-hover));
   color: var(--color-white);
-  border: none;
+  border-color: var(--color-brand-hover, var(--color-interactive-primary-hover));
+  border-bottom-color: var(--portal-btn-border-color, var(--color-white));
 }
 .btn-filled:disabled {
   background: var(--portal-bg-lighter);
@@ -211,7 +214,9 @@ button.dropdown-trigger > svg.dropdown-caret,
 .btn-auth {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
-  border: var(--border-width) solid var(--portal-border-light);
+  border: var(--portal-btn-border-width, 2px) solid currentColor;
+  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border-radius: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -219,15 +224,15 @@ button.dropdown-trigger > svg.dropdown-caret,
   letter-spacing: var(--letter-spacing-wider);
   transition: all var(--transition-fast);
   text-transform: uppercase;
-  background-color: transparent;
-  color: var(--portal-text-light);
+  background-color: inherit;
+  color: inherit;
   box-shadow: none;
 }
 
 .btn-auth:hover {
-  background-color: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
+  background-color: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
 }
 
 .btn-auth:disabled {
@@ -302,10 +307,10 @@ button.dropdown-trigger > svg.dropdown-caret,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--btn-portal-icon-size, 36px);
-  height: var(--btn-portal-icon-size, 36px);
-  min-width: var(--btn-portal-icon-size, 36px);
-  min-height: var(--btn-portal-icon-size, 36px);
+  width: var(--portal-btn-icon-size, 36px);
+  height: var(--portal-btn-icon-size, 36px);
+  min-width: var(--portal-btn-icon-size, 36px);
+  min-height: var(--portal-btn-icon-size, 36px);
   padding: 0;
   background: transparent;
   border: none;
@@ -329,21 +334,18 @@ button.dropdown-trigger > svg.dropdown-caret,
 }
 .icon-btn.icon-btn-success:hover {
   color: var(--color-success-500);
-  background-color: var(--portal-alpha-success-10);
 }
 .icon-btn.icon-btn-active {
   color: var(--status-active);
-  background: var(--portal-alpha-success-15);
 }
 .icon-btn.icon-btn-active:hover {
-  background: var(--portal-alpha-success-25);
+  color: var(--color-primary);
 }
 .icon-btn.icon-btn-warning {
   color: var(--color-warning);
 }
 .icon-btn.icon-btn-warning:hover {
   color: var(--color-warning);
-  background-color: var(--portal-alpha-warning-10);
 }
 /* Outline variant - icon button with border */
 .icon-btn.icon-btn-outline {
@@ -354,30 +356,29 @@ button.dropdown-trigger > svg.dropdown-caret,
 }
 .icon-btn.icon-btn-outline.icon-btn-danger:hover {
   border-color: var(--color-danger);
-  background: var(--portal-alpha-danger-10);
 }
 /* Size modifiers */
 .icon-btn.icon-btn-sm {
-  width: var(--btn-portal-icon-size-sm);
-  height: var(--btn-portal-icon-size-sm);
-  min-width: var(--btn-portal-icon-size-sm);
-  min-height: var(--btn-portal-icon-size-sm);
+  width: var(--portal-btn-icon-size-sm);
+  height: var(--portal-btn-icon-size-sm);
+  min-width: var(--portal-btn-icon-size-sm);
+  min-height: var(--portal-btn-icon-size-sm);
 }
 .icon-btn.icon-btn-xs {
-  width: var(--btn-portal-icon-size-xs);
-  height: var(--btn-portal-icon-size-xs);
-  min-width: var(--btn-portal-icon-size-xs);
-  min-height: var(--btn-portal-icon-size-xs);
+  width: var(--portal-btn-icon-size-xs);
+  height: var(--portal-btn-icon-size-xs);
+  min-width: var(--portal-btn-icon-size-xs);
+  min-height: var(--portal-btn-icon-size-xs);
 }
 .icon-btn svg {
-  width: var(--btn-portal-icon-inner-size);
-  height: var(--btn-portal-icon-inner-size);
+  width: var(--portal-btn-icon-inner-size);
+  height: var(--portal-btn-icon-inner-size);
 }
 
 /* Icon button focus */
-/* Uses --focus-ring-* variables from portal-theme.css */
+/* Uses --portal-focus-* variables from portal-theme.css */
 .icon-btn:focus-visible {
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--portal-focus-ring);
   outline: none;
 }
 
@@ -429,10 +430,10 @@ button.dropdown-trigger > svg.dropdown-caret,
     .data-table td .icon-btn,
     .table-actions .icon-btn,
     .actions-cell .icon-btn {
-      width: var(--btn-portal-icon-size-xs);
-      height: var(--btn-portal-icon-size-xs);
-      min-width: var(--btn-portal-icon-size-xs);
-      min-height: var(--btn-portal-icon-size-xs);
+      width: var(--portal-btn-icon-size-xs);
+      height: var(--portal-btn-icon-size-xs);
+      min-width: var(--portal-btn-icon-size-xs);
+      min-height: var(--portal-btn-icon-size-xs);
     }
 
     .data-table .icon-btn svg,
@@ -489,12 +490,12 @@ button.dropdown-trigger > svg.dropdown-caret,
 .portal td .icon-btn,
   .portal .actions-cell .icon-btn,
   .portal .table-actions .icon-btn {
-    width: var(--btn-portal-icon-size);
-    height: var(--btn-portal-icon-size);
-    min-width: var(--btn-portal-icon-size);
-    min-height: var(--btn-portal-icon-size);
-    max-width: var(--btn-portal-icon-size);
-    max-height: var(--btn-portal-icon-size);
+    width: var(--portal-btn-icon-size);
+    height: var(--portal-btn-icon-size);
+    min-width: var(--portal-btn-icon-size);
+    min-height: var(--portal-btn-icon-size);
+    max-width: var(--portal-btn-icon-size);
+    max-height: var(--portal-btn-icon-size);
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -672,7 +673,7 @@ button.dropdown-trigger > svg.dropdown-caret,
  * ============================================ */
 .toggle-group {
   display: flex;
-  border: var(--border-width) solid var(--btn-portal-border-color);
+  border: var(--border-width) solid var(--portal-btn-border-color);
   background: transparent;
 }
 .toggle-btn {
@@ -680,7 +681,7 @@ button.dropdown-trigger > svg.dropdown-caret,
   padding: 0.75rem 1.25rem;
   background: transparent;
   border: none;
-  font-family: var(--btn-portal-font-family);
+  font-family: var(--portal-btn-font-family);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
@@ -691,7 +692,7 @@ button.dropdown-trigger > svg.dropdown-caret,
     color var(--transition-mouse) ease;
 }
 .toggle-btn:not(:last-child) {
-  border-right: var(--border-width) solid var(--btn-portal-border-color);
+  border-right: var(--border-width) solid var(--portal-btn-border-color);
 }
 .toggle-btn:hover:not(.active) {
   background: var(--portal-alpha-white-10);
@@ -713,7 +714,7 @@ button.dropdown-trigger > svg.dropdown-caret,
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  font-size: var(--btn-portal-font-size, 16px);
+  font-size: var(--portal-btn-font-size, 16px);
   font-weight: var(--font-weight-regular);
   font-family: var(--font-family-mono, monospace);
   background: transparent;

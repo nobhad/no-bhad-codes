@@ -97,9 +97,9 @@
 /* Contact page */
 @import "./pages/contact.css" layer(pages);
 
-/* Admin dashboard */
-@import "./pages/admin.css" layer(pages);
+/* Admin dashboard — shared portal first, page overrides last */
 @import "./admin/index.css" layer(pages);
+@import "./pages/admin.css" layer(pages);
 
 /* Client portal */
 @import "./pages/client.css" layer(pages);
@@ -108,7 +108,14 @@
 
 /* Projects page */
 @import "./pages/projects.css" layer(pages);
-@import "./pages/projects-detail.css" layer(pages);
+
+/* Project detail — imported WITHOUT layer wrapper.
+   In Vite dev mode, bare @import inside a layered file does NOT inherit
+   the parent layer, making it unlayered (highest priority). The previous
+   session moved it to layer(pages), but that caused its rules to lose
+   to higher layers (states, responsive). Importing unlayered here ensures
+   project-detail styles always win the cascade. */
+@import "./pages/projects-detail.css";
 
 /* Terminal intake form */
 @import "./pages/terminal-intake.css" layer(pages);

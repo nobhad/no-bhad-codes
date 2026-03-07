@@ -659,7 +659,7 @@ a.text-danger:hover {
 }
 
 .tw-modal-title {
-  font-size: var(--btn-portal-font-size, 16px);
+  font-size: var(--portal-btn-font-size, 16px);
   font-family: var(--font-family-mono, monospace);
   color: var(--portal-text-light);
   font-weight: var(--font-weight-regular);
@@ -837,7 +837,7 @@ a.text-danger:hover {
 }
 
 .status-metric-threshold {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   margin-top: var(--space-1);
 }
 
@@ -971,7 +971,7 @@ a.text-danger:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .perf-kpi-trend {
@@ -1031,7 +1031,7 @@ a.text-danger:hover {
 }
 
 .perf-member-role {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .perf-member-stats {
@@ -1044,7 +1044,7 @@ a.text-danger:hover {
 }
 
 .perf-member-projects {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 /* Project performance */
@@ -1067,14 +1067,14 @@ a.text-danger:hover {
 }
 
 .perf-project-client {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .perf-project-meta {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .perf-ml-auto {
@@ -1132,7 +1132,7 @@ a.text-danger:hover {
 
 .analytics-query-date {
   display: block;
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .analytics-trash-icon {
@@ -1181,7 +1181,7 @@ a.text-danger:hover {
 }
 
 .analytics-hint {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .analytics-action-icon {
@@ -1220,7 +1220,7 @@ a.text-danger:hover {
 }
 
 .analytics-pagination {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   margin-top: var(--space-2);
   text-align: center;
 }
@@ -1237,7 +1237,7 @@ a.text-danger:hover {
 }
 
 .analytics-chart-hint {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 /* ============================================
@@ -1633,7 +1633,7 @@ a.text-danger:hover {
 
 /* Quick action buttons - ensure visible borders */
 .ovdash-quick-actions .btn {
-  border: var(--btn-portal-border-width) solid var(--btn-portal-border-color);
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
 }
 
 /* ============================================
@@ -1789,7 +1789,7 @@ a.text-danger:hover {
 
 /* Keyboard shortcut badge */
 .msgtab-kbd {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   padding: var(--space-px) var(--icon-gap-xs);
 }
 

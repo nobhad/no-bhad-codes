@@ -60,7 +60,7 @@
 @import "./system-status.css";
 @import "./configuration.css";
 @import "./audit-log.css";
-@import "../deliverables.css";
+/* deliverables consolidated into shared/portal-components.css */
 
 /* Layout refinements */
 @import "./overview-layout.css";
@@ -68,3 +68,14 @@
 
 /* Unified modal system */
 @import "../shared/modal-system.css";
+
+/* Activity type colors for admin client detail */
+:root {
+  --activity-email-color: var(--app-color-info);
+  --activity-invoice-color: var(--app-color-success);
+  --activity-project-color: var(--color-admin-purple);
+  --activity-file-color: var(--app-color-warning);
+  --activity-message-color: var(--color-cyan);
+  --activity-contact-color: var(--color-pink);
+  --activity-status-color: var(--app-color-warning);
+}

@@ -211,7 +211,7 @@
 .onboarding-select {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: var(--select-caret);
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 36px;
@@ -375,7 +375,7 @@
 
 .onboarding-review-value--empty {
   color: var(--portal-text-muted);
-  font-weight: var(--font-weight-muted, 400);
+  font-weight: var(--portal-font-weight-muted, 400);
 }
 
 .onboarding-review-tags {

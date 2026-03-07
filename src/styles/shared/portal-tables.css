@@ -349,11 +349,13 @@
   color: var(--portal-text-muted);
 }
 
-.stats-summary-item.stats-pending { color: var(--app-color-warning); }
-.stats-summary-item.stats-active { color: var(--app-color-info); }
-.stats-summary-item.stats-completed { color: var(--app-color-success); }
-.stats-summary-item.stats-overdue { color: var(--app-color-danger); }
-.stats-summary-item.stats-cancelled { color: var(--portal-text-muted); }
+.stats-summary-item.stats-pending,
+.stats-summary-item.stats-active,
+.stats-summary-item.stats-completed,
+.stats-summary-item.stats-overdue,
+.stats-summary-item.stats-cancelled {
+  color: inherit;
+}
 
 /* Header actions — right side of header */
 .data-table-actions {

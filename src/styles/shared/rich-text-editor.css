@@ -84,7 +84,7 @@
 .rich-text-toolbar select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--portal-focus-ring);
 }
 
 /* Quill toolbar icons - make them visible on dark theme */
@@ -203,7 +203,7 @@
 /* Focus state */
 .rich-text-editor:focus-within {
   border-color: var(--color-primary);
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--portal-focus-ring);
 }
 
 /* Disabled state */

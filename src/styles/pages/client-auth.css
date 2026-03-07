@@ -38,7 +38,7 @@
 
 .new-client-title {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
   text-transform: uppercase;
   color: var(--color-dark);
@@ -73,7 +73,7 @@
 
 .auth-title {
   margin: 0;
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-2xl);
   text-transform: uppercase;
   color: var(--color-dark);
@@ -355,7 +355,7 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 
 .login-form .form-heading {
   margin: 0 0 0.5rem 0;
-  font-family: var(--font-family-acme);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xl);
   text-transform: uppercase;
   color: var(--color-dark);

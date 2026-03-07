@@ -9,7 +9,7 @@
 
 /* ============================================
    Tasks Main Container
-   Uses .admin-table-card background from shared/portal-cards.css
+   Uses .data-table-card background from shared/portal-cards.css
    ============================================ */
 
 .tasks-main-container {
@@ -48,7 +48,7 @@
 }
 
 /* Tasks table styling within main container */
-.tasks-main-container .admin-table-scroll-wrapper {
+.tasks-main-container .data-table-scroll-wrapper {
   overflow: visible;
 }
 
@@ -344,7 +344,7 @@
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   font-size: var(--font-size-xs);
   color: var(--portal-text-secondary);
 }
@@ -357,7 +357,7 @@
 
 .task-comment {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-1);
 }
 
@@ -408,7 +408,7 @@
 
 .time-summary-card {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-2);
   text-align: center;
 }
@@ -430,7 +430,7 @@
    Only page-specific overrides here */
 #time-entries-list .data-table {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 #time-entries-list .data-table th {
@@ -686,7 +686,7 @@
 .kanban-loading .kanban-column-skeleton {
   height: 256px;
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   animation: pulse 2s ease-in-out infinite;
 }
 

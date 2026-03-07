@@ -544,7 +544,7 @@
 
 /* Text size variants */
 .pdetail-text-xs {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
 }
 
 .pdetail-text-sm {
@@ -621,7 +621,7 @@
 
 /* Completed date text */
 .pdetail-completed-date {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   margin-top: 0.25rem;
   display: block;
   color: var(--portal-text-light);
@@ -678,7 +678,7 @@
 
 /* Created by text */
 .pdetail-created-by {
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   margin-top: 0.5rem;
   display: block;
 }

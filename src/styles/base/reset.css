@@ -217,10 +217,10 @@ a {
 /* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
 /* Applies to: a, button, input, select, textarea, [tabindex] */
 /* Use box-shadow instead of outline - follows element border-radius naturally */
-/* Uses --focus-ring-* variables from portal-theme.css */
+/* Uses --portal-focus-* variables from portal-theme.css */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--focus-ring-color, var(--color-primary));
+  box-shadow: 0 0 0 var(--portal-focus-width, 2px) var(--portal-focus-color, var(--color-primary));
 }
 
 /* Remove focus ring for mouse users (non-keyboard focus) */

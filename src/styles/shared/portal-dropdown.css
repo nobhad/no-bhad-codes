@@ -42,6 +42,7 @@
   box-shadow: none;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-base);
   color: var(--portal-text-light);
 }
 
@@ -78,15 +79,24 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   gap: var(--dropdown-caret-gap, var(--space-2));
 }
 
-/* Caret icon in dropdown trigger - consistent sizing and positioning */
-.dropdown-trigger .dropdown-caret,
-.dropdown-trigger > svg:last-child,
-:is(.btn, .btn-secondary, .btn-primary, .btn-outline) > .dropdown-caret {
+/* Caret icon — SINGLE source of truth for ALL dropdown carets.
+   Color matches border variable so caret and border are always in sync.
+   Size, spacing, and transition are uniform across all dropdown types. */
+.dropdown-caret,
+.custom-dropdown-caret {
   flex-shrink: 0;
   width: var(--dropdown-caret-size, var(--icon-size-xs));
   height: var(--dropdown-caret-size, var(--icon-size-xs));
-  margin-left: auto;
+  color: var(--portal-border-color);
   transition: transform var(--transition-fast);
+  margin-left: var(--dropdown-caret-gap, var(--space-1));
+}
+
+/* Caret in button triggers - push caret to far right */
+.dropdown-trigger .dropdown-caret,
+.dropdown-trigger > svg:last-child,
+:is(.btn, .btn-secondary, .btn-primary, .btn-outline) > .dropdown-caret {
+  margin-left: auto;
 }
 
 /* Rotate caret when open */
@@ -129,9 +139,9 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 
 /* Hover state for button dropdown triggers - ensure text visible */
 :is(.btn, .btn-secondary, .btn-primary, .btn-outline).dropdown-trigger:hover {
-  background: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
 }
 
 /* Ensure SVG icons in dropdown triggers also get hover color */
@@ -458,14 +468,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Caret icon - uses root dropdown caret variables for consistency */
-.custom-dropdown[data-modal-dropdown] .custom-dropdown-caret {
-  width: var(--dropdown-caret-size, var(--icon-size-xs));
-  height: var(--dropdown-caret-size, var(--icon-size-xs));
-  flex-shrink: 0;
-  color: var(--portal-text-muted);
-  transition: transform var(--transition-fast) ease;
-  margin-left: var(--dropdown-caret-gap, var(--space-2));
-}
+/* Modal-dropdown caret — inherits size/color/transition from root .custom-dropdown-caret */
 
 .custom-dropdown[data-modal-dropdown].open .custom-dropdown-caret {
   transform: rotate(180deg);
@@ -652,9 +655,9 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* Allow dropdown to escape table containers */
 .portal
   :is(
-    .admin-table-card,
-    .admin-table-scroll-wrapper,
-    .admin-table-container,
+    .data-table-card,
+    .data-table-scroll-wrapper,
+    .data-table-container,
     .data-table,
     .data-table tbody
   ) {
@@ -695,14 +698,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 /* Hover state - show border (only when closed) */
 .portal .table-dropdown:not(.open) .custom-dropdown-trigger:hover {
-  border-color: var(--table-border-color);
+  border-color: var(--portal-border-color);
 }
 
 /* Focus state - only show border when closed */
 .portal .table-dropdown:not(.open) .custom-dropdown-trigger:is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
-  border-color: var(--table-border-color);
+  border-color: var(--portal-border-color);
   box-shadow: none;
 }
 
@@ -763,11 +766,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   align-self: center;
 }
 
-.portal .table-dropdown .custom-dropdown-caret {
-  width: var(--dropdown-caret-size);
-  height: var(--dropdown-caret-size);
-  flex-shrink: 0;
-}
+/* Table-dropdown caret — inherits size/color/transition from root .custom-dropdown-caret */
 
 /* Dropdown menu - sides + bottom, no top */
 /* Explicit font settings since this may not inherit from .portal */
@@ -991,7 +990,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   .pagination-page-size-dropdown
   .table-dropdown.custom-dropdown
   .custom-dropdown-trigger:hover {
-  border-color: var(--table-border-color);
+  border-color: var(--portal-border-color);
 }
 
 /* Trigger - open state (dropdown opens UPWARD) */
@@ -1247,16 +1246,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   opacity: 0.5;
 }
 
-/* Caret icon - uses root dropdown caret variables for consistency */
-.portal .modal-dropdown .custom-dropdown-caret,
-.confirm-dialog .modal-dropdown .custom-dropdown-caret,
-.admin-modal .modal-dropdown .custom-dropdown-caret {
-  width: var(--dropdown-caret-size, var(--icon-size-xs));
-  height: var(--dropdown-caret-size, var(--icon-size-xs));
-  flex-shrink: 0;
-  margin-left: var(--dropdown-caret-gap, var(--space-2));
-  transition: transform var(--transition-fast);
-}
+/* Modal-dropdown caret — inherits size/color/transition from root .custom-dropdown-caret */
 
 /* Hover state - 2px primary border */
 .portal .modal-dropdown .custom-dropdown-trigger:hover,
@@ -1398,5 +1388,5 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--portal-alpha-black-50, rgba(0, 0, 0, 0.5));
+  background-color: var(--portal-alpha-black-50);
 }
