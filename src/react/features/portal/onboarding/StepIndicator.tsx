@@ -55,19 +55,19 @@ export function StepIndicator({
               className={cn(
                 'tw-flex tw-items-center tw-justify-center',
                 'tw-w-7 tw-h-7',
-                'tw-text-[14px] tw-font-mono',
+                'tw-text-sm tw-font-mono',
                 'tw-transition-all tw-duration-200',
                 'tw-border tw-border-primary',
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary focus:tw-ring-offset-2 focus:tw-ring-offset-black',
                 isCompleted && [
                   'tw-bg-white',
-                  'tw-text-black',
+                  'tw-text-[var(--portal-text-dark)]',
                   isAccessible && 'tw-cursor-pointer hover:tw-opacity-80'
                 ],
                 isCurrent &&
                   !isCompleted && [
                   'tw-bg-white',
-                  'tw-text-black'
+                  'tw-text-[var(--portal-text-dark)]'
                 ],
                 !isCompleted &&
                   !isCurrent && [
@@ -157,19 +157,19 @@ export function StepIndicatorDetailed({
                   className={cn(
                     'tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
                     'tw-w-8 tw-h-8',
-                    'tw-text-[14px] tw-font-mono',
+                    'tw-text-sm tw-font-mono',
                     'tw-transition-all tw-duration-200',
                     'tw-border tw-border-primary',
                     'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary focus:tw-ring-offset-2 focus:tw-ring-offset-black',
                     isCompleted && [
                       'tw-bg-white',
-                      'tw-text-black',
+                      'tw-text-[var(--portal-text-dark)]',
                       isAccessible && 'tw-cursor-pointer hover:tw-opacity-80'
                     ],
                     isCurrent &&
                       !isCompleted && [
                       'tw-bg-white',
-                      'tw-text-black'
+                      'tw-text-[var(--portal-text-dark)]'
                     ],
                     !isCompleted &&
                       !isCurrent && [
@@ -205,7 +205,7 @@ export function StepIndicatorDetailed({
               {/* Step Title */}
               <span
                 className={cn(
-                  'tw-mt-2 tw-text-[11px] tw-text-center tw-max-w-[80px] tw-leading-tight tw-font-mono',
+                  'tw-mt-2 tw-text-2xs tw-text-center tw-max-w-[80px] tw-leading-tight tw-font-mono',
                   isCurrent
                     ? 'tw-text-primary tw-font-bold'
                     : 'text-muted'

@@ -64,6 +64,9 @@ export const API_ENDPOINTS = {
   // Auth
   AUTH: '/api/auth',
   AUTH_PORTAL_LOGIN: '/api/auth/portal-login',
+  AUTH_VERIFY_INVITATION: '/api/auth/verify-invitation',
+  AUTH_SET_PASSWORD: '/api/auth/set-password',
+  AUTH_ADMIN_LOGIN: '/api/auth/admin/login',
 
   // Admin-specific endpoints (require admin authentication)
   ADMIN: {
@@ -72,8 +75,12 @@ export const API_ENDPOINTS = {
     SYSTEM_STATUS: '/api/admin/system-status',
     PERFORMANCE: '/api/admin/performance',
 
+    // Sidebar
+    SIDEBAR_COUNTS: '/api/admin/sidebar-counts',
+
     // CRM
     LEADS: '/api/admin/leads',
+    CONTACT_SUBMISSIONS: '/api/admin/contact-submissions',
     LEADS_BULK_STATUS: '/api/admin/leads/bulk/status',
     LEADS_BULK_DELETE: '/api/admin/leads/bulk/delete',
     CLIENTS: '/api/admin/clients',
@@ -170,6 +177,12 @@ export const API_ENDPOINTS = {
   INTEGRATIONS_STRIPE_STATUS: '/api/integrations/stripe/status',
   INTEGRATIONS_CALENDAR_STATUS: '/api/integrations/calendar/status',
   INTEGRATIONS_CALENDAR_SETTINGS: '/api/integrations/calendar/settings',
+
+  // Message Threads
+  MESSAGE_THREADS: '/api/messages/threads',
+
+  // Client notifications
+  CLIENT_NOTIFICATIONS: '/api/clients/me/notifications',
 
   // Client contacts (nested under clients)
   CLIENT_CONTACTS: '/api/clients/contacts',
@@ -268,6 +281,29 @@ export const buildEndpoint = {
 
   // Approvals
   approvalRespond: (id: number | string) => `${API_ENDPOINTS.APPROVALS}/requests/${id}/respond`,
+
+  // Leads
+  adminLead: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}`,
+  adminLeadStatus: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`,
+  adminLeadInvite: (id: number | string) => `${API_ENDPOINTS.ADMIN.LEADS}/${id}/invite`,
+
+  // Contact Submissions
+  adminContactSubmissionStatus: (id: number | string) => `${API_ENDPOINTS.ADMIN.CONTACT_SUBMISSIONS}/${id}/status`,
+
+  // Projects (admin)
+  adminProject: (id: number | string) => `${API_ENDPOINTS.PROJECTS}/${id}`,
+
+  // Message Threads
+  messageThreadRead: (id: number | string) => `${API_ENDPOINTS.MESSAGE_THREADS}/${id}/read`,
+
+  // Invoice downloads
+  invoicePaymentReceipt: (id: number | string) => `${API_ENDPOINTS.INVOICES}/payments/${id}/receipt`,
+
+  // File operations
+  filePreview: (id: number | string) => `${API_ENDPOINTS.FILES}/${id}/preview`,
+
+  // Document request file downloads
+  documentRequestFileDownload: (documentId: number | string) => `${API_ENDPOINTS.DOCUMENT_REQUESTS}/files/${documentId}/download`,
 
   // Webhooks
   webhook: (id: number | string) => `${API_ENDPOINTS.ADMIN.WEBHOOKS}/${id}`,

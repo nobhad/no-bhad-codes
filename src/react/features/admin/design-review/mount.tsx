@@ -1,10 +1,10 @@
 /**
- * Design Review Panel Mount
+ * Design Review Table Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { DesignReviewPanel } from './DesignReviewPanel';
+import { DesignReviewTable } from './DesignReviewTable';
 
 export interface DesignReviewMountOptions extends BaseMountOptions {
   /** Filter by project ID */
@@ -14,10 +14,10 @@ export interface DesignReviewMountOptions extends BaseMountOptions {
 }
 
 export const {
-  mount: mountDesignReviewPanel,
-  unmount: unmountDesignReviewPanel,
-  shouldUseReact: shouldUseReactDesignReviewPanel
+  mount: mountDesignReviewTable,
+  unmount: unmountDesignReviewTable,
+  shouldUseReact: shouldUseReactDesignReviewTable
 } = createMountWrapper<DesignReviewMountOptions>({
-  Component: DesignReviewPanel,
-  displayName: 'DesignReviewPanel'
+  Component: DesignReviewTable,
+  displayName: 'DesignReviewTable'
 });

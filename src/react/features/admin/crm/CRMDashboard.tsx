@@ -6,7 +6,7 @@ import { LoadingState } from '@react/factories';
 // Lazy load child components
 const LeadsTable = React.lazy(() => import('../leads/LeadsTable').then(m => ({ default: m.LeadsTable })));
 const ContactsTable = React.lazy(() => import('../contacts/ContactsTable').then(m => ({ default: m.ContactsTable })));
-const MessagingPanel = React.lazy(() => import('../messaging/MessagingPanel').then(m => ({ default: m.MessagingPanel })));
+const MessagingView = React.lazy(() => import('../messaging/MessagingView').then(m => ({ default: m.MessagingView })));
 const MessagesTable = React.lazy(() => import('../messaging/MessagesTable').then(m => ({ default: m.MessagesTable })));
 const ClientsTable = React.lazy(() => import('../clients/ClientsTable').then(m => ({ default: m.ClientsTable })));
 
@@ -40,39 +40,47 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
   // Render individual views for specific subtabs
   if (activeSubtab === 'leads') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
-        <LeadsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
+          <LeadsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'contacts') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
-        <ContactsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
+          <ContactsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'messages') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
-        <MessagingPanel onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
+          <MessagingView onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'clients') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
-        <ClientsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading clients..." />}>
+          <ClientsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
       <React.Suspense fallback={<LoadingState message="Loading leads..." />}>
         <section className="overview-table-section">
           <LeadsTable
@@ -123,5 +131,3 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
     </div>
   );
 }
-
-export default CRMDashboard;

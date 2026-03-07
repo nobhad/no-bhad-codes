@@ -348,10 +348,10 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.draft, label: 'draft', hideIfZero: true },
-            { value: stats.sent, label: 'sent', variant: 'active', hideIfZero: true },
-            { value: stats.accepted, label: 'accepted', variant: 'completed', hideIfZero: true },
-            { value: stats.declined, label: 'declined', variant: 'cancelled', hideIfZero: true }
+            { value: stats.draft, label: 'draft' },
+            { value: stats.sent, label: 'sent', variant: 'active' },
+            { value: stats.accepted, label: 'accepted', variant: 'completed' },
+            { value: stats.declined, label: 'declined', variant: 'cancelled' }
           ]}
           tooltip={`${stats.total} Total | ${formatCurrency(stats.totalValue)} Value | ${stats.acceptanceRate}% Acceptance`}
         />
@@ -543,5 +543,3 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
     </TableLayout>
   );
 }
-
-export default ProposalsTable;

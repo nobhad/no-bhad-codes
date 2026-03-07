@@ -197,9 +197,9 @@ export function PortalQuestionnairesView({
       stats={
         <TableStats items={[
           { value: responses.length, label: 'total' },
-          { value: completedCount, label: 'completed', variant: 'completed', hideIfZero: true },
-          { value: pendingCount, label: 'pending', variant: 'pending', hideIfZero: true },
-          { value: needsRevisionCount, label: 'needs revision', variant: 'overdue', hideIfZero: true }
+          { value: completedCount, label: 'completed', variant: 'completed' },
+          { value: pendingCount, label: 'pending', variant: 'pending' },
+          { value: needsRevisionCount, label: 'needs revision', variant: 'overdue' }
         ]} />
       }
       actions={
@@ -222,7 +222,7 @@ export function PortalQuestionnairesView({
         <EmptyState
           icon={<FileText className="icon-lg" />}
           message={responses.length === 0
-            ? 'No questionnaires assigned yet'
+            ? 'No questionnaires assigned yet. Questionnaires will appear here when your project team sends them.'
             : 'No questionnaires match the current filters.'
           }
         />

@@ -13,6 +13,7 @@ import { formatDate } from '../utils/format-utils';
 import { SanitizationUtils } from '../utils/sanitization-utils';
 import { unwrapApiData } from '../utils/api-client';
 import { createLogger } from '../utils/logger';
+import { API_ENDPOINTS } from '../constants/api-endpoints';
 
 const logger = createLogger('NotificationBell');
 
@@ -69,7 +70,7 @@ export class NotificationBell {
     this.pollInterval = options.pollInterval ?? DEFAULT_POLL_INTERVAL;
     this.isAdmin = options.isAdmin ?? false;
     // Use role-appropriate API path
-    this.apiBasePath = this.isAdmin ? '/api/admin/notifications' : '/api/clients/me/notifications';
+    this.apiBasePath = this.isAdmin ? API_ENDPOINTS.ADMIN.NOTIFICATIONS : API_ENDPOINTS.CLIENT_NOTIFICATIONS;
   }
 
   /**

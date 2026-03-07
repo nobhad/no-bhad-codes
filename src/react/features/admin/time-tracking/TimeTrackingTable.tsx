@@ -32,7 +32,7 @@ import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 import { unwrapApiData } from '../../../../utils/api-client';
 
-const logger = createLogger('TimeTrackingPanel');
+const logger = createLogger('TimeTrackingTable');
 
 interface TimeEntry {
   id: number;
@@ -60,7 +60,7 @@ interface TimeStats {
   totalValue: number;
 }
 
-interface TimeTrackingPanelProps {
+interface TimeTrackingTableProps {
   projectId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
@@ -107,7 +107,7 @@ function sortTimeEntries(a: TimeEntry, b: TimeEntry, sort: SortConfig): number {
   }
 }
 
-export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingPanelProps) {
+export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -283,8 +283,8 @@ export function TimeTrackingPanel({ projectId, onNavigate, getAuthToken, showNot
         <TableStats
           items={[
             { value: formatDuration(stats.totalHours * 60), label: 'total' },
-            { value: formatDuration(stats.billableHours * 60), label: 'billable', variant: 'completed', hideIfZero: true },
-            { value: formatDuration(stats.unbilledHours * 60), label: 'unbilled', variant: 'pending', hideIfZero: true },
+            { value: formatDuration(stats.billableHours * 60), label: 'billable', variant: 'completed' },
+            { value: formatDuration(stats.unbilledHours * 60), label: 'unbilled', variant: 'pending' },
             { value: formatCurrency(stats.totalValue), label: 'value' }
           ]}
           tooltip={`${formatDuration(stats.totalHours * 60)} Total • ${formatDuration(stats.billableHours * 60)} Billable • ${formatDuration(stats.unbilledHours * 60)} Unbilled • ${formatCurrency(stats.totalValue)} Value`}
@@ -439,5 +439,3 @@ function formatDuration(minutes: number): string {
   const mins = minutes % 60;
   return `${hours}h ${mins}m`;
 }
-
-export default TimeTrackingPanel;

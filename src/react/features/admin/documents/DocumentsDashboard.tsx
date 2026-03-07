@@ -39,43 +39,51 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
   // Render individual views for specific subtabs
   if (activeSubtab === 'invoices') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
-        <InvoicesTable
-          onNavigate={onNavigate}
-          getAuthToken={getAuthToken}
-          showNotification={showNotification}
-        />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
+          <InvoicesTable
+            onNavigate={onNavigate}
+            getAuthToken={getAuthToken}
+            showNotification={showNotification}
+          />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'contracts') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
-        <ContractsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading contracts..." />}>
+          <ContractsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'document-requests') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
-        <DocumentRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading document requests..." />}>
+          <DocumentRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'questionnaires') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
-        <QuestionnairesTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading questionnaires..." />}>
+          <QuestionnairesTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
       <React.Suspense fallback={<LoadingState message="Loading invoices..." />}>
         <section className="overview-table-section">
           <InvoicesTable
@@ -126,5 +134,3 @@ export function DocumentsDashboard({ onNavigate, getAuthToken, showNotification 
     </div>
   );
 }
-
-export default DocumentsDashboard;

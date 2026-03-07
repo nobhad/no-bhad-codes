@@ -607,5 +607,3 @@ function SourceBreakdown({
     </div>
   );
 }
-
-export default AnalyticsDashboard;

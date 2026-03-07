@@ -22,6 +22,7 @@ export { useProjectDetail } from './useProjectDetail';
 export { useClientDetail } from './useClientDetail';
 
 // Data hooks - Portal
+export { usePortalFetch, usePortalData } from './usePortalFetch';
 export { usePortalInvoices } from './usePortalInvoices';
 
 // Table/UI hooks
@@ -29,3 +30,6 @@ export { useTableFilters } from './useTableFilters';
 export { usePagination } from './usePagination';
 export { useSelection } from './useSelection';
 export { useExport } from './useExport';
+
+// Portal SPA hooks
+export { usePortalAuth } from './usePortalAuth';

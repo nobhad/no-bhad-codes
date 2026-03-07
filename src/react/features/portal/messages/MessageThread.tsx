@@ -20,6 +20,7 @@ import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/E
 import { IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { UI_LIMITS } from '@react/config/portal-constants';
 import type { Message, MessageThread as MessageThreadType, MessageAttachment } from './types';
 
 // ============================================================================
@@ -378,7 +379,7 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, UI_LIMITS.MAX_TEXTAREA_HEIGHT)}px`;
     }
   }, [content]);
 

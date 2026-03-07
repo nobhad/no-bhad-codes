@@ -64,7 +64,7 @@ export function PortalHeader({
             'tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center',
             'tw-border tw-border-primary tw-bg-transparent',
             'tw-text-primary tw-font-bold tw-font-mono',
-            isCollapsed ? 'tw-w-8 tw-h-8 tw-text-[11px]' : 'tw-w-9 tw-h-9 tw-text-[12px]'
+            isCollapsed ? 'tw-w-8 tw-h-8 tw-text-2xs' : 'tw-w-9 tw-h-9 tw-text-xs'
           )}
         >
           {user?.avatar ? (
@@ -81,10 +81,10 @@ export function PortalHeader({
         {/* Name and Email */}
         {!isCollapsed && user && (
           <div className="tw-flex-1 tw-min-w-0">
-            <p className="tw-text-[12px] tw-font-bold tw-text-primary tw-truncate tw-font-mono">
+            <p className="tw-text-xs tw-font-bold tw-text-primary tw-truncate tw-font-mono">
               {user.name}
             </p>
-            <p className="tw-text-[10px] tw-text-[var(--portal-text-muted)] tw-truncate tw-font-mono">
+            <p className="tw-text-3xs tw-text-[var(--portal-text-muted)] tw-truncate tw-font-mono">
               {user.email}
             </p>
           </div>
@@ -127,5 +127,3 @@ export function PortalHeader({
     </div>
   );
 }
-
-export default PortalHeader;

@@ -323,11 +323,11 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-            { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.review, label: 'review', variant: 'pending', hideIfZero: true },
-            { value: stats.delivered, label: 'delivered', variant: 'completed', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
+            { value: stats.pending, label: 'pending', variant: 'pending' },
+            { value: stats.inProgress, label: 'in progress', variant: 'active' },
+            { value: stats.review, label: 'review', variant: 'pending' },
+            { value: stats.delivered, label: 'delivered', variant: 'completed' },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inProgress} In Progress • ${stats.review} Review • ${stats.delivered} Delivered`}
         />
@@ -530,5 +530,3 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     </TableLayout>
   );
 }
-
-export default DeliverablesTable;

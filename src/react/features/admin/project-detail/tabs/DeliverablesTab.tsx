@@ -144,7 +144,7 @@ export function DeliverablesTab({
                         )}
                       >
                         {milestone.is_completed ? (
-                          <Check className="icon-md tw-text-black" />
+                          <Check className="icon-md tw-text-[var(--portal-text-dark)]" />
                         ) : (
                           <Package className="icon-xs" />
                         )}
@@ -195,7 +195,7 @@ export function DeliverablesTab({
                             )}
                           >
                             {item.isCompleted ? (
-                              <Check className="icon-xs tw-text-black" />
+                              <Check className="icon-xs tw-text-[var(--portal-text-dark)]" />
                             ) : (
                               <Clock className="icon-xs" />
                             )}
@@ -225,7 +225,7 @@ export function DeliverablesTab({
       <div className="tw-flex tw-items-center tw-gap-6 text-muted tw-text-xs">
         <div className="tw-flex tw-items-center tw-gap-2">
           <div className="tw-w-4 tw-h-4 tw-bg-white tw-flex tw-items-center tw-justify-center deliv-icon-box">
-            <Check className="icon-xs tw-text-black" />
+            <Check className="icon-xs tw-text-[var(--portal-text-dark)]" />
           </div>
           <span>Completed</span>
         </div>

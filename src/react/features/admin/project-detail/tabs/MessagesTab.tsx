@@ -122,7 +122,7 @@ export function MessagesTab({
                         : 'tw-bg-transparent tw-border tw-border-[var(--portal-border-color)]'
                     )}
                   >
-                    <User className={cn('icon-md', isAdmin ? 'tw-text-black' : 'tw-text-primary')} />
+                    <User className={cn('icon-md', isAdmin ? 'tw-text-[var(--portal-text-dark)]' : 'tw-text-primary')} />
                   </div>
 
                   {/* Message Content */}
@@ -144,7 +144,7 @@ export function MessagesTab({
                       className={cn(
                         'tw-px-4 tw-py-2 msgtab-bubble',
                         isAdmin
-                          ? 'tw-bg-white tw-text-black'
+                          ? 'tw-bg-white tw-text-[var(--portal-text-dark)]'
                           : 'tw-border tw-border-[var(--portal-border-color)] tw-text-primary'
                       )}
                     >

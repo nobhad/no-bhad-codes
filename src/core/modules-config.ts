@@ -10,6 +10,9 @@
 
 import { container } from './container';
 import type { ModuleDefinition } from '../types/modules';
+import type { BusinessCardRenderer } from '../modules/ui/business-card-renderer';
+import type { RouterService } from '../services/router-service';
+import type { DataService } from '../services/data-service';
 
 /**
  * Register all application modules with the DI container
@@ -71,8 +74,8 @@ export function registerModules(debug: boolean = false): void {
       factory: async () => {
         const { BusinessCardInteractions } =
           await import('../modules/ui/business-card-interactions');
-        const renderer = await container.resolve('SectionCardRenderer');
-        return new BusinessCardInteractions(renderer as any);
+        const renderer = await container.resolve<BusinessCardRenderer>('SectionCardRenderer');
+        return new BusinessCardInteractions(renderer);
       },
       dependencies: ['SectionCardRenderer']
     },
@@ -81,13 +84,11 @@ export function registerModules(debug: boolean = false): void {
       type: 'dom',
       factory: async () => {
         const { NavigationModule } = await import('../modules/ui/navigation');
-        const routerService = await container.resolve('RouterService');
+        const routerService = await container.resolve<RouterService>('RouterService');
         // DataService may not be available on client/admin pages - handle gracefully
-        let dataService: { init?: () => Promise<void> | void } | null = null;
+        let dataService: DataService | null = null;
         try {
-          dataService = (await container.resolve('DataService')) as {
-            init?: () => Promise<void> | void;
-          };
+          dataService = await container.resolve<DataService>('DataService');
           if (dataService && typeof dataService.init === 'function') {
             await dataService.init();
           }
@@ -96,8 +97,8 @@ export function registerModules(debug: boolean = false): void {
         }
         return new NavigationModule({
           debug,
-          routerService: routerService as any,
-          dataService: dataService as any
+          routerService,
+          dataService: dataService ?? undefined
         });
       },
       dependencies: ['RouterService']
@@ -314,6 +315,67 @@ export function registerModules(debug: boolean = false): void {
           name: 'PortalShellModule'
         };
       }
+    },
+    {
+      name: 'ReactPortalModule',
+      type: 'dom',
+      factory: async () => {
+        // Mount the React SPA for admin and client portal pages
+        const currentPath = window.location.pathname;
+        const pageType = document.body.getAttribute('data-page') || '';
+        const isPortalPage =
+          currentPath.includes('/admin') ||
+          (currentPath === '/dashboard' && (pageType === 'admin' || pageType === 'client-portal')) ||
+          (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
+
+        if (isPortalPage) {
+          let cleanup: (() => void) | null = null;
+
+          return {
+            init: async () => {
+              const { mountPortalApp } = await import('../react/app/mount-portal');
+              // Hide EJS elements outside the React-managed container
+              // (site header, mobile nav) — React renders its own shell.
+              const siteHeader = document.querySelector('body > header.header') as HTMLElement;
+              const mobileNav = document.querySelector('body > nav.nav') as HTMLElement;
+              const siteFooter = document.querySelector('body > footer, body > .footer') as HTMLElement;
+              if (siteHeader) siteHeader.style.display = 'none';
+              if (mobileNav) mobileNav.style.display = 'none';
+              if (siteFooter) siteFooter.style.display = 'none';
+
+              // Mount React directly into the existing EJS container.
+              // mountPortalApp uses flushSync so React paints in the same
+              // frame as clearing — no visual flash.
+              const dashboardContainer =
+                document.querySelector('.dashboard-container.portal') as HTMLElement;
+              if (dashboardContainer) {
+                dashboardContainer.innerHTML = '';
+                cleanup = mountPortalApp(dashboardContainer);
+              }
+            },
+            destroy: () => {
+              cleanup?.();
+              cleanup = null;
+              // Restore EJS elements if React is unmounted
+              const siteHeader = document.querySelector('body > header.header') as HTMLElement;
+              const mobileNav = document.querySelector('body > nav.nav') as HTMLElement;
+              const siteFooter = document.querySelector('body > footer, body > .footer') as HTMLElement;
+              if (siteHeader) siteHeader.style.display = '';
+              if (mobileNav) mobileNav.style.display = '';
+              if (siteFooter) siteFooter.style.display = '';
+            },
+            isInitialized: true,
+            name: 'ReactPortalModule'
+          };
+        }
+
+        return {
+          init: async () => {},
+          destroy: () => {},
+          isInitialized: true,
+          name: 'ReactPortalModule'
+        };
+      }
     }
   ];
 
@@ -358,7 +420,17 @@ export function getMainSiteModules(): string[] {
 }
 
 /**
+ * Get module list for React SPA portal (admin + client)
+ * Replaces both getAdminModules and getClientPortalModules
+ * when the React SPA is active.
+ */
+export function getReactPortalModules(): string[] {
+  return ['ThemeModule', 'ReactPortalModule'];
+}
+
+/**
  * Get module list for client portal
+ * @deprecated Use getReactPortalModules() for the React SPA
  */
 export function getClientPortalModules(): string[] {
   return ['ThemeModule', 'NavigationModule', 'ClientPortalModule'];

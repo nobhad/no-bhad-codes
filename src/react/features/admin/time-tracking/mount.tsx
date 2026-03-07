@@ -1,10 +1,10 @@
 /**
- * Time Tracking Panel Mount
+ * Time Tracking Table Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { TimeTrackingPanel } from './TimeTrackingPanel';
+import { TimeTrackingTable } from './TimeTrackingTable';
 
 export interface TimeTrackingMountOptions extends BaseMountOptions {
   /** Filter by project ID */
@@ -12,10 +12,10 @@ export interface TimeTrackingMountOptions extends BaseMountOptions {
 }
 
 export const {
-  mount: mountTimeTrackingPanel,
-  unmount: unmountTimeTrackingPanel,
-  shouldUseReact: shouldUseReactTimeTrackingPanel
+  mount: mountTimeTrackingTable,
+  unmount: unmountTimeTrackingTable,
+  shouldUseReact: shouldUseReactTimeTrackingTable
 } = createMountWrapper<TimeTrackingMountOptions>({
-  Component: TimeTrackingPanel,
-  displayName: 'TimeTrackingPanel'
+  Component: TimeTrackingTable,
+  displayName: 'TimeTrackingTable'
 });

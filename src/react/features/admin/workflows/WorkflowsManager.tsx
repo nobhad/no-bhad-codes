@@ -37,31 +37,35 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
   // Individual subtab views
   if (activeSubtab === 'approvals' || activeSubtab === 'triggers') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
-        <WorkflowsTable
-          onNavigate={onNavigate}
-          getAuthToken={getAuthToken}
-          showNotification={showNotification}
-        />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
+          <WorkflowsTable
+            onNavigate={onNavigate}
+            getAuthToken={getAuthToken}
+            showNotification={showNotification}
+          />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'email-templates') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
-        <EmailTemplatesManager
-          onNavigate={onNavigate}
-          getAuthToken={getAuthToken}
-          showNotification={showNotification}
-        />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
+          <EmailTemplatesManager
+            onNavigate={onNavigate}
+            getAuthToken={getAuthToken}
+            showNotification={showNotification}
+          />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
       <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
         <section className="overview-table-section">
           <WorkflowsTable
@@ -88,5 +92,3 @@ export function WorkflowsManager({ getAuthToken, showNotification, onNavigate }:
     </div>
   );
 }
-
-export default WorkflowsManager;

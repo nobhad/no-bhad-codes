@@ -43,13 +43,13 @@ function getActivityIcon(type: string): React.ElementType {
  */
 function getActivityColor(type: string): string {
   const colorMap: Record<string, string> = {
-    email: 'tw-text-blue-400',
-    invoice: 'tw-text-green-400',
-    project: 'tw-text-purple-400',
-    file: 'tw-text-orange-400',
-    message: 'tw-text-cyan-400',
-    contact: 'tw-text-pink-400',
-    status: 'tw-text-yellow-400',
+    email: 'tw-text-[var(--activity-email-color)]',
+    invoice: 'tw-text-[var(--activity-invoice-color)]',
+    project: 'tw-text-[var(--activity-project-color)]',
+    file: 'tw-text-[var(--activity-file-color)]',
+    message: 'tw-text-[var(--activity-message-color)]',
+    contact: 'tw-text-[var(--activity-contact-color)]',
+    status: 'tw-text-[var(--activity-status-color)]',
     completed: 'tw-text-[var(--status-completed)]',
     alert: 'tw-text-[var(--status-cancelled)]'
   };

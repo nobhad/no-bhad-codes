@@ -39,10 +39,10 @@ interface ReactRegistry {
   filesManager?: RegistryEntry;
   emailTemplatesManager?: RegistryEntry;
   knowledgeBase?: RegistryEntry;
-  messagingPanel?: RegistryEntry;
-  timeTrackingPanel?: RegistryEntry;
-  designReviewPanel?: RegistryEntry;
-  systemStatusPanel?: RegistryEntry;
+  messagingView?: RegistryEntry;
+  timeTrackingTable?: RegistryEntry;
+  designReviewTable?: RegistryEntry;
+  systemStatusDashboard?: RegistryEntry;
   // Admin analytics components
   overviewDashboard?: RegistryEntry;
   analyticsDashboard?: RegistryEntry;

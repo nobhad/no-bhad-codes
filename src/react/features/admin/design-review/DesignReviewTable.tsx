@@ -58,7 +58,7 @@ interface DesignReviewStats {
   avgReviewTime: string;
 }
 
-interface DesignReviewPanelProps {
+interface DesignReviewTableProps {
   projectId?: string;
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
@@ -102,7 +102,7 @@ function sortReviews(a: DesignReview, b: DesignReview, sort: SortConfig): number
   }
 }
 
-export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNotification: _showNotification }: DesignReviewPanelProps) {
+export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNotification: _showNotification }: DesignReviewTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -185,10 +185,10 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-            { value: stats.inReview, label: 'in review', variant: 'active', hideIfZero: true },
-            { value: stats.approved, label: 'approved', variant: 'completed', hideIfZero: true },
-            { value: stats.needsRevision, label: 'needs revision', variant: 'overdue', hideIfZero: true }
+            { value: stats.pending, label: 'pending', variant: 'pending' },
+            { value: stats.inReview, label: 'in review', variant: 'active' },
+            { value: stats.approved, label: 'approved', variant: 'completed' },
+            { value: stats.needsRevision, label: 'needs revision', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inReview} In Review • ${stats.approved} Approved • Avg: ${stats.avgReviewTime}`}
         />
@@ -331,5 +331,3 @@ export function DesignReviewPanel({ projectId, onNavigate, getAuthToken, showNot
     </TableLayout>
   );
 }
-
-export default DesignReviewPanel;

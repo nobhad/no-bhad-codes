@@ -117,16 +117,6 @@ export function formatDuration(ms: number): string {
 }
 
 /**
- * Format duration in minutes/seconds
- */
-export function formatDurationMinSec(ms: number): { minutes: number; seconds: number } {
-  return {
-    minutes: Math.floor(ms / MS_PER_MINUTE),
-    seconds: Math.floor((ms % MS_PER_MINUTE) / MS_PER_SECOND)
-  };
-}
-
-/**
  * Check if a date is today
  */
 export function isToday(date: Date | string): boolean {
@@ -145,29 +135,4 @@ export function isToday(date: Date | string): boolean {
 export function isPast(date: Date | string): boolean {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.getTime() < Date.now();
-}
-
-/**
- * Get time until a future date
- */
-export function getTimeUntil(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const now = new Date();
-  const diffMs = dateObj.getTime() - now.getTime();
-
-  if (diffMs <= 0) {
-    return 'Now';
-  }
-
-  const diffMins = Math.ceil(diffMs / MS_PER_MINUTE);
-  const diffHours = Math.ceil(diffMs / MS_PER_HOUR);
-  const diffDays = Math.ceil(diffMs / MS_PER_DAY);
-
-  if (diffMins < 60) {
-    return `in ${diffMins} minute${diffMins === 1 ? '' : 's'}`;
-  }
-  if (diffHours < 24) {
-    return `in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
-  }
-  return `in ${diffDays} day${diffDays === 1 ? '' : 's'}`;
 }

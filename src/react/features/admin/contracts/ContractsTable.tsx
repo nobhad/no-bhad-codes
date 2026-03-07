@@ -345,10 +345,10 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.draft, label: 'draft', hideIfZero: true },
-            { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-            { value: stats.signed, label: 'signed', variant: 'completed', hideIfZero: true },
-            { value: stats.expired, label: 'expired', variant: 'overdue', hideIfZero: true }
+            { value: stats.draft, label: 'draft' },
+            { value: stats.pending, label: 'pending', variant: 'pending' },
+            { value: stats.signed, label: 'signed', variant: 'completed' },
+            { value: stats.expired, label: 'expired', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total • ${stats.draft} Draft • ${stats.pending} Pending • ${stats.signed} Signed`}
         />
@@ -557,5 +557,3 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     </TableLayout>
   );
 }
-
-export default ContractsTable;

@@ -320,7 +320,7 @@ export function IconButton({
     return null;
   }
 
-  // Icon size is controlled by CSS variables (--btn-portal-icon-inner-size)
+  // Icon size is controlled by CSS variables (--portal-btn-icon-inner-size)
   // No hardcoded sizes passed to icons
 
   // Resolve button properties
@@ -400,7 +400,7 @@ interface TableActionButtonProps {
 
 /**
  * TableActionButton - Legacy-compatible component for table row actions.
- * Icon sizing is controlled by CSS variables (--btn-portal-icon-inner-size).
+ * Icon sizing is controlled by CSS variables (--portal-btn-icon-inner-size).
  *
  * @deprecated Use IconButton with action prop instead
  */

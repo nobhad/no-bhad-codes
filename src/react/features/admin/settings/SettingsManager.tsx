@@ -4,7 +4,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/factories';
 
 // Lazy load child components
-const SystemStatusPanel = React.lazy(() => import('../system-status/SystemStatusPanel').then(m => ({ default: m.SystemStatusPanel })));
+const SystemStatusDashboard = React.lazy(() => import('../system-status/SystemStatusDashboard').then(m => ({ default: m.SystemStatusDashboard })));
 const WorkflowsTable = React.lazy(() => import('../workflows/WorkflowsTable').then(m => ({ default: m.WorkflowsTable })));
 const EmailTemplatesManager = React.lazy(() => import('../email-templates/EmailTemplatesManager').then(m => ({ default: m.EmailTemplatesManager })));
 const BusinessConfiguration = React.lazy(() => import('./BusinessConfiguration').then(m => ({ default: m.BusinessConfiguration })));
@@ -43,51 +43,61 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   // Configuration subtab
   if (activeSubtab === 'configuration') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
-        <BusinessConfiguration {...sharedProps} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
+          <BusinessConfiguration {...sharedProps} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Workflows subtab
   if (activeSubtab === 'workflows') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
-        <WorkflowsTable {...sharedProps} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading workflows..." />}>
+          <WorkflowsTable {...sharedProps} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Email Templates subtab
   if (activeSubtab === 'email-templates') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
-        <EmailTemplatesManager {...sharedProps} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading email templates..." />}>
+          <EmailTemplatesManager {...sharedProps} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Audit Log subtab
   if (activeSubtab === 'audit-log') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading audit log..." />}>
-        <AuditLogViewer {...sharedProps} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading audit log..." />}>
+          <AuditLogViewer {...sharedProps} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // System Health subtab
   if (activeSubtab === 'system-health') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
-        <SystemStatusPanel {...sharedProps} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
+          <SystemStatusDashboard {...sharedProps} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Overview - show configuration + system health stacked
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
       <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
         <section className="overview-table-section">
           <BusinessConfiguration {...sharedProps} overviewMode />
@@ -96,11 +106,9 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
 
       <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
         <section className="overview-table-section">
-          <SystemStatusPanel {...sharedProps} />
+          <SystemStatusDashboard {...sharedProps} />
         </section>
       </React.Suspense>
     </div>
   );
 }
-
-export default SettingsManager;

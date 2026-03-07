@@ -232,8 +232,8 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
         <TableStats
           items={[
             { value: stats.totalArticles, label: 'articles' },
-            { value: stats.published, label: 'published', variant: 'completed', hideIfZero: true },
-            { value: stats.draft, label: 'draft', variant: 'pending', hideIfZero: true }
+            { value: stats.published, label: 'published', variant: 'completed' },
+            { value: stats.draft, label: 'draft', variant: 'pending' }
           ]}
           tooltip={`${stats.totalArticles} Articles • ${stats.published} Published • ${stats.draft} Draft • ${stats.totalViews} Views`}
         />
@@ -367,5 +367,3 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
     </TableLayout>
   );
 }
-
-export default ArticlesTable;

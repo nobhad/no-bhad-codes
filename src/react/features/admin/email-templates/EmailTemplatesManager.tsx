@@ -198,8 +198,8 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.active, label: 'active', variant: 'completed', hideIfZero: true },
-            { value: stats.total - stats.active, label: 'inactive', variant: 'pending', hideIfZero: true }
+            { value: stats.active, label: 'active', variant: 'completed' },
+            { value: stats.total - stats.active, label: 'inactive', variant: 'pending' }
           ]}
           tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.total - stats.active} Inactive`}
         />
@@ -331,5 +331,3 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     </TableLayout>
   );
 }
-
-export default EmailTemplatesManager;

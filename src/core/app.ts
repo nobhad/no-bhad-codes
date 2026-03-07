@@ -15,9 +15,8 @@ import { registerServices } from './services-config';
 import {
   registerModules,
   getMainSiteModules,
-  getClientPortalModules,
-  getClientIntakeModules,
-  getAdminModules
+  getReactPortalModules,
+  getClientIntakeModules
 } from './modules-config';
 import { setupDebugHelpers } from './debug';
 import { isDev } from './env';
@@ -320,13 +319,10 @@ export class Application {
     const isHomePage = currentPath === '/' || currentPath === '/index.html';
 
     let baseCoreModules: string[];
-    if (isClientPortal) {
-      // /portal login, /dashboard (client), and /client/* pages use portal modules
-      baseCoreModules = getClientPortalModules();
+    if (isClientPortal || isAdminPage) {
+      baseCoreModules = getReactPortalModules();
     } else if (isClientIntake) {
       baseCoreModules = getClientIntakeModules();
-    } else if (isAdminPage) {
-      baseCoreModules = getAdminModules();
     } else {
       baseCoreModules = getMainSiteModules();
     }

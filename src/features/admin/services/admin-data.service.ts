@@ -10,6 +10,7 @@
 
 import { apiFetch, apiPost, apiPut, parseApiResponse, unwrapApiData } from '../../../utils/api-client';
 import { createLogger } from '../../../utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '../../../constants/api-endpoints';
 
 const logger = createLogger('AdminDataService');
 
@@ -196,7 +197,7 @@ class AdminDataService {
     if (cached) return cached;
 
     try {
-      const response = await apiFetch('/api/admin/leads');
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.LEADS);
       const data = await parseApiResponse<{ leads: Lead[]; stats: LeadStats }>(response);
       this._leadsData = data.leads || [];
       this.cache.set('leads', data);
@@ -209,7 +210,7 @@ class AdminDataService {
 
   async updateLeadStatus(id: number, status: string): Promise<boolean> {
     try {
-      const response = await apiPut(`/api/admin/leads/${id}/status`, { status });
+      const response = await apiPut(buildEndpoint.adminLeadStatus(id), { status });
       if (response.ok) {
         this.cache.invalidate('leads');
         return true;
@@ -223,7 +224,7 @@ class AdminDataService {
 
   async inviteLead(leadId: number): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await apiPost(`/api/admin/leads/${leadId}/invite`);
+      const response = await apiPost(buildEndpoint.adminLeadInvite(leadId));
 
       if (response.ok) {
         const raw = await response.json();
@@ -258,7 +259,7 @@ class AdminDataService {
     if (cached) return cached;
 
     try {
-      const response = await apiFetch('/api/admin/contact-submissions');
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.CONTACT_SUBMISSIONS);
       const data = await parseApiResponse<{ submissions: Contact[]; stats: ContactStats }>(
         response
       );
@@ -273,7 +274,7 @@ class AdminDataService {
 
   async updateContactStatus(id: number, status: string): Promise<boolean> {
     try {
-      const response = await apiPut(`/api/admin/contact-submissions/${id}/status`, { status });
+      const response = await apiPut(buildEndpoint.adminContactSubmissionStatus(id), { status });
       if (response.ok) {
         this.cache.invalidate('contacts');
         return true;
@@ -298,7 +299,7 @@ class AdminDataService {
     if (cached) return cached;
 
     try {
-      const response = await apiFetch('/api/projects');
+      const response = await apiFetch(API_ENDPOINTS.PROJECTS);
       const data = await parseApiResponse<{ projects: Project[]; stats: unknown }>(response);
       this._projectsData = data.projects || [];
       this.cache.set('projects', data);
@@ -311,7 +312,7 @@ class AdminDataService {
 
   async updateProjectStatus(id: number, status: string): Promise<boolean> {
     try {
-      const response = await apiPut(`/api/projects/${id}`, { status });
+      const response = await apiPut(buildEndpoint.adminProject(id), { status });
       if (response.ok) {
         this.cache.invalidate('projects');
         this.cache.invalidate('leads');
@@ -337,7 +338,7 @@ class AdminDataService {
     if (cached) return cached;
 
     try {
-      const response = await apiFetch('/api/admin/clients');
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.CLIENTS);
       const data = await parseApiResponse<{ clients: Client[]; stats: unknown }>(response);
       this._clientsData = data.clients || [];
       this.cache.set('clients', data);
@@ -358,7 +359,7 @@ class AdminDataService {
 
   async fetchThreads(): Promise<MessageThread[]> {
     try {
-      const response = await apiFetch('/api/messages/threads');
+      const response = await apiFetch(API_ENDPOINTS.MESSAGE_THREADS);
       const data = await parseApiResponse<{ threads: MessageThread[] }>(response);
       this._threadsData = data.threads || [];
       return this._threadsData;
@@ -370,7 +371,7 @@ class AdminDataService {
 
   async fetchMessages(threadId: number): Promise<Message[]> {
     try {
-      const response = await apiFetch(`/api/messages/threads/${threadId}/messages`);
+      const response = await apiFetch(buildEndpoint.messageThreadMessages(threadId));
       const data = await parseApiResponse<{ messages: Message[] }>(response);
       return data.messages || [];
     } catch (error) {
@@ -381,7 +382,7 @@ class AdminDataService {
 
   async sendMessage(threadId: number, message: string): Promise<boolean> {
     try {
-      const response = await apiPost(`/api/messages/threads/${threadId}/messages`, { message });
+      const response = await apiPost(buildEndpoint.messageThreadMessages(threadId), { message });
       return response.ok;
     } catch (error) {
       logger.error('Failed to send message', { error, threadId });
@@ -391,7 +392,7 @@ class AdminDataService {
 
   async markThreadRead(threadId: number): Promise<void> {
     try {
-      await apiPut(`/api/messages/threads/${threadId}/read`);
+      await apiPut(buildEndpoint.messageThreadRead(threadId));
     } catch (error) {
       logger.error('Failed to mark thread read', { error, threadId });
     }
@@ -407,7 +408,7 @@ class AdminDataService {
 
   async fetchSidebarCounts(): Promise<SidebarCounts> {
     try {
-      const response = await apiFetch('/api/admin/sidebar-counts');
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.SIDEBAR_COUNTS);
       if (!response.ok) return { leads: 0, messages: 0 };
 
       const data = await parseApiResponse<SidebarCounts>(response);

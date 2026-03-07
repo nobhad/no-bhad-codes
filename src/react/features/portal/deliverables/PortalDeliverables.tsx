@@ -15,15 +15,14 @@ import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
 import { DeliverableCard } from './DeliverableCard';
 import type { PortalDeliverable, PortalDeliverablesResponse } from './types';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalDeliverables');
 
-export interface PortalDeliverablesProps {
-  getAuthToken?: () => string | null;
+export interface PortalDeliverablesProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 function filterDeliverable(
@@ -120,9 +119,9 @@ export function PortalDeliverables({
         <TableStats
           items={[
             { value: deliverables.length, label: 'total' },
-            { value: countByStatus.in_review || 0, label: 'in review', variant: 'pending', hideIfZero: true },
-            { value: countByStatus.approved || 0, label: 'approved', variant: 'completed', hideIfZero: true },
-            { value: countByStatus.revision_requested || 0, label: 'revisions', variant: 'overdue', hideIfZero: true }
+            { value: countByStatus.in_review || 0, label: 'in review', variant: 'pending' },
+            { value: countByStatus.approved || 0, label: 'approved', variant: 'completed' },
+            { value: countByStatus.revision_requested || 0, label: 'revisions', variant: 'overdue' }
           ]}
         />
       }
@@ -147,7 +146,7 @@ export function PortalDeliverables({
           icon={<Package className="icon-lg" />}
           message={
             deliverables.length === 0
-              ? 'No deliverables yet'
+              ? 'No deliverables yet. Deliverables will appear here as your project progresses.'
               : 'No deliverables match the current filters.'
           }
         />

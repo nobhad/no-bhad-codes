@@ -271,6 +271,41 @@ interface ApiSuccessResponse<T> {
 }
 
 /**
+ * Decode HTML entities in a string.
+ * Fixes double-encoding from legacy input sanitization that stored
+ * &amp; instead of & in the database.
+ */
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#x60;/g, '`')
+    .replace(/&#x3D;/g, '=');
+}
+
+/**
+ * Recursively decode HTML entities in all string values of an object.
+ * Applied at the API response level so all consumers get clean data.
+ */
+function decodeResponseStrings<T>(data: T): T {
+  if (data === null || data === undefined) return data;
+  if (typeof data === 'string') return decodeHtmlEntities(data) as T;
+  if (Array.isArray(data)) return data.map(decodeResponseStrings) as T;
+  if (typeof data === 'object') {
+    const decoded: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      decoded[key] = decodeResponseStrings(value);
+    }
+    return decoded as T;
+  }
+  return data;
+}
+
+/**
  * Helper to parse JSON response with error handling
  */
 export async function parseJsonResponse<T>(response: Response): Promise<T> {
@@ -301,13 +336,17 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
   const json = (await response.json()) as ApiSuccessResponse<T> | T;
 
   // Check if response follows the canonical format with data wrapper
+  let result: T;
   if (json && typeof json === 'object' && 'success' in json && json.success === true) {
     // Return unwrapped data, or empty object if no data property
-    return (json as ApiSuccessResponse<T>).data ?? ({} as T);
+    result = (json as ApiSuccessResponse<T>).data ?? ({} as T);
+  } else {
+    // Legacy format - return as-is for backward compatibility
+    result = json as T;
   }
 
-  // Legacy format - return as-is for backward compatibility
-  return json as T;
+  // Decode HTML entities from legacy input sanitization
+  return decodeResponseStrings(result);
 }
 
 /**
@@ -319,10 +358,14 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
  * const { clients, stats } = unwrapApiData(json);
  */
 export function unwrapApiData<T>(json: unknown): T {
+  let result: T;
   if (json && typeof json === 'object' && 'success' in json && (json as Record<string, unknown>).success === true) {
-    return ((json as Record<string, unknown>).data ?? {}) as T;
+    result = ((json as Record<string, unknown>).data ?? {}) as T;
+  } else {
+    result = json as T;
   }
-  return json as T;
+  // Decode HTML entities from legacy input sanitization
+  return decodeResponseStrings(result);
 }
 
 /**

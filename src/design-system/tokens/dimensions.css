@@ -1,0 +1,74 @@
+/**
+ * ===============================================
+ * DIMENSION DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/dimensions.css
+ *
+ * Semantic dimension variables for widths, heights,
+ * and size constraints. Prevents hardcoded px values.
+ */
+
+:root {
+  /* ============================================
+   * SIDEBAR DIMENSIONS
+   * ============================================ */
+  --sidebar-width-open: 240px;
+  --sidebar-width-collapsed: 56px;
+  --sidebar-width-default: 280px;
+
+  /* Aside/column variations */
+  --aside-width-narrow: 240px;
+  --aside-width-medium: 280px;
+  --aside-width-wide: 320px;
+
+  /* ============================================
+   * ICON BUTTON SIZES (container, not icon itself)
+   * Icon glyph sizes are in variables.css (--icon-size-*)
+   * ============================================ */
+  --icon-btn-size-sm: 28px;
+  --icon-btn-size-md: 36px;
+  --icon-btn-size-lg: 40px;
+  --icon-btn-size-xl: 48px;
+
+  /* Large icon / logo containers */
+  --icon-size-3xl: 64px;
+
+  /* ============================================
+   * TOOLTIP / POPOVER CONSTRAINTS
+   * ============================================ */
+  --tooltip-max-width: 280px;
+  --tooltip-max-width-sm: 250px;
+
+  /* ============================================
+   * CONTENT DIMENSION CONSTRAINTS
+   * ============================================ */
+  --panel-min-height-sm: 72px;
+  --card-min-height-sm: 120px;
+  --chart-height-md: 200px;
+  --form-container-max-width: 420px;
+  --logo-width-sidebar: 120px;
+
+  /* ============================================
+   * DIVIDER / BORDER SIZES
+   * ============================================ */
+  --divider-thin: 1px;
+  --divider-size: 2px;
+  --scrollbar-width: 4px;
+  --tooltip-arrow-size: 6px;
+
+  /* ============================================
+   * INDICATOR DOTS
+   * ============================================ */
+  --indicator-dot-md: 10px;
+  --indicator-dot-sm: 6px;
+
+  /* ============================================
+   * FORM INPUT WIDTHS
+   * ============================================ */
+  --input-width-search-table: 180px;
+
+  /* ============================================
+   * PROGRESS COMPONENT
+   * ============================================ */
+  --progress-bar-height: 16px;
+}

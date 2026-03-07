@@ -1,18 +1,18 @@
 /**
- * Help Panel Mount
+ * Help Center Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { HelpPanel } from './HelpPanel';
+import { HelpCenter } from './HelpCenter';
 
 export interface HelpMountOptions extends BaseMountOptions {}
 
 export const {
-  mount: mountHelpPanel,
-  unmount: unmountHelpPanel,
-  shouldUseReact: shouldUseReactHelpPanel
+  mount: mountHelpCenter,
+  unmount: unmountHelpCenter,
+  shouldUseReact: shouldUseReactHelpCenter
 } = createMountWrapper<HelpMountOptions>({
-  Component: HelpPanel,
-  displayName: 'HelpPanel'
+  Component: HelpCenter,
+  displayName: 'HelpCenter'
 });

@@ -1,3 +1,3 @@
-export { ApprovalsPanel } from './ApprovalsPanel';
-export { mountApprovalsPanel, unmountApprovalsPanel } from './mount';
+export { ApprovalsTable } from './ApprovalsTable';
+export { mountApprovalsTable, unmountApprovalsTable } from './mount';
 export type { ApprovalsMountOptions } from './mount';

@@ -1,3 +1,3 @@
-export { SystemStatusPanel } from './SystemStatusPanel';
-export { mountSystemStatusPanel, unmountSystemStatusPanel } from './mount';
+export { SystemStatusDashboard } from './SystemStatusDashboard';
+export { mountSystemStatusDashboard, unmountSystemStatusDashboard } from './mount';
 export type { SystemStatusMountOptions } from './mount';

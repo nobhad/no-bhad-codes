@@ -11,6 +11,7 @@
 import { apiPost } from '../../utils/api-client';
 import { initPasswordToggle } from '../../components/password-toggle';
 import { createLogger } from '../../utils/logger';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
 
 const logger = createLogger('AdminLogin');
 
@@ -66,7 +67,7 @@ export class AdminLoginOnMainSite {
       if (btnLoading) btnLoading.style.display = 'inline';
 
       try {
-        const response = await apiPost('/api/auth/admin/login', { password });
+        const response = await apiPost(API_ENDPOINTS.AUTH_ADMIN_LOGIN, { password });
 
         if (response.ok) {
           // Redirect to admin dashboard after successful login

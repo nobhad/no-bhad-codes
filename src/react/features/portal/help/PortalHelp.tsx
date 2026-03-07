@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { getLucideIcon } from '@react/factories';
@@ -14,8 +15,8 @@ import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import { BUSINESS_INFO } from '../../../../constants/business';
 import { TIMING } from '../../../../constants/timing';
 import { unwrapApiData } from '../../../../utils/api-client';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
-import type { BaseMountOptions } from '@react/factories';
 
 const logger = createLogger('PortalHelp');
 
@@ -62,7 +63,10 @@ interface ExpandedCategory extends KBCategory {
   isLoading: boolean;
 }
 
-export interface PortalHelpProps extends BaseMountOptions {}
+export interface PortalHelpProps extends PortalViewProps {
+  /** Callback for navigation events */
+  onNavigate?: (tab: string, entityId?: string) => void;
+}
 
 // ============================================================================
 // HOOK: usePortalHelp
@@ -515,7 +519,7 @@ function ArticleDetail({ article, onBack }: ArticleDetailProps) {
         {article.content && (
           <div
             className="help-article-body"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }}
           />
         )}
       </article>

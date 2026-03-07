@@ -36,6 +36,19 @@ import { createLogger } from '../utils/logger';
 const logger = createLogger('AuthStore');
 
 // ============================================
+// HTTP Error with status code
+// ============================================
+
+class HttpError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+  }
+}
+
+// ============================================
 // Module-level guards
 // ============================================
 
@@ -299,7 +312,7 @@ function createAuthStore(): AuthStore {
     const json = await response.json();
 
     if (!response.ok) {
-      throw new Error(json.error || 'Request failed');
+      throw new HttpError(json.error || 'Request failed', response.status);
     }
 
     // Server wraps responses in { success: true, data: { ... } }
@@ -507,8 +520,17 @@ function createAuthStore(): AuthStore {
 
         await fetchWithAuth(validateEndpoint, { method: 'GET' });
         return true;
-      } catch (_error) {
-        handleSessionExpired();
+      } catch (error) {
+        // Only expire session on explicit auth rejection (401/403).
+        // Network errors or server issues should not destroy a valid local session.
+        const isAuthRejection =
+          error instanceof HttpError && (error.status === 401 || error.status === 403);
+
+        if (isAuthRejection) {
+          handleSessionExpired();
+        } else {
+          logger.warn('Session validation failed (non-auth error):', error);
+        }
         return false;
       }
     },
@@ -644,9 +666,12 @@ function createAuthStore(): AuthStore {
       startRefreshTimer();
       startInactivityTimer();
 
-      // Validate with server (fire-and-forget with graceful error handling)
-      store.validateSession().catch(() => {
-        handleSessionExpired();
+      // Validate with server (fire-and-forget).
+      // On failure, log but do NOT expire the session — the server already
+      // gates authenticated pages via JWT cookie. If the token is truly
+      // invalid, API calls will 401 and the global interceptor handles it.
+      store.validateSession().catch((error) => {
+        logger.warn('Background session validation failed:', error);
       });
     } else {
       clearSession();

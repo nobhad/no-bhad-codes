@@ -14,18 +14,14 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { PORTAL_DOCREQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { DocumentRequestCard, type DocumentRequest } from './DocumentRequestCard';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalDocumentRequests');
 
-export interface PortalDocumentRequestsProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
+export interface PortalDocumentRequestsProps extends PortalViewProps {}
 
 interface DocumentRequestSummary {
   total: number;
@@ -179,9 +175,9 @@ export function PortalDocumentRequests({
       stats={
         <TableStats items={[
           { value: summary.total, label: 'total' },
-          { value: summary.pending + summary.rejected, label: 'action needed', variant: 'pending', hideIfZero: true },
-          { value: summary.submitted, label: 'in review', hideIfZero: true },
-          { value: summary.approved, label: 'approved', variant: 'completed', hideIfZero: true }
+          { value: summary.pending + summary.rejected, label: 'action needed', variant: 'pending' },
+          { value: summary.submitted, label: 'in review' },
+          { value: summary.approved, label: 'approved', variant: 'completed' }
         ]} />
       }
       actions={

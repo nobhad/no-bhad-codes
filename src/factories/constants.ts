@@ -22,7 +22,7 @@ export const UI_CONTEXTS = {
 
 /**
  * Standard icon sizes (in pixels).
- * NOTE: For React components, prefer CSS variables (--btn-portal-icon-inner-size).
+ * NOTE: For React components, prefer CSS variables (--portal-btn-icon-inner-size).
  * These values are used by server-side rendering factories only.
  */
 export const ICON_SIZES = {
@@ -37,7 +37,7 @@ export const ICON_SIZES = {
 
 /**
  * Standard button sizes (in pixels).
- * NOTE: For React components, prefer CSS variables (--btn-portal-icon-size-*).
+ * NOTE: For React components, prefer CSS variables (--portal-btn-icon-size-*).
  * These values are used by server-side rendering factories only.
  */
 export const BUTTON_SIZES = {

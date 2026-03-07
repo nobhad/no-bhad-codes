@@ -385,8 +385,8 @@ export function ClientsTable({
         <TableStats
           items={[
             { value: stats.total },
-            { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-            { value: stats.inactive, label: 'inactive', variant: 'overdue', hideIfZero: true }
+            { value: stats.pending, label: 'pending', variant: 'pending' },
+            { value: stats.inactive, label: 'inactive', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total / ${stats.active} Active / ${stats.pending} Pending / ${stats.inactive} Inactive`}
         />

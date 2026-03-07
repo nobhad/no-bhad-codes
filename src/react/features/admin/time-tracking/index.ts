@@ -1,3 +1,3 @@
-export { TimeTrackingPanel } from './TimeTrackingPanel';
-export { mountTimeTrackingPanel, unmountTimeTrackingPanel } from './mount';
+export { TimeTrackingTable } from './TimeTrackingTable';
+export { mountTimeTrackingTable, unmountTimeTrackingTable } from './mount';
 export type { TimeTrackingMountOptions } from './mount';

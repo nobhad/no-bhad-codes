@@ -144,5 +144,5 @@ export const adminAuthEndpoints = {
   // will be proxied by Vite to the backend and preserve cookie behavior.
   login: '/api/auth/admin/login',
   logout: '/api/auth/admin/logout',
-  validate: '/api/auth/admin/validate'
+  validate: '/api/auth/validate'
 };

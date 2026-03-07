@@ -38,10 +38,10 @@ import { mountWorkflowsManager, unmountWorkflowsManager } from './features/admin
 import { mountFilesManager, unmountFilesManager } from './features/admin/files';
 import { mountEmailTemplatesManager, unmountEmailTemplatesManager } from './features/admin/email-templates';
 import { mountKnowledgeBase, unmountKnowledgeBase } from './features/admin/knowledge-base';
-import { mountMessagingPanel, unmountMessagingPanel } from './features/admin/messaging';
-import { mountTimeTrackingPanel, unmountTimeTrackingPanel } from './features/admin/time-tracking';
-import { mountDesignReviewPanel, unmountDesignReviewPanel } from './features/admin/design-review';
-import { mountSystemStatusPanel, unmountSystemStatusPanel } from './features/admin/system-status';
+import { mountMessagingView, unmountMessagingView } from './features/admin/messaging';
+import { mountTimeTrackingTable, unmountTimeTrackingTable } from './features/admin/time-tracking';
+import { mountDesignReviewTable, unmountDesignReviewTable } from './features/admin/design-review';
+import { mountSystemStatusDashboard, unmountSystemStatusDashboard } from './features/admin/system-status';
 
 // Analytics components
 import { mountOverviewDashboard, unmountOverviewDashboard } from './features/admin/overview';
@@ -157,24 +157,24 @@ registerReactComponent('knowledgeBase', {
   unmount: unmountKnowledgeBase
 });
 
-registerReactComponent('messagingPanel', {
-  mount: mountMessagingPanel,
-  unmount: unmountMessagingPanel
+registerReactComponent('messagingView', {
+  mount: mountMessagingView,
+  unmount: unmountMessagingView
 });
 
-registerReactComponent('timeTrackingPanel', {
-  mount: mountTimeTrackingPanel,
-  unmount: unmountTimeTrackingPanel
+registerReactComponent('timeTrackingTable', {
+  mount: mountTimeTrackingTable,
+  unmount: unmountTimeTrackingTable
 });
 
-registerReactComponent('designReviewPanel', {
-  mount: mountDesignReviewPanel,
-  unmount: unmountDesignReviewPanel
+registerReactComponent('designReviewTable', {
+  mount: mountDesignReviewTable,
+  unmount: unmountDesignReviewTable
 });
 
-registerReactComponent('systemStatusPanel', {
-  mount: mountSystemStatusPanel,
-  unmount: unmountSystemStatusPanel
+registerReactComponent('systemStatusDashboard', {
+  mount: mountSystemStatusDashboard,
+  unmount: unmountSystemStatusDashboard
 });
 
 // Register analytics components

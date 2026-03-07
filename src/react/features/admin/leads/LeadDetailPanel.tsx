@@ -264,7 +264,7 @@ export function LeadDetailPanel({
         </div>
 
         {/* Created date */}
-        <div className="field-label" style={{ marginBottom: 'var(--space-2)' }}>
+        <div className="field-label field-label--spaced">
           Created {formatDate(lead.created_at)}
         </div>
 
@@ -420,9 +420,9 @@ export function LeadDetailPanel({
               ) : (
                 <ul className="activity-feed">
                   {tasks.map((task) => (
-                    <li key={task.id} className="lead-task-item activity-feed-item">
+                    <li key={task.id} className={cn('lead-task-item activity-feed-item', task.status === 'completed' && 'task-completed')}>
                       <button
-                        className={cn('icon-btn icon-btn-ghost', task.status === 'completed' && 'task-done')}
+                        className={cn('icon-btn', task.status === 'completed' && 'icon-btn-success')}
                         onClick={() => task.status !== 'completed' && handleCompleteTask(task.id)}
                         title={task.status === 'completed' ? 'Completed' : 'Mark complete'}
                         disabled={task.status === 'completed'}
@@ -430,7 +430,7 @@ export function LeadDetailPanel({
                         <Check className="icon-sm" />
                       </button>
                       <div className="activity-body">
-                        <span className="activity-text" style={task.status === 'completed' ? { textDecoration: 'line-through', opacity: 0.5 } : undefined}>
+                        <span className="activity-text">
                           {task.title}
                         </span>
                         {task.due_date && (
@@ -466,14 +466,14 @@ export function LeadDetailPanel({
                       </div>
                       <div className="table-actions">
                         <button
-                          className={cn('icon-btn icon-btn-ghost', note.is_pinned && 'active')}
+                          className={cn('icon-btn', note.is_pinned && 'active')}
                           onClick={() => handleTogglePin(note.id)}
                           title={note.is_pinned ? 'Unpin' : 'Pin'}
                         >
                           <Pin className="icon-xs" />
                         </button>
                         <button
-                          className="icon-btn icon-btn-ghost"
+                          className="icon-btn"
                           onClick={() => handleDeleteNote(note.id)}
                           title="Delete note"
                         >

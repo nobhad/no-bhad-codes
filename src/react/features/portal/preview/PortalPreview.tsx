@@ -10,6 +10,7 @@ import { cn } from '@react/lib/utils';
 import { getLucideIcon } from '@/react/factories';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -20,11 +21,7 @@ const logger = createLogger('PortalPreview');
 // TYPES
 // ============================================
 
-export interface PortalPreviewProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+export interface PortalPreviewProps extends PortalViewProps {
   /** Navigation callback */
   onNavigate?: (tab: string, entityId?: string) => void;
 }

@@ -10,7 +10,7 @@
  */
 
 import type { ClientPortalContext } from './portal-types';
-import { loadAuthModule, loadNavigationModule, loadMessagesModule } from './modules';
+import { loadAuthModule } from './modules';
 import { createDOMCache } from '../../utils/dom-cache';
 import { ROUTES } from '../../constants/api-endpoints';
 import { ICONS, getAccessibleIcon } from '../../constants/icons';

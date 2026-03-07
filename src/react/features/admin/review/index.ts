@@ -1,3 +1,3 @@
-export { ReviewPanel } from './ReviewPanel';
-export { mountReviewPanel, unmountReviewPanel } from './mount';
+export { ReviewTable } from './ReviewTable';
+export { mountReviewTable, unmountReviewTable } from './mount';
 export type { ReviewMountOptions } from './mount';

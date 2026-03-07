@@ -315,8 +315,8 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.active, label: 'active', variant: 'completed', hideIfZero: true },
-            { value: stats.inactive, label: 'inactive', variant: 'cancelled', hideIfZero: true }
+            { value: stats.active, label: 'active', variant: 'completed' },
+            { value: stats.inactive, label: 'inactive', variant: 'cancelled' }
           ]}
           tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.inactive} Inactive • ${stats.totalRuns} Runs`}
         />
@@ -544,5 +544,3 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     </TableLayout>
   );
 }
-
-export default WorkflowsTable;

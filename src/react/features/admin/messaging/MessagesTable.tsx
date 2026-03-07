@@ -170,7 +170,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
         <TableStats
           items={[
             { value: conversations.filter(c => !c.isArchived).length, label: 'conversations' },
-            { value: totalUnread, label: 'unread', variant: 'pending', hideIfZero: true }
+            { value: totalUnread, label: 'unread', variant: 'pending' }
           ]}
           tooltip={`${conversations.length} Conversations • ${totalUnread} Unread`}
         />
@@ -309,5 +309,3 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
     </TableLayout>
   );
 }
-
-export default MessagesTable;

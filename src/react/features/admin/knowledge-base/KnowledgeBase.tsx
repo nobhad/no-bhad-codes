@@ -37,31 +37,35 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
   // Individual subtab views
   if (activeSubtab === 'categories') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
-        <CategoriesTable
-          onNavigate={onNavigate}
-          getAuthToken={getAuthToken}
-          showNotification={showNotification}
-        />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
+          <CategoriesTable
+            onNavigate={onNavigate}
+            getAuthToken={getAuthToken}
+            showNotification={showNotification}
+          />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'articles') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
-        <ArticlesTable
-          onNavigate={onNavigate}
-          getAuthToken={getAuthToken}
-          showNotification={showNotification}
-        />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading articles..." />}>
+          <ArticlesTable
+            onNavigate={onNavigate}
+            getAuthToken={getAuthToken}
+            showNotification={showNotification}
+          />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
       <React.Suspense fallback={<LoadingState message="Loading categories..." />}>
         <section className="overview-table-section">
           <CategoriesTable
@@ -88,5 +92,3 @@ export function KnowledgeBase({ onNavigate, getAuthToken, showNotification }: Kn
     </div>
   );
 }
-
-export default KnowledgeBase;

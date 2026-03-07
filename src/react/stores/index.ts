@@ -14,3 +14,18 @@ export {
 } from './admin';
 
 export { initStateBridge, destroyStateBridge, isBridgeInitialized } from './bridge';
+
+// Portal store (React SPA)
+export {
+  usePortalStore,
+  useCurrentTab as usePortalCurrentTab,
+  useCurrentGroup,
+  useNavItems,
+  useSubtabGroups,
+  useCapabilities,
+  usePageTitle,
+  useSidebarCollapsed,
+  usePortalTheme,
+  usePortalRole,
+  type PortalStoreState
+} from './portal-store';

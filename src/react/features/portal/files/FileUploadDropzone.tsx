@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { UI_LIMITS } from '@react/config/portal-constants';
 
 // Allowed file types (matches server validation)
 const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
@@ -297,7 +298,7 @@ export function FileUploadDropzone({
         disabled && 'tw-cursor-not-allowed',
         className
       )}
-      style={disabled ? { opacity: 0.5 } : undefined}
+      style={disabled ? { opacity: UI_LIMITS.DISABLED_OPACITY } : undefined}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

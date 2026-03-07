@@ -47,7 +47,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Contact Information
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Tell us how to reach you during the project.
         </p>
       </div>
@@ -72,7 +72,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('contactName') && (
-            <span className="tw-text-[12px] tw-text-primary">{getFieldError('contactName')}</span>
+            <span className="tw-text-xs tw-text-primary">{getFieldError('contactName')}</span>
           )}
         </div>
 
@@ -94,7 +94,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('contactEmail') && (
-            <span className="tw-text-[12px] tw-text-primary">{getFieldError('contactEmail')}</span>
+            <span className="tw-text-xs tw-text-primary">{getFieldError('contactEmail')}</span>
           )}
         </div>
 
@@ -114,7 +114,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('contactPhone') && (
-            <span className="tw-text-[12px] tw-text-primary">{getFieldError('contactPhone')}</span>
+            <span className="tw-text-xs tw-text-primary">{getFieldError('contactPhone')}</span>
           )}
         </div>
 
@@ -147,7 +147,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Company Details
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Help us understand your business.
         </p>
       </div>
@@ -185,7 +185,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               className="tw-input tw-pl-10"
             />
           </div>
-          <span className="tw-text-[12px] text-muted">
+          <span className="tw-text-xs text-muted">
             Leave blank if this is a new business
           </span>
         </div>
@@ -205,7 +205,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                 'tw-px-3 tw-py-2',
                 'tw-border tw-transition-colors',
                 basicInfo.preferredContactMethod === method
-                  ? 'tw-border-primary tw-bg-white tw-text-black'
+                  ? 'tw-border-primary tw-bg-white tw-text-[var(--portal-text-dark)]'
                   : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
               )}
             >
@@ -230,8 +230,8 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                 )}
               </span>
               <span className={cn(
-                'tw-text-[14px] tw-font-mono tw-capitalize',
-                basicInfo.preferredContactMethod === method ? 'tw-text-black' : 'tw-text-primary'
+                'tw-text-sm tw-font-mono tw-capitalize',
+                basicInfo.preferredContactMethod === method ? 'tw-text-[var(--portal-text-dark)]' : 'tw-text-primary'
               )}>
                 {method}
               </span>

@@ -301,8 +301,8 @@ export function ProjectsTable({
           <TableStats
             items={[
               { value: stats.total, label: 'total' },
-              { value: stats.active, label: 'active', variant: 'active', hideIfZero: true },
-              { value: stats.onHold, label: 'on hold', variant: 'pending', hideIfZero: true }
+              { value: stats.active, label: 'active', variant: 'active' },
+              { value: stats.onHold, label: 'on hold', variant: 'pending' }
             ]}
             tooltip={`${stats.total} Total - ${stats.active} Active - ${stats.completed} Completed - ${stats.onHold} On Hold`}
           />

@@ -148,7 +148,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Upload Assets
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Share any files, logos, or resources for your project.
         </p>
       </div>
@@ -183,10 +183,10 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           )}
         />
 
-        <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-mb-1">
+        <p className="tw-text-sm tw-text-primary tw-font-mono tw-mb-1">
           Drag and drop files here
         </p>
-        <p className="tw-text-[12px] text-muted tw-mb-3">
+        <p className="tw-text-xs text-muted tw-mb-3">
           or click to browse
         </p>
 
@@ -194,7 +194,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           Browse Files
         </button>
 
-        <p className="tw-text-[12px] text-muted tw-mt-3">
+        <p className="tw-text-xs text-muted tw-mt-3">
           Max 25MB per file. Supports images, PDFs, and documents.
         </p>
       </div>
@@ -223,10 +223,10 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
                 >
                   <FileIcon className="icon-sm text-muted tw-flex-shrink-0" />
                   <div className="tw-flex-1 tw-min-w-0">
-                    <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-truncate">
+                    <p className="tw-text-sm tw-text-primary tw-font-mono tw-truncate">
                       {file.name}
                     </p>
-                    <p className="tw-text-[12px] text-muted">
+                    <p className="tw-text-xs text-muted">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -252,7 +252,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
             checked={assets.logoProvided}
             onCheckedChange={(checked) => handleChange('logoProvided', checked === true)}
           />
-          <span className="tw-text-[14px] tw-font-mono">
+          <span className="tw-text-sm tw-font-mono">
             Logo included in uploaded files
           </span>
         </label>
@@ -265,7 +265,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Additional Resources
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Tell us about any other assets or content access we may need.
         </p>
       </div>
@@ -292,7 +292,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           rows={2}
           className="tw-textarea"
         />
-        <span className="tw-text-[12px] text-muted">
+        <span className="tw-text-xs text-muted">
           Never share passwords directly. We'll provide a secure way to share credentials if needed.
         </span>
       </div>

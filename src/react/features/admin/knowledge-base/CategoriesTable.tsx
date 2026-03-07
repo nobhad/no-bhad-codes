@@ -158,7 +158,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
         <TableStats
           items={[
             { value: categories.length, label: 'categories' },
-            { value: activeCount, label: 'active', variant: 'completed', hideIfZero: true }
+            { value: activeCount, label: 'active', variant: 'completed' }
           ]}
           tooltip={`${categories.length} Categories • ${activeCount} Active`}
         />
@@ -266,5 +266,3 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
     </TableLayout>
   );
 }
-
-export default CategoriesTable;

@@ -367,5 +367,3 @@ function getPriorityColor(priority: string): string {
   default: return 'var(--portal-text-muted)';
   }
 }
-
-export default OverviewDashboard;

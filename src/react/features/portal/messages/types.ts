@@ -3,6 +3,8 @@
  * Types for client portal messaging feature
  */
 
+import type { PortalViewProps } from '../types';
+
 // ============================================================================
 // MESSAGE TYPES
 // ============================================================================
@@ -89,9 +91,4 @@ export interface UpdateMessageResponse {
 // COMPONENT PROPS
 // ============================================================================
 
-export interface PortalMessagesProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
+export interface PortalMessagesProps extends PortalViewProps {}

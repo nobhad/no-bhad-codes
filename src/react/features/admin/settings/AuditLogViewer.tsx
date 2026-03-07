@@ -297,5 +297,3 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
     </TableLayout>
   );
 }
-
-export default AuditLogViewer;

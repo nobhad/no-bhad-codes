@@ -341,9 +341,9 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-            { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true }
+            { value: stats.pending, label: 'pending', variant: 'pending' },
+            { value: stats.inProgress, label: 'in progress', variant: 'active' },
+            { value: stats.completed, label: 'completed', variant: 'completed' }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.inProgress} In Progress • ${stats.completed} Completed • ${stats.totalHours}h Total Hours • ${formatCurrency(stats.totalRevenue)} Revenue`}
         />
@@ -562,5 +562,3 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     </TableLayout>
   );
 }
-
-export default AdHocRequestsTable;
