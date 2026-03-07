@@ -229,38 +229,6 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
-      name: 'AdminDashboardModule',
-      type: 'dom',
-      factory: async () => {
-        // Load admin dashboard on /admin/* pages and /dashboard (admin)
-        const currentPath = window.location.pathname;
-        const pageType = document.body.getAttribute('data-page') || '';
-        if (currentPath.includes('/admin') || (currentPath === '/dashboard' && pageType === 'admin')) {
-          const { AdminDashboard } = await import('../features/admin/admin-dashboard');
-          const adminDashboard = new AdminDashboard();
-          // Expose globally for onclick handlers in rendered HTML
-          window.adminDashboard = adminDashboard;
-          return {
-            init: async () => {
-              /* AdminDashboard initializes itself */
-            },
-            destroy: () => {
-              window.adminDashboard = null;
-            },
-            isInitialized: true,
-            name: 'AdminDashboardModule'
-          };
-        }
-        // Return a dummy module for other pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'AdminDashboardModule'
-        };
-      }
-    },
-    {
       name: 'ReactPortalModule',
       type: 'dom',
       factory: async () => {
@@ -365,8 +333,6 @@ export function getMainSiteModules(): string[] {
 
 /**
  * Get module list for React SPA portal (admin + client)
- * Replaces both getAdminModules and getClientPortalModules
- * when the React SPA is active.
  */
 export function getReactPortalModules(): string[] {
   return ['ThemeModule', 'ReactPortalModule'];
@@ -377,12 +343,5 @@ export function getReactPortalModules(): string[] {
  */
 export function getClientIntakeModules(): string[] {
   return ['ThemeModule', 'NavigationModule', 'FooterModule'];
-}
-
-/**
- * Get module list for admin pages
- */
-export function getAdminModules(): string[] {
-  return ['ThemeModule', 'NavigationModule', 'AdminDashboardModule'];
 }
 

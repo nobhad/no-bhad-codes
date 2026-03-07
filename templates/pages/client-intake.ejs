@@ -1,26 +1,24 @@
 <section class="terminal-intake-container">
-    <!-- Terminal UI will be rendered by JavaScript -->
+    <!-- Onboarding wizard rendered by React -->
 </section>
 
-<link rel="stylesheet" href="/src/styles/pages/terminal-intake.css">
-
 <script type="module">
-    import { TerminalIntakeModule } from '/src/features/client/terminal-intake.ts';
+    import { mountOnboardingWizard } from '/src/react/features/portal/onboarding/mount.tsx';
 
     document.addEventListener('DOMContentLoaded', () => {
         const container = document.querySelector('.terminal-intake-container');
         if (container) {
-            const module = new TerminalIntakeModule(container);
-            module.init().catch(error => {
-                console.error('[TerminalIntake] Failed to initialize:', error);
-                // Show fallback error message
+            try {
+                mountOnboardingWizard(container);
+            } catch (error) {
+                console.error('[Intake] Failed to mount onboarding wizard:', error);
                 container.innerHTML = `
                     <div class="module-error-state">
                         <h2>Unable to load intake form</h2>
                         <p>Please try refreshing the page or contact nobhaduri@gmail.com</p>
                     </div>
                 `;
-            });
+            }
         }
     });
 </script>

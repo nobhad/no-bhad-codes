@@ -7,9 +7,8 @@
  * Entry point for the admin dashboard.
  */
 
-// CRITICAL: Register React components BEFORE app initialization
-// This must be the FIRST import to prevent race conditions
-import './react/admin-entry';
+// Import pre-generated Tailwind CSS for React components
+import './react/styles/tailwind-generated.css';
 
 // Import admin CSS bundle
 import './styles/bundles/admin.css';

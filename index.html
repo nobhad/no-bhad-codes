@@ -1820,20 +1820,9 @@
           intakeBackdrop.classList.add('open');
           document.body.style.overflow = 'hidden';
 
-          if (!terminalModule && intakeContainer) {
-            console.log('[IntakeModal] Creating new TerminalIntakeModule');
-            try {
-              const module = await import('./src/features/client/terminal-intake.ts');
-              const { TerminalIntakeModule } = module;
-              terminalModule = new TerminalIntakeModule(intakeContainer, { isModal: true });
-              await terminalModule.init();
-              console.log('[IntakeModal] TerminalIntakeModule initialized');
-            } catch (error) {
-              console.error('[IntakeModal] Failed to initialize:', error);
-              intakeContainer.innerHTML =
-                '<div style="text-align: center; padding: 2rem; color: #ff4444; background: #1e1e1e; height: 100%; display: flex; flex-direction: column; justify-content: center;"><h2>Unable to load intake form</h2><p>Please try refreshing the page or <a href="/client/intake" style="color: #00ff41;">visit the intake page directly</a>.</p></div>';
-            }
-          }
+          // Redirect to standalone intake page
+          window.location.href = '/client/intake';
+          return;
         }
 
         function closeIntakeModal() {

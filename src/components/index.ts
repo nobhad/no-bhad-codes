@@ -5,7 +5,6 @@
  * @file src/components/index.ts
  *
  * Central registry for all active components.
- * Dead/unused components have been removed.
  */
 
 // State components
@@ -27,7 +26,7 @@ export { ConsentBanner } from './consent-banner';
 export type { ConsentBannerProps, ConsentBannerState } from './consent-banner';
 export { createConsentBanner } from './create-consent-banner';
 
-// Core active components
+// Empty/loading/error state renderers
 export {
   createEmptyState,
   renderEmptyState,
@@ -38,6 +37,7 @@ export {
 } from './empty-state';
 export type { EmptyStateOptions, LoadingStateOptions, ErrorStateOptions } from './empty-state';
 
+// Status badge
 export {
   createStatusBadge,
   getStatusBadgeHTML,
@@ -46,50 +46,12 @@ export {
 } from './status-badge';
 export type { StatusBadgeVariant } from './status-badge';
 
+// Icon button
 export { createIconButton } from './icon-button';
 export type { IconButtonConfig } from './icon-button';
 
-export {
-  createTableDropdown,
-  getStatusLabel,
-  LEAD_STATUS_OPTIONS,
-  CONTACT_STATUS_OPTIONS,
-  PROJECT_STATUS_OPTIONS
-} from './table-dropdown';
-export type { TableDropdownOption, TableDropdownConfig } from './table-dropdown';
-
-export { createPortalModal } from './portal-modal';
-export type { PortalModalConfig, PortalModalInstance } from './portal-modal';
-
-export { getPortalCheckboxHTML } from './portal-checkbox';
-export type { PortalCheckboxConfig } from './portal-checkbox';
-
+// Password toggle (login pages)
 export { initPasswordToggle, initAllPasswordToggles } from './password-toggle';
-
-export { createSecondarySidebar, SECONDARY_TAB_ICONS } from './secondary-sidebar';
-export type {
-  SecondaryTab,
-  SecondarySidebarConfig,
-  SecondarySidebarController
-} from './secondary-sidebar';
-
-export { renderBreadcrumbs } from './breadcrumbs';
-export type { BreadcrumbItem } from './breadcrumbs';
-
-// Bulk action utilities
-export {
-  createBulkActionToolbar,
-  createHeaderCheckbox,
-  createRowCheckbox,
-  setupBulkSelectionHandlers,
-  resetSelection,
-  getSelectionState,
-  getSelectedIds,
-  createArchiveAction,
-  createDeleteAction,
-  createStatusUpdateAction
-} from '../utils/table-bulk-actions';
-export type { BulkAction, BulkActionConfig, BulkSelectionState } from '../utils/table-bulk-actions';
 
 // Focus trap utilities
 export {

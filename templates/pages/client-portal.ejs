@@ -398,14 +398,22 @@
                     <h2>New Project</h2>
                 </div>
                 <section class="terminal-intake-container portal-intake">
-                    <!-- Terminal UI will be rendered by JavaScript -->
+                    <!-- Onboarding wizard rendered by React -->
                 </section>
             </div>
 
-            <link rel="stylesheet" href="/src/styles/pages/terminal-intake.css">
             <script type="module">
-                import { initPortalIntakeLoader } from '/src/features/client/portal-intake-loader.ts';
-                document.addEventListener('DOMContentLoaded', () => initPortalIntakeLoader());
+                import { mountOnboardingWizard } from '/src/react/features/portal/onboarding/mount.tsx';
+                document.addEventListener('DOMContentLoaded', () => {
+                    const container = document.querySelector('.terminal-intake-container.portal-intake');
+                    if (container) {
+                        try {
+                            mountOnboardingWizard(container);
+                        } catch (error) {
+                            console.error('[Intake] Failed to mount onboarding wizard:', error);
+                        }
+                    }
+                });
             </script>
 
             <!-- Project Preview View -->

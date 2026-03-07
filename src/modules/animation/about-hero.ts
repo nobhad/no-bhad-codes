@@ -21,7 +21,7 @@
 import { BaseHeroAnimation } from './base-hero-animation';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
-import { showAvatarIntro } from '../../features/client/terminal-intake-ui';
+import { showAvatarIntro } from './avatar-intro';
 
 interface AboutHeroOptions extends ModuleOptions {
   /** Selector for the hero container */

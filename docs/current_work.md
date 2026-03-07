@@ -1,8 +1,86 @@
 # Current Work
 
-**Last Updated:** March 4, 2026
+**Last Updated:** March 7, 2026
+
+## Full Vanilla JS/TS Portal Audit & Cleanup (March 7, 2026)
+
+### Summary
+
+Audited entire portal codebase (admin + client). React SPA (`PortalApp.tsx` / `PortalRoutes.tsx`) already handles all routing and component mounting for both admin and client portals. The vanilla `AdminDashboard` orchestrator was registered in the DI container but **never loaded** -- `getAdminModules()` was exported but never called; admin pages used `getReactPortalModules()` instead. Removed **99 dead vanilla files** totaling **~29,500 lines**.
+
+### Deleted (99 files, ~29,500 lines)
+
+- [x] **Admin orchestration** (22 files): `admin-dashboard.ts`, `admin-project-details.ts`, `admin-tab-manager.ts`, `admin-event-setup.ts`, `admin-contacts-handler.ts`, `admin-messages-handler.ts`, `admin-performance-handler.ts`, `admin-data-operations.ts`, `admin-ui-helpers.ts`, `admin-command-palette.ts`, `admin-security.ts`, `admin-auth.ts`, `admin-types.ts`, `ReactModuleLoader.ts`, `universal-handlers.ts`, renderers (2), services (3), modules (2)
+- [x] **Admin project-details** (19 files): entire `project-details/` directory
+- [x] **React-vanilla bridge** (2 files): `registry.ts`, `admin-entry.tsx`
+- [x] **Shared table manager** (12 files): entire `table-manager/` directory + `portal-header.ts`
+- [x] **Dead vanilla components** (14 files): `command-palette`, `inline-edit`, `keyboard-help`, `rich-text-editor`, `table-keyboard-nav`, `modal-dropdown`, `annotation-canvas`, `notification-bell`, `portal-modal`, `portal-checkbox`, `breadcrumbs`, `secondary-sidebar`, `table-dropdown`
+- [x] **Dead vanilla utils** (5 files): `table-module-factory`, `table-pagination`, `table-filter`, `table-dropdown`, `table-bulk-actions`
+- [x] **Dead vanilla client files** (24 files): terminal intake (11), proposal builder (10), helpers (3)
+- [x] **Dead config** (1 file): `table-definitions.ts`
+
+### Modified (cleanup)
+
+- [x] `src/admin.ts` -- replaced dead `admin-entry` import with Tailwind CSS import
+- [x] `src/core/modules-config.ts` -- removed dead `AdminDashboardModule` registration and `getAdminModules()` function
+- [x] `src/components/index.ts` -- removed exports for all deleted components
+- [x] `src/modules/animation/about-hero.ts` -- updated import to use new `avatar-intro.ts`
+- [x] `index.html` -- replaced inline terminal-intake dynamic import with redirect to `/client/intake`
+- [x] `client/intake.html` -- replaced `TerminalIntakeModule` with React `OnboardingWizard`
+- [x] `templates/pages/client-intake.ejs` -- replaced with React mount
+- [x] `templates/pages/client-portal.ejs` -- replaced `portal-intake-loader` with React mount
+
+### Created (1 file)
+
+- [x] `src/modules/animation/avatar-intro.ts` -- extracted `showAvatarIntro` function (used by about-hero animation on main site) from deleted `terminal-intake-ui.ts`
+
+---
 
 This file tracks active development work and TODOs. Completed items are archived in `archive/ARCHIVED_WORK_2026-03.md`.
+
+---
+
+## Client Portal Audit - Critical Fixes (March 7, 2026)
+
+### Fixed
+
+- [x] **onNavigate undefined (CRITICAL)** — Added `switchView` to `ClientPortalContext` in `client-portal.ts`. All React component in-app navigation (dashboard stat cards, activity feed clicks) was silently failing because `context.switchView` was never set.
+- [x] **Incomplete hash-to-tab mapping** — Synced `getTabFromHash()` in `portal-session-manager.ts` to all 18 routes (was only 8, and `/review` mapped to wrong tab `preview`).
+- [x] **Dashboard SQL status mismatch** — Fixed `server/routes/clients.ts` `/me/dashboard` endpoint. Was querying `'planning', 'in-progress', 'review'` but DB schema uses `'pending', 'active', 'in-progress', 'in-review'`.
+- [x] **Stale closure in messages** — Fixed `usePortalMessages.ts:sendMessage` to use `getAuthTokenRef.current` instead of stale `getAuthToken` capture. Removed `getAuthToken` from dependency array.
+- [x] **Wrong dependency in MessageBubble** — Fixed `handleSaveEdit` dependency array to reference `messageContent` instead of `message.content` (field is `message.message` from API).
+
+### Dead Code Removal (48 files deleted)
+
+- [x] Removed entire vanilla TS portal orchestration (8 files): `client-portal.ts`, `portal-session-manager.ts`, `portal-event-handlers.ts`, `portal-settings-handler.ts`, `portal-dashboard-renderer.ts`, `portal-project-detail.ts`, `portal-types.ts`, `ReactModuleLoader.ts`
+- [x] Removed all 23 vanilla TS module stubs in `src/features/client/modules/`
+- [x] Removed 9 dead shared portal modules (`PortalFeatureModule.ts`, `PortalDashboard.ts`, etc.)
+- [x] Removed dead `PortalShell.ts` and `PortalModuleLoader.ts`
+- [x] Removed dead React navigation duplicates (`src/react/features/portal/navigation/` — 5 files)
+- [x] Cleaned `portal-entry.tsx` to CSS-only (removed all dead registrations)
+- [x] Removed `ClientPortalModule` and `PortalShellModule` from `modules-config.ts`
+- [x] Removed deprecated `getClientPortalModules()` and `getPortalModules()`
+- [x] Removed `PortalFeatureModule` export from `features/shared/index.ts`
+- [x] Removed dead navigation export from `react/features/portal/index.ts`
+
+### Architecture Note
+
+Both admin and client portals now run as a React SPA via `ReactPortalModule` → `mountPortalApp()` → `PortalApp.tsx`. Routing is React Router (hash-based). Auth is `usePortalAuth` hook. State is Zustand `portal-store.ts`.
+
+### Known Issues (Lower Priority)
+
+- [ ] `usePortalData` hook's `fetchData` depends on `transform` — callers must memoize transform functions to avoid infinite re-renders
+
+### Files Modified
+
+- `src/portal.ts` — Removed dead vanilla TS imports
+- `src/core/modules-config.ts` — Removed dead module definitions
+- `src/react/portal-entry.tsx` — Stripped to CSS-only import
+- `src/react/features/portal/index.ts` — Removed dead navigation export
+- `src/features/shared/index.ts` — Removed dead PortalFeatureModule export
+- `src/react/features/portal/messages/usePortalMessages.ts` — Fixed stale closure
+- `src/react/features/portal/messages/MessageThread.tsx` — Fixed dependency array
+- `server/routes/clients.ts` — Fixed dashboard SQL statuses
 
 ---
 
