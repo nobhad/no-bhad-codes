@@ -11,7 +11,7 @@ The Workflow Automation System provides three types of automation:
 2. **Event Triggers**: Automated actions triggered by system events
 3. **Email Templates**: Customizable email templates with variable substitution
 
-**Location:** Admin Dashboard → Workflows tab (with Approvals/Triggers/Email Templates subtabs)
+**Location:** Admin Dashboard → Settings → Workflows subtab
 **File:** `src/features/admin/modules/admin-workflows.ts`
 
 ---

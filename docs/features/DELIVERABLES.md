@@ -219,7 +219,7 @@ CREATE TABLE deliverable_approvals (
 - Version history panel
 - Design review modal integration
 
-### Design Review Modal (`src/react/features/admin/design-review/DesignReviewPanel.tsx`)
+### Design Review Modal (`src/react/features/admin/design-review/DesignReviewTable.tsx`)
 
 - Annotation canvas overlay
 - Tool palette (draw, highlight, text)

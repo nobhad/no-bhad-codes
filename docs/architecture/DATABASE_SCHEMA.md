@@ -57,7 +57,7 @@ This database supports a comprehensive freelance business management system incl
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `users` | Team member accounts | email, display_name, role (admin/team_member/contractor/system), is_active |
+| `users` | Admin + system accounts (solo operation, no team management) | email, display_name, role (admin/system), is_active |
 | `clients` | Client accounts | 48+ cols: auth, billing, health scoring, last_login, lockout |
 | `client_contacts` | Multiple contacts per client | first_name, last_name, email, role, is_primary |
 | `client_activities` | Activity log | activity_type, title, metadata (JSON) |
@@ -423,7 +423,7 @@ See [DATABASE_NORMALIZATION_PLAN.md](../archive/DATABASE_NORMALIZATION_PLAN.md) 
 
 ### Phase 2 - Medium Risk (Complete)
 
-- [x] Create `users` table for team members (Migration 068)
+- [x] Create `users` table for admin/system accounts (Migration 068)
 - [x] Add INTEGER FK columns alongside TEXT columns (Migration 068)
 - [x] Remove duplicate notification preference columns from clients (Migration 069)
 - [x] Remove TEXT user columns, use INTEGER FKs (Migration 070)

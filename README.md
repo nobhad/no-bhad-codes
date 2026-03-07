@@ -1,4 +1,4 @@
-# No Bhad Codes - Professional Portfolio & Client Management System
+# No Bhad Codes - Solo Freelance Portfolio & Client Management System
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -7,7 +7,7 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![GSAP](https://img.shields.io/badge/GSAP-88CE02?style=for-the-badge&logo=greensock&logoColor=white)](https://greensock.com/gsap/)
 
-> Modern TypeScript portfolio website and enterprise-grade client management system built with Vite, Express, and advanced web technologies.
+> Modern TypeScript portfolio website and client management system for a solo freelance operation, built with Vite, Express, and advanced web technologies.
 
 ## Features
 
@@ -46,7 +46,7 @@
 
 ### **Security & Operations**
 
-- **JWT Authentication**: Role-based access control
+- **JWT Authentication**: Admin/client role-based access (single admin operator)
 - **Rate Limiting**: Configurable request throttling
 - **Input Validation**: Comprehensive data sanitization
 - **Error Logging**: Centralized logging with correlation IDs
@@ -213,6 +213,8 @@ no-bhad-codes/
 The application uses SQLite with the following main entities:
 
 ### Users
+
+This is a **solo operation** — there is no team management. The `users` table stores the single admin account and client accounts.
 
 - **id**: Primary key
 - **email**: Unique email address
@@ -759,7 +761,7 @@ const apiService = container.get<ApiService>('apiService');
 ### Authentication & Authorization
 
 - **JWT Tokens**: Secure token-based authentication
-- **Role-Based Access**: Admin and client role separation
+- **Role-Based Access**: Admin (single operator) and client role separation
 - **Token Refresh**: Automatic token renewal
 - **Session Management**: Secure session handling
 

@@ -615,7 +615,7 @@ All portal React components now use the same patterns:
 
 1. **Created Parent Dashboard Components (showing stacked tables, not cards):**
    - `WorkDashboard.tsx` - Shows ProjectsTable, GlobalTasksTable, AdHocRequestsTable
-   - `CRMDashboard.tsx` - Shows LeadsTable, ContactsTable, ClientsTable, MessagingPanel
+   - `CRMDashboard.tsx` - Shows LeadsTable, ContactsTable, ClientsTable, MessagingView
    - `DocumentsDashboard.tsx` - Shows InvoicesTable, ContractsTable, DocumentRequestsTable, QuestionnairesTable
    - Each listens for `{groupName}SubtabChange` events and handles internal view switching
    - Overview shows all tables stacked with `defaultPageSize={10}`
@@ -925,7 +925,7 @@ All portal React components now use the same patterns:
 - Icon sizes: `--icon-size-xs` (12px), `--icon-size-sm` (14px), `--icon-size-md` (16px), `--icon-size-lg` (20px), `--icon-size-xl` (24px), `--icon-size-2xl` (32px)
 - Font sizes: `--font-size-2xs` (10px), `--font-size-xs` (12px), `--font-size-sm` (14px), `--font-size-base` (16px), `--font-size-lg` (18px), `--font-size-xl` (20px)
 - Letter spacing: `--letter-spacing-label` (0.05em), `--letter-spacing-title` (0.02em), `--letter-spacing-wide` (0.08em)
-- Button sizes: `--btn-portal-icon-size` (32px), `--btn-portal-icon-size-sm` (28px)
+- Button sizes: `--portal-btn-icon-size` (32px), `--portal-btn-icon-size-sm` (28px)
 
 **Files Modified:**
 
@@ -962,7 +962,7 @@ All portal React components now use the same patterns:
 
 **Tables Affected (all now fixed at root):**
 
-- WorkflowsManager, GlobalTasksTable, EmailTemplatesManager, DesignReviewPanel
+- WorkflowsManager, GlobalTasksTable, EmailTemplatesManager, DesignReviewTable
 - TasksManager, QuestionnairesTable, ContractsTable, DeletedItemsTable
 - FilesManager, AdHocRequestsTable, DeliverablesTable, DocumentRequestsTable
 - KnowledgeBase (and others using the pattern)

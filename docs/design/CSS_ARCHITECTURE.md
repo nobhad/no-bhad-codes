@@ -63,14 +63,14 @@ Portal button tokens use CSS variables for theming. Never hardcode RGB values.
 
 ```css
 /* Dark mode (default) */
---btn-portal-color: var(--portal-text-light);
---btn-portal-border: var(--portal-text-light);
---btn-portal-hover-bg: var(--portal-text-light);
---btn-portal-hover-color: var(--portal-background);
+--portal-btn-color: var(--portal-text-light);
+--portal-btn-border: var(--portal-text-light);
+--portal-btn-hover-bg: var(--portal-text-light);
+--portal-btn-hover-color: var(--portal-background);
 
 /* Light mode - automatically inverted */
---btn-portal-color: var(--portal-text-primary);
---btn-portal-border: var(--portal-text-primary);
+--portal-btn-color: var(--portal-text-primary);
+--portal-btn-border: var(--portal-text-primary);
 ```
 
 ### Z-Index Tokens

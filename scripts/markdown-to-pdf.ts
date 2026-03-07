@@ -5,6 +5,39 @@
  * Uses pdf-lib for better form field performance
  *
  * Usage: npx ts-node scripts/markdown-to-pdf.ts <input.md> [output.pdf]
+ *
+ * ============================================================
+ * CONTRACT PAGE STRUCTURE CONVENTION
+ * ============================================================
+ * All contracts MUST follow this page breakdown:
+ *
+ * PAGE 1: Header + Bill-To + Scope of Work
+ *   - Branded header (logo, business info)
+ *   - <!-- bill-to --> block (client info left, contract details right)
+ *   - Scope of Work (features, technical details, deliverables)
+ *   - Annual Maintenance Plan (if applicable)
+ *
+ * PAGE 2: Pricing + Payment + Timeline  (<!-- pagebreak --> before ## Pricing)
+ *   - Pricing table
+ *   - Payment Schedule table
+ *   - Payment methods + check disclaimer
+ *   - Timeline table
+ *
+ * PAGE 3: Terms & Conditions + Signatures  (<!-- pagebreak --> before ## Terms & Conditions)
+ *   - Terms & Conditions (Ownership, Revisions, Content, Cancellation, Delays)
+ *   - Agreement section with signature lines
+ *
+ * HEADING HIERARCHY:
+ *   H2 (##)  = Section headings — 13pt bold uppercase (SCOPE OF WORK, PRICING, etc.)
+ *   H3 (###) = Sub-headings — 10pt bold uppercase (CUSTOM WEBSITE DEVELOPMENT, OWNERSHIP, etc.)
+ *
+ * SPECIAL BLOCKS:
+ *   <!-- bill-to --> ... <!-- /bill-to -->   Two-column client/details layout
+ *   <!-- totals --> ... <!-- /totals -->     Right-aligned subtotal/total section
+ *   <!-- pagebreak -->                       Force new page
+ *
+ * FOOTER: All pages include branded footer + "Page X of Y"
+ * ============================================================
  */
 
 import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
@@ -29,8 +62,8 @@ const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
 
 // Font sizes
 const FONT_SIZE_H1 = 18;
-const FONT_SIZE_H2 = 14;
-const FONT_SIZE_H3 = 11;
+const FONT_SIZE_H2 = 13;
+const FONT_SIZE_H3 = 10;
 const FONT_SIZE_H4 = 10;
 const FONT_SIZE_BODY = 9;
 const FONT_SIZE_SMALL = 8;
@@ -125,13 +158,49 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     });
   };
 
+  // Helper to calculate smart column widths based on content
+  const calculateColumnWidths = (data: string[][]): number[] => {
+    const numCols = data[0].length;
+
+    // Measure the max content width for each column
+    const maxWidths: number[] = new Array(numCols).fill(0);
+    for (const row of data) {
+      row.forEach((cell, colIndex) => {
+        const text = stripMarkdownFormatting(cell);
+        const font = helveticaBold; // Use bold for max width estimate
+        const textWidth = font.widthOfTextAtSize(text, FONT_SIZE_SMALL) + 10; // padding
+        if (textWidth > maxWidths[colIndex]) {
+          maxWidths[colIndex] = textWidth;
+        }
+      });
+    }
+
+    const totalNeeded = maxWidths.reduce((sum, w) => sum + w, 0);
+
+    if (totalNeeded <= CONTENT_WIDTH) {
+      // Everything fits — give leftover space to the first column
+      const leftover = CONTENT_WIDTH - totalNeeded;
+      const widths = [...maxWidths];
+      widths[0] += leftover;
+      return widths;
+    }
+
+    // Content exceeds available width — give first column the remaining space
+    // after sizing other columns to their content
+    const otherColsWidth = maxWidths.slice(1).reduce((sum, w) => sum + w, 0);
+    const firstColWidth = Math.max(CONTENT_WIDTH - otherColsWidth, CONTENT_WIDTH * 0.3);
+    const scale = (CONTENT_WIDTH - firstColWidth) / (otherColsWidth || 1);
+    const widths = [firstColWidth, ...maxWidths.slice(1).map(w => w * scale)];
+    return widths;
+  };
+
   // Helper to render table
   const renderTable = () => {
     if (tableData.length === 0) return;
 
     const numCols = tableData[0].length;
-    const colWidth = CONTENT_WIDTH / numCols;
-    const rowHeight = 18;
+    const colWidths = calculateColumnWidths(tableData);
+    const rowHeight = 20;
     const tableHeight = tableData.length * rowHeight;
 
     // Check if table fits
@@ -146,35 +215,24 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     tableData.forEach((row, rowIndex) => {
       const rowY = startY - rowIndex * rowHeight;
 
+      let cellX = startX;
       row.forEach((cell, colIndex) => {
-        const cellX = startX + colIndex * colWidth;
+        const colWidth = colWidths[colIndex] || (CONTENT_WIDTH / numCols);
         const cellContent = stripMarkdownFormatting(cell);
 
-        // Header row background
+        // Header row: dark background, white text
         if (rowIndex === 0) {
           page.drawRectangle({
             x: cellX,
             y: rowY - rowHeight,
             width: colWidth,
             height: rowHeight,
-            color: rgb(0.94, 0.94, 0.94),
-            borderColor: rgb(0, 0, 0),
-            borderWidth: 0.5
-          });
-        } else {
-          page.drawRectangle({
-            x: cellX,
-            y: rowY - rowHeight,
-            width: colWidth,
-            height: rowHeight,
-            borderColor: rgb(0, 0, 0),
-            borderWidth: 0.5
+            color: rgb(0.2, 0.2, 0.2)
           });
         }
 
-        // Cell text - draw checkmark for check cells, center dashes
+        // Cell text
         if (isCheckmark(cell)) {
-          // Draw a checkmark using lines
           const centerX = cellX + colWidth / 2;
           const centerY = rowY - rowHeight / 2;
           page.drawLine({
@@ -190,42 +248,80 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
             color: rgb(0, 0, 0)
           });
         } else if (cellContent.trim() === '-' || cellContent.trim() === '') {
-          // Center dash or empty cell
           if (cellContent.trim() === '-') {
             const dashWidth = helvetica.widthOfTextAtSize('-', FONT_SIZE_SMALL);
-            drawText('-', cellX + (colWidth - dashWidth) / 2, rowY - rowHeight + 5, {
+            drawText('-', cellX + (colWidth - dashWidth) / 2, rowY - rowHeight + 6, {
               font: helvetica,
-              size: FONT_SIZE_SMALL
+              size: FONT_SIZE_SMALL,
+              color: rowIndex === 0 ? { r: 1, g: 1, b: 1 } : { r: 0, g: 0, b: 0 }
             });
           }
         } else {
-          // Center content in columns 1+ (GOOD/BETTER/BEST columns), left-align first column
-          const font = rowIndex === 0 ? helveticaBold : helvetica;
-          const displayText = cellContent.substring(0, 30);
+          const isHeader = rowIndex === 0;
+          const isBoldCell = cell.includes('**');
+          const font = (isHeader || isBoldCell) ? helveticaBold : helvetica;
+          const textColor = isHeader ? { r: 1, g: 1, b: 1 } : { r: 0, g: 0, b: 0 };
+          const maxTextWidth = colWidth - 10;
+
+          // Truncate only if truly necessary
+          let displayText = cellContent;
+          while (font.widthOfTextAtSize(displayText, FONT_SIZE_SMALL) > maxTextWidth && displayText.length > 3) {
+            displayText = displayText.substring(0, displayText.length - 1);
+          }
+
           if (colIndex > 0) {
-            // Center the text
+            // Right-align currency, center others
             const textWidth = font.widthOfTextAtSize(displayText, FONT_SIZE_SMALL);
-            drawText(displayText, cellX + (colWidth - textWidth) / 2, rowY - rowHeight + 5, {
-              font,
-              size: FONT_SIZE_SMALL
-            });
+            const isCurrency = displayText.startsWith('$');
+            if (isCurrency) {
+              drawText(displayText, cellX + colWidth - textWidth - 5, rowY - rowHeight + 6, {
+                font,
+                size: FONT_SIZE_SMALL,
+                color: textColor
+              });
+            } else {
+              drawText(displayText, cellX + (colWidth - textWidth) / 2, rowY - rowHeight + 6, {
+                font,
+                size: FONT_SIZE_SMALL,
+                color: textColor
+              });
+            }
           } else {
-            // Left align first column
-            drawText(displayText, cellX + 4, rowY - rowHeight + 5, {
+            drawText(displayText, cellX + 6, rowY - rowHeight + 6, {
               font,
-              size: FONT_SIZE_SMALL
+              size: FONT_SIZE_SMALL,
+              color: textColor
             });
           }
         }
+
+        cellX += colWidth;
       });
     });
 
-    y = startY - tableHeight - 12; // Padding below tables
+    y = startY - tableHeight - 8;
     tableData = [];
     inTable = false;
   };
 
-  // === HEADER WITH LOGO ===
+  // === HEADER - BRANDED LAYOUT (matches invoice style) ===
+  // Extract document title from first H1 line
+  let documentTitle = 'DOCUMENT';
+  for (const l of lines) {
+    if (l.trim().startsWith('# ')) {
+      documentTitle = stripMarkdownFormatting(l.trim().slice(2)).toUpperCase();
+      break;
+    }
+  }
+
+  // Draw document title (large, top-left)
+  const titleFontSize = 28;
+  drawText(documentTitle, PAGE_MARGIN, y - 20, {
+    font: helveticaBold,
+    size: titleFontSize
+  });
+
+  // Logo + business info (right side)
   const logoPaths = [
     join(process.cwd(), 'public/images/avatar_pdf.png'),
     join(process.cwd(), 'public/images/pdf-header-logo.png'),
@@ -240,36 +336,51 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     }
   }
 
+  const logoHeight = 100;
+  const rightMargin = PAGE_WIDTH - PAGE_MARGIN;
+  let textStartX = rightMargin - 180;
+
   if (logoPath) {
     const logoBytes = readFileSync(logoPath);
     const logoImage = await pdfDoc.embedPng(logoBytes);
-    const logoWidth = 50;
-    const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
-    const logoX = (PAGE_WIDTH - logoWidth) / 2;
-
+    const logoWidth = (logoImage.width / logoImage.height) * logoHeight;
+    const logoX = rightMargin - logoWidth - 150;
     page.drawImage(logoImage, {
       x: logoX,
-      y: PAGE_HEIGHT - 35 - logoHeight,
+      y: y - logoHeight + 10,
       width: logoWidth,
       height: logoHeight
     });
+    textStartX = logoX + logoWidth + 18;
   }
 
-  // Business header
-  y = PAGE_HEIGHT - 100;
-  const headerText = `${BUSINESS_INFO.name}`;
-  const headerWidth = helveticaBold.widthOfTextAtSize(headerText, FONT_SIZE_BODY);
-  drawText(headerText, (PAGE_WIDTH - headerWidth) / 2, y, {
+  // Business info (right of logo)
+  drawText(BUSINESS_INFO.name, textStartX, y - 11, {
     font: helveticaBold,
-    size: FONT_SIZE_BODY
+    size: 15
+  });
+  drawText(BUSINESS_INFO.owner, textStartX, y - 34, {
+    size: 10
+  });
+  drawText(BUSINESS_INFO.email, textStartX, y - 54, {
+    size: 9,
+    color: { r: 0.4, g: 0.4, b: 0.4 }
+  });
+  drawText(BUSINESS_INFO.website, textStartX, y - 70, {
+    size: 9,
+    color: { r: 0.4, g: 0.4, b: 0.4 }
   });
 
-  y -= LINE_HEIGHT;
-  const subHeaderText = `${BUSINESS_INFO.contact} | ${BUSINESS_INFO.email} | ${BUSINESS_INFO.website}`;
-  const subHeaderWidth = helvetica.widthOfTextAtSize(subHeaderText, FONT_SIZE_SMALL);
-  drawText(subHeaderText, (PAGE_WIDTH - subHeaderWidth) / 2, y, { size: FONT_SIZE_SMALL });
+  y -= 120;
 
-  y -= 25;
+  // Divider line
+  page.drawLine({
+    start: { x: PAGE_MARGIN, y },
+    end: { x: rightMargin, y },
+    thickness: 1,
+    color: rgb(0, 0, 0)
+  });
+  y -= 21;
 
   // Process lines
   for (let i = 0; i < lines.length; i++) {
@@ -287,6 +398,167 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     if (trimmed === '<!-- pagebreak -->') {
       if (inTable) renderTable();
       addNewPage();
+      continue;
+    }
+
+    // Totals block (right-aligned subtotal/total section)
+    if (trimmed === '<!-- totals -->') {
+      if (inTable) renderTable();
+      const totalsLines: string[] = [];
+      i++;
+      while (i < lines.length) {
+        const blockLine = lines[i].trim();
+        if (blockLine === '<!-- /totals -->') break;
+        if (blockLine !== '') totalsLines.push(blockLine);
+        i++;
+      }
+
+      const rightEdge = PAGE_WIDTH - PAGE_MARGIN;
+      const totalsWidth = 200;
+      const totalsX = rightEdge - totalsWidth;
+
+      for (const tLine of totalsLines) {
+        const labelMatch = tLine.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
+        if (labelMatch) {
+          const label = labelMatch[1];
+          const value = stripMarkdownFormatting(labelMatch[2]);
+          const isTotal = label.toUpperCase() === 'TOTAL';
+
+          if (isTotal) {
+            // Thick line above TOTAL
+            page.drawLine({
+              start: { x: totalsX, y: y + 4 },
+              end: { x: rightEdge, y: y + 4 },
+              thickness: 1.5,
+              color: rgb(0, 0, 0)
+            });
+            y -= 12;
+
+            // TOTAL label + value — same size, bold
+            const totalSize = 11;
+            drawText(`${label}:`, totalsX, y, {
+              font: helveticaBold,
+              size: totalSize
+            });
+            const valueWidth = helveticaBold.widthOfTextAtSize(value, totalSize);
+            drawText(value, rightEdge - valueWidth, y, {
+              font: helveticaBold,
+              size: totalSize
+            });
+            y -= totalSize + 6;
+          } else {
+            // Thin line above subtotal
+            page.drawLine({
+              start: { x: totalsX, y: y + 4 },
+              end: { x: rightEdge, y: y + 4 },
+              thickness: 0.5,
+              color: rgb(0.6, 0.6, 0.6)
+            });
+            y -= 8;
+
+            // Regular subtotal line
+            drawText(`${label}:`, totalsX, y, {
+              font: helvetica,
+              size: FONT_SIZE_BODY,
+              color: { r: 0.3, g: 0.3, b: 0.3 }
+            });
+            const valueWidth = helvetica.widthOfTextAtSize(value, FONT_SIZE_BODY);
+            drawText(value, rightEdge - valueWidth, y, {
+              size: FONT_SIZE_BODY
+            });
+            y -= LINE_HEIGHT + 2;
+          }
+        } else {
+          // "Amount Due (USD)" — small right-aligned text
+          const stripped = stripMarkdownFormatting(tLine);
+          const textWidth = helvetica.widthOfTextAtSize(stripped, 7);
+          drawText(stripped, rightEdge - textWidth, y, {
+            size: 7,
+            color: { r: 0.5, g: 0.5, b: 0.5 }
+          });
+          y -= 14;
+        }
+      }
+
+      y -= 8;
+      continue;
+    }
+
+    // Two-column bill-to + details block
+    if (trimmed === '<!-- bill-to -->') {
+      const billToLines: string[] = [];
+      const detailLines: { label: string; value: string }[] = [];
+      let inDetails = false;
+      i++;
+
+      // Collect bill-to and details lines
+      while (i < lines.length) {
+        const blockLine = lines[i].trim();
+        if (blockLine === '<!-- /bill-to -->') break;
+        if (blockLine === '<!-- details -->') {
+          inDetails = true;
+          i++;
+          continue;
+        }
+        if (blockLine === '') { i++; continue; }
+
+        if (inDetails) {
+          const labelMatch = blockLine.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
+          if (labelMatch) {
+            detailLines.push({ label: labelMatch[1] + ':', value: labelMatch[2] });
+          }
+        } else {
+          billToLines.push(blockLine);
+        }
+        i++;
+      }
+
+      // Render BILL TO label
+      const detailsX = PAGE_WIDTH / 2 + 36;
+      drawText('BILL TO:', PAGE_MARGIN, y, { font: helveticaBold, size: FONT_SIZE_H2 });
+      y -= 14;
+
+      // Save Y for details column (render at same height)
+      const billToStartY = y;
+
+      // Render bill-to lines on left
+      for (const btLine of billToLines) {
+        const stripped = stripMarkdownFormatting(btLine);
+        const isBold = btLine.startsWith('**') && btLine.endsWith('**');
+        drawText(stripped, PAGE_MARGIN, y, {
+          font: isBold ? helveticaBold : helvetica,
+          size: isBold ? 10 : FONT_SIZE_BODY
+        });
+        y -= LINE_HEIGHT;
+      }
+
+      // Render details on right side at same starting Y
+      let detailY = billToStartY;
+      for (const detail of detailLines) {
+        drawText(detail.label, detailsX, detailY, {
+          font: helveticaBold,
+          size: 9,
+          color: { r: 0.3, g: 0.3, b: 0.3 }
+        });
+        // Right-align the value
+        const valueWidth = helvetica.widthOfTextAtSize(detail.value, 9);
+        const rightEdge = PAGE_WIDTH - PAGE_MARGIN;
+        drawText(detail.value, rightEdge - valueWidth, detailY, { size: 9 });
+        detailY -= 14;
+      }
+
+      // Use the lower of the two columns
+      y = Math.min(y, detailY) - 12;
+
+      // Draw divider below
+      page.drawLine({
+        start: { x: PAGE_MARGIN, y: y + 4 },
+        end: { x: PAGE_WIDTH - PAGE_MARGIN, y: y + 4 },
+        thickness: 1,
+        color: rgb(0, 0, 0)
+      });
+      y -= 8;
+
       continue;
     }
 
@@ -316,22 +588,16 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
       renderTable();
     }
 
-    // H1
+    // H1 - skip, already rendered in header
     if (trimmed.startsWith('# ')) {
-      checkPageBreak(30);
-      y -= 10;
-      const text = stripMarkdownFormatting(trimmed.slice(2));
-      const textWidth = helveticaBold.widthOfTextAtSize(text, FONT_SIZE_H1);
-      drawText(text, (PAGE_WIDTH - textWidth) / 2, y, { font: helveticaBold, size: FONT_SIZE_H1 });
-      y -= FONT_SIZE_H1 + 6;
       continue;
     }
 
     // H2
     if (trimmed.startsWith('## ')) {
       checkPageBreak(28);
-      y -= 14; // More space above
-      const text = stripMarkdownFormatting(trimmed.slice(3));
+      y -= 6; // Space above heading
+      const text = stripMarkdownFormatting(trimmed.slice(3)).toUpperCase();
       drawText(text, PAGE_MARGIN, y, { font: helveticaBold, size: FONT_SIZE_H2 });
       y -= FONT_SIZE_H2 + 2; // Less space below
       continue;
@@ -340,8 +606,8 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     // H3
     if (trimmed.startsWith('### ')) {
       checkPageBreak(25);
-      y -= 12; // More space above H3
-      const text = stripMarkdownFormatting(trimmed.slice(4));
+      y -= 6; // Space above heading
+      const text = stripMarkdownFormatting(trimmed.slice(4)).toUpperCase();
       drawText(text, PAGE_MARGIN, y, { font: helveticaBold, size: FONT_SIZE_H3 });
       y -= FONT_SIZE_H3; // Minimal space below
       continue;
@@ -544,7 +810,14 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
     // Italic note (starts with * and ends with *)
     if (trimmed.startsWith('*') && trimmed.endsWith('*') && !trimmed.startsWith('**')) {
       checkPageBreak(15);
-      y -= 8; // Padding above italic notes
+      y -= 4;
+      const noteText = stripMarkdownFormatting(trimmed.slice(1, -1));
+      drawText(noteText, PAGE_MARGIN, y, {
+        size: 7,
+        color: { r: 0.5, g: 0.5, b: 0.5 }
+      });
+      y -= 10;
+      continue;
     }
 
     // Regular paragraph
@@ -580,6 +853,40 @@ async function convertMarkdownToPdf(inputPath: string, outputPath: string): Prom
   // Render any remaining table
   if (inTable) {
     renderTable();
+  }
+
+  // Add footer to all pages
+  const allPages = pdfDoc.getPages();
+  const totalPages = allPages.length;
+  const footerText = `${BUSINESS_INFO.name} \u2022 ${BUSINESS_INFO.owner} \u2022 ${BUSINESS_INFO.email} \u2022 ${BUSINESS_INFO.website}`;
+  for (let pageIdx = 0; pageIdx < allPages.length; pageIdx++) {
+    const p = allPages[pageIdx];
+    // Footer divider line
+    p.drawLine({
+      start: { x: PAGE_MARGIN, y: 72 },
+      end: { x: PAGE_WIDTH - PAGE_MARGIN, y: 72 },
+      thickness: 1,
+      color: rgb(0, 0, 0)
+    });
+    // Footer text centered
+    const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
+    p.drawText(footerText, {
+      x: (PAGE_WIDTH - footerWidth) / 2,
+      y: 56,
+      size: 7,
+      font: helvetica,
+      color: rgb(0.5, 0.5, 0.5)
+    });
+    // Page number right-aligned
+    const pageNumText = `Page ${pageIdx + 1} of ${totalPages}`;
+    const pageNumWidth = helvetica.widthOfTextAtSize(pageNumText, 7);
+    p.drawText(pageNumText, {
+      x: PAGE_WIDTH - PAGE_MARGIN - pageNumWidth,
+      y: 42,
+      size: 7,
+      font: helvetica,
+      color: rgb(0.5, 0.5, 0.5)
+    });
   }
 
   // Save PDF

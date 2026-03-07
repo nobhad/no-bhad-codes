@@ -1,6 +1,6 @@
 # Documentation
 
-Welcome to the no-bhad-codes portfolio and "The Backend" (portal) application documentation. This directory contains comprehensive guides for the application's architecture, features, and development practices.
+Welcome to the no-bhad-codes portfolio and "The Backend" (portal) application documentation. This is a **solo freelance operation** — one admin manages all clients, projects, and business operations. There is no team management or multi-user admin.
 
 ## 📚 Documentation Overview
 

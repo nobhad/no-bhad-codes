@@ -103,7 +103,7 @@ Follow-up tasks and reminders for each lead:
 
 - Due date and time
 - Priority (low, medium, high, urgent)
-- Assignment to team member
+- Assignment tracking (solo operator)
 - Reminder scheduling
 - Overdue task tracking
 - Upcoming task list

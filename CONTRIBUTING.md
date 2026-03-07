@@ -327,7 +327,7 @@ Brief description of changes
 - [ ] Advanced analytics dashboard
 - [ ] Multi-language support
 - [ ] File version control system
-- [ ] Team collaboration features
+- [ ] Enhanced client self-service features
 
 ### Technical Improvements
 - [ ] Database migration system

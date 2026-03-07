@@ -21,7 +21,7 @@
 
 ## Overview
 
-The Admin Dashboard is the administrative side of "The Backend" portal system. It provides comprehensive capabilities for managing leads, projects, clients, and analytics. Only users with admin privileges can access this dashboard.
+The Admin Dashboard is the administrative side of "The Backend" portal system. It provides comprehensive capabilities for managing leads, projects, clients, and analytics. This is a **solo operation** — a single admin (the business owner) manages everything. There is no team management or multi-user admin.
 
 **Key Features:**
 

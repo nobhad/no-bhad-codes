@@ -179,6 +179,8 @@ export default {
 
       // Font sizes
       fontSize: {
+        '3xs': ['10px', { lineHeight: '1.4' }],
+        '2xs': ['11px', { lineHeight: '1.4' }],
         xs: ['12px', { lineHeight: '1.4' }],
         sm: ['14px', { lineHeight: '1.4' }],
         base: ['15px', { lineHeight: '1.5' }],
