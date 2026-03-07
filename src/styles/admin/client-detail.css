@@ -11,16 +11,15 @@
    HEADER CARD
    ============================================== */
 
+/* Card padding from portal-cards.css, only horizontal override */
 #tab-client-detail .cd-header-card {
   margin-bottom: var(--space-3);
-  padding: var(--space-4) var(--space-5);
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
 }
 
-#tab-client-detail .cd-header-card .detail-title-row {
-  margin-bottom: 0;
-}
+/* Title sizing — font-size override only, rest from portal theme */
 #tab-client-detail .cd-header-card .detail-title {
-  margin: 0;
   font-size: var(--font-size-xl);
 }
 
@@ -35,7 +34,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
 }
 
 .contact-inline-item svg {
@@ -48,7 +46,7 @@
   gap: var(--space-4);
   margin-top: var(--space-3);
   padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--portal-border-dark);
+  border-top: var(--portal-border);
 }
 
 /* ==============================================
@@ -61,7 +59,7 @@
   gap: var(--space-2);
   margin-top: var(--space-3);
   padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--portal-border-dark);
+  border-top: var(--portal-border);
 }
 
 .header-tags-container:empty {
@@ -92,9 +90,7 @@
 #tab-client-detail .overview-grid {
   grid-template-columns: 1fr 300px;
 }
-#tab-client-detail .portal-project-card {
-  padding: var(--space-4);
-}
+/* .portal-project-card padding from portal-cards.css */
 
 .cd-contact-grid {
   display: grid;
@@ -133,7 +129,6 @@
 }
 
 .project-item-name {
-  font-size: var(--font-size-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -172,7 +167,6 @@
   width: 100px;
   height: 100px;
   border-radius: var(--portal-radius-full);
-  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -190,7 +184,7 @@
   gap: var(--space-2);
   margin-top: 0;
   padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--portal-border-dark);
+  border-top: var(--portal-border);
 }
 
 .health-factor {
@@ -226,7 +220,7 @@
   gap: var(--space-2);
   margin-top: var(--space-3);
   padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--portal-border-dark);
+  border-top: var(--portal-border);
 }
 
 .stats-compact .stat-item {
@@ -236,10 +230,9 @@
   border-radius: var(--border-radius-sm);
 }
 
+/* .stat-value base from field-label-spacing.css, compact override */
 .stats-compact .stat-value {
-  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
 }
 
 .stats-compact .field-label {
@@ -265,16 +258,13 @@
   width: 12px;
   height: 12px;
 }
-.recent-activity-list .activity-title {
-  font-size: var(--font-size-xs);
-}
+/* .activity-title font from portal theme */
 
 .activity-view-all {
   display: block;
   margin-top: var(--space-3);
   padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--portal-border-dark);
-  font-size: var(--font-size-xs);
+  border-top: var(--portal-border);
   color: var(--portal-accent);
   text-align: center;
   cursor: pointer;
@@ -299,10 +289,6 @@
 }
 #tab-client-detail .cd-recent-activity-full .activity-title {
   white-space: normal;
-  font-size: var(--font-size-sm);
-}
-#tab-client-detail .cd-recent-activity-full .activity-time {
-  font-size: var(--font-size-xs);
 }
 
 /* ==============================================
@@ -374,7 +360,6 @@
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap);
-  font-size: var(--font-size-sm);
   text-transform: capitalize;
 }
 
@@ -408,9 +393,7 @@
   background: var(--status-cancelled);
 }
 
-.client-project-item .project-date {
-  font-size: var(--font-size-sm);
-}
+/* .project-date font from portal theme */
 
 /* ==============================================
    BILLING
@@ -436,7 +419,6 @@
 }
 
 .billing-value {
-  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -460,14 +442,11 @@
 .client-invoice-item .invoice-number {
   font-weight: var(--font-weight-medium);
 }
-.client-invoice-item .invoice-date {
-  font-size: var(--font-size-sm);
-}
+/* .invoice-date font from portal theme */
 .client-invoice-item .invoice-amount {
   font-weight: var(--font-weight-semibold);
 }
 .client-invoice-item .invoice-status {
-  font-size: var(--font-size-sm);
   text-transform: capitalize;
 }
 .client-invoice-item .invoice-status.status-paid {
@@ -492,11 +471,7 @@
   align-items: center;
 }
 
-/* Modal form labels */
-.admin-modal .form-group label {
-  display: block;
-  margin-bottom: var(--space-2);
-}
+/* Modal form labels — styled by portal-cards.css unified label system */
 
 /* ==============================================
    RESPONSIVE

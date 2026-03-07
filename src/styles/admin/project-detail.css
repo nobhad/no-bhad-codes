@@ -66,13 +66,7 @@
   gap: var(--space-1);
 }
 
-/* Panel card header: title on left, action on right */
-.panel-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
+/* Panel card header — use .portal-card-header-row from portal-cards.css */
 
 /* Description divider within a panel card */
 .panel-description {
@@ -140,16 +134,13 @@
   justify-content: space-between;
   padding: var(--space-3) 0;
   border-bottom: var(--border-width) solid var(--portal-border-color);
-  font-size: var(--font-size-base);
 }
 
 .financial-row:last-child {
   border-bottom: none;
 }
 
-.financial-row-label {
-  font-size: var(--font-size-sm);
-}
+/* .financial-row-label inherits portal label styling */
 
 .financial-row-value {
   font-weight: var(--font-weight-semibold);
@@ -196,29 +187,19 @@
   margin-bottom: var(--space-3);
 }
 
+/* Page title h1/h2 — font-family from portal theme, only size override */
 #tab-project-detail .page-title h1,
 #tab-project-detail .page-title h2,
 #tab-client-detail .page-title h1,
 #tab-client-detail .page-title h2 {
-  font-family: var(--font-family-sans);
   font-size: clamp(1.5rem, 4vw, 2rem);
   margin: 0;
 }
 
-/* Project Overview Card (shared by client detail and project detail) */
+/* Project Overview Card — uses .portal-card from portal-cards.css
+   Only page-specific spacing overrides here */
 .project-detail-overview {
-  background: transparent;
-  border: none;
-  padding: var(--space-3);
   margin-bottom: var(--space-3);
-  display: flex;
-  flex-direction: column;
-}
-
-.project-detail-overview .overview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* h3 styling centralized in admin.css */
@@ -288,16 +269,8 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 
 /* Invoice summary moved to pd-invoices.css */
 
-/* Summary cards - styled like Weekly Overview cards */
+/* Summary card — base from portal-cards.css, only layout tweaks */
 body[data-page="admin"] [id^="pd-tab-"] .summary-card {
-  background: transparent;
-  border: none;
-  padding: var(--space-3);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  box-shadow: var(--shadow-card);
   flex: 1;
 }
 
@@ -353,16 +326,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin-bottom: var(--space-1-5);
 }
 
-/* Readonly form value display (no background) */
+/* Readonly form value display */
 [data-page="admin"] .form-value-readonly {
-  display: block;
-  background: transparent;
   padding: var(--space-1-5) 0;
   margin-top: var(--space-1-5);
-  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-normal);
-  text-align: left;
 }
 
 /* Thicker focus border for admin form fields */
@@ -380,12 +348,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   outline: none;
 }
 
-/* Custom status dropdown for settings form - matches text fields */
+/* Custom status dropdown for settings form */
 [data-page="admin"] #pd-setting-status {
   width: 100%;
   padding: 1.75rem var(--space-3) var(--space-1) var(--space-3);
   border: none;
-  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
   text-transform: capitalize;
@@ -450,18 +417,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin-bottom: var(--space-4);
 }
 
-/* Settings form inputs - reduced top padding to match Overview spacing */
+/* Settings form inputs — padding override only, font from portal-forms.css */
 #pd-tab-settings input,
 #pd-tab-settings .form-input {
   padding: var(--space-2) var(--space-4);
   min-height: auto;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
-}
-
-/* Settings form placeholder - not bold */
-#pd-tab-settings input::placeholder {
-  font-weight: var(--font-weight-regular);
 }
 
 /* Form row for Account Status and Last Login - overrides from portal-forms.css */
@@ -474,12 +434,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   gap: var(--space-1);
 }
 
-/* Readonly form values - match meta-value styling */
-#pd-tab-settings .form-value-readonly {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
-}
+/* Readonly form values — meta-value styling from shared */
 
 /* Client account actions buttons */
 #pd-tab-settings .client-account-actions {
@@ -493,8 +448,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 #pd-status-dropdown .custom-dropdown-trigger {
   padding: var(--space-1) var(--space-1-5);
   padding-left: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
   min-height: auto;
 }
 
@@ -521,7 +474,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   text-align: left;
   cursor: pointer;
   text-transform: capitalize;
-  font-size: var(--font-size-sm);
 }
 
 #pd-status-dropdown .custom-dropdown-option:hover {
@@ -634,25 +586,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex: 1;
 }
 
-.milestone-title,
-/* Milestone title - styling from unified rule in portal-cards.css */
-[data-page="admin"] .milestone-title {
-  margin: 0 0 var(--space-1) 0;
-  font-family: var(--font-family-sans);
-}
+/* .milestone-title styled by unified rule in portal-cards.css */
 
 /* .milestone-item.completed styling consolidated in shared/portal-cards.css */
 
-.milestone-description,
-[data-page="admin"] .milestone-description {
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-1);
-}
-
-.milestone-due,
-[data-page="admin"] .milestone-due {
-  font-size: var(--font-size-xs);
-}
+/* .milestone-description, .milestone-due — font-size from portal theme */
 
 .milestone-actions {
   display: flex;
@@ -720,12 +658,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin: 0 0 var(--space-1-5) 0;
 }
 
-/* Project notes h4 - styling from unified rule in portal-cards.css */
-body[data-page="admin"] .project-notes h4,
-body[data-page="admin"] #tab-project-detail .project-notes h4 {
-  font-family: inherit;
-  margin: var(--space-2) 0 var(--space-1) 0;
-}
+/* .project-notes h4 styled by unified rule in portal-cards.css */
 
 .project-notes .features-list,
 .features-container .features-list {
@@ -741,7 +674,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .features-container .feature-tag {
   background: var(--portal-bg-medium);
   padding: var(--space-0-5) var(--space-1-5);
-  font-size: var(--font-size-sm);
   display: inline-block;
   text-transform: capitalize;
 }
@@ -775,9 +707,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   text-overflow: ellipsis;
 }
 
-#pd-files-list .file-meta {
-  font-size: var(--font-size-xs);
-}
+/* .file-meta font-size from portal theme */
 
 #pd-files-list .file-actions {
   display: flex;
@@ -831,19 +761,15 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .milestone-due-date {
-  font-size: var(--font-size-xs);
   background: var(--portal-bg-dark);
   padding: var(--space-0-5) var(--space-0-5);
 }
 
 .milestone-description {
-  font-size: var(--font-size-sm);
   margin: var(--space-1) 0;
 }
 
 .milestone-deliverables {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
   margin: var(--space-2) 0;
   padding-left: var(--space-4);
 }
@@ -863,14 +789,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   flex-wrap: wrap;
 }
 
-.milestone-task-count {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
 .milestone-progress-text {
-  font-size: var(--font-size-sm);
-  color: var(--app-color-primary);
+  color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -884,7 +804,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .milestone-progress-fill {
   height: 100%;
-  background: var(--app-color-primary);
+  background: var(--color-primary);
   transition: width var(--transition-medium);
 }
 
@@ -940,25 +860,22 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .milestone-task-title {
   flex: 1;
-  font-size: var(--font-size-sm);
 }
 
 .milestone-task-meta {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-xs);
 }
 
 .milestone-tasks-empty,
 .milestone-tasks-error {
   padding: var(--space-3);
   text-align: center;
-  font-size: var(--font-size-sm);
 }
 
 .milestone-tasks-error {
-  color: var(--app-color-danger);
+  color: var(--color-danger);
 }
 
 /* File upload dropzone styles in shared/portal-files.css */
@@ -968,10 +885,8 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* ================================================
    Overview Stats Grid
    ================================================ */
+/* .analytics-overview — card styling from portal-cards.css */
 .analytics-overview {
-  background: transparent;
-  border: none;
-  padding: var(--space-4);
   margin-top: var(--space-2);
 }
 
@@ -995,16 +910,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   height: 100%;
 }
 
+/* .overview-stat — uses .summary-card from portal-cards.css */
 .overview-stat {
-  background: transparent;
-  border: none;
-  border-radius: var(--border-radius-md);
-  padding: var(--space-4);
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  box-shadow: var(--shadow-card);
 }
 
 /* .stat-number styling from unified rule in portal-cards.css */
@@ -1045,13 +953,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   width: 100%;
   box-sizing: border-box;
   padding: var(--space-2) var(--space-3);
-  padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
+  padding-right: var(--space-1-5);
   border: var(--border-width-heavy) solid var(--portal-border-dark);
   background-color: var(--portal-bg-pitch);
-  font-size: var(--font-size-base);
   cursor: pointer;
   text-align: left;
-  box-shadow: none;
 }
 
 [data-page="admin"]
@@ -1133,11 +1039,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 [data-page="admin"] .custom-dropdown-item {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  text-align: left;
   cursor: pointer;
   transition: background-color var(--transition-faster);
 }
@@ -1234,7 +1138,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
 }
 
 .pd-client-item svg {
@@ -1268,9 +1171,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--space-0-5);
 }
 
-.pd-meta-value {
-  font-size: var(--font-size-sm);
-}
+/* .pd-meta-value font from portal theme */
 
 /* Header Description */
 .pd-header-description {
@@ -1279,7 +1180,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-header-description .pd-description {
   margin: var(--space-1) 0 0;
-  font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
 }
 
@@ -1329,7 +1229,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-description {
   margin: var(--space-1) 0 0;
-  font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
 }
 
@@ -1345,9 +1244,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--space-0-5);
 }
 
-.pd-detail-value {
-  font-size: var(--font-size-sm);
-}
+/* .pd-detail-value font from portal theme */
 
 /* URL Links */
 .pd-urls-section {
@@ -1366,7 +1263,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--icon-gap);
   padding: var(--space-1) var(--space-2);
   background: var(--portal-bg-medium);
-  font-size: var(--font-size-sm);
   text-decoration: none;
   transition:
     background var(--transition-fast),
@@ -1429,7 +1325,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-progress-percent {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  font-family: var(--font-family-sans);
 }
 
 .pd-progress-card .progress-bar {
@@ -1455,7 +1350,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Label styling from unified rule in portal-forms.css */
 
 .pd-stat-value {
-  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -1599,7 +1493,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .notes-display .notes-content {
-  font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -1616,7 +1509,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Uses utility classes: flex flex-col gap-4 */
 
 .document-generation-content .modal-description {
-  font-size: var(--font-size-sm);
   margin: 0;
   line-height: var(--line-height-normal);
 }
@@ -1642,7 +1534,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   align-items: center;
   justify-content: center;
   background: var(--portal-bg-dark);
-  color: var(--app-color-primary);
+  color: var(--color-primary);
 }
 
 .document-icon svg {
@@ -1657,13 +1549,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .document-info h4 {
   margin: 0 0 var(--space-1) 0;
-  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
 }
 
 .document-info p {
   margin: 0;
-  font-size: var(--font-size-sm);
   line-height: var(--line-height-snug);
 }
 
@@ -1684,7 +1574,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--space-2);
   padding: var(--space-3);
   background: var(--portal-bg-darker);
-  font-size: var(--font-size-xs);
   margin: 0;
   line-height: var(--line-height-snug);
 }
