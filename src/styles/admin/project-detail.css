@@ -1395,14 +1395,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-bottom: 0;
 }
 
-/* Ensure field labels use muted color consistently */
-.pd-header-card .field-label,
-.pd-details-card .field-label,
-.pd-overview-grid .field-label,
-.pd-detail-section .field-label,
-.pd-detail-item .field-label {
-  color: var(--portal-text-muted);
-}
+/* Field labels inherit from shared field-label-spacing.css via --portal-label-color */
 
 .pd-description {
   margin: var(--space-1) 0 0;

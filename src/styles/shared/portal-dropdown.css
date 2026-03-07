@@ -80,14 +80,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 }
 
 /* Caret icon — SINGLE source of truth for ALL dropdown carets.
-   Color matches border variable so caret and border are always in sync.
+   Uses currentColor so caret inherits the same color as surrounding text/border.
    Size, spacing, and transition are uniform across all dropdown types. */
 .dropdown-caret,
 .custom-dropdown-caret {
   flex-shrink: 0;
   width: var(--dropdown-caret-size, var(--icon-size-xs));
   height: var(--dropdown-caret-size, var(--icon-size-xs));
-  color: var(--portal-border-color);
+  color: currentColor;
   transition: transform var(--transition-fast);
   margin-left: var(--dropdown-caret-gap, var(--space-1));
 }
