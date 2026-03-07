@@ -65,20 +65,20 @@ export function NotesTab({
   return (
     <div className="tw-section">
       {/* Header */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="pd-tab-header">
+        <div className="pd-row-compact">
           <StickyNote className="icon-lg" />
-          <h3 className="heading ">
+          <h3 className="heading">
             Internal Notes
           </h3>
-          <span className="text-muted tw-text-sm">
+          <span className="text-muted pd-hint">
             (Only visible to admins)
           </span>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="pd-row-compact">
           {hasChanges && (
-            <span className="text-muted tw-text-sm">Unsaved changes</span>
+            <span className="text-muted pd-hint">Unsaved changes</span>
           )}
           <button
             className="btn-primary"

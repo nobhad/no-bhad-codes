@@ -189,30 +189,28 @@ export function InvoicesTab({
   return (
     <div className="tw-section">
       {/* Header with stats and actions */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-6 invtab-stats">
+      <div className="pd-tab-header">
+        <div className="invtab-stats">
           <div>
-            <span className="text-muted ">Outstanding: </span>
+            <span className="text-muted">Outstanding: </span>
             <span
               className={cn(
-                totalOutstanding > 0
-                  ? 'tw-text-primary'
-                  : 'text-muted',
-                'tw-font-semibold'
+                'pd-highlight-value',
+                totalOutstanding === 0 && 'text-muted'
               )}
             >
               {formatCurrency(totalOutstanding)}
             </span>
           </div>
           <div>
-            <span className="text-muted ">Paid: </span>
-            <span className="tw-text-primary tw-font-semibold">
+            <span className="text-muted">Paid: </span>
+            <span className="pd-highlight-value">
               {formatCurrency(totalPaid)}
             </span>
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-3">
+        <div className="pd-row-tight">
           {/* Status Filter */}
           <select
             value={statusFilter}
@@ -240,29 +238,29 @@ export function InvoicesTab({
       {/* Invoices List */}
       {filteredInvoices.length === 0 ? (
         <div className="empty-state">
-          <Inbox className="icon-xl tw-mb-2" />
+          <Inbox className="icon-xl pd-mb-2" />
           <span>
             {statusFilter === 'all' ? 'No invoices yet' : `No ${statusFilter} invoices`}
           </span>
         </div>
       ) : (
         <div className="tw-panel invtab-panel">
-          <table className="tw-w-full">
+          <table className="pd-full-width">
             <thead>
               <tr className="invtab-header-row">
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Invoice #
                 </th>
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Amount
                 </th>
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Status
                 </th>
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Due Date
                 </th>
-                <th className="label tw-text-right tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-right">
                   Actions
                 </th>
               </tr>
@@ -278,38 +276,37 @@ export function InvoicesTab({
                 return (
                   <tr
                     key={invoice.id}
-                    className="tw-list-item tw-cursor-pointer invtab-row"
+                    className="tw-list-item invtab-row"
                     onClick={() => onViewInvoice?.(invoice.id)}
                   >
-                    <td className="tw-px-4 tw-py-3">
-                      <span className="tw-text-primary tw-font-semibold">
+                    <td className="pd-table-cell">
+                      <span className="pd-highlight-value">
                         {invoice.invoice_number}
                       </span>
                     </td>
-                    <td className="tw-px-4 tw-py-3">
-                      <span className="tw-text-primary tw-font-semibold">
+                    <td className="pd-table-cell">
+                      <span className="pd-highlight-value">
                         {formatCurrency(invoice.amount_total)}
                       </span>
                     </td>
-                    <td className="tw-px-4 tw-py-3">
+                    <td className="pd-table-cell">
                       <span className="tw-badge">
                         {INVOICE_STATUS_CONFIG[displayStatus]?.label || displayStatus}
                       </span>
                     </td>
-                    <td className="tw-px-4 tw-py-3">
+                    <td className="pd-table-cell">
                       <span
                         className={cn(
                           isOverdue(invoice)
-                            ? 'tw-text-primary'
-                            : 'text-muted',
-                          ''
+                            ? 'pd-highlight-value'
+                            : 'text-muted'
                         )}
                       >
                         {formatDate(invoice.due_date)}
                       </span>
                     </td>
-                    <td className="tw-px-4 tw-py-3" onClick={(e) => e.stopPropagation()}>
-                      <div className="tw-flex tw-items-center tw-justify-end tw-gap-1">
+                    <td className="pd-table-cell" onClick={(e) => e.stopPropagation()}>
+                      <div className="pd-row-end">
                         <button
                           className="icon-btn"
                           onClick={() => onViewInvoice?.(invoice.id)}
@@ -372,7 +369,7 @@ export function InvoicesTab({
                                     deleteDialog.open();
                                   }}
                                 >
-                                  <Trash2 className="icon-md tw-mr-2" />
+                                  <Trash2 className="icon-md invtab-dropdown-icon" />
                                   Delete
                                 </PortalDropdownItem>
                               </>

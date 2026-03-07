@@ -65,7 +65,7 @@ export function PortalViewLayout({
   }
 
   return (
-    <div ref={containerRef} className={cn('portal-main-container tw-section', className)}>
+    <div ref={containerRef} className={cn('portal-main-container', className)}>
       {children}
     </div>
   );

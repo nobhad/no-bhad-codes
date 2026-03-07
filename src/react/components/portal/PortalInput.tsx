@@ -20,22 +20,22 @@ export const PortalInput = React.forwardRef<HTMLInputElement, PortalInputProps>(
     const inputId = id || `input-${React.useId()}`;
 
     return (
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="form-field">
         {label && (
           <label htmlFor={inputId} className="field-label">
             {label}
-            {required && <span className="tw-text-primary tw-ml-1">*</span>}
+            {required && <span className="form-required">*</span>}
           </label>
         )}
         <input
           ref={ref}
           id={inputId}
-          className={cn('tw-input', error && 'tw-border-primary', className)}
+          className={cn('form-input', error && 'form-input-error', className)}
           {...props}
         />
-        {error && <span className="tw-text-xs tw-text-primary">{error}</span>}
+        {error && <span className="form-error-message">{error}</span>}
         {helperText && !error && (
-          <span className="tw-text-xs text-muted">{helperText}</span>
+          <span className="form-helper-text">{helperText}</span>
         )}
       </div>
     );

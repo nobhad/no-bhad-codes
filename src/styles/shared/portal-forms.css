@@ -154,7 +154,7 @@
   min-height: 100px;
 }
 
-/* Select dropdown arrow - dark mode default (white arrow on dark bg) */
+/* Select dropdown arrow - uses theme-aware caret variable */
 .portal :is(select:not(.status-select), .form-select),
 .modal-overlay :is(select:not(.status-select), .form-select) {
   appearance: none;
@@ -1199,4 +1199,103 @@ html[data-theme="light"] .form-field-select {
     height: calc(var(--space-5, 2rem) + var(--space-0-5, 0.125rem));
     font-size: var(--font-size-sm, 12px);
   }
+}
+
+/* ============================================
+ * FILE UPLOAD COMPONENT
+ * ============================================ */
+.file-upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.file-upload-hint {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+}
+
+.file-upload-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.file-upload-error svg {
+  flex-shrink: 0;
+}
+
+.file-upload-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5);
+  border: var(--border-width) solid var(--portal-border-color);
+}
+.file-upload-item.has-error {
+  border-color: var(--color-danger);
+}
+.file-upload-item.is-complete {
+  border-color: var(--color-success);
+}
+
+.file-upload-item-icon svg {
+  flex-shrink: 0;
+}
+
+.file-upload-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-upload-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-0-5);
+}
+
+.file-upload-item-name {
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-upload-item-progress {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+}
+
+.file-upload-progress-track {
+  height: 0.25rem;
+  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  overflow: hidden;
+}
+
+.file-upload-progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width var(--transition-normal, 0.3s);
+}
+
+.file-upload-item-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+}
+
+.file-upload-remove-btn {
+  padding: var(--space-0-5);
+  background: transparent;
+  border: none;
+  color: var(--portal-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.file-upload-remove-btn:hover {
+  color: var(--color-primary);
 }

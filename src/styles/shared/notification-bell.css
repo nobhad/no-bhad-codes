@@ -4,51 +4,58 @@
  * ===============================================
  * @file src/styles/client-portal/notification-bell.css
  *
- * Styles for the notification bell dropdown in client portal.
+ * Styles for the notification bell dropdown in portal header.
+ * Bell button matches .header-theme-toggle sizing/styling.
  */
 
 /* ============================================================================
    NOTIFICATION BELL CONTAINER
    ============================================================================ */
 
-.notification-bell-container {
+.portal-global-header .notification-bell-container {
   position: relative;
   display: inline-flex;
 }
 
 /* ============================================================================
-   BELL BUTTON
+   BELL BUTTON - matches .header-theme-toggle exactly
    ============================================================================ */
 
-.notification-bell-btn {
+.portal-global-header .notification-bell-btn {
   position: relative;
-  width: 36px;
-  height: 36px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
+  min-width: var(--portal-btn-icon-size);
+  min-height: var(--portal-btn-icon-size);
+  padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-secondary);
   cursor: pointer;
-  transition:
-    color var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-.notification-bell-btn:hover {
   color: var(--portal-text-light);
-  background: var(--portal-bg-hover);
+  transition: color var(--transition-mouse) ease;
+  font-family: inherit;
 }
 
-.notification-bell-btn:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.portal-global-header .notification-bell-btn:hover {
+  color: var(--color-primary);
+  background: transparent;
 }
 
-.notification-bell-btn svg {
-  width: 20px;
-  height: 20px;
+.portal-global-header .notification-bell-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.portal-global-header .notification-bell-btn:focus-visible {
+  box-shadow: var(--portal-focus-ring);
+}
+
+.portal-global-header .notification-bell-btn svg {
+  width: var(--portal-btn-icon-inner-size);
+  height: var(--portal-btn-icon-inner-size);
 }
 
 /* ============================================================================
@@ -62,16 +69,13 @@
   min-width: 16px;
   height: 16px;
   padding: 0 var(--space-0-5);
-  font-size: var(--font-size-2xs);
+  font-size: 10px;
   font-weight: var(--font-weight-semibold);
   line-height: 16px;
   text-align: center;
   color: var(--color-white);
-  background: var(--color-danger-500);
-}
-
-.notification-badge.hidden {
-  display: none;
+  background: var(--color-danger, #dc2626);
+  pointer-events: none;
 }
 
 /* ============================================================================
@@ -84,16 +88,13 @@
   right: 0;
   width: 320px;
   max-height: 420px;
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-darker);
   border: var(--border-width) solid var(--portal-border-color);
   z-index: var(--z-index-portal-dropdown, 9700);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.notification-dropdown.hidden {
-  display: none;
+  font-family: var(--font-family-mono);
 }
 
 /* ============================================================================
@@ -105,17 +106,33 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-width) solid var(--portal-border-dark);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
 .notification-dropdown-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--portal-text-light);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider, 0.05em);
   margin: 0;
 }
 
-/* .btn-link from portal-buttons.css provides base styling */
+.notification-header .btn-link {
+  font-size: var(--font-size-xs);
+  color: var(--portal-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider, 0.05em);
+}
+
+.notification-header .btn-link:hover {
+  color: var(--portal-text-light);
+}
 
 /* ============================================================================
    NOTIFICATION LIST
@@ -127,9 +144,11 @@
   max-height: 360px;
 }
 
-/* Uses universal empty state from loading.css, only unique padding for dropdown */
 .notification-empty {
   padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--portal-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================================================
@@ -140,10 +159,16 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
+  width: 100%;
   padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-width) solid var(--portal-border-dark);
+  border: none;
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+  background: transparent;
   cursor: pointer;
   transition: background-color var(--transition-fast);
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
 }
 
 .notification-item:last-child {
@@ -160,11 +185,11 @@
 }
 
 .notification-item.unread {
-  background: var(--color-state-selected);
+  background: var(--portal-alpha-white-05);
 }
 
 .notification-item.unread:hover {
-  background: var(--color-state-hover);
+  background: var(--portal-bg-hover);
 }
 
 .notification-item-content {
@@ -182,7 +207,7 @@
 
 .notification-item-message {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-muted);
   margin: 0 0 var(--space-1) 0;
   line-height: var(--line-height-snug);
   display: -webkit-box;

@@ -11,7 +11,7 @@
   /* ============================================
    * FONT FAMILIES
    * ============================================
-   * Dual-font system (DISCOTHÈQUE-inspired):
+   * Dual-font system:
    * - Headings: Cormorant Garamond (classic serif)
    * - Body/UI: Inconsolata (monospace)
    */
@@ -77,10 +77,10 @@
   /* ============================================
    * LETTER SPACING
    * ============================================
-   * DISCOTHÈQUE uses very tight heading tracking
+   * Portal uses very tight heading tracking
    */
 
-  --letter-spacing-tightest: -0.09em; /* DISCOTHÈQUE heading style */
+  --letter-spacing-tightest: -0.09em; /* Portal heading style */
   --letter-spacing-tighter: -0.05em;
   --letter-spacing-tight: -0.025em;
   --letter-spacing-normal: 0;

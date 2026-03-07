@@ -39,9 +39,9 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
   if (projects.length === 0) {
     return (
       <div className="empty-state">
-        <FolderKanban className="icon-xl tw-mb-3" />
+        <FolderKanban className="icon-xl mb-3" />
         <p>No projects yet</p>
-        <p className="">
+        <p>
           Projects associated with this client will appear here
         </p>
       </div>
@@ -57,25 +57,25 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
         key={project.id}
         className="portal-card tw-group"
       >
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-          <div className="tw-flex-1 tw-min-w-0">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-mb-1">
-              <h4 className="heading tw-truncate ">
+        <div className="project-card-header">
+          <div className="project-card-info">
+            <div className="project-title-row">
+              <h4 className="heading truncate">
                 {project.project_name}
               </h4>
-              <span className="tw-badge tw-text-xs">
+              <span className="tw-badge text-xs">
                 {statusConfig?.label || project.status}
               </span>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-2 text-muted tw-text-sm">
+            <div className="project-date-row text-muted text-sm">
               <Clock className="icon-xs" />
               <span>Created {formatDate(project.created_at)}</span>
             </div>
           </div>
 
           <button
-            className="btn-ghost tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity"
+            className="btn-ghost hover-reveal"
             onClick={() => onViewProject?.(project.id)}
           >
             <ExternalLink className="icon-md" />
@@ -85,10 +85,10 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
         {/* Progress bar */}
         {(project.status === 'active' || project.status === 'in-progress') && (
-          <div className="tw-mt-3">
-            <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
+          <div className="project-card-progress">
+            <div className="progress-header">
               <span className="field-label">Progress</span>
-              <span className="text-muted tw-text-sm">
+              <span className="text-muted text-sm">
                 {progress}%
               </span>
             </div>
@@ -113,15 +113,15 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
     return (
       <div>
-        <h3 className="section-title ">
+        <h3 className="section-title">
           {title} ({projectList.length})
         </h3>
         {projectList.length === 0 ? (
-          <p className="text-muted  text-muted tw-italic">
+          <p className="text-muted empty-text-italic">
             {emptyMessage}
           </p>
         ) : (
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+          <div className="card-grid-2col--compact">
             {projectList.map(renderProjectCard)}
           </div>
         )}
@@ -132,24 +132,24 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
   return (
     <div className="tw-section">
       {/* Header */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="heading tw-text-lg">
+      <div className="tab-section-header">
+        <h2 className="heading text-lg">
           Projects ({projects.length})
         </h2>
 
         {/* Summary stats */}
-        <div className="tw-flex tw-items-center tw-gap-4">
-          <div className="tw-text-center">
-            <span className="stat-value tw-text-lg">
+        <div className="summary-stats-inline">
+          <div className="stat-inline">
+            <span className="stat-value text-lg">
               {activeProjects.length}
             </span>
-            <span className="text-muted tw-ml-1 tw-text-sm">Active</span>
+            <span className="text-muted text-sm stat-inline-label">Active</span>
           </div>
-          <div className="tw-text-center">
-            <span className="stat-value tw-text-lg">
+          <div className="stat-inline">
+            <span className="stat-value text-lg">
               {completedProjects.length}
             </span>
-            <span className="text-muted tw-ml-1 tw-text-sm">
+            <span className="text-muted text-sm stat-inline-label">
               Completed
             </span>
           </div>

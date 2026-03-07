@@ -39,12 +39,12 @@
   }
 
   /* Modal tab hover */
-  .admin-modal-tab:hover {
+  .portal-modal-tab:hover {
     color: var(--color-text-primary);
   }
 
   /* Modal close hover */
-  .admin-modal-close:hover,
+  .portal-modal-close:hover,
   .modal-close:hover {
     color: var(--color-text-primary);
   }
@@ -140,7 +140,7 @@
 
   /* Close buttons in modals and toasts */
   .modal-close,
-  .admin-modal-close,
+  .portal-modal-close,
   .toast-close {
     min-width: 44px;
     min-height: 44px;
@@ -258,12 +258,12 @@
 
 /* Modal content - responsive max-width */
 .modal-content,
-.admin-modal {
+.portal-modal {
   max-width: min(var(--modal-width-md, 560px), calc(100vw - 2 * var(--space-4, 16px)));
 }
 
 /* Wide modal variant */
-.admin-modal.admin-modal--wide,
+.portal-modal.portal-modal--wide,
 .modal-content.modal-content--wide {
   max-width: min(var(--modal-width-lg, 860px), calc(100vw - 2 * var(--space-4, 16px)));
 }
@@ -301,7 +301,7 @@
 /* Small mobile - full width modals */
 @media (--small-mobile) {
   .modal-content,
-  .admin-modal,
+  .portal-modal,
   .invoice-modal-content,
   .invoice-edit-modal,
   .file-preview-modal-content,
@@ -314,13 +314,13 @@
 
   /* Full height on very small screens */
   .modal-overlay,
-  .admin-modal-overlay {
+  .portal-modal-overlay {
     padding: 0;
     align-items: flex-start;
   }
 
   .modal-content,
-  .admin-modal {
+  .portal-modal {
     min-height: 100vh;
     min-height: 100dvh;
     max-height: 100vh;
@@ -468,7 +468,7 @@
 
 /* Modal overlay - use dvh for proper sizing */
 .modal-overlay,
-.admin-modal-overlay {
+.portal-modal-overlay {
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -476,7 +476,7 @@
 /* Full-screen modals on mobile */
 @media (--small-mobile) {
   .modal-content,
-  .admin-modal {
+  .portal-modal {
     max-height: 100vh;
     max-height: 100dvh;
     min-height: 100vh;
@@ -550,14 +550,14 @@
 /* Safe area insets for notched devices */
 @supports (padding: max(0px)) {
   .modal-content,
-  .admin-modal {
+  .portal-modal {
     padding-left: max(var(--space-5), env(safe-area-inset-left));
     padding-right: max(var(--space-5), env(safe-area-inset-right));
   }
 
   @media (--small-mobile) {
     .modal-overlay,
-    .admin-modal-overlay {
+    .portal-modal-overlay {
       padding-bottom: env(safe-area-inset-bottom);
     }
   }

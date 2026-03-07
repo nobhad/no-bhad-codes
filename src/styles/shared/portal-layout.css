@@ -207,7 +207,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   font-size: var(--font-size-xs);
 }
 
-/* Theme toggle in global header */
+/* Theme toggle in global header — matches icon-btn sizing */
 .portal-global-header .header-theme-toggle {
   position: relative;
   display: inline-flex;
@@ -215,15 +215,14 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   justify-content: center;
   width: var(--portal-btn-icon-size);
   height: var(--portal-btn-icon-size);
+  min-width: var(--portal-btn-icon-size);
+  min-height: var(--portal-btn-icon-size);
   padding: 0;
   background: transparent;
   border: none;
-  border-radius: var(--portal-radius-sm, 4px);
   cursor: pointer;
-  color: var(--portal-text-secondary);
-  transition:
-    color var(--transition-mouse) ease,
-    background var(--transition-mouse) ease;
+  color: var(--portal-text-light);
+  transition: color var(--transition-mouse) ease;
 }
 
 /* Override nav-base.css absolute positioning for portal header icons */
@@ -234,13 +233,18 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 }
 
 .portal-global-header .header-theme-toggle:hover {
-  background: var(--portal-alpha-white-08);
-  color: var(--portal-text-light);
+  color: var(--color-primary);
+  background: transparent;
 }
 
 .portal-global-header .header-theme-toggle:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  box-shadow: var(--portal-focus-ring);
+  outline: none;
+}
+
+.portal-global-header .header-theme-toggle svg {
+  width: var(--portal-btn-icon-inner-size);
+  height: var(--portal-btn-icon-inner-size);
 }
 
 /* Theme icons visibility - override nav-base opacity-based toggle */
@@ -1090,7 +1094,7 @@ td {
 }
 
 /* =====================================================
-   PORTAL TYPOGRAPHY - DISCOTHÈQUE THEME
+   PORTAL TYPOGRAPHY
    ===================================================== */
 .portal h1,
 .portal h2,
@@ -1294,9 +1298,19 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 .tw-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
   padding: var(--portal-card-padding);
+}
+
+/* Panel card header — heading + action button on same row */
+.panel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* Clickable card variant — portal-card + card-clickable */
@@ -1640,7 +1654,8 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-whitespace-pre-wrap { white-space: pre-wrap; }
 .tw-break-words { word-wrap: break-word; }
 .tw-line-through { text-decoration: line-through; }
-.tw-italic { font-style: italic; }
+.tw-italic,
+.text-italic { font-style: italic; }
 
 /* Status colors - semantic colors for status indicators */
 .tw-text-green-400 { color: var(--status-active); }

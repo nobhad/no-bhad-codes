@@ -23,14 +23,14 @@
   --portal-btn-padding: var(--portal-btn-padding-y) var(--portal-btn-padding-x);
   --portal-btn-min-height: var(--space-5);
 
-  /* Button typography - DISCOTHÈQUE: Inconsolata monospace */
+  /* Button typography - Portal: Inconsolata monospace */
   --portal-btn-font-family: "Inconsolata", ui-monospace, monospace;
   --portal-btn-font-size: 0.875rem;
   --portal-btn-font-weight: 500;
   --portal-btn-letter-spacing: -0.02em;
   --portal-btn-text-transform: uppercase;
 
-  /* Button borders - DISCOTHÈQUE: no radius, 2px white border, thicker bottom */
+  /* Button borders - Portal: no radius, 2px border, thicker bottom */
   --portal-btn-border-width: 2px;
   --portal-btn-border-bottom-width: 6px;
   --portal-btn-border-radius: 0;

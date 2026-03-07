@@ -27,7 +27,7 @@
   height: 32px;
   min-width: 32px;
   background: transparent;
-  border: var(--portal-border);
+  border: none;
   color: var(--portal-text-muted);
 }
 

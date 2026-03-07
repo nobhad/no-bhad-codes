@@ -59,6 +59,13 @@
   gap: var(--space-1);
 }
 
+/* Field label with inline icon (e.g. Links section) */
+.project-info-field .field-label:has(svg) {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+}
+
 /* Field value with leading icon */
 .project-info-field-value {
   display: flex;
@@ -1605,3 +1612,582 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Contract tab styles: see pd-contract.css */
 /* Invoice tab styles: see pd-invoices.css */
+
+/* =====================================================
+   PROJECT DETAIL TAB SHARED CLASSES
+   Semantic replacements for Tailwind utilities
+   ===================================================== */
+
+/* --- Layout: Row / Column / Grid --- */
+
+/* Horizontal row: flex, align-center, justify-between */
+.pd-tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Horizontal row: flex, align-center, gap-4 */
+.pd-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Horizontal row: flex, align-center, gap-3 */
+.pd-row-tight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Horizontal row: flex, align-center, gap-2 */
+.pd-row-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Horizontal row: flex, align-center, gap-1 */
+.pd-row-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Horizontal row: flex, align-center, gap-6 */
+.pd-row-wide {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* Flex row with justify-end */
+.pd-row-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Flex row with items at start */
+.pd-row-start {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* Flex row with items at start, gap-4 */
+.pd-row-start-wide {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+/* Vertical column: flex-col, gap-3 */
+.pd-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Vertical column: flex-col, gap-2 */
+.pd-col-tight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Vertical column: flex-col, gap-4 */
+.pd-col-wide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Vertical column: flex-col, gap-1 */
+.pd-col-inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Centered column (for upload zones, empty states) */
+.pd-col-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* 2-column grid, gap-4 */
+.pd-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+/* Flexible item that fills remaining space, truncates overflow */
+.pd-flex-fill {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Flex item that does not shrink */
+.pd-no-shrink {
+  flex-shrink: 0;
+}
+
+/* --- Table cells --- */
+
+.pd-table-cell {
+  padding: var(--space-3) var(--space-4);
+}
+
+.pd-cell-left {
+  text-align: left;
+}
+
+.pd-cell-right {
+  text-align: right;
+}
+
+/* Full-width element */
+.pd-full-width {
+  width: 100%;
+}
+
+/* --- Text styling --- */
+
+/* Primary highlighted value (e.g., stats, amounts) */
+.pd-highlight-value {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Large text display (e.g., timeline, contract value) */
+.pd-text-lg {
+  font-size: var(--font-size-lg);
+}
+
+/* Completed / strikethrough text */
+.pd-completed-text {
+  text-decoration: line-through;
+}
+
+/* Truncated text with max-width */
+.pd-truncate-filename {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+/* Hint text (small, secondary) */
+.pd-hint {
+  font-size: var(--font-size-sm);
+}
+
+/* Extra-small text */
+.pd-text-xs {
+  font-size: var(--font-size-xs);
+}
+
+/* --- Spacing utilities --- */
+
+.pd-mt-1 {
+  margin-top: var(--space-1);
+}
+
+.pd-mt-2 {
+  margin-top: var(--space-2);
+}
+
+.pd-mt-3 {
+  margin-top: var(--space-3);
+}
+
+.pd-mt-4 {
+  margin-top: var(--space-4);
+}
+
+.pd-mb-2 {
+  margin-bottom: var(--space-2);
+}
+
+.pd-mb-3 {
+  margin-bottom: var(--space-3);
+}
+
+/* --- Files Tab --- */
+
+/* File upload dropzone */
+.files-dropzone {
+  border: var(--border-width-thick) dashed var(--portal-border-color);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.files-dropzone:hover {
+  border-color: var(--color-primary);
+}
+
+.files-dropzone.is-dragging {
+  border-color: var(--color-primary);
+  background-color: var(--portal-bg-hover);
+}
+
+/* Upload icon sizing */
+.files-upload-icon {
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+}
+
+.files-upload-icon.is-dragging {
+  color: var(--color-primary);
+}
+
+/* Upload text area */
+.files-upload-text {
+  text-align: center;
+}
+
+/* Uploading spinner indicator */
+.files-upload-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+}
+
+/* Table header row styling */
+.files-table-header {
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+/* --- Tasks Tab --- */
+
+/* Milestone checkbox */
+.tasks-checkbox {
+  width: 20px;
+  height: 20px;
+  border: var(--border-width) solid var(--portal-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.tasks-checkbox.is-completed {
+  background-color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.tasks-checkbox:not(.is-completed):hover {
+  border-color: var(--color-primary);
+}
+
+/* Milestone order indicator */
+.tasks-order-indicator {
+  width: var(--space-6);
+  text-align: center;
+  font-size: var(--font-size-xs);
+}
+
+/* Tasks expanded content area */
+.tasks-expanded-content {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+/* Tasks deliverable list */
+.tasks-deliverable-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-top: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Tasks deliverable item */
+.tasks-deliverable-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* --- Contract Tab --- */
+
+/* Contract status header layout */
+.contract-status-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* Contract stat header (icon + label) */
+.contract-stat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+/* Contract files header bar */
+.contract-files-header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Contract empty state padding */
+.contract-empty-state {
+  padding: var(--space-4);
+}
+
+/* Contract warning card */
+.contract-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.contract-warning-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-primary);
+}
+
+/* Panel without padding (for tables) */
+.contract-panel-no-padding {
+  overflow: hidden;
+}
+
+/* --- Invoices Tab --- */
+
+/* Invoice header stat row */
+.invtab-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* Invoice filter select width */
+.invtab-filter {
+  min-width: 140px;
+}
+
+/* Invoice table panel (no extra padding) */
+.invtab-panel {
+  overflow: hidden;
+}
+
+/* Invoice table header row */
+.invtab-header-row {
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Invoice table row - clickable */
+.invtab-row {
+  cursor: pointer;
+}
+
+/* Invoice dropdown icon margin */
+.invtab-dropdown-icon {
+  margin-right: var(--space-2);
+}
+
+/* --- Deliverables Tab --- */
+
+/* Deliverables milestone header */
+.deliv-milestone-header {
+  padding: var(--space-4);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Deliverables milestone description */
+.deliv-milestone-desc {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+/* Deliverables content area */
+.deliv-content {
+  padding: var(--space-4);
+}
+
+/* Deliverables list */
+.deliv-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Deliverable item row */
+.deliv-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* Deliverables legend */
+.deliv-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.deliv-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* --- Messages Tab --- */
+
+/* Messages container layout */
+.msgtab-container {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+}
+
+/* Messages scrollable panel */
+.msgtab-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+/* Message thread column */
+.msgtab-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Message row (avatar + bubble) */
+.msgtab-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.msgtab-row.is-admin {
+  flex-direction: row-reverse;
+}
+
+/* Message avatar */
+.msgtab-avatar {
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.msgtab-avatar.is-admin {
+  background-color: var(--color-white);
+}
+
+.msgtab-avatar.is-client {
+  background-color: transparent;
+  border: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Message content wrapper */
+.msgtab-content-wrap {
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.msgtab-content-wrap.is-admin {
+  align-items: flex-end;
+}
+
+/* Message meta (sender + time) */
+.msgtab-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+/* Message bubble */
+.msgtab-bubble {
+  padding: var(--space-2) var(--space-4);
+}
+
+.msgtab-bubble.is-admin {
+  background-color: var(--color-white);
+  color: var(--portal-text-dark);
+}
+
+.msgtab-bubble.is-client {
+  border: var(--border-width) solid var(--portal-border-color);
+  color: var(--color-text-primary);
+}
+
+/* Message content text */
+.msgtab-content {
+  margin: 0;
+  line-height: var(--line-height-normal);
+  word-wrap: break-word;
+}
+
+/* Message input area */
+.msgtab-input-panel {
+  border-top: var(--border-width) solid var(--portal-border-color);
+  padding-top: var(--space-4);
+}
+
+/* Message input row */
+.msgtab-input-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Message textarea flex fill */
+.msgtab-textarea {
+  flex: 1;
+}
+
+/* Send button alignment */
+.msgtab-send-btn {
+  align-self: flex-end;
+}
+
+/* Keyboard shortcut hint */
+.msgtab-kbd {
+  font-size: var(--font-size-xs);
+  padding: var(--space-0-5) var(--space-1);
+}
+
+/* --- Notes Tab --- */
+
+/* Notes panel */
+.notes-panel {
+  padding: 0;
+}
+
+/* Notes textarea full-bleed */
+.notes-textarea {
+  width: 100%;
+  border: none;
+  resize: vertical;
+  min-height: 300px;
+  padding: var(--space-4);
+}
+
+/* Notes hint text */
+.notes-hint {
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+}

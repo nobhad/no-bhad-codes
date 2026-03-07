@@ -27,7 +27,7 @@ All colors must use CSS variables. Never hardcode hex/rgb values.
 }
 ```
 
-#### Portal Colors (DISCOTHÈQUE Dark Theme)
+#### Portal Colors (Dark Theme)
 
 Applied via `[data-page="admin"]` and `[data-page="client-portal"]` selectors:
 

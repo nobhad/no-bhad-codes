@@ -164,9 +164,9 @@ export function NotesTab({
 
   // Render note form
   const renderForm = () => (
-    <div className="tw-panel tw-mb-4">
-      <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
-        <h3 className="heading tw-text-sm">
+    <div className="tw-panel panel-form-spacing">
+      <div className="panel-header-row--compact">
+        <h3 className="heading text-sm">
           {editingId ? 'Edit Note' : 'New Note'}
         </h3>
         <button
@@ -186,7 +186,7 @@ export function NotesTab({
         autoFocus
       />
 
-      <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-3">
+      <div className="form-actions--compact">
         <button className="btn-ghost" onClick={handleCancel}>
           Cancel
         </button>
@@ -208,27 +208,27 @@ export function NotesTab({
       key={note.id}
       className={cn(
         'portal-card tw-group',
-        note.is_pinned && 'tw-border-primary'
+        note.is_pinned && 'border-primary-accent'
       )}
     >
       {/* Note header */}
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-mb-2">
-        <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="note-card-header">
+        <div className="note-meta">
           {note.is_pinned && (
-            <Pin className="icon-xs tw-text-primary tw-fill-current" />
+            <Pin className="icon-xs active-primary" />
           )}
-          <span className="text-muted tw-text-xs">
+          <span className="text-muted text-xs">
             {formatDate(note.created_at)}
             {note.updated_at !== note.created_at && ' (edited)'}
           </span>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-1 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity">
+        <div className="note-actions">
           <button
             onClick={() => handleTogglePin(note)}
             className={cn(
               'btn-icon',
-              note.is_pinned && 'tw-text-primary'
+              note.is_pinned && 'active-primary'
             )}
             title={note.is_pinned ? 'Unpin' : 'Pin'}
           >
@@ -252,14 +252,14 @@ export function NotesTab({
       </div>
 
       {/* Note content */}
-      <p className="text-muted tw-text-sm tw-whitespace-pre-wrap">
+      <p className="text-muted text-sm note-content">
         {note.content}
       </p>
 
       {/* Note footer */}
       {note.created_by && (
-        <div className="tw-mt-2 tw-pt-2 tw-border-t">
-          <span className="text-muted tw-text-xs">
+        <div className="note-footer">
+          <span className="text-muted text-xs">
             by {note.created_by}
           </span>
         </div>
@@ -270,8 +270,8 @@ export function NotesTab({
   return (
     <div className="tw-section">
       {/* Header */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="heading tw-text-lg">
+      <div className="tab-section-header">
+        <h2 className="heading text-lg">
           Notes ({notes.length})
         </h2>
         {!isAdding && !editingId && (
@@ -290,17 +290,17 @@ export function NotesTab({
         <div className="empty-state">
           <StickyNote className="icon-xl" />
           <span>No notes yet</span>
-          <span className="tw-text-sm">Add internal notes about this client</span>
+          <span className="empty-state-hint">Add internal notes about this client</span>
         </div>
       ) : (
-        <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="detail-list--spaced">
           {/* Pinned notes section */}
           {pinnedNotes.length > 0 && (
             <div>
-              <h3 className="label tw-mb-2">
+              <h3 className="label section-label-block">
                 Pinned
               </h3>
-              <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+              <div className="card-grid-2col--compact">
                 {pinnedNotes.map(renderNote)}
               </div>
             </div>
@@ -310,11 +310,11 @@ export function NotesTab({
           {unpinnedNotes.length > 0 && (
             <div>
               {pinnedNotes.length > 0 && (
-                <h3 className="label tw-mb-2">
+                <h3 className="label section-label-block">
                   Recent
                 </h3>
               )}
-              <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+              <div className="card-grid-2col--compact">
                 {unpinnedNotes.map(renderNote)}
               </div>
             </div>

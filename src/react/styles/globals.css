@@ -10,7 +10,8 @@
  * - portal-buttons.css: tw-btn-*, tw-btn-primary, tw-btn-secondary, etc.
  * - portal-forms.css: tw-input, tw-select, tw-textarea, tw-checkbox
  * - portal-tabs.css: tw-tab-list, tw-tab, tw-tab-active
- * - portal-components.css: tw-empty-state, tw-loading, tw-error, tw-modal-*, tw-dropdown-*, tw-badge, tw-status-dot
+ * - portal-components.css: tw-empty-state, tw-loading, tw-error, tw-dropdown-*, tw-badge, tw-status-dot
+ * - admin/modals.css: portal-modal-*, portal-modal-overlay, portal-modal-header, etc.
  * - portal-layout.css: tw-flex, tw-grid, tw-gap-*, tw-container, tw-section, tw-panel, tw-card, etc.
  * - portal-stat-cards.css: tw-stat-card, tw-stat-value, tw-stat-label
  * - portal-files.css: tw-dropzone, tw-dropzone-*
@@ -34,25 +35,25 @@
 :root,
 .react-portal-mount {
   /* Shadcn-specific variables that reference portal-theme.css */
-  --background: var(--portal-bg-pitch, #000000);
-  --foreground: var(--portal-text-light, #ffffff);
+  --background: var(--portal-bg-pitch, #d4d4d4);
+  --foreground: var(--portal-text-light, #171717);
   --card: transparent;
-  --card-foreground: var(--portal-text-light, #ffffff);
-  --popover: var(--portal-bg-pitch, #000000);
-  --popover-foreground: var(--portal-text-light, #ffffff);
-  --primary: var(--portal-text-light, #ffffff);
-  --primary-foreground: var(--portal-bg-pitch, #000000);
+  --card-foreground: var(--portal-text-light, #171717);
+  --popover: var(--portal-bg-pitch, #d4d4d4);
+  --popover-foreground: var(--portal-text-light, #171717);
+  --primary: var(--portal-text-light, #171717);
+  --primary-foreground: var(--portal-bg-pitch, #d4d4d4);
   --secondary: transparent;
-  --secondary-foreground: var(--portal-text-light, #ffffff);
+  --secondary-foreground: var(--portal-text-light, #171717);
   --muted: transparent;
-  --muted-foreground: var(--portal-text-muted, rgba(255, 255, 255, 0.46));
-  --accent: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
-  --accent-foreground: var(--portal-text-light, #ffffff);
-  --destructive: var(--portal-text-light, #ffffff);
-  --destructive-foreground: var(--portal-bg-pitch, #000000);
-  --border: var(--portal-alpha-white-30, rgba(255, 255, 255, 0.3));
-  --input: var(--portal-border-color, rgba(255, 255, 255, 1));
-  --ring: var(--portal-text-light, #ffffff);
+  --muted-foreground: var(--portal-text-muted, rgba(0, 0, 0, 0.46));
+  --accent: var(--portal-alpha-white-10, rgba(0, 0, 0, 0.1));
+  --accent-foreground: var(--portal-text-light, #171717);
+  --destructive: var(--portal-text-light, #171717);
+  --destructive-foreground: var(--portal-bg-pitch, #d4d4d4);
+  --border: var(--portal-alpha-white-30, rgba(0, 0, 0, 0.3));
+  --input: var(--portal-border-color, rgba(0, 0, 0, 1));
+  --ring: var(--portal-text-light, #171717);
   --radius: 0;
   --font-mono: "Inconsolata", "Courier", "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
 }

@@ -182,7 +182,7 @@ export function OverviewTab({
             <div className="project-info-field">
               <span className="field-label">Start Date</span>
               <div className="project-info-field-value">
-                <Calendar className="icon-xs" />
+                <Calendar className="icon-sm" />
                 <InlineEdit
                   value={project.start_date || ''}
                   type="date"
@@ -195,7 +195,7 @@ export function OverviewTab({
             <div className="project-info-field">
               <span className="field-label">Target End Date</span>
               <div className="project-info-field-value">
-                <Calendar className="icon-xs" />
+                <Calendar className="icon-sm" />
                 <InlineEdit
                   value={project.end_date || ''}
                   type="date"
@@ -208,7 +208,7 @@ export function OverviewTab({
             <div className="project-info-field">
               <span className="field-label">Budget</span>
               <div className="project-info-field-value">
-                <DollarSign className="icon-xs" />
+                <DollarSign className="icon-sm" />
                 <InlineEdit
                   value={String(project.budget || '')}
                   type="currency"
@@ -223,7 +223,7 @@ export function OverviewTab({
             <div className="project-info-field">
               <span className="field-label">Quoted Price</span>
               <div className="project-info-field-value">
-                <DollarSign className="icon-xs" />
+                <DollarSign className="icon-sm" />
                 <InlineEdit
                   value={String(project.price || '')}
                   type="currency"
@@ -252,10 +252,10 @@ export function OverviewTab({
           <div className="project-info-grid">
             <div className="project-info-field">
               <div className="field-label">
-                <LinkIcon className="icon-xs" /> Preview URL
+                <LinkIcon className="icon-sm" /> Preview URL
                 {project.preview_url && (
                   <a href={project.preview_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open preview URL">
-                    <ExternalLink className="icon-xs" />
+                    <ExternalLink className="icon-sm" />
                   </a>
                 )}
               </div>
@@ -269,10 +269,10 @@ export function OverviewTab({
 
             <div className="project-info-field">
               <div className="field-label">
-                <LinkIcon className="icon-xs" /> Repository
+                <LinkIcon className="icon-sm" /> Repository
                 {project.repo_url && (
                   <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open repository URL">
-                    <ExternalLink className="icon-xs" />
+                    <ExternalLink className="icon-sm" />
                   </a>
                 )}
               </div>
@@ -286,10 +286,10 @@ export function OverviewTab({
 
             <div className="project-info-field">
               <div className="field-label">
-                <LinkIcon className="icon-xs" /> Production URL
+                <LinkIcon className="icon-sm" /> Production URL
                 {project.production_url && (
                   <a href={project.production_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open production URL">
-                    <ExternalLink className="icon-xs" />
+                    <ExternalLink className="icon-sm" />
                   </a>
                 )}
               </div>
@@ -381,7 +381,7 @@ export function OverviewTab({
                       }}
                       aria-label={milestone.is_completed ? 'Mark incomplete' : 'Mark complete'}
                     >
-                      {milestone.is_completed && <Check className="icon-xs" />}
+                      {milestone.is_completed && <Check className="icon-sm" />}
                     </button>
 
                     <div
@@ -452,7 +452,7 @@ export function OverviewTab({
                             deleteDialog.open();
                           }}
                         >
-                          <Trash2 className="icon-xs" />
+                          <Trash2 className="icon-sm" />
                           Delete
                         </button>
                       </div>

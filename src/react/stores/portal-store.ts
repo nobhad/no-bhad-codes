@@ -67,10 +67,10 @@ export interface PortalStoreState {
 // ============================================
 
 function getInitialTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   const stored = localStorage.getItem(STORAGE_KEYS.THEME);
   if (stored === 'light' || stored === 'dark') return stored;
-  return 'dark';
+  return 'light';
 }
 
 function getInitialSidebarState(): boolean {

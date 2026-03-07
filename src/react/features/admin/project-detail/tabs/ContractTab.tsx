@@ -11,7 +11,6 @@ import {
   ExternalLink,
   Inbox
 } from 'lucide-react';
-import { cn } from '@react/lib/utils';
 import type { Project, ProjectFile } from '../../types';
 import { formatCurrency } from '../../../../../utils/format-utils';
 
@@ -99,9 +98,9 @@ export function ContractTab({
   return (
     <div className="tw-section">
       {/* Contract Status Card */}
-      <div className="tw-panel ">
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-          <div className="tw-flex tw-items-start tw-gap-4">
+      <div className="tw-panel">
+        <div className="contract-status-layout">
+          <div className="pd-row-start-wide">
             {isSigned ? (
               <Check className="icon-xl" />
             ) : (
@@ -109,8 +108,8 @@ export function ContractTab({
             )}
 
             <div>
-              <div className="tw-flex tw-items-center tw-gap-3">
-                <h3 className="heading tw-text-lg">
+              <div className="pd-row-tight">
+                <h3 className="heading pd-text-lg">
                   Contract Status
                 </h3>
                 <span className="tw-badge">
@@ -119,14 +118,14 @@ export function ContractTab({
               </div>
 
               {isSigned && project.contract_signed_date && (
-                <div className="tw-flex tw-items-center tw-gap-2 text-muted tw-mt-2 ">
+                <div className="pd-row-compact text-muted pd-mt-2">
                   <Calendar className="icon-md" />
                   <span>Signed on {formatDate(project.contract_signed_date)}</span>
                 </div>
               )}
 
               {!isSigned && (
-                <p className="text-muted tw-mt-2 ">
+                <p className="text-muted pd-mt-2">
                   {contractStatus.status === 'pending'
                     ? 'Contract has been sent and is awaiting client signature.'
                     : 'Contract has not been sent to the client yet.'}
@@ -136,7 +135,7 @@ export function ContractTab({
           </div>
 
           {/* Actions */}
-          <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="pd-row-compact">
             {!isSigned && (
               <>
                 <button
@@ -160,10 +159,10 @@ export function ContractTab({
       </div>
 
       {/* Contract Terms */}
-      <div className="tw-grid tw-grid-cols-2 tw-gap-4">
+      <div className="pd-grid-2">
         {/* Project Value */}
         <div className="stat-card">
-          <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
+          <div className="contract-stat-header">
             <DollarSign className="icon-md" />
             <span className="field-label">
               Contract Value
@@ -173,7 +172,7 @@ export function ContractTab({
             {formatCurrency(project.price || project.budget)}
           </div>
           {project.deposit_amount && (
-            <div className="text-muted tw-mt-1 ">
+            <div className="text-muted pd-mt-1">
               Deposit: {formatCurrency(project.deposit_amount)}
             </div>
           )}
@@ -181,13 +180,13 @@ export function ContractTab({
 
         {/* Timeline */}
         <div className="stat-card">
-          <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
+          <div className="contract-stat-header">
             <Calendar className="icon-md" />
             <span className="field-label">
               Project Timeline
             </span>
           </div>
-          <div className="tw-text-primary tw-text-lg">
+          <div className="pd-highlight-value pd-text-lg">
             {project.start_date && project.end_date ? (
               <>
                 {formatDate(project.start_date)} - {formatDate(project.end_date)}
@@ -203,23 +202,23 @@ export function ContractTab({
 
       {/* Contract Files */}
       <div className="tw-panel contract-panel-no-padding">
-        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 contract-files-header">
-          <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="pd-tab-header contract-files-header">
+          <div className="pd-row-compact">
             <FileText className="icon-md" />
-            <span className="heading ">
+            <span className="heading">
               Contract Documents
             </span>
           </div>
-          <span className="text-muted tw-text-sm">
+          <span className="text-muted pd-hint">
             {contractFiles.length} file{contractFiles.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {contractFiles.length === 0 ? (
           <div className="empty-state contract-empty-state">
-            <Inbox className="icon-xl tw-mb-2" />
+            <Inbox className="icon-xl pd-mb-2" />
             <span>No contract documents</span>
-            <span className="tw-text-sm">
+            <span className="pd-hint">
               Upload contracts in the Files tab or generate one above
             </span>
           </div>
@@ -230,13 +229,13 @@ export function ContractTab({
                 key={file.id}
                 className="tw-list-item"
               >
-                <div className="tw-flex tw-items-center tw-gap-3">
+                <div className="pd-row-tight">
                   <FileText className="icon-lg" />
                   <div>
-                    <span className="tw-text-primary ">
+                    <span className="pd-highlight-value">
                       {file.original_name}
                     </span>
-                    <div className="text-muted tw-text-sm">
+                    <div className="text-muted pd-hint">
                       {formatDate(file.created_at)}
                     </div>
                   </div>
@@ -259,13 +258,13 @@ export function ContractTab({
 
       {/* Warning for unsigned contracts */}
       {!isSigned && project.status === 'active' && (
-        <div className="portal-card tw-flex tw-items-start tw-gap-3 contract-warning">
-          <AlertTriangle className="icon-lg tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
+        <div className="portal-card contract-warning">
+          <AlertTriangle className="icon-lg contract-warning-icon" />
           <div>
-            <h4 className="heading ">
+            <h4 className="heading">
               Contract Not Signed
             </h4>
-            <p className="text-muted tw-mt-1 ">
+            <p className="text-muted pd-mt-1">
               This project is active but the contract has not been signed.
               Consider sending the contract for signature before proceeding with work.
             </p>

@@ -56,7 +56,7 @@
 @import "./help.css";
 @import "./requests.css";
 @import "./documents.css";
-@import "./notification-bell.css";
+@import "../shared/notification-bell.css";
 @import "./components.css";
 
 /* Unified modal system */

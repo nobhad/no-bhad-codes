@@ -85,7 +85,118 @@
 
 /* ==============================================
    OVERVIEW GRID
+   Two-column responsive grid: main content (2/3) + sidebar (1/3)
    ============================================== */
+
+.client-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--portal-section-gap);
+}
+
+@media (min-width: 1024px) {
+  .client-overview-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.client-overview-main,
+.client-overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
+
+/* Contact info vertical list */
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Account detail row — label left, value right */
+.account-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.account-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Tags list */
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Health factors grid */
+.health-factors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.health-factor-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.health-factor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+/* Stats grid — 3-column for client stats */
+.client-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+/* Stat card icon + label header */
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Tag remove button */
+.tag-remove-btn {
+  background: transparent;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: inherit;
+  line-height: 0;
+}
+
+.tag-remove-btn:hover {
+  opacity: 0.7;
+}
+
+/* Tag color dot */
+.tag-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--portal-radius-full);
+  display: inline-block;
+  margin-right: var(--space-2);
+}
 
 #tab-client-detail .overview-grid {
   grid-template-columns: 1fr 300px;
@@ -528,4 +639,390 @@
   .billing-info-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==============================================
+   TAB COMPONENTS - Contacts, Activity, Notes, Projects
+   ============================================== */
+
+/* --- Shared Tab Layout --- */
+
+/* Section header: title + action (used across all tabs) */
+.tab-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Panel header row: heading + close button */
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.panel-header-row--compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+/* Form actions row: buttons aligned right */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.form-actions--compact {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* Two-column card grid */
+.card-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.card-grid-2col--compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+/* Vertical list (flex column with gap) */
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detail-list--spaced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail-list--section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Contact detail row: icon + text inline */
+.contact-detail-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* --- Contacts Tab --- */
+
+/* Contact card header */
+.contact-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+/* Contact identity: avatar + name/title */
+.contact-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Contact avatar circle */
+.contact-avatar {
+  width: 40px;
+  height: 40px;
+  border: var(--border-width) solid var(--portal-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Contact name row: name + star icon */
+.contact-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Checkbox label inline */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+/* Align to bottom of container */
+.align-end {
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Form field column */
+.form-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Notes section within contact card */
+.contact-notes {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+/* Dropdown menu item with icon */
+.dropdown-item-icon {
+  margin-right: var(--space-2);
+}
+
+/* --- Activity Tab --- */
+
+/* Activity date header: label + divider */
+.activity-date-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* Activity date divider: flex-1 line */
+.activity-date-divider {
+  flex: 1;
+  height: 1px;
+}
+
+/* Timeline wrapper: positioned container with left padding */
+.activity-timeline-wrapper {
+  position: relative;
+  padding-left: var(--space-8, 2rem);
+}
+
+/* Timeline vertical line: absolute positioned */
+.activity-timeline-vert {
+  position: absolute;
+  left: var(--space-3);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+/* Timeline event row */
+.activity-event-row {
+  position: relative;
+  display: flex;
+  gap: var(--space-4);
+}
+
+/* Timeline dot: absolutely positioned icon container */
+.activity-dot {
+  position: absolute;
+  left: calc(-1 * var(--space-5));
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Activity event content panel */
+.activity-event-content {
+  flex: 1;
+}
+
+/* Activity event header: title + timestamp */
+.activity-event-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* Activity event body: description area */
+.activity-event-body {
+  flex: 1;
+}
+
+/* Activity metadata row */
+.activity-metadata {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+/* --- Notes Tab --- */
+
+/* Note card header: metadata + actions */
+.note-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Note metadata (date, pin icon) */
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Note action buttons: hidden by default, visible on hover */
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tw-group:hover .note-actions,
+.portal-card:hover .note-actions {
+  opacity: 1;
+}
+
+/* Note content with preserved whitespace */
+.note-content {
+  white-space: pre-wrap;
+}
+
+/* Note footer: author info with top border */
+.note-footer {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Section label with bottom margin */
+.section-label-block {
+  margin-bottom: var(--space-2);
+}
+
+/* --- Projects Tab --- */
+
+/* Project card header: title area + action */
+.project-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Project card title area */
+.project-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Project title row: name + badge */
+.project-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+/* Project date row */
+.project-date-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Hover-reveal button */
+.hover-reveal {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tw-group:hover .hover-reveal,
+.portal-card:hover .hover-reveal {
+  opacity: 1;
+}
+
+/* Progress section within project card */
+.project-card-progress {
+  margin-top: var(--space-3);
+}
+
+/* Progress header: label + percentage */
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+}
+
+/* Summary stats inline */
+.summary-stats-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Stat with inline label */
+.stat-inline {
+  text-align: center;
+}
+
+.stat-inline-label {
+  margin-left: var(--space-1);
+}
+
+/* Italic empty text */
+.empty-text-italic {
+  font-style: italic;
+}
+
+/* Active primary color for icons/text */
+.active-primary {
+  color: var(--portal-accent);
+  fill: currentColor;
+}
+
+/* Primary border accent */
+.border-primary-accent {
+  border-color: var(--portal-accent);
+}
+
+/* Spacing bottom for form panel */
+.panel-form-spacing {
+  margin-bottom: var(--space-4);
+}
+
+/* Top margin for full-width fields */
+.form-field-full {
+  margin-top: var(--space-4);
+}
+
+/* Item bottom spacing */
+.item-spacing-bottom {
+  margin-bottom: var(--space-2);
+}
+
+/* Empty state hint text */
+.empty-state-hint {
+  font-size: var(--font-size-sm);
+}
+
+/* Description with top margin */
+.description-text {
+  margin-top: var(--space-1);
 }

@@ -138,17 +138,17 @@ export function TasksTab({
   return (
     <div className="tw-section">
       {/* Header with progress */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-4">
+      <div className="pd-tab-header">
+        <div className="pd-row">
           <div>
-            <span className="text-muted ">Progress: </span>
-            <span className="tw-text-primary tw-font-semibold">
+            <span className="text-muted">Progress: </span>
+            <span className="pd-highlight-value">
               {progress}%
             </span>
           </div>
           <div>
-            <span className="text-muted ">Completed: </span>
-            <span className="tw-text-primary tw-font-semibold">
+            <span className="text-muted">Completed: </span>
+            <span className="pd-highlight-value">
               {completedCount}/{totalCount}
             </span>
           </div>
@@ -175,7 +175,7 @@ export function TasksTab({
             New Milestone
           </h4>
 
-          <div className="tw-flex tw-flex-col tw-gap-3">
+          <div className="pd-col">
             <input
               type="text"
               placeholder="Milestone title..."
@@ -193,7 +193,7 @@ export function TasksTab({
               className="tw-textarea tasks-textarea"
             />
 
-            <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="pd-row-compact">
               <Calendar className="icon-md" />
               <input
                 type="date"
@@ -203,7 +203,7 @@ export function TasksTab({
               />
             </div>
 
-            <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-2">
+            <div className="pd-row-end pd-mt-2">
               <button
                 className="btn-ghost"
                 onClick={() => {
@@ -230,12 +230,12 @@ export function TasksTab({
       {/* Milestones List */}
       {milestones.length === 0 ? (
         <div className="empty-state">
-          <Inbox className="icon-xl tw-mb-2" />
+          <Inbox className="icon-xl pd-mb-2" />
           <span>No milestones yet</span>
-          <span className="tw-text-xs">Add milestones to track project progress</span>
+          <span className="pd-text-xs">Add milestones to track project progress</span>
         </div>
       ) : (
-        <div className="tw-flex tw-flex-col tw-gap-2">
+        <div className="pd-col-tight">
           {milestones.map((milestone, index) => {
             const isExpanded = expandedMilestones.has(milestone.id);
             const taskProgress = milestone.task_count
@@ -262,33 +262,30 @@ export function TasksTab({
                       handleToggle(milestone.id);
                     }}
                     className={cn(
-                      'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-transition-colors tw-flex-shrink-0 tasks-checkbox',
-                      milestone.is_completed
-                        ? 'tw-bg-white tw-border-primary'
-                        : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
+                      'tasks-checkbox',
+                      milestone.is_completed && 'is-completed'
                     )}
                   >
                     {milestone.is_completed && (
-                      <Check className="icon-xs tw-text-[var(--portal-text-dark)]" />
+                      <Check className="icon-sm" style={{ color: 'var(--portal-text-dark)' }} />
                     )}
                   </button>
 
                   {/* Title and Progress */}
-                  <div className="tw-flex-1 tw-min-w-0">
-                    <div className="tw-flex tw-items-center tw-gap-2">
+                  <div className="pd-flex-fill">
+                    <div className="pd-row-compact">
                       <span
                         className={cn(
                           milestone.is_completed
-                            ? 'text-muted tw-line-through'
-                            : 'tw-text-primary',
-                          ''
+                            ? 'text-muted pd-completed-text'
+                            : 'pd-highlight-value'
                         )}
                       >
                         {milestone.title}
                       </span>
 
                       {milestone.task_count !== undefined && milestone.task_count > 0 && (
-                        <span className="text-muted tw-text-xs">
+                        <span className="text-muted pd-text-xs">
                           ({milestone.completed_task_count || 0}/{milestone.task_count} tasks)
                         </span>
                       )}
@@ -307,14 +304,14 @@ export function TasksTab({
 
                   {/* Due Date */}
                   {milestone.due_date && (
-                    <span className="text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
-                      <Calendar className="icon-xs" />
+                    <span className="text-muted pd-row-inline pd-text-xs">
+                      <Calendar className="icon-sm" />
                       {formatDate(milestone.due_date)}
                     </span>
                   )}
 
                   {/* Order indicator */}
-                  <span className="text-muted tw-w-6 tw-text-center tw-text-xs">
+                  <span className="text-muted tasks-order-indicator">
                     #{index + 1}
                   </span>
 
@@ -328,25 +325,25 @@ export function TasksTab({
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                  <div className="tw-px-4 tw-pb-4 tw-pt-0 tasks-expanded-content">
+                  <div className="tasks-expanded-content">
                     {/* Description */}
                     {milestone.description && (
-                      <p className="text-muted tw-mt-3 tasks-description">
+                      <p className="text-muted pd-mt-3 tasks-description">
                         {milestone.description}
                       </p>
                     )}
 
                     {/* Deliverables */}
                     {milestone.deliverables && milestone.deliverables.length > 0 && (
-                      <div className="tw-mt-3">
+                      <div className="pd-mt-3">
                         <span className="field-label">
                           Deliverables
                         </span>
-                        <ul className="tw-mt-2 tw-space-y-1">
+                        <ul className="tasks-deliverable-list">
                           {milestone.deliverables.map((deliverable, idx) => (
                             <li
                               key={idx}
-                              className="text-muted tw-flex tw-items-start tw-gap-2 "
+                              className="text-muted tasks-deliverable-item"
                             >
                               <span>•</span>
                               {deliverable}
@@ -358,13 +355,13 @@ export function TasksTab({
 
                     {/* Completed Date */}
                     {milestone.is_completed && milestone.completed_date && (
-                      <div className="tw-mt-3 tw-text-primary tw-text-xs">
+                      <div className="pd-highlight-value pd-text-xs pd-mt-3">
                         Completed on {formatDate(milestone.completed_date)}
                       </div>
                     )}
 
                     {/* Actions */}
-                    <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-mt-4">
+                    <div className="pd-row-end pd-mt-4">
                       <button
                         className="btn-ghost"
                         onClick={(e) => {
@@ -373,7 +370,7 @@ export function TasksTab({
                           deleteDialog.open();
                         }}
                       >
-                        <Trash2 className="icon-xs" />
+                        <Trash2 className="icon-sm" />
                         Delete
                       </button>
                     </div>
