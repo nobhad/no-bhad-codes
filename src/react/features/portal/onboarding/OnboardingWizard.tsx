@@ -8,6 +8,7 @@ import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Check, Save, Loader2 } from 'lucide-react';
 import { gsap } from 'gsap';
+import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { StepIndicator } from './StepIndicator';
 import {
@@ -471,24 +472,12 @@ export function OnboardingWizard({
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="loading-state tw-h-64">
-        <span className="loading-spinner" />
-        <span>Loading...</span>
-      </div>
-    );
+    return <LoadingState message="Loading onboarding..." />;
   }
 
   // Error state
   if (loadError) {
-    return (
-      <div className="error-state tw-h-64">
-        <p>{loadError}</p>
-        <button className="btn-secondary tw-mt-4" onClick={loadProgress}>
-          Retry
-        </button>
-      </div>
-    );
+    return <ErrorState message={loadError} onRetry={loadProgress} />;
   }
 
   return (
@@ -500,7 +489,7 @@ export function OnboardingWizard({
             <h2 className="heading tw-text-xl">
               Client Onboarding
             </h2>
-            <p className="text-muted tw-text-[14px] tw-mt-0.5">
+            <p className="text-muted tw-text-sm tw-mt-0.5">
               {currentStepConfig?.description}
             </p>
           </div>

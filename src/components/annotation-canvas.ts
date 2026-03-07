@@ -262,13 +262,14 @@ export class AnnotationCanvas {
   }
 
   private getColorValue(color?: AnnotationColor): string {
-    const colorMap: Record<AnnotationColor, string> = {
-      red: '#ef4444',
-      yellow: '#eab308',
-      blue: '#3b82f6',
-      green: '#22c55e'
+    const CSS_VAR_MAP: Record<AnnotationColor, string> = {
+      red: '--color-annotation-red',
+      yellow: '--color-annotation-yellow',
+      blue: '--color-annotation-blue',
+      green: '--color-annotation-green'
     };
-    return colorMap[color || this.currentColor];
+    const varName = CSS_VAR_MAP[color || this.currentColor];
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || varName;
   }
 
   public setTool(tool: AnnotationTool): void {

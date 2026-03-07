@@ -30,8 +30,10 @@ import { SearchFilter } from '@react/components/portal/TableFilters';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { FileUploadDropzone } from './FileUploadDropzone';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
+import { downloadFile } from '../../../../utils/file-download';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalFilesManager');
@@ -85,13 +87,9 @@ interface FolderCategory {
   count: number;
 }
 
-export interface PortalFilesProps {
+export interface PortalFilesProps extends PortalViewProps {
   /** Filter files by project ID */
   projectId?: string;
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 // ============================================================================
@@ -446,14 +444,10 @@ export function PortalFilesManager({
 
   // Handle file download
   const handleDownload = useCallback((file: PortalFile) => {
-    const a = document.createElement('a');
-    a.href = buildEndpoint.fileDownload(file.id);
-    a.download = file.originalName || file.filename;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }, []);
+    downloadFile(file.id, file.originalName || file.filename).catch(() => {
+      showNotification?.('Failed to download file', 'error');
+    });
+  }, [showNotification]);
 
   // Handle file delete
   const handleDeleteClick = useCallback(
@@ -512,7 +506,7 @@ export function PortalFilesManager({
         stats={
           <TableStats items={[
             { value: files.length, label: 'total' },
-            { value: filteredFiles.length, label: 'shown', hideIfZero: true }
+            { value: filteredFiles.length, label: 'shown' }
           ]} />
         }
         actions={

@@ -333,9 +333,9 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'to do', variant: 'pending', hideIfZero: true },
-            { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
+            { value: stats.pending, label: 'to do', variant: 'pending' },
+            { value: stats.inProgress, label: 'in progress', variant: 'active' },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total - ${stats.pending} To Do - ${stats.inProgress} In Progress - ${stats.completed} Done${stats.overdue > 0 ? ` - ${stats.overdue} Overdue` : ''}`}
         />
@@ -685,5 +685,3 @@ function TasksKanbanView({
     </div>
   );
 }
-
-export default GlobalTasksTable;

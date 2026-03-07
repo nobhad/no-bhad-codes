@@ -13,7 +13,7 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import { PORTAL_PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
-import type { PortalProject, PortalProjectStatus } from '../types';
+import type { PortalProject, PortalProjectStatus, PortalViewProps } from '../types';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
@@ -110,13 +110,9 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
   );
 });
 
-interface PortalProjectsListProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
+interface PortalProjectsListProps extends PortalViewProps {
   /** Callback when a project is selected */
   onSelectProject?: (projectId: string) => void;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 /**
@@ -309,8 +305,8 @@ export function PortalProjectsList({
       stats={
         <TableStats items={[
           { value: projects.length, label: 'total' },
-          { value: activeCount, label: 'active', variant: 'active', hideIfZero: true },
-          { value: completedCount, label: 'completed', variant: 'completed', hideIfZero: true }
+          { value: activeCount, label: 'active', variant: 'active' },
+          { value: completedCount, label: 'completed', variant: 'completed' }
         ]} />
       }
       actions={

@@ -269,7 +269,7 @@ export function TasksTab({
                     )}
                   >
                     {milestone.is_completed && (
-                      <Check className="icon-xs tw-text-black" />
+                      <Check className="icon-xs tw-text-[var(--portal-text-dark)]" />
                     )}
                   </button>
 

@@ -156,7 +156,7 @@ export abstract class PortalFeatureModule extends BaseModule {
     }
 
     return `
-      <div class="admin-table-actions toolbar">
+      <div class="data-table-actions toolbar">
         ${buttons.join('')}
       </div>
     `;
@@ -239,7 +239,7 @@ export abstract class PortalFeatureModule extends BaseModule {
     });
 
     return `
-      <div class="admin-table-card">
+      <div class="data-table-card">
         <table class="admin-table">
           <thead>
             <tr>${headerCells.join('')}</tr>

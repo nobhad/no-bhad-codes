@@ -40,7 +40,7 @@ async function _mountReactDesignReview(
   container: HTMLElement,
   deliverableId: number
 ): Promise<boolean> {
-  const component = getReactComponent('designReviewPanel');
+  const component = getReactComponent('designReviewTable');
   if (!component) {
     logger.warn('React design review panel not registered');
     return false;

@@ -3,6 +3,8 @@
  * Types for client-facing questionnaire components
  */
 
+import type { PortalViewProps } from '../types';
+
 // ============================================================================
 // QUESTION TYPES
 // ============================================================================
@@ -116,20 +118,11 @@ export const QUESTIONNAIRE_STATUS_CONFIG: Record<
 // COMPONENT PROPS
 // ============================================================================
 
-export interface PortalQuestionnairesProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
+export interface PortalQuestionnairesProps extends PortalViewProps {}
 
-export interface QuestionnaireFormProps {
+export interface QuestionnaireFormProps extends PortalViewProps {
   /** The questionnaire response to render */
   response: PortalQuestionnaireResponse;
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   /** Callback when form is submitted successfully */
   onSubmitSuccess?: () => void;
   /** Callback to go back to list view */

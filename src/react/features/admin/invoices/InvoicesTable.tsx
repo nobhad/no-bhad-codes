@@ -384,8 +384,8 @@ export function InvoicesTable({
           <TableStats
             items={[
               { value: stats.total, label: 'total' },
-              { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-              { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
+              { value: stats.pending, label: 'pending', variant: 'pending' },
+              { value: stats.overdue, label: 'overdue', variant: 'overdue' }
             ]}
             tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.paid} Paid • ${stats.overdue} Overdue`}
           />

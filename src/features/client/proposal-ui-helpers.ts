@@ -13,7 +13,6 @@ import { gsap } from 'gsap';
 import type {
   ProposalTier,
   ProposalFeature,
-  ProposalSelection,
   MaintenanceOption,
   ProposalStep
 } from './proposal-builder-types';

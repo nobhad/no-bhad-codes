@@ -13,6 +13,7 @@ import { BillingForm } from './BillingForm';
 import { NotificationsForm } from './NotificationsForm';
 import { ContactsSection } from './ContactsSection';
 import { useSettingsData } from './useSettingsData';
+import type { PortalViewProps } from '../types';
 
 // --- Exported types (consumed by hook and child components) ---
 
@@ -42,12 +43,7 @@ export interface NotificationPreferences {
 
 export type SettingsTab = 'profile' | 'billing' | 'notifications';
 
-export interface PortalSettingsProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
+export interface PortalSettingsProps extends PortalViewProps {}
 
 /**
  * PortalSettings Component

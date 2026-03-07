@@ -1,8 +1,8 @@
 /**
  * ===============================================
- * WEBHOOKS PANEL
+ * WEBHOOKS MANAGER
  * ===============================================
- * @file src/react/features/admin/webhooks/WebhooksPanel.tsx
+ * @file src/react/features/admin/webhooks/WebhooksManager.tsx
  *
  * Full CRUD admin panel for managing webhooks.
  * Views: Main table, Add/Edit modal, Deliveries, Stats, Test modal.
@@ -49,7 +49,7 @@ import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
-const logger = createLogger('WebhooksPanel');
+const logger = createLogger('WebhooksManager');
 
 // ============================================
 // CONSTANTS
@@ -150,7 +150,7 @@ interface WebhookFormData {
   retryBackoffSeconds: number;
 }
 
-interface WebhooksPanelProps {
+interface WebhooksManagerProps {
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -258,12 +258,12 @@ function sortDeliveries(a: WebhookDelivery, b: WebhookDelivery, sort: SortConfig
 // MAIN COMPONENT
 // ============================================
 
-export function WebhooksPanel({
+export function WebhooksManager({
   getAuthToken,
   showNotification,
   onNavigate: _onNavigate,
   defaultPageSize = 25
-}: WebhooksPanelProps) {
+}: WebhooksManagerProps) {
   const containerRef = useFadeIn();
 
   // ---- Auth headers ----
@@ -708,9 +708,9 @@ export function WebhooksPanel({
             <TableStats
               items={[
                 { value: deliveries.length, label: 'total' },
-                { value: deliveries.filter((d) => d.status === 'success').length, label: 'success', variant: 'completed', hideIfZero: true },
-                { value: deliveries.filter((d) => d.status === 'failed').length, label: 'failed', variant: 'cancelled', hideIfZero: true },
-                { value: deliveries.filter((d) => d.status === 'pending').length, label: 'pending', variant: 'pending', hideIfZero: true }
+                { value: deliveries.filter((d) => d.status === 'success').length, label: 'success', variant: 'completed' },
+                { value: deliveries.filter((d) => d.status === 'failed').length, label: 'failed', variant: 'cancelled' },
+                { value: deliveries.filter((d) => d.status === 'pending').length, label: 'pending', variant: 'pending' }
               ]}
             />
           }
@@ -857,13 +857,13 @@ export function WebhooksPanel({
               </div>
               <div className="detail-row">
                 <span className="detail-label">Payload</span>
-                <pre className="detail-value form-textarea" style={{ whiteSpace: 'pre-wrap', maxHeight: '200px', overflow: 'auto' }}>
+                <pre className="detail-value form-textarea" style={{ whiteSpace: 'pre-wrap', maxHeight: 'var(--chart-height-md)', overflow: 'auto' }}>
                   {selectedDelivery.payload || 'N/A'}
                 </pre>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Response Body</span>
-                <pre className="detail-value form-textarea" style={{ whiteSpace: 'pre-wrap', maxHeight: '200px', overflow: 'auto' }}>
+                <pre className="detail-value form-textarea" style={{ whiteSpace: 'pre-wrap', maxHeight: 'var(--chart-height-md)', overflow: 'auto' }}>
                   {selectedDelivery.responseBody || 'N/A'}
                 </pre>
               </div>
@@ -937,8 +937,8 @@ export function WebhooksPanel({
           <TableStats
             items={[
               { value: listStats.total, label: 'total' },
-              { value: listStats.active, label: 'active', variant: 'completed', hideIfZero: true },
-              { value: listStats.inactive, label: 'inactive', variant: 'cancelled', hideIfZero: true }
+              { value: listStats.active, label: 'active', variant: 'completed' },
+              { value: listStats.inactive, label: 'inactive', variant: 'cancelled' }
             ]}
             tooltip={`${listStats.total} Total -- ${listStats.active} Active -- ${listStats.inactive} Inactive`}
           />
@@ -1298,5 +1298,3 @@ export function WebhooksPanel({
     </>
   );
 }
-
-export default WebhooksPanel;

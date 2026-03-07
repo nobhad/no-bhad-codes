@@ -40,7 +40,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
         <div className="tw-flex tw-items-center tw-gap-2">
           <Icon className="icon-sm tw-text-primary" />
-          <h4 className="tw-text-[14px] tw-font-mono tw-text-primary">
+          <h4 className="tw-text-sm tw-font-mono tw-text-primary">
             {title}
           </h4>
           {stepNumber && (
@@ -53,7 +53,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
           <button
             type="button"
             onClick={onEdit}
-            className="btn-ghost tw-text-[12px]"
+            className="btn-ghost tw-text-xs"
           >
             <Edit3 className="icon-xs" />
             Edit
@@ -62,7 +62,7 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
       </div>
       <div className="tw-space-y-2">
         {items.map((item, index) => (
-          <div key={index} className="tw-flex tw-gap-2 tw-text-[14px] tw-font-mono">
+          <div key={index} className="tw-flex tw-gap-2 tw-text-sm tw-font-mono">
             <span className="text-muted tw-min-w-[100px] tw-flex-shrink-0">
               {item.label}:
             </span>
@@ -101,7 +101,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
         <h3 className="heading tw-text-lg">
           Review Your Information
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Please review all the information below before submitting.
         </p>
       </div>
@@ -111,12 +111,12 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
         <div className="error-state tw-flex tw-items-start tw-gap-3">
           <AlertCircle className="icon-sm tw-flex-shrink-0 tw-mt-0.5" />
           <div>
-            <p className="tw-text-[14px] tw-font-bold tw-font-mono">
+            <p className="tw-text-sm tw-font-bold tw-font-mono">
               Please fix the following issues:
             </p>
             <ul className="tw-mt-1 tw-space-y-1">
               {errors.map((error, index) => (
-                <li key={index} className="tw-text-[14px] tw-font-mono">
+                <li key={index} className="tw-text-sm tw-font-mono">
                   {error.message}
                 </li>
               ))}
@@ -174,7 +174,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           <h4 className="label tw-mb-2">
             Project Description
           </h4>
-          <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
+          <p className="tw-text-sm tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
             {projectOverview.projectDescription}
           </p>
         </div>
@@ -253,7 +253,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           <h4 className="label tw-mb-2">
             Additional Notes
           </h4>
-          <p className="tw-text-[14px] tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
+          <p className="tw-text-sm tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
             {requirements.additionalNotes}
           </p>
         </div>
@@ -263,10 +263,10 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
       <div className="portal-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-primary">
         <Check className="icon-sm tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
         <div>
-          <p className="tw-text-[14px] tw-font-bold tw-font-mono tw-text-primary">
+          <p className="tw-text-sm tw-font-bold tw-font-mono tw-text-primary">
             Ready to submit
           </p>
-          <p className="tw-text-[14px] text-muted tw-mt-1 tw-font-mono">
+          <p className="tw-text-sm text-muted tw-mt-1 tw-font-mono">
             Click "Complete Onboarding" below to submit your information. We'll review everything and
             get back to you within 1-2 business days.
           </p>

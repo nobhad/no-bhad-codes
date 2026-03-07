@@ -15,15 +15,14 @@ import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
 import { ProposalCard } from './ProposalCard';
 import type { PortalProposal, PortalProposalsResponse } from './types';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalProposals');
 
-export interface PortalProposalsProps {
-  getAuthToken?: () => string | null;
+export interface PortalProposalsProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 function filterProposal(
@@ -49,7 +48,7 @@ function filterProposal(
 
 export function PortalProposals({
   getAuthToken,
-  onNavigate,
+  onNavigate
 }: PortalProposalsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(0.05);
@@ -120,10 +119,10 @@ export function PortalProposals({
         <TableStats
           items={[
             { value: proposals.length, label: 'total' },
-            { value: countByStatus.sent || 0, label: 'sent', variant: 'pending', hideIfZero: true },
-            { value: countByStatus.viewed || 0, label: 'viewed', hideIfZero: true },
-            { value: countByStatus.accepted || 0, label: 'accepted', variant: 'completed', hideIfZero: true },
-            { value: countByStatus.declined || 0, label: 'declined', variant: 'cancelled', hideIfZero: true }
+            { value: countByStatus.sent || 0, label: 'sent', variant: 'pending' },
+            { value: countByStatus.viewed || 0, label: 'viewed' },
+            { value: countByStatus.accepted || 0, label: 'accepted', variant: 'completed' },
+            { value: countByStatus.declined || 0, label: 'declined', variant: 'cancelled' }
           ]}
         />
       }
@@ -148,7 +147,7 @@ export function PortalProposals({
           icon={<FileText className="icon-lg" />}
           message={
             proposals.length === 0
-              ? 'No proposals yet'
+              ? 'No proposals yet. Proposals will appear here once they are sent to you.'
               : 'No proposals match the current filters.'
           }
         />

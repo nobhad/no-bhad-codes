@@ -1,10 +1,10 @@
 /**
  * ===============================================
- * DATA QUALITY PANEL
+ * DATA QUALITY DASHBOARD
  * ===============================================
- * @file src/react/features/admin/data-quality/DataQualityPanel.tsx
+ * @file src/react/features/admin/data-quality/DataQualityDashboard.tsx
  *
- * Admin panel for data quality management with tabs:
+ * Admin dashboard for data quality management with tabs:
  * - Duplicate Detection
  * - Metrics & History
  * - Validation Errors
@@ -31,13 +31,13 @@ import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
-const logger = createLogger('DataQualityPanel');
+const logger = createLogger('DataQualityDashboard');
 
 // ============================================
 // TYPES
 // ============================================
 
-interface DataQualityPanelProps {
+interface DataQualityDashboardProps {
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -176,7 +176,7 @@ async function fetchWithAuth<T>(url: string, getAuthToken?: () => string | null,
 function DuplicateDetectionTab({
   getAuthToken,
   showNotification
-}: Pick<DataQualityPanelProps, 'getAuthToken' | 'showNotification'>) {
+}: Pick<DataQualityDashboardProps, 'getAuthToken' | 'showNotification'>) {
   const [duplicates, setDuplicates] = useState<DuplicateRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -335,7 +335,7 @@ function DuplicateDetectionTab({
 function MetricsHistoryTab({
   getAuthToken,
   showNotification
-}: Pick<DataQualityPanelProps, 'getAuthToken' | 'showNotification'>) {
+}: Pick<DataQualityDashboardProps, 'getAuthToken' | 'showNotification'>) {
   const [metrics, setMetrics] = useState<DataQualityMetric[]>([]);
   const [history, setHistory] = useState<MetricHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -466,7 +466,7 @@ function MetricsHistoryTab({
 function ValidationErrorsTab({
   getAuthToken,
   showNotification
-}: Pick<DataQualityPanelProps, 'getAuthToken' | 'showNotification'>) {
+}: Pick<DataQualityDashboardProps, 'getAuthToken' | 'showNotification'>) {
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorTypeFilter, setErrorTypeFilter] = useState('');
@@ -571,7 +571,7 @@ function ValidationErrorsTab({
 function RateLimitingTab({
   getAuthToken,
   showNotification
-}: Pick<DataQualityPanelProps, 'getAuthToken' | 'showNotification'>) {
+}: Pick<DataQualityDashboardProps, 'getAuthToken' | 'showNotification'>) {
   const [stats, setStats] = useState<RateLimitStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [blockIp, setBlockIp] = useState('');
@@ -768,10 +768,10 @@ function RateLimitingTab({
 }
 
 // ============================================
-// MAIN PANEL
+// MAIN DASHBOARD
 // ============================================
 
-export function DataQualityPanel({ getAuthToken, showNotification, onNavigate }: DataQualityPanelProps) {
+export function DataQualityDashboard({ getAuthToken, showNotification, onNavigate }: DataQualityDashboardProps) {
   const containerRef = useFadeIn();
   const [activeTab, setActiveTab] = useState<DataQualityTab>('duplicates');
 
@@ -802,4 +802,4 @@ export function DataQualityPanel({ getAuthToken, showNotification, onNavigate }:
   );
 }
 
-export default DataQualityPanel;
+export default DataQualityDashboard;

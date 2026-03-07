@@ -1,18 +1,18 @@
 /**
- * Data Quality Panel Mount
+ * Data Quality Dashboard Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { DataQualityPanel } from './DataQualityPanel';
+import { DataQualityDashboard } from './DataQualityDashboard';
 
 export interface DataQualityMountOptions extends BaseMountOptions {}
 
 export const {
-  mount: mountDataQualityPanel,
-  unmount: unmountDataQualityPanel,
-  shouldUseReact: shouldUseReactDataQualityPanel
+  mount: mountDataQualityDashboard,
+  unmount: unmountDataQualityDashboard,
+  shouldUseReact: shouldUseReactDataQualityDashboard
 } = createMountWrapper<DataQualityMountOptions>({
-  Component: DataQualityPanel,
-  displayName: 'DataQualityPanel'
+  Component: DataQualityDashboard,
+  displayName: 'DataQualityDashboard'
 });

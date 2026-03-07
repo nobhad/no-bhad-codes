@@ -111,7 +111,7 @@ export function ContractTab({
               )}
             >
               {isSigned ? (
-                <Check className="icon-xl tw-text-black" />
+                <Check className="icon-xl tw-text-[var(--portal-text-dark)]" />
               ) : (
                 <FileSignature className="icon-xl" />
               )}

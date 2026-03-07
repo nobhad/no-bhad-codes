@@ -26,7 +26,7 @@ import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
-const logger = createLogger('IntegrationsPanel');
+const logger = createLogger('IntegrationsManager');
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,7 +69,7 @@ interface NotificationFormData {
   enabled: boolean;
 }
 
-interface IntegrationsPanelProps {
+interface IntegrationsManagerProps {
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
@@ -268,11 +268,11 @@ function NotificationFormModal({
 // Main Component
 // ---------------------------------------------------------------------------
 
-export function IntegrationsPanel({
+export function IntegrationsManager({
   onNavigate: _onNavigate,
   getAuthToken,
   showNotification
-}: IntegrationsPanelProps) {
+}: IntegrationsManagerProps) {
   const containerRef = useFadeIn();
 
   // Data state
@@ -642,7 +642,7 @@ export function IntegrationsPanel({
                     <div className="tw-space-y-1 tw-text-sm">
                       <div className="tw-flex tw-justify-between">
                         <span className="text-muted">Connected</span>
-                        <span className={stripeStatus.connected ? 'tw-text-green-500' : ''}>
+                        <span className={stripeStatus.connected ? 'tw-text-[var(--status-completed)]' : ''}>
                           {stripeStatus.connected ? (
                             <CheckCircle className="icon-sm" style={{ color: 'var(--status-completed)' }} />
                           ) : (
@@ -762,4 +762,4 @@ export function IntegrationsPanel({
   );
 }
 
-export default IntegrationsPanel;
+export default IntegrationsManager;

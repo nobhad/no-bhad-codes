@@ -1,3 +1,3 @@
-export { MessagingPanel } from './MessagingPanel';
-export { mountMessagingPanel, unmountMessagingPanel } from './mount';
+export { MessagingView } from './MessagingView';
+export { mountMessagingView, unmountMessagingView } from './mount';
 export type { MessagingMountOptions } from './mount';

@@ -387,15 +387,14 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.clients, label: 'clients', hideIfZero: true },
-            { value: stats.projects, label: 'projects', hideIfZero: true },
-            { value: stats.invoices, label: 'invoices', hideIfZero: true },
-            { value: stats.files, label: 'files', hideIfZero: true },
+            { value: stats.clients, label: 'clients' },
+            { value: stats.projects, label: 'projects' },
+            { value: stats.invoices, label: 'invoices' },
+            { value: stats.files, label: 'files' },
             {
               value: stats.expiringIn7Days,
               label: 'expiring',
-              variant: 'overdue',
-              hideIfZero: true
+              variant: 'overdue'
             }
           ]}
           tooltip={`${stats.total} Total • ${stats.clients} Clients • ${stats.projects} Projects • ${stats.invoices} Invoices • ${stats.files} Files`}
@@ -593,5 +592,3 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     </TableLayout>
   );
 }
-
-export default DeletedItemsTable;

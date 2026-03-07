@@ -10,6 +10,7 @@ import { StatCard } from '@react/components/portal';
 import { formatRelativeTime, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -70,11 +71,7 @@ interface DashboardData {
   recentActivity: ActivityItem[];
 }
 
-export interface PortalDashboardProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+export interface PortalDashboardProps extends PortalViewProps {
   /** Callback for navigation events */
   onNavigate?: (tab: string, entityId?: string) => void;
 }

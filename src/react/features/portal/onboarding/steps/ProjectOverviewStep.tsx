@@ -46,7 +46,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Project Details
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Tell us about your project goals and timeline.
         </p>
       </div>
@@ -71,7 +71,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             />
           </div>
           {getFieldError('projectName') && (
-            <span className="tw-text-[12px] tw-text-primary">{getFieldError('projectName')}</span>
+            <span className="tw-text-xs tw-text-primary">{getFieldError('projectName')}</span>
           )}
         </div>
 
@@ -93,7 +93,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             ))}
           </select>
           {getFieldError('projectType') && (
-            <span className="tw-text-[12px] tw-text-primary">{getFieldError('projectType')}</span>
+            <span className="tw-text-xs tw-text-primary">{getFieldError('projectType')}</span>
           )}
         </div>
       </div>
@@ -111,7 +111,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
           className={cn('tw-textarea', getFieldError('projectDescription') && 'tw-border-primary')}
         />
         {getFieldError('projectDescription') && (
-          <span className="tw-text-[12px] tw-text-primary">{getFieldError('projectDescription')}</span>
+          <span className="tw-text-xs tw-text-primary">{getFieldError('projectDescription')}</span>
         )}
       </div>
 
@@ -122,7 +122,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Timeline & Budget
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Help us understand your constraints.
         </p>
       </div>
@@ -142,7 +142,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               className="tw-input tw-pl-10"
             />
           </div>
-          <span className="tw-text-[12px] text-muted">
+          <span className="tw-text-xs text-muted">
             When do you want to launch?
           </span>
         </div>
@@ -167,7 +167,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               ))}
             </select>
           </div>
-          <span className="tw-text-[12px] text-muted">
+          <span className="tw-text-xs text-muted">
             This helps us recommend the right scope
           </span>
         </div>

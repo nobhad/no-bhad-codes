@@ -4,6 +4,21 @@
  */
 
 // ============================================================================
+// BASE VIEW PROPS
+// ============================================================================
+
+/**
+ * Base props interface for all top-level portal view components.
+ * Every portal view that makes API calls should extend this interface.
+ */
+export interface PortalViewProps {
+  /** Function to retrieve auth token for API calls */
+  getAuthToken?: () => string | null;
+  /** Callback to show toast notifications */
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+}
+
+// ============================================================================
 // INVOICE TYPES
 // ============================================================================
 

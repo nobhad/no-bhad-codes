@@ -1,3 +1,3 @@
-export { WebhooksPanel } from './WebhooksPanel';
-export { mountWebhooksPanel, unmountWebhooksPanel } from './mount';
+export { WebhooksManager } from './WebhooksManager';
+export { mountWebhooksManager, unmountWebhooksManager } from './mount';
 export type { WebhooksMountOptions } from './mount';

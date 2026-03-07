@@ -33,13 +33,6 @@ const logger = createLogger('OnboardingWizard');
 let reactOnboardingUnmountFn: (() => void) | null = null;
 
 /**
- * Check if React portal onboarding should be used
- */
-function shouldUseReactPortalOnboarding(): boolean {
-  return true;
-}
-
-/**
  * Cleanup React portal onboarding
  */
 export function cleanupPortalOnboarding(): void {
@@ -57,8 +50,6 @@ export function mountReactOnboarding(
   ctx: ClientPortalContext,
   options?: { onComplete?: () => void }
 ): boolean {
-  if (!shouldUseReactPortalOnboarding()) return false;
-
   const component = getReactComponent('portalOnboarding');
   if (!component) return false;
 

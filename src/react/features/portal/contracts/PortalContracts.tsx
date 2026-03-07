@@ -15,15 +15,14 @@ import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
 import { ContractCard } from './ContractCard';
 import type { PortalContract, PortalContractsResponse } from './types';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalContracts');
 
-export interface PortalContractsProps {
-  getAuthToken?: () => string | null;
+export interface PortalContractsProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 function filterContract(
@@ -46,7 +45,7 @@ function filterContract(
 
 export function PortalContracts({
   getAuthToken,
-  onNavigate,
+  onNavigate
 }: PortalContractsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(0.05);
@@ -117,10 +116,10 @@ export function PortalContracts({
         <TableStats
           items={[
             { value: contracts.length, label: 'total' },
-            { value: countByStatus.sent || 0, label: 'sent', variant: 'pending', hideIfZero: true },
-            { value: countByStatus.signed || 0, label: 'signed', variant: 'completed', hideIfZero: true },
-            { value: countByStatus.active || 0, label: 'active', variant: 'active', hideIfZero: true },
-            { value: countByStatus.expired || 0, label: 'expired', variant: 'cancelled', hideIfZero: true }
+            { value: countByStatus.sent || 0, label: 'sent', variant: 'pending' },
+            { value: countByStatus.signed || 0, label: 'signed', variant: 'completed' },
+            { value: countByStatus.active || 0, label: 'active', variant: 'active' },
+            { value: countByStatus.expired || 0, label: 'expired', variant: 'cancelled' }
           ]}
         />
       }
@@ -145,7 +144,7 @@ export function PortalContracts({
           icon={<FileSignature className="icon-lg" />}
           message={
             contracts.length === 0
-              ? 'No contracts yet'
+              ? 'No contracts yet. Contracts will appear here once they are sent to you.'
               : 'No contracts match the current filters.'
           }
         />

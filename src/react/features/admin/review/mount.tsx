@@ -1,18 +1,18 @@
 /**
- * Review Panel Mount
+ * Review Table Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { ReviewPanel } from './ReviewPanel';
+import { ReviewTable } from './ReviewTable';
 
 export interface ReviewMountOptions extends BaseMountOptions {}
 
 export const {
-  mount: mountReviewPanel,
-  unmount: unmountReviewPanel,
-  shouldUseReact: shouldUseReactReviewPanel
+  mount: mountReviewTable,
+  unmount: unmountReviewTable,
+  shouldUseReact: shouldUseReactReviewTable
 } = createMountWrapper<ReviewMountOptions>({
-  Component: ReviewPanel,
-  displayName: 'ReviewPanel'
+  Component: ReviewTable,
+  displayName: 'ReviewTable'
 });

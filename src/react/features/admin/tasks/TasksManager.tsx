@@ -312,10 +312,10 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.inProgress, label: 'in progress', variant: 'pending', hideIfZero: true },
-            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true },
-            { value: stats.blocked, label: 'blocked', variant: 'cancelled', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
+            { value: stats.inProgress, label: 'in progress', variant: 'pending' },
+            { value: stats.completed, label: 'completed', variant: 'completed' },
+            { value: stats.blocked, label: 'blocked', variant: 'cancelled' },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total • ${stats.todo} To Do • ${stats.inProgress} In Progress • ${stats.completed} Completed • ${stats.blocked} Blocked • ${stats.overdue} Overdue`}
         />

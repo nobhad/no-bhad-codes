@@ -1,3 +1,3 @@
-export { DataQualityPanel } from './DataQualityPanel';
-export { mountDataQualityPanel, unmountDataQualityPanel } from './mount';
+export { DataQualityDashboard } from './DataQualityDashboard';
+export { mountDataQualityDashboard, unmountDataQualityDashboard } from './mount';
 export type { DataQualityMountOptions } from './mount';

@@ -36,10 +36,7 @@ const TAB_TITLES: Record<string, string> = {
   contracts: 'Contracts',
   deliverables: 'Deliverables',
   review: 'Project Preview',
-  onboarding: 'Onboarding',
-  work: 'Work',
-  docs: 'Documents',
-  support: 'Support'
+  onboarding: 'Onboarding'
 };
 
 /**
@@ -139,14 +136,9 @@ export function getTabFromHash(): string {
 
 /**
  * Update URL hash without triggering navigation
- * Resolves group names (work, docs, support) to their default tabs
  */
 function updateHash(tabName: string): void {
-  // Resolve group names to their actual tab
-  const resolved = resolvePortalTab(tabName);
-  const actualTab = resolved.tab;
-
-  const hashPath = PORTAL_ROUTES[actualTab] || '/dashboard';
+  const hashPath = PORTAL_ROUTES[tabName] || '/dashboard';
   const newHash = `#${hashPath}`;
 
   // Only update if different to avoid unnecessary history entries
@@ -201,44 +193,13 @@ export function initHashRouter(_callbacks?: Record<string, unknown>): void {
   switchTab(initialTab, {}, false);
 }
 
-const PORTAL_TAB_GROUPS = {
-  work: {
-    label: 'Work',
-    tabs: ['requests', 'review', 'new-project'],
-    defaultTab: 'requests'
-  },
-  docs: {
-    label: 'Documents',
-    tabs: ['files', 'invoices', 'documents', 'questionnaires'],
-    defaultTab: 'files'
-  },
-  support: {
-    label: 'Support',
-    tabs: ['messages', 'help'],
-    defaultTab: 'messages'
-  }
-} as const;
-
-type PortalTabGroup = keyof typeof PORTAL_TAB_GROUPS;
-
-function getPortalGroupForTab(tabName: string): PortalTabGroup | null {
-  const entries = Object.entries(PORTAL_TAB_GROUPS) as [
-    PortalTabGroup,
-    (typeof PORTAL_TAB_GROUPS)[PortalTabGroup],
-  ][];
-  for (const [group, config] of entries) {
-    if ((config.tabs as readonly string[]).includes(tabName)) return group;
-  }
-  return null;
-}
-
-function resolvePortalTab(tabName: string): { group: PortalTabGroup | null; tab: string } {
-  if (tabName in PORTAL_TAB_GROUPS) {
-    const group = tabName as PortalTabGroup;
-    return { group, tab: PORTAL_TAB_GROUPS[group].defaultTab };
-  }
-
-  return { group: getPortalGroupForTab(tabName), tab: tabName };
+/**
+ * Resolve a tab name to its actual tab.
+ * Client sidebar uses individual tab buttons (no groups),
+ * so this simply passes through the tab name unchanged.
+ */
+function resolvePortalTab(tabName: string): { group: null; tab: string } {
+  return { group: null, tab: tabName };
 }
 
 // ============================================================================

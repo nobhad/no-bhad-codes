@@ -16,6 +16,7 @@
 import { initAllPasswordToggles } from '../../components/password-toggle';
 import { decodeJwtPayload } from '../../utils/jwt-utils';
 import { createLogger } from '../../utils/logger';
+import { API_ENDPOINTS } from '../../constants/api-endpoints';
 
 const logger = createLogger('SetPassword');
 
@@ -25,8 +26,8 @@ const PASSWORD_MIN_LENGTH = 12;
 const SESSION_EXPIRY_DAYS = 7;
 const SESSION_EXPIRY_MS = SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
-const API_VERIFY_INVITATION = '/api/auth/verify-invitation';
-const API_SET_PASSWORD = '/api/auth/set-password';
+const API_VERIFY_INVITATION = API_ENDPOINTS.AUTH_VERIFY_INVITATION;
+const API_SET_PASSWORD = API_ENDPOINTS.AUTH_SET_PASSWORD;
 const PORTAL_DASHBOARD_PATH = '/client/portal';
 
 const AUTH_STORAGE_KEYS = {

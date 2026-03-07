@@ -1,18 +1,18 @@
 /**
- * Integrations Panel Mount
+ * Integrations Manager Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { IntegrationsPanel } from './IntegrationsPanel';
+import { IntegrationsManager } from './IntegrationsManager';
 
 export interface IntegrationsMountOptions extends BaseMountOptions {}
 
 export const {
-  mount: mountIntegrationsPanel,
-  unmount: unmountIntegrationsPanel,
-  shouldUseReact: shouldUseReactIntegrationsPanel
+  mount: mountIntegrationsManager,
+  unmount: unmountIntegrationsManager,
+  shouldUseReact: shouldUseReactIntegrationsManager
 } = createMountWrapper<IntegrationsMountOptions>({
-  Component: IntegrationsPanel,
-  displayName: 'IntegrationsPanel'
+  Component: IntegrationsManager,
+  displayName: 'IntegrationsManager'
 });

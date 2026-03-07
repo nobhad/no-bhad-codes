@@ -56,7 +56,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Design Preferences
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Help us understand your visual style.
         </p>
       </div>
@@ -76,10 +76,10 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'tw-flex tw-items-center tw-justify-center tw-gap-2',
                 'tw-px-3 tw-py-2',
                 'tw-border tw-transition-all tw-duration-200',
-                'tw-text-[14px] tw-text-center tw-font-mono',
+                'tw-text-sm tw-text-center tw-font-mono',
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white',
                 requirements.designStyle === style
-                  ? 'tw-border-primary tw-bg-white tw-text-black'
+                  ? 'tw-border-primary tw-bg-white tw-text-[var(--portal-text-dark)]'
                   : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-primary'
               )}
             >
@@ -89,7 +89,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
           ))}
         </div>
         {getFieldError('designStyle') && (
-          <span className="tw-text-[12px] tw-text-primary">{getFieldError('designStyle')}</span>
+          <span className="tw-text-xs tw-text-primary">{getFieldError('designStyle')}</span>
         )}
       </div>
 
@@ -113,7 +113,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             checked={requirements.brandGuidelines}
             onCheckedChange={(checked) => handleChange('brandGuidelines', checked === true)}
           />
-          <span className="tw-text-[14px] tw-font-mono">
+          <span className="tw-text-sm tw-font-mono">
             I have brand guidelines
           </span>
         </label>
@@ -124,7 +124,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
             checked={requirements.contentReady}
             onCheckedChange={(checked) => handleChange('contentReady', checked === true)}
           />
-          <span className="tw-text-[14px] tw-font-mono">
+          <span className="tw-text-sm tw-font-mono">
             Content is ready/prepared
           </span>
         </label>
@@ -137,7 +137,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
         <h3 className="heading tw-text-lg">
           Features & Functionality
         </h3>
-        <p className="text-muted tw-text-[14px] tw-mt-1">
+        <p className="text-muted tw-text-sm tw-mt-1">
           Select the features you need for your project.
         </p>
       </div>
@@ -155,10 +155,10 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'tw-flex tw-items-center tw-gap-2 tw-text-left',
                 'tw-px-3 tw-py-2',
                 'tw-border tw-transition-all tw-duration-200',
-                'tw-text-[14px] tw-font-mono',
+                'tw-text-sm tw-font-mono',
                 'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white',
                 isSelected
-                  ? 'tw-border-primary tw-bg-white tw-text-black'
+                  ? 'tw-border-primary tw-bg-white tw-text-[var(--portal-text-dark)]'
                   : 'tw-border-[var(--portal-border-color)] tw-text-[var(--portal-text-light)] hover:tw-border-primary'
               )}
             >
@@ -171,7 +171,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                     : 'tw-border-primary'
                 )}
               >
-                {isSelected && <Check className="icon-xs tw-text-white" strokeWidth={3} />}
+                {isSelected && <Check className="icon-xs tw-text-[var(--portal-text-light)]" strokeWidth={3} />}
               </div>
               <span>{feature}</span>
             </button>

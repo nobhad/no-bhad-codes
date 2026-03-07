@@ -1,18 +1,18 @@
 /**
- * System Status Panel Mount
+ * System Status Dashboard Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { SystemStatusPanel } from './SystemStatusPanel';
+import { SystemStatusDashboard } from './SystemStatusDashboard';
 
 export interface SystemStatusMountOptions extends BaseMountOptions {}
 
 export const {
-  mount: mountSystemStatusPanel,
-  unmount: unmountSystemStatusPanel,
-  shouldUseReact: shouldUseReactSystemStatusPanel
+  mount: mountSystemStatusDashboard,
+  unmount: unmountSystemStatusDashboard,
+  shouldUseReact: shouldUseReactSystemStatusDashboard
 } = createMountWrapper<SystemStatusMountOptions>({
-  Component: SystemStatusPanel,
-  displayName: 'SystemStatusPanel'
+  Component: SystemStatusDashboard,
+  displayName: 'SystemStatusDashboard'
 });

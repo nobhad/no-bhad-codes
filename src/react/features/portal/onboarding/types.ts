@@ -3,6 +3,8 @@
  * Types for the client portal onboarding wizard
  */
 
+import type { PortalViewProps } from '../types';
+
 // ============================================================================
 // STEP TYPES
 // ============================================================================
@@ -146,10 +148,8 @@ export interface StepValidationResult {
 // COMPONENT PROPS TYPES
 // ============================================================================
 
-export interface OnboardingWizardProps {
-  getAuthToken?: () => string | null;
+export interface OnboardingWizardProps extends PortalViewProps {
   onComplete?: () => void;
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 export interface StepProps {

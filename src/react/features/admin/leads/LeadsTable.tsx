@@ -314,8 +314,8 @@ export function LeadsTable({
           <TableStats
             items={[
               { value: stats.total, label: 'total' },
-              { value: stats.new, label: 'new', variant: 'active', hideIfZero: true },
-              { value: stats.qualified, label: 'qualified', variant: 'completed', hideIfZero: true }
+              { value: stats.new, label: 'new', variant: 'active' },
+              { value: stats.qualified, label: 'qualified', variant: 'completed' }
             ]}
             tooltip={`${stats.total} Total • ${stats.new} New • ${stats.contacted} Contacted • ${stats.qualified} Qualified`}
           />

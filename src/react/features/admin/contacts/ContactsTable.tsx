@@ -332,8 +332,8 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.active, label: 'active', variant: 'active', hideIfZero: true },
-            { value: stats.primary, label: 'primary', variant: 'pending', hideIfZero: true }
+            { value: stats.active, label: 'active', variant: 'active' },
+            { value: stats.primary, label: 'primary', variant: 'pending' }
           ]}
           tooltip={`${stats.total} Total • ${stats.active} Active • ${stats.primary} Primary • ${stats.withCompany} With Company`}
         />
@@ -523,5 +523,3 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     </TableLayout>
   );
 }
-
-export default ContactsTable;

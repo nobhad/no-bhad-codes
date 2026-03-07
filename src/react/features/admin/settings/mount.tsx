@@ -10,8 +10,7 @@ export interface SettingsMountOptions extends BaseMountOptions {}
 
 export const {
   mount: mountSettingsManager,
-  unmount: unmountSettingsManager,
-  shouldUseReact: shouldUseReactSettingsManager
+  unmount: unmountSettingsManager
 } = createMountWrapper<SettingsMountOptions>({
   Component: SettingsManager,
   displayName: 'SettingsManager'

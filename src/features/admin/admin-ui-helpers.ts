@@ -231,11 +231,11 @@ export function loadVisitorStats(domCache: DOMCacheInstance): void {
 export function applyAttentionFilter(
   tabName: string,
   filter: string,
-  filterTable: (tableName: string, filter: string) => void
+  onFilterTable: (tableName: string, filter: string) => void
 ): void {
   setTimeout(() => {
     if (tabName === 'invoices' && filter === 'overdue') {
-      filterTable('invoices', 'overdue');
+      onFilterTable('invoices', 'overdue');
       const filterCards = document.querySelectorAll(
         '.stat-card-clickable[data-table="invoices"]'
       );

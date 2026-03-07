@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
+import { GSAP } from '../config/portal-constants';
 
 /**
  * Hook for basic fade-in animation
@@ -15,8 +16,8 @@ export function useFadeIn<T extends HTMLElement>(delay = 0) {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ref.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.4, delay, ease: 'power2.out' }
+        { opacity: 0, y: GSAP.FADE_Y_OFFSET },
+        { opacity: 1, y: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT }
       );
     });
 
@@ -49,7 +50,7 @@ export function useSlideIn<T extends HTMLElement>(
       gsap.fromTo(
         ref.current,
         { opacity: 0, [axis]: value },
-        { opacity: 1, [axis]: 0, duration: 0.4, delay, ease: 'power2.out' }
+        { opacity: 1, [axis]: 0, duration: GSAP.DURATION_NORMAL, delay, ease: GSAP.EASE_DEFAULT }
       );
     });
 
@@ -64,7 +65,7 @@ export function useSlideIn<T extends HTMLElement>(
  * @param stagger - Time between each child animation
  * @param delay - Initial delay before animation starts
  */
-export function useStaggerChildren<T extends HTMLElement>(stagger = 0.1, delay = 0) {
+export function useStaggerChildren<T extends HTMLElement>(stagger: number = GSAP.STAGGER_DEFAULT, delay: number = 0) {
   const ref = useRef<T>(null);
 
   useEffect(() => {
@@ -76,14 +77,14 @@ export function useStaggerChildren<T extends HTMLElement>(stagger = 0.1, delay =
     const ctx = gsap.context(() => {
       gsap.fromTo(
         children,
-        { opacity: 0, y: 20 },
+        { opacity: 0, y: GSAP.FADE_Y_OFFSET },
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: GSAP.DURATION_NORMAL,
           delay,
           stagger,
-          ease: 'power2.out'
+          ease: GSAP.EASE_DEFAULT
         }
       );
     });
@@ -107,8 +108,8 @@ export function useScaleIn<T extends HTMLElement>(delay = 0) {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ref.current,
-        { opacity: 0, scale: 0.9 },
-        { opacity: 1, scale: 1, duration: 0.3, delay, ease: 'power2.out' }
+        { opacity: 0, scale: GSAP.SCALE_START },
+        { opacity: 1, scale: 1, duration: GSAP.DURATION_FAST, delay, ease: GSAP.EASE_DEFAULT }
       );
     });
 
@@ -159,13 +160,13 @@ export function useScrollReveal<T extends HTMLElement>(delay = 0) {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ref.current,
-        { opacity: 0, y: 50 },
+        { opacity: 0, y: GSAP.SCROLL_Y_OFFSET },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
+          duration: GSAP.DURATION_SLOW,
           delay,
-          ease: 'power2.out',
+          ease: GSAP.EASE_DEFAULT,
           scrollTrigger: {
             trigger: ref.current,
             start: 'top 85%',

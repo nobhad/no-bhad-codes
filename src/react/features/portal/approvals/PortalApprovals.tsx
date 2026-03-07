@@ -16,19 +16,16 @@ import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
 import { ApprovalCard } from './ApprovalCard';
 import type { PendingApproval, PendingApprovalsResponse } from './types';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 import { unwrapApiData } from '../../../../utils/api-client';
 
 const logger = createLogger('PortalApprovals');
 
-export interface PortalApprovalsProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
+export interface PortalApprovalsProps extends PortalViewProps {
   /** Callback to navigate to entity detail */
   onNavigate?: (entityType: string, entityId: string) => void;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 /**
@@ -191,10 +188,10 @@ export function PortalApprovals({
         <TableStats
           items={[
             { value: approvals.length, label: 'total' },
-            { value: countByType.proposal || 0, label: 'proposals', variant: 'pending', hideIfZero: true },
-            { value: countByType.invoice || 0, label: 'invoices', hideIfZero: true },
-            { value: countByType.contract || 0, label: 'contracts', hideIfZero: true },
-            { value: countByType.deliverable || 0, label: 'deliverables', hideIfZero: true }
+            { value: countByType.proposal || 0, label: 'proposals', variant: 'pending' },
+            { value: countByType.invoice || 0, label: 'invoices' },
+            { value: countByType.contract || 0, label: 'contracts' },
+            { value: countByType.deliverable || 0, label: 'deliverables' }
           ]}
         />
       }
@@ -219,7 +216,7 @@ export function PortalApprovals({
           icon={<Inbox className="icon-lg" />}
           message={
             approvals.length === 0
-              ? 'No pending approvals'
+              ? 'No pending approvals. Items requiring your review will appear here.'
               : 'No approvals match the current filters.'
           }
         />

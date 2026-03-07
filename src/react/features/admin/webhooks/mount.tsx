@@ -1,10 +1,10 @@
 /**
- * Webhooks Panel Mount
+ * Webhooks Manager Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { WebhooksPanel } from './WebhooksPanel';
+import { WebhooksManager } from './WebhooksManager';
 
 export interface WebhooksMountOptions extends BaseMountOptions {
   /** Default page size for pagination */
@@ -12,10 +12,10 @@ export interface WebhooksMountOptions extends BaseMountOptions {
 }
 
 export const {
-  mount: mountWebhooksPanel,
-  unmount: unmountWebhooksPanel,
-  shouldUseReact: shouldUseReactWebhooksPanel
+  mount: mountWebhooksManager,
+  unmount: unmountWebhooksManager,
+  shouldUseReact: shouldUseReactWebhooksManager
 } = createMountWrapper<WebhooksMountOptions>({
-  Component: WebhooksPanel,
-  displayName: 'WebhooksPanel'
+  Component: WebhooksManager,
+  displayName: 'WebhooksManager'
 });

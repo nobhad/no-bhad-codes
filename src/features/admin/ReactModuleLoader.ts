@@ -96,8 +96,8 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
   },
   messages: {
     import: () => import('../../react/features/admin/messaging/mount'),
-    mountFn: 'mountMessagingPanel',
-    unmountFn: 'unmountMessagingPanel'
+    mountFn: 'mountMessagingView',
+    unmountFn: 'unmountMessagingView'
   },
 
   // Work
@@ -179,13 +179,13 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
   },
   'time-tracking': {
     import: () => import('../../react/features/admin/time-tracking/mount'),
-    mountFn: 'mountTimeTrackingPanel',
-    unmountFn: 'unmountTimeTrackingPanel'
+    mountFn: 'mountTimeTrackingTable',
+    unmountFn: 'unmountTimeTrackingTable'
   },
   'design-review': {
     import: () => import('../../react/features/admin/design-review/mount'),
-    mountFn: 'mountDesignReviewPanel',
-    unmountFn: 'unmountDesignReviewPanel'
+    mountFn: 'mountDesignReviewTable',
+    unmountFn: 'unmountDesignReviewTable'
   },
   'ad-hoc-analytics': {
     import: () => import('../../react/features/admin/ad-hoc-analytics/mount'),
@@ -194,18 +194,18 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
   },
   'data-quality': {
     import: () => import('../../react/features/admin/data-quality/mount'),
-    mountFn: 'mountDataQualityPanel',
-    unmountFn: 'unmountDataQualityPanel'
+    mountFn: 'mountDataQualityDashboard',
+    unmountFn: 'unmountDataQualityDashboard'
   },
   integrations: {
     import: () => import('../../react/features/admin/integrations/mount'),
-    mountFn: 'mountIntegrationsPanel',
-    unmountFn: 'unmountIntegrationsPanel'
+    mountFn: 'mountIntegrationsManager',
+    unmountFn: 'unmountIntegrationsManager'
   },
   webhooks: {
     import: () => import('../../react/features/admin/webhooks/mount'),
-    mountFn: 'mountWebhooksPanel',
-    unmountFn: 'unmountWebhooksPanel'
+    mountFn: 'mountWebhooksManager',
+    unmountFn: 'unmountWebhooksManager'
   },
   workflows: {
     import: () => import('../../react/features/admin/workflows/mount'),
@@ -216,18 +216,18 @@ const REACT_MODULES: Record<string, ReactModuleDefinition> = {
   // Client Portal Modules
   approvals: {
     import: () => import('../../react/features/admin/approvals/mount'),
-    mountFn: 'mountApprovalsPanel',
-    unmountFn: 'unmountApprovalsPanel'
+    mountFn: 'mountApprovalsTable',
+    unmountFn: 'unmountApprovalsTable'
   },
   review: {
     import: () => import('../../react/features/admin/review/mount'),
-    mountFn: 'mountReviewPanel',
-    unmountFn: 'unmountReviewPanel'
+    mountFn: 'mountReviewTable',
+    unmountFn: 'unmountReviewTable'
   },
   help: {
     import: () => import('../../react/features/admin/help/mount'),
-    mountFn: 'mountHelpPanel',
-    unmountFn: 'unmountHelpPanel'
+    mountFn: 'mountHelpCenter',
+    unmountFn: 'unmountHelpCenter'
   },
 
   // Detail Views

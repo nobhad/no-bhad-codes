@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { type LucideIcon } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { UI_LIMITS } from '@react/config/portal-constants';
 
 export interface NavItemProps {
   /** Unique identifier for the nav item */
@@ -39,7 +40,7 @@ export function NavItem({
       onClick={onClick}
       className={cn(
         'tw-w-full tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2',
-        'tw-text-[14px] tw-font-mono tw-transition-colors tw-cursor-pointer',
+        'tw-text-sm tw-font-mono tw-transition-colors tw-cursor-pointer',
         'tw-border-none tw-bg-transparent',
         isActive
           ? 'tw-text-primary tw-border-l-2 tw-border-l-primary'
@@ -61,7 +62,7 @@ export function NavItem({
           <span className="tw-flex-1 tw-text-left tw-truncate">{label}</span>
           {badge !== undefined && badge > 0 && (
             <span className="tw-badge">
-              {badge > 99 ? '99+' : badge}
+              {badge > UI_LIMITS.MAX_BADGE_DISPLAY ? `${UI_LIMITS.MAX_BADGE_DISPLAY}+` : badge}
             </span>
           )}
         </>
@@ -78,5 +79,3 @@ export function NavItem({
     </button>
   );
 }
-
-export default NavItem;

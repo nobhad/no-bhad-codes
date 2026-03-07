@@ -38,31 +38,37 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
   // Render individual views for specific subtabs
   if (activeSubtab === 'projects') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
-        <ProjectsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
+          <ProjectsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'tasks') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading tasks..." />}>
-        <GlobalTasksTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading tasks..." />}>
+          <GlobalTasksTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   if (activeSubtab === 'ad-hoc-requests') {
     return (
-      <React.Suspense fallback={<LoadingState message="Loading requests..." />}>
-        <AdHocRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
-      </React.Suspense>
+      <div className="subtab-content-wrapper">
+        <React.Suspense fallback={<LoadingState message="Loading requests..." />}>
+          <AdHocRequestsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+        </React.Suspense>
+      </div>
     );
   }
 
   // Overview - show all tables stacked with default pagination of 10
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="overview-tables">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
       <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
         <section className="overview-table-section">
           <ProjectsTable
@@ -101,5 +107,3 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
     </div>
   );
 }
-
-export default WorkDashboard;

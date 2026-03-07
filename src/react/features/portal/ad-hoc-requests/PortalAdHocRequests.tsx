@@ -17,6 +17,7 @@ import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { AdHocRequestCard } from './AdHocRequestCard';
 import { NewRequestForm } from './NewRequestForm';
 import type { AdHocRequest, NewAdHocRequestPayload } from './types';
+import type { PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
@@ -46,12 +47,7 @@ function filterAdHocRequest(
   return true;
 }
 
-export interface PortalAdHocRequestsProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
+export interface PortalAdHocRequestsProps extends PortalViewProps {}
 
 /**
  * PortalAdHocRequests Component

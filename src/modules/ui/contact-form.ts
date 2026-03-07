@@ -196,48 +196,35 @@ export class ContactFormModule extends BaseModule {
     const inputField = field as HTMLInputElement;
     const value = inputField.value.trim();
     let isValid = true;
-    let errorMessage = '';
     const isRequired = inputField.hasAttribute('required');
 
-    // Get the parent form-group
-    const formGroup = field.closest('.form-group');
-
     // Remove existing error styling
-    formGroup?.classList.remove('error');
-    field.classList.remove('error');
     this.removeErrorMessage(field);
 
     // Validate based on field type
     if (inputField.tagName === 'TEXTAREA') {
       if (isRequired && value.length < 10) {
         isValid = false;
-        errorMessage = 'Please provide a more detailed message';
       }
     } else {
       switch (inputField.type) {
       case 'email':
         if (value && !this.isValidEmail(value)) {
           isValid = false;
-          errorMessage = 'Please enter a valid email address';
         } else if (isRequired && !value) {
           isValid = false;
-          errorMessage = 'Email is required';
         }
         break;
       case 'text':
         if (isRequired && value.length < 2) {
           isValid = false;
-          errorMessage =
-              inputField.name === 'name'
-                ? 'Name is required'
-                : 'This field must be at least 2 characters';
         }
         break;
       }
     }
 
     if (!isValid) {
-      this.showFieldError(field, errorMessage);
+      this.showFieldError(field, '');
     }
 
     return isValid;
@@ -249,56 +236,71 @@ export class ContactFormModule extends BaseModule {
     return result.isValid;
   }
 
-  showFieldError(field: Element, message: string) {
+  showFieldError(field: Element, _message: string) {
     const inputField = field as HTMLInputElement | HTMLTextAreaElement;
-    const formGroup = field.closest('.form-group');
-    if (formGroup) {
-      formGroup.classList.add('error');
+    const inputItem = field.closest('.input-item');
+    if (inputItem) {
+      inputItem.classList.add('error');
     }
-
     field.classList.add('error');
     inputField.setAttribute('aria-invalid', 'true');
-
-    const errorId = `${inputField.id || inputField.name || 'field'}-error`;
-
-    const existingError = formGroup?.querySelector('.error-message') as HTMLElement | null;
-    if (existingError) {
-      if (!existingError.id) existingError.id = errorId;
-      existingError.textContent = message;
-      existingError.style.display = 'block';
-      existingError.setAttribute('role', 'alert');
-      existingError.setAttribute('aria-live', 'polite');
-      inputField.setAttribute('aria-describedby', existingError.id);
-    } else {
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'field-error';
-      errorDiv.id = errorId;
-      errorDiv.setAttribute('role', 'alert');
-      errorDiv.setAttribute('aria-live', 'polite');
-      errorDiv.textContent = message;
-      field.parentNode?.insertBefore(errorDiv, field.nextSibling);
-      inputField.setAttribute('aria-describedby', errorId);
-    }
   }
 
   removeErrorMessage(field: Element) {
     const inputField = field as HTMLInputElement | HTMLTextAreaElement;
-    const formGroup = field.closest('.form-group');
-
+    const inputItem = field.closest('.input-item');
+    if (inputItem) {
+      inputItem.classList.remove('error');
+    }
+    field.classList.remove('error');
     inputField.removeAttribute('aria-invalid');
     inputField.removeAttribute('aria-describedby');
+  }
 
-    const errorSpan = formGroup?.querySelector('.error-message') as HTMLElement | null;
-    if (errorSpan) {
-      errorSpan.style.display = 'none';
-      errorSpan.textContent = '';
-      errorSpan.removeAttribute('role');
-      errorSpan.removeAttribute('aria-live');
+  /**
+   * Show a single consolidated error tooltip above the form
+   */
+  private showErrorTooltip(errors: string[]): void {
+    this.removeErrorTooltip();
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'form-error-tooltip';
+    tooltip.setAttribute('role', 'alert');
+    tooltip.setAttribute('aria-live', 'assertive');
+
+    const list = document.createElement('ul');
+    errors.forEach((error) => {
+      const li = document.createElement('li');
+      li.textContent = error;
+      list.appendChild(li);
+    });
+    tooltip.appendChild(list);
+
+    // Insert inside submit-row — absolutely positioned, centered in gap
+    const submitRow = this.form?.querySelector('.submit-row');
+    if (submitRow) {
+      submitRow.appendChild(tooltip);
+      // Center tooltip between button right edge and form right edge
+      const btn = submitRow.querySelector('.submit-button') as HTMLElement;
+      if (btn) {
+        const btnRight = btn.offsetLeft + btn.offsetWidth;
+        const rowWidth = (submitRow as HTMLElement).offsetWidth;
+        const midpoint = btnRight + (rowWidth - btnRight) / 2;
+        const tooltipWidth = tooltip.offsetWidth;
+        tooltip.style.left = `${midpoint - tooltipWidth / 2}px`;
+      }
+    } else {
+      this.form?.append(tooltip);
     }
+  }
 
-    const errorDiv = field.parentNode?.querySelector('.field-error');
-    if (errorDiv) {
-      errorDiv.remove();
+  /**
+   * Remove the error tooltip
+   */
+  private removeErrorTooltip(): void {
+    const existing = this.form?.querySelector('.form-error-tooltip');
+    if (existing) {
+      existing.remove();
     }
   }
 
@@ -383,7 +385,7 @@ export class ContactFormModule extends BaseModule {
     errors.forEach((error) => {
       this.log('Validation error:', error);
 
-      // Map error message to field
+      // Map error message to field and highlight it
       let fieldSelector = '';
       if (error.toLowerCase().includes('name')) {
         fieldSelector = 'input[name="Name"]';
@@ -404,6 +406,9 @@ export class ContactFormModule extends BaseModule {
       }
     });
 
+    // Show all errors in a single tooltip
+    this.showErrorTooltip(errors);
+
     // Focus on the first field with an error for accessibility
     if (firstErrorField) {
       (firstErrorField as HTMLElement).focus();
@@ -414,11 +419,10 @@ export class ContactFormModule extends BaseModule {
    * Clear all field errors and ARIA attributes
    */
   private clearAllErrors() {
-    // Remove inline error messages
-    const errorMessages = this.form?.querySelectorAll('.field-error');
-    errorMessages?.forEach((error) => error.remove());
+    // Remove tooltip
+    this.removeErrorTooltip();
 
-    // Remove error class from form groups and fields
+    // Remove error class from input items and fields
     const errorFields = this.form?.querySelectorAll('.error');
     errorFields?.forEach((field) => field.classList.remove('error'));
 
@@ -426,14 +430,6 @@ export class ContactFormModule extends BaseModule {
     this.form?.querySelectorAll('input, select, textarea').forEach((el) => {
       el.removeAttribute('aria-invalid');
       el.removeAttribute('aria-describedby');
-    });
-
-    // Hide any pre-existing error message spans
-    const errorMessageSpans = this.form?.querySelectorAll('.error-message');
-    errorMessageSpans?.forEach((span) => {
-      (span as HTMLElement).style.display = 'none';
-      (span as HTMLElement).removeAttribute('role');
-      (span as HTMLElement).removeAttribute('aria-live');
     });
   }
 
@@ -640,13 +636,12 @@ export class ContactFormModule extends BaseModule {
    */
   checkForSecurityIssues(field: HTMLInputElement) {
     const { value } = field;
+    const errors: string[] = [];
 
     // Check for XSS patterns
     if (SanitizationUtils.detectXss(value)) {
-      this.showFieldError(
-        field,
-        'Invalid characters detected. Please remove any HTML or script tags.'
-      );
+      errors.push('Invalid characters detected. Please remove any HTML or script tags.');
+      this.showFieldError(field, '');
       SanitizationUtils.logSecurityViolation(
         'client_xss_attempt',
         {
@@ -660,7 +655,8 @@ export class ContactFormModule extends BaseModule {
 
     // Check for extremely long input (potential DoS)
     if (value.length > 5000) {
-      this.showFieldError(field, 'Input too long. Please shorten your message.');
+      errors.push('Input too long. Please shorten your message.');
+      this.showFieldError(field, '');
       SanitizationUtils.logSecurityViolation(
         'input_length_violation',
         {
@@ -669,6 +665,10 @@ export class ContactFormModule extends BaseModule {
         },
         navigator.userAgent
       );
+    }
+
+    if (errors.length > 0) {
+      this.showErrorTooltip(errors);
     }
   }
 

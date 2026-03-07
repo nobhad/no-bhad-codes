@@ -340,10 +340,10 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.draft, label: 'draft', hideIfZero: true },
-            { value: stats.sent, label: 'sent', variant: 'pending', hideIfZero: true },
-            { value: stats.inProgress, label: 'in progress', variant: 'active', hideIfZero: true },
-            { value: stats.completed, label: 'completed', variant: 'completed', hideIfZero: true }
+            { value: stats.draft, label: 'draft' },
+            { value: stats.sent, label: 'sent', variant: 'pending' },
+            { value: stats.inProgress, label: 'in progress', variant: 'active' },
+            { value: stats.completed, label: 'completed', variant: 'completed' }
           ]}
           tooltip={`${stats.total} Total | ${stats.avgCompletion}% Avg Completion`}
         />

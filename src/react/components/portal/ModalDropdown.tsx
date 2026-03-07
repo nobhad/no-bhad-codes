@@ -394,7 +394,7 @@ export function ModalDropdown({
                               : 'tw-border-primary/40'
                           )}
                         >
-                          {isSelected && <Check className="tw-h-3 tw-w-3 tw-text-black" />}
+                          {isSelected && <Check className="tw-h-3 tw-w-3 tw-text-[var(--portal-text-dark)]" />}
                         </div>
                       )}
                       <div className="tw-flex-1 tw-min-w-0">

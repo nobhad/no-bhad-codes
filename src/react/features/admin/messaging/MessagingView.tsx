@@ -21,7 +21,7 @@ import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 import { unwrapApiData } from '../../../../utils/api-client';
 
-const logger = createLogger('MessagingPanel');
+const logger = createLogger('MessagingView');
 
 interface Message {
   id: number;
@@ -48,7 +48,7 @@ interface Conversation {
   isArchived: boolean;
 }
 
-interface MessagingPanelProps {
+interface MessagingViewProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
   /** Show notification callback */
@@ -58,7 +58,7 @@ interface MessagingPanelProps {
   defaultPageSize?: number;
 }
 
-export function MessagingPanel({ getAuthToken, showNotification, onNavigate, defaultPageSize: _defaultPageSize = 25 }: MessagingPanelProps) {
+export function MessagingView({ getAuthToken, showNotification, onNavigate, defaultPageSize: _defaultPageSize = 25 }: MessagingViewProps) {
   const containerRef = useFadeIn();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -506,4 +506,4 @@ function formatTime(timestamp: string): string {
   });
 }
 
-export default MessagingPanel;
+export default MessagingView;

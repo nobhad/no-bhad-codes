@@ -10,8 +10,6 @@
 import { createLogger } from '../../utils/logger';
 import { alertError } from '../../utils/confirm-dialog';
 import { confirmDanger } from '../../utils/confirm-dialog';
-import { showToast } from '../../utils/toast-notifications';
-import type { PerformanceMetricsDisplay } from './admin-performance-handler';
 import { getPerformanceMetrics } from './admin-performance-handler';
 
 const logger = createLogger('AdminDataOps');

@@ -1,18 +1,18 @@
 /**
- * Approvals Panel Mount
+ * Approvals Table Mount
  * Island architecture mount using createMountWrapper factory
  */
 
 import { createMountWrapper, type BaseMountOptions } from '@/react/factories';
-import { ApprovalsPanel } from './ApprovalsPanel';
+import { ApprovalsTable } from './ApprovalsTable';
 
 export interface ApprovalsMountOptions extends BaseMountOptions {}
 
 export const {
-  mount: mountApprovalsPanel,
-  unmount: unmountApprovalsPanel,
-  shouldUseReact: shouldUseReactApprovalsPanel
+  mount: mountApprovalsTable,
+  unmount: unmountApprovalsTable,
+  shouldUseReact: shouldUseReactApprovalsTable
 } = createMountWrapper<ApprovalsMountOptions>({
-  Component: ApprovalsPanel,
-  displayName: 'ApprovalsPanel'
+  Component: ApprovalsTable,
+  displayName: 'ApprovalsTable'
 });

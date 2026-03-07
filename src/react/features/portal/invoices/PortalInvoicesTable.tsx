@@ -25,18 +25,14 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { usePortalInvoices } from '@react/hooks/usePortalInvoices';
 import { PORTAL_INVOICE_STATUS_CONFIG } from '../types';
 import { PORTAL_INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
-import type { PortalInvoice } from '../types';
+import type { PortalInvoice, PortalViewProps } from '../types';
 import { createLogger } from '../../../../utils/logger';
+import { downloadInvoicePdf, downloadBlob } from '../../../../utils/file-download';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalInvoicesTable');
 
-interface PortalInvoicesTableProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
+interface PortalInvoicesTableProps extends PortalViewProps {}
 
 /**
  * Format currency for display
@@ -158,27 +154,9 @@ export function PortalInvoicesTable({
   // Handle download invoice
   const handleDownload = async (invoice: PortalInvoice) => {
     try {
-      const response = await fetch(buildEndpoint.invoicePdf(invoice.id), {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download invoice');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `invoice-${invoice.invoice_number}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      await downloadInvoicePdf(invoice.id, invoice.invoice_number);
     } catch (err) {
       logger.error('Error downloading invoice:', err);
-      showNotification?.('Failed to download invoice', 'error');
     }
   };
 

@@ -321,10 +321,10 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
         <TableStats
           items={[
             { value: stats.total, label: 'total' },
-            { value: stats.pending, label: 'pending', variant: 'pending', hideIfZero: true },
-            { value: stats.submitted, label: 'submitted', variant: 'active', hideIfZero: true },
-            { value: stats.approved, label: 'approved', variant: 'completed', hideIfZero: true },
-            { value: stats.overdue, label: 'overdue', variant: 'overdue', hideIfZero: true }
+            { value: stats.pending, label: 'pending', variant: 'pending' },
+            { value: stats.submitted, label: 'submitted', variant: 'active' },
+            { value: stats.approved, label: 'approved', variant: 'completed' },
+            { value: stats.overdue, label: 'overdue', variant: 'overdue' }
           ]}
           tooltip={`${stats.total} Total • ${stats.pending} Pending • ${stats.submitted} Submitted • ${stats.approved} Approved • ${stats.overdue} Overdue`}
         />
@@ -495,5 +495,3 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     </TableLayout>
   );
 }
-
-export default DocumentRequestsTable;

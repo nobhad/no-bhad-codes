@@ -1,5 +1,5 @@
 /**
- * HelpPanel
+ * HelpCenter
  * Client-facing knowledge base / FAQ browser.
  * Fetches from API_ENDPOINTS.KNOWLEDGE_BASE (public-facing articles).
  */
@@ -14,7 +14,7 @@ import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
-const logger = createLogger('HelpPanel');
+const logger = createLogger('HelpCenter');
 
 // ============================================================================
 // CONSTANTS
@@ -35,7 +35,7 @@ interface HelpArticle {
   updatedAt: string;
 }
 
-export interface HelpPanelProps {
+export interface HelpCenterProps {
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -45,7 +45,7 @@ export interface HelpPanelProps {
 // COMPONENT
 // ============================================================================
 
-export function HelpPanel({ getAuthToken }: HelpPanelProps) {
+export function HelpCenter({ getAuthToken }: HelpCenterProps) {
   const containerRef = useFadeIn();
   const [articles, setArticles] = useState<HelpArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -218,4 +218,4 @@ export function HelpPanel({ getAuthToken }: HelpPanelProps) {
   );
 }
 
-export default HelpPanel;
+export default HelpCenter;

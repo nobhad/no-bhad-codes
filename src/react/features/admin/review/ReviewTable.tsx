@@ -1,5 +1,5 @@
 /**
- * ReviewPanel
+ * ReviewTable
  * Client-facing view of design reviews assigned to the client.
  * Fetches from API_ENDPOINTS.ADMIN.DESIGN_REVIEWS filtered by client.
  */
@@ -14,7 +14,7 @@ import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 
-const logger = createLogger('ReviewPanel');
+const logger = createLogger('ReviewTable');
 
 // ============================================================================
 // TYPES
@@ -29,7 +29,7 @@ interface ReviewItem {
   url?: string;
 }
 
-export interface ReviewPanelProps {
+export interface ReviewTableProps {
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -51,7 +51,7 @@ const STATUS_CLASS_MAP: Record<string, string> = {
 // COMPONENT
 // ============================================================================
 
-export function ReviewPanel({ getAuthToken, showNotification: _showNotification, onNavigate }: ReviewPanelProps) {
+export function ReviewTable({ getAuthToken, showNotification: _showNotification, onNavigate }: ReviewTableProps) {
   const containerRef = useFadeIn();
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -169,4 +169,4 @@ export function ReviewPanel({ getAuthToken, showNotification: _showNotification,
   );
 }
 
-export default ReviewPanel;
+export default ReviewTable;

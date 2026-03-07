@@ -39,7 +39,7 @@ const DASHBOARD_CONTACT_STATUS_OPTIONS = [
 export async function loadContactSubmissions(
   domCache: DOMCacheInstance,
   contactsData: ContactSubmission[],
-  showContactDetails: (contactId: number) => void
+  onShowDetails: (contactId: number) => void
 ): Promise<ContactSubmission[]> {
   try {
     const response = await apiFetch('/api/admin/contact-submissions');
@@ -47,7 +47,7 @@ export async function loadContactSubmissions(
     if (response.ok) {
       const raw = await response.json();
       const data = unwrapApiData<{ submissions: ContactSubmission[]; stats: ContactStats }>(raw);
-      return updateContactsDisplay(data, domCache, contactsData, showContactDetails);
+      return updateContactsDisplay(data, domCache, contactsData, onShowDetails);
     }
   } catch (error) {
     logger.error(' Failed to load contact submissions:', error);
@@ -62,7 +62,7 @@ function updateContactsDisplay(
   data: { submissions: ContactSubmission[]; stats: ContactStats },
   domCache: DOMCacheInstance,
   _contactsData: ContactSubmission[],
-  showContactDetails: (contactId: number) => void
+  onShowDetails: (contactId: number) => void
 ): ContactSubmission[] {
   const contacts = data.submissions || [];
 
@@ -124,7 +124,7 @@ function updateContactsDisplay(
         row.addEventListener('click', (e) => {
           if ((e.target as HTMLElement).closest('.table-dropdown')) return;
           const contactId = parseInt((row as HTMLElement).dataset.contactId || '0');
-          showContactDetails(contactId);
+          onShowDetails(contactId);
         });
       });
 
@@ -142,7 +142,7 @@ function updateContactsDisplay(
           showStatusDot: true,
           onChange: (value: string) => {
             updateContactStatus(parseInt(contactId, 10), value, domCache, () =>
-              loadContactSubmissions(domCache, contacts, showContactDetails)
+              loadContactSubmissions(domCache, contacts, onShowDetails)
             );
           }
         });

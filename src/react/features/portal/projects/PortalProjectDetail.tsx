@@ -19,7 +19,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency, formatDate as formatDateFn } from '@react/factories';
+import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency } from '@react/factories';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
@@ -28,22 +28,19 @@ import type {
   PortalProject,
   PortalProjectStatus,
   PortalProjectMilestone,
-  PortalProjectUpdate
+  PortalProjectUpdate,
+  PortalViewProps
 } from '../types';
 import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { buildEndpoint } from '../../../../constants/api-endpoints';
 
 const logger = createLogger('PortalProjectDetail');
 
-interface PortalProjectDetailProps {
+interface PortalProjectDetailProps extends PortalViewProps {
   /** Project ID to display */
   projectId: string;
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
   /** Callback to go back to projects list */
   onBack?: () => void;
-  /** Show notification callback */
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 /**
@@ -454,7 +451,7 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
     return (
       <EmptyState
         icon={<ListTodo className="icon-lg" />}
-        message="No milestones defined yet"
+        message="No milestones defined yet. Milestones will appear here as your project is planned."
       />
     );
   }
@@ -521,7 +518,7 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
     return (
       <EmptyState
         icon={<Activity className="icon-lg" />}
-        message="No updates yet"
+        message="No updates yet. Project updates will appear here as work progresses."
       />
     );
   }
@@ -568,7 +565,7 @@ function FilesList({ files }: { files: ProjectFile[] }) {
     return (
       <EmptyState
         icon={<Download className="icon-lg" />}
-        message="No files shared yet"
+        message="No files shared yet. Files will appear here when they are uploaded to this project."
       />
     );
   }
@@ -622,7 +619,7 @@ function ThreadsList({ threads }: { threads: ProjectThread[] }) {
     return (
       <EmptyState
         icon={<MessageSquare className="icon-lg" />}
-        message="No messages yet"
+        message="No messages yet. Messages for this project will appear here."
       />
     );
   }
@@ -663,7 +660,7 @@ function InvoicesList({ invoices }: { invoices: ProjectInvoice[] }) {
     return (
       <EmptyState
         icon={<Receipt className="icon-lg" />}
-        message="No invoices yet"
+        message="No invoices yet. Invoices for this project will appear here."
       />
     );
   }
@@ -716,7 +713,7 @@ function TimeSummaryTab({ summary }: { summary: TimeSummary | null }) {
     return (
       <EmptyState
         icon={<Clock className="icon-lg" />}
-        message="No time tracked yet"
+        message="No time tracked yet. Time entries will appear here as work is logged."
       />
     );
   }

@@ -473,12 +473,15 @@ export class RouterService extends BaseService {
     }
 
     // Check for project detail routes (#/projects/:slug)
-    // These are handled by PageTransitionModule, not RouterService
-    // Return null to skip RouterService handling
+    // PageTransitionModule handles page visibility; return a route so navigation completes
     const projectDetailMatch = searchPath.match(/^#\/projects\/(.+)$/);
     if (projectDetailMatch) {
-      this.log('Project detail route detected, returning null (handled by PageTransitionModule)');
-      return null;
+      this.log('Project detail route detected, slug:', projectDetailMatch[1]);
+      return {
+        path: searchPath,
+        section: 'project-detail',
+        title: 'Project - No Bhad Codes'
+      };
     }
 
     // Direct match (try hash style first)

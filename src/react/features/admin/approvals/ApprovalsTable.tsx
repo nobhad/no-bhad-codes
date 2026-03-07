@@ -1,5 +1,5 @@
 /**
- * ApprovalsPanel
+ * ApprovalsTable
  * Client-facing panel showing pending approvals (ad-hoc requests, document requests, etc.)
  * Fetches from API_ENDPOINTS.APPROVALS_PENDING
  */
@@ -14,7 +14,7 @@ import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
 
-const logger = createLogger('ApprovalsPanel');
+const logger = createLogger('ApprovalsTable');
 
 // ============================================================================
 // TYPES
@@ -29,7 +29,7 @@ interface ApprovalItem {
   status: 'pending' | 'approved' | 'declined';
 }
 
-export interface ApprovalsPanelProps {
+export interface ApprovalsTableProps {
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
@@ -49,7 +49,7 @@ const STATUS_CLASS_MAP: Record<string, string> = {
 // COMPONENT
 // ============================================================================
 
-export function ApprovalsPanel({ getAuthToken, showNotification }: ApprovalsPanelProps) {
+export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTableProps) {
   const containerRef = useFadeIn();
   const [approvals, setApprovals] = useState<ApprovalItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -194,4 +194,4 @@ export function ApprovalsPanel({ getAuthToken, showNotification }: ApprovalsPane
   );
 }
 
-export default ApprovalsPanel;
+export default ApprovalsTable;

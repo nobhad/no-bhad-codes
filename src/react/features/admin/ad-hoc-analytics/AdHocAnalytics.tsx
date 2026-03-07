@@ -55,7 +55,6 @@ interface QueryResult {
 }
 
 interface AdHocAnalyticsProps {
-  onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
@@ -378,17 +377,33 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
   );
 }
 
-/** Chart colors using CSS variable fallbacks */
-const CHART_COLORS = [
-  'rgba(0, 175, 240, 0.8)',
-  'rgba(75, 192, 192, 0.8)',
-  'rgba(255, 159, 64, 0.8)',
-  'rgba(153, 102, 255, 0.8)',
-  'rgba(255, 99, 132, 0.8)',
-  'rgba(54, 162, 235, 0.8)',
-  'rgba(255, 206, 86, 0.8)',
-  'rgba(231, 76, 60, 0.8)'
-];
+/** Chart color CSS variable names - resolved at runtime */
+const CHART_COLOR_VARS = [
+  '--app-color-primary',
+  '--app-color-success',
+  '--app-color-warning',
+  '--app-color-purple',
+  '--app-color-danger',
+  '--app-color-info',
+  '--app-color-warning-light',
+  '--app-color-danger-dark',
+] as const;
+
+/** Resolve CSS variables at runtime for Chart.js colors */
+function getChartColors(): string[] {
+  const style = getComputedStyle(document.documentElement);
+
+  return CHART_COLOR_VARS.map(varName => {
+    const color = style.getPropertyValue(varName).trim();
+    if (color.startsWith('#')) {
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, 0.8)`;
+    }
+    return color;
+  });
+}
 
 /** Detect which columns are numeric */
 function getNumericColumns(result: QueryResult): string[] {
@@ -420,6 +435,7 @@ function QueryChart({ result }: { result: QueryResult }) {
       chartRef.current = null;
     }
 
+    const chartColors = getChartColors();
     const maxRows = chartType === 'pie' ? 20 : 50;
     const rows = result.rows.slice(0, maxRows);
     const labels = labelCol
@@ -430,10 +446,10 @@ function QueryChart({ result }: { result: QueryResult }) {
       label: col,
       data: rows.map(r => Number(r[col]) || 0),
       backgroundColor: chartType === 'pie'
-        ? rows.map((_, i) => CHART_COLORS[i % CHART_COLORS.length])
-        : CHART_COLORS[idx % CHART_COLORS.length],
+        ? rows.map((_, i) => chartColors[i % chartColors.length])
+        : chartColors[idx % chartColors.length],
       borderColor: chartType === 'line'
-        ? CHART_COLORS[idx % CHART_COLORS.length]
+        ? chartColors[idx % chartColors.length]
         : 'transparent',
       borderWidth: chartType === 'line' ? 2 : 0,
       tension: 0.3,
@@ -444,8 +460,8 @@ function QueryChart({ result }: { result: QueryResult }) {
     const pieDatasets = chartType === 'pie' ? [datasets[0]] : datasets;
 
     const computedStyle = getComputedStyle(document.documentElement);
-    const textColor = computedStyle.getPropertyValue('--portal-text-secondary').trim() || '#999';
-    const gridColor = computedStyle.getPropertyValue('--portal-border-color').trim() || '#333';
+    const textColor = computedStyle.getPropertyValue('--portal-text-secondary').trim() || computedStyle.getPropertyValue('--color-text-secondary').trim();
+    const gridColor = computedStyle.getPropertyValue('--portal-border-color').trim() || computedStyle.getPropertyValue('--color-border').trim();
 
     chartRef.current = new ChartJS(canvasRef.current, {
       type: chartType,
@@ -511,5 +527,3 @@ function QueryChart({ result }: { result: QueryResult }) {
     </div>
   );
 }
-
-export default AdHocAnalytics;

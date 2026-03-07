@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { ChevronRight, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { PORTAL_SELECTORS } from '@react/config/portal-constants';
 
 /**
  * Portal Dropdown Menu
@@ -50,17 +51,27 @@ PortalDropdownSubContent.displayName = 'PortalDropdownSubContent';
 
 const PortalDropdownContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn('portal-dropdown-content', className)}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-));
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
+    container?: HTMLElement | null;
+  }
+>(({ className, sideOffset = 4, container, ...props }, ref) => {
+  // Render into .dashboard-layout to inherit portal theme context
+  // Falls back to document.body if not found
+  const portalContainer = container ??
+    document.querySelector<HTMLElement>(PORTAL_SELECTORS.LAYOUT_CONTAINER) ??
+    document.body;
+
+  return (
+    <DropdownMenuPrimitive.Portal container={portalContainer}>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn('portal-dropdown-content', className)}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  );
+});
 PortalDropdownContent.displayName = 'PortalDropdownContent';
 
 const PortalDropdownItem = React.forwardRef<

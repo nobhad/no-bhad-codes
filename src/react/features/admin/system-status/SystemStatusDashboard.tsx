@@ -62,7 +62,7 @@ interface SystemStatusData {
   lastUpdated: string;
 }
 
-interface SystemStatusPanelProps {
+interface SystemStatusDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
@@ -132,7 +132,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showNotification }: SystemStatusPanelProps) {
+export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, showNotification }: SystemStatusDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -240,7 +240,7 @@ export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showN
         <TableStats items={[
           { value: overallLabel, label: '', variant: data.overallStatus === 'operational' ? 'completed' : 'pending' },
           { value: data.services.length, label: 'services' },
-          { value: data.incidents.length, label: 'incidents', variant: 'pending', hideIfZero: true }
+          { value: data.incidents.length, label: 'incidents', variant: 'pending' }
         ]} />
       }
       actions={
@@ -395,4 +395,4 @@ export function SystemStatusPanel({ onNavigate: _onNavigate, getAuthToken, showN
   );
 }
 
-export default SystemStatusPanel;
+export default SystemStatusDashboard;

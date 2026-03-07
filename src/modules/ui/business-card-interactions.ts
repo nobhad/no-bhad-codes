@@ -842,7 +842,7 @@ export class BusinessCardInteractions extends BaseModule {
     this.cardFront = null;
     this.cardBack = null;
     this.cardContainer = null;
-    this.renderer = null as any;
+    this.renderer = null!;
 
     this.log('BusinessCardInteractions cleanup completed');
   }

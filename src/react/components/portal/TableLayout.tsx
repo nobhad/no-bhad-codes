@@ -84,8 +84,6 @@ export interface StatItem {
   value: number | string;
   label?: string;
   variant?: 'default' | 'pending' | 'active' | 'completed' | 'overdue' | 'cancelled';
-  /** Only show if value > 0 */
-  hideIfZero?: boolean;
 }
 
 export interface TableStatsProps {
@@ -96,7 +94,7 @@ export interface TableStatsProps {
 
 export function TableStats({ items, tooltip }: TableStatsProps) {
   const visibleItems = items.filter(item => {
-    if (!item.hideIfZero) return true;
+    if (!item.variant || item.variant === 'default') return true;
     return typeof item.value === 'number' ? item.value > 0 : item.value !== '0';
   });
 

@@ -295,7 +295,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
         <TableStats
           items={[
             { value: stats.totalFiles, label: 'files' },
-            { value: stats.totalFolders, label: 'folders', hideIfZero: true },
+            { value: stats.totalFolders, label: 'folders' },
             { value: formatFileSize(stats.totalSize), label: 'total' }
           ]}
           tooltip={`${stats.totalFiles} Files • ${stats.totalFolders} Folders • ${formatFileSize(stats.totalSize)} Total`}
@@ -539,5 +539,3 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
-
-export default FilesManager;
