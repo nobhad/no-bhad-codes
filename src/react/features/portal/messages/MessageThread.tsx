@@ -172,7 +172,7 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
     } else {
       showNotification?.('Failed to update message', 'error');
     }
-  }, [editContent, message.content, message.id, onEdit, handleCancelEdit, showNotification]);
+  }, [editContent, messageContent, message.id, onEdit, handleCancelEdit, showNotification]);
 
   const handleDelete = useCallback(async () => {
     const success = await onDelete(message.id);

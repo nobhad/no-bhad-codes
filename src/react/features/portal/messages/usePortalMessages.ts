@@ -198,7 +198,7 @@ export function usePortalMessages({
           });
           body = formData;
           // Let browser set Content-Type for FormData
-          const token = getAuthToken?.();
+          const token = getAuthTokenRef.current?.();
           headers = token ? { Authorization: `Bearer ${token}` } : {};
         } else {
           body = JSON.stringify({ content });
@@ -242,7 +242,7 @@ export function usePortalMessages({
         return false;
       }
     },
-    [selectedThread, getAuthToken, getHeaders]
+    [selectedThread, getHeaders]
   );
 
   /**

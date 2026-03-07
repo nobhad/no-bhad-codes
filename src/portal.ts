@@ -7,8 +7,7 @@
  * Entry point for the client portal.
  */
 
-// CRITICAL: Register React components BEFORE app initialization
-// This must be the FIRST import to prevent race conditions
+// Import Tailwind CSS for React portal components
 import './react/portal-entry';
 
 // Import client portal CSS bundle
@@ -24,16 +23,8 @@ if (import.meta.env?.PROD) {
   injectSpeedInsights();
 }
 
-// Import and initialize application
+// Import and initialize application (React SPA mounts via ReactPortalModule)
 import { app } from './core/app';
-
-// Import password toggle component
-import { initAllPasswordToggles } from './components/password-toggle';
-
-// Initialize password toggles when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  initAllPasswordToggles();
-});
 
 // Export for debugging
 export { app };

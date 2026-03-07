@@ -229,29 +229,6 @@ export function registerModules(debug: boolean = false): void {
       }
     },
     {
-      name: 'ClientPortalModule',
-      type: 'dom',
-      factory: async () => {
-        // Load client portal on /portal (login), /dashboard (client), and /client/* pages except intake
-        const currentPath = window.location.pathname;
-        const pageType = document.body.getAttribute('data-page') || '';
-        const isClientPage =
-          (currentPath === '/dashboard' && pageType === 'client-portal') ||
-          (currentPath.startsWith('/client') && !currentPath.includes('/client/intake'));
-        if (isClientPage) {
-          const { ClientPortalModule } = await import('../features/client/client-portal');
-          return new ClientPortalModule();
-        }
-        // Return a dummy module for other pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'ClientPortalModule'
-        };
-      }
-    },
-    {
       name: 'AdminDashboardModule',
       type: 'dom',
       factory: async () => {
@@ -280,39 +257,6 @@ export function registerModules(debug: boolean = false): void {
           destroy: () => {},
           isInitialized: true,
           name: 'AdminDashboardModule'
-        };
-      }
-    },
-    {
-      name: 'PortalShellModule',
-      type: 'dom',
-      factory: async () => {
-        // Load portal shell on both admin and client pages
-        const currentPath = window.location.pathname;
-        const isPortalPage = currentPath.includes('/admin') || currentPath.includes('/client');
-
-        if (isPortalPage) {
-          const { getPortalShell, destroyPortalShell } = await import('../features/portal');
-          const shell = getPortalShell();
-
-          return {
-            init: async () => {
-              await shell.init();
-            },
-            destroy: () => {
-              destroyPortalShell();
-            },
-            isInitialized: true,
-            name: 'PortalShellModule'
-          };
-        }
-
-        // Return a dummy module for other pages
-        return {
-          init: async () => {},
-          destroy: () => {},
-          isInitialized: true,
-          name: 'PortalShellModule'
         };
       }
     },
@@ -429,14 +373,6 @@ export function getReactPortalModules(): string[] {
 }
 
 /**
- * Get module list for client portal
- * @deprecated Use getReactPortalModules() for the React SPA
- */
-export function getClientPortalModules(): string[] {
-  return ['ThemeModule', 'NavigationModule', 'ClientPortalModule'];
-}
-
-/**
  * Get module list for client intake
  */
 export function getClientIntakeModules(): string[] {
@@ -450,10 +386,3 @@ export function getAdminModules(): string[] {
   return ['ThemeModule', 'NavigationModule', 'AdminDashboardModule'];
 }
 
-/**
- * Get module list for portal pages (unified shell)
- * Used for both admin and client portals when using the new architecture
- */
-export function getPortalModules(): string[] {
-  return ['ThemeModule', 'NavigationModule', 'PortalShellModule'];
-}
