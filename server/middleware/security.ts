@@ -454,7 +454,7 @@ export function requestFingerprint(req: Request, res: Response, next: NextFuncti
     };
 
     // Add fingerprint to request for use by other middleware
-    (req as any).fingerprint = fingerprint;
+    (req as Request & { fingerprint: typeof fingerprint }).fingerprint = fingerprint;
 
     next();
   } catch (_error) {

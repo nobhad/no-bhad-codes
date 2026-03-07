@@ -128,7 +128,7 @@ router.patch(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const contactId = parseInt(req.params.contactId);
+    const contactId = parseInt(req.params.contactId, 10);
     const { isPrimary, firstName, lastName, email, phone, role } = req.body;
 
     if (isNaN(contactId)) {
@@ -206,20 +206,27 @@ router.post(
       return errorResponse(res, 'contactIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
-    const db = getDatabase();
-    let deleted = 0;
-
-    for (const contactId of contactIds) {
-      const id = typeof contactId === 'string' ? parseInt(contactId, 10) : contactId;
-      if (isNaN(id)) continue;
-
-      const result = await db.run('DELETE FROM client_contacts WHERE id = ?', [id]);
-      if (result.changes && result.changes > 0) {
-        deleted++;
-      }
+    const MAX_BATCH_SIZE = 100;
+    if (contactIds.length > MAX_BATCH_SIZE) {
+      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} contacts at once`, 400, 'VALIDATION_ERROR');
     }
 
-    sendSuccess(res, { deleted });
+    const db = getDatabase();
+    const validIds = contactIds
+      .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
+      .filter((id: number) => !isNaN(id) && id > 0);
+
+    if (validIds.length === 0) {
+      return sendSuccess(res, { deleted: 0 });
+    }
+
+    const placeholders = validIds.map(() => '?').join(',');
+    const result = await db.run(
+      `DELETE FROM client_contacts WHERE id IN (${placeholders})`,
+      validIds
+    );
+
+    sendSuccess(res, { deleted: result.changes || 0 });
   })
 );
 

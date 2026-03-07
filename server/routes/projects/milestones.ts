@@ -38,7 +38,10 @@ router.get(
   '/:id/milestones',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
@@ -103,7 +106,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { title, description, due_date, deliverables = [] } = req.body;
 
     if (!title) {
@@ -166,8 +172,11 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const projectId = parseInt(req.params.id);
-    const milestoneId = parseInt(req.params.milestoneId);
+    const projectId = parseInt(req.params.id, 10);
+    const milestoneId = parseInt(req.params.milestoneId, 10);
+    if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
+      return errorResponse(res, 'Invalid project or milestone ID', 400, 'VALIDATION_ERROR');
+    }
     const { title, description, due_date, deliverables, is_completed } = req.body;
 
     const db = getDatabase();
@@ -279,8 +288,11 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const projectId = parseInt(req.params.id);
-    const milestoneId = parseInt(req.params.milestoneId);
+    const projectId = parseInt(req.params.id, 10);
+    const milestoneId = parseInt(req.params.milestoneId, 10);
+    if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
+      return errorResponse(res, 'Invalid project or milestone ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     // Verify milestone belongs to project

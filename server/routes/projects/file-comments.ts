@@ -12,7 +12,7 @@ router.get(
   '/files/:fileId/comments',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
     }
@@ -32,7 +32,7 @@ router.post(
   '/files/:fileId/comments',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { content, is_internal, parent_comment_id, author_name } = req.body;
 
     if (isNaN(fileId)) {
@@ -66,7 +66,7 @@ router.delete(
   '/files/comments/:commentId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const commentId = parseInt(req.params.commentId);
+    const commentId = parseInt(req.params.commentId, 10);
     if (isNaN(commentId)) {
       return errorResponse(res, 'Invalid comment ID', 400, 'INVALID_ID');
     }

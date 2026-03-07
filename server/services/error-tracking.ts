@@ -114,8 +114,9 @@ export class ErrorTrackingService {
 
         if (event.request?.data) {
           if (typeof event.request.data === 'object' && event.request.data !== null) {
-            delete (event.request.data as any).password;
-            delete (event.request.data as any).token;
+            const data = event.request.data as Record<string, unknown>;
+            delete data.password;
+            delete data.token;
           }
         }
 

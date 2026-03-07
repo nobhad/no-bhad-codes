@@ -143,10 +143,10 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const minCompleteness = req.query.min_completeness
-      ? parseInt(req.query.min_completeness as string)
+      ? parseInt(req.query.min_completeness as string, 10)
       : undefined;
     const maxCompleteness = req.query.max_completeness
-      ? parseInt(req.query.max_completeness as string)
+      ? parseInt(req.query.max_completeness as string, 10)
       : undefined;
     const onboardingStatus = req.query.onboarding_status as OnboardingStatus | undefined;
 
@@ -168,10 +168,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400);
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
     const status = await clientInfoService.getClientInfoStatus(clientId);
@@ -192,10 +192,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400);
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
     const items = await clientInfoService.getMissingItems(clientId);
@@ -212,10 +212,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400);
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
     const completeness = await clientInfoService.calculateCompleteness(clientId);
@@ -232,10 +232,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400);
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
@@ -252,10 +252,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400);
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
     await clientInfoService.resetOnboarding(clientId);

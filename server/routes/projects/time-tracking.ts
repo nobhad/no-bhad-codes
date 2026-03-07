@@ -17,7 +17,10 @@ router.get(
   '/:id/time-entries',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
@@ -57,7 +60,10 @@ router.get(
   '/:id/time-summary',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
@@ -95,7 +101,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
@@ -155,7 +164,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const entryId = parseInt(req.params.entryId);
+    const entryId = parseInt(req.params.entryId, 10);
+    if (isNaN(entryId) || entryId <= 0) {
+      return errorResponse(res, 'Invalid entry ID', 400, 'VALIDATION_ERROR');
+    }
 
     // Support both frontend format and legacy format
     const {
@@ -197,7 +209,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const entryId = parseInt(req.params.entryId);
+    const entryId = parseInt(req.params.entryId, 10);
+    if (isNaN(entryId) || entryId <= 0) {
+      return errorResponse(res, 'Invalid entry ID', 400, 'VALIDATION_ERROR');
+    }
     await projectService.deleteTimeEntry(entryId);
     messageResponse(res, 'Time entry deleted successfully');
   })
@@ -208,7 +223,10 @@ router.get(
   '/:id/time-stats',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const stats = await projectService.getProjectTimeStats(projectId);
     sendSuccess(res, { stats });
   })

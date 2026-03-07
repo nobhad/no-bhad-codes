@@ -16,7 +16,7 @@ router.get(
   '/:id/folders',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
     const parentId = req.query.parent_id ? parseInt(req.query.parent_id as string) : undefined;
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
@@ -36,7 +36,7 @@ router.post(
   '/:id/folders',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
     const { name, description, parent_folder_id, color, icon } = req.body;
 
     if (isNaN(projectId)) {
@@ -69,7 +69,7 @@ router.put(
   '/folders/:folderId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const folderId = parseInt(req.params.folderId);
+    const folderId = parseInt(req.params.folderId, 10);
     const { name, description, color, icon, sort_order } = req.body;
     if (isNaN(folderId)) {
       return errorResponse(res, 'Invalid folder ID', 400, 'INVALID_ID');
@@ -96,9 +96,12 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const folderId = parseInt(req.params.folderId);
+    const folderId = parseInt(req.params.folderId, 10);
+    if (isNaN(folderId) || folderId <= 0) {
+      return errorResponse(res, 'Invalid folder ID', 400, 'VALIDATION_ERROR');
+    }
     const moveFilesTo = req.query.move_files_to
-      ? parseInt(req.query.move_files_to as string)
+      ? parseInt(req.query.move_files_to as string, 10)
       : undefined;
     await fileService.deleteFolder(folderId, moveFilesTo);
     messageResponse(res, 'Folder deleted');
@@ -110,7 +113,7 @@ router.post(
   '/files/:fileId/move',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { folder_id } = req.body;
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
@@ -130,7 +133,7 @@ router.post(
   '/folders/:folderId/move',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const folderId = parseInt(req.params.folderId);
+    const folderId = parseInt(req.params.folderId, 10);
     const { parent_folder_id } = req.body;
     if (isNaN(folderId)) {
       return errorResponse(res, 'Invalid folder ID', 400, 'INVALID_ID');

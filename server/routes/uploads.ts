@@ -552,7 +552,7 @@ router.post(
   authenticateToken,
   upload.single('project_file'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
@@ -628,7 +628,7 @@ router.get(
   '/project/:projectId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
@@ -804,7 +804,7 @@ router.get(
   '/file/:fileId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
@@ -896,7 +896,7 @@ router.delete(
   '/file/:fileId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
@@ -1025,7 +1025,7 @@ router.get(
   '/deliverables/project/:projectId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
     const status = req.query.status as string | undefined;
 
     if (isNaN(projectId)) {
@@ -1076,7 +1076,7 @@ router.get(
   '/deliverables/:fileId/workflow',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
@@ -1107,7 +1107,7 @@ router.post(
   authenticateToken,
   validateRequest({ notes: UploadValidationSchemas.deliverableAction.notes }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { notes } = req.body;
 
     if (isNaN(fileId)) {
@@ -1141,7 +1141,7 @@ router.post(
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
@@ -1176,7 +1176,7 @@ router.post(
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { feedback } = req.body;
 
     if (isNaN(fileId)) {
@@ -1217,7 +1217,7 @@ router.post(
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { comment } = req.body;
 
     if (isNaN(fileId)) {
@@ -1253,7 +1253,7 @@ router.post(
       return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
     }
 
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { reason } = req.body;
 
     if (isNaN(fileId)) {
@@ -1285,7 +1285,7 @@ router.post(
   authenticateToken,
   validateRequest({ notes: UploadValidationSchemas.deliverableAction.notes }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { notes } = req.body;
 
     if (isNaN(fileId)) {
@@ -1317,7 +1317,7 @@ router.post(
     ]
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const { comment } = req.body;
 
     if (isNaN(fileId)) {
@@ -1367,7 +1367,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.id);
+    const fileId = parseInt(req.params.id, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
@@ -1410,7 +1410,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.id);
+    const fileId = parseInt(req.params.id, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');

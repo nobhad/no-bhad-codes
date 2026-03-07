@@ -11,6 +11,12 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { cacheService } from '../services/cache-service.js';
 import { logger } from '../services/logger.js';
+import type { JWTAuthRequest } from '../types/request.js';
+
+/** Extended request with cache invalidation tags */
+interface CacheRequest extends Request {
+  cacheInvalidateTags?: string[];
+}
 
 export interface CacheMiddlewareOptions {
   ttl?: number; // Time to live in seconds
@@ -43,7 +49,8 @@ function generateCacheKey(req: Request, varyBy: string[] = []): string {
   const headersString = Object.keys(headers).length > 0 ? JSON.stringify(headers) : '';
 
   // Add user context for authenticated requests
-  const userContext = (req as any).user ? `user:${(req as any).user.id}` : '';
+  const authReq = req as JWTAuthRequest;
+  const userContext = authReq.user ? `user:${authReq.user.id}` : '';
 
   const fullKey = `${baseKey}:${query}:${headersString}:${userContext}`;
 
@@ -255,7 +262,7 @@ export function invalidateCache(
 ): (req: Request, res: Response, next: NextFunction) => Promise<void> {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // Store tags to invalidate after successful response
-    (req as any).cacheInvalidateTags = Array.isArray(tags) ? tags : [tags];
+    (req as CacheRequest).cacheInvalidateTags = Array.isArray(tags) ? tags : [tags];
 
     // Intercept successful responses
     const originalJson = res.json.bind(res);
@@ -263,7 +270,7 @@ export function invalidateCache(
 
     const invalidateTags = async () => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        const tagsToInvalidate = (req as any).cacheInvalidateTags as string[];
+        const tagsToInvalidate = (req as CacheRequest).cacheInvalidateTags ?? [];
 
         for (const tag of tagsToInvalidate) {
           try {

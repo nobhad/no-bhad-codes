@@ -59,8 +59,8 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
       return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
@@ -124,8 +124,8 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
       return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
@@ -146,8 +146,8 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
       return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
@@ -164,8 +164,8 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
       return errorResponse(res, 'Invalid trigger ID', 400, 'INVALID_TRIGGER_ID');
     }
 
@@ -190,8 +190,8 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const triggerId = req.query.triggerId ? parseInt(req.query.triggerId as string) : undefined;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+    const triggerId = req.query.triggerId ? parseInt(req.query.triggerId as string, 10) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
 
     const logs = await workflowTriggerService.getTriggerLogs(triggerId, limit);
     sendSuccess(res, { logs });
@@ -207,7 +207,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const eventType = req.query.eventType as EventType | undefined;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
 
     const events = await workflowTriggerService.getSystemEvents(eventType, limit);
     sendSuccess(res, { events });

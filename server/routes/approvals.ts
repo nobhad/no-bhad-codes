@@ -42,9 +42,9 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid workflow ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid workflow ID', 400, 'VALIDATION_ERROR');
     }
 
     const workflow = await approvalService.getWorkflowDefinition(id);
@@ -116,9 +116,9 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const workflowId = parseInt(req.params.id);
-    if (isNaN(workflowId)) {
-      return errorResponse(res, 'Invalid workflow ID', 400);
+    const workflowId = parseInt(req.params.id, 10);
+    if (isNaN(workflowId) || workflowId <= 0) {
+      return errorResponse(res, 'Invalid workflow ID', 400, 'VALIDATION_ERROR');
     }
 
     const { step_order, approver_type, approver_value, is_optional, auto_approve_after_hours } =
@@ -216,10 +216,10 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { entityType, entityId } = req.params;
-    const id = parseInt(entityId);
+    const id = parseInt(entityId, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid entity ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid entity ID', 400, 'VALIDATION_ERROR');
     }
 
     const instance = await approvalService.getEntityWorkflow(entityType as EntityType, id);
@@ -242,9 +242,9 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid instance ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid instance ID', 400, 'VALIDATION_ERROR');
     }
 
     const instance = await approvalService.getWorkflowInstance(id);
@@ -270,9 +270,9 @@ router.post(
   '/requests/:id/approve',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const requestId = parseInt(req.params.id);
-    if (isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    const requestId = parseInt(req.params.id, 10);
+    if (isNaN(requestId) || requestId <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const { comment } = req.body;
@@ -307,9 +307,9 @@ router.post(
   '/requests/:id/reject',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const requestId = parseInt(req.params.id);
-    if (isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    const requestId = parseInt(req.params.id, 10);
+    if (isNaN(requestId) || requestId <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const { reason } = req.body;
@@ -349,9 +349,9 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const instanceId = parseInt(req.params.id);
-    if (isNaN(instanceId)) {
-      return errorResponse(res, 'Invalid instance ID', 400);
+    const instanceId = parseInt(req.params.id, 10);
+    if (isNaN(instanceId) || instanceId <= 0) {
+      return errorResponse(res, 'Invalid instance ID', 400, 'VALIDATION_ERROR');
     }
 
     const { reason } = req.body;

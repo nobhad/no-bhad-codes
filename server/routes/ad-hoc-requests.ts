@@ -12,7 +12,14 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { getDatabase } from '../database/init.js';
-import { adHocRequestService, type AdHocRequest } from '../services/ad-hoc-request-service.js';
+import {
+  adHocRequestService,
+  type AdHocRequest,
+  type AdHocRequestStatus,
+  type AdHocRequestType,
+  type AdHocRequestPriority,
+  type AdHocRequestUrgency
+} from '../services/ad-hoc-request-service.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { projectService } from '../services/project-service.js';
 import { InvoiceService, type InvoiceLineItem } from '../services/invoice-service.js';
@@ -183,8 +190,8 @@ router.get(
 
     const requests = await adHocRequestService.getRequests({
       clientId,
-      status: status as any,
-      requestType: requestType as any
+      status: status as AdHocRequestStatus,
+      requestType: requestType as AdHocRequestType
     });
 
     sendSuccess(res, { requests });
@@ -368,10 +375,10 @@ router.get(
     const requests = await adHocRequestService.getRequests({
       projectId,
       clientId,
-      status: status as any,
-      requestType: requestType as any,
-      priority: priority as any,
-      urgency: urgency as any
+      status: status as AdHocRequestStatus,
+      requestType: requestType as AdHocRequestType,
+      priority: priority as AdHocRequestPriority,
+      urgency: urgency as AdHocRequestUrgency
     });
 
     sendSuccess(res, { requests });

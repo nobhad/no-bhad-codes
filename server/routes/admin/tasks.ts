@@ -36,20 +36,27 @@ router.post(
       return errorResponse(res, 'taskIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
-    const db = getDatabase();
-    let deleted = 0;
-
-    for (const taskId of taskIds) {
-      const id = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId;
-      if (isNaN(id)) continue;
-
-      const result = await db.run('DELETE FROM project_tasks WHERE id = ?', [id]);
-      if (result.changes && result.changes > 0) {
-        deleted++;
-      }
+    const MAX_BATCH_SIZE = 100;
+    if (taskIds.length > MAX_BATCH_SIZE) {
+      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} tasks at once`, 400, 'VALIDATION_ERROR');
     }
 
-    sendSuccess(res, { deleted });
+    const db = getDatabase();
+    const validIds = taskIds
+      .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
+      .filter((id: number) => !isNaN(id) && id > 0);
+
+    if (validIds.length === 0) {
+      return sendSuccess(res, { deleted: 0 });
+    }
+
+    const placeholders = validIds.map(() => '?').join(',');
+    const result = await db.run(
+      `DELETE FROM project_tasks WHERE id IN (${placeholders})`,
+      validIds
+    );
+
+    sendSuccess(res, { deleted: result.changes || 0 });
   })
 );
 
@@ -62,7 +69,7 @@ router.put(
   requireAdmin,
   validateRequest(ValidationSchemas.task),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
     const { title, description, status, priority, dueDate, assignedTo } = req.body;
 
     if (isNaN(taskId)) {

@@ -54,8 +54,14 @@ export function formatZapierPayload(
  * Flatten nested objects for Zapier compatibility
  * Zapier works better with flat structures
  */
-export function flattenObject(obj: Record<string, unknown>, prefix = ''): Record<string, unknown> {
+export function flattenObject(obj: Record<string, unknown>, prefix = '', depth = 0): Record<string, unknown> {
+  const MAX_DEPTH = 10;
   const result: Record<string, unknown> = {};
+
+  if (depth >= MAX_DEPTH) {
+    result[prefix || 'value'] = '[Max depth exceeded]';
+    return result;
+  }
 
   for (const [key, value] of Object.entries(obj)) {
     const newKey = prefix ? `${prefix}_${key}` : key;
@@ -66,7 +72,7 @@ export function flattenObject(obj: Record<string, unknown>, prefix = ''): Record
       !Array.isArray(value) &&
       !(value instanceof Date)
     ) {
-      Object.assign(result, flattenObject(value as Record<string, unknown>, newKey));
+      Object.assign(result, flattenObject(value as Record<string, unknown>, newKey, depth + 1));
     } else if (value instanceof Date) {
       result[newKey] = value.toISOString();
     } else if (Array.isArray(value)) {

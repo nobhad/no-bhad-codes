@@ -221,7 +221,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const queryId = parseInt(req.params.queryId);
+    const queryId = parseInt(req.params.queryId, 10);
 
     if (isNaN(queryId)) {
       return errorResponse(res, 'Invalid query ID', 400, 'INVALID_ID');

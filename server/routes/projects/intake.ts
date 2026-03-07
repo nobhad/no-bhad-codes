@@ -54,7 +54,10 @@ router.get(
   '/:id/intake/pdf',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     // Get project with client info

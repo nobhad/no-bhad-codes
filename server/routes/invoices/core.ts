@@ -269,7 +269,7 @@ if (process.env.NODE_ENV === 'development') {
   router.get(
     '/test-get/:id',
     asyncHandler(async (req: express.Request, res: express.Response) => {
-      const invoiceId = parseInt(req.params.id);
+      const invoiceId = parseInt(req.params.id, 10);
 
       if (isNaN(invoiceId)) {
         return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
@@ -592,8 +592,8 @@ router.get(
     const search = searchParam ? searchParam.substring(0, 200) : undefined;
 
     const filters = {
-      clientId: req.query.clientId ? parseInt(req.query.clientId as string) : undefined,
-      projectId: req.query.projectId ? parseInt(req.query.projectId as string) : undefined,
+      clientId: req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined,
+      projectId: req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined,
       status,
       invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
       search,
@@ -603,8 +603,8 @@ router.get(
       dueDateTo: req.query.dueDateTo as string | undefined,
       minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
       maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
+      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0
     };
 
     try {
@@ -637,7 +637,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId)) {
       return errorResponse(res, 'Invalid client ID', 400, 'INVALID_ID');
@@ -671,7 +671,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
@@ -722,7 +722,7 @@ router.get(
   '/:id/pdf',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
@@ -834,7 +834,7 @@ router.put(
   // Validate and sanitize input
   validateRequest(InvoiceValidationSchemas.updateStatus),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
     const { status, paymentData } = req.body;
 
     if (isNaN(invoiceId)) {
@@ -869,7 +869,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
@@ -1007,7 +1007,7 @@ router.post(
   // Validate and sanitize input
   validateRequest(InvoiceValidationSchemas.recordPayment),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
     const { amountPaid, paymentMethod, paymentReference } = req.body;
 
     if (isNaN(invoiceId)) {
@@ -1096,7 +1096,7 @@ router.get(
   '/stats',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
+    const clientId = req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined;
 
     try {
       const stats = await getInvoiceService().getInvoiceStats(clientId);

@@ -665,7 +665,11 @@ router.get(
     keyGenerator: (req) => `client:${req.params.id}:details`
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
 
     // Check if user can access this client
     if (req.user!.type === 'client' && req.user!.id !== clientId) {
@@ -875,7 +879,11 @@ router.put(
   validateRequest(ClientValidationSchemas.update),
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
 
     // Check if user can update this client
     if (req.user!.type === 'client' && req.user!.id !== clientId) {
@@ -959,7 +967,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     const projects = await db.all(
@@ -985,7 +998,12 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     // Get client details
@@ -1110,7 +1128,12 @@ router.delete(
   requireAdmin,
   invalidateCache(['clients', 'projects']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const deletedBy = req.user?.email || 'admin';
 
     const result = await softDeleteService.softDeleteClient(clientId, deletedBy);
@@ -1139,7 +1162,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const contacts = await clientService.getContacts(clientId);
     sendSuccess(res, { contacts });
   })
@@ -1154,7 +1182,12 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { firstName, lastName, email, phone, title, department, role, isPrimary, notes } =
       req.body;
 
@@ -1192,7 +1225,12 @@ router.put(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const contactId = parseInt(req.params.contactId);
+    const contactId = parseInt(req.params.contactId, 10);
+
+    if (isNaN(contactId) || contactId <= 0) {
+      return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
+    }
+
     const contact = await clientService.updateContact(contactId, req.body);
     sendSuccess(res, { contact });
   })
@@ -1207,7 +1245,12 @@ router.delete(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const contactId = parseInt(req.params.contactId);
+    const contactId = parseInt(req.params.contactId, 10);
+
+    if (isNaN(contactId) || contactId <= 0) {
+      return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.deleteContact(contactId);
     sendSuccess(res, undefined, 'Contact deleted successfully');
   })
@@ -1222,8 +1265,17 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
-    const contactId = parseInt(req.params.contactId);
+    const clientId = parseInt(req.params.id, 10);
+    const contactId = parseInt(req.params.contactId, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
+    if (isNaN(contactId) || contactId <= 0) {
+      return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.setPrimaryContact(clientId, contactId);
     sendSuccess(res, undefined, 'Primary contact updated');
   })
@@ -1241,7 +1293,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { type, startDate, endDate, limit, offset } = req.query;
 
     const activities = await clientService.getActivityTimeline(clientId, {
@@ -1264,7 +1321,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { activityType, title, description, metadata } = req.body;
 
     if (!activityType || !title) {
@@ -1348,7 +1410,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const notes = await clientService.getNotes(clientId);
     sendSuccess(res, { notes: notes.map(toApiNote) });
   })
@@ -1363,7 +1430,12 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { content } = req.body;
 
     if (!content || typeof content !== 'string' || !content.trim()) {
@@ -1384,7 +1456,12 @@ router.put(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const noteId = parseInt(req.params.noteId);
+    const noteId = parseInt(req.params.noteId, 10);
+
+    if (isNaN(noteId) || noteId <= 0) {
+      return errorResponse(res, 'Invalid note ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { is_pinned } = req.body;
 
     if (typeof is_pinned !== 'boolean') {
@@ -1405,7 +1482,12 @@ router.delete(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const noteId = parseInt(req.params.noteId);
+    const noteId = parseInt(req.params.noteId, 10);
+
+    if (isNaN(noteId) || noteId <= 0) {
+      return errorResponse(res, 'Invalid note ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.deleteNote(noteId);
     sendSuccess(res, undefined, 'Note deleted');
   })
@@ -1480,7 +1562,12 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fieldId = parseInt(req.params.fieldId);
+    const fieldId = parseInt(req.params.fieldId, 10);
+
+    if (isNaN(fieldId) || fieldId <= 0) {
+      return errorResponse(res, 'Invalid field ID', 400, 'VALIDATION_ERROR');
+    }
+
     const field = await clientService.updateCustomField(fieldId, req.body);
     sendSuccess(res, { field });
   })
@@ -1494,7 +1581,12 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fieldId = parseInt(req.params.fieldId);
+    const fieldId = parseInt(req.params.fieldId, 10);
+
+    if (isNaN(fieldId) || fieldId <= 0) {
+      return errorResponse(res, 'Invalid field ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.deleteCustomField(fieldId);
     sendSuccess(res, undefined, 'Custom field deactivated');
   })
@@ -1508,7 +1600,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const values = await clientService.getClientCustomFields(clientId);
     sendSuccess(res, { values });
   })
@@ -1523,7 +1620,12 @@ router.put(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { values } = req.body;
 
     if (!Array.isArray(values)) {
@@ -1552,7 +1654,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const tags = await clientService.getClientTags(clientId);
     sendSuccess(res, { tags });
   })
@@ -1567,8 +1674,17 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
-    const tagId = parseInt(req.params.tagId);
+    const clientId = parseInt(req.params.id, 10);
+    const tagId = parseInt(req.params.tagId, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
+    if (isNaN(tagId) || tagId <= 0) {
+      return errorResponse(res, 'Invalid tag ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.addTagToClient(clientId, tagId);
     sendSuccess(res, undefined, 'Tag added to client');
   })
@@ -1583,8 +1699,17 @@ router.delete(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
-    const tagId = parseInt(req.params.tagId);
+    const clientId = parseInt(req.params.id, 10);
+    const tagId = parseInt(req.params.tagId, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
+    if (isNaN(tagId) || tagId <= 0) {
+      return errorResponse(res, 'Invalid tag ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.removeTagFromClient(clientId, tagId);
     sendSuccess(res, undefined, 'Tag removed from client');
   })
@@ -1602,7 +1727,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const health = await clientService.calculateHealthScore(clientId);
     sendSuccess(res, { health });
   })
@@ -1617,7 +1747,12 @@ router.post(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const health = await clientService.updateHealthStatus(clientId);
     sendSuccess(res, { health });
   })
@@ -1644,7 +1779,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     const stats = await clientService.getClientStats(clientId);
     sendSuccess(res, { stats });
   })
@@ -1663,7 +1803,12 @@ router.put(
   requireAdmin,
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.id);
+    const clientId = parseInt(req.params.id, 10);
+
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+    }
+
     await clientService.updateCRMFields(clientId, req.body);
     sendSuccess(res, undefined, 'CRM fields updated');
   })
@@ -1931,8 +2076,8 @@ router.put(
       return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
     }
 
-    const contactId = parseInt(req.params.id);
-    if (isNaN(contactId)) {
+    const contactId = parseInt(req.params.id, 10);
+    if (isNaN(contactId) || contactId <= 0) {
       return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
     }
 
@@ -1994,8 +2139,8 @@ router.delete(
       return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
     }
 
-    const contactId = parseInt(req.params.id);
-    if (isNaN(contactId)) {
+    const contactId = parseInt(req.params.id, 10);
+    if (isNaN(contactId) || contactId <= 0) {
       return errorResponse(res, 'Invalid contact ID', 400, 'VALIDATION_ERROR');
     }
 

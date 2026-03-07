@@ -52,7 +52,10 @@ router.get(
   '/:id/contract/pdf',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     // Get project with client info
@@ -627,7 +630,10 @@ router.post(
   '/:id/contract/request-signature',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     // Get project with client info
@@ -1130,7 +1136,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { signatureData, signerName } = req.body;
     const db = getDatabase();
 
@@ -1242,7 +1251,10 @@ router.get(
   '/:id/contract/signature-status',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get(

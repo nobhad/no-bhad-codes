@@ -159,7 +159,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const entryId = parseInt(req.params.entryId);
+    const entryId = parseInt(req.params.entryId, 10);
 
     if (isNaN(entryId)) {
       return errorResponse(res, 'Invalid entry ID', 400, 'INVALID_ID');
@@ -242,7 +242,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const entryId = parseInt(req.params.entryId);
+    const entryId = parseInt(req.params.entryId, 10);
 
     if (isNaN(entryId)) {
       return errorResponse(res, 'Invalid entry ID', 400, 'INVALID_ID');

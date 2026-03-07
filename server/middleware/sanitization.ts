@@ -12,8 +12,10 @@ import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
 
 /**
- * Sanitize a string to prevent XSS attacks
- * Encodes HTML entities to prevent script injection
+ * Sanitize a string to prevent XSS attacks.
+ * Strips dangerous HTML tags and patterns but preserves the original text.
+ * React JSX and EJS (<%= %>) handle output escaping — encoding on input
+ * causes double-encoding (& → &amp; stored in DB, rendered literally).
  */
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') {
@@ -21,14 +23,20 @@ export function sanitizeString(input: string): string {
   }
 
   return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
-    .replace(/`/g, '&#x60;')
-    .replace(/=/g, '&#x3D;');
+    // Remove script tags and contents
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove event handler attributes
+    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+    // Remove javascript: protocol
+    .replace(/javascript\s*:/gi, '')
+    // Remove vbscript: protocol
+    .replace(/vbscript\s*:/gi, '')
+    // Remove data: URLs that could contain scripts
+    .replace(/data\s*:\s*text\/html/gi, '')
+    // Remove expression() CSS hack
+    .replace(/expression\s*\(/gi, '')
+    // Remove HTML tags but keep text content
+    .replace(/<[^>]*>/g, '');
 }
 
 /**
@@ -146,35 +154,30 @@ export function sanitize(value: unknown): unknown {
 }
 
 /**
- * Strip dangerous patterns that could be used for injection attacks
- * More aggressive sanitization for high-risk fields
+ * Strip dangerous patterns that could be used for injection attacks.
+ * More aggressive sanitization for high-risk fields.
+ * Does NOT encode HTML entities — output escaping is handled by React/EJS.
  */
 export function stripDangerousPatterns(input: string): string {
   if (typeof input !== 'string') {
     return input;
   }
 
-  return (
-    input
-      // Remove script tags
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      // Remove event handlers
-      .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
-      // Remove javascript: URLs
-      .replace(/javascript:/gi, '')
-      // Remove data: URLs that could contain scripts
-      .replace(/data:\s*text\/html/gi, '')
-      // Remove vbscript: URLs
-      .replace(/vbscript:/gi, '')
-      // Remove expression() CSS
-      .replace(/expression\s*\(/gi, '')
-      // Then apply standard sanitization
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-  );
+  return input
+    // Remove script tags and contents
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove event handlers
+    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+    // Remove javascript: URLs
+    .replace(/javascript\s*:/gi, '')
+    // Remove data: URLs that could contain scripts
+    .replace(/data\s*:\s*text\/html/gi, '')
+    // Remove vbscript: URLs
+    .replace(/vbscript\s*:/gi, '')
+    // Remove expression() CSS
+    .replace(/expression\s*\(/gi, '')
+    // Remove HTML tags but keep text content
+    .replace(/<[^>]*>/g, '');
 }
 
 export default sanitizeInputs;

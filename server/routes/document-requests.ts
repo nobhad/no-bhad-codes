@@ -48,11 +48,11 @@ router.post(
   '/:id/view',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const clientEmail = req.user?.email;
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!clientEmail) {
@@ -71,12 +71,12 @@ router.post(
   '/:id/upload',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const { fileId } = req.body;
     const uploaderEmail = req.user?.email;
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!fileId) {
@@ -178,11 +178,11 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const clientId = parseInt(req.params.clientId);
+    const clientId = parseInt(req.params.clientId, 10);
     const status = req.query.status as RequestStatus | undefined;
 
-    if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400);
+    if (isNaN(clientId) || clientId <= 0) {
+      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
     const requests = await documentRequestService.getClientRequests(clientId, status);
@@ -200,10 +200,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
 
-    if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
     }
 
     const requests = await documentRequestService.getProjectPendingRequests(projectId);
@@ -219,10 +219,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await documentRequestService.getRequest(id);
@@ -312,11 +312,11 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const reviewerEmail = req.user?.email || 'admin';
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await documentRequestService.startReview(id, reviewerEmail);
@@ -335,12 +335,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const { notes } = req.body;
     const reviewerEmail = req.user?.email || 'admin';
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     // Approve the request - this also copies the file to the Files tab
@@ -377,12 +377,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const { reason } = req.body;
     const reviewerEmail = req.user?.email || 'admin';
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!reason) {
@@ -416,10 +416,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     const request = await documentRequestService.sendReminder(id);
@@ -435,10 +435,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid request ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
     }
 
     await documentRequestService.deleteRequest(id);
@@ -503,10 +503,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const template = await documentRequestService.getTemplate(id);
@@ -556,10 +556,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const template = await documentRequestService.updateTemplate(id, req.body);
@@ -579,10 +579,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     await documentRequestService.deleteTemplate(id);
