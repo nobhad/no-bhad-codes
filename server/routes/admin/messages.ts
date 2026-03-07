@@ -73,7 +73,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const conversationId = parseInt(req.params.conversationId);
+    const conversationId = parseInt(req.params.conversationId, 10);
 
     if (isNaN(conversationId)) {
       return errorResponse(res, 'Invalid conversation ID', 400, 'INVALID_ID');
@@ -130,7 +130,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const conversationId = parseInt(req.params.conversationId);
+    const conversationId = parseInt(req.params.conversationId, 10);
 
     if (isNaN(conversationId)) {
       return errorResponse(res, 'Invalid conversation ID', 400, 'INVALID_ID');
@@ -159,7 +159,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const conversationId = parseInt(req.params.conversationId);
+    const conversationId = parseInt(req.params.conversationId, 10);
     const { content, attachments } = req.body;
 
     if (isNaN(conversationId)) {
@@ -233,7 +233,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const conversationId = parseInt(req.params.conversationId);
+    const conversationId = parseInt(req.params.conversationId, 10);
     const { starred } = req.body;
 
     if (isNaN(conversationId)) {

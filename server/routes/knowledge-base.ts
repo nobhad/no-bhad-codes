@@ -54,7 +54,7 @@ router.get(
 router.get(
   '/featured',
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 5;
     const articles = await knowledgeBaseService.getFeaturedArticles(limit);
     sendSuccess(res, { articles });
   })
@@ -112,11 +112,11 @@ router.get(
 router.post(
   '/articles/:id/feedback',
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const articleId = parseInt(req.params.id);
+    const articleId = parseInt(req.params.id, 10);
     const { isHelpful, comment } = req.body;
 
-    if (isNaN(articleId)) {
-      return errorResponse(res, 'Invalid article ID', 400);
+    if (isNaN(articleId) || articleId <= 0) {
+      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
     }
 
     if (typeof isHelpful !== 'boolean') {
@@ -187,10 +187,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid category ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid category ID', 400, 'VALIDATION_ERROR');
     }
 
     const category = await knowledgeBaseService.updateCategory(id, req.body);
@@ -211,10 +211,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid category ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid category ID', 400, 'VALIDATION_ERROR');
     }
 
     await knowledgeBaseService.deleteCategory(id);
@@ -257,10 +257,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid article ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
     }
 
     const article = await knowledgeBaseService.getArticleById(id);
@@ -312,10 +312,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid article ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
     }
 
     const article = await knowledgeBaseService.updateArticle(id, req.body);
@@ -336,10 +336,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid article ID', 400);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
     }
 
     await knowledgeBaseService.deleteArticle(id);

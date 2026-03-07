@@ -8,6 +8,7 @@ import { webhookService } from '../services/webhook-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.use(requireAdmin);
  * GET /api/v1/webhooks
  * List all webhooks
  */
-router.get('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const webhooks = await webhookService.listWebhooks();
     sendSuccess(res, { webhooks });
@@ -30,13 +31,13 @@ router.get('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
     });
     errorResponse(res, 'Failed to list webhooks', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * GET /api/v1/webhooks/:id
  * Get webhook by ID
  */
-router.get('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -59,14 +60,14 @@ router.get('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => 
     });
     errorResponse(res, 'Failed to retrieve webhook', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * POST /api/v1/webhooks
  * Create new webhook
  * Body: { name, url, events[], payloadTemplate, method?, headers? }
  */
-router.post('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const {
       name,
@@ -118,13 +119,13 @@ router.post('/webhooks', async (req: AuthenticatedRequest, res: Response) => {
     });
     errorResponse(res, 'Failed to create webhook', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * PUT /api/v1/webhooks/:id
  * Update webhook configuration
  */
-router.put('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.put('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -155,13 +156,13 @@ router.put('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => 
     });
     errorResponse(res, 'Failed to update webhook', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * DELETE /api/v1/webhooks/:id
  * Delete webhook (and all associated deliveries)
  */
-router.delete('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -177,14 +178,14 @@ router.delete('/webhooks/:id', async (req: AuthenticatedRequest, res: Response) 
     });
     errorResponse(res, 'Failed to delete webhook', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * PATCH /api/v1/webhooks/:id/toggle
  * Toggle webhook active/inactive
  * Body: { active: boolean }
  */
-router.patch('/webhooks/:id/toggle', async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/webhooks/:id/toggle', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -211,14 +212,14 @@ router.patch('/webhooks/:id/toggle', async (req: AuthenticatedRequest, res: Resp
     });
     errorResponse(res, 'Failed to toggle webhook', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * POST /api/v1/webhooks/:id/test
  * Test webhook by sending sample payload
  * Body: { eventType, sampleData? }
  */
-router.post('/webhooks/:id/test', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks/:id/test', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -248,14 +249,14 @@ router.post('/webhooks/:id/test', async (req: AuthenticatedRequest, res: Respons
     });
     errorResponse(res, 'Failed to test webhook', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * GET /api/v1/webhooks/:id/deliveries
  * List webhook deliveries with filtering
  * Query: status?, eventType?, limit?, offset?
  */
-router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -296,7 +297,7 @@ router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Re
     });
     errorResponse(res, 'Failed to list deliveries', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * GET /api/v1/webhooks/:id/deliveries/:deliveryId
@@ -304,7 +305,7 @@ router.get('/webhooks/:id/deliveries', async (req: AuthenticatedRequest, res: Re
  */
 router.get(
   '/webhooks/:id/deliveries/:deliveryId',
-  async (req: AuthenticatedRequest, res: Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id, deliveryId } = req.params;
       const webhookId = parseInt(id, 10);
@@ -327,14 +328,14 @@ router.get(
       });
       errorResponse(res, 'Failed to retrieve delivery', 500, 'INTERNAL_ERROR');
     }
-  }
+  })
 );
 
 /**
  * GET /api/v1/webhooks/:id/stats
  * Get delivery statistics for webhook
  */
-router.get('/webhooks/:id/stats', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -351,14 +352,14 @@ router.get('/webhooks/:id/stats', async (req: AuthenticatedRequest, res: Respons
     });
     errorResponse(res, 'Failed to retrieve statistics', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * POST /api/v1/webhooks/:id/retry
  * Manually retry failed delivery
  * Body: { deliveryId }
  */
-router.post('/webhooks/:id/retry', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks/:id/retry', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -392,13 +393,13 @@ router.post('/webhooks/:id/retry', async (req: AuthenticatedRequest, res: Respon
     });
     errorResponse(res, 'Failed to retry delivery', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * POST /api/v1/webhooks/:id/secret/regenerate
  * Regenerate webhook secret key for security rotation
  */
-router.post('/webhooks/:id/secret/regenerate', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -423,14 +424,14 @@ router.post('/webhooks/:id/secret/regenerate', async (req: AuthenticatedRequest,
     });
     errorResponse(res, 'Failed to regenerate secret', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 /**
  * POST /api/v1/webhooks/events/trigger
  * Manually trigger webhook event (for testing/validation)
  * Body: { eventType, data? }
  */
-router.post('/events/trigger', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/events/trigger', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { eventType, data } = req.body;
 
@@ -448,6 +449,6 @@ router.post('/events/trigger', async (req: AuthenticatedRequest, res: Response) 
     });
     errorResponse(res, 'Failed to trigger event', 500, 'INTERNAL_ERROR');
   }
-});
+}));
 
 export default router;

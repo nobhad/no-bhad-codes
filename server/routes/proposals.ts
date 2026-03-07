@@ -125,6 +125,7 @@ interface ProposalRow {
   signed_at?: string | null;
   terms_and_conditions?: string | null;
   contract_terms?: string | null;
+  default_deposit_percentage?: number | null;
   // Joined fields
   project_name?: string;
   client_name?: string;
@@ -411,7 +412,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -742,7 +743,7 @@ router.get(
     )) as unknown as FeatureRow[];
 
     // Get signature data if proposal is signed
-    const signature = (proposal as any).signed_at
+    const signature = proposal.signed_at
       ? ((await db.get(
         `SELECT ${PROPOSAL_SIGNATURE_COLUMNS} FROM proposal_signatures WHERE proposal_id = ? ORDER BY signed_at DESC LIMIT 1`,
         [id]
@@ -760,7 +761,7 @@ router.get(
       : undefined;
 
     // Check if proposal is signed for watermark
-    const isSigned = Boolean((proposal as any).signed_at);
+    const isSigned = Boolean(proposal.signed_at);
 
     // Helper functions
     const formatDate = (dateStr: string | undefined | null): string => {
@@ -1228,7 +1229,7 @@ router.get(
 
     // Calculate payment amounts based on deposit percentage (default 50%)
     const finalPrice = getNumber(p, 'final_price');
-    const depositPercentage = ((proposal as any).default_deposit_percentage as number) || 50;
+    const depositPercentage = proposal.default_deposit_percentage || 50;
     const depositAmount = Math.round(finalPrice * (depositPercentage / 100));
     const finalPayment = finalPrice - depositAmount;
 
@@ -1389,7 +1390,7 @@ router.get(
     }
 
     // === TERMS & CONDITIONS ===
-    const termsText = (proposal as any).terms_and_conditions || (proposal as any).contract_terms;
+    const termsText = proposal.terms_and_conditions || proposal.contract_terms;
     if (termsText) {
       ctx.y -= 35;
       ensureSpace(ctx, 80, drawContinuationHeader);
@@ -1674,7 +1675,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const templateId = parseInt(req.params.templateId);
+    const templateId = parseInt(req.params.templateId, 10);
+
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
+
     const template = await proposalService.getTemplate(templateId);
     sendSuccess(res, { template });
   })
@@ -1701,7 +1707,12 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const templateId = parseInt(req.params.templateId);
+    const templateId = parseInt(req.params.templateId, 10);
+
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
+
     const template = await proposalService.updateTemplate(templateId, req.body);
     sendSuccess(res, { template }, 'Template updated successfully');
   })
@@ -1713,7 +1724,12 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const templateId = parseInt(req.params.templateId);
+    const templateId = parseInt(req.params.templateId, 10);
+
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.deleteTemplate(templateId);
     sendSuccess(res, undefined, 'Template deleted successfully');
   })
@@ -1728,7 +1744,7 @@ router.get(
   '/:id/versions',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -1750,7 +1766,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -1768,8 +1784,8 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
-    const versionId = parseInt(req.params.versionId);
+    const proposalId = parseInt(req.params.id, 10);
+    const versionId = parseInt(req.params.versionId, 10);
 
     if (isNaN(proposalId) || proposalId <= 0 || isNaN(versionId) || versionId <= 0) {
       return errorResponse(res, 'Invalid proposal or version ID', 400, 'VALIDATION_ERROR');
@@ -1813,7 +1829,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { signerEmail, signerName, expiresInDays } = req.body;
     if (!signerEmail) {
       return errorResponse(res, 'signerEmail is required', 400, 'VALIDATION_ERROR');
@@ -1833,7 +1854,7 @@ router.post(
   '/:id/sign',
   signatureRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     // Validate proposal ID
     if (isNaN(proposalId) || proposalId <= 0) {
@@ -1871,7 +1892,7 @@ router.get(
   '/:id/signature-status',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -1956,7 +1977,7 @@ router.get(
   '/:id/comments',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -1978,7 +1999,7 @@ router.post(
   '/:id/comments',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -2012,7 +2033,12 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const commentId = parseInt(req.params.commentId);
+    const commentId = parseInt(req.params.commentId, 10);
+
+    if (isNaN(commentId) || commentId <= 0) {
+      return errorResponse(res, 'Invalid comment ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.deleteComment(commentId);
     sendSuccess(res, undefined, 'Comment deleted successfully');
   })
@@ -2028,7 +2054,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
     const activities = await proposalService.getActivities(proposalId, limit);
     sendSuccess(res, { activities });
@@ -2040,7 +2071,7 @@ router.post(
   '/:id/track-view',
   signatureRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     // Validate proposal ID
     if (isNaN(proposalId) || proposalId <= 0) {
@@ -2063,7 +2094,7 @@ router.get(
   '/:id/custom-items',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -2085,7 +2116,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -2106,7 +2137,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const itemId = parseInt(req.params.itemId);
+    const itemId = parseInt(req.params.itemId, 10);
 
     if (isNaN(itemId) || itemId <= 0) {
       return errorResponse(res, 'Invalid item ID', 400, 'VALIDATION_ERROR');
@@ -2123,7 +2154,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const itemId = parseInt(req.params.itemId);
+    const itemId = parseInt(req.params.itemId, 10);
 
     if (isNaN(itemId) || itemId <= 0) {
       return errorResponse(res, 'Invalid item ID', 400, 'VALIDATION_ERROR');
@@ -2144,7 +2175,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -2168,7 +2199,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
 
     if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
@@ -2189,7 +2220,12 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { expirationDate } = req.body;
     if (!expirationDate) {
       return errorResponse(res, 'expirationDate is required', 400, 'VALIDATION_ERROR');
@@ -2205,7 +2241,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.markProposalSent(proposalId, req.user!.email);
     sendSuccess(res, undefined, 'Proposal marked as sent');
   })
@@ -2217,7 +2258,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     const token = await proposalService.generateAccessToken(proposalId);
     sendSuccess(res, { accessToken: token });
   })
@@ -2269,7 +2315,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, 'VALIDATION_ERROR');
+    }
+
     await proposalService.markReminderSent(proposalId);
     sendSuccess(res, undefined, 'Reminder marked as sent');
   })

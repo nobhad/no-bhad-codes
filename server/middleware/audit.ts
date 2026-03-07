@@ -148,7 +148,7 @@ export function auditMiddleware() {
       const action = getAction(req.method, req.path);
       const entityType = getEntityType(req.path);
       const entityId =
-        getEntityId(req) || body?.id?.toString() || (body?.data as any)?.id?.toString();
+        getEntityId(req) || body?.id?.toString() || (body?.data as Record<string, unknown> | undefined)?.id?.toString();
 
       // Fire and forget audit log - errors are caught internally
       auditLogger
@@ -171,7 +171,7 @@ export function auditMiddleware() {
           requestMethod: req.method,
           metadata: {
             statusCode: res.statusCode,
-            responseId: body?.id || (body?.data as any)?.id
+            responseId: body?.id || (body?.data as Record<string, unknown> | undefined)?.id
           }
         })
         .catch((err) => {

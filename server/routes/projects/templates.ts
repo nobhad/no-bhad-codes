@@ -28,7 +28,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const templateId = parseInt(req.params.templateId);
+    const templateId = parseInt(req.params.templateId, 10);
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
     const template = await projectService.getTemplate(templateId);
 
     if (!template) {

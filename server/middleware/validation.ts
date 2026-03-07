@@ -538,7 +538,7 @@ export function validateRequest(
   /**
    * Check for unknown fields in the data
    */
-  const checkUnknownFields = (data: Record<string, any>, source: string): ValidationError[] => {
+  const checkUnknownFields = (data: Record<string, unknown>, source: string): ValidationError[] => {
     if (allowUnknownFields) return [];
 
     const unknownFields = Object.keys(data).filter((field) => !schemaFields.has(field));
@@ -564,9 +564,15 @@ export function validateRequest(
         validationResults.push(result);
 
         if (result.isValid && result.sanitizedData) {
-          req.body = stripUnknownFields
-            ? result.sanitizedData
-            : { ...req.body, ...result.sanitizedData };
+          if (stripUnknownFields) {
+            req.body = result.sanitizedData;
+          } else {
+            // Apply sanitized data property-by-property to prevent prototype pollution
+            for (const key of Object.keys(result.sanitizedData)) {
+              if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+              req.body[key] = result.sanitizedData[key];
+            }
+          }
         }
       }
 
@@ -574,15 +580,18 @@ export function validateRequest(
       if (validateQuery && req.query) {
         // Check for unknown fields
         unknownFieldErrors.push(
-          ...checkUnknownFields(req.query as Record<string, any>, 'query parameters')
+          ...checkUnknownFields(req.query as Record<string, unknown>, 'query parameters')
         );
 
         const result = validator.validate(req.query, schema);
         validationResults.push(result);
 
         if (result.isValid && result.sanitizedData) {
-          // Cast sanitizedData to preserve Express types
-          Object.assign(req.query, result.sanitizedData);
+          // Apply sanitized data property-by-property to prevent prototype pollution
+          for (const key of Object.keys(result.sanitizedData)) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            (req.query as Record<string, unknown>)[key] = result.sanitizedData[key];
+          }
         }
       }
 
@@ -595,8 +604,11 @@ export function validateRequest(
         validationResults.push(result);
 
         if (result.isValid && result.sanitizedData) {
-          // Cast sanitizedData to preserve Express types
-          Object.assign(req.params, result.sanitizedData);
+          // Apply sanitized data property-by-property to prevent prototype pollution
+          for (const key of Object.keys(result.sanitizedData)) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            req.params[key] = String(result.sanitizedData[key]);
+          }
         }
       }
 

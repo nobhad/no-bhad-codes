@@ -132,7 +132,7 @@ export class DeliverableService {
     query += ' ORDER BY created_at DESC';
     if (options?.limit) {
       query += ' LIMIT ? OFFSET ?';
-      params.push(options.limit as any, (options?.offset || 0) as any);
+      params.push(Number(options.limit), Number(options?.offset || 0));
     }
 
     const rows = await this.db.all(query, params);

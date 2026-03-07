@@ -21,7 +21,10 @@ router.get(
   '/:id/tasks',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
@@ -63,7 +66,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
@@ -81,7 +87,10 @@ router.get(
   '/tasks/:taskId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const task = await projectService.getTask(taskId);
 
     if (!task) {
@@ -102,7 +111,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const task = await projectService.updateTask(taskId, req.body);
     sendSuccess(res, { task }, 'Task updated successfully');
   })
@@ -114,7 +126,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     await projectService.deleteTask(taskId);
     sendSuccess(res, undefined, 'Task deleted successfully');
   })
@@ -126,7 +141,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const task = await projectService.completeTask(taskId);
     sendSuccess(res, { task }, 'Task completed successfully');
   })
@@ -138,7 +156,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const { position, milestoneId } = req.body;
 
     await projectService.moveTask(taskId, position, milestoneId);
@@ -156,7 +177,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const { dependsOnTaskId, type } = req.body;
 
     if (!dependsOnTaskId) {
@@ -174,8 +198,11 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
-    const dependsOnTaskId = parseInt(req.params.dependsOnTaskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    const dependsOnTaskId = parseInt(req.params.dependsOnTaskId, 10);
+    if (isNaN(taskId) || taskId <= 0 || isNaN(dependsOnTaskId) || dependsOnTaskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
 
     await projectService.removeDependency(taskId, dependsOnTaskId);
     sendSuccess(res, undefined, 'Dependency removed successfully');
@@ -187,7 +214,7 @@ router.get(
   '/:id/tasks/blocked',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
     }
@@ -210,7 +237,7 @@ router.get(
   '/tasks/:taskId/comments',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId)) {
       return errorResponse(res, 'Invalid task ID', 400, 'INVALID_ID');
     }
@@ -229,7 +256,7 @@ router.post(
   '/tasks/:taskId/comments',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
     const { content } = req.body;
 
     if (isNaN(taskId)) {
@@ -255,7 +282,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const commentId = parseInt(req.params.commentId);
+    const commentId = parseInt(req.params.commentId, 10);
+    if (isNaN(commentId) || commentId <= 0) {
+      return errorResponse(res, 'Invalid comment ID', 400, 'VALIDATION_ERROR');
+    }
     await projectService.deleteTaskComment(commentId);
     sendSuccess(res, undefined, 'Comment deleted successfully');
   })
@@ -271,7 +301,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const { content } = req.body;
 
     if (!content) {
@@ -288,7 +321,7 @@ router.post(
   '/tasks/checklist/:itemId/toggle',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const itemId = parseInt(req.params.itemId);
+    const itemId = parseInt(req.params.itemId, 10);
     if (isNaN(itemId)) {
       return errorResponse(res, 'Invalid checklist item ID', 400, 'INVALID_ID');
     }
@@ -308,7 +341,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: Response) => {
-    const itemId = parseInt(req.params.itemId);
+    const itemId = parseInt(req.params.itemId, 10);
+    if (isNaN(itemId) || itemId <= 0) {
+      return errorResponse(res, 'Invalid checklist item ID', 400, 'VALIDATION_ERROR');
+    }
     await projectService.deleteChecklistItem(itemId);
     sendSuccess(res, undefined, 'Checklist item deleted successfully');
   })

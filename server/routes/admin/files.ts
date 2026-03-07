@@ -87,7 +87,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');

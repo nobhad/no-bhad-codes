@@ -477,7 +477,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const configured = isGoogleCalendarConfigured();
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
 
     let syncConfig = null;
     if (userId) {
@@ -518,7 +518,7 @@ router.get(
       return;
     }
 
-    const state = (req as any).user?.id?.toString() || '';
+    const state = req.user?.id?.toString() || '';
     const authUrl = getGoogleAuthUrl(state);
     sendSuccess(res, { authUrl });
   })
@@ -534,7 +534,12 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { code } = req.body;
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
+      return;
+    }
 
     if (!code) {
       errorResponse(res, 'Authorization code is required', 400, 'VALIDATION_ERROR');
@@ -569,7 +574,11 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
+      return;
+    }
     const { syncMilestones, syncTasks, syncInvoiceDueDates, isActive } = req.body;
 
     const existing = await getCalendarSyncConfig(userId);

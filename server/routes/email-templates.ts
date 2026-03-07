@@ -60,9 +60,9 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const template = await emailTemplateService.getTemplate(id);
@@ -114,9 +114,9 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const {
@@ -171,9 +171,9 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     try {
@@ -204,9 +204,9 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const versions = await emailTemplateService.getVersions(id);
@@ -222,11 +222,11 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    const version = parseInt(req.params.version);
+    const id = parseInt(req.params.id, 10);
+    const version = parseInt(req.params.version, 10);
 
-    if (isNaN(id) || isNaN(version)) {
-      return errorResponse(res, 'Invalid template ID or version', 400);
+    if (isNaN(id) || id <= 0 || isNaN(version) || version <= 0) {
+      return errorResponse(res, 'Invalid template ID or version', 400, 'VALIDATION_ERROR');
     }
 
     const v = await emailTemplateService.getVersion(id, version);
@@ -246,11 +246,11 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    const version = parseInt(req.params.version);
+    const id = parseInt(req.params.id, 10);
+    const version = parseInt(req.params.version, 10);
 
-    if (isNaN(id) || isNaN(version)) {
-      return errorResponse(res, 'Invalid template ID or version', 400);
+    if (isNaN(id) || id <= 0 || isNaN(version) || version <= 0) {
+      return errorResponse(res, 'Invalid template ID or version', 400, 'VALIDATION_ERROR');
     }
 
     const template = await emailTemplateService.restoreVersion(id, version, req.user?.email);
@@ -274,9 +274,9 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const template = await emailTemplateService.getTemplate(id);
@@ -330,9 +330,9 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return errorResponse(res, 'Invalid template ID', 400);
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
     }
 
     const { to_email, sample_data } = req.body;
@@ -385,10 +385,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const templateId = req.query.templateId ? parseInt(req.query.templateId as string) : undefined;
+    const templateId = req.query.templateId ? parseInt(req.query.templateId as string, 10) : undefined;
     const recipientEmail = req.query.recipientEmail as string | undefined;
     const status = req.query.status as string | undefined;
-    const limitParam = req.query.limit ? parseInt(req.query.limit as string) : 100;
+    const limitParam = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
 
     // Validate numeric parameters
     if (templateId !== undefined && (isNaN(templateId) || templateId <= 0)) {

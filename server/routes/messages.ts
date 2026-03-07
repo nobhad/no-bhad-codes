@@ -259,7 +259,12 @@ router.post(
   validateRequest(ValidationSchemas.message),
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { message, priority = 'normal', reply_to } = req.body;
     const attachments = req.files as Express.Multer.File[];
 
@@ -424,7 +429,12 @@ router.get(
   authenticateToken,
   cache({ ttl: 30, tags: ['messages'] }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     // Verify thread access
@@ -508,7 +518,12 @@ router.put(
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     // Verify thread access
@@ -740,9 +755,9 @@ router.get(
   '/messages/:messageId/mentions',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
-    if (isNaN(messageId)) {
-      return errorResponse(res, 'Invalid message ID', 400);
+    const messageId = parseInt(req.params.messageId, 10);
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessMessage(req, messageId))) {
@@ -777,9 +792,9 @@ router.get(
   '/messages/:messageId/reactions',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
-    if (isNaN(messageId)) {
-      return errorResponse(res, 'Invalid message ID', 400);
+    const messageId = parseInt(req.params.messageId, 10);
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessMessage(req, messageId))) {
@@ -797,11 +812,11 @@ router.post(
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
     const { reaction } = req.body;
 
-    if (isNaN(messageId)) {
-      return errorResponse(res, 'Invalid message ID', 400);
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessMessage(req, messageId))) {
@@ -828,11 +843,11 @@ router.delete(
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
     const reaction = decodeURIComponent(req.params.reaction);
 
-    if (isNaN(messageId)) {
-      return errorResponse(res, 'Invalid message ID', 400);
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessMessage(req, messageId))) {
@@ -853,9 +868,9 @@ router.get(
   '/projects/:projectId/subscription',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
-    if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400);
+    const projectId = parseInt(req.params.projectId, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessProject(req, projectId))) {
@@ -872,11 +887,11 @@ router.put(
   '/projects/:projectId/subscription',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
     const { notify_all, notify_mentions, notify_replies } = req.body;
 
-    if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessProject(req, projectId))) {
@@ -897,11 +912,11 @@ router.post(
   '/projects/:projectId/mute',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
     const { until } = req.body; // Optional: datetime to mute until
 
-    if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
     }
 
     if (!(await canAccessProject(req, projectId))) {
@@ -923,7 +938,11 @@ router.post(
   '/projects/:projectId/unmute',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
+
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
 
     const subscription = await messageService.unmuteProject(projectId, req.user!.email);
     sendSuccess(res, { subscription }, 'Project unmuted');
@@ -939,7 +958,11 @@ router.post(
   '/messages/:messageId/read',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
+
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
+    }
 
     await messageService.markAsRead(messageId, req.user!.email, req.user!.type);
     sendSuccess(res, undefined, 'Marked as read');
@@ -968,7 +991,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
+
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
+    }
+
     const receipts = await messageService.getReadReceipts(messageId);
     sendSuccess(res, { receipts });
   })
@@ -989,7 +1017,12 @@ router.get(
   '/threads/:threadId/unread-count',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const count = await messageService.getThreadUnreadCount(threadId, req.user!.email);
     sendSuccess(res, { unread_count: count });
   })
@@ -1004,7 +1037,12 @@ router.get(
   '/threads/:threadId/pinned',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const pinnedMessages = await messageService.getPinnedMessages(threadId);
     sendSuccess(res, { pinned_messages: pinnedMessages });
   })
@@ -1017,7 +1055,12 @@ router.post(
   requireAdmin,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
+
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { thread_id } = req.body;
 
     if (!thread_id) {
@@ -1036,7 +1079,12 @@ router.delete(
   requireAdmin,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
+
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
+    }
+
     const threadId = parseInt(req.query.thread_id as string);
 
     if (!threadId) {
@@ -1058,7 +1106,12 @@ router.put(
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
+
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { message: content } = req.body;
 
     if (!content || content.trim().length === 0) {
@@ -1082,7 +1135,11 @@ router.delete(
   authenticateToken,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const messageId = parseInt(req.params.messageId);
+    const messageId = parseInt(req.params.messageId, 10);
+
+    if (isNaN(messageId) || messageId <= 0) {
+      return errorResponse(res, 'Invalid message ID', 400, 'VALIDATION_ERROR');
+    }
 
     await messageService.deleteMessage(messageId, req.user!.email);
     const success = true;
@@ -1106,7 +1163,11 @@ router.post(
   requireAdmin,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
 
     await messageService.archiveThread(threadId, req.user!.email);
     sendSuccess(res, undefined, 'Thread archived');
@@ -1120,7 +1181,11 @@ router.post(
   requireAdmin,
   invalidateCache(['messages']),
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
 
     await messageService.unarchiveThread(threadId);
     sendSuccess(res, undefined, 'Thread unarchived');
@@ -1179,7 +1244,12 @@ router.post(
   requireAdmin,
   invalidateCache(['messages']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { message } = req.body;
 
     if (!message || message.trim().length === 0) {
@@ -1220,7 +1290,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const threadId = parseInt(req.params.threadId);
+    const threadId = parseInt(req.params.threadId, 10);
+
+    if (isNaN(threadId) || threadId <= 0) {
+      return errorResponse(res, 'Invalid thread ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     const messages = await db.all(

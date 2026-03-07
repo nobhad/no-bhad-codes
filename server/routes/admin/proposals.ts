@@ -81,7 +81,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const proposalId = parseInt(req.params.proposalId);
+    const proposalId = parseInt(req.params.proposalId, 10);
 
     if (isNaN(proposalId)) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'INVALID_ID');
@@ -110,7 +110,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const proposalId = parseInt(req.params.proposalId);
+    const proposalId = parseInt(req.params.proposalId, 10);
 
     if (isNaN(proposalId)) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'INVALID_ID');
@@ -152,7 +152,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const proposalId = parseInt(req.params.proposalId);
+    const proposalId = parseInt(req.params.proposalId, 10);
 
     if (isNaN(proposalId)) {
       return errorResponse(res, 'Invalid proposal ID', 400, 'INVALID_ID');

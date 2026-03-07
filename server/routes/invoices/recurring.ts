@@ -131,7 +131,7 @@ router.get(
   '/recurring/:projectId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
@@ -171,7 +171,7 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
+    const recurringId = parseInt(req.params.id, 10);
 
     if (isNaN(recurringId)) {
       return errorResponse(res, 'Invalid recurring invoice ID', 400, 'INVALID_ID');
@@ -202,7 +202,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
+    const recurringId = parseInt(req.params.id, 10);
 
     if (isNaN(recurringId)) {
       return errorResponse(res, 'Invalid recurring invoice ID', 400, 'INVALID_ID');
@@ -233,7 +233,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
+    const recurringId = parseInt(req.params.id, 10);
 
     if (isNaN(recurringId)) {
       return errorResponse(res, 'Invalid recurring invoice ID', 400, 'INVALID_ID');
@@ -264,7 +264,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const recurringId = parseInt(req.params.id);
+    const recurringId = parseInt(req.params.id, 10);
 
     if (isNaN(recurringId)) {
       return errorResponse(res, 'Invalid recurring invoice ID', 400, 'INVALID_ID');

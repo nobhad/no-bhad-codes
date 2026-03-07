@@ -29,7 +29,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
     const { depositInvoiceId, amount } = req.body;
 
     if (isNaN(invoiceId)) {
@@ -73,7 +73,7 @@ router.get(
   '/:id/credits',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');

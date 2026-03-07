@@ -30,7 +30,7 @@ router.get(
   '/:id/reminders',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
@@ -64,7 +64,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const reminderId = parseInt(req.params.id);
+    const reminderId = parseInt(req.params.id, 10);
 
     if (isNaN(reminderId)) {
       return errorResponse(res, 'Invalid reminder ID', 400, 'INVALID_ID');
@@ -109,7 +109,7 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const invoiceId = parseInt(req.params.id);
+    const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
       return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');

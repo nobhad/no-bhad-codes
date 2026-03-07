@@ -20,7 +20,7 @@ dotenv.config();
  */
 interface ConfigSchemaItem {
   required?: boolean;
-  default?: any;
+  default?: string | number | boolean;
   type?: 'boolean' | 'number' | 'email' | 'url';
   values?: readonly string[];
   minLength?: number;
@@ -249,17 +249,17 @@ const validationErrors: string[] = [];
  */
 const config: Partial<AppConfig> = {};
 
+/** Dynamic key access — avoids `as any` for config[key] indexing */
+const configRecord = config as Record<string, string | number | boolean | undefined>;
+
 /**
  * Type conversion and validation functions
  */
-const validators: Record<string, (value: any) => any> = {
+const validators: Record<string, (value: string) => string | number | boolean> = {
   boolean: (value) => {
-    if (typeof value === 'boolean') return value;
-    if (typeof value === 'string') {
-      const lower = value.toLowerCase();
-      if (lower === 'true' || lower === '1' || lower === 'yes') return true;
-      if (lower === 'false' || lower === '0' || lower === 'no') return false;
-    }
+    const lower = value.toLowerCase();
+    if (lower === 'true' || lower === '1' || lower === 'yes') return true;
+    if (lower === 'false' || lower === '0' || lower === 'no') return false;
     throw new Error('Invalid boolean value');
   },
 
@@ -301,7 +301,7 @@ function validateConfigValue(key: string, schema: ConfigSchemaItem): void {
 
     // Use default value if provided
     if (defaultValue !== undefined) {
-      (config as any)[key] = defaultValue;
+      configRecord[key] = defaultValue;
       return;
     }
 
@@ -309,16 +309,16 @@ function validateConfigValue(key: string, schema: ConfigSchemaItem): void {
     return;
   }
 
-  let value = envValue.trim();
+  let value: string | number | boolean = envValue.trim();
 
   try {
     // Type conversion
     if (type && validators[type]) {
-      value = validators[type](value);
+      value = validators[type](value as string);
     }
 
     // Value validation
-    if (values && !values.includes(value)) {
+    if (values && typeof value === 'string' && !values.includes(value)) {
       throw new Error(`Value must be one of: ${values.join(', ')}`);
     }
 
@@ -337,7 +337,7 @@ function validateConfigValue(key: string, schema: ConfigSchemaItem): void {
       }
     }
 
-    (config as any)[key] = value;
+    configRecord[key] = value;
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     validationErrors.push(`Invalid ${key}: ${errorMessage}`);
@@ -374,51 +374,51 @@ function validateConfig(): void {
 function generateDerivedConfig(): void {
   // Auto-generate secrets in development if not provided
   // Use crypto.randomBytes for cryptographically secure random generation
-  if ((config as any).NODE_ENV === 'development') {
-    if (!(config as any).JWT_SECRET || (config as any).JWT_SECRET.includes('change-this')) {
-      (config as any).JWT_SECRET = `dev-jwt-secret-${crypto.randomBytes(32).toString('hex')}`;
+  if (configRecord.NODE_ENV === 'development') {
+    if (!configRecord.JWT_SECRET || String(configRecord.JWT_SECRET).includes('change-this')) {
+      configRecord.JWT_SECRET = `dev-jwt-secret-${crypto.randomBytes(32).toString('hex')}`;
       console.warn('⚠️  Using auto-generated JWT_SECRET for development');
     }
 
     if (
-      !(config as any).REFRESH_TOKEN_SECRET ||
-      (config as any).REFRESH_TOKEN_SECRET.includes('change-this')
+      !configRecord.REFRESH_TOKEN_SECRET ||
+      String(configRecord.REFRESH_TOKEN_SECRET).includes('change-this')
     ) {
-      (config as any).REFRESH_TOKEN_SECRET =
+      configRecord.REFRESH_TOKEN_SECRET =
         `dev-refresh-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
 
-    if (!(config as any).SESSION_SECRET || (config as any).SESSION_SECRET.includes('change-this')) {
-      (config as any).SESSION_SECRET =
+    if (!configRecord.SESSION_SECRET || String(configRecord.SESSION_SECRET).includes('change-this')) {
+      configRecord.SESSION_SECRET =
         `dev-session-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
   }
 
   // Derive API base URL from port if not set
-  if (!(config as any).API_BASE_URL && (config as any).NODE_ENV === 'development') {
-    (config as any).API_BASE_URL = `http://localhost:${(config as any).PORT}`;
+  if (!configRecord.API_BASE_URL && configRecord.NODE_ENV === 'development') {
+    configRecord.API_BASE_URL = `http://localhost:${configRecord.PORT}`;
   }
 
   // Email validation - require email config if enabled
-  if ((config as any).EMAIL_ENABLED) {
+  if (configRecord.EMAIL_ENABLED) {
     const emailRequiredFields = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'FROM_EMAIL'];
-    const missingEmailFields = emailRequiredFields.filter((field) => !(config as any)[field]);
+    const missingEmailFields = emailRequiredFields.filter((field) => !configRecord[field]);
 
     if (missingEmailFields.length > 0) {
       console.warn(`⚠️  EMAIL_ENABLED is true but missing: ${missingEmailFields.join(', ')}`);
       console.warn('   Email functionality will be disabled.');
-      (config as any).EMAIL_ENABLED = false;
+      configRecord.EMAIL_ENABLED = false;
     }
   }
 
   // Ensure directories exist
   const directories = [
-    (config as any).UPLOAD_DIR,
-    (config as any).TEMP_DIR,
-    (config as any).DATABASE_PATH ? path.dirname((config as any).DATABASE_PATH) : undefined,
-    (config as any).DATABASE_BACKUP_PATH,
-    (config as any).LOG_FILE ? path.dirname((config as any).LOG_FILE) : undefined,
-    (config as any).LOG_ERROR_FILE ? path.dirname((config as any).LOG_ERROR_FILE) : undefined
+    configRecord.UPLOAD_DIR,
+    configRecord.TEMP_DIR,
+    configRecord.DATABASE_PATH ? path.dirname(String(configRecord.DATABASE_PATH)) : undefined,
+    configRecord.DATABASE_BACKUP_PATH as string | undefined,
+    configRecord.LOG_FILE ? path.dirname(String(configRecord.LOG_FILE)) : undefined,
+    configRecord.LOG_ERROR_FILE ? path.dirname(String(configRecord.LOG_ERROR_FILE)) : undefined
   ].filter(Boolean) as string[];
 
   directories.forEach((dir) => {
@@ -438,18 +438,18 @@ function generateDerivedConfig(): void {
  */
 function getConfigSummary(): object {
   const summary = {
-    environment: (config as any).NODE_ENV,
-    port: (config as any).PORT,
-    database: (config as any).DATABASE_PATH,
-    emailEnabled: (config as any).EMAIL_ENABLED,
+    environment: configRecord.NODE_ENV,
+    port: configRecord.PORT,
+    database: configRecord.DATABASE_PATH,
+    emailEnabled: configRecord.EMAIL_ENABLED,
     features: {
-      registration: (config as any).ENABLE_REGISTRATION,
-      passwordReset: (config as any).ENABLE_PASSWORD_RESET,
-      emailVerification: (config as any).ENABLE_EMAIL_VERIFICATION,
-      twoFactor: (config as any).ENABLE_2FA,
-      apiDocs: (config as any).ENABLE_API_DOCS
+      registration: configRecord.ENABLE_REGISTRATION,
+      passwordReset: configRecord.ENABLE_PASSWORD_RESET,
+      emailVerification: configRecord.ENABLE_EMAIL_VERIFICATION,
+      twoFactor: configRecord.ENABLE_2FA,
+      apiDocs: configRecord.ENABLE_API_DOCS
     },
-    maintenanceMode: (config as any).MAINTENANCE_MODE
+    maintenanceMode: configRecord.MAINTENANCE_MODE
   };
 
   return summary;

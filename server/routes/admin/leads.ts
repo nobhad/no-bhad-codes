@@ -40,6 +40,7 @@ router.get(
       const db = getDatabase();
 
       // Get all projects with client info
+      const MAX_LEADS = 500;
       const leads = await db.all(`
         SELECT
           p.id,
@@ -68,7 +69,8 @@ router.get(
         FROM projects p
         LEFT JOIN clients c ON p.client_id = c.id
         ORDER BY p.created_at DESC
-      `);
+        LIMIT ?
+      `, [MAX_LEADS]);
 
       // Get stats - using simplified lead statuses
       const stats = await db.get(`
@@ -119,6 +121,7 @@ router.get(
       const db = getDatabase();
 
       // Get all contact submissions
+      const MAX_SUBMISSIONS = 500;
       const submissions = await db.all(`
         SELECT
           id,
@@ -133,7 +136,8 @@ router.get(
           replied_at
         FROM contact_submissions
         ORDER BY created_at DESC
-      `);
+        LIMIT ?
+      `, [MAX_SUBMISSIONS]);
 
       // Get stats
       const stats = await db.get(`
@@ -769,7 +773,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const ruleId = parseInt(req.params.id);
+    const ruleId = parseInt(req.params.id, 10);
+    if (isNaN(ruleId) || ruleId <= 0) {
+      return errorResponse(res, 'Invalid rule ID', 400, 'VALIDATION_ERROR');
+    }
     const rule = await leadService.updateScoringRule(ruleId, req.body);
     sendSuccess(res, { rule });
   })
@@ -783,7 +790,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const ruleId = parseInt(req.params.id);
+    const ruleId = parseInt(req.params.id, 10);
+    if (isNaN(ruleId) || ruleId <= 0) {
+      return errorResponse(res, 'Invalid rule ID', 400, 'VALIDATION_ERROR');
+    }
     await leadService.deleteScoringRule(ruleId);
     sendSuccess(res, undefined, 'Scoring rule deleted');
   })
@@ -797,7 +807,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const result = await leadService.calculateLeadScore(projectId);
     sendSuccess(res, result);
   })
@@ -867,7 +880,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { stageId } = req.body;
 
     if (!stageId) {
@@ -891,7 +907,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const tasks = await leadService.getTasks(projectId);
     sendSuccess(res, { tasks });
   })
@@ -905,7 +924,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { title, description, taskType, dueDate, dueTime, assignedTo, priority, reminderAt } =
       req.body;
 
@@ -936,7 +958,10 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const task = await leadService.updateTask(taskId, req.body);
     sendSuccess(res, { task });
   })
@@ -950,7 +975,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const taskId = parseInt(req.params.taskId);
+    const taskId = parseInt(req.params.taskId, 10);
+    if (isNaN(taskId) || taskId <= 0) {
+      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+    }
     const task = await leadService.completeTask(taskId, req.user?.email);
     sendSuccess(res, { task });
   })
@@ -996,7 +1024,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const notes = await leadService.getNotes(projectId);
     sendSuccess(res, { notes });
   })
@@ -1010,7 +1041,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { content } = req.body;
 
     if (!content) {
@@ -1030,7 +1064,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const noteId = parseInt(req.params.noteId);
+    const noteId = parseInt(req.params.noteId, 10);
+    if (isNaN(noteId) || noteId <= 0) {
+      return errorResponse(res, 'Invalid note ID', 400, 'VALIDATION_ERROR');
+    }
     const note = await leadService.togglePinNote(noteId);
     sendSuccess(res, { note });
   })
@@ -1044,7 +1081,10 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const noteId = parseInt(req.params.noteId);
+    const noteId = parseInt(req.params.noteId, 10);
+    if (isNaN(noteId) || noteId <= 0) {
+      return errorResponse(res, 'Invalid note ID', 400, 'VALIDATION_ERROR');
+    }
     await leadService.deleteNote(noteId);
     sendSuccess(res, undefined, 'Note deleted');
   })
@@ -1076,7 +1116,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { sourceId } = req.body;
 
     if (!sourceId) {
@@ -1100,7 +1143,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const { assignee } = req.body;
 
     if (!assignee) {
@@ -1164,7 +1210,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.id);
+    const projectId = parseInt(req.params.id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
+      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+    }
     const duplicates = await leadService.findDuplicates(projectId);
     sendSuccess(res, { duplicates });
   })
@@ -1178,7 +1227,10 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const duplicateId = parseInt(req.params.id);
+    const duplicateId = parseInt(req.params.id, 10);
+    if (isNaN(duplicateId) || duplicateId <= 0) {
+      return errorResponse(res, 'Invalid duplicate ID', 400, 'VALIDATION_ERROR');
+    }
     const { status } = req.body;
 
     if (!status || !['merged', 'not_duplicate', 'dismissed'].includes(status)) {

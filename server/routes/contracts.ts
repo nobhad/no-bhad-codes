@@ -129,7 +129,7 @@ router.get(
   '/:contractId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
 
     // Validate contractId is a valid number
     if (isNaN(contractId) || contractId <= 0) {
@@ -152,7 +152,7 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
 
     // Validate contract ID
     if (isNaN(contractId) || contractId <= 0) {
@@ -221,7 +221,11 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
 
     if (req.body?.status && !contractService.isValidContractStatus(req.body.status)) {
       return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
@@ -238,7 +242,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     const contract = await contractService.getContract(contractId);
@@ -274,7 +283,8 @@ router.post(
       const crypto = await import('crypto');
       signatureToken = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30); // 30 day expiry
+      const CONTRACT_SIGNATURE_EXPIRY_DAYS = 30;
+      expiresAt.setDate(expiresAt.getDate() + CONTRACT_SIGNATURE_EXPIRY_DAYS);
 
       await db.run(
         'UPDATE projects SET contract_signature_token = ?, contract_signature_expires_at = ? WHERE id = ?',
@@ -342,7 +352,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
 
     const contract = await contractService.getContract(contractId);
@@ -415,9 +430,9 @@ router.post(
     });
 
     await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
-       VALUES (?, 'reminder_sent', ?, ?)`,
-      [contract.projectId, req.user?.email || 'admin', JSON.stringify({ contractId })]
+      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
+       VALUES (?, ?, 'reminder_sent', ?, ?)`,
+      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
     );
 
     await db.run(
@@ -436,7 +451,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
     const now = new Date().toISOString();
 
@@ -454,9 +474,9 @@ router.post(
     );
 
     await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
-       VALUES (?, 'expired', ?, ?)`,
-      [contract.projectId, req.user?.email || 'admin', JSON.stringify({ contractId })]
+      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
+       VALUES (?, ?, 'expired', ?, ?)`,
+      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
     );
 
     sendSuccess(res, { contract }, 'Contract expired');
@@ -469,7 +489,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const { content } = req.body;
 
     const original = await contractService.getContract(contractId);
@@ -493,7 +518,12 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const db = getDatabase();
     const contract = await contractService.getContract(contractId);
 
@@ -557,9 +587,9 @@ router.post(
     });
 
     await db.run(
-      `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
-       VALUES (?, 'renewal_reminder_sent', ?, ?)`,
-      [contract.projectId, req.user?.email || 'admin', JSON.stringify({ contractId })]
+      `INSERT INTO contract_signature_log (project_id, contract_id, action, actor_email, details)
+       VALUES (?, ?, 'renewal_reminder_sent', ?, ?)`,
+      [contract.projectId, contractId, req.user?.email || 'admin', JSON.stringify({ contractId })]
     );
 
     sendSuccess(res, undefined, 'Renewal reminder sent');
@@ -572,7 +602,12 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const contractId = parseInt(req.params.contractId);
+    const contractId = parseInt(req.params.contractId, 10);
+
+    if (isNaN(contractId) || contractId <= 0) {
+      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+    }
+
     const contract = await contractService.updateContract(contractId, { status: 'cancelled' });
     sendSuccess(res, { contract }, 'Contract cancelled successfully');
   })
@@ -643,7 +678,12 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const templateId = parseInt(req.params.templateId);
+    const templateId = parseInt(req.params.templateId, 10);
+
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
+
     const template = await contractService.getTemplate(templateId);
     sendSuccess(res, { template });
   })
@@ -676,7 +716,11 @@ router.put(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const templateId = parseInt(req.params.templateId);
+    const templateId = parseInt(req.params.templateId, 10);
+
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
 
     if (req.body?.type && !contractService.isValidTemplateType(req.body.type)) {
       return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
@@ -693,7 +737,12 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
-    const templateId = parseInt(_req.params.templateId);
+    const templateId = parseInt(_req.params.templateId, 10);
+
+    if (isNaN(templateId) || templateId <= 0) {
+      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+    }
+
     await contractService.deleteTemplate(templateId);
     sendSuccess(res, undefined, 'Template deleted successfully');
   })

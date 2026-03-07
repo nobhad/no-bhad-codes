@@ -146,13 +146,15 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     roles: ['admin', 'client'],
     order: 1,
     shortcut: '1',
-    activeForRole: 'admin' // Default active for both roles
+    activeForRole: 'admin'
   },
+
+  // Admin subtab items (hidden from sidebar, shown as subtabs within groups)
   {
     id: 'projects',
     label: 'Projects',
     icon: 'briefcase',
-    roles: ['admin', 'client'],
+    roles: ['admin'],
     group: 'work',
     order: 2,
     badge: 'badge-projects'
@@ -161,26 +163,16 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     id: 'messages',
     label: 'Messages',
     icon: 'messageSquare',
-    roles: ['admin', 'client'],
+    roles: ['admin'],
     group: 'crm',
     order: 3,
     badge: 'badge-messages'
   },
   {
-    id: 'files',
-    label: 'Files',
-    icon: 'fileText',
-    roles: ['client'],
-    group: 'documents',
-    order: 4,
-    badge: 'badge-documents',
-    dataTab: 'files'
-  },
-  {
     id: 'invoices',
     label: 'Invoices',
     icon: 'receipt',
-    roles: ['admin', 'client'],
+    roles: ['admin'],
     group: 'documents',
     order: 5,
     badge: 'badge-invoices'
@@ -189,7 +181,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     id: 'requests',
     label: 'Requests',
     icon: 'messageCircle',
-    roles: ['admin', 'client'],
+    roles: ['admin'],
     group: 'work',
     order: 6,
     badge: 'badge-requests'
@@ -198,8 +190,59 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     id: 'questionnaires',
     label: 'Questionnaires',
     icon: 'clipboardList',
-    roles: ['admin', 'client'],
+    roles: ['admin'],
     group: 'documents',
+    order: 7,
+    badge: 'badge-questionnaires'
+  },
+
+  // Client top-level items (no group — visible directly in sidebar)
+  {
+    id: 'projects',
+    label: 'Projects',
+    icon: 'briefcase',
+    roles: ['client'],
+    order: 2,
+    badge: 'badge-projects'
+  },
+  {
+    id: 'messages',
+    label: 'Messages',
+    icon: 'messageSquare',
+    roles: ['client'],
+    order: 3,
+    badge: 'badge-messages'
+  },
+  {
+    id: 'files',
+    label: 'Files',
+    icon: 'fileText',
+    roles: ['client'],
+    order: 4,
+    badge: 'badge-documents',
+    dataTab: 'files'
+  },
+  {
+    id: 'invoices',
+    label: 'Invoices',
+    icon: 'receipt',
+    roles: ['client'],
+    order: 5,
+    badge: 'badge-invoices'
+  },
+  {
+    id: 'requests',
+    label: 'Requests',
+    icon: 'messageCircle',
+    roles: ['client'],
+    order: 6,
+    badge: 'badge-requests'
+  },
+  {
+    id: 'questionnaires',
+    label: 'Questionnaires',
+    icon: 'clipboardList',
+    roles: ['client'],
     order: 7,
     badge: 'badge-questionnaires'
   },
@@ -208,7 +251,7 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Settings',
     icon: 'settingsClient',
     roles: ['client'],
-    order: 100 // Always last for client
+    order: 100
   },
 
   // ========== ADMIN-ONLY TABS ==========
@@ -320,7 +363,6 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Proposals',
     icon: 'fileText',
     roles: ['client'],
-    group: 'documents',
     order: 16
   },
   {
@@ -328,7 +370,6 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Contracts',
     icon: 'fileText',
     roles: ['client'],
-    group: 'documents',
     order: 17
   },
   {
@@ -336,7 +377,6 @@ export const UNIFIED_NAVIGATION: UnifiedNavItem[] = [
     label: 'Deliverables',
     icon: 'package',
     roles: ['client'],
-    group: 'documents',
     order: 17.5
   },
   {
@@ -518,7 +558,7 @@ export const UNIFIED_TAB_GROUPS: Record<
 > = {
   work: {
     label: 'Work',
-    tabs: ['projects', 'tasks', 'ad-hoc-requests'],
+    tabs: ['projects', 'tasks', 'requests', 'ad-hoc-requests'],
     defaultTab: 'projects',
     roles: ['admin']
   },
@@ -534,13 +574,7 @@ export const UNIFIED_TAB_GROUPS: Record<
     defaultTab: 'invoices',
     roles: ['admin']
   },
-  // Client groups (for hash routing)
-  docs: {
-    label: 'Documents',
-    tabs: ['files', 'invoices', 'documents', 'questionnaires'],
-    defaultTab: 'files',
-    roles: ['client']
-  },
+  // Client support group (for hash routing)
   support: {
     label: 'Support',
     tabs: ['messages', 'help'],
@@ -624,9 +658,9 @@ export function resolveTab(
   tabName: string,
   role: UserRole
 ): { group: string | null; tab: string } {
-  // Check if it's a group
+  // Check if it's a group — tab stays as the group name (overview view)
   if (UNIFIED_TAB_GROUPS[tabName] && UNIFIED_TAB_GROUPS[tabName].roles.includes(role)) {
-    return { group: tabName, tab: UNIFIED_TAB_GROUPS[tabName].defaultTab };
+    return { group: tabName, tab: tabName };
   }
 
   // Find which group this tab belongs to (if any)
@@ -650,6 +684,19 @@ export function getTabTitle(tabId: string): string {
  * Check if a tab is accessible for a role
  */
 export function canAccessTab(tabId: string, role: UserRole): boolean {
-  const navItem = UNIFIED_NAVIGATION.find((item) => item.id === tabId);
-  return navItem ? navItem.roles.includes(role) : false;
+  // Check top-level navigation items — use .some() not .find() because
+  // UNIFIED_NAVIGATION has duplicate IDs for shared tabs (admin + client versions)
+  const hasNavAccess = UNIFIED_NAVIGATION.some(
+    (item) => item.id === tabId && item.roles.includes(role)
+  );
+  if (hasNavAccess) return true;
+
+  // Check subtab groups — subtab IDs are valid if the group is accessible
+  for (const group of UNIFIED_SUBTAB_GROUPS) {
+    if (group.roles.includes(role) && group.subtabs.some((s) => s.id === tabId)) {
+      return true;
+    }
+  }
+
+  return false;
 }

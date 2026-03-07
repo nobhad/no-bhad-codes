@@ -113,7 +113,7 @@ router.get(
   '/scheduled/:projectId',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
       return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
@@ -153,7 +153,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const scheduledId = parseInt(req.params.id);
+    const scheduledId = parseInt(req.params.id, 10);
 
     if (isNaN(scheduledId)) {
       return errorResponse(res, 'Invalid scheduled invoice ID', 400, 'INVALID_ID');

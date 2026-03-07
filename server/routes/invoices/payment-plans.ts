@@ -134,7 +134,7 @@ router.delete(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const templateId = parseInt(req.params.id);
+    const templateId = parseInt(req.params.id, 10);
 
     if (isNaN(templateId)) {
       return errorResponse(res, 'Invalid template ID', 400, 'INVALID_ID');

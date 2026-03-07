@@ -13,7 +13,7 @@ router.get(
   '/files/:fileId/versions',
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
       return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
     }
@@ -33,7 +33,7 @@ router.post(
   authenticateToken,
   upload.single('file'),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const fileId = parseInt(req.params.fileId);
+    const fileId = parseInt(req.params.fileId, 10);
     const file = req.file;
 
     if (isNaN(fileId)) {
@@ -69,8 +69,11 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const fileId = parseInt(req.params.fileId);
-    const versionId = parseInt(req.params.versionId);
+    const fileId = parseInt(req.params.fileId, 10);
+    const versionId = parseInt(req.params.versionId, 10);
+    if (isNaN(fileId) || fileId <= 0 || isNaN(versionId) || versionId <= 0) {
+      return errorResponse(res, 'Invalid file or version ID', 400, 'VALIDATION_ERROR');
+    }
     const version = await fileService.restoreVersion(fileId, versionId);
     sendSuccess(res, { version }, 'Version restored');
   })
