@@ -64,7 +64,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  color: var(--portal-text-light);
 }
 
 /* Panel card header: title on left, action on right */
@@ -93,15 +92,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--portal-text-light);
   text-decoration: none;
   padding: var(--space-2);
   border-bottom: var(--border-width) solid var(--portal-border-color);
-  transition: color var(--transition-fast);
-}
-
-.link-list-item:hover {
-  color: var(--portal-text-secondary);
 }
 
 /* Milestone list container */
@@ -155,12 +148,10 @@
 }
 
 .financial-row-label {
-  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
 }
 
 .financial-row-value {
-  color: var(--portal-text-light);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -211,7 +202,6 @@
 #tab-client-detail .page-title h2 {
   font-family: var(--font-family-sans);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--portal-text-light);
   margin: 0;
 }
 
@@ -221,7 +211,6 @@
   border: none;
   padding: var(--space-3);
   margin-bottom: var(--space-3);
-  color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
 }
@@ -319,7 +308,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Summary card values - match overview stat numbers */
 [data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value {
-  color: var(--portal-text-light);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
 }
@@ -373,7 +361,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin-top: var(--space-1-5);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
   line-height: var(--line-height-normal);
   text-align: left;
 }
@@ -405,8 +392,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-color: var(--color-black);
-  color: var(--portal-text-light);
+  background-color: var(--portal-bg-pitch);
   background-image: var(--select-caret);
   background-repeat: no-repeat;
   background-position: right var(--space-4) center;
@@ -415,7 +401,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 #pd-setting-status:focus {
-  outline: 3px solid var(--color-primary);
+  outline: var(--border-width-thick) solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -424,25 +410,25 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] #pd-setting-status.status-on-hold,
 [data-page="admin"] #pd-setting-status.status-on_hold {
   background-color: var(--color-warning);
-  color: var(--color-black);
+  color: var(--portal-text-dark);
   background-image: var(--select-caret-light);
 }
 
 [data-page="admin"] #pd-setting-status.status-active {
   background-color: var(--color-info);
-  color: var(--color-black);
+  color: var(--portal-text-dark);
   background-image: var(--select-caret-light);
 }
 
 [data-page="admin"] #pd-setting-status.status-completed {
   background-color: var(--color-success);
-  color: var(--color-black);
+  color: var(--portal-text-dark);
   background-image: var(--select-caret-light);
 }
 
 [data-page="admin"] #pd-setting-status.status-cancelled {
   background-color: var(--color-danger);
-  color: var(--color-white);
+  color: var(--portal-text-light);
   background-image: var(--select-caret);
 }
 
@@ -490,7 +476,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Readonly form values - match meta-value styling */
 #pd-tab-settings .form-value-readonly {
-  color: var(--color-white);
+  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
 }
@@ -532,7 +518,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   padding: var(--space-1) var(--space-1-5);
   background: transparent;
   border: none;
-  color: var(--portal-text-light);
   text-align: left;
   cursor: pointer;
   text-transform: capitalize;
@@ -543,31 +528,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background: var(--color-primary);
 }
 
-/* Ensure all detail view text is light on dark backgrounds (client + project) */
-/* Exclude .field-label and .meta-label which use --portal-text-secondary */
-#tab-project-detail,
-#tab-client-detail,
-#tab-project-detail p,
-#tab-client-detail p,
-#tab-project-detail span:not(.field-label):not(.meta-label),
-#tab-client-detail span:not(.field-label):not(.meta-label),
-#tab-project-detail strong,
-#tab-client-detail strong,
-#tab-project-detail li,
-#tab-client-detail li,
-#tab-project-detail td,
-#tab-client-detail td,
-#tab-project-detail th,
-#tab-client-detail th {
-  color: var(--portal-text-light);
-}
-
-#tab-project-detail h3,
-#tab-client-detail h3,
-#tab-project-detail h4,
-#tab-client-detail h4 {
-  color: var(--portal-text-light);
-}
+/* Text color inherited from portal theme — no overrides needed */
 
 /* Sans-serif font for main name heading in each detail view */
 #tab-project-detail #pd-project-name,
@@ -575,12 +536,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-family: var(--font-family-sans);
 }
 
-/* Secondary/muted text in detail views */
-#tab-project-detail .file-meta,
-#tab-project-detail .invoice-date,
-#tab-client-detail .portal-project-card .loading-text {
-  color: var(--portal-text-secondary);
-}
+/* Text color inherited from portal theme — no overrides needed */
 /* .empty-state, .loading-state, .error-state styling from components/loading.css */
 
 /* Card Header with Action - base in portal-cards.css, override margin */
@@ -637,7 +593,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   width: var(--icon-size-lg);
   height: var(--icon-size-lg);
   cursor: pointer;
-  background: var(--color-black);
+  background: var(--portal-bg-pitch);
   position: relative;
   display: flex;
   align-items: center;
@@ -669,7 +625,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   top: 2px;
   width: 6px;
   height: 10px;
-  border: solid white;
+  border: solid var(--portal-text-light);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -681,7 +637,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .milestone-title,
 /* Milestone title - styling from unified rule in portal-cards.css */
 [data-page="admin"] .milestone-title {
-  color: var(--portal-text-light);
   margin: 0 0 var(--space-1) 0;
   font-family: var(--font-family-sans);
 }
@@ -690,7 +645,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .milestone-description,
 [data-page="admin"] .milestone-description {
-  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-1);
 }
@@ -698,7 +652,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .milestone-due,
 [data-page="admin"] .milestone-due {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
 }
 
 .milestone-actions {
@@ -741,7 +694,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin: 0;
   min-height: 0;
   white-space: normal;
-  color: var(--portal-text-light);
   display: flex;
   flex-direction: column;
 }
@@ -762,7 +714,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   border: var(--border-width) solid var(--portal-border-medium);
   min-height: 100px;
   white-space: pre-wrap;
-  color: var(--portal-text-light);
 }
 
 .project-notes p {
@@ -789,7 +740,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .project-notes .feature-tag,
 .features-container .feature-tag {
   background: var(--portal-bg-medium);
-  color: var(--portal-text-light);
   padding: var(--space-0-5) var(--space-1-5);
   font-size: var(--font-size-sm);
   display: inline-block;
@@ -810,7 +760,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 #pd-files-list .file-icon {
   flex-shrink: 0;
-  color: var(--portal-text-secondary);
 }
 
 #pd-files-list .file-info {
@@ -821,7 +770,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 #pd-files-list .file-name {
   display: block;
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -829,7 +777,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 #pd-files-list .file-meta {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
 }
 
 #pd-files-list .file-actions {
@@ -858,7 +805,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Client Account Info */
 .client-account-info {
   margin-bottom: var(--space-2);
-  color: var(--portal-text-light);
 }
 
 .client-account-info p {
@@ -886,14 +832,12 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .milestone-due-date {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
   background: var(--portal-bg-dark);
   padding: var(--space-0-5) var(--space-0-5);
 }
 
 .milestone-description {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
   margin: var(--space-1) 0;
 }
 
@@ -921,7 +865,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .milestone-task-count {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
   font-weight: var(--font-weight-medium);
 }
 
@@ -997,7 +940,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .milestone-task-title {
   flex: 1;
-  color: var(--portal-text-light);
   font-size: var(--font-size-sm);
 }
 
@@ -1006,14 +948,12 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   align-items: center;
   gap: var(--space-2);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
 }
 
 .milestone-tasks-empty,
 .milestone-tasks-error {
   padding: var(--space-3);
   text-align: center;
-  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -1107,8 +1047,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   padding: var(--space-2) var(--space-3);
   padding-right: var(--space-1-5); /* Half of space-3 so less gap to right of caret */
   border: var(--border-width-heavy) solid var(--portal-border-dark);
-  background-color: var(--color-black);
-  color: var(--portal-text-light);
+  background-color: var(--portal-bg-pitch);
   font-size: var(--font-size-base);
   cursor: pointer;
   text-align: left;
@@ -1160,7 +1099,7 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin-top: calc(-1 * var(--space-1));
   padding: 0;
   list-style: none;
-  background-color: var(--color-black);
+  background-color: var(--portal-bg-pitch);
   border: var(--border-width-heavy) solid var(--portal-border-dark);
   border-top: none;
   max-height: 300px;
@@ -1198,7 +1137,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  color: var(--portal-text-light);
   text-align: left;
   cursor: pointer;
   transition: background-color var(--transition-faster);
@@ -1218,15 +1156,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Dropdown item hover - subtle highlight (status dropdowns in detail panels) */
 [data-page="admin"] .details-panel .custom-dropdown-item:hover {
   background-color: var(--portal-bg-hover);
-  color: var(--portal-text-light);
 }
 
 /* Hide currently selected item from dropdown menu - prevents double representation */
 [data-page="admin"] .custom-dropdown-item.selected {
   display: none;
-}
-
-[data-page="admin"] .custom-dropdown-item:last-child {
 }
 
 /* Caret color matches text color */
@@ -1301,11 +1235,9 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   align-items: center;
   gap: var(--space-2);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
 }
 
 .pd-client-item svg {
-  color: var(--portal-text-muted);
   flex-shrink: 0;
 }
 
@@ -1338,7 +1270,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-meta-value {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
 }
 
 /* Header Description */
@@ -1348,7 +1279,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-header-description .pd-description {
   margin: var(--space-1) 0 0;
-  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
 }
@@ -1399,7 +1329,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-description {
   margin: var(--space-1) 0 0;
-  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
 }
@@ -1418,7 +1347,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 
 .pd-detail-value {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
 }
 
 /* URL Links */
@@ -1438,7 +1366,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   gap: var(--icon-gap);
   padding: var(--space-1) var(--space-2);
   background: var(--portal-bg-medium);
-  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   text-decoration: none;
   transition:
@@ -1502,7 +1429,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-progress-percent {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--portal-text-light);
   font-family: var(--font-family-sans);
 }
 
@@ -1531,7 +1457,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 .pd-stat-value {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
 }
 
 .pd-stat-success {
@@ -1674,7 +1599,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 }
 
 .notes-display .notes-content {
-  color: var(--portal-text-light);
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
@@ -1692,7 +1616,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
 /* Uses utility classes: flex flex-col gap-4 */
 
 .document-generation-content .modal-description {
-  color: var(--portal-text-secondary);
   font-size: var(--font-size-sm);
   margin: 0;
   line-height: var(--line-height-normal);
@@ -1736,13 +1659,11 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   margin: 0 0 var(--space-1) 0;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
 }
 
 .document-info p {
   margin: 0;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
   line-height: var(--line-height-snug);
 }
 
@@ -1764,7 +1685,6 @@ body[data-page="admin"] #tab-project-detail .project-notes h4 {
   padding: var(--space-3);
   background: var(--portal-bg-darker);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
   margin: 0;
   line-height: var(--line-height-snug);
 }
