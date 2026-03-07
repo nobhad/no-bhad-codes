@@ -87,7 +87,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
         {(project.status === 'active' || project.status === 'in-progress') && (
           <div className="tw-mt-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
-              <span className="label">Progress</span>
+              <span className="field-label">Progress</span>
               <span className="text-muted tw-text-sm">
                 {progress}%
               </span>

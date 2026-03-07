@@ -73,7 +73,7 @@ export function IntakeTab({
           <h3 className="section-title">Project Scope</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
-              <span className="label">Features</span>
+              <span className="field-label">Features</span>
               <InlineTextarea
                 value={project.features || ''}
                 placeholder="No features listed"
@@ -82,7 +82,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Page Count</span>
+              <span className="field-label">Page Count</span>
               <InlineEdit
                 value={project.page_count || ''}
                 type="text"
@@ -92,7 +92,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Integrations</span>
+              <span className="field-label">Integrations</span>
               <InlineTextarea
                 value={project.integrations || ''}
                 placeholder="No integrations listed"
@@ -101,7 +101,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Add-ons</span>
+              <span className="field-label">Add-ons</span>
               <InlineTextarea
                 value={project.addons || ''}
                 placeholder="No add-ons listed"
@@ -116,7 +116,7 @@ export function IntakeTab({
           <h3 className="section-title">Design & Content</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
-              <span className="label">Design Level</span>
+              <span className="field-label">Design Level</span>
               <InlineSelect
                 value={project.design_level || ''}
                 options={DESIGN_LEVEL_OPTIONS}
@@ -126,7 +126,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Content Status</span>
+              <span className="field-label">Content Status</span>
               <InlineSelect
                 value={project.content_status || ''}
                 options={CONTENT_STATUS_OPTIONS}
@@ -136,7 +136,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Brand Assets</span>
+              <span className="field-label">Brand Assets</span>
               <InlineSelect
                 value={project.brand_assets || ''}
                 options={BRAND_ASSETS_OPTIONS}
@@ -152,7 +152,7 @@ export function IntakeTab({
           <h3 className="section-title">Technical</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
-              <span className="label">Tech Comfort</span>
+              <span className="field-label">Tech Comfort</span>
               <InlineSelect
                 value={project.tech_comfort || ''}
                 options={TECH_COMFORT_OPTIONS}
@@ -162,7 +162,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Hosting Preference</span>
+              <span className="field-label">Hosting Preference</span>
               <InlineSelect
                 value={project.hosting_preference || ''}
                 options={HOSTING_OPTIONS}
@@ -172,7 +172,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Current Site</span>
+              <span className="field-label">Current Site</span>
               <InlineEdit
                 value={project.current_site || ''}
                 type="text"
@@ -190,7 +190,7 @@ export function IntakeTab({
           <h3 className="section-title">Background</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
-              <span className="label">Inspiration</span>
+              <span className="field-label">Inspiration</span>
               <InlineTextarea
                 value={project.inspiration || ''}
                 placeholder="No inspiration listed"
@@ -199,7 +199,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Challenges</span>
+              <span className="field-label">Challenges</span>
               <InlineTextarea
                 value={project.challenges || ''}
                 placeholder="No challenges listed"
@@ -208,7 +208,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Additional Info</span>
+              <span className="field-label">Additional Info</span>
               <InlineTextarea
                 value={project.additional_info || ''}
                 placeholder="No additional info"
@@ -217,7 +217,7 @@ export function IntakeTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Referral Source</span>
+              <span className="field-label">Referral Source</span>
               <InlineEdit
                 value={project.referral_source || ''}
                 type="text"

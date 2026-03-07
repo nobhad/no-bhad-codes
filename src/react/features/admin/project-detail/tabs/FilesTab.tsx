@@ -308,7 +308,7 @@ export function FilesTab({
                   </td>
                   <td className="tw-px-4 tw-py-3">
                     <button
-                      className="btn-icon"
+                      className="icon-btn"
                       onClick={() => handleToggleSharing(file.id)}
                       title={file.is_shared ? 'Shared with client - click to make private' : 'Private - click to share'}
                       disabled={togglingFileId === file.id}
@@ -324,7 +324,7 @@ export function FilesTab({
                     <div className="tw-flex tw-items-center tw-justify-end tw-gap-1">
                       {file.download_url && (
                         <button
-                          className="btn-icon"
+                          className="icon-btn"
                           onClick={() => handleDownload(file)}
                           title="Download"
                         >
@@ -332,7 +332,7 @@ export function FilesTab({
                         </button>
                       )}
                       <button
-                        className="btn-icon"
+                        className="icon-btn"
                         onClick={() => {
                           setDeletingFileId(file.id);
                           deleteDialog.open();

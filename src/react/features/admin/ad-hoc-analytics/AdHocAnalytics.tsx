@@ -247,7 +247,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                           e.stopPropagation();
                           deleteQuery(sq.id);
                         }}
-                        className="btn-icon"
+                        className="icon-btn"
                       >
                         <Trash2 className="analytics-trash-icon" />
                       </button>

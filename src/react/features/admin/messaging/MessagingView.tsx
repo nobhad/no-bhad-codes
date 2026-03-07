@@ -380,14 +380,14 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
               <div className="messaging-conv-actions">
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                  className={cn('btn-icon', selectedConversation.isStarred ? 'tw-text-primary' : 'text-muted')}
+                  className={cn('icon-btn', selectedConversation.isStarred ? 'tw-text-primary' : 'text-muted')}
                 >
                   <Star
                     className="messaging-star-icon"
                     style={{ fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
                   />
                 </button>
-                <button className="btn-icon">
+                <button className="icon-btn">
                   <MoreHorizontal className="messaging-more-icon" />
                 </button>
               </div>
@@ -454,7 +454,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
             {/* Message Input */}
             <div className="messaging-compose">
               <div className="messaging-compose-row">
-                <button className="btn-icon">
+                <button className="icon-btn">
                   <Paperclip className="messaging-attachment-icon" />
                 </button>
                 <div className="messaging-compose-input-container">

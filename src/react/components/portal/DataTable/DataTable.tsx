@@ -479,7 +479,7 @@ export function DataTable<T extends { id: number }>({
 
             <div className="tw-flex tw-items-center tw-gap-4">
               <div className="tw-flex tw-items-center tw-gap-2">
-                <label className="label">Show</label>
+                <label className="field-label">Show</label>
                 <select
                   value={pagination.pageSize}
                   onChange={(e) => pagination.setPageSize(Number(e.target.value))}
@@ -496,7 +496,7 @@ export function DataTable<T extends { id: number }>({
               <div className="tw-flex tw-items-center tw-gap-1">
                 <button
                   type="button"
-                  className="btn-icon"
+                  className="icon-btn"
                   onClick={pagination.firstPage}
                   disabled={!pagination.canGoPrev}
                   title="First page"
@@ -505,7 +505,7 @@ export function DataTable<T extends { id: number }>({
                 </button>
                 <button
                   type="button"
-                  className="btn-icon"
+                  className="icon-btn"
                   onClick={pagination.prevPage}
                   disabled={!pagination.canGoPrev}
                   title="Previous page"
@@ -522,7 +522,7 @@ export function DataTable<T extends { id: number }>({
 
                 <button
                   type="button"
-                  className="btn-icon"
+                  className="icon-btn"
                   onClick={pagination.nextPage}
                   disabled={!pagination.canGoNext}
                   title="Next page"
@@ -531,7 +531,7 @@ export function DataTable<T extends { id: number }>({
                 </button>
                 <button
                   type="button"
-                  className="btn-icon"
+                  className="icon-btn"
                   onClick={pagination.lastPage}
                   disabled={!pagination.canGoNext}
                   title="Last page"

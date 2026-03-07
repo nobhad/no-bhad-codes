@@ -320,7 +320,7 @@ export function OverviewTab({
 
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between">
-              <span className="label">Created</span>
+              <span className="field-label">Created</span>
               <span className="text-muted ">
                 {formatDate(client.created_at)}
               </span>
@@ -328,7 +328,7 @@ export function OverviewTab({
 
             {client.invitation_sent_at && (
               <div className="tw-flex tw-items-center tw-justify-between">
-                <span className="label">Invited</span>
+                <span className="field-label">Invited</span>
                 <span className="text-muted ">
                   {formatDate(client.invitation_sent_at)}
                 </span>
@@ -336,7 +336,7 @@ export function OverviewTab({
             )}
 
             <div className="tw-flex tw-items-center tw-justify-between">
-              <span className="label">Portal Access</span>
+              <span className="field-label">Portal Access</span>
               <span
                 className={cn(
                   client.status === 'active'

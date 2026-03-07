@@ -339,7 +339,7 @@ export function TasksTab({
                     {/* Deliverables */}
                     {milestone.deliverables && milestone.deliverables.length > 0 && (
                       <div className="tw-mt-3">
-                        <span className="label">
+                        <span className="field-label">
                           Deliverables
                         </span>
                         <ul className="tw-mt-2 tw-space-y-1">

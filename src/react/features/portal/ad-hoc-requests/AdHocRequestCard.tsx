@@ -133,7 +133,7 @@ export function AdHocRequestCard({
           <div className="tw-section tw-border-t tw-border-[var(--portal-border-color)] tw-mt-3 tw-pt-3">
             {/* Description */}
             <div>
-              <label className="label">Description</label>
+              <label className="field-label">Description</label>
               <p className="text-muted tw-text-sm tw-mt-1 tw-whitespace-pre-wrap">
                 {request.description}
               </p>
@@ -152,7 +152,7 @@ export function AdHocRequestCard({
             {/* Attachments */}
             {hasAttachments && (
               <div>
-                <label className="label">Attachments</label>
+                <label className="field-label">Attachments</label>
                 <div className="tw-mt-1 tw-flex tw-flex-col tw-gap-1">
                   {request.attachments!.map((attachment) => (
                     <div
@@ -187,7 +187,7 @@ export function AdHocRequestCard({
             {/* Quote Details */}
             {hasQuote && (
               <div className="tw-panel tw-p-3">
-                <label className="label">Quote Details</label>
+                <label className="field-label">Quote Details</label>
                 <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-2">
                   {/* Hours and Rate */}
                   {request.quote!.hours_estimated > 0 && (

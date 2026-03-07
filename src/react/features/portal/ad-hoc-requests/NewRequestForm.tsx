@@ -174,7 +174,7 @@ export function NewRequestForm({
     <form onSubmit={handleSubmit} className="tw-section">
       {/* Title */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="label">
+        <label className="field-label">
           Title
           <span className="form-required">*</span>
         </label>
@@ -198,7 +198,7 @@ export function NewRequestForm({
 
       {/* Description */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="label">
+        <label className="field-label">
           Description
           <span className="form-required">*</span>
         </label>
@@ -222,7 +222,7 @@ export function NewRequestForm({
 
       {/* Priority */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="label">Priority</label>
+        <label className="field-label">Priority</label>
         <div className="tw-flex tw-gap-2">
           {PRIORITY_OPTIONS.map((p) => (
             <button
@@ -246,7 +246,7 @@ export function NewRequestForm({
       {/* Project (Optional) */}
       {projects.length > 0 && (
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <label className="label">Related Project (Optional)</label>
+          <label className="field-label">Related Project (Optional)</label>
           <select
             value={projectId || ''}
             onChange={(e) => setProjectId(e.target.value ? Number(e.target.value) : undefined)}
@@ -265,7 +265,7 @@ export function NewRequestForm({
 
       {/* File Upload */}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <label className="label">Attachments (Optional)</label>
+        <label className="field-label">Attachments (Optional)</label>
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}

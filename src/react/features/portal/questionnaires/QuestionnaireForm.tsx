@@ -673,7 +673,7 @@ export function QuestionnaireForm({
                   {index + 1}.
                 </span>
                 <div className="qform-question-label-container">
-                  <label className="label">
+                  <label className="field-label">
                     {question.text}
                     {question.required && (
                       <span className="form-required">*</span>

@@ -159,7 +159,7 @@ export function OverviewTab({
 
           <div className="project-info-grid">
             <div className="project-info-field">
-              <span className="label">Type</span>
+              <span className="field-label">Type</span>
               <InlineSelect
                 value={project.project_type || ''}
                 options={PROJECT_TYPE_OPTIONS}
@@ -170,7 +170,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Timeline</span>
+              <span className="field-label">Timeline</span>
               <InlineEdit
                 value={project.timeline || ''}
                 type="text"
@@ -180,7 +180,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Start Date</span>
+              <span className="field-label">Start Date</span>
               <div className="project-info-field-value">
                 <Calendar className="icon-xs" />
                 <InlineEdit
@@ -193,7 +193,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Target End Date</span>
+              <span className="field-label">Target End Date</span>
               <div className="project-info-field-value">
                 <Calendar className="icon-xs" />
                 <InlineEdit
@@ -206,7 +206,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Budget</span>
+              <span className="field-label">Budget</span>
               <div className="project-info-field-value">
                 <DollarSign className="icon-xs" />
                 <InlineEdit
@@ -221,7 +221,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <span className="label">Quoted Price</span>
+              <span className="field-label">Quoted Price</span>
               <div className="project-info-field-value">
                 <DollarSign className="icon-xs" />
                 <InlineEdit
@@ -237,7 +237,7 @@ export function OverviewTab({
           </div>
 
           <div className="panel-description">
-            <span className="label">Description</span>
+            <span className="field-label">Description</span>
             <InlineTextarea
               value={project.description || ''}
               placeholder="Add description"
@@ -251,7 +251,7 @@ export function OverviewTab({
           <h3 className="section-title">Links</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
-              <div className="label">
+              <div className="field-label">
                 <LinkIcon className="icon-xs" /> Preview URL
                 {project.preview_url && (
                   <a href={project.preview_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open preview URL">
@@ -268,7 +268,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <div className="label">
+              <div className="field-label">
                 <LinkIcon className="icon-xs" /> Repository
                 {project.repo_url && (
                   <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open repository URL">
@@ -285,7 +285,7 @@ export function OverviewTab({
             </div>
 
             <div className="project-info-field">
-              <div className="label">
+              <div className="field-label">
                 <LinkIcon className="icon-xs" /> Production URL
                 {project.production_url && (
                   <a href={project.production_url} target="_blank" rel="noopener noreferrer" className="inline-link-external" aria-label="Open production URL">
@@ -316,7 +316,7 @@ export function OverviewTab({
           {/* Progress Bar */}
           <div className="progress-field">
             <div className="progress-field-header">
-              <span className="label">Progress</span>
+              <span className="field-label">Progress</span>
               <span className="text-muted">{progress}%</span>
             </div>
             <div className="progress-bar progress-sm">
@@ -411,7 +411,7 @@ export function OverviewTab({
                     </div>
 
                     <button
-                      className="btn-icon"
+                      className="icon-btn"
                       onClick={() => toggleMilestoneExpand(milestone.id)}
                       aria-label={expandedMilestones.has(milestone.id) ? 'Collapse' : 'Expand'}
                     >
