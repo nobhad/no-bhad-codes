@@ -15,7 +15,7 @@ const AlertDialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     className={cn(
-      'tw-modal-overlay tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0',
+      'portal-modal-overlay tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -33,7 +33,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        'tw-modal tw-:fixed tw-:left-[50%] tw-:top-[50%] tw-:z-50 tw-:translate-x-[-50%] tw-:translate-y-[-50%] tw-:duration-200 tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[state=closed]:slide-out-to-left-1/2 tw-:data-[state=closed]:slide-out-to-top-[48%] tw-:data-[state=open]:slide-in-from-left-1/2 tw-:data-[state=open]:slide-in-from-top-[48%]',
+        'portal-modal tw-:fixed tw-:left-[50%] tw-:top-[50%] tw-:z-50 tw-:translate-x-[-50%] tw-:translate-y-[-50%] tw-:duration-200 tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[state=closed]:slide-out-to-left-1/2 tw-:data-[state=closed]:slide-out-to-top-[48%] tw-:data-[state=open]:slide-in-from-left-1/2 tw-:data-[state=open]:slide-in-from-top-[48%]',
         className
       )}
       {...props}
@@ -47,7 +47,7 @@ const AlertDialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('tw-modal-header tw-:flex-col tw-:space-y-2', className)}
+    className={cn('portal-modal-header tw-:flex-col tw-:space-y-2', className)}
     {...props}
   />
 );
@@ -73,7 +73,7 @@ const AlertDialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    className={cn('tw-modal-title', className)}
+    className={cn('portal-modal-title', className)}
     {...props}
   />
 ));

@@ -224,20 +224,20 @@ export function ClientDetail({
   return (
     <div ref={containerRef} className="tw-section">
       {/* Header */}
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-items-center tw-gap-3">
+      <div className="detail-title-row">
+        <div className="detail-title-group">
           {/* Back Button */}
           <IconButton action="back" onClick={onBack} title="Back to clients" />
 
           {/* Client Info */}
-          <div className="tw-flex tw-flex-col tw-gap-0.5">
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <h1 className="heading tw-text-lg tw-m-0">
+          <div className="detail-info">
+            <div className="detail-name-row">
+              <h1 className="detail-title">
                 {getDisplayName()}
               </h1>
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="tw-bg-transparent tw-border-none tw-cursor-pointer tw-p-0">
+                  <button className="btn-unstyled">
                     <span className="tw-badge">
                       {CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
                     </span>
@@ -258,14 +258,14 @@ export function ClientDetail({
               </PortalDropdown>
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-3 text-muted tw-text-xs">
+            <div className="detail-meta">
               {client.email && (
-                <span className="tw-text-primary">{client.email}</span>
+                <span className="meta-value">{client.email}</span>
               )}
               {client.client_type && (
-                <span>
-                  Type:{' '}
-                  <span className="tw-text-primary">
+                <span className="meta-item">
+                  <span className="field-label">Type:</span>{' '}
+                  <span className="meta-value">
                     {CLIENT_TYPE_LABELS[client.client_type] || client.client_type}
                   </span>
                 </span>
@@ -275,7 +275,7 @@ export function ClientDetail({
         </div>
 
         {/* Actions */}
-        <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="detail-actions">
           <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
           {!client.invitation_sent_at && (
@@ -308,7 +308,7 @@ export function ClientDetail({
               <PortalDropdownSeparator />
               <PortalDropdownItem
                 onClick={deleteDialog.open}
-                className="tw-text-[var(--status-cancelled)]"
+                className="danger"
               >
                 <Trash2 className="icon-sm" />
                 Delete Client

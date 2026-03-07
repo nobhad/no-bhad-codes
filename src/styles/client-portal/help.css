@@ -219,9 +219,12 @@
 }
 
 .help-accordion-chevron {
-  margin-left: var(--space-1);
-  color: var(--portal-text-secondary);
+  flex-shrink: 0;
+  width: var(--dropdown-caret-size, var(--icon-size-xs));
+  height: var(--dropdown-caret-size, var(--icon-size-xs));
+  color: currentColor;
   transition: transform var(--transition-fast);
+  margin-left: var(--dropdown-caret-gap, var(--space-1));
 }
 
 .help-accordion-item.expanded .help-accordion-chevron {

@@ -6,6 +6,17 @@
 
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  FolderKanban,
+  Receipt,
+  MessageSquare,
+  FileText,
+  FileSignature,
+  File,
+  Send,
+  ClipboardList,
+  Activity
+} from 'lucide-react';
 import { StatCard } from '@react/components/portal';
 import { formatRelativeTime, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -24,20 +35,17 @@ const logger = createLogger('PortalDashboard');
 /** Endpoint for client dashboard data */
 const DASHBOARD_ENDPOINT = `${API_ENDPOINTS.CLIENTS_ME}/dashboard`;
 
-/** Maps activity type to a short icon letter */
-const ACTIVITY_TYPE_ICONS: Record<string, string> = {
-  project: 'P',
-  invoice: 'I',
-  message: 'M',
-  document: 'D',
-  contract: 'C',
-  file: 'F',
-  request: 'R',
-  questionnaire: 'Q'
+/** Maps activity type to Lucide icon component */
+const ACTIVITY_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  project: FolderKanban,
+  invoice: Receipt,
+  message: MessageSquare,
+  document: FileText,
+  contract: FileSignature,
+  file: File,
+  request: Send,
+  questionnaire: ClipboardList
 };
-
-/** Fallback icon letter for unknown activity types */
-const DEFAULT_ACTIVITY_ICON = 'A';
 
 /** Navigation tab targets for stat cards */
 const NAV_TAB_PROJECTS = 'projects';
@@ -168,10 +176,10 @@ function usePortalDashboard({
 // ============================================================================
 
 /**
- * Get the icon letter for an activity type.
+ * Get the Lucide icon component for an activity type.
  */
-function getActivityIcon(type: string): string {
-  return ACTIVITY_TYPE_ICONS[type] ?? DEFAULT_ACTIVITY_ICON;
+function getActivityIcon(type: string): React.ComponentType<{ className?: string }> {
+  return ACTIVITY_TYPE_ICONS[type] ?? Activity;
 }
 
 // ============================================================================
@@ -215,7 +223,7 @@ function ActivityList({ activities, onNavigate }: ActivityListProps) {
           }
         >
           <span className="activity-icon">
-            {getActivityIcon(item.type)}
+            {React.createElement(getActivityIcon(item.type), { className: 'icon-md' })}
           </span>
           <div className="activity-content">
             <span className="activity-title">{item.title}</span>

@@ -137,6 +137,16 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border-color: transparent;
 }
 
+/* Unstyled button - reset all button defaults, used as dropdown triggers */
+.btn-unstyled {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
 /* Full width button */
 .btn-full {
   width: 100%;
@@ -696,8 +706,11 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
  * BASE BUTTON - shared base for all portal buttons
  * ============================================ */
 
-/* Base button — .btn is canonical; .tw-btn kept as alias */
-.btn,
+/* Base button — ghost/text style for standalone .btn without variant class.
+   .btn-primary, .btn-secondary, .btn-outline, .btn-danger get full styling
+   from form-buttons.css (components layer). We exclude them here so the
+   pages-layer ghost override doesn't strip their borders/backgrounds. */
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger),
 .tw-btn {
   display: inline-flex;
   align-items: center;
@@ -715,12 +728,12 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   transition: color var(--transition-fast);
 }
 
-.btn:hover,
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):hover,
 .tw-btn:hover {
   color: var(--color-primary);
 }
 
-.btn:disabled,
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):disabled,
 .tw-btn:disabled {
   color: var(--portal-text-muted);
   cursor: not-allowed;

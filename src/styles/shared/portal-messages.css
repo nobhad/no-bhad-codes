@@ -1056,26 +1056,7 @@
 
 /* Loading/error/empty states: canonical styles in components/loading.css */
 
-/* Icon sizes */
-.icon-xs {
-  width: 12px;
-  height: 12px;
-}
-
-.icon-sm {
-  width: 16px;
-  height: 16px;
-}
-
-.icon-md {
-  width: 20px;
-  height: 20px;
-}
-
-.icon-lg {
-  width: 24px;
-  height: 24px;
-}
+/* Icon sizes — canonical definitions in portal-components.css */
 
 /* Hidden file input */
 .file-input-hidden {

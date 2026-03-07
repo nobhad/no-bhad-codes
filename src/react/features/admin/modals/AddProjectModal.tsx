@@ -1,15 +1,15 @@
 /**
  * AddProjectModal
  * Form modal to add a new project with client selection and new-client toggle.
- * Replaces the EJS #add-project-modal from admin-modals.ejs.
+ * Uses shared PortalModal + PortalInput for consistent UI.
  * Uses ModalDropdown for client, project type, budget, and timeline selections.
  */
 
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { FolderPlus, X } from 'lucide-react';
-import { useScaleIn } from '@react/hooks/useGsap';
+import { FolderPlus } from 'lucide-react';
+import { PortalModal } from '@react/components/portal/PortalModal';
+import { PortalInput } from '@react/components/portal/PortalInput';
 import { ModalDropdown } from '@react/components/portal/ModalDropdown';
 import type { ModalDropdownOption } from '@react/components/portal/ModalDropdown';
 
@@ -89,9 +89,6 @@ export function AddProjectModal({
   timelineOptions,
   loading = false
 }: AddProjectModalProps) {
-  const contentRef = useScaleIn<HTMLDivElement>();
-  const titleId = React.useId();
-
   const [formState, setFormState] = useState(INITIAL_FORM_STATE);
   const [newClient, setNewClient] = useState<NewClientData>(INITIAL_NEW_CLIENT);
 
@@ -160,189 +157,152 @@ export function AddProjectModal({
   }, [onOpenChange, resetForm]);
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="admin-modal-overlay" />
-        <DialogPrimitive.Content
-          ref={contentRef}
-          className="admin-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={titleId}
-        >
-          {/* Header */}
-          <div className="admin-modal-header">
-            <div className="admin-modal-title">
-              <FolderPlus size={20} />
-              <h2 id={titleId}>Add New Project</h2>
-            </div>
-            <DialogPrimitive.Close className="admin-modal-close" aria-label="Close modal">
-              <X size={18} />
-            </DialogPrimitive.Close>
+    <PortalModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Add New Project"
+      icon={<FolderPlus size={20} />}
+      onSubmit={handleSubmit}
+      footer={
+        <>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            {loading ? 'Adding...' : 'Add Project'}
+          </button>
+        </>
+      }
+    >
+      {/* Client Selection */}
+      <div className="form-group">
+        <label className="field-label">Client *</label>
+        <ModalDropdown
+          options={clientOptionsWithNew}
+          value={formState.clientId}
+          onChange={handleDropdownChange('clientId')}
+          placeholder="Select a client"
+          searchable={clientOptions.length > 5}
+        />
+      </div>
+
+      {/* New Client Fields (shown when "Add New Client" is selected) */}
+      {isNewClient && (
+        <fieldset>
+          <legend>New Client Details</legend>
+
+          <div className="form-group">
+            <PortalInput
+              type="text"
+              label="Contact Name"
+              placeholder="John Smith"
+              value={newClient.contactName}
+              onChange={handleNewClientChange('contactName')}
+              required
+            />
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit}>
-            <div className="admin-modal-body">
-              {/* Client Selection */}
-              <div className="form-group">
-                <label className="field-label">Client *</label>
-                <ModalDropdown
-                  options={clientOptionsWithNew}
-                  value={formState.clientId}
-                  onChange={handleDropdownChange('clientId')}
-                  placeholder="Select a client"
-                  searchable={clientOptions.length > 5}
-                />
-              </div>
+          <div className="form-group">
+            <PortalInput
+              type="email"
+              label="Email"
+              placeholder="client@example.com"
+              value={newClient.email}
+              onChange={handleNewClientChange('email')}
+              required
+            />
+          </div>
 
-              {/* New Client Fields (shown when "Add New Client" is selected) */}
-              {isNewClient && (
-                <fieldset>
-                  <legend>New Client Details</legend>
+          <div className="form-group">
+            <PortalInput
+              type="text"
+              label="Company Name"
+              placeholder="Acme Inc."
+              value={newClient.companyName}
+              onChange={handleNewClientChange('companyName')}
+            />
+          </div>
 
-                  <div className="form-group">
-                    <label className="field-label" htmlFor="new-project-client-name">
-                      Contact Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="new-project-client-name"
-                      className="form-input"
-                      placeholder="John Smith"
-                      value={newClient.contactName}
-                      onChange={handleNewClientChange('contactName')}
-                      required
-                    />
-                  </div>
+          <div className="form-group">
+            <PortalInput
+              type="tel"
+              label="Phone"
+              placeholder="(555) 123-4567"
+              value={newClient.phone}
+              onChange={handleNewClientChange('phone')}
+            />
+          </div>
+        </fieldset>
+      )}
 
-                  <div className="form-group">
-                    <label className="field-label" htmlFor="new-project-client-email">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      id="new-project-client-email"
-                      className="form-input"
-                      placeholder="client@example.com"
-                      value={newClient.email}
-                      onChange={handleNewClientChange('email')}
-                      required
-                    />
-                  </div>
+      {/* Project Fields */}
+      <div className="form-group">
+        <label className="field-label">Project Type *</label>
+        <ModalDropdown
+          options={projectTypeOptions}
+          value={formState.projectType}
+          onChange={handleDropdownChange('projectType')}
+          placeholder="Select project type"
+        />
+      </div>
 
-                  <div className="form-group">
-                    <label className="field-label" htmlFor="new-project-client-company">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      id="new-project-client-company"
-                      className="form-input"
-                      placeholder="Acme Inc."
-                      value={newClient.companyName}
-                      onChange={handleNewClientChange('companyName')}
-                    />
-                  </div>
+      <div className="form-group">
+        <label className="field-label" htmlFor="new-project-description">
+          Description *
+        </label>
+        <textarea
+          id="new-project-description"
+          className="form-textarea"
+          rows={3}
+          placeholder="Brief project description..."
+          value={formState.description}
+          onChange={handleTextChange('description')}
+          required
+        />
+      </div>
 
-                  <div className="form-group">
-                    <label className="field-label" htmlFor="new-project-client-phone">
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      id="new-project-client-phone"
-                      className="form-input"
-                      placeholder="(555) 123-4567"
-                      value={newClient.phone}
-                      onChange={handleNewClientChange('phone')}
-                    />
-                  </div>
-                </fieldset>
-              )}
+      <div className="form-group">
+        <label className="field-label">Budget *</label>
+        <ModalDropdown
+          options={budgetOptions}
+          value={formState.budget}
+          onChange={handleDropdownChange('budget')}
+          placeholder="Select budget range"
+        />
+      </div>
 
-              {/* Project Fields */}
-              <div className="form-group">
-                <label className="field-label">Project Type *</label>
-                <ModalDropdown
-                  options={projectTypeOptions}
-                  value={formState.projectType}
-                  onChange={handleDropdownChange('projectType')}
-                  placeholder="Select project type"
-                />
-              </div>
+      <div className="form-group">
+        <label className="field-label">Timeline *</label>
+        <ModalDropdown
+          options={timelineOptions}
+          value={formState.timeline}
+          onChange={handleDropdownChange('timeline')}
+          placeholder="Select timeline"
+        />
+      </div>
 
-              <div className="form-group">
-                <label className="field-label" htmlFor="new-project-description">
-                  Description *
-                </label>
-                <textarea
-                  id="new-project-description"
-                  className="form-textarea"
-                  rows={3}
-                  placeholder="Brief project description..."
-                  value={formState.description}
-                  onChange={handleTextChange('description')}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="field-label">Budget *</label>
-                <ModalDropdown
-                  options={budgetOptions}
-                  value={formState.budget}
-                  onChange={handleDropdownChange('budget')}
-                  placeholder="Select budget range"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="field-label">Timeline *</label>
-                <ModalDropdown
-                  options={timelineOptions}
-                  value={formState.timeline}
-                  onChange={handleDropdownChange('timeline')}
-                  placeholder="Select timeline"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="field-label" htmlFor="new-project-notes">
-                  Additional Notes
-                </label>
-                <textarea
-                  id="new-project-notes"
-                  className="form-textarea"
-                  rows={2}
-                  placeholder="Any additional details..."
-                  value={formState.notes}
-                  onChange={handleTextChange('notes')}
-                />
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="admin-modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleCancel}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                {loading ? 'Adding...' : 'Add Project'}
-              </button>
-            </div>
-          </form>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+      <div className="form-group">
+        <label className="field-label" htmlFor="new-project-notes">
+          Additional Notes
+        </label>
+        <textarea
+          id="new-project-notes"
+          className="form-textarea"
+          rows={2}
+          placeholder="Any additional details..."
+          value={formState.notes}
+          onChange={handleTextChange('notes')}
+        />
+      </div>
+    </PortalModal>
   );
 }

@@ -330,7 +330,7 @@ function SearchBar({ query, onChange, onClear }: SearchBarProps) {
             onClick={onClear}
             aria-label="Clear search"
           >
-            {XIcon && <XIcon className="icon-xs" />}
+            {XIcon && <XIcon className="icon-sm" />}
           </button>
         )}
       </div>
@@ -365,7 +365,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
                 onClick={() => onToggle(category.slug)}
               >
                 <div className="help-accordion-icon">
-                  {BookOpenIcon && <BookOpenIcon className="icon-xs" />}
+                  {BookOpenIcon && <BookOpenIcon className="icon-sm" />}
                 </div>
                 <span className="help-accordion-title">{category.name}</span>
                 <span className="help-accordion-count">{category.article_count}</span>
@@ -385,7 +385,7 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
                         className="help-accordion-article"
                         onClick={() => onArticleClick(category.slug, article.slug)}
                       >
-                        {FileTextIcon && <FileTextIcon className="icon-xs" />}
+                        {FileTextIcon && <FileTextIcon className="icon-sm" />}
                         <span>{article.title}</span>
                       </button>
                     ))}
@@ -423,7 +423,7 @@ function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
             onClick={() => onArticleClick(article.category_slug || '', article.slug)}
           >
             <div className="help-featured-card-icon">
-              {FileTextIcon && <FileTextIcon className="icon-xs" />}
+              {FileTextIcon && <FileTextIcon className="icon-sm" />}
             </div>
             <div className="help-featured-card-content">
               <p className="help-featured-card-title">{article.title}</p>
@@ -476,7 +476,7 @@ function SearchResults({ results, query, isSearching, onArticleClick }: SearchRe
             onClick={() => onArticleClick(article.category_slug || '', article.slug)}
           >
             <span className="help-result-icon">
-              {FileTextIcon && <FileTextIcon className="icon-xs" />}
+              {FileTextIcon && <FileTextIcon className="icon-sm" />}
             </span>
             <div className="help-result-content">
               <p className="help-result-title">{article.title}</p>
@@ -507,7 +507,7 @@ function ArticleDetail({ article, onBack }: ArticleDetailProps) {
         className="btn-secondary"
         onClick={onBack}
       >
-        {ArrowLeftIcon && <ArrowLeftIcon className="icon-xs" />}
+        {ArrowLeftIcon && <ArrowLeftIcon className="icon-sm" />}
         <span>Back to Help Center</span>
       </button>
 
@@ -539,7 +539,7 @@ function ContactSection({ onNavigate }: ContactSectionProps) {
         <div className="help-contact-text">
           <h3 className="section-title">Still Need Help?</h3>
           <p className="help-contact-description">
-            Can&apos;t find what you&apos;re looking for? Reach out and we&apos;ll be happy to help.
+            Can&apos;t find what you&apos;re looking for? Reach out and I&apos;ll be happy to help.
           </p>
         </div>
         <div className="help-contact-actions">
@@ -549,7 +549,7 @@ function ContactSection({ onNavigate }: ContactSectionProps) {
               className="btn-primary"
               onClick={() => onNavigate('messages')}
             >
-              {SendIcon && <SendIcon className="icon-xs" />}
+              {SendIcon && <SendIcon className="icon-sm" />}
               <span>Send a Message</span>
             </button>
           )}
@@ -557,8 +557,8 @@ function ContactSection({ onNavigate }: ContactSectionProps) {
             href={`mailto:${BUSINESS_INFO.email}`}
             className="btn-secondary"
           >
-            {MailIcon && <MailIcon className="icon-xs" />}
-            <span>Email Us</span>
+            {MailIcon && <MailIcon className="icon-sm" />}
+            <span>Email Me</span>
           </a>
         </div>
       </div>

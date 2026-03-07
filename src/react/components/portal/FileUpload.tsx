@@ -218,23 +218,23 @@ export function FileUpload({
           multiple={multiple}
           onChange={handleInputChange}
           disabled={disabled || loading}
-          className="tw-sr-only"
+          className="sr-only"
           aria-hidden="true"
         />
 
         {loading ? (
-          <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
-            <div className="tw-animate-spin">
-              <Upload className="tw-h-8 tw-w-8" />
+          <div className="file-upload-zone">
+            <div className="animate-spin">
+              <Upload className="icon-xl" />
             </div>
             <p>Uploading...</p>
           </div>
         ) : (
-          <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
-            <Upload className="tw-h-8 tw-w-8" />
+          <div className="file-upload-zone">
+            <Upload className="icon-xl" />
             <p className="dropzone-desktop">{dropzoneText}</p>
             <p className="dropzone-mobile">{dropzoneTextMobile}</p>
-            <span className="tw-text-sm text-muted">
+            <span className="file-upload-hint">
               Max {maxFiles} files, {Math.round(maxSize / (1024 * 1024))}MB each
             </span>
           </div>
@@ -242,8 +242,8 @@ export function FileUpload({
       </div>
 
       {displayError && (
-        <div className="tw-flex tw-items-center tw-gap-2 tw-mt-2 tw-text-sm tw-text-danger">
-          <AlertCircle className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        <div className="file-upload-error">
+          <AlertCircle className="icon-md" />
           <span>{displayError}</span>
         </div>
       )}
@@ -284,33 +284,35 @@ export function FileUploadProgress({
   return (
     <div
       className={cn(
-        'tw-flex tw-items-center tw-gap-3 tw-p-2 tw-border tw-border-primary/20',
-        error && 'tw-border-danger',
-        complete && 'tw-border-success',
+        'file-upload-item',
+        error && 'has-error',
+        complete && 'is-complete',
         className
       )}
     >
-      <File className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+      <div className="file-upload-item-icon">
+        <File className="icon-lg" />
+      </div>
 
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-flex tw-justify-between tw-items-center tw-mb-1">
-          <span className="tw-text-sm tw-truncate">{fileName}</span>
+      <div className="file-upload-item-info">
+        <div className="file-upload-item-header">
+          <span className="file-upload-item-name">{fileName}</span>
           {!complete && !error && (
-            <span className="tw-text-xs text-muted">{Math.round(progress)}%</span>
+            <span className="file-upload-item-progress">{Math.round(progress)}%</span>
           )}
         </div>
 
         {!complete && !error && (
-          <div className="tw-h-1 tw-bg-white/10 tw-overflow-hidden">
+          <div className="file-upload-progress-track">
             <div
-              className="tw-h-full tw-bg-primary tw-transition-all tw-duration-300"
+              className="file-upload-progress-bar"
               style={{ width: `${progress}%` }}
             />
           </div>
         )}
 
         {error && errorMessage && (
-          <span className="tw-text-xs tw-text-danger">{errorMessage}</span>
+          <span className="file-upload-item-error">{errorMessage}</span>
         )}
       </div>
 
@@ -318,10 +320,10 @@ export function FileUploadProgress({
         <button
           type="button"
           onClick={onCancel}
-          className="tw-p-1 text-muted hover:tw-text-primary tw-transition-colors"
+          className="file-upload-remove-btn"
           aria-label="Cancel upload"
         >
-          <X className="tw-h-4 tw-w-4" />
+          <X className="icon-md" />
         </button>
       )}
     </div>

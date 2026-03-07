@@ -383,20 +383,20 @@ a.text-danger:hover {
   height: var(--icon-size-xs);
 }
 .icon-sm {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+.icon-md {
   width: var(--icon-size-md);
   height: var(--icon-size-md);
 }
-.icon-md {
+.icon-lg {
   width: var(--icon-size-lg);
   height: var(--icon-size-lg);
 }
-.icon-lg {
+.icon-xl {
   width: var(--icon-size-xl);
   height: var(--icon-size-xl);
-}
-.icon-xl {
-  width: var(--icon-size-2xl);
-  height: var(--icon-size-2xl);
 }
 
 /* Flex shrink prevention for icons */
@@ -630,40 +630,7 @@ a.text-danger:hover {
   border-bottom: none;
 }
 
-/* Modals/Popups */
-.tw-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--portal-alpha-black-80);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--z-index-50);
-}
-
-.tw-modal {
-  background: var(--portal-bg-pitch);
-  border: var(--border-width) solid var(--portal-alpha-white-30);
-  padding: var(--space-6);
-  max-width: 32rem;
-  width: 100%;
-  position: relative;
-}
-
-.tw-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-
-.tw-modal-title {
-  font-size: var(--portal-btn-font-size, 16px);
-  font-family: var(--font-family-mono, monospace);
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-regular);
-}
+/* Modals/Popups — see admin/modals.css for portal-modal-* definitions */
 
 /* Dropdown menus */
 .tw-dropdown {

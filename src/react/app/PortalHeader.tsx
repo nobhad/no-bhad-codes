@@ -19,6 +19,7 @@ import {
   useToggleSidebar
 } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
+import { NotificationBell } from '../components/portal/NotificationBell';
 // ============================================
 // COMPONENT
 // ============================================
@@ -79,11 +80,7 @@ export function PortalHeader() {
         </div>
 
         <div className="portal-global-header-right">
-          {/* Notification bell mount point - React component will mount here */}
-          <div
-            className="notification-bell-container"
-            id="notification-bell-container"
-          />
+          <NotificationBell />
 
           <button
             id="header-toggle-theme"
@@ -92,9 +89,9 @@ export function PortalHeader() {
             onClick={toggleTheme}
           >
             {theme === 'dark' ? (
-              <Sun size={18} aria-hidden="true" />
+              <Sun aria-hidden="true" />
             ) : (
-              <Moon size={18} aria-hidden="true" />
+              <Moon aria-hidden="true" />
             )}
           </button>
         </div>

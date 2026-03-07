@@ -269,7 +269,7 @@ export function ModalDropdown({
   return (
     <div className={cn('modal-dropdown-container', className)}>
       {label && (
-        <label htmlFor={triggerId} className="tw-block tw-text-sm tw-font-medium tw-mb-1">{label}</label>
+        <label htmlFor={triggerId} className="field-label">{label}</label>
       )}
 
       {/* Trigger Button */}
@@ -280,14 +280,9 @@ export function ModalDropdown({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         className={cn(
-          'modal-dropdown-trigger tw-w-full tw-flex tw-items-center tw-justify-between',
-          'tw-px-3 tw-py-2 tw-text-left',
-          'tw-border tw-border-primary/20 tw-bg-transparent',
-          'tw-transition-colors',
-          'hover:tw-border-primary/40',
-          'focus:tw-outline-none focus:tw-border-primary',
-          disabled && 'tw-opacity-50 tw-cursor-not-allowed',
-          error && 'tw-border-danger',
+          'modal-dropdown-trigger',
+          disabled && 'is-disabled',
+          error && 'has-error',
           triggerClassName
         )}
         aria-haspopup="listbox"
@@ -295,7 +290,7 @@ export function ModalDropdown({
       >
         <span
           className={cn(
-            'tw-truncate',
+            'text-truncate',
             selectedValues.length === 0 && 'text-muted'
           )}
         >
@@ -303,41 +298,41 @@ export function ModalDropdown({
         </span>
         <ChevronDown
           className={cn(
-            'tw-h-4 tw-w-4 tw-transition-transform tw-flex-shrink-0 tw-ml-2',
-            isOpen && 'tw-rotate-180'
+            'modal-dropdown-chevron',
+            isOpen && 'is-open'
           )}
         />
       </button>
 
-      {error && <p className="tw-text-sm tw-text-danger tw-mt-1">{error}</p>}
+      {error && <p className="form-error-message">{error}</p>}
 
       {/* Modal Overlay */}
       {isOpen && (
-        <div className="modal-dropdown-overlay tw-fixed tw-inset-0 tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50">
+        <div className="modal-dropdown-overlay">
           <div
             ref={dropdownRef}
-            className="tw-w-full tw-max-w-md tw-mx-4 tw-bg-[var(--portal-bg-dark)] tw-border tw-border-primary/20 tw-max-h-[80vh] tw-flex tw-flex-col"
+            className="modal-dropdown-panel"
             role="listbox"
             aria-label={label || 'Select options'}
           >
             {/* Header */}
-            <div className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-border-b tw-border-primary/20">
-              <span className="tw-font-medium">{label || 'Select'}</span>
+            <div className="modal-dropdown-header">
+              <span className="heading">{label || 'Select'}</span>
               <button
                 type="button"
                 onClick={handleClose}
-                className="tw-p-1 text-muted hover:tw-text-primary tw-transition-colors"
+                className="icon-btn icon-btn-sm"
                 aria-label="Close"
               >
-                <X className="tw-h-5 tw-w-5" />
+                <X className="icon-md" />
               </button>
             </div>
 
             {/* Search Input */}
             {searchable && (
-              <div className="tw-p-3 tw-border-b tw-border-primary/20">
-                <div className="tw-relative">
-                  <Search className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 tw-h-4 tw-w-4 text-muted" />
+              <div className="modal-dropdown-search-section">
+                <div className="modal-dropdown-search-wrapper">
+                  <Search className="modal-dropdown-search-icon" />
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -348,7 +343,7 @@ export function ModalDropdown({
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={searchPlaceholder}
-                    className="tw-w-full tw-pl-10 tw-pr-3 tw-py-2 tw-bg-transparent tw-border tw-border-primary/20 focus:tw-border-primary focus:tw-outline-none"
+                    className="form-input modal-dropdown-search-input"
                   />
                 </div>
               </div>
@@ -357,11 +352,11 @@ export function ModalDropdown({
             {/* Options List */}
             <div
               ref={listRef}
-              className="tw-overflow-y-auto tw-flex-1"
+              className="modal-dropdown-list"
               onKeyDown={handleKeyDown}
             >
               {filteredOptions.length === 0 ? (
-                <div className="tw-p-4 tw-text-center text-muted">
+                <div className="modal-dropdown-empty">
                   No options found
                 </div>
               ) : (
@@ -376,11 +371,10 @@ export function ModalDropdown({
                       onClick={() => handleSelect(option.value)}
                       disabled={option.disabled}
                       className={cn(
-                        'tw-w-full tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-text-left tw-transition-colors',
-                        'hover:tw-bg-white/5',
-                        isFocused && 'tw-bg-white/10',
-                        isSelected && 'tw-text-primary',
-                        option.disabled && 'tw-opacity-50 tw-cursor-not-allowed'
+                        'modal-dropdown-option',
+                        isFocused && 'is-focused',
+                        isSelected && 'is-selected',
+                        option.disabled && 'is-disabled'
                       )}
                       role="option"
                       aria-selected={isSelected}
@@ -388,25 +382,23 @@ export function ModalDropdown({
                       {multiple && (
                         <div
                           className={cn(
-                            'tw-w-5 tw-h-5 tw-border tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
-                            isSelected
-                              ? 'tw-bg-primary tw-border-primary'
-                              : 'tw-border-primary/40'
+                            'modal-dropdown-checkbox',
+                            isSelected && 'is-checked'
                           )}
                         >
-                          {isSelected && <Check className="tw-h-3 tw-w-3 tw-text-[var(--portal-text-dark)]" />}
+                          {isSelected && <Check className="modal-dropdown-check-icon" />}
                         </div>
                       )}
-                      <div className="tw-flex-1 tw-min-w-0">
-                        <div className="tw-truncate">{option.label}</div>
+                      <div className="modal-dropdown-option-text">
+                        <div className="text-truncate">{option.label}</div>
                         {option.description && (
-                          <div className="tw-text-sm text-muted tw-truncate">
+                          <div className="modal-dropdown-option-desc">
                             {option.description}
                           </div>
                         )}
                       </div>
                       {!multiple && isSelected && (
-                        <Check className="tw-h-4 tw-w-4 tw-text-primary tw-flex-shrink-0" />
+                        <Check className="modal-dropdown-selected-icon" />
                       )}
                     </button>
                   );
@@ -416,18 +408,18 @@ export function ModalDropdown({
 
             {/* Footer for multi-select */}
             {multiple && (
-              <div className="tw-flex tw-justify-end tw-gap-2 tw-p-3 tw-border-t tw-border-primary/20">
+              <div className="modal-dropdown-footer">
                 <button
                   type="button"
                   onClick={() => onChange([])}
-                  className="btn-secondary tw-text-sm"
+                  className="btn-secondary btn-sm"
                 >
                   Clear
                 </button>
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="btn-primary tw-text-sm"
+                  className="btn-primary btn-sm"
                 >
                   Done
                 </button>

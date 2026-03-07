@@ -137,10 +137,10 @@
 }
 
 /* ==============================================
-   ADMIN MODAL (Legacy Pattern)
+   PORTAL MODAL (Shared Component)
    ============================================== */
 
-.admin-modal-overlay {
+.portal-modal-overlay {
   position: fixed;
   inset: 0;
   background: var(--color-overlay-light);
@@ -158,14 +158,14 @@
   transition: opacity var(--transition-faster);
 }
 
-.admin-modal-overlay.closing {
+.portal-modal-overlay.closing {
   opacity: 0;
 }
-.admin-modal-overlay.hidden {
+.portal-modal-overlay.hidden {
   display: none;
 }
 
-.admin-modal {
+.portal-modal {
   background: var(--portal-bg-darker);
   box-shadow: var(--shadow-modal);
   width: 100%;
@@ -177,8 +177,21 @@
   animation: slideUp var(--transition-fast);
 }
 
-.admin-modal.admin-modal--wide {
+.portal-modal.portal-modal--sm {
+  max-width: var(--modal-width-sm, 400px);
+}
+
+.portal-modal.portal-modal--wide {
   max-width: var(--modal-width-lg, 860px);
+}
+
+.portal-modal.portal-modal--xl {
+  max-width: var(--modal-width-xl, 1000px);
+}
+
+.portal-modal.portal-modal--full {
+  max-width: calc(100vw - 2rem);
+  margin: var(--space-4);
 }
 
 @keyframes fadeIn {
@@ -201,7 +214,7 @@
   }
 }
 
-.admin-modal-header {
+.portal-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -209,21 +222,27 @@
   flex-shrink: 0;
 }
 
-.admin-modal-title svg {
+.portal-modal-title svg {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
   color: var(--portal-text-light);
   flex-shrink: 0;
 }
 
-.admin-modal-header h2 {
+.portal-modal-header h2 {
   margin: 0;
   color: var(--portal-text-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
 
-.admin-modal-close {
+.portal-modal-description {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+  margin-top: var(--space-0-5);
+}
+
+.portal-modal-close {
   background: none;
   border: none;
   font-size: var(--font-size-2xl);
@@ -234,11 +253,11 @@
   transition: color var(--transition-faster);
 }
 
-.admin-modal-close:hover {
+.portal-modal-close:hover {
   color: var(--color-text-primary);
 }
 
-.admin-modal form {
+.portal-modal form {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -246,13 +265,13 @@
   overflow: hidden;
 }
 
-.admin-modal fieldset {
+.portal-modal fieldset {
   border: none;
   padding: 0;
   margin: 0 0 var(--space-4) 0;
 }
 
-.admin-modal legend {
+.portal-modal legend {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
@@ -264,11 +283,53 @@
   width: 100%;
 }
 
+/* ============================================
+ * CONFIRM DIALOG
+ * ============================================ */
+.confirm-dialog-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.confirm-dialog-icon {
+  padding: var(--space-1-5);
+  border: var(--border-width) solid var(--portal-border-color);
+  flex-shrink: 0;
+}
+
+.confirm-dialog-icon svg {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+.confirm-dialog-content {
+  flex: 1;
+}
+
+.confirm-dialog-description {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+  margin-top: var(--space-0-5);
+}
+
+.confirm-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--portal-border-color);
+}
+
+.is-loading {
+  opacity: 0.5;
+}
+
 /* ==============================================
    MODAL TABS
    ============================================== */
 
-.admin-modal-tabs {
+.portal-modal-tabs {
   display: flex;
   gap: 0;
   padding: 0 var(--space-5);
@@ -276,7 +337,7 @@
   flex-shrink: 0;
 }
 
-.admin-modal-tab {
+.portal-modal-tab {
   background: none;
   border: none;
   padding: var(--space-3) var(--space-4);
@@ -288,14 +349,14 @@
   transition: color var(--transition-faster);
 }
 
-.admin-modal-tab:hover {
+.portal-modal-tab:hover {
   color: var(--color-text-primary);
 }
-.admin-modal-tab.active {
+.portal-modal-tab.active {
   color: var(--color-primary);
 }
 
-.admin-modal-tab.active::after {
+.portal-modal-tab.active::after {
   content: "";
   position: absolute;
   bottom: -1px;
@@ -305,7 +366,7 @@
   background: var(--color-primary);
 }
 
-.admin-modal-body {
+.portal-modal-body {
   padding: var(--space-4) var(--space-5);
   overflow-y: auto;
   flex: 1;
@@ -316,20 +377,20 @@
   overscroll-behavior: contain;
 }
 
-.admin-modal-body .form-group {
+.portal-modal-body .form-group {
   margin-bottom: 0;
 }
 
-.admin-modal-body .form-row {
+.portal-modal-body .form-row {
   display: flex;
   gap: var(--space-4);
 }
 
-.admin-modal-body .form-row .form-group {
+.portal-modal-body .form-row .form-group {
   flex: 1;
 }
 
-.admin-modal-footer {
+.portal-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
@@ -494,39 +555,39 @@
    MODAL DROPDOWN
    ============================================== */
 
-.admin-modal .custom-dropdown[data-modal-dropdown] {
+.portal-modal .custom-dropdown[data-modal-dropdown] {
   --dropdown-bg: var(--color-black);
   --dropdown-border-color: var(--portal-border-dark);
   --dropdown-border-width: 1px;
   --dropdown-radius: var(--portal-radius-lg);
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
+.portal-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger {
   border: var(--border-width) solid var(--dropdown-border-color);
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
-.admin-modal
+.portal-modal .custom-dropdown[data-modal-dropdown]:not(.open) .custom-dropdown-trigger:focus,
+.portal-modal
   .custom-dropdown[data-modal-dropdown]:not(.open)
   .custom-dropdown-trigger:focus-visible {
   outline: none;
   border-color: var(--color-primary);
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
+.portal-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
   border: var(--border-width) solid var(--color-primary);
   border-bottom: none;
   outline: none;
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
+.portal-modal .custom-dropdown[data-modal-dropdown].open .custom-dropdown-menu {
   border: var(--border-width) solid var(--color-primary);
   border-top: none;
 }
 
 /* Modal dropdown menu positioning - using @layer utilities for cascade priority */
 @layer utilities {
-  .admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
+  .portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-menu {
     position: absolute;
     top: 100%;
     bottom: auto;
@@ -537,23 +598,23 @@
   }
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
+.portal-modal .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
   border-bottom: var(--border-width) solid var(--color-primary);
   border-top: none;
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
+.portal-modal .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
   border-bottom: none;
   border-top: var(--border-width) solid var(--color-primary);
 }
 
 
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
+.portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger {
   padding: var(--space-2) var(--space-3);
   padding-right: var(--space-1-5);
 }
 
-.admin-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
+.portal-modal .custom-dropdown[data-modal-dropdown] .custom-dropdown-item {
   padding: var(--space-2) var(--space-3);
   text-align: left;
   justify-content: flex-start;
@@ -836,7 +897,7 @@
   font-weight: var(--font-weight-regular);
 }
 
-#dr-create-modal .admin-modal {
+#dr-create-modal .portal-modal {
   height: 860px;
 }
 
@@ -1132,13 +1193,13 @@
 
 @media (--small-mobile) {
   .modal-overlay,
-  .admin-modal-overlay {
+  .portal-modal-overlay {
     padding: 0;
     align-items: flex-start;
   }
 
   .modal-content,
-  .admin-modal {
+  .portal-modal {
     max-width: 100%;
     width: 100%;
     max-height: 100vh;
@@ -1146,19 +1207,19 @@
     margin: 0;
   }
 
-  .admin-modal-body,
+  .portal-modal-body,
   .modal-body {
     padding: var(--space-3);
     min-height: 0;
     flex: 1;
   }
 
-  .admin-modal-header,
+  .portal-modal-header,
   .modal-header {
     padding: var(--space-3);
   }
 
-  .admin-modal-footer,
+  .portal-modal-footer,
   .modal-footer {
     padding: var(--space-3);
   }

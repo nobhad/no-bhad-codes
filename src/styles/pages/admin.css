@@ -18,7 +18,7 @@
 /* Portal theme variables and admin overrides are in variables.css */
 
 /* ================================================
-   DISCOTHÈQUE COLOR HIERARCHY
+   PORTAL COLOR HIERARCHY
    ================================================
    Canvas (body): --portal-bg-pitch (#000000) - pure black base
    Sidebar:       --portal-bg-pitch (#000000) - matches canvas
@@ -1500,7 +1500,7 @@ body.modal-open .dashboard-content {
 /* Modal z-index - overlay must sit above sidebar, panel above overlay */
 @layer utilities {
   [data-page="admin"] .details-panel,
-  [data-page="admin"] .admin-modal-overlay,
+  [data-page="admin"] .portal-modal-overlay,
   [data-page="admin"] #lead-details-panel,
   [data-page="admin"] #contact-details-panel {
     z-index: var(--z-index-portal-modal);

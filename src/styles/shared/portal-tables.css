@@ -1931,3 +1931,126 @@
 .contact-cell {
   /* Inherit table cell styling */
 }
+
+/* ============================================
+ * DATA TABLE COMPONENT
+ * Semantic classes for the React DataTable component.
+ * Replaces tw-* utility classes with meaningful names.
+ * ============================================ */
+.data-table-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+}
+
+.data-table-stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.data-table-stat-value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.data-table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.data-table-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.data-table-search-icon {
+  position: absolute;
+  left: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--portal-text-muted);
+}
+
+.data-table-search-input {
+  padding-left: var(--space-5) !important;
+}
+
+.data-table-checkbox {
+  /* Styled via data attributes in CSS */
+}
+.data-table-checkbox[data-state="checked"] {
+  background-color: var(--color-brand-primary, var(--color-primary));
+  border-color: var(--color-brand-primary, var(--color-primary));
+}
+
+.data-table-row-selected {
+  background-color: var(--portal-alpha-primary-10, rgba(0, 175, 240, 0.1));
+}
+
+.data-table-sort-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.data-table-pagination {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--portal-border-color);
+}
+
+.data-table-pagination-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.data-table-pagination-info {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+}
+
+.data-table-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.data-table-page-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.data-table-page-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.data-table-page-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  padding: 0 var(--space-1);
+}
+
+.data-table-row-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.form-select-sm {
+  padding-top: var(--space-0-5);
+  padding-bottom: var(--space-0-5);
+}

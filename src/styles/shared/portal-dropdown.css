@@ -1209,7 +1209,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal .modal-dropdown,
 .confirm-dialog .modal-dropdown,
-.admin-modal .modal-dropdown {
+.portal-modal .modal-dropdown {
   position: relative;
   display: block;
   width: 100%;
@@ -1219,7 +1219,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* Trigger - matches form-input styling */
 .portal .modal-dropdown .custom-dropdown-trigger,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger,
-.admin-modal .modal-dropdown .custom-dropdown-trigger {
+.portal-modal .modal-dropdown .custom-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1241,7 +1241,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* Placeholder text styling */
 .portal .modal-dropdown .custom-dropdown-text.placeholder,
 .confirm-dialog .modal-dropdown .custom-dropdown-text.placeholder,
-.admin-modal .modal-dropdown .custom-dropdown-text.placeholder {
+.portal-modal .modal-dropdown .custom-dropdown-text.placeholder {
   color: var(--portal-text-light);
   opacity: 0.5;
 }
@@ -1251,14 +1251,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* Hover state - 2px primary border */
 .portal .modal-dropdown .custom-dropdown-trigger:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:hover,
-.admin-modal .modal-dropdown .custom-dropdown-trigger:hover {
+.portal-modal .modal-dropdown .custom-dropdown-trigger:hover {
   border-color: var(--color-primary);
 }
 
 /* Focus state */
 .portal .modal-dropdown .custom-dropdown-trigger:is(:focus, :focus-visible),
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:is(:focus, :focus-visible),
-.admin-modal .modal-dropdown .custom-dropdown-trigger:is(:focus, :focus-visible) {
+.portal-modal .modal-dropdown .custom-dropdown-trigger:is(:focus, :focus-visible) {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: none;
@@ -1267,14 +1267,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* Rotate caret when open */
 .portal .modal-dropdown.open .custom-dropdown-caret,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-caret,
-.admin-modal .modal-dropdown.open .custom-dropdown-caret {
+.portal-modal .modal-dropdown.open .custom-dropdown-caret {
   transform: rotate(180deg);
 }
 
 /* Trigger when open - connect to menu */
 .portal .modal-dropdown.open .custom-dropdown-trigger,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-trigger,
-.admin-modal .modal-dropdown.open .custom-dropdown-trigger {
+.portal-modal .modal-dropdown.open .custom-dropdown-trigger {
   border-color: var(--color-primary);
   border-bottom-color: transparent;
   border-radius: var(--portal-radius-lg) var(--portal-radius-lg) 0 0;
@@ -1283,7 +1283,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* Modal dropdown menu */
 .portal .modal-dropdown .custom-dropdown-menu,
 .confirm-dialog .modal-dropdown .custom-dropdown-menu,
-.admin-modal .modal-dropdown .custom-dropdown-menu {
+.portal-modal .modal-dropdown .custom-dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
@@ -1304,14 +1304,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal .modal-dropdown.open .custom-dropdown-menu,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-menu,
-.admin-modal .modal-dropdown.open .custom-dropdown-menu {
+.portal-modal .modal-dropdown.open .custom-dropdown-menu {
   display: block;
 }
 
 /* Modal dropdown items */
 .portal .modal-dropdown .custom-dropdown-item,
 .confirm-dialog .modal-dropdown .custom-dropdown-item,
-.admin-modal .modal-dropdown .custom-dropdown-item {
+.portal-modal .modal-dropdown .custom-dropdown-item {
   display: flex;
   align-items: center;
   padding: 0 var(--space-4);
@@ -1326,19 +1326,19 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal .modal-dropdown .custom-dropdown-item:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-item:hover,
-.admin-modal .modal-dropdown .custom-dropdown-item:hover {
+.portal-modal .modal-dropdown .custom-dropdown-item:hover {
   background-color: var(--color-primary);
 }
 
 .portal .modal-dropdown .custom-dropdown-item.selected,
 .confirm-dialog .modal-dropdown .custom-dropdown-item.selected,
-.admin-modal .modal-dropdown .custom-dropdown-item.selected {
+.portal-modal .modal-dropdown .custom-dropdown-item.selected {
   background-color: var(--portal-bg-lighter);
 }
 
 .portal .modal-dropdown .custom-dropdown-item.selected:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-item.selected:hover,
-.admin-modal .modal-dropdown .custom-dropdown-item.selected:hover {
+.portal-modal .modal-dropdown .custom-dropdown-item.selected:hover {
   background-color: var(--color-primary);
 }
 
@@ -1354,39 +1354,192 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   width: 100%;
 }
 
-/* Trigger button - opens the dropdown */
+/* Overlay - covers screen when dropdown is open */
+.modal-dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal, 50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--portal-alpha-black-50, rgba(0, 0, 0, 0.5));
+}
+
+/* ============================================
+ * MODAL DROPDOWN
+ * ============================================ */
 .modal-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   padding: var(--space-1-5) var(--space-2);
+  text-align: left;
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-light);
-  font-size: inherit;
-  font-family: inherit;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-  text-align: left;
   transition: border-color var(--transition-fast);
 }
-
 .modal-dropdown-trigger:hover {
-  border-color: var(--portal-text-light);
+  border-color: var(--portal-border-light);
 }
-
 .modal-dropdown-trigger:focus {
   outline: none;
   border-color: var(--color-primary);
 }
+.modal-dropdown-trigger.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.modal-dropdown-trigger.has-error {
+  border-color: var(--color-danger);
+}
 
-/* Overlay - covers screen when dropdown is open */
-.modal-dropdown-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-index-50, 50);
+.modal-dropdown-chevron {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex-shrink: 0;
+  margin-left: var(--space-1);
+  transition: transform var(--transition-fast);
+}
+.modal-dropdown-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.modal-dropdown-panel {
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 var(--space-3);
+  background: var(--portal-bg-dark);
+  border: var(--border-width) solid var(--portal-border-color);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+.modal-dropdown-search-section {
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+.modal-dropdown-search-wrapper {
+  position: relative;
+}
+
+.modal-dropdown-search-icon {
+  position: absolute;
+  left: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--portal-text-muted);
+}
+
+.modal-dropdown-search-input {
+  width: 100%;
+  padding-left: var(--space-5);
+}
+
+.modal-dropdown-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-dropdown-empty {
+  padding: var(--space-3);
+  text-align: center;
+  color: var(--portal-text-muted);
+}
+
+.modal-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+.modal-dropdown-option:hover {
+  background: var(--portal-alpha-white-5, rgba(255, 255, 255, 0.05));
+}
+.modal-dropdown-option.is-focused {
+  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+}
+.modal-dropdown-option.is-selected {
+  color: var(--color-primary);
+}
+.modal-dropdown-option.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-dropdown-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: var(--border-width) solid var(--portal-border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--portal-alpha-black-50);
+  flex-shrink: 0;
+}
+.modal-dropdown-checkbox.is-checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.modal-dropdown-check-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--portal-text-dark, var(--color-black));
+}
+
+.modal-dropdown-option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-dropdown-option-desc {
+  font-size: var(--font-size-sm);
+  color: var(--portal-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-dropdown-selected-icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.modal-dropdown-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-top: var(--border-width) solid var(--portal-border-color);
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

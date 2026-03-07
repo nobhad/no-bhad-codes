@@ -15,10 +15,9 @@
 
 .detail-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
+  gap: var(--space-3);
   overflow: visible;
   position: relative;
   z-index: var(--z-index-10);
@@ -82,12 +81,9 @@
   color: var(--portal-text-muted);
 }
 
-.detail-meta .meta-item {
+.detail-meta .field-label {
   display: inline;
-}
-
-.detail-meta .meta-value {
-  color: var(--portal-text-secondary);
+  margin-bottom: 0;
 }
 
 /* Dropdown danger item styling moved to shared/portal-dropdown.css */

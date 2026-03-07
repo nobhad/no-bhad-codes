@@ -39,22 +39,22 @@ function getActivityIcon(type: string): React.ElementType {
 }
 
 /**
- * Get color for activity type
+ * Get CSS variable for activity type color
  */
-function getActivityColor(type: string): string {
+function getActivityColorVar(type: string): string {
   const colorMap: Record<string, string> = {
-    email: 'tw-text-[var(--activity-email-color)]',
-    invoice: 'tw-text-[var(--activity-invoice-color)]',
-    project: 'tw-text-[var(--activity-project-color)]',
-    file: 'tw-text-[var(--activity-file-color)]',
-    message: 'tw-text-[var(--activity-message-color)]',
-    contact: 'tw-text-[var(--activity-contact-color)]',
-    status: 'tw-text-[var(--activity-status-color)]',
-    completed: 'tw-text-[var(--status-completed)]',
-    alert: 'tw-text-[var(--status-cancelled)]'
+    email: 'var(--activity-email-color)',
+    invoice: 'var(--activity-invoice-color)',
+    project: 'var(--activity-project-color)',
+    file: 'var(--activity-file-color)',
+    message: 'var(--activity-message-color)',
+    contact: 'var(--activity-contact-color)',
+    status: 'var(--activity-status-color)',
+    completed: 'var(--status-completed)',
+    alert: 'var(--status-cancelled)'
   };
 
-  return colorMap[type] || 'tw-text-[var(--portal-text-muted)]';
+  return colorMap[type] || 'var(--portal-text-muted)';
 }
 
 /**
@@ -132,7 +132,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
       <div className="empty-state">
         <Clock className="icon-xl" />
         <span>No activity yet</span>
-        <span className="tw-text-sm">Activity will appear here as you interact with this client</span>
+        <span className="empty-state-hint">Activity will appear here as you interact with this client</span>
       </div>
     );
   }
@@ -140,8 +140,8 @@ export function ActivityTab({ activities }: ActivityTabProps) {
   return (
     <div className="tw-section">
       {/* Header */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <h2 className="heading tw-text-lg">
+      <div className="tab-section-header">
+        <h2 className="heading text-lg">
           Activity Log
         </h2>
         <span className="text-muted ">
@@ -150,58 +150,56 @@ export function ActivityTab({ activities }: ActivityTabProps) {
       </div>
 
       {/* Timeline */}
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="detail-list--section">
         {groupedActivities.map((group) => (
           <div key={group.date}>
             {/* Date Header */}
-            <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-              <span className="heading ">
+            <div className="activity-date-header">
+              <span className="heading">
                 {group.label}
               </span>
-              <div className="tw-flex-1 tw-h-px activity-divider-line" />
+              <div className="activity-date-divider activity-divider-line" />
             </div>
 
             {/* Activities for this date */}
-            <div className="tw-relative tw-pl-8">
+            <div className="activity-timeline-wrapper">
               {/* Timeline line */}
-              <div className="tw-absolute tw-left-3 tw-top-0 tw-bottom-0 tw-w-px activity-timeline-line" />
+              <div className="activity-timeline-vert activity-timeline-line" />
 
-              <div className="tw-flex tw-flex-col tw-gap-4">
+              <div className="detail-list--spaced">
                 {group.items.map((activity, index) => {
                   const Icon = getActivityIcon(activity.activityType);
-                  const iconColor = getActivityColor(activity.activityType);
+                  const iconColorVar = getActivityColorVar(activity.activityType);
                   const isLast = index === group.items.length - 1;
 
                   return (
-                    <div key={activity.id} className="tw-relative tw-flex tw-gap-4">
+                    <div key={activity.id} className="activity-event-row">
                       {/* Timeline dot */}
-                      <div
-                        className="tw-absolute tw--left-5 tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-border tw-border-[var(--portal-border-color)] activity-timeline-dot"
-                      >
-                        <Icon className={cn('icon-sm', iconColor)} />
+                      <div className="activity-dot activity-timeline-dot">
+                        <Icon className="icon-sm" style={{ color: iconColorVar }} />
                       </div>
 
                       {/* Activity content */}
                       <div
                         className={cn(
-                          'tw-flex-1 tw-panel',
-                          !isLast && 'tw-mb-2'
+                          'activity-event-content tw-panel',
+                          !isLast && 'item-spacing-bottom'
                         )}
                       >
-                        <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-                          <div className="tw-flex-1">
-                            <h4 className="heading ">
+                        <div className="activity-event-header">
+                          <div className="activity-event-body">
+                            <h4 className="heading">
                               {activity.title}
                             </h4>
                             {activity.description && (
-                              <p className="text-muted tw-mt-1 tw-text-sm">
+                              <p className="text-muted text-sm description-text">
                                 {activity.description}
                               </p>
                             )}
                           </div>
 
                           <span
-                            className="text-muted tw-whitespace-nowrap tw-text-sm"
+                            className="text-muted whitespace-nowrap text-sm"
                             title={formatFullDate(activity.createdAt)}
                           >
                             {formatRelativeTime(activity.createdAt)}
@@ -210,9 +208,9 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
                         {/* Activity metadata */}
                         {(activity.createdBy || activity.metadata) && (
-                          <div className="tw-flex tw-items-center tw-gap-3 tw-mt-2 tw-pt-2 activity-border-top">
+                          <div className="activity-metadata activity-border-top">
                             {activity.createdBy && (
-                              <span className="text-muted tw-text-sm">
+                              <span className="text-muted text-sm">
                                 by {activity.createdBy}
                               </span>
                             )}
@@ -220,7 +218,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                               Object.entries(activity.metadata).map(([key, value]) => (
                                 <span
                                   key={key}
-                                  className="text-muted tw-text-sm"
+                                  className="text-muted text-sm"
                                 >
                                   {key}: {String(value)}
                                 </span>

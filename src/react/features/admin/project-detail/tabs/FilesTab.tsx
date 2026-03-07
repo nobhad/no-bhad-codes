@@ -53,15 +53,15 @@ function formatDate(date: string): string {
  */
 function getFileIcon(fileType: string): React.ReactNode {
   if (fileType.startsWith('image/')) {
-    return <Image className="icon-lg tw-text-[var(--color-brand-primary)]" />;
+    return <Image className="icon-lg" style={{ color: 'var(--color-brand-primary)' }} />;
   }
   if (fileType === 'application/pdf') {
-    return <FileText className="icon-lg tw-text-[var(--status-cancelled)]" />;
+    return <FileText className="icon-lg" style={{ color: 'var(--status-cancelled)' }} />;
   }
   if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('archive')) {
-    return <FileArchive className="icon-lg tw-text-[var(--status-warning)]" />;
+    return <FileArchive className="icon-lg" style={{ color: 'var(--status-warning)' }} />;
   }
-  return <File className="icon-lg tw-text-[var(--portal-text-muted)]" />;
+  return <File className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />;
 }
 
 /**
@@ -191,10 +191,8 @@ export function FilesTab({
       {/* Upload Section */}
       <div
         className={cn(
-          'tw-panel tw-border-2 tw-border-dashed tw-cursor-pointer tw-transition-colors ',
-          isDragging
-            ? 'tw-border-primary tw-bg-[var(--portal-bg-hover)]'
-            : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
+          'tw-panel files-dropzone',
+          isDragging && 'is-dragging'
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -209,25 +207,25 @@ export function FilesTab({
           onChange={(e) => handleFileSelect(e.target.files)}
         />
 
-        <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
+        <div className="pd-col-center">
           <Upload
             className={cn(
-              'tw-h-8 tw-w-8',
-              isDragging && 'tw-text-primary'
+              'files-upload-icon',
+              isDragging && 'is-dragging'
             )}
           />
-          <div className="tw-text-center">
-            <p className="tw-text-primary ">
+          <div className="files-upload-text">
+            <p className="pd-highlight-value">
               {isDragging ? 'Drop files here' : 'Drag and drop files here, or click to select'}
             </p>
-            <p className="text-muted tw-mt-1 tw-text-sm">
+            <p className="text-muted pd-hint pd-mt-1">
               Supports images, PDFs, documents, and archives
             </p>
           </div>
 
           {/* Category Selector */}
-          <div className="tw-flex tw-items-center tw-gap-2 tw-mt-2" onClick={(e) => e.stopPropagation()}>
-            <span className="text-muted tw-text-sm">Category:</span>
+          <div className="pd-row-compact pd-mt-2" onClick={(e) => e.stopPropagation()}>
+            <span className="text-muted pd-hint">Category:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -243,8 +241,8 @@ export function FilesTab({
           </div>
 
           {isUploading && (
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-primary ">
-              <div className="tw-animate-spin tw-h-4 tw-w-4 tw-border-2 tw-border-current tw-border-t-transparent files-spinner" />
+            <div className="files-upload-status">
+              <div className="files-spinner" />
               Uploading...
             </div>
           )}
@@ -254,27 +252,27 @@ export function FilesTab({
       {/* Files List */}
       {files.length === 0 ? (
         <div className="empty-state">
-          <Inbox className="icon-xl tw-mb-2" />
+          <Inbox className="icon-xl pd-mb-2" />
           <span>No files uploaded yet</span>
         </div>
       ) : (
         <div className="tw-panel contract-panel-no-padding">
-          <table className="tw-w-full">
+          <table className="pd-full-width">
             <thead>
               <tr className="files-table-header">
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   File
                 </th>
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Size
                 </th>
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Uploaded
                 </th>
-                <th className="label tw-text-left tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-left">
                   Shared
                 </th>
-                <th className="label tw-text-right tw-px-4 tw-py-3">
+                <th className="label pd-table-cell pd-cell-right">
                   Actions
                 </th>
               </tr>
@@ -285,28 +283,28 @@ export function FilesTab({
                   key={file.id}
                   className="tw-list-item files-table-row"
                 >
-                  <td className="tw-px-4 tw-py-3">
-                    <div className="tw-flex tw-items-center tw-gap-3">
+                  <td className="pd-table-cell">
+                    <div className="pd-row-tight">
                       {getFileIcon(file.file_type)}
-                      <div className="tw-flex tw-flex-col">
-                        <span className="tw-text-primary tw-truncate tw-max-w-[300px] ">
+                      <div className="pd-col-inline">
+                        <span className="pd-highlight-value pd-truncate-filename">
                           {file.original_name}
                         </span>
                         {file.category && (
-                          <span className="text-muted tw-text-sm">
+                          <span className="text-muted pd-hint">
                             {FILE_CATEGORY_OPTIONS.find((c) => c.value === file.category)?.label || file.category}
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="tw-px-4 tw-py-3 text-muted ">
+                  <td className="pd-table-cell text-muted">
                     {formatFileSize(file.file_size)}
                   </td>
-                  <td className="tw-px-4 tw-py-3 text-muted ">
+                  <td className="pd-table-cell text-muted">
                     {formatDate(file.created_at)}
                   </td>
-                  <td className="tw-px-4 tw-py-3">
+                  <td className="pd-table-cell">
                     <button
                       className="icon-btn"
                       onClick={() => handleToggleSharing(file.id)}
@@ -320,8 +318,8 @@ export function FilesTab({
                       )}
                     </button>
                   </td>
-                  <td className="tw-px-4 tw-py-3">
-                    <div className="tw-flex tw-items-center tw-justify-end tw-gap-1">
+                  <td className="pd-table-cell">
+                    <div className="pd-row-end">
                       {file.download_url && (
                         <button
                           className="icon-btn"

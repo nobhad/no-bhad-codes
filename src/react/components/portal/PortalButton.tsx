@@ -30,9 +30,9 @@ export const PortalButton = React.forwardRef<HTMLButtonElement, PortalButtonProp
     };
 
     const sizeClasses: Record<string, string> = {
-      sm: 'tw-text-sm tw-py-1 tw-px-2',
+      sm: 'btn-sm',
       md: '',
-      lg: 'tw-text-lg tw-py-3 tw-px-6',
+      lg: 'btn-lg',
       icon: ''
     };
 

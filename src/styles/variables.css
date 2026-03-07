@@ -109,7 +109,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
 
   /* Font sizes defined in design-system/tokens/typography.css (fluid clamp values) */
 
-  /* Border Width - DISCOTHÈQUE uses 2px borders consistently */
+  /* Border Width - Portal uses 2px borders consistently */
   --border-width: 2px;
   --border-width-thick: 3px;   /* For focus states, emphasized borders */
   --border-width-heavy: 4px;   /* For strong visual emphasis */
@@ -137,6 +137,38 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --portal-btn-icon-size-xs: 24px;
   --btn-table-icon-size: 24px;
   --portal-btn-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
+
+  /* Button Tokens - brutalist design system */
+  --portal-btn-bg: transparent;
+  --portal-btn-color: var(--color-white);
+  --portal-btn-border-width: var(--border-width);
+  --portal-btn-border-color: var(--color-white);
+  --portal-btn-border-bottom-width: 6px;
+  --portal-btn-border-radius: 0;
+  --portal-btn-padding: 8px 18px;
+  --portal-btn-font-size: var(--font-size-sm, 14px);
+  --portal-btn-font-weight: var(--font-weight-semibold, 600);
+  --portal-btn-font-family: var(--font-family-mono, monospace);
+  --portal-btn-letter-spacing: var(--letter-spacing-wider, 0.05em);
+  --portal-btn-text-transform: uppercase;
+  --portal-btn-shadow: none;
+  --portal-btn-transition: all var(--transition-fast);
+  --portal-btn-hover-bg: var(--color-white);
+  --portal-btn-hover-color: var(--color-black);
+  --portal-btn-hover-border: var(--color-white);
+  --portal-btn-shadow-hover: none;
+  --portal-btn-sm-padding-y: 4px;
+  --portal-btn-sm-padding-x: 12px;
+  --portal-btn-sm-font-size: var(--font-size-xs, 12px);
+  --portal-btn-sm-min-height: 28px;
+
+  /* Danger button tokens */
+  --portal-btn-danger-bg: transparent;
+  --portal-btn-danger-color: var(--color-error-500, #ef4444);
+  --portal-btn-danger-border: var(--color-error-500, #ef4444);
+  --portal-btn-danger-hover-bg: var(--color-error-500, #ef4444);
+  --portal-btn-danger-hover-color: var(--color-white);
+  --portal-btn-danger-hover-border: var(--color-error-500, #ef4444);
 
   /* Dropdown caret sizing and spacing - consistent across all dropdowns */
   --dropdown-caret-size: var(--icon-size-xs);
@@ -267,7 +299,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
  * Portal-specific design tokens are defined in:
  * src/design-system/tokens/portal-theme.css
  *
- * This includes dark mode (DISCOTHÈQUE) and light mode overrides.
+ * This includes dark mode and light mode (default) overrides.
  */
 
 /* ============================================

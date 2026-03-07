@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Client Portal - No Bhad Codes</title>
     <style>
-      /* Inline fallbacks before main CSS loads - portal defaults to dark */
+      /* Inline fallbacks before main CSS loads - portal defaults to light */
       :root {
+        --page-bg: var(--portal-bg-pitch, #d4d4d4);
+        --page-fg: var(--portal-text-light, #171717);
+      }
+      [data-theme='dark'] {
         --page-bg: var(--portal-bg-pitch, #000000);
         --page-fg: var(--portal-text-light, #ffffff);
-      }
-      [data-theme='light'] {
-        --page-bg: var(--portal-bg-pitch, #ffffff);
-        --page-fg: var(--portal-text-light, #000000);
       }
       html,
       body {

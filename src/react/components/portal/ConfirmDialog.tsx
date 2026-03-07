@@ -40,22 +40,18 @@ interface ConfirmDialogProps {
 
 const variantConfig: Record<DialogVariant, {
   icon: React.ReactNode;
-  iconClass: string;
   buttonClass: string;
 }> = {
   danger: {
-    icon: <Trash2 className="tw-h-5 tw-w-5" />,
-    iconClass: 'tw-p-2 tw-border tw-border-primary',
+    icon: <Trash2 />,
     buttonClass: 'btn-danger'
   },
   warning: {
-    icon: <AlertTriangle className="tw-h-5 tw-w-5" />,
-    iconClass: 'tw-p-2 tw-border tw-border-primary',
+    icon: <AlertTriangle />,
     buttonClass: 'btn-primary'
   },
   info: {
-    icon: <Info className="tw-h-5 tw-w-5" />,
-    iconClass: 'tw-p-2 tw-border tw-border-primary',
+    icon: <Info />,
     buttonClass: 'btn-primary'
   }
 };
@@ -90,23 +86,23 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="tw-modal">
-        <AlertDialogHeader className="tw-modal-header">
-          <div className="tw-flex tw-items-start tw-gap-4">
-            <div className={config.iconClass}>
+      <AlertDialogContent className="portal-modal">
+        <AlertDialogHeader className="portal-modal-header">
+          <div className="confirm-dialog-body">
+            <div className="confirm-dialog-icon">
               {config.icon}
             </div>
-            <div className="tw-flex-1">
-              <AlertDialogTitle className="tw-modal-title">
+            <div className="confirm-dialog-content">
+              <AlertDialogTitle className="portal-modal-title">
                 {title}
               </AlertDialogTitle>
-              <AlertDialogDescription className="tw-text-sm text-muted tw-mt-1">
+              <AlertDialogDescription className="confirm-dialog-description">
                 {description}
               </AlertDialogDescription>
             </div>
           </div>
         </AlertDialogHeader>
-        <AlertDialogFooter className="tw-flex tw-justify-end tw-gap-2 tw-pt-4 tw-border-t tw-border-primary/20">
+        <AlertDialogFooter className="confirm-dialog-footer">
           <AlertDialogCancel
             onClick={handleCancel}
             disabled={loading}
@@ -119,7 +115,7 @@ export function ConfirmDialog({
             disabled={loading}
             className={cn(
               config.buttonClass,
-              loading && 'tw-opacity-50'
+              loading && 'is-loading'
             )}
           >
             {loading ? 'Processing...' : confirmText}

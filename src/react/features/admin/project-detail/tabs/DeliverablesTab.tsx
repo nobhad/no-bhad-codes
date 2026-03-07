@@ -88,17 +88,17 @@ export function DeliverablesTab({
   return (
     <div className="tw-section">
       {/* Header with stats */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <div className="tw-flex tw-items-center tw-gap-4">
+      <div className="pd-tab-header">
+        <div className="pd-row">
           <div>
-            <span className="text-muted ">Overall Progress: </span>
-            <span className="tw-text-primary tw-font-semibold">
+            <span className="text-muted">Overall Progress: </span>
+            <span className="pd-highlight-value">
               {progress}%
             </span>
           </div>
           <div>
-            <span className="text-muted ">Deliverables: </span>
-            <span className="tw-text-primary tw-font-semibold">
+            <span className="text-muted">Deliverables: </span>
+            <span className="pd-highlight-value">
               {completedCount}/{totalCount}
             </span>
           </div>
@@ -116,12 +116,12 @@ export function DeliverablesTab({
       {/* Deliverables List */}
       {totalCount === 0 ? (
         <div className="empty-state">
-          <Inbox className="icon-xl tw-mb-2" />
+          <Inbox className="icon-xl pd-mb-2" />
           <span>No deliverables defined yet</span>
-          <span className="tw-text-xs">Add deliverables to milestones in the Tasks tab</span>
+          <span className="pd-text-xs">Add deliverables to milestones in the Tasks tab</span>
         </div>
       ) : (
-        <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="pd-col-wide">
           {milestones
             .filter((m) => m.deliverables && m.deliverables.length > 0)
             .map((milestone) => {
@@ -133,8 +133,8 @@ export function DeliverablesTab({
                   className="tw-panel"
                 >
                   {/* Milestone Header */}
-                  <div className="tw-flex tw-items-center tw-justify-between tw-p-4 deliv-milestone-header">
-                    <div className="tw-flex tw-items-center tw-gap-3">
+                  <div className="pd-tab-header deliv-milestone-header">
+                    <div className="pd-row-tight">
                       {milestone.is_completed ? (
                         <Check className="icon-md" />
                       ) : (
@@ -146,8 +146,7 @@ export function DeliverablesTab({
                           className={cn(
                             milestone.is_completed
                               ? 'text-muted'
-                              : 'tw-text-primary',
-                            ''
+                              : 'pd-highlight-value'
                           )}
                         >
                           {milestone.title}
@@ -162,20 +161,20 @@ export function DeliverablesTab({
 
                     {/* Due Date */}
                     {milestone.due_date && (
-                      <span className="text-muted tw-flex tw-items-center tw-gap-1 tw-text-xs">
-                        <Calendar className="icon-xs" />
+                      <span className="text-muted pd-row-inline pd-text-xs">
+                        <Calendar className="icon-sm" />
                         {formatDate(milestone.due_date)}
                       </span>
                     )}
                   </div>
 
                   {/* Deliverables */}
-                  <div className="tw-p-4">
-                    <ul className="tw-flex tw-flex-col tw-gap-2">
+                  <div className="deliv-content">
+                    <ul className="deliv-list">
                       {milestoneDeliverables.map((item, idx) => (
                         <li
                           key={idx}
-                          className="tw-flex tw-items-start tw-gap-3"
+                          className="deliv-item"
                         >
                           {item.isCompleted ? (
                             <Check className="icon-sm" />
@@ -186,9 +185,8 @@ export function DeliverablesTab({
                           <span
                             className={cn(
                               item.isCompleted
-                                ? 'text-muted tw-line-through'
-                                : 'tw-text-primary',
-                              ''
+                                ? 'text-muted pd-completed-text'
+                                : 'pd-highlight-value'
                             )}
                           >
                             {item.text}
@@ -204,13 +202,13 @@ export function DeliverablesTab({
       )}
 
       {/* Legend */}
-      <div className="tw-flex tw-items-center tw-gap-6 text-muted">
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <Check className="icon-xs" />
+      <div className="deliv-legend text-muted">
+        <div className="deliv-legend-item">
+          <Check className="icon-sm" />
           <span>Completed</span>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <Clock className="icon-xs" />
+        <div className="deliv-legend-item">
+          <Clock className="icon-sm" />
           <span>In Progress</span>
         </div>
       </div>

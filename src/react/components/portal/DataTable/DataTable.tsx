@@ -266,11 +266,11 @@ export function DataTable<T extends { id: number }>({
     <div ref={containerRef} className={cn('tw-section', className)}>
       {/* Stats Bar */}
       {stats.length > 0 && (
-        <div className="tw-flex tw-items-center tw-gap-6 tw-text-sm text-muted">
+        <div className="data-table-stats">
           {stats.map((stat) => (
-            <span key={stat.key} className="tw-flex tw-items-center tw-gap-1">
+            <span key={stat.key} className="data-table-stat-item">
               {stat.label}:{' '}
-              <strong className="tw-font-semibold tw-text-primary">
+              <strong className="data-table-stat-value">
                 {stat.value}
               </strong>
             </span>
@@ -279,18 +279,18 @@ export function DataTable<T extends { id: number }>({
       )}
 
       {/* Filters Bar */}
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+      <div className="data-table-toolbar">
         {/* Search */}
-        <div className="tw-relative tw-flex-1 tw-min-w-[200px] tw-max-w-[320px]">
-          <span className="tw-absolute tw-left-3 tw-top-1/2 tw--translate-y-1/2 text-muted">
-            <Search className="tw-h-4 tw-w-4" />
+        <div className="data-table-search-wrapper">
+          <span className="data-table-search-icon">
+            <Search className="icon-md" />
           </span>
           <input
             type="text"
             placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="tw-input tw-pl-10"
+            className="form-input data-table-search-input"
           />
         </div>
 
@@ -300,7 +300,7 @@ export function DataTable<T extends { id: number }>({
             key={filter.key}
             value={filterValues[filter.key] || 'all'}
             onChange={(e) => setFilter(filter.key, e.target.value)}
-            className="tw-select"
+            className="form-select"
           >
             {filter.options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -313,7 +313,7 @@ export function DataTable<T extends { id: number }>({
         {/* Clear Filters */}
         {hasActiveFilters && (
           <PortalButton variant="ghost" size="sm" onClick={clearFilters}>
-            <X className="tw-h-4 tw-w-4" />
+            <X className="icon-md" />
             Clear
           </PortalButton>
         )}
@@ -328,13 +328,13 @@ export function DataTable<T extends { id: number }>({
             disabled={filteredData.length === 0}
             title="Export to CSV"
           >
-            <Download className="tw-h-4 tw-w-4" />
+            <Download className="icon-md" />
           </PortalButton>
         )}
 
         {/* Refresh */}
         <PortalButton variant="ghost" size="sm" onClick={onRefetch} loading={isLoading}>
-          <RefreshCw className="tw-h-4 tw-w-4" />
+          <RefreshCw className="icon-md" />
         </PortalButton>
       </div>
 
@@ -354,7 +354,7 @@ export function DataTable<T extends { id: number }>({
       {error && (
         <div className="error-state">
           {error}
-          <PortalButton variant="secondary" size="sm" onClick={onRefetch} className="tw-ml-4">
+          <PortalButton variant="secondary" size="sm" onClick={onRefetch}>
             Retry
           </PortalButton>
         </div>
@@ -370,7 +370,7 @@ export function DataTable<T extends { id: number }>({
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
                 aria-label="Select all"
-                className="tw-data-[state=checked]:tw-bg-[var(--color-brand-primary)] tw-data-[state=checked]:tw-border-[var(--color-brand-primary)]"
+                className="data-table-checkbox"
               />
             </PortalTableHead>
 
@@ -404,7 +404,7 @@ export function DataTable<T extends { id: number }>({
           ) : paginatedData.length === 0 ? (
             <PortalTableEmpty
               colSpan={colSpan}
-              icon={<Inbox className="tw-h-6 tw-w-6" />}
+              icon={<Inbox className="icon-lg" />}
               message={hasActiveFilters ? emptyFilteredMessage : emptyMessage}
             />
           ) : (
@@ -414,7 +414,7 @@ export function DataTable<T extends { id: number }>({
                 clickable={!!onRowClick}
                 onClick={() => handleRowClick(item)}
                 className={cn(
-                  selection.isSelected(item) && 'tw-bg-[var(--color-brand-primary-10)]'
+                  selection.isSelected(item) && 'data-table-row-selected'
                 )}
               >
                 {/* Checkbox */}
@@ -423,7 +423,7 @@ export function DataTable<T extends { id: number }>({
                     checked={selection.isSelected(item)}
                     onCheckedChange={() => selection.toggleSelection(item)}
                     aria-label={`Select item ${item.id}`}
-                    className="tw-data-[state=checked]:tw-bg-[var(--color-brand-primary)] tw-data-[state=checked]:tw-border-[var(--color-brand-primary)]"
+                    className="data-table-checkbox"
                   />
                 </PortalTableCell>
 
@@ -440,7 +440,7 @@ export function DataTable<T extends { id: number }>({
                 {/* Actions */}
                 {rowActions.length > 0 && (
                   <PortalTableCell onClick={(e) => e.stopPropagation()}>
-                    <div className="tw-flex tw-items-center tw-gap-1">
+                    <div className="data-table-row-actions">
                       {rowActions.map((action) => {
                         const show = action.show ? action.show(item) : true;
                         if (!show) return null;
@@ -471,19 +471,19 @@ export function DataTable<T extends { id: number }>({
 
       {/* Pagination */}
       {!isLoading && filteredData.length > 0 && (
-        <div className="portal-card tw-mt-4">
-          <div className="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-gap-4">
-            <div className="tw-text-sm text-muted">
+        <div className="portal-card data-table-pagination">
+          <div className="data-table-pagination-layout">
+            <div className="data-table-pagination-info">
               {pagination.pageInfo}
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-4">
-              <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="data-table-pagination-controls">
+              <div className="data-table-page-size">
                 <label className="field-label">Show</label>
                 <select
                   value={pagination.pageSize}
                   onChange={(e) => pagination.setPageSize(Number(e.target.value))}
-                  className="tw-select tw-py-1"
+                  className="form-select form-select-sm"
                 >
                   {pagination.pageSizeOptions.map((size) => (
                     <option key={size} value={size}>
@@ -493,7 +493,7 @@ export function DataTable<T extends { id: number }>({
                 </select>
               </div>
 
-              <div className="tw-flex tw-items-center tw-gap-1">
+              <div className="data-table-page-nav">
                 <button
                   type="button"
                   className="icon-btn"
@@ -501,7 +501,7 @@ export function DataTable<T extends { id: number }>({
                   disabled={!pagination.canGoPrev}
                   title="First page"
                 >
-                  <ChevronsLeft className="tw-h-4 tw-w-4" />
+                  <ChevronsLeft className="icon-md" />
                 </button>
                 <button
                   type="button"
@@ -510,14 +510,14 @@ export function DataTable<T extends { id: number }>({
                   disabled={!pagination.canGoPrev}
                   title="Previous page"
                 >
-                  <ChevronLeft className="tw-h-4 tw-w-4" />
+                  <ChevronLeft className="icon-md" />
                 </button>
 
-                <div className="tw-flex tw-items-center tw-gap-1 tw-px-2">
+                <div className="data-table-page-indicator">
                   <span className="tw-badge">
                     {pagination.page}
                   </span>
-                  <span className="tw-text-sm text-muted">of {pagination.totalPages}</span>
+                  <span className="text-muted">of {pagination.totalPages}</span>
                 </div>
 
                 <button
@@ -527,7 +527,7 @@ export function DataTable<T extends { id: number }>({
                   disabled={!pagination.canGoNext}
                   title="Next page"
                 >
-                  <ChevronRight className="tw-h-4 tw-w-4" />
+                  <ChevronRight className="icon-md" />
                 </button>
                 <button
                   type="button"
@@ -536,7 +536,7 @@ export function DataTable<T extends { id: number }>({
                   disabled={!pagination.canGoNext}
                   title="Last page"
                 >
-                  <ChevronsRight className="tw-h-4 tw-w-4" />
+                  <ChevronsRight className="icon-md" />
                 </button>
               </div>
             </div>

@@ -675,4 +675,11 @@ html[data-theme="light"] body[data-page="client-portal"] {
 
   /* Portal borders — same color as text */
   --portal-border-color: var(--color-gray-900);
+
+  /* Button tokens — inverted for light mode */
+  --portal-btn-color: var(--color-gray-900);
+  --portal-btn-border-color: var(--color-gray-900);
+  --portal-btn-hover-bg: var(--color-gray-900);
+  --portal-btn-hover-color: var(--color-white);
+  --portal-btn-hover-border: var(--color-gray-900);
 }

@@ -11,12 +11,12 @@
  * - Portal text colors
  * - Portal background colors
  * - Portal border system
- * - Dark mode (default)
- * - Light mode overrides
+ * - Dark mode (base layer)
+ * - Light mode (default, overrides dark base)
  */
 
 /* ============================================
- * PORTAL DARK MODE (DEFAULT) - DISCOTHÈQUE THEME
+ * PORTAL DARK MODE (BASE LAYER)
  * Black background, white text
  * ============================================ */
 [data-page="admin"],
@@ -51,7 +51,7 @@
   --portal-border: var(--border-width) solid var(--portal-border-color);
   --portal-border-subtle: var(--portal-alpha-white-08);
 
-  /* Border weight aliases — all map to --portal-border-color (DISCOTHÈQUE: uniform borders) */
+  /* Border weight aliases — all map to --portal-border-color (uniform borders) */
   --portal-border-dark: var(--portal-border-color);
   --portal-border-medium: var(--portal-border-color);
   --portal-border-light: var(--portal-border-color);

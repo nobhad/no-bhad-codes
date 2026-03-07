@@ -8,11 +8,11 @@ import { useScaleIn } from '@react/hooks/useGsap';
  * Modal size variants - portal design system
  */
 const modalSizes = {
-  sm: 'tw-max-w-sm',
-  md: 'tw-max-w-lg',
-  lg: 'tw-max-w-2xl',
-  xl: 'tw-max-w-4xl',
-  full: 'tw-max-w-full tw-m-4'
+  sm: 'portal-modal--sm',
+  md: '',
+  lg: 'portal-modal--wide',
+  xl: 'portal-modal--xl',
+  full: 'portal-modal--full'
 } as const;
 
 type ModalSize = keyof typeof modalSizes;
@@ -36,12 +36,16 @@ interface PortalModalProps {
   footer?: React.ReactNode;
   /** Additional class names for the content */
   className?: string;
+  /** Icon displayed next to the title */
+  icon?: React.ReactNode;
+  /** When provided, wraps body + footer in a <form> */
+  onSubmit?: (e: React.FormEvent) => void;
 }
 
 /**
  * PortalModal
- * Modal component matching the portal design system
- * Uses GSAP for entrance animation via useScaleIn hook
+ * Shared modal component for the portal design system.
+ * Uses GSAP for entrance animation via useScaleIn hook.
  */
 export function PortalModal({
   open,
@@ -52,47 +56,53 @@ export function PortalModal({
   size = 'md',
   showCloseButton = true,
   footer,
-  className
+  className,
+  icon,
+  onSubmit
 }: PortalModalProps) {
   const contentRef = useScaleIn<HTMLDivElement>();
+
+  const bodyAndFooter = (
+    <>
+      <div className="portal-modal-body">{children}</div>
+      {footer && <div className="portal-modal-footer">{footer}</div>}
+    </>
+  );
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        {/* Overlay */}
-        <DialogPrimitive.Overlay className="tw-modal-overlay" />
-
-        {/* Content */}
+        <DialogPrimitive.Overlay className="portal-modal-overlay" />
         <DialogPrimitive.Content
           ref={contentRef}
-          className={cn('tw-modal tw-fixed tw-top-1/2 tw-left-1/2 tw--translate-x-1/2 tw--translate-y-1/2 tw-z-50', modalSizes[size], className)}
+          className={cn('portal-modal', modalSizes[size], className)}
         >
           {/* Header */}
-          <div className="tw-modal-header">
-            <div className="tw-flex-1">
-              <DialogPrimitive.Title className="tw-modal-title">
-                {title}
+          <div className="portal-modal-header">
+            <div className="portal-modal-title">
+              {icon && <span className="heading-icon">{icon}</span>}
+              <DialogPrimitive.Title asChild>
+                <h2>{title}</h2>
               </DialogPrimitive.Title>
-              {description && (
-                <DialogPrimitive.Description className="tw-text-sm text-muted tw-mt-1">
-                  {description}
-                </DialogPrimitive.Description>
-              )}
             </div>
-
+            {description && (
+              <DialogPrimitive.Description className="portal-modal-description">
+                {description}
+              </DialogPrimitive.Description>
+            )}
             {showCloseButton && (
-              <DialogPrimitive.Close className="btn-close">
-                <X className="tw-h-4 tw-w-4" />
-                <span className="tw-sr-only">Close</span>
+              <DialogPrimitive.Close className="portal-modal-close" aria-label="Close modal">
+                <X size={18} />
               </DialogPrimitive.Close>
             )}
           </div>
 
-          {/* Body */}
-          <div className="tw-py-4 tw-scroll-container tw-max-h-[60vh]">{children}</div>
-
-          {/* Footer */}
-          {footer && <div className="tw-flex tw-justify-end tw-gap-2 tw-pt-4 tw-border-t tw-border-primary/20">{footer}</div>}
+          {/* Body + Footer — optionally wrapped in <form> */}
+          {onSubmit ? (
+            <form onSubmit={onSubmit}>{bodyAndFooter}</form>
+          ) : (
+            bodyAndFooter
+          )}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

@@ -174,13 +174,13 @@
 }
 
 /* Larger modal for questionnaire editor */
-[data-page="admin"] #questionnaire-modal .admin-modal--lg {
+[data-page="admin"] #questionnaire-modal .portal-modal--lg {
   max-width: 700px;
   width: 90%;
 }
 
 /* View response modal sizing */
-[data-page="admin"] #view-response-modal .admin-modal--lg {
+[data-page="admin"] #view-response-modal .portal-modal--lg {
   max-width: 700px;
   width: 90%;
   max-height: 85vh;

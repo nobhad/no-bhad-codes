@@ -52,7 +52,7 @@ export function EmptyStateNoResults({
 
   return (
     <FactoryEmptyState
-      icon={<Search className="tw-h-6 tw-w-6" />}
+      icon={<Search className="icon-lg" />}
       message={message}
       ctaLabel={onClear ? 'Clear filters' : undefined}
       onCtaClick={onClear}
@@ -70,7 +70,7 @@ export function EmptyStateNoFiles({
 }) {
   return (
     <FactoryEmptyState
-      icon={<FolderOpen className="tw-h-6 tw-w-6" />}
+      icon={<FolderOpen className="icon-lg" />}
       message="No files yet. Upload files to get started."
       ctaLabel={onUpload ? 'Upload files' : undefined}
       onCtaClick={onUpload}
@@ -88,7 +88,7 @@ export function EmptyStateNoData({
 }) {
   return (
     <FactoryEmptyState
-      icon={<Inbox className="tw-h-6 tw-w-6" />}
+      icon={<Inbox className="icon-lg" />}
       message={`No ${entityName} to display at this time.`}
       className={className}
     />

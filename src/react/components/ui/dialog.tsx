@@ -19,7 +19,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'tw-modal-overlay tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0',
+      'portal-modal-overlay tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -36,7 +36,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'tw-modal tw-:fixed tw-:left-[50%] tw-:top-[50%] tw-:z-50 tw-:translate-x-[-50%] tw-:translate-y-[-50%] tw-:duration-200 tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[state=closed]:slide-out-to-left-1/2 tw-:data-[state=closed]:slide-out-to-top-[48%] tw-:data-[state=open]:slide-in-from-left-1/2 tw-:data-[state=open]:slide-in-from-top-[48%]',
+        'portal-modal tw-:fixed tw-:left-[50%] tw-:top-[50%] tw-:z-50 tw-:translate-x-[-50%] tw-:translate-y-[-50%] tw-:duration-200 tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[state=closed]:slide-out-to-left-1/2 tw-:data-[state=closed]:slide-out-to-top-[48%] tw-:data-[state=open]:slide-in-from-left-1/2 tw-:data-[state=open]:slide-in-from-top-[48%]',
         className
       )}
       {...props}
@@ -56,7 +56,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('tw-modal-header tw-:flex-col tw-:space-y-1.5', className)}
+    className={cn('portal-modal-header tw-:flex-col tw-:space-y-1.5', className)}
     {...props}
   />
 );
@@ -82,7 +82,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('tw-modal-title', className)}
+    className={cn('portal-modal-title', className)}
     {...props}
   />
 ));

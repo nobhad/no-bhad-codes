@@ -4,7 +4,7 @@
  * ===============================================
  * @file src/styles/bundles/light-mode.css
  *
- * DISCOTHÈQUE light mode: Black text, black borders on white.
+ * Portal light mode (default): Black text, black borders on white.
  * Shared between admin and client portal bundles.
  *
  * IMPORTANT: These MUST be unlayered to override layered tokens.
