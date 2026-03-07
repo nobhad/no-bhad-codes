@@ -86,7 +86,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       {/* Progress Bar */}
       <div className="portal-card-progress">
         <div className="portal-card-header">
-          <span className="label">Progress</span>
+          <span className="field-label">Progress</span>
           <span className="tw-text-primary tw-text-sm">{project.progress}%</span>
         </div>
         <div className="tw-progress-track">

@@ -69,8 +69,8 @@ export function ContractTab({
     return files.filter(
       (f) =>
         f.category === 'contract' ||
-        f.original_name.toLowerCase().includes('contract') ||
-        f.original_name.toLowerCase().includes('agreement')
+        f.original_name?.toLowerCase().includes('contract') ||
+        f.original_name?.toLowerCase().includes('agreement')
     );
   }, [files]);
 
@@ -102,20 +102,11 @@ export function ContractTab({
       <div className="tw-panel ">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
           <div className="tw-flex tw-items-start tw-gap-4">
-            <div
-              className={cn(
-                'tw-w-12 tw-h-12 tw-flex tw-items-center tw-justify-center contract-icon-box',
-                isSigned
-                  ? 'tw-bg-white'
-                  : 'tw-border tw-border-[var(--portal-border-color)]'
-              )}
-            >
-              {isSigned ? (
-                <Check className="icon-xl tw-text-[var(--portal-text-dark)]" />
-              ) : (
-                <FileSignature className="icon-xl" />
-              )}
-            </div>
+            {isSigned ? (
+              <Check className="icon-xl" />
+            ) : (
+              <FileSignature className="icon-xl" />
+            )}
 
             <div>
               <div className="tw-flex tw-items-center tw-gap-3">
@@ -174,7 +165,7 @@ export function ContractTab({
         <div className="stat-card">
           <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
             <DollarSign className="icon-md" />
-            <span className="label">
+            <span className="field-label">
               Contract Value
             </span>
           </div>
@@ -192,7 +183,7 @@ export function ContractTab({
         <div className="stat-card">
           <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
             <Calendar className="icon-md" />
-            <span className="label">
+            <span className="field-label">
               Project Timeline
             </span>
           </div>
@@ -253,7 +244,7 @@ export function ContractTab({
 
                 {file.download_url && (
                   <button
-                    className="btn-icon"
+                    className="icon-btn"
                     onClick={() => handleDownload(file)}
                     title="Download"
                   >

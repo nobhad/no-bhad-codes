@@ -311,7 +311,7 @@ export function InvoicesTab({
                     <td className="tw-px-4 tw-py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="tw-flex tw-items-center tw-justify-end tw-gap-1">
                         <button
-                          className="btn-icon"
+                          className="icon-btn"
                           onClick={() => onViewInvoice?.(invoice.id)}
                           title="View invoice"
                         >
@@ -320,7 +320,7 @@ export function InvoicesTab({
 
                         {canSend && (
                           <button
-                            className="btn-icon"
+                            className="icon-btn"
                             onClick={() => handleSend(invoice.id)}
                             disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
                             title="Send invoice"
@@ -331,7 +331,7 @@ export function InvoicesTab({
 
                         {canMarkPaid && (
                           <button
-                            className="btn-icon"
+                            className="icon-btn"
                             onClick={() => {
                               setDeletingInvoiceId(invoice.id);
                               markPaidDialog.open();
@@ -344,7 +344,7 @@ export function InvoicesTab({
 
                         {!isDraft && onDownloadPdf && (
                           <button
-                            className="btn-icon"
+                            className="icon-btn"
                             onClick={() => handleDownloadPdf(invoice.id)}
                             disabled={actionLoading?.type === 'download' && actionLoading?.id === invoice.id}
                             title="Download PDF"
@@ -355,7 +355,7 @@ export function InvoicesTab({
 
                         <PortalDropdown>
                           <PortalDropdownTrigger asChild>
-                            <button className="btn-icon">
+                            <button className="icon-btn">
                               <MoreHorizontal className="icon-md" />
                             </button>
                           </PortalDropdownTrigger>

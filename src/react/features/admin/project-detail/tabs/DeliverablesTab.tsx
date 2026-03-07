@@ -135,20 +135,11 @@ export function DeliverablesTab({
                   {/* Milestone Header */}
                   <div className="tw-flex tw-items-center tw-justify-between tw-p-4 deliv-milestone-header">
                     <div className="tw-flex tw-items-center tw-gap-3">
-                      <div
-                        className={cn(
-                          'tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 deliv-icon-box',
-                          milestone.is_completed
-                            ? 'tw-bg-white'
-                            : 'tw-border tw-border-[var(--portal-border-color)]'
-                        )}
-                      >
-                        {milestone.is_completed ? (
-                          <Check className="icon-md tw-text-[var(--portal-text-dark)]" />
-                        ) : (
-                          <Package className="icon-xs" />
-                        )}
-                      </div>
+                      {milestone.is_completed ? (
+                        <Check className="icon-md" />
+                      ) : (
+                        <Package className="icon-md" />
+                      )}
 
                       <div>
                         <h4
@@ -186,20 +177,11 @@ export function DeliverablesTab({
                           key={idx}
                           className="tw-flex tw-items-start tw-gap-3"
                         >
-                          <div
-                            className={cn(
-                              'tw-w-5 tw-h-5 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-mt-0.5 deliv-icon-box',
-                              item.isCompleted
-                                ? 'tw-bg-white'
-                                : 'tw-border tw-border-[var(--portal-border-color)]'
-                            )}
-                          >
-                            {item.isCompleted ? (
-                              <Check className="icon-xs tw-text-[var(--portal-text-dark)]" />
-                            ) : (
-                              <Clock className="icon-xs" />
-                            )}
-                          </div>
+                          {item.isCompleted ? (
+                            <Check className="icon-sm" />
+                          ) : (
+                            <Clock className="icon-sm" />
+                          )}
 
                           <span
                             className={cn(
@@ -222,17 +204,13 @@ export function DeliverablesTab({
       )}
 
       {/* Legend */}
-      <div className="tw-flex tw-items-center tw-gap-6 text-muted tw-text-xs">
+      <div className="tw-flex tw-items-center tw-gap-6 text-muted">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <div className="tw-w-4 tw-h-4 tw-bg-white tw-flex tw-items-center tw-justify-center deliv-icon-box">
-            <Check className="icon-xs tw-text-[var(--portal-text-dark)]" />
-          </div>
+          <Check className="icon-xs" />
           <span>Completed</span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-2">
-          <div className="tw-w-4 tw-h-4 tw-border tw-border-[var(--portal-border-color)] tw-flex tw-items-center tw-justify-center deliv-icon-box">
-            <Clock className="icon-xs" />
-          </div>
+          <Clock className="icon-xs" />
           <span>In Progress</span>
         </div>
       </div>

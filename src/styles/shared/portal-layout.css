@@ -1296,7 +1296,7 @@ html[data-theme="light"] .portal .funnel-value {
 .tw-panel {
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
-  padding: var(--space-4);
+  padding: var(--portal-card-padding);
 }
 
 /* Clickable card variant — portal-card + card-clickable */

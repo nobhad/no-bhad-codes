@@ -294,7 +294,7 @@ export function ProjectDetail({
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="btn-icon">
+              <button className="icon-btn">
                 <MoreHorizontal className="icon-lg" />
               </button>
             </PortalDropdownTrigger>

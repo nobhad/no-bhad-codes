@@ -216,7 +216,7 @@ export function ContactsTab({
         </h3>
         <button
           onClick={handleCancel}
-          className="btn-icon"
+          className="icon-btn"
         >
           <X className="icon-md" />
         </button>
@@ -255,7 +255,7 @@ export function ContactsTab({
         />
 
         <div className="tw-flex tw-flex-col tw-gap-1.5">
-          <label className="label">
+          <label className="field-label">
             Role
           </label>
           <select
@@ -368,7 +368,7 @@ export function ContactsTab({
 
                 <PortalDropdown>
                   <PortalDropdownTrigger asChild>
-                    <button className="btn-icon">
+                    <button className="icon-btn">
                       <Pencil className="icon-md" />
                     </button>
                   </PortalDropdownTrigger>

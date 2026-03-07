@@ -373,7 +373,7 @@ export function PortalProjectDetail({
           {/* Progress Section */}
           <div className="tw-panel">
             <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
-              <span className="label">Overall Progress</span>
+              <span className="field-label">Overall Progress</span>
               <span className="tw-text-primary">{progress}%</span>
             </div>
             <div className="tw-progress-track">
