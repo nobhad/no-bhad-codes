@@ -132,15 +132,19 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --sidebar-icon-size: 20px;
 
   /* Button Icon Sizes - portal icon button dimensions */
-  --btn-portal-icon-size: 32px;
-  --btn-portal-icon-size-sm: 28px;
-  --btn-portal-icon-size-xs: 24px;
+  --portal-btn-icon-size: 32px;
+  --portal-btn-icon-size-sm: 28px;
+  --portal-btn-icon-size-xs: 24px;
   --btn-table-icon-size: 24px;
-  --btn-portal-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
+  --portal-btn-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
 
   /* Dropdown caret sizing and spacing - consistent across all dropdowns */
   --dropdown-caret-size: var(--icon-size-xs);
   --dropdown-caret-gap: var(--space-2); /* Gap between text and caret */
+
+  /* Native <select> caret — matches Lucide ChevronDown used in custom dropdowns */
+  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 
   /* Dropdown text styling - single source of truth for all dropdowns */
   --dropdown-font-size: inherit;

@@ -43,7 +43,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: var(--portal-bg-dark, rgba(0, 0, 0, 0.5));
+    background: var(--portal-bg-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,7 +83,7 @@
 
   /* Selected - checkbox/radio style selection */
   .is-selected {
-    background-color: var(--color-primary-10, rgba(0, 175, 240, 0.1));
+    background-color: var(--color-primary-10);
     border-color: var(--color-primary);
   }
 
@@ -164,7 +164,7 @@
 
   /* Drag target */
   .is-drag-over {
-    background-color: var(--color-primary-10, rgba(0, 175, 240, 0.1));
+    background-color: var(--color-primary-10);
     border: var(--border-width) dashed var(--color-primary);
   }
 

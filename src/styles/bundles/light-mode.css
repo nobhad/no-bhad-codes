@@ -37,15 +37,15 @@ html[data-theme="light"] body[data-page="client-portal"] .portal {
  * These are NOT defined in portal-theme.css.
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"] {
-  --portal-alpha-white-08: rgba(0, 0, 0, 0.08);
-  --portal-alpha-white-10: rgba(0, 0, 0, 0.1);
-  --portal-alpha-white-15: rgba(0, 0, 0, 0.15);
-  --portal-alpha-white-20: rgba(0, 0, 0, 0.2);
-  --portal-alpha-white-30: rgba(0, 0, 0, 0.3);
+  --portal-alpha-white-08: var(--portal-alpha-black-08);
+  --portal-alpha-white-10: var(--portal-alpha-black-10);
+  --portal-alpha-white-15: var(--portal-alpha-black-15);
+  --portal-alpha-white-20: var(--portal-alpha-black-20);
+  --portal-alpha-white-30: var(--portal-alpha-black-30);
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--color-light-bg);
+  background-color: var(--portal-bg-pitch);
 }
 
 /* ============================================

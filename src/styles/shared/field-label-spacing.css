@@ -8,8 +8,8 @@
  * Do NOT define .field-label, .meta-label, .meta-value, .meta-item elsewhere.
  *
  * CSS Variables (defined in variables.css):
- * - --field-label-value-gap: Gap between label and value (0.25rem)
- * - --field-group-gap: Gap between field groups (1rem)
+ * - --portal-field-label-gap: Gap between label and value (0.25rem)
+ * - --portal-field-group-gap: Gap between field groups (1rem)
  * - --portal-text-secondary: Label text color
  * - --portal-text-light: Value text color
  */
@@ -20,12 +20,12 @@
 .field-label,
 .meta-label {
   display: block;
-  font-size: var(--label-font-size);
-  font-weight: var(--label-font-weight);
+  font-size: var(--portal-label-size);
+  font-weight: var(--portal-label-weight);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: var(--label-letter-spacing);
-  margin-bottom: var(--field-label-value-gap, 0.25rem);
+  letter-spacing: var(--portal-label-spacing);
+  margin-bottom: var(--portal-field-label-gap, 0.25rem);
   line-height: var(--line-height-tight);
 }
 
@@ -49,6 +49,9 @@
 }
 .field-label--primary {
   color: var(--color-primary);
+}
+.field-label--spaced {
+  margin-bottom: var(--space-2);
 }
 
 /* =====================================================
@@ -105,7 +108,7 @@
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: var(--field-label-value-gap, 0.25rem);
+  gap: var(--portal-field-label-gap, 0.25rem);
 }
 
 /* Remove margin-bottom from labels inside meta-item (gap handles spacing) */
@@ -131,7 +134,7 @@
    ===================================================== */
 .meta-grid {
   display: grid;
-  gap: var(--field-group-gap, 1rem);
+  gap: var(--portal-field-group-gap, 1rem);
 }
 
 .meta-grid--2col {
@@ -165,11 +168,11 @@
    STAT LABEL - Compact variant for stat cards
    ===================================================== */
 .stat-label {
-  font-size: var(--label-font-size);
-  font-weight: var(--label-font-weight);
+  font-size: var(--portal-label-size);
+  font-weight: var(--portal-label-weight);
   color: var(--portal-text-secondary);
   text-transform: uppercase;
-  letter-spacing: var(--label-letter-spacing);
+  letter-spacing: var(--portal-label-spacing);
   margin: 0;
 }
 

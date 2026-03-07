@@ -49,9 +49,10 @@
 
 /* ============================================
  * ADMIN-SPECIFIC STYLES (pages layer)
+ * Shared portal styles first, then page overrides last so they win cascade
  * ============================================ */
-@import "../pages/admin.css" layer(pages);
 @import "../admin/index.css" layer(pages);
+@import "../pages/admin.css" layer(pages);
 
 /* ============================================
  * LIGHT MODE (shared + admin-specific overrides)
@@ -128,3 +129,4 @@ html:has(body.admin-logged-in[data-page="admin"]) {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-neutral-500);
 }
+

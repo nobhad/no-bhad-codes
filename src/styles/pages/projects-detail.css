@@ -35,6 +35,10 @@
 }
 
 @media (--tablet) {
+  .project-detail-section {
+    padding: clamp(1rem, 4vw, 2rem) clamp(2rem, 10vw, 10%);
+  }
+
   .worksub-wrapper {
     padding-top: 60px;
   }
@@ -50,8 +54,8 @@
   top: 50%;
   width: 80px;
   height: 80px;
-  border-radius: var(--portal-radius-full);
-  background-color: var(--color-dark);
+  border-radius: 50%;
+  background-color: var(--color-bg-inverse);
   box-shadow: var(--shadow-elevated-sm);
   cursor: pointer;
   border: none;
@@ -68,7 +72,7 @@
 .back-button svg {
   width: 40px;
   height: 40px;
-  stroke: var(--color-light);
+  stroke: var(--color-text-inverse);
   transform: rotate(9deg);
   transition:
     transform var(--transition-mouse, 0.2s) cubic-bezier(0.25, 0.1, 0.25, 3.5),

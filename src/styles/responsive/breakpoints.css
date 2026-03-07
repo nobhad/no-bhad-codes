@@ -158,7 +158,6 @@
     }
 
     /* Table header mobile titles */
-    .admin-table-header h3 .title-mobile,
     .data-table-header h3 .title-mobile {
       display: inline;
     }

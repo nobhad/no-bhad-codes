@@ -213,8 +213,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 }
 
 .dropdown-btn {
-  width: var(--btn-portal-icon-size);
-  height: var(--btn-portal-icon-size);
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
   padding: 0;
   background: var(--portal-bg-light);
   color: var(--portal-text-light);

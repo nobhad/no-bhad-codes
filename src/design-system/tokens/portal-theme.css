@@ -24,38 +24,37 @@
   /* ----------------------------------------
    * TEXT COLORS
    * ---------------------------------------- */
-  --portal-text-light: #ffffff;
-  --portal-text-primary: #ffffff;
-  --portal-text-secondary: #ffffff;
-  --portal-text-muted: #ffffff;   /* No grey - differentiate by weight only */
-  --portal-text-dark: #000000;
-  --portal-placeholder-color: rgba(255, 255, 255, 0.45);  /* Placeholder only */
+  --portal-text-light: var(--color-white);
+  --portal-text-primary: var(--color-white);
+  --portal-text-secondary: var(--color-white);
+  --portal-text-muted: var(--color-white);   /* No grey - differentiate by weight only */
+  --portal-text-dark: var(--color-black);
+  --portal-placeholder-color: var(--portal-alpha-white-45);
 
   /* ----------------------------------------
    * BACKGROUND COLORS
    * ---------------------------------------- */
-  --portal-bg-pitch: #000000;
-  --portal-bg-darkest: #000000;
-  --portal-bg-darker: #0a0a0a;
-  --portal-bg-dark: #1a1a1a;
-  --portal-bg-medium: #2a2a2a;
-  --portal-bg-light: #3a3a3a;
-  --portal-bg-lighter: #4a4a4a;
-  --portal-bg-hover: #1a1a1a;
-  --portal-bg-readonly: #0a0a0a;
+  --portal-bg-pitch: var(--portal-neutral-0);
+  --portal-bg-darkest: var(--portal-neutral-0);
+  --portal-bg-darker: var(--portal-neutral-50);
+  --portal-bg-dark: var(--portal-neutral-100);
+  --portal-bg-medium: var(--portal-neutral-200);
+  --portal-bg-light: var(--portal-neutral-300);
+  --portal-bg-lighter: var(--portal-neutral-400);
+  --portal-bg-hover: var(--portal-neutral-100);
+  --portal-bg-readonly: var(--portal-neutral-50);
 
   /* ----------------------------------------
    * BORDER SYSTEM
    * ---------------------------------------- */
-  --portal-border-color: #ffffff;
+  --portal-border-color: var(--color-white);
   --portal-border: var(--border-width) solid var(--portal-border-color);
-  --portal-border-subtle: rgba(255, 255, 255, 0.08);
+  --portal-border-subtle: var(--portal-alpha-white-08);
 
   /* Border weight aliases — all map to --portal-border-color (DISCOTHÈQUE: uniform borders) */
   --portal-border-dark: var(--portal-border-color);
   --portal-border-medium: var(--portal-border-color);
   --portal-border-light: var(--portal-border-color);
-  --table-border-color: var(--portal-border-color);
 
   /* ----------------------------------------
    * ALPHA COLORS
@@ -69,14 +68,17 @@
   --portal-alpha-white-20: rgba(255, 255, 255, 0.2);
   --portal-alpha-white-25: rgba(255, 255, 255, 0.25);
   --portal-alpha-white-30: rgba(255, 255, 255, 0.3);
+  --portal-alpha-white-45: rgba(255, 255, 255, 0.45);
   --portal-alpha-white-50: rgba(255, 255, 255, 0.5);
   --portal-alpha-black-04: rgba(0, 0, 0, 0.04);
   --portal-alpha-black-05: rgba(0, 0, 0, 0.05);
+  --portal-alpha-black-08: rgba(0, 0, 0, 0.08);
   --portal-alpha-black-10: rgba(0, 0, 0, 0.1);
   --portal-alpha-black-15: rgba(0, 0, 0, 0.15);
   --portal-alpha-black-20: rgba(0, 0, 0, 0.2);
   --portal-alpha-black-30: rgba(0, 0, 0, 0.3);
   --portal-alpha-black-40: rgba(0, 0, 0, 0.4);
+  --portal-alpha-black-45: rgba(0, 0, 0, 0.45);
   --portal-alpha-black-50: rgba(0, 0, 0, 0.5);
   --portal-alpha-black-60: rgba(0, 0, 0, 0.6);
   --portal-alpha-black-70: rgba(0, 0, 0, 0.7);
@@ -117,18 +119,18 @@
    * Dark bg = light text/icons
    * Light bg = dark text/icons
    * ---------------------------------------- */
-  --hover-bg-color: var(--portal-text-light);        /* White bg on hover */
-  --hover-text-color: var(--portal-bg-pitch);        /* Black text on hover */
-  --hover-icon-color: var(--portal-bg-pitch);        /* Black icons on hover */
-  --hover-border-color: var(--portal-text-light);    /* White border on hover */
+  --portal-hover-bg: var(--portal-text-light);        /* White bg on hover */
+  --portal-hover-text: var(--portal-bg-pitch);        /* Black text on hover */
+  --portal-hover-icon: var(--portal-bg-pitch);        /* Black icons on hover */
+  --portal-hover-border: var(--portal-text-light);    /* White border on hover */
 
   /* ----------------------------------------
    * FOCUS STATE COLORS
    * ---------------------------------------- */
-  --focus-ring-color: var(--color-primary);
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 0px;
-  --focus-ring: 0 0 0 var(--focus-ring-width) var(--portal-alpha-primary-25);
+  --portal-focus-color: var(--color-primary);
+  --portal-focus-width: 2px;
+  --portal-focus-offset: 0px;
+  --portal-focus-ring: 0 0 0 var(--portal-focus-width) var(--portal-alpha-primary-25);
 
   /* ----------------------------------------
    * BUTTON COLORS
@@ -151,8 +153,8 @@
   /* ----------------------------------------
    * FIELD/LABEL SPACING
    * ---------------------------------------- */
-  --field-label-value-gap: 0.125rem;
-  --field-group-gap: 0.75rem;
+  --portal-field-label-gap: 0.125rem;
+  --portal-field-group-gap: 0.75rem;
 
   /* ----------------------------------------
    * FONT SIZE MINIMUMS - Portal enforces 15px floor
@@ -166,106 +168,106 @@
    * Muted/secondary text uses normal weight for visual distinction
    * ---------------------------------------- */
   --font-weight-base: 500;   /* Portal default: medium weight for primary text */
-  --font-weight-muted: 400;  /* Muted/secondary/label text */
+  --portal-font-weight-muted: 400;  /* Muted/secondary/label text */
 
   /* ----------------------------------------
    * LABEL STYLING
    * ---------------------------------------- */
-  --label-font-size: 0.75rem;
-  --label-color: var(--portal-text-secondary);
-  --label-font-weight: 500;
-  --label-text-transform: uppercase;
-  --label-letter-spacing: 0.05em;
+  --portal-label-size: 0.75rem;
+  --portal-label-color: var(--portal-text-secondary);
+  --portal-label-weight: 500;
+  --portal-label-transform: uppercase;
+  --portal-label-spacing: 0.05em;
 
   /* ----------------------------------------
    * SUBTAB FONT STYLING - ROOT LEVEL
    * Single source for all subtab buttons
    * MUST match h3 heading size for consistency
    * ---------------------------------------- */
-  --subtab-font-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
-  --subtab-font-size: var(--font-size-base);  /* 16px - matches h3 */
-  --subtab-font-weight: 500;
-  --subtab-text-transform: uppercase;
-  --subtab-letter-spacing: 0.05em;
+  --portal-subtab-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
+  --portal-subtab-size: var(--font-size-base);  /* 16px - matches h3 */
+  --portal-subtab-weight: 500;
+  --portal-subtab-transform: uppercase;
+  --portal-subtab-spacing: 0.05em;
 
   /* ----------------------------------------
    * DASHBOARD LAYOUT TOKENS
    * See: src/design-system/tokens/spacing.css
    * ---------------------------------------- */
-  --dashboard-panel-padding: var(--space-4);
-  --dashboard-title-margin: var(--space-3);
+  --portal-dashboard-padding: var(--space-4);
+  --portal-dashboard-title-margin: var(--space-3);
 
   /* ----------------------------------------
    * OVERRIDE SEMANTIC COLOR TOKENS
    * Portal uses inverted color scheme
    * ---------------------------------------- */
-  --color-neutral-100: #1a1a1a;
-  --color-neutral-200: #0a0a0a;
-  --color-neutral-300: #000000;
-  --color-neutral-400: #787878;
-  --color-neutral-500: #a0a0a0;
-  --color-neutral-600: #c0c0c0;
-  --color-neutral-700: #e0e0e0;
-  --color-neutral-800: #f4f4f4;
-  --color-neutral-900: #ffffff;
-  --color-dark: #ffffff;
-  --color-light: #000000;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #ffffff;
-  --color-text-tertiary: #ffffff;
-  --color-border: #ffffff;
-  --color-border-light: #787878;
-  --color-nav-text: #ffffff;
-  --color-white: #ffffff;
-  --color-black: #000000;
+  --color-neutral-100: var(--portal-neutral-100);
+  --color-neutral-200: var(--portal-neutral-50);
+  --color-neutral-300: var(--portal-neutral-0);
+  --color-neutral-400: var(--portal-neutral-500);
+  --color-neutral-500: var(--portal-neutral-600);
+  --color-neutral-600: var(--portal-neutral-700);
+  --color-neutral-700: var(--portal-neutral-800);
+  --color-neutral-800: var(--portal-neutral-900);
+  --color-neutral-900: var(--color-white);
+  --color-dark: var(--color-white);
+  --color-light: var(--color-black);
+  --color-text-primary: var(--color-white);
+  --color-text-secondary: var(--color-white);
+  --color-text-tertiary: var(--color-white);
+  --color-border: var(--color-white);
+  --color-border-light: var(--portal-neutral-500);
+  --color-nav-text: var(--color-white);
 
   /* App-level aliases for portal */
-  --app-color-primary: #ffffff;
+  --app-color-primary: var(--color-white);
 
   /* Form variables */
-  --form-input-border: #ffffff;
-  --form-input-placeholder: #787878;
-  --form-btn-bg: #ffffff;
-  --form-btn-fg: #000000;
-  --form-btn-shadow: rgba(0, 0, 0, 0.3);
+  --form-input-border: var(--color-white);
+  --form-input-placeholder: var(--portal-neutral-500);
+  --form-btn-bg: var(--color-white);
+  --form-btn-fg: var(--color-black);
+  --form-btn-shadow: var(--portal-alpha-black-30);
 }
 
 /* ============================================
- * PORTAL LIGHT MODE - INVERTED DISCOTHÈQUE
- * White background, black text
+ * PORTAL LIGHT MODE - MATCHES MAIN SITE
+ * Same colors, borders, and hover patterns
  * ============================================
  * IMPORTANT: Use consistent selector pattern
  */
 html[data-theme="light"] body[data-page="admin"],
-html[data-theme="light"] body[data-page="client-portal"] {
+html[data-theme="light"] body[data-page="client-portal"],
+html[data-theme="light"] [data-page="admin"],
+html[data-theme="light"] [data-page="client-portal"] {
   /* ----------------------------------------
-   * TEXT COLORS - ALL BLACK
+   * TEXT COLORS - Matches main site light theme
    * ---------------------------------------- */
-  --portal-text-light: #000000;
-  --portal-text-primary: #000000;
-  --portal-text-secondary: #000000;
-  --portal-text-muted: #000000;   /* All black — differentiate by weight only */
-  --portal-text-dark: #ffffff;
-  --portal-placeholder-color: rgba(0, 0, 0, 0.45);  /* Placeholder only */
+  --portal-text-light: var(--color-gray-900);
+  --portal-text-primary: var(--color-gray-900);
+  --portal-text-secondary: var(--color-gray-700);
+  --portal-text-muted: var(--color-gray-500);
+  --portal-text-dark: var(--color-off-white);
+  --portal-placeholder-color: var(--portal-alpha-black-45);
 
   /* ----------------------------------------
-   * BACKGROUND COLORS - WHITE BASE
+   * BACKGROUND COLORS - Matches main site (#d4d4d4 gray base)
    * ---------------------------------------- */
-  --portal-bg-pitch: #ffffff;
-  --portal-bg-darkest: #ffffff;
-  --portal-bg-darker: #f5f5f5;
-  --portal-bg-dark: #e5e5e5;
-  --portal-bg-medium: #d5d5d5;
-  --portal-bg-light: #c5c5c5;
-  --portal-bg-lighter: #b5b5b5;
-  --portal-bg-hover: #e5e5e5;
-  --portal-bg-readonly: #f5f5f5;
+  --portal-bg-pitch: var(--color-gray-300);
+  --portal-bg-darkest: var(--color-gray-300);
+  --portal-bg-darker: var(--color-gray-200);
+  --portal-bg-dark: var(--color-gray-100);
+  --portal-bg-medium: var(--color-gray-50);
+  --portal-bg-light: var(--color-off-white);
+  --portal-bg-lighter: var(--color-off-white);
+  --portal-bg-hover: var(--color-gray-200);
+  --portal-bg-readonly: var(--color-gray-200);
 
   /* ----------------------------------------
-   * BORDER SYSTEM - BLACK BORDERS
+   * BORDER SYSTEM - Same color as text
    * ---------------------------------------- */
-  --portal-border-color: #000000;
-  --portal-border-subtle: rgba(0, 0, 0, 0.08);
+  --portal-border-color: var(--color-gray-900);          /* Matches --portal-text-primary */
+  --portal-border-subtle: var(--portal-alpha-black-08);
 
   /* ----------------------------------------
    * FONT SIZE MINIMUMS - Portal enforces 15px floor
@@ -279,7 +281,7 @@ html[data-theme="light"] body[data-page="client-portal"] {
    * Muted/secondary text uses normal weight for visual distinction
    * ---------------------------------------- */
   --font-weight-base: 500;   /* Portal default: medium weight for primary text */
-  --font-weight-muted: 400;  /* Muted/secondary/label text */
+  --portal-font-weight-muted: 400;  /* Muted/secondary/label text */
 
   /* ----------------------------------------
    * ACCENT COLORS - Portal interactive accent (Light Mode)
@@ -288,70 +290,62 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --portal-accent-hover: var(--color-interactive-primary-hover);
 
   /* ----------------------------------------
-   * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)
-   * Light bg = dark text/icons
+   * HOVER STATE COLORS - Matches main site (subtle)
    * ---------------------------------------- */
-  --hover-bg-color: var(--portal-text-light);        /* Black bg on hover */
-  --hover-text-color: var(--portal-bg-pitch);        /* White text on hover */
-  --hover-icon-color: var(--portal-bg-pitch);        /* White icons on hover */
-  --hover-border-color: var(--portal-text-light);    /* Black border on hover */
+  --portal-hover-bg: var(--color-state-hover);          /* Subtle 5% darken — matches main site */
+  --portal-hover-text: var(--color-text-primary);       /* Keep text color on hover */
+  --portal-hover-icon: var(--color-text-primary);       /* Keep icon color on hover */
+  --portal-hover-border: var(--color-gray-900);          /* Matches text color */
 
   /* ----------------------------------------
    * FOCUS STATE COLORS (Light Mode)
    * ---------------------------------------- */
-  --focus-ring-color: var(--color-primary);
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 0px;
+  --portal-focus-color: var(--color-primary);
+  --portal-focus-width: 2px;
+  --portal-focus-offset: 0px;
 
   /* ----------------------------------------
-   * BUTTON COLORS (Light Mode)
+   * BUTTON COLORS (Light Mode) - Matches text color
    * ---------------------------------------- */
-  --btn-portal-border-color: #000000;
-  --btn-portal-color: #000000;
-  --btn-portal-hover-bg: #000000;
-  --btn-portal-hover-color: #ffffff;
-  --btn-portal-hover-border: #000000;
+  --portal-btn-border-color: var(--color-gray-900);
+  --portal-btn-color: var(--color-gray-900);
+  --portal-btn-hover-bg: var(--color-gray-900);
+  --portal-btn-hover-color: var(--color-off-white);
+  --portal-btn-hover-border: var(--color-gray-900);
 
   /* ----------------------------------------
-   * OVERRIDE SEMANTIC COLOR TOKENS - INVERTED
+   * OVERRIDE SEMANTIC COLOR TOKENS
+   * Matches main site light theme values
    * ---------------------------------------- */
-  --color-neutral-100: #f5f5f5;
-  --color-neutral-200: #ffffff;
-  --color-neutral-300: #ffffff;
-  --color-neutral-400: #000000;
-  --color-neutral-500: #000000;
-  --color-neutral-600: #000000;
-  --color-neutral-700: #000000;
-  --color-neutral-800: #000000;
-  --color-neutral-900: #000000;
-  --color-dark: #000000;
-  --color-light: #ffffff;
-  --color-text-primary: #000000;
-  --color-text-secondary: #000000;
-  --color-text-tertiary: #000000;
-  --color-border: #000000;
-  --color-border-light: #787878;
-  --color-nav-text: #000000;
-  --color-white: #000000; /* Inverted for text that uses var(--color-white) */
-  --color-black: #ffffff;
+  --color-neutral-100: var(--color-gray-100);
+  --color-neutral-200: var(--color-gray-200);
+  --color-neutral-300: var(--color-gray-300);
+  --color-neutral-400: var(--color-gray-400);
+  --color-neutral-500: var(--color-gray-500);
+  --color-neutral-600: var(--color-gray-600);
+  --color-neutral-700: var(--color-gray-700);
+  --color-neutral-800: var(--color-gray-800);
+  --color-neutral-900: var(--color-gray-900);
+  --color-dark: var(--color-gray-900);
+  --color-light: var(--color-off-white);
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-700);
+  --color-text-tertiary: var(--color-gray-500);
+  --color-border: var(--color-gray-900);                 /* Matches text color */
+  --color-border-light: var(--color-gray-700);           /* Matches --portal-text-secondary */
+  --color-nav-text: var(--color-gray-900);              /* Matches text color */
+  /* Chart grid lines */
+  --color-gray-600: var(--color-gray-300);
 
-  /* Gray scale - ALL BLACK for text in light mode */
-  --color-gray-100: #000000;
-  --color-gray-200: #000000;
-  --color-gray-300: #000000;
-  --color-gray-400: #000000;
-  --color-gray-500: #000000;
-  --color-gray-600: #cccccc; /* Chart grid lines - light gray on white */
+  /* App-level aliases - matches main site brand */
+  --app-color-primary: var(--color-brand-primary);
 
-  /* App-level aliases for portal light mode */
-  --app-color-primary: #000000;
-
-  /* Form variables for portal light mode */
-  --form-input-border: #000000;
-  --form-input-placeholder: #787878;
-  --form-btn-bg: #000000;
-  --form-btn-fg: #ffffff;
-  --form-btn-shadow: rgba(0, 0, 0, 0.15);
+  /* Form variables - borders match text color */
+  --form-input-border: var(--color-gray-900);
+  --form-input-placeholder: var(--color-gray-500);
+  --form-btn-bg: var(--color-gray-900);
+  --form-btn-fg: var(--color-off-white);
+  --form-btn-shadow: var(--portal-alpha-black-15);
 }
 
 /* Apply to html element as well for full coverage */

@@ -30,7 +30,7 @@
   min-width: var(--table-col-xs);
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   background-color: var(--portal-bg-darker);
   color: var(--portal-text-light);
 }
@@ -90,7 +90,7 @@
   min-height: var(--space-6);
   box-sizing: border-box;
   background: var(--portal-bg-medium);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   animation: slideDown var(--duration-fast) ease-out;
 }
 
@@ -180,7 +180,7 @@
   overflow-y: auto;
   padding: var(--space-1) 0;
   background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   box-shadow: var(--shadow-card);
   z-index: var(--z-index-portal-dropdown, 100);
 }
@@ -207,7 +207,7 @@
   min-height: var(--space-6);
   box-sizing: border-box;
   background: var(--portal-bg-medium);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   animation: slideDown var(--duration-fast) ease-out;
 }
 
@@ -247,11 +247,11 @@
 /* Ensure button text color is correct on hover */
 .bulk-actions-buttons .btn-primary:hover,
 .bulk-actions-buttons .btn-secondary:hover {
-  color: var(--btn-portal-hover-color);
+  color: var(--portal-btn-hover-color);
 }
 
 .bulk-actions-buttons .btn-danger:hover {
-  color: var(--btn-portal-danger-hover-color);
+  color: var(--portal-btn-danger-hover-color);
 }
 
 /* ===============================================
@@ -269,7 +269,7 @@
   align-items: center;
   gap: var(--icon-gap-sm);
   padding: var(--space-1) var(--space-3);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   background: var(--portal-bg-dark);
   color: var(--portal-text-light);
   font-size: var(--font-size-sm);
@@ -279,7 +279,7 @@
 
 .btn-export:hover {
   background: var(--portal-bg-hover);
-  border-color: var(--table-border-color);
+  border-color: var(--portal-border-color);
 }
 
 .btn-export svg {
@@ -299,7 +299,7 @@
   min-width: var(--table-col-md);
   padding: var(--space-1) 0;
   background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   box-shadow: var(--shadow-card);
   z-index: var(--z-index-portal-dropdown, 100);
   opacity: 0;
@@ -431,7 +431,7 @@
   margin-left: var(--space-2);
   border-radius: var(--border-radius-sm);
   background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -444,7 +444,7 @@
   min-width: 1rem;
   padding: 0 var(--space-0-5);
   background: var(--portal-bg-dark);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   font-family: inherit;
   font-size: inherit;
 }

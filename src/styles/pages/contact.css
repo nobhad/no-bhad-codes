@@ -29,7 +29,7 @@
   /* Layout height kept for animation compat */
   --contact-layout-height: 480px;
   /* Contact form border - thicker, same color as text, themes with dark/light toggle */
-  --contact-field-border-width: var(--border-width-thick);
+  --contact-field-border-width: var(--border-width);
   --contact-field-border-color: var(--color-text-primary);
 }
 
@@ -193,6 +193,7 @@ p.contact-options {
 
 /* Submit row */
 .submit-row {
+  position: relative;
   display: flex;
   align-items: center;
   margin-top: 1rem;
@@ -400,8 +401,9 @@ p.contact-options {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  background: transparent;
-  border: var(--contact-field-border-width) solid var(--contact-field-border-color);
+  background: inherit;
+  border: var(--portal-btn-border-width, 2px) solid currentColor;
+  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
   border-radius: 0;
   box-shadow: none;
   padding: 0.9375rem 1.875rem;
@@ -527,36 +529,58 @@ html[data-theme="dark"] .input-item textarea {
    FORM VALIDATION STYLES
    ========================================== */
 
-/* Field error - hidden by default when empty */
-.contact-form .field-error {
-  display: none;
-  min-height: 0;
+/* Consolidated error tooltip - right of submit button, no layout shift */
+.form-error-tooltip {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-danger);
+  color: var(--color-gray-50);
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  border: 1px solid var(--color-danger);
+  border-radius: 0;
+  white-space: nowrap;
+  z-index: var(--z-index-20, 20);
 }
 
-/* Tooltip bubble — shown when JS populates the element with an error message */
-.contact-form .field-error:not(:empty) {
-  display: inline-block;
-  background-color: var(--color-dark);
-  color: var(--color-neutral-100);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--portal-radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  margin-top: var(--space-0-5);
-  pointer-events: none;
-  line-height: var(--line-height-snug);
+/* Tooltip caret pointing up toward form fields */
+.form-error-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--color-danger);
 }
 
-/* Dark theme: invert so tooltip remains readable */
-html[data-theme="dark"] .contact-form .field-error:not(:empty) {
-  background-color: var(--color-neutral-100);
-  color: var(--color-dark);
+/* Error list inside tooltip */
+.form-error-tooltip ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
-section.contact-section .contact-form .form-input.error,
-section.contact-section .contact-form .form-textarea.error,
+.form-error-tooltip li::before {
+  content: '*';
+  margin-right: 0.4rem;
+  font-weight: var(--font-weight-bold);
+  font-size: 1.2em;
+}
+
+/* Error field highlight - border turns red */
 section.contact-section .contact-form input.error,
 section.contact-section .contact-form textarea.error {
+  border-color: var(--color-danger);
   background-color: transparent;
 }
 

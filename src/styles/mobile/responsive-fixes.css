@@ -25,9 +25,9 @@
 @media (hover: hover) {
   /* Portal buttons hover - uses token variables */
   .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):hover {
-    background: var(--btn-portal-hover-bg);
-    color: var(--btn-portal-hover-color);
-    box-shadow: var(--btn-portal-shadow-hover);
+    background: var(--portal-btn-hover-bg);
+    color: var(--portal-btn-hover-color);
+    box-shadow: var(--portal-btn-shadow-hover);
   }
 
   /* .icon-btn hover: portal-buttons.css */
@@ -109,8 +109,8 @@
 @media (hover: none) {
   /* Buttons show feedback on active/press - uses token variables */
   .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):active {
-    background: var(--btn-portal-hover-bg);
-    color: var(--btn-portal-hover-color);
+    background: var(--portal-btn-hover-bg);
+    color: var(--portal-btn-hover-color);
     transform: scale(0.98);
   }
 
@@ -340,23 +340,19 @@
 /* Apply responsive behavior to admin tables on mobile */
 @media (--mobile) {
   /* Table containers - allow content to fit */
-  .admin-table-container,
-  .table-container,
   .data-table-container,
-  .admin-table-scroll-wrapper,
-  .table-scroll-wrapper,
-  .data-table-scroll-wrapper {
+  .table-container,
+  .data-table-scroll-wrapper,
+  .table-scroll-wrapper {
     width: 100%;
     overflow: visible;
   }
 
   /* Tables collapse to fit viewport */
-  .admin-table-container > .data-table,
-  .table-container > .data-table,
   .data-table-container > .data-table,
-  .admin-table-scroll-wrapper > .data-table,
-  .table-scroll-wrapper > .data-table,
-  .data-table-scroll-wrapper > .data-table {
+  .table-container > .data-table,
+  .data-table-scroll-wrapper > .data-table,
+  .table-scroll-wrapper > .data-table {
     min-width: 0;
     width: 100%;
   }

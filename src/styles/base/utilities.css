@@ -360,7 +360,7 @@
 }
 .text-muted {
   color: var(--portal-text-muted);
-  font-weight: var(--font-weight-muted, 400);
+  font-weight: var(--portal-font-weight-muted, 400);
 }
 .text-light {
   color: var(--portal-text-light);
@@ -557,22 +557,22 @@
 
 /* ============================================
    FOCUS RING
-   Reusable focus ring pattern using --focus-ring token
+   Reusable focus ring pattern using --portal-focus-ring token
    from portal-theme.css (0 0 0 2px with primary alpha).
-   Apply via class or reference the --focus-ring variable directly.
+   Apply via class or reference the --portal-focus-ring variable directly.
    ============================================ */
 
 .focus-ring:focus,
 .focus-ring:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--portal-focus-ring);
 }
 
 /* Danger variant - red ring for destructive actions */
 .focus-ring-danger:focus,
 .focus-ring-danger:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--color-danger);
+  box-shadow: 0 0 0 var(--portal-focus-width, 2px) var(--color-danger);
 }
 
 /* ============================================
@@ -602,7 +602,7 @@ html[data-wireframe="true"] {
 }
 
 html[data-wireframe="true"] *:focus-visible {
-  outline-color: var(--color-gray-700);
+  outline-color: var(--color-text-secondary);
 }
 
 /* ============================================
@@ -633,51 +633,46 @@ html[data-wireframe="true"] *:focus-visible {
 
 /* ============================================
    PORTAL LIGHT MODE - HIGHEST PRIORITY
-   Unlayered CSS overrides all layered content
-   ALL white/grey text becomes BLACK in light mode
-   Uses design tokens from portal-theme.css
+   Unlayered CSS overrides all layered content.
+   References :root primitives from colors.css
+   (which are never remapped by portal-theme.css).
    ============================================ */
 
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"] {
-  /* ALL portal text colors → BLACK
-     NOTE: Use literal #000000, NOT var(--color-black).
-     portal-theme.css inverts --color-black to #ffffff in light mode. */
-  --portal-text-light: #000000;
-  --portal-text-primary: #000000;
-  --portal-text-secondary: #000000;
-  --portal-text-muted: #000000;
+  /* Portal text colors — use gray-900 for primary text on light bg */
+  --portal-text-light: var(--color-gray-900);
+  --portal-text-primary: var(--color-gray-900);
+  --portal-text-secondary: var(--color-gray-700);
+  --portal-text-muted: var(--color-gray-500);
 
-  /* ALL generic text colors → BLACK */
-  --color-dark: #000000;
-  --color-white: #000000;
-  --color-text-primary: #000000;
-  --color-text-secondary: #000000;
-  --color-text-tertiary: #000000;
+  /* Generic text colors — match main site light theme */
+  --color-dark: var(--color-gray-900);
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-700);
+  --color-text-tertiary: var(--color-gray-500);
 
-  /* ALL gray colors → BLACK (for text) */
-  --color-gray-100: #000000;
-  --color-gray-200: #000000;
-  --color-gray-300: #000000;
-  --color-gray-400: #000000;
-  --color-gray-500: #000000;
-  --color-neutral-400: #000000;
-  --color-neutral-500: #000000;
-  --color-neutral-600: #000000;
-  --color-neutral-700: #000000;
-  --color-neutral-800: #000000;
-  --color-neutral-900: #000000;
+  /* Semantic neutral ramp — match main site gray scale */
+  --color-neutral-100: var(--color-gray-100);
+  --color-neutral-200: var(--color-gray-200);
+  --color-neutral-300: var(--color-gray-300);
+  --color-neutral-400: var(--color-gray-400);
+  --color-neutral-500: var(--color-gray-500);
+  --color-neutral-600: var(--color-gray-600);
+  --color-neutral-700: var(--color-gray-700);
+  --color-neutral-800: var(--color-gray-800);
+  --color-neutral-900: var(--color-gray-900);
 
-  /* Portal backgrounds → WHITE */
-  --portal-bg-pitch: #ffffff;
-  --portal-bg-darkest: #ffffff;
-  --portal-bg-darker: #f5f5f5;
-  --portal-bg-dark: #e5e5e5;
-  --portal-bg-medium: #d5d5d5;
-  --portal-bg-light: #c5c5c5;
-  --portal-bg-hover: #e5e5e5;
-  --portal-bg-readonly: #f5f5f5;
+  /* Portal backgrounds — matches main site gray base (#d4d4d4) */
+  --portal-bg-pitch: var(--color-gray-300);
+  --portal-bg-darkest: var(--color-gray-300);
+  --portal-bg-darker: var(--color-gray-200);
+  --portal-bg-dark: var(--color-gray-100);
+  --portal-bg-medium: var(--color-gray-50);
+  --portal-bg-light: var(--color-off-white);
+  --portal-bg-hover: var(--color-gray-200);
+  --portal-bg-readonly: var(--color-gray-200);
 
-  /* Portal borders → BLACK */
-  --portal-border-color: #000000;
+  /* Portal borders — same color as text */
+  --portal-border-color: var(--color-gray-900);
 }

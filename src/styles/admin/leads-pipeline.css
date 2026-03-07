@@ -317,13 +317,13 @@
 }
 
 .leads-analytics-section .analytics-columns-2col .analytics-column:first-child {
-  border-right: var(--border-width) solid var(--table-border-color);
+  border-right: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Scoring rules: border-top separator, padding for content */
 .leads-analytics-section > .analytics-column-full {
   padding: var(--space-2);
-  border-top: var(--border-width) solid var(--table-border-color);
+  border-top: var(--border-width) solid var(--portal-border-color);
 }
 
 /* 3-column grid (legacy) */
@@ -351,7 +351,7 @@
 .analytics-column,
 .analytics-column-full {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--portal-card-padding);
   min-width: 0;
   color: var(--portal-text-light);
@@ -392,7 +392,7 @@
   gap: var(--icon-gap);
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   min-width: 0;
   text-align: left;
   margin-bottom: var(--space-1);
@@ -462,7 +462,7 @@
   align-items: center;
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   margin-bottom: var(--space-1);
 }
 
@@ -551,7 +551,7 @@
   gap: var(--icon-gap);
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 /* Mobile: no border changes needed since we use card backgrounds */
@@ -695,19 +695,12 @@
   margin-bottom: var(--space-4);
 }
 
-#lead-details-panel .panel-status-row .field-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-muted);
-}
 
 /* Lead details panel: single-column layout so Company / Project are not squished */
 #lead-details-panel .project-detail-meta {
   display: grid;
   grid-template-columns: 1fr;
-  row-gap: var(--field-group-gap);
+  row-gap: var(--portal-field-group-gap);
   column-gap: var(--space-1-5);
 }
 
@@ -725,14 +718,14 @@
   margin-left: 0.3em;
 }
 
-/* Panel links (name -> client, project -> project details): match text by default, red on hover */
+/* Panel links (name -> client, project -> project details): inherit text, primary on hover */
 #lead-details-panel .panel-link {
-  color: var(--portal-text-light);
+  color: inherit;
   text-decoration: none;
 }
 
 #lead-details-panel .panel-link:hover {
-  color: var(--color-error-500);
+  color: var(--color-primary);
   text-decoration: underline;
 }
 
@@ -754,7 +747,7 @@
 
 .lead-score-badge.score-warm {
   background: var(--color-warning-500);
-  color: var(--color-gray-900);
+  color: var(--color-text-primary);
   border-color: var(--color-warning-600);
 }
 
@@ -798,14 +791,15 @@
   padding: var(--space-1);
   background: transparent;
   margin-bottom: var(--space-1);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .lead-task-item.task-completed {
-  opacity: 0.6;
+  opacity: var(--opacity-completed, 0.5);
 }
 
-.lead-task-item.task-completed .task-title {
+.lead-task-item.task-completed .task-title,
+.lead-task-item.task-completed .activity-text {
   text-decoration: line-through;
 }
 
@@ -866,7 +860,7 @@
   background: transparent;
   padding: var(--space-1-5);
   margin-bottom: var(--space-1);
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
 }
 
 .lead-note-item.note-pinned {

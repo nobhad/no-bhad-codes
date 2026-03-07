@@ -25,19 +25,20 @@
   align-items: center;
   justify-content: center;
   gap: var(--icon-gap-md, 0.5rem);
-  padding: var(--btn-portal-padding);
-  border: var(--btn-portal-border-width) solid var(--btn-portal-border-color);
-  border-radius: var(--btn-portal-border-radius);
-  font-size: var(--btn-portal-font-size);
-  font-weight: var(--btn-portal-font-weight);
-  font-family: var(--btn-portal-font-family);
-  letter-spacing: var(--btn-portal-letter-spacing);
-  text-transform: var(--btn-portal-text-transform);
+  padding: var(--portal-btn-padding);
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
+  border-bottom-width: var(--portal-btn-border-bottom-width);
+  border-radius: var(--portal-btn-border-radius);
+  font-size: var(--portal-btn-font-size);
+  font-weight: var(--portal-btn-font-weight);
+  font-family: var(--portal-btn-font-family);
+  letter-spacing: var(--portal-btn-letter-spacing);
+  text-transform: var(--portal-btn-text-transform);
   cursor: pointer;
-  background: var(--btn-portal-bg);
-  color: var(--btn-portal-color);
-  box-shadow: var(--btn-portal-shadow);
-  transition: var(--btn-portal-transition);
+  background: var(--portal-btn-bg);
+  color: var(--portal-btn-color);
+  box-shadow: var(--portal-btn-shadow);
+  transition: var(--portal-btn-transition);
   text-decoration: none;
   white-space: nowrap;
   text-shadow: none;
@@ -67,10 +68,10 @@ button.btn-secondary svg {
 .btn-primary:not(.icon-btn):not(.sidebar-btn):hover,
 .btn-secondary:not(.icon-btn):not(.sidebar-btn):hover,
 .btn-outline:not(.icon-btn):not(.sidebar-btn):hover {
-  background: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
-  box-shadow: var(--btn-portal-shadow-hover);
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
+  box-shadow: var(--portal-btn-shadow-hover);
 }
 
 /* Focus state */
@@ -89,9 +90,9 @@ button.btn-secondary svg {
 .btn-primary.form-valid,
 .form-button.form-valid,
 .login-btn.form-valid {
-  background: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
 }
 
 /* Submit button focus */
@@ -105,9 +106,9 @@ input[type="submit"]:active {
 /* Submit button valid state */
 input[type="submit"].form-valid,
 input.form-button.form-valid {
-  background: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
 }
 
 /* ============================================

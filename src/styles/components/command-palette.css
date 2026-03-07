@@ -116,7 +116,7 @@
   background: var(--portal-bg-dark);
   border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-muted);
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   font-family: inherit;
   font-weight: var(--font-weight-medium);
 }
@@ -233,7 +233,7 @@
   background: var(--portal-bg-dark);
   border: var(--border-width) solid var(--portal-border);
   color: var(--portal-text-muted);
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   font-weight: var(--font-weight-medium);
 }
 

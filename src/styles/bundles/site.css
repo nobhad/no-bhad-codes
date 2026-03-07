@@ -56,6 +56,12 @@
 @import "../pages/about.css" layer(pages);
 @import "../pages/contact.css" layer(pages);
 @import "../pages/projects.css" layer(pages);
+
+/* Project detail — imported WITHOUT layer wrapper.
+   Unlayered CSS has highest cascade priority, ensuring project-detail
+   styles always win over layered states/responsive rules. */
+@import "../pages/projects-detail.css";
+
 @import "../pages/terminal-intake.css" layer(pages);
 @import "../pages/proposal-builder.css" layer(pages);
 @import "../pages/client-portal-section.css" layer(pages);

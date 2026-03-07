@@ -180,7 +180,7 @@
 .overview-panel {
   background: transparent;
   /* Explicit fallback: 2px border if variables fail */
-  border: var(--border-width, 2px) solid var(--table-border-color, var(--portal-border-color, currentColor));
+  border: var(--border-width, 2px) solid var(--portal-border-color, currentColor);
   overflow: hidden;
 }
 
@@ -236,7 +236,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs, 10px);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: 0 var(--space-0-5);
   line-height: 14px;
   min-width: 18px;
@@ -790,7 +790,7 @@
 /* Individual stat panel - matches portal card styling */
 .overview-stat-panel {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--portal-card-padding);
 }
 
@@ -820,7 +820,7 @@
 /* Attention banner - matches .overview-panel */
 .overview-attention-banner {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--portal-card-padding);
 }
 
@@ -889,7 +889,7 @@
   gap: var(--space-1);
   padding: var(--space-2);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   color: var(--portal-text-light);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);

@@ -48,9 +48,9 @@
 }
 
 .date-range-selector .btn-secondary.active {
-  background: var(--btn-portal-hover-bg);
-  color: var(--btn-portal-hover-color);
-  border-color: var(--btn-portal-hover-border);
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
   position: relative;
   z-index: var(--z-index-content);
 }
@@ -103,7 +103,7 @@
 
 .analytics-chart-card {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
@@ -127,7 +127,7 @@
 }
 
 .analytics-card-header svg {
-  color: var(--portal-text-muted);
+  color: var(--portal-text-primary);
 }
 
 /* ============================================
@@ -136,7 +136,7 @@
 
 .analytics-section {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   overflow: hidden;
 }
 
@@ -164,15 +164,14 @@
 }
 
 /* Non-canvas charts and placeholders */
-.chart,
-.timeline-chart {
+.chart {
   height: 320px;
   background: transparent;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--portal-text-muted);
+  color: var(--portal-text-primary);
   font-style: italic;
   padding: 1rem;
   box-sizing: border-box;
@@ -180,11 +179,20 @@
 
 .timeline-chart {
   height: 200px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--portal-text-primary);
+  font-style: italic;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .chart-container {
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   overflow: hidden;
 }
 
@@ -197,11 +205,11 @@
   gap: var(--space-2);
   min-height: 200px;
   padding: var(--space-4);
-  color: var(--portal-text-muted);
+  color: var(--portal-text-primary);
 }
 
 .chart-placeholder svg {
-  opacity: 0.5;
+  color: currentColor;
 }
 
 .chart-placeholder p {
@@ -279,7 +287,7 @@
   gap: var(--space-1);
   padding: var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--table-border-color);
+  border: var(--border-width) solid var(--portal-border-color);
   text-align: center;
   min-height: 120px;
   transition: border-color var(--transition-faster);
@@ -293,7 +301,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--portal-text-light);
+  color: var(--portal-text-primary);
 }
 
 .kpi-card-icon svg {
@@ -314,7 +322,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
+  color: var(--portal-text-primary);
 }
 
 .kpi-card-change {
@@ -354,10 +362,10 @@
 
 .vital-card h4 {
   color: var(--portal-text-secondary);
-  font-size: var(--label-font-size);
+  font-size: var(--portal-label-size);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: var(--label-letter-spacing);
+  letter-spacing: var(--portal-label-spacing);
   margin-bottom: var(--space-1);
 }
 
@@ -490,9 +498,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--portal-text-muted);
+  color: var(--portal-text-primary);
   flex-shrink: 0;
-  opacity: 0.7;
 }
 
 .funnel-arrow svg {
