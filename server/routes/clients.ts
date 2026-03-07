@@ -329,7 +329,7 @@ router.get(
 
     // Get active projects count
     const projectsResult = await db.get(
-      'SELECT COUNT(*) as count FROM active_projects WHERE client_id = ? AND status IN (\'planning\', \'in-progress\', \'review\')',
+      'SELECT COUNT(*) as count FROM active_projects WHERE client_id = ? AND status IN (\'pending\', \'active\', \'in-progress\', \'in-review\')',
       [clientId]
     );
     const activeProjects = projectsResult?.count || 0;

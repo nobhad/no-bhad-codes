@@ -5,7 +5,6 @@
 
 export * from './types';
 export * from './invoices';
-export * from './navigation';
 export * from './projects';
 export * from './files';
 export * from './messages';

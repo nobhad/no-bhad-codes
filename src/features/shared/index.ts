@@ -22,6 +22,3 @@ export type {
   ToolbarConfig,
   ModuleRegistration
 } from './types';
-
-// Base module
-export { PortalFeatureModule } from './PortalFeatureModule';
