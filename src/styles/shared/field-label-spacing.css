@@ -22,7 +22,7 @@
   display: block;
   font-size: var(--portal-label-size);
   font-weight: var(--portal-label-weight);
-  color: var(--portal-text-secondary);
+  color: var(--portal-label-color);
   text-transform: uppercase;
   letter-spacing: var(--portal-label-spacing);
   margin-bottom: var(--portal-field-label-gap, 0.25rem);
@@ -170,7 +170,7 @@
 .stat-label {
   font-size: var(--portal-label-size);
   font-weight: var(--portal-label-weight);
-  color: var(--portal-text-secondary);
+  color: var(--portal-label-color);
   text-transform: uppercase;
   letter-spacing: var(--portal-label-spacing);
   margin: 0;

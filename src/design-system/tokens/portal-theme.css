@@ -172,10 +172,12 @@
 
   /* ----------------------------------------
    * LABEL STYLING
+   * All labels use same size/color/weight as body text.
+   * Differentiated by text-transform only.
    * ---------------------------------------- */
-  --portal-label-size: 0.75rem;
-  --portal-label-color: var(--portal-text-secondary);
-  --portal-label-weight: 500;
+  --portal-label-size: var(--font-size-sm);
+  --portal-label-color: var(--portal-text-primary);
+  --portal-label-weight: var(--font-weight-base);
   --portal-label-transform: uppercase;
   --portal-label-spacing: 0.05em;
 

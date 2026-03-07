@@ -433,7 +433,7 @@
   transform: translateY(-50%);
   width: var(--dropdown-caret-size);
   height: var(--dropdown-caret-size);
-  color: var(--portal-text-muted);
+  color: currentColor;
   transition: transform var(--transition-fast);
 }
 

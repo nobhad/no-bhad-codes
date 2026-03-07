@@ -18,22 +18,12 @@ button:has(> svg) {
   gap: var(--icon-gap-md, 0.5rem);
 }
 
-/* Icon before text (default order) */
-:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > :is(svg, .btn-icon),
+/* Icon before text (default order).
+   Exclude dropdown triggers — their SVG carets must stay AFTER text. */
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline):not(.dropdown-trigger) > :is(svg, .btn-icon),
 .icon-btn > :is(svg, .icon-btn-svg),
-button:not(.overview-panel-action) > :is(.icon-wrap, .tab-icon, svg) {
+button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.modal-dropdown-trigger) > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
-}
-
-/* Dropdown caret after text - must override button > svg order */
-.custom-dropdown-trigger > svg,
-.custom-dropdown-trigger .custom-dropdown-caret,
-.dropdown-trigger > .dropdown-caret,
-button.dropdown-trigger > svg.dropdown-caret,
-:is(.btn, .btn-primary, .btn-secondary, .btn-outline).dropdown-trigger > svg,
-:is(.btn, .btn-primary, .btn-secondary, .btn-outline) > .dropdown-caret {
-  order: 1;
-  margin-left: auto;
 }
 
 /* ============================================
