@@ -386,7 +386,7 @@ const CHART_COLOR_VARS = [
   '--app-color-danger',
   '--app-color-info',
   '--app-color-warning-light',
-  '--app-color-danger-dark',
+  '--app-color-danger-dark'
 ] as const;
 
 /** Resolve CSS variables at runtime for Chart.js colors */
