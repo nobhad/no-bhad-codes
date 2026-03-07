@@ -44,7 +44,7 @@ Tasks within projects with full CRUD support and subtasks:
 
 - Tasks linked to milestones
 - Subtask support (parent_task_id)
-- Assignment to team members
+- Assignment tracking (solo operator)
 - Due dates and time estimates
 - Sort order for kanban/list views
 - Actual hours tracking

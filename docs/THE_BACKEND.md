@@ -16,7 +16,9 @@ Complete documentation for the No Bhad Codes Portal System, consisting of the **
 
 ## Overview
 
-"THE BACKEND" refers to the complete portal system with two interfaces:
+"THE BACKEND" is a **solo freelance operation** — one admin (the business owner) manages all clients, projects, and operations. There is no team management or multi-user admin.
+
+It provides two interfaces:
 
 | Portal | URL | Purpose |
 |--------|-----|---------|
@@ -88,7 +90,7 @@ The administrative interface for business operations.
 | Analytics | [ANALYTICS.md](./features/ANALYTICS.md) | KPIs, dashboards, reporting |
 | Files | [FILES.md](./features/FILES.md) | File management |
 | Time Tracking | [TIME_TRACKING.md](./features/TIME_TRACKING.md) | Time entries, billing |
-| Settings | [SETTINGS.md](./features/SETTINGS.md) | System configuration |
+| Settings | [SETTINGS.md](./features/SETTINGS.md) | Configuration, Workflows, Email Templates, Audit Log, System Health |
 
 ### Access
 
