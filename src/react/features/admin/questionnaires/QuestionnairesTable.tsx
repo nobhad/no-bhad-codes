@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   ClipboardList,
   Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -33,7 +34,6 @@ import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('QuestionnairesTable');
 
@@ -132,9 +132,26 @@ function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig
 
 export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: QuestionnairesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
 
-  // Build headers helper with auth token
+  // Build endpoint URL with query params
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (clientId) params.append('client_id', clientId);
+    if (projectId) params.append('project_id', projectId);
+    const query = params.toString();
+    return query ? `${API_ENDPOINTS.QUESTIONNAIRES}?${query}` : API_ENDPOINTS.QUESTIONNAIRES;
+  }, [clientId, projectId]);
+
+  // Data fetching via useListFetch
+  const { data, isLoading, error, refetch, setData } = useListFetch<Questionnaire>({
+    endpoint,
+    getAuthToken,
+    itemsKey: 'questionnaires',
+    deps: [clientId, projectId]
+  });
+  const questionnaires = useMemo(() => data?.items ?? [], [data]);
+
+  // Build headers helper for mutation calls (POST/PATCH/DELETE)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -145,8 +162,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
     }
     return headers;
   }, [getAuthToken]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Filtering and sorting
   const {
@@ -187,35 +202,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
     items: paginatedQuestionnaires
   });
 
-  const fetchQuestionnaires = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams();
-      if (clientId) params.append('client_id', clientId);
-      if (projectId) params.append('project_id', projectId);
-
-      const response = await fetch(`${API_ENDPOINTS.QUESTIONNAIRES}?${params}`, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch questionnaires');
-
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setQuestionnaires((payload.questionnaires as Questionnaire[]) || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clientId, projectId, getHeaders]);
-
-  useEffect(() => {
-    fetchQuestionnaires();
-  }, [fetchQuestionnaires]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
     try {
@@ -228,19 +214,20 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
       if (!response.ok) throw new Error('Failed to update questionnaire');
 
-      setQuestionnaires((prev) =>
-        prev.map((q) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((q) =>
           q.id === questionnaireId
             ? { ...q, status: newStatus as Questionnaire['status'] }
             : q
         )
-      );
+      } : prev);
       showNotification?.('Questionnaire status updated', 'success');
     } catch (err) {
       logger.error('Failed to update questionnaire status:', err);
       showNotification?.('Failed to update questionnaire status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handleSendQuestionnaire = useCallback(async (id: number) => {
     try {
@@ -250,13 +237,13 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to send questionnaire');
-      fetchQuestionnaires();
+      refetch();
       showNotification?.('Questionnaire sent', 'success');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send questionnaire');
+      logger.error('Failed to send questionnaire:', err);
       showNotification?.('Failed to send questionnaire', 'error');
     }
-  }, [getHeaders, showNotification, fetchQuestionnaires]);
+  }, [getHeaders, showNotification, refetch]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -273,14 +260,14 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
       if (!response.ok) throw new Error('Failed to delete questionnaires');
 
-      setQuestionnaires((prev) => prev.filter((q) => !ids.includes(q.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((q) => !ids.includes(q.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} questionnaire${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
       logger.error('Failed to delete questionnaires:', err);
       showNotification?.('Failed to delete questionnaires', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -433,7 +420,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={fetchQuestionnaires} />
+            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedQuestionnaires.length === 0 ? (

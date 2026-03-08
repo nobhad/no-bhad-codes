@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import {
   Palette,
   MessageSquare,
   Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -28,7 +29,6 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { DESIGN_REVIEWS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 interface DesignReview {
   id: number;
@@ -57,6 +57,15 @@ interface DesignReviewStats {
   needsRevision: number;
   avgReviewTime: string;
 }
+
+const DEFAULT_STATS: DesignReviewStats = {
+  total: 0,
+  pending: 0,
+  inReview: 0,
+  approved: 0,
+  needsRevision: 0,
+  avgReviewTime: '0'
+};
 
 interface DesignReviewTableProps {
   projectId?: string;
@@ -104,29 +113,21 @@ function sortReviews(a: DesignReview, b: DesignReview, sort: SortConfig): number
 
 export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNotification: _showNotification }: DesignReviewTableProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reviews, setReviews] = useState<DesignReview[]>([]);
-  const [stats, setStats] = useState<DesignReviewStats>({
-    total: 0,
-    pending: 0,
-    inReview: 0,
-    approved: 0,
-    needsRevision: 0,
-    avgReviewTime: '0'
+
+  const endpoint = projectId
+    ? `${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?projectId=${encodeURIComponent(projectId)}`
+    : API_ENDPOINTS.ADMIN.DESIGN_REVIEWS;
+
+  const { data, isLoading, error, refetch } = useListFetch<DesignReview, DesignReviewStats>({
+    endpoint,
+    getAuthToken,
+    defaultStats: DEFAULT_STATS,
+    itemsKey: 'reviews',
+    deps: [projectId]
   });
 
-  // Auth headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
+  const reviews = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_STATS, [data]);
 
   const {
     filterValues,
@@ -143,31 +144,6 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
     filterFn: filterReview,
     sortFn: sortReviews
   });
-
-  const loadReviews = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?${params}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load design reviews');
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setReviews((data.reviews as DesignReview[]) || []);
-      setStats((data.stats as DesignReviewStats) || { total: 0, pending: 0, approved: 0, inRevision: 0 });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load design reviews');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [projectId, getHeaders]);
-
-  useEffect(() => {
-    loadReviews();
-  }, [loadReviews]);
 
   const filteredReviews = useMemo(() => applyFilters(reviews), [applyFilters, reviews]);
 
@@ -260,7 +236,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={loadReviews} />
+            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedReviews.length === 0 ? (

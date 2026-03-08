@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import {
   Folder,
   Inbox,
@@ -7,6 +7,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
@@ -26,7 +27,6 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 interface Category {
   id: number;
@@ -84,20 +84,12 @@ function sortCategories(a: Category, b: Category, sort: SortConfig): number {
 export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: CategoriesTableProps) {
   const containerRef = useFadeIn();
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data, isLoading, error, refetch } = useListFetch<Category>({
+    endpoint: API_ENDPOINTS.ADMIN.KB_CATEGORIES,
+    getAuthToken,
+    itemsKey: 'categories'
+  });
+  const categories = useMemo(() => data?.items ?? [], [data]);
 
   const {
     search,
@@ -112,28 +104,6 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
     filterFn: filterCategory,
     sortFn: sortCategories
   });
-
-  const loadCategories = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.KB_CATEGORIES, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load categories');
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setCategories((data.categories as Category[]) || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load categories');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
 
   const filteredCategories = useMemo(() => applyFilters(categories), [applyFilters, categories]);
 
@@ -170,7 +140,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
             onChange={setSearch}
             placeholder="Search categories..."
           />
-          <IconButton action="refresh" onClick={loadCategories} disabled={isLoading} title="Refresh" />
+          <IconButton action="refresh" onClick={refetch} disabled={isLoading} title="Refresh" />
           <IconButton action="add" title="New Category" />
         </>
       }
@@ -218,7 +188,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={5} message={error} onRetry={loadCategories} />
+            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedCategories.length === 0 ? (

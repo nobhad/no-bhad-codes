@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   FileText,
   Inbox,
   ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -38,7 +39,6 @@ import { useSelection } from '@react/hooks/useSelection';
 import { PROPOSALS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('ProposalsTable');
@@ -75,6 +75,16 @@ const PROPOSAL_STATUS_CONFIG: Record<string, { label: string; color: string }> =
   accepted: { label: 'Accepted', color: 'var(--status-completed)' },
   declined: { label: 'Declined', color: 'var(--status-cancelled)' },
   expired: { label: 'Expired', color: 'var(--portal-text-muted)' }
+};
+
+const DEFAULT_PROPOSAL_STATS: ProposalStats = {
+  total: 0,
+  draft: 0,
+  sent: 0,
+  accepted: 0,
+  declined: 0,
+  totalValue: 0,
+  acceptanceRate: 0
 };
 
 interface ProposalsTableProps {
@@ -129,9 +139,18 @@ function sortProposals(a: Proposal, b: Proposal, sort: SortConfig): number {
 
 export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Build headers helper with auth token
+  // Data fetching via useListFetch
+  const { data, isLoading, error, refetch, setData } = useListFetch<Proposal, ProposalStats>({
+    endpoint: API_ENDPOINTS.ADMIN.PROPOSALS,
+    getAuthToken,
+    defaultStats: DEFAULT_PROPOSAL_STATS,
+    itemsKey: 'proposals'
+  });
+  const proposals = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_PROPOSAL_STATS, [data]);
+
+  // Build headers helper for mutation calls (POST/PATCH/DELETE)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -142,17 +161,6 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
     }
     return headers;
   }, [getAuthToken]);
-  const [error, setError] = useState<string | null>(null);
-  const [proposals, setProposals] = useState<Proposal[]>([]);
-  const [stats, setStats] = useState<ProposalStats>({
-    total: 0,
-    draft: 0,
-    sent: 0,
-    accepted: 0,
-    declined: 0,
-    totalValue: 0,
-    acceptanceRate: 0
-  });
 
   // Filtering and sorting
   const {
@@ -193,45 +201,6 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
     items: paginatedProposals
   });
 
-  const loadProposals = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.PROPOSALS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load proposals');
-      const json = await response.json();
-      // sendPaginated puts array directly in data; unwrapApiData extracts it
-      const fetchedProposals = unwrapApiData<Proposal[]>(json);
-      setProposals(Array.isArray(fetchedProposals) ? fetchedProposals : []);
-      // Stats are computed client-side from the proposals list
-      const proposalList = Array.isArray(fetchedProposals) ? fetchedProposals : [];
-      const computedStats: ProposalStats = {
-        total: proposalList.length,
-        draft: proposalList.filter(p => p.status === 'draft').length,
-        sent: proposalList.filter(p => p.status === 'sent').length,
-        accepted: proposalList.filter(p => p.status === 'accepted').length,
-        declined: proposalList.filter(p => p.status === 'declined').length,
-        totalValue: proposalList.reduce((sum, p) => sum + (p.amount || 0), 0),
-        acceptanceRate: proposalList.length > 0
-          ? (proposalList.filter(p => p.status === 'accepted').length / proposalList.length) * 100
-          : 0
-      };
-      setStats(computedStats);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load proposals');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadProposals();
-  }, [loadProposals]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (proposalId: number, newStatus: string) => {
     try {
@@ -244,19 +213,20 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
 
       if (!response.ok) throw new Error('Failed to update proposal');
 
-      setProposals((prev) =>
-        prev.map((p) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((p) =>
           p.id === proposalId
             ? { ...p, status: newStatus as Proposal['status'] }
             : p
         )
-      );
+      } : prev);
       showNotification?.('Proposal status updated', 'success');
     } catch (err) {
       logger.error('Failed to update proposal status:', err);
       showNotification?.('Failed to update proposal status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handleSendProposal = useCallback(async (proposalId: number) => {
     try {
@@ -266,15 +236,18 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to send proposal');
-      setProposals((prev) =>
-        prev.map((p) => (p.id === proposalId ? { ...p, status: 'sent', sentAt: new Date().toISOString() } : p))
-      );
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((p) =>
+          p.id === proposalId ? { ...p, status: 'sent' as const, sentAt: new Date().toISOString() } : p
+        )
+      } : prev);
       showNotification?.('Proposal sent', 'success');
     } catch (err) {
       logger.error('Failed to send proposal:', err);
       showNotification?.('Failed to send proposal', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handleDuplicate = useCallback(async (proposalId: number) => {
     try {
@@ -284,13 +257,13 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to duplicate proposal');
-      loadProposals();
+      refetch();
       showNotification?.('Proposal duplicated', 'success');
     } catch (err) {
       logger.error('Failed to duplicate proposal:', err);
       showNotification?.('Failed to duplicate proposal', 'error');
     }
-  }, [getHeaders, showNotification, loadProposals]);
+  }, [getHeaders, showNotification, refetch]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -307,14 +280,14 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
 
       if (!response.ok) throw new Error('Failed to delete proposals');
 
-      setProposals((prev) => prev.filter((p) => !ids.includes(p.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((p) => !ids.includes(p.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} proposal${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
       logger.error('Failed to delete proposals:', err);
       showNotification?.('Failed to delete proposals', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -455,7 +428,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={loadProposals} />
+            <PortalTableError colSpan={6} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={6} rows={5} />
           ) : paginatedProposals.length === 0 ? (

@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import {
   Inbox,
   User
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
@@ -25,7 +26,6 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 interface Conversation {
   id: number;
@@ -93,20 +93,12 @@ function sortConversations(a: Conversation, b: Conversation, sort: SortConfig): 
 export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, overviewMode = false }: MessagesTableProps) {
   const containerRef = useFadeIn();
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { data, isLoading, error, refetch } = useListFetch<Conversation>({
+    endpoint: API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS,
+    getAuthToken,
+    itemsKey: 'conversations'
+  });
+  const conversations = useMemo(() => data?.items ?? [], [data]);
 
   const {
     search,
@@ -121,31 +113,6 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
     filterFn: filterConversation,
     sortFn: sortConversations
   });
-
-  const loadConversations = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load conversations');
-
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setConversations((data.conversations as Conversation[]) || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load conversations');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadConversations();
-  }, [loadConversations]);
 
   const filteredConversations = useMemo(() => applyFilters(conversations), [applyFilters, conversations]);
 
@@ -182,7 +149,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
             onChange={setSearch}
             placeholder="Search messages..."
           />
-          <IconButton action="refresh" onClick={loadConversations} disabled={isLoading} title="Refresh" />
+          <IconButton action="refresh" onClick={refetch} disabled={isLoading} title="Refresh" />
         </>
       }
       pagination={
@@ -237,7 +204,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={loadConversations} />
+            <PortalTableError colSpan={6} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={6} rows={5} />
           ) : paginatedConversations.length === 0 ? (

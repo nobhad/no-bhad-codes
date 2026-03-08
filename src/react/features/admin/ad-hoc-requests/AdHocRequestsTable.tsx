@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   Zap,
   Inbox,
@@ -37,10 +37,10 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { AD_HOC_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
+import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('AdHocRequestsTable');
 
@@ -72,6 +72,15 @@ interface AdHocRequestStats {
   totalRevenue: number;
   totalHours: number;
 }
+
+const DEFAULT_AD_HOC_STATS: AdHocRequestStats = {
+  total: 0,
+  pending: 0,
+  inProgress: 0,
+  completed: 0,
+  totalRevenue: 0,
+  totalHours: 0
+};
 
 interface AdHocRequestsTableProps {
   clientId?: string;
@@ -144,9 +153,28 @@ function sortAdHocRequests(a: AdHocRequest, b: AdHocRequest, sort: SortConfig): 
 
 export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: AdHocRequestsTableProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Build headers helper with auth token
+  // Build endpoint with optional query params
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (clientId) params.set('clientId', clientId);
+    if (projectId) params.set('projectId', projectId);
+    const qs = params.toString();
+    return qs ? `${API_ENDPOINTS.AD_HOC_REQUESTS}?${qs}` : API_ENDPOINTS.AD_HOC_REQUESTS;
+  }, [clientId, projectId]);
+
+  // Data fetching via useListFetch
+  const { data, isLoading, error, refetch, setData } = useListFetch<AdHocRequest, AdHocRequestStats>({
+    endpoint,
+    getAuthToken,
+    defaultStats: DEFAULT_AD_HOC_STATS,
+    itemsKey: 'requests',
+    deps: [endpoint]
+  });
+  const requests = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_AD_HOC_STATS, [data]);
+
+  // Build headers helper for mutation calls
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -157,16 +185,6 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     }
     return headers;
   }, [getAuthToken]);
-  const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<AdHocRequest[]>([]);
-  const [stats, setStats] = useState<AdHocRequestStats>({
-    total: 0,
-    pending: 0,
-    inProgress: 0,
-    completed: 0,
-    totalRevenue: 0,
-    totalHours: 0
-  });
 
   // Filtering and sorting
   const {
@@ -207,40 +225,6 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     items: paginatedRequests
   });
 
-  const loadRequests = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (clientId) params.set('clientId', clientId);
-      if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`${API_ENDPOINTS.AD_HOC_REQUESTS}?${params}`, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load ad-hoc requests');
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setRequests((payload.requests as AdHocRequest[]) || []);
-      setStats((payload.stats as AdHocRequestStats) || {
-        total: 0,
-        pending: 0,
-        inProgress: 0,
-        completed: 0,
-        totalRevenue: 0,
-        totalHours: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load ad-hoc requests');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clientId, projectId, getHeaders]);
-
-  useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
@@ -253,13 +237,14 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
       if (!response.ok) throw new Error('Failed to update request');
 
-      setRequests((prev) =>
-        prev.map((request) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((request) =>
           request.id === requestId
             ? { ...request, status: newStatus as AdHocRequest['status'] }
             : request
         )
-      );
+      } : prev);
       showNotification?.('Status updated', 'success');
     } catch (err) {
       logger.error('Failed to update request status:', err);
@@ -282,7 +267,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
       if (!response.ok) throw new Error('Failed to delete requests');
 
-      setRequests((prev) => prev.filter((r) => !ids.includes(r.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -441,7 +426,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={8} message={error} onRetry={loadRequests} />
+            <PortalTableError colSpan={8} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={8} rows={5} />
           ) : paginatedRequests.length === 0 ? (

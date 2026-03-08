@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Trash2,
   AlertTriangle,
@@ -13,6 +13,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -39,7 +40,6 @@ import { formatDate } from '@react/utils/formatDate';
 import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filterConfigs';
 import type { SortConfig } from '@react/features/admin/types';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('DeletedItemsTable');
@@ -73,6 +73,15 @@ interface DeletedItemsTableProps {
   defaultPageSize?: number;
   overviewMode?: boolean;
 }
+
+const DEFAULT_STATS: DeletedItemsStats = {
+  total: 0,
+  clients: 0,
+  projects: 0,
+  invoices: 0,
+  files: 0,
+  expiringIn7Days: 0
+};
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   client: <User className="cell-icon" />,
@@ -128,9 +137,18 @@ function sortDeletedItems(a: DeletedItem, b: DeletedItem, sort: SortConfig): num
 
 export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: DeletedItemsTableProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Build headers helper with auth token
+  // Fetch deleted items via factory hook
+  const { data, isLoading, error, refetch, setData } = useListFetch<DeletedItem, DeletedItemsStats>({
+    endpoint: API_ENDPOINTS.ADMIN.DELETED_ITEMS,
+    getAuthToken,
+    defaultStats: DEFAULT_STATS,
+    itemsKey: 'items'
+  });
+  const items = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_STATS, [data]);
+
+  // Build headers helper for mutation calls
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -141,16 +159,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     }
     return headers;
   }, [getAuthToken]);
-  const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<DeletedItem[]>([]);
-  const [stats, setStats] = useState<DeletedItemsStats>({
-    total: 0,
-    clients: 0,
-    projects: 0,
-    invoices: 0,
-    files: 0,
-    expiringIn7Days: 0
-  });
+
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Use centralized table filters hook
@@ -198,37 +207,6 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     [setFilter]
   );
 
-  const loadDeletedItems = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.DELETED_ITEMS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load deleted items');
-      const payload = unwrapApiData<{ items?: DeletedItem[]; stats?: DeletedItemsStats }>(await response.json());
-      setItems(payload.items || []);
-      setStats(payload.stats || {
-        total: 0,
-        clients: 0,
-        projects: 0,
-        invoices: 0,
-        files: 0,
-        expiringIn7Days: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load deleted items');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadDeletedItems();
-  }, [loadDeletedItems]);
-
   const handleRestore = useCallback(async (itemId: string) => {
     try {
       const response = await fetch(buildEndpoint.adminDeletedItemRestore(itemId), {
@@ -237,13 +215,13 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to restore item');
-      setItems((prev) => prev.filter((item) => item.id !== itemId));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev);
       showNotification?.('Item restored', 'success');
     } catch (err) {
       logger.error('Failed to restore item:', err);
       showNotification?.('Failed to restore item', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handlePermanentDelete = useCallback(async (itemId: string) => {
     if (
@@ -260,13 +238,13 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to delete item');
-      setItems((prev) => prev.filter((item) => item.id !== itemId));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => item.id !== itemId) } : prev);
       showNotification?.('Item permanently deleted', 'success');
     } catch (err) {
       logger.error('Failed to delete item:', err);
       showNotification?.('Failed to delete item', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handleEmptyTrash = useCallback(async () => {
     if (
@@ -283,13 +261,13 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to empty trash');
-      setItems([]);
+      setData((prev) => prev ? { ...prev, items: [] } : prev);
       showNotification?.('Trash emptied', 'success');
     } catch (err) {
       logger.error('Failed to empty trash:', err);
       showNotification?.('Failed to empty trash', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   // Bulk restore
   const handleBulkRestore = useCallback(async () => {
@@ -311,7 +289,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         body: JSON.stringify({ ids })
       });
       if (!response.ok) throw new Error('Failed to restore items');
-      setItems((prev) => prev.filter((item) => !selection.selectedIds.has(item.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Restored ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -320,7 +298,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   // Bulk permanent delete
   const handleBulkDelete = useCallback(async () => {
@@ -344,7 +322,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
         body: JSON.stringify({ ids })
       });
       if (!response.ok) throw new Error('Failed to delete items');
-      setItems((prev) => prev.filter((item) => !selection.selectedIds.has(item.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((item) => !selection.selectedIds.has(item.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} item${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -353,7 +331,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   function isExpiringSoon(expiresAt: string): boolean {
     const daysUntilExpiry = Math.ceil(
@@ -522,7 +500,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={loadDeletedItems} />
+            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedItems.length === 0 ? (

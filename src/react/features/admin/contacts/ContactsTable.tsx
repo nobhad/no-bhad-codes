@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Inbox,
@@ -8,6 +8,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -40,7 +41,6 @@ import { CONTACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('ContactsTable');
 
@@ -66,6 +66,13 @@ interface ContactStats {
   primary: number;
   withCompany: number;
 }
+
+const DEFAULT_CONTACT_STATS: ContactStats = {
+  total: 0,
+  active: 0,
+  primary: 0,
+  withCompany: 0
+};
 
 interface ContactsTableProps {
   /** Auth token getter for API calls */
@@ -129,7 +136,17 @@ function sortContacts(a: Contact, b: Contact, sort: SortConfig): number {
 export function ContactsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContactsTableProps) {
   const containerRef = useFadeIn();
 
-  // Build headers helper with auth token
+  // Data fetching via useListFetch
+  const { data, isLoading, error, refetch, setData } = useListFetch<Contact, ContactStats>({
+    endpoint: API_ENDPOINTS.ADMIN.CONTACTS,
+    getAuthToken,
+    defaultStats: DEFAULT_CONTACT_STATS,
+    itemsKey: 'contacts'
+  });
+  const contacts = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_CONTACT_STATS, [data]);
+
+  // Build headers helper for mutation calls (POST/PATCH/DELETE)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -140,15 +157,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     }
     return headers;
   }, [getAuthToken]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [stats, setStats] = useState<ContactStats>({
-    total: 0,
-    active: 0,
-    primary: 0,
-    withCompany: 0
-  });
 
   // Filtering and sorting
   const {
@@ -189,37 +197,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
     items: paginatedContacts
   });
 
-  const loadContacts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.CONTACTS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load contacts');
-
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setContacts((payload.contacts as Contact[]) || []);
-      setStats((payload.stats as ContactStats) || {
-        total: 0,
-        active: 0,
-        primary: 0,
-        withCompany: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load contacts');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadContacts();
-  }, [loadContacts]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (contactId: number, newStatus: string) => {
     try {
@@ -232,19 +209,20 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
       if (!response.ok) throw new Error('Failed to update contact');
 
-      setContacts((prev) =>
-        prev.map((contact) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((contact) =>
           contact.id === contactId
             ? { ...contact, status: newStatus as Contact['status'] }
             : contact
         )
-      );
+      } : prev);
       showNotification?.('Contact status updated', 'success');
     } catch (err) {
       logger.error('Failed to update contact status:', err);
       showNotification?.('Failed to update contact status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const togglePrimary = useCallback(async (contactId: number, isPrimary: boolean) => {
     try {
@@ -257,17 +235,18 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
       if (!response.ok) throw new Error('Failed to update contact');
 
-      setContacts((prev) =>
-        prev.map((contact) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((contact) =>
           contact.id === contactId ? { ...contact, isPrimary: !isPrimary } : contact
         )
-      );
+      } : prev);
       showNotification?.(isPrimary ? 'Removed primary status' : 'Set as primary contact', 'success');
     } catch (err) {
       logger.error('Failed to update contact:', err);
       showNotification?.('Failed to update contact', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -284,14 +263,14 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
       if (!response.ok) throw new Error('Failed to delete contacts');
 
-      setContacts((prev) => prev.filter((c) => !ids.includes(c.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((c) => !ids.includes(c.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} contact${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
       logger.error('Failed to delete contacts:', err);
       showNotification?.('Failed to delete contacts', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -416,7 +395,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={loadContacts} />
+            <PortalTableError colSpan={6} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={6} rows={5} />
           ) : paginatedContacts.length === 0 ? (
