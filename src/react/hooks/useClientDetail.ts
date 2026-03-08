@@ -33,16 +33,21 @@ export function useClientDetail({
   const notesHook = useClientNotes(hookOptions);
   const tagsHook = useClientTags(hookOptions);
 
+  const { fetchAll: fetchCore } = core;
+  const { fetchAll: fetchContacts } = contactsHook;
+  const { fetchAll: fetchNotes } = notesHook;
+  const { fetchAll: fetchTags } = tagsHook;
+
   const fetchAll = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       await Promise.all([
-        core.fetchAll(),
-        contactsHook.fetchAll(),
-        notesHook.fetchAll(),
-        tagsHook.fetchAll()
+        fetchCore(),
+        fetchContacts(),
+        fetchNotes(),
+        fetchTags()
       ]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
@@ -50,7 +55,7 @@ export function useClientDetail({
     } finally {
       setIsLoading(false);
     }
-  }, [core.fetchAll, contactsHook.fetchAll, notesHook.fetchAll, tagsHook.fetchAll]);
+  }, [fetchCore, fetchContacts, fetchNotes, fetchTags]);
 
   // Auto-fetch on mount
   useEffect(() => {
