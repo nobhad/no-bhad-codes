@@ -61,24 +61,19 @@
   padding-top: var(--space-4);
 }
 
-/* Inline link list (preview/repo/production URLs) */
-.link-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Milestone list container */
-.milestone-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Wrapper: groups the milestone row + expanded content with continuous border */
+/* Inline link list + milestone list: flex column layout */
+.link-list,
+.milestone-list,
 .milestone-item-wrapper {
   display: flex;
   flex-direction: column;
+}
+
+.link-list { gap: var(--space-3); }
+.milestone-list { gap: var(--space-2); }
+
+/* Wrapper: groups the milestone row + expanded content with continuous border */
+.milestone-item-wrapper {
   border: var(--portal-border);
 }
 

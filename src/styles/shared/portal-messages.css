@@ -1,11 +1,29 @@
 /* PORTAL MESSAGES - Layout only, inherits all other styles from portal base */
 
 /* ===========================================
+   FLEX COLUMN BASE - shared by all column containers
+   =========================================== */
+.portal .messages-layout,
+.portal .messages-clients-column,
+.portal .messages-thread-column,
+.portal .message-attachments,
+.portal .message-compose,
+.messaging-sidebar,
+.messaging-main-area,
+.messaging-messages-list,
+.message-thread-container,
+.message-bubble-container,
+.message-edit-form,
+.message-attachments-list,
+.message-composer {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===========================================
    MAIN WRAPPER - fills available space
    =========================================== */
 .portal .messages-layout {
-  display: flex;
-  flex-direction: column;
   flex: 1;
   min-height: 0;
   border: var(--portal-border);
@@ -35,8 +53,6 @@
    LEFT COLUMN - Clients list
    =========================================== */
 .portal .messages-clients-column {
-  display: flex;
-  flex-direction: column;
   min-height: 0;
   border-right: var(--portal-border);
 }
@@ -120,8 +136,6 @@
    RIGHT COLUMN - Message thread + compose
    =========================================== */
 .portal .messages-thread-column {
-  display: flex;
-  flex-direction: column;
   min-height: 0;
   overflow: hidden;
 }
@@ -325,8 +339,6 @@
 
 /* Message attachments */
 .portal .message-attachments {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-1);
   margin-top: var(--space-2);
 }
@@ -372,8 +384,6 @@
 /* Compose area - fixed at bottom */
 .portal .message-compose {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
   gap: var(--space-2);
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
   border-top: var(--portal-border);
@@ -533,8 +543,6 @@
   width: 320px;
   flex-shrink: 0;
   border-right: var(--border-width) solid var(--portal-border-color);
-  display: flex;
-  flex-direction: column;
 }
 
 /* Section header with border */
@@ -669,8 +677,6 @@
 /* Message area */
 .messaging-main-area {
   flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Conversation header */
@@ -704,8 +710,6 @@
 }
 
 .messaging-messages-list {
-  display: flex;
-  flex-direction: column;
   gap: 1rem;
 }
 
@@ -840,15 +844,11 @@
 
 /* Message thread container */
 .message-thread-container {
-  display: flex;
-  flex-direction: column;
   height: 100%;
 }
 
 /* Message bubble container */
 .message-bubble-container {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-0-5);
 }
 
@@ -925,8 +925,6 @@
 
 /* Message edit form */
 .message-edit-form {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-1);
 }
 
@@ -969,8 +967,6 @@
 
 /* Message attachments */
 .message-attachments-list {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-0-5);
   margin-top: var(--space-1);
 }
@@ -1001,8 +997,6 @@
 
 /* Composer container - border-top only (sits at bottom of card) */
 .message-composer {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-1-5);
   border-top: var(--border-width) solid var(--portal-border-color);

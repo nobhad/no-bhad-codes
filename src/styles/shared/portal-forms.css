@@ -588,11 +588,19 @@ input.search-bar-input {
    Used by QuestionnaireForm.tsx
    ===================================================== */
 
-/* Form header row */
-.qform-header {
+/* Shared flex row: center + space-between */
+.qform-header,
+.qform-actions,
+.qform-select-btn,
+.qform-file-selected,
+.file-upload-item-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* Form header row */
+.qform-header {
   gap: 0.75rem;
 }
 
@@ -670,9 +678,6 @@ input.search-bar-input {
 
 /* Action buttons row */
 .qform-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
   padding-top: 0.5rem;
 }
@@ -696,9 +701,6 @@ input.search-bar-input {
 }
 
 .qform-select-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 0.5rem;
   text-align: left;
 }
@@ -742,9 +744,6 @@ input.search-bar-input {
 }
 
 .qform-file-selected {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
 }
 
@@ -1038,9 +1037,6 @@ input.search-bar-input {
 }
 
 .file-upload-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: var(--space-0-5);
 }
 

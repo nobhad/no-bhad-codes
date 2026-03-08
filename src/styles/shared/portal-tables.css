@@ -438,23 +438,17 @@
   color: inherit;
 }
 
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.pagination-size {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
+/* Pagination row controls: shared flex base, individual gaps */
+.pagination-controls,
+.pagination-size,
 .pagination-nav {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
 }
+
+.pagination-controls { gap: var(--space-4); }
+.pagination-size { gap: var(--space-2); }
+.pagination-nav { gap: var(--space-1); }
 
 .pagination-btn {
   display: flex;
