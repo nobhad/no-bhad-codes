@@ -18,6 +18,7 @@ import { generateDefaultMilestones } from './milestone-generator.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { logger } from './logger.js';
 import { emailService } from './email-service.js';
+import { getBaseUrl, getPortalUrl } from '../config/environment.js';
 
 // ============================================
 // Types
@@ -482,8 +483,7 @@ async function sendClientNotification(
     return;
   }
 
-  const portalUrl = process.env.WEBSITE_URL || 'http://localhost:3000';
-  const finalCtaUrl = ctaUrl || `${portalUrl}/client/portal`;
+  const finalCtaUrl = ctaUrl || getPortalUrl();
 
   try {
     await emailService.sendEmail({
@@ -561,7 +561,7 @@ async function notifyProposalAccepted(data: {
     'Great News! Your Proposal Has Been Accepted',
     `Your proposal for "${projectName}" has been accepted! The next step is to review and sign the contract to get started.`,
     'View Your Portal',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`
+    getPortalUrl()
   );
 }
 
@@ -590,7 +590,7 @@ async function notifyContractSigned(data: {
     'Contract Signed - Project Now Active!',
     `The contract for "${projectName}" has been signed and your project is now active! You can track progress, view milestones, and communicate with us through your portal.`,
     'View Project Status',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal#projects`
+    `${getPortalUrl()}#projects`
   );
 }
 
@@ -624,7 +624,7 @@ async function notifyDeliverableApproved(data: {
     'Deliverable Approved and Ready!',
     `"${title}" for "${projectName}" has been approved and is now available in your Files. You can download it from your portal.`,
     'View Files',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal#files`
+    `${getPortalUrl()}#files`
   );
 }
 
@@ -655,7 +655,7 @@ async function notifyQuestionnaireCompleted(data: { entityId?: number | null }):
     'Questionnaire Completed - Thank You!',
     `Thank you for completing "${title}" for "${projectName}". Your responses have been received and a PDF summary has been added to your project files.`,
     'View Your Portal',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`
+    getPortalUrl()
   );
 }
 
@@ -686,7 +686,7 @@ async function notifyDocumentRequestApproved(data: { entityId?: number | null })
     'Document Approved!',
     `Your submitted document "${title}" for "${projectName}" has been approved. It has been added to your project files.`,
     'View Files',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal#files`
+    `${getPortalUrl()}#files`
   );
 }
 
@@ -718,7 +718,7 @@ async function notifyInvoicePaid(data: { entityId?: number | null }): Promise<vo
     'Payment Received - Thank You!',
     `We've received your payment of $${amount.toFixed(2)} for Invoice #${invoiceNumber} (${projectName}). A receipt has been generated and is available in your portal.`,
     'View Receipt',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal#invoices`
+    `${getPortalUrl()}#invoices`
   );
 }
 
@@ -752,7 +752,7 @@ async function notifyMilestoneCompleted(data: {
     'Milestone Completed!',
     `Great news! The milestone "${title}" for "${projectName}" has been completed. Check your portal for updated project progress.`,
     'View Project Progress',
-    `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal#projects`
+    `${getPortalUrl()}#projects`
   );
 }
 

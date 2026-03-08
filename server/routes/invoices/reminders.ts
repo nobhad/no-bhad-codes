@@ -15,6 +15,7 @@ import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
 import { getInvoiceService, toSnakeCaseReminder } from './helpers.js';
+import { getPortalUrl } from '../../config/environment.js';
 
 const router = express.Router();
 
@@ -168,7 +169,7 @@ router.post(
       }
 
       const outstandingAmount = invoice.amountTotal - (invoice.amountPaid || 0);
-      const portalUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
+      const portalUrl = `${getPortalUrl()}?invoice=${invoiceId}`;
 
       await emailService.sendEmail({
         to: clientEmail,

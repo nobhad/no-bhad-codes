@@ -19,6 +19,7 @@ import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import * as crypto from 'crypto';
 import { logger } from './logger.js';
+import { getBaseUrl } from '../config/environment.js';
 import {
   validateJsonSchema,
   validateLineItems,
@@ -770,7 +771,7 @@ class ProposalService {
       const isActivated = clientId ? await isClientActivated(clientId) : false;
 
       if (isActivated) {
-        const baseUrl = process.env.WEBSITE_URL || process.env.BASE_URL || 'http://localhost:3000';
+        const baseUrl = getBaseUrl();
         const clientData: ProposalSignedClientData = {
           ...notificationData,
           portalUrl: `${baseUrl}/client/portal`,

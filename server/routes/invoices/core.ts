@@ -33,6 +33,7 @@ import { workflowTriggerService } from '../../services/workflow-trigger-service.
 import { receiptService } from '../../services/receipt-service.js';
 import { logger } from '../../services/logger.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { getPortalUrl } from '../../config/environment.js';
 
 const router = express.Router();
 
@@ -906,7 +907,7 @@ router.post(
         const clientName = getString(clientRow, 'display_name');
         const client = { email: clientEmail, name: clientName };
 
-        const invoiceUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoiceId}`;
+        const invoiceUrl = `${getPortalUrl()}?invoice=${invoiceId}`;
 
         // Send invoice email
         await emailService.sendEmail({

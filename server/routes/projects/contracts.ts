@@ -29,6 +29,7 @@ import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { logger } from '../../services/logger.js';
+import { getBaseUrl } from '../../config/environment.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const CONTRACT_COLUMNS = `
@@ -718,7 +719,7 @@ router.post(
     );
 
     // Generate signature URL
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
     const contractPreviewUrl = `${baseUrl}/api/projects/${projectId}/contract/pdf`;
 
@@ -1014,7 +1015,7 @@ router.post(
 
     // Send confirmation email to client
     const { emailService } = await import('../../services/email-service.js');
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
 
     await emailService.sendEmail({
       to: clientEmail,
