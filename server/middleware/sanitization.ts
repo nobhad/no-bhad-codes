@@ -13,9 +13,8 @@ import { logger } from '../services/logger.js';
 
 /**
  * Sanitize a string to prevent XSS attacks.
- * Strips dangerous HTML tags and patterns but preserves the original text.
- * React JSX and EJS (<%= %>) handle output escaping — encoding on input
- * causes double-encoding (& → &amp; stored in DB, rendered literally).
+ * Encodes HTML entities so that dangerous characters are rendered as
+ * literal text rather than interpreted as markup.
  */
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') {
@@ -23,20 +22,13 @@ export function sanitizeString(input: string): string {
   }
 
   return input
-    // Remove script tags and contents
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    // Remove event handler attributes
-    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
-    // Remove javascript: protocol
-    .replace(/javascript\s*:/gi, '')
-    // Remove vbscript: protocol
-    .replace(/vbscript\s*:/gi, '')
-    // Remove data: URLs that could contain scripts
-    .replace(/data\s*:\s*text\/html/gi, '')
-    // Remove expression() CSS hack
-    .replace(/expression\s*\(/gi, '')
-    // Remove HTML tags but keep text content
-    .replace(/<[^>]*>/g, '');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .replace(/=/g, '&#x3D;');
 }
 
 /**
@@ -77,7 +69,7 @@ export function sanitizeObject(obj: unknown): unknown {
 /**
  * Sanitize object values in place (for read-only objects like req.query)
  */
-function sanitizeInPlace(obj: Record<string, any>): void {
+function sanitizeInPlace(obj: Record<string, unknown>): void {
   const skipFields = ['password', 'password_hash', 'token', 'accessToken', 'refreshToken'];
 
   for (const key of Object.keys(obj)) {
@@ -89,7 +81,7 @@ function sanitizeInPlace(obj: Record<string, any>): void {
     } else if (Array.isArray(value)) {
       obj[key] = value.map((item) => sanitizeObject(item));
     } else if (value && typeof value === 'object') {
-      sanitizeInPlace(value);
+      sanitizeInPlace(value as Record<string, unknown>);
     }
   }
 }
@@ -127,12 +119,12 @@ export function sanitizeInputs(
 
       // Sanitize query parameters (read-only, must mutate in place)
       if (sanitizeQuery && req.query && typeof req.query === 'object') {
-        sanitizeInPlace(req.query as Record<string, any>);
+        sanitizeInPlace(req.query as Record<string, unknown>);
       }
 
       // Sanitize URL parameters (read-only, must mutate in place)
       if (sanitizeParams && req.params && typeof req.params === 'object') {
-        sanitizeInPlace(req.params as Record<string, any>);
+        sanitizeInPlace(req.params as Record<string, unknown>);
       }
 
       next();
@@ -156,14 +148,15 @@ export function sanitize(value: unknown): unknown {
 /**
  * Strip dangerous patterns that could be used for injection attacks.
  * More aggressive sanitization for high-risk fields.
- * Does NOT encode HTML entities — output escaping is handled by React/EJS.
+ * First removes dangerous patterns (script tags, event handlers, etc.),
+ * then applies standard HTML entity encoding on the remaining content.
  */
 export function stripDangerousPatterns(input: string): string {
   if (typeof input !== 'string') {
     return input;
   }
 
-  return input
+  const stripped = input
     // Remove script tags and contents
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     // Remove event handlers
@@ -175,9 +168,10 @@ export function stripDangerousPatterns(input: string): string {
     // Remove vbscript: URLs
     .replace(/vbscript\s*:/gi, '')
     // Remove expression() CSS
-    .replace(/expression\s*\(/gi, '')
-    // Remove HTML tags but keep text content
-    .replace(/<[^>]*>/g, '');
+    .replace(/expression\s*\(/gi, '');
+
+  // Apply standard HTML entity encoding on the remaining content
+  return sanitizeString(stripped);
 }
 
 export default sanitizeInputs;

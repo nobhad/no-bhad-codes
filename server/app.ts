@@ -377,7 +377,11 @@ app.use((req, res) => {
       request: {
         method: req.method,
         url: req.originalUrl,
-        headers: req.headers as Record<string, string>
+        headers: Object.fromEntries(
+          Object.entries(req.headers).filter(
+            ([key]) => !['authorization', 'cookie', 'x-api-key', 'x-csrf-token', 'x-auth-token'].includes(key.toLowerCase())
+          )
+        ) as Record<string, string>
       }
     }
   );
