@@ -10,7 +10,7 @@
 
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { authenticateToken, requireAdmin, type AuthenticatedRequest } from '../../middleware/auth.js';
 
@@ -26,7 +26,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     if (isNaN(limit) || limit < 0) {
-      return errorResponse(res, 'Invalid limit parameter', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid limit parameter', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -53,7 +53,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const notificationId = parseInt(req.params.id, 10);
     if (isNaN(notificationId) || notificationId <= 0) {
-      return errorResponse(res, 'Invalid notification ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid notification ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -65,7 +65,7 @@ router.put(
     );
 
     if (result.changes === 0) {
-      return errorResponse(res, 'Notification not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Notification not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, undefined, 'Notification marked as read');

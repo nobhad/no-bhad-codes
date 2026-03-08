@@ -28,7 +28,8 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated
+  sendCreated,
+  ErrorCodes
 } from '../utils/api-response.js';
 import { getBaseUrl } from '../config/environment.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
@@ -312,15 +313,15 @@ router.get(
     const requestType = req.query.requestType as string | undefined;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.UNAUTHORIZED);
     }
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (requestType && !adHocRequestService.isValidType(requestType)) {
-      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const requests = await adHocRequestService.getRequests({
@@ -382,7 +383,7 @@ router.post(
       req.body;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.UNAUTHORIZED);
     }
 
     if (!projectId || !title || !description || !requestType) {
@@ -395,15 +396,15 @@ router.post(
     }
 
     if (!adHocRequestService.isValidType(requestType)) {
-      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request priority', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request urgency', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -413,7 +414,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     if (attachmentFileId) {
@@ -515,21 +516,21 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.UNAUTHORIZED);
     }
 
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.clientId !== clientId) {
-      return errorResponse(res, 'Request not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Request not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     if (request.status !== 'quoted') {
-      return errorResponse(res, 'Quote is not available for approval', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Quote is not available for approval', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
@@ -570,21 +571,21 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401, 'UNAUTHORIZED');
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.UNAUTHORIZED);
     }
 
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (request.clientId !== clientId) {
-      return errorResponse(res, 'Request not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Request not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     if (request.status !== 'quoted') {
-      return errorResponse(res, 'Quote is not available for decline', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Quote is not available for decline', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const updatedRequest = await adHocRequestService.updateRequest(requestId, {
@@ -649,19 +650,19 @@ router.get(
     const urgency = req.query.urgency as string | undefined;
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (requestType && !adHocRequestService.isValidType(requestType)) {
-      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request priority', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request urgency', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const requests = await adHocRequestService.getRequests({
@@ -703,7 +704,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
@@ -767,17 +768,17 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
     if (!request.taskId) {
-      return errorResponse(res, 'Request is not linked to a task yet', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Request is not linked to a task yet', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { userName, hours, date, description, billable, hourlyRate } = req.body;
     if (!userName || !hours || !date) {
-      return errorResponse(res, 'userName, hours, and date are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'userName, hours, and date are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const entry = await projectService.logTime(request.projectId, {
@@ -903,19 +904,19 @@ router.post(
     }
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!adHocRequestService.isValidType(requestType)) {
-      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request priority', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request urgency', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (attachmentFileId && projectId) {
@@ -989,19 +990,19 @@ router.put(
     } = req.body;
 
     if (status && !adHocRequestService.isValidStatus(status)) {
-      return errorResponse(res, 'Invalid request status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (requestType && !adHocRequestService.isValidType(requestType)) {
-      return errorResponse(res, 'Invalid request type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (priority && !adHocRequestService.isValidPriority(priority)) {
-      return errorResponse(res, 'Invalid request priority', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request priority', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (urgency && !adHocRequestService.isValidUrgency(urgency)) {
-      return errorResponse(res, 'Invalid request urgency', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request urgency', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Get current request to check for status transition
@@ -1089,13 +1090,13 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
 
     if (!request.clientEmail) {
-      return errorResponse(res, 'Client email not found', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Client email not found', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const hasQuoteDetails =
@@ -1243,7 +1244,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
@@ -1331,7 +1332,7 @@ router.post(
     const { requestIds, useTimeEntries = true, dueDate, notes, terms } = req.body || {};
 
     if (!Array.isArray(requestIds) || requestIds.length === 0) {
-      return errorResponse(res, 'requestIds is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'requestIds is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const requests = await Promise.all(
@@ -1517,7 +1518,7 @@ router.post(
     const requestId = Number(req.params.requestId);
 
     if (Number.isNaN(requestId)) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await adHocRequestService.getRequest(requestId);
@@ -1621,7 +1622,7 @@ router.post(
     const { requestIds } = req.body;
 
     if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
-      return errorResponse(res, 'requestIds array is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'requestIds array is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const deletedBy = req.user?.email || String(req.user?.id || 'system');

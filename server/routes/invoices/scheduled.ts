@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseScheduledInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -40,7 +40,7 @@ router.post(
     } = req.body;
 
     if (!projectId || !clientId || !scheduledDate || !lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['projectId', 'clientId', 'scheduledDate', 'lineItems']
       });
     }
@@ -61,7 +61,7 @@ router.post(
         scheduled_invoice: toSnakeCaseScheduledInvoice(scheduled)
       }, 'Invoice scheduled', 201);
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to schedule invoice', 500, 'SCHEDULING_FAILED', {
+      errorResponseWithPayload(res, 'Failed to schedule invoice', 500, ErrorCodes.SCHEDULING_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to schedule invoice')
       });
     }
@@ -92,7 +92,7 @@ router.get(
         res,
         'Failed to retrieve scheduled invoices',
         500,
-        'RETRIEVAL_FAILED',
+        ErrorCodes.RETRIEVAL_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to retrieve scheduled invoices')
         }
@@ -116,7 +116,7 @@ router.get(
     const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -131,7 +131,7 @@ router.get(
         res,
         'Failed to retrieve scheduled invoices',
         500,
-        'RETRIEVAL_FAILED',
+        ErrorCodes.RETRIEVAL_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to retrieve scheduled invoices')
         }
@@ -156,7 +156,7 @@ router.delete(
     const scheduledId = parseInt(req.params.id, 10);
 
     if (isNaN(scheduledId)) {
-      return errorResponse(res, 'Invalid scheduled invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid scheduled invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -168,7 +168,7 @@ router.delete(
         res,
         'Failed to cancel scheduled invoice',
         500,
-        'CANCELLATION_FAILED',
+        ErrorCodes.CANCELLATION_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to cancel scheduled invoice')
         }

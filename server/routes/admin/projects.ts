@@ -8,7 +8,7 @@ import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../../config/upl
 import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponse, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -38,7 +38,7 @@ router.post(
         res,
         'Project type, description, budget, and timeline are required',
         400,
-        'VALIDATION_ERROR'
+        ErrorCodes.VALIDATION_ERROR
       );
     }
 
@@ -48,7 +48,7 @@ router.post(
         res,
         'Either newClient data or clientId is required',
         400,
-        'VALIDATION_ERROR'
+        ErrorCodes.VALIDATION_ERROR
       );
     }
 
@@ -61,7 +61,7 @@ router.post(
       if (newClient) {
         // Validate new client fields
         if (!newClient.name || !newClient.email) {
-          return errorResponse(res, 'Client name and email are required', 400, 'VALIDATION_ERROR');
+          return errorResponse(res, 'Client name and email are required', 400, ErrorCodes.VALIDATION_ERROR);
         }
 
         // Check for existing client with same email
@@ -73,7 +73,7 @@ router.post(
             res,
             'Client with this email already exists',
             409,
-            'DUPLICATE_RESOURCE'
+            ErrorCodes.DUPLICATE_RESOURCE
           );
         }
 
@@ -99,7 +99,7 @@ router.post(
           [clientId]
         );
         if (!client) {
-          return errorResponse(res, 'Client not found', 404, 'RESOURCE_NOT_FOUND');
+          return errorResponse(res, 'Client not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
         }
         finalClientId = clientId;
         clientData = {
@@ -187,7 +187,7 @@ router.post(
       logger.error('[AdminProjects] Error creating project:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to create project', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to create project', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -315,7 +315,7 @@ router.post(
         res,
         'projectIds array is required and must not be empty',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 

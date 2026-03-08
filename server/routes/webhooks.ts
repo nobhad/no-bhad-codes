@@ -5,7 +5,7 @@
 
 import { Router, Response } from 'express';
 import { webhookService } from '../services/webhook-service.js';
-import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -118,7 +118,7 @@ router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Resp
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to list webhooks', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list webhooks', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -148,12 +148,12 @@ router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: 
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const webhook = await webhookService.getWebhookById(webhookId);
 
     if (!webhook) {
-      return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Webhook not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // Don't expose secret key in response
@@ -164,7 +164,7 @@ router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: 
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to retrieve webhook', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to retrieve webhook', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -220,25 +220,25 @@ router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allo
     } = req.body;
 
     if (!name || !url || !events || !payloadTemplate) {
-      return errorResponse(res, 'Missing required fields', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Missing required fields', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!Array.isArray(events) || events.length === 0) {
-      return errorResponse(res, 'Events must be non-empty array', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Events must be non-empty array', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Validate URL
     try {
       new URL(url);
     } catch {
-      return errorResponse(res, 'Invalid URL', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid URL', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Validate payload template is valid JSON
     try {
       JSON.parse(payloadTemplate);
     } catch {
-      return errorResponse(res, 'Invalid JSON in payloadTemplate', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid JSON in payloadTemplate', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const webhook = await webhookService.createWebhook(name, url, events, payloadTemplate, {
@@ -256,7 +256,7 @@ router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allo
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to create webhook', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to create webhook', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -286,7 +286,7 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Validate payload template if provided
@@ -294,7 +294,7 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
       try {
         JSON.parse(req.body.payload_template);
       } catch {
-        return errorResponse(res, 'Invalid JSON in payload_template', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid JSON in payload_template', 400, ErrorCodes.VALIDATION_ERROR);
       }
     }
 
@@ -304,13 +304,13 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
   } catch (error: unknown) {
     const rawMessage = error instanceof Error ? error.message : '';
     if (rawMessage.includes('not found')) {
-      return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Webhook not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Webhooks] Failed to update webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, sanitizeErrorMessage(error, 'Failed to update webhook'), 500, 'INTERNAL_ERROR');
+    errorResponse(res, sanitizeErrorMessage(error, 'Failed to update webhook'), 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -340,7 +340,7 @@ router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, re
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await webhookService.deleteWebhook(webhookId);
     sendSuccess(res, undefined, 'Webhook deleted');
@@ -349,7 +349,7 @@ router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, re
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to delete webhook', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to delete webhook', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -389,12 +389,12 @@ router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.to
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { active } = req.body;
 
     if (typeof active !== 'boolean') {
-      return errorResponse(res, 'Active must be boolean', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Active must be boolean', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const webhook = await webhookService.toggleWebhook(webhookId, active);
@@ -403,13 +403,13 @@ router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.to
   } catch (error: unknown) {
     const rawMessage = error instanceof Error ? error.message : '';
     if (rawMessage.includes('not found')) {
-      return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Webhook not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Webhooks] Failed to toggle webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, sanitizeErrorMessage(error, 'Failed to toggle webhook'), 500, 'INTERNAL_ERROR');
+    errorResponse(res, sanitizeErrorMessage(error, 'Failed to toggle webhook'), 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -451,18 +451,18 @@ router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test,
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { eventType, sampleData } = req.body;
 
     if (!eventType) {
-      return errorResponse(res, 'eventType is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'eventType is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const webhook = await webhookService.getWebhookById(webhookId);
 
     if (!webhook) {
-      return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Webhook not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // Trigger test event
@@ -474,7 +474,7 @@ router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test,
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to test webhook', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to test webhook', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -521,13 +521,13 @@ router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedReq
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { status, eventType, limit = '50', offset = '0' } = req.query;
     const parsedLimit = parseInt(limit as string, 10);
     const parsedOffset = parseInt(offset as string, 10);
     if (isNaN(parsedLimit) || isNaN(parsedOffset)) {
-      return errorResponse(res, 'Invalid pagination parameters', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid pagination parameters', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const validStatuses = ['pending', 'success', 'failed'] as const;
@@ -555,7 +555,7 @@ router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedReq
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to list deliveries', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list deliveries', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -593,13 +593,13 @@ router.get(
       const webhookId = parseInt(id, 10);
       const parsedDeliveryId = parseInt(deliveryId, 10);
       if (isNaN(webhookId) || webhookId <= 0 || isNaN(parsedDeliveryId) || parsedDeliveryId <= 0) {
-        return errorResponse(res, 'Invalid ID parameters', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid ID parameters', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       const delivery = await webhookService.getDeliveryById(parsedDeliveryId);
 
       if (!delivery) {
-        return errorResponse(res, 'Delivery not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Delivery not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       sendSuccess(res, { delivery });
@@ -608,7 +608,7 @@ router.get(
         error: error instanceof Error ? error : new Error(String(error)),
         category: 'WEBHOOK'
       });
-      errorResponse(res, 'Failed to retrieve delivery', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to retrieve delivery', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -637,7 +637,7 @@ router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest,
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const stats = await webhookService.getDeliveryStats(webhookId);
@@ -647,7 +647,7 @@ router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest,
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to retrieve statistics', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to retrieve statistics', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -687,22 +687,22 @@ router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retr
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { deliveryId } = req.body;
 
     if (!deliveryId) {
-      return errorResponse(res, 'deliveryId is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'deliveryId is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const parsedDeliveryId = parseInt(deliveryId, 10);
     if (isNaN(parsedDeliveryId) || parsedDeliveryId <= 0) {
-      return errorResponse(res, 'Invalid delivery ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid delivery ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const delivery = await webhookService.getDeliveryById(parsedDeliveryId);
     if (!delivery) {
-      return errorResponse(res, 'Delivery not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Delivery not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // Trigger retry immediately
@@ -714,7 +714,7 @@ router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retr
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to retry delivery', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to retry delivery', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -744,7 +744,7 @@ router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: Authenti
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
     if (isNaN(webhookId) || webhookId <= 0) {
-      return errorResponse(res, 'Invalid webhook ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid webhook ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const newSecret = await webhookService.regenerateSecret(webhookId);
@@ -762,7 +762,7 @@ router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: Authenti
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to regenerate secret', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to regenerate secret', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 
@@ -798,7 +798,7 @@ router.post('/events/trigger', validateRequest(WebhookValidationSchemas.triggerE
     const { eventType, data } = req.body;
 
     if (!eventType) {
-      return errorResponse(res, 'eventType is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'eventType is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await webhookService.triggerEvent(eventType, data || {});
@@ -809,7 +809,7 @@ router.post('/events/trigger', validateRequest(WebhookValidationSchemas.triggerE
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to trigger event', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to trigger event', 500, ErrorCodes.INTERNAL_ERROR);
   }
 }));
 

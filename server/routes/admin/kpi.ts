@@ -2,7 +2,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { queryStats } from '../../services/query-stats.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -60,7 +60,7 @@ router.get(
       logger.error('Error reading bundle stats:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to read bundle stats', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to read bundle stats', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );

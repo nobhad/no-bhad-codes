@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { sendSuccess, errorResponse, errorResponseWithPayload, sanitizeErrorMessage } from '../utils/api-response.js';
+import { sendSuccess, errorResponse, errorResponseWithPayload, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { receiptService, Receipt } from '../services/receipt-service.js';
 import { getDatabase } from '../database/init.js';
@@ -168,7 +168,7 @@ router.get(
         count: receipts.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
       });
     }
@@ -203,12 +203,12 @@ router.get(
     const receiptId = parseInt(req.params.id, 10);
 
     if (isNaN(receiptId)) {
-      return errorResponse(res, 'Invalid receipt ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid receipt ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       if (!(await canAccessReceipt(req, receiptId))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
       }
 
       const receipt = await receiptService.getReceiptById(receiptId);
@@ -216,9 +216,9 @@ router.get(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Receipt not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Receipt not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to retrieve receipt', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve receipt', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve receipt')
       });
     }
@@ -251,12 +251,12 @@ router.get(
     const invoiceId = parseInt(req.params.invoiceId, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       if (!(await canAccessInvoiceReceipts(req, invoiceId))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
       }
 
       const receipts = await receiptService.getReceiptsByInvoice(invoiceId);
@@ -265,7 +265,7 @@ router.get(
         count: receipts.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
       });
     }
@@ -310,12 +310,12 @@ router.get(
     const receiptId = parseInt(req.params.id, 10);
 
     if (isNaN(receiptId)) {
-      return errorResponse(res, 'Invalid receipt ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid receipt ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       if (!(await canAccessReceipt(req, receiptId))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
       }
 
       const { pdfBytes, filename } = await receiptService.getReceiptPdf(receiptId);
@@ -325,9 +325,9 @@ router.get(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Receipt not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Receipt not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to generate receipt PDF', 500, 'PDF_FAILED', {
+      errorResponseWithPayload(res, 'Failed to generate receipt PDF', 500, ErrorCodes.PDF_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to generate receipt PDF')
       });
     }
@@ -361,7 +361,7 @@ router.get(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -371,7 +371,7 @@ router.get(
         count: receipts.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
       });
     }

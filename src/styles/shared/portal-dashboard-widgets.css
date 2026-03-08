@@ -160,33 +160,6 @@
   flex-wrap: wrap;
 }
 
-.portal .dashboard-tasks-kanban .task-priority {
-  font-size: var(--font-size-xs);  /* 12px */
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  padding: var(--space-0-5) var(--space-1);
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--portal-text-muted);
-}
-
-.portal .dashboard-tasks-kanban .task-priority.task-priority-urgent {
-  background: transparent;
-  border-color: var(--status-cancelled);
-  color: var(--status-cancelled);
-}
-
-.portal .dashboard-tasks-kanban .task-priority.task-priority-high {
-  background: transparent;
-  border-color: var(--status-on-hold);
-  color: var(--status-on-hold);
-}
-
-.portal .dashboard-tasks-kanban .task-priority.task-priority-medium {
-  background: transparent;
-  border-color: var(--app-color-primary);
-  color: var(--app-color-primary);
-}
 
 .portal .dashboard-tasks-kanban .task-due-date {
   display: flex;
@@ -391,15 +364,7 @@
   background: none;
 }
 
-.portal .attention-icon-warning {
-  color: var(--portal-text-secondary);
-}
-
-.portal .attention-icon-info {
-  color: var(--portal-text-secondary);
-}
-
-.portal .attention-icon-danger {
+.portal :is(.attention-icon-warning, .attention-icon-info, .attention-icon-danger) {
   color: var(--portal-text-secondary);
 }
 

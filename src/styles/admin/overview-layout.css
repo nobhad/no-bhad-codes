@@ -100,10 +100,6 @@
   letter-spacing: var(--letter-spacing-title);
 }
 
-/* Alert values - red text only, no border changes */
-.stat-value-alert {
-  color: var(--status-cancelled);
-}
 
 /* =====================================================
    2-COLUMN GRID

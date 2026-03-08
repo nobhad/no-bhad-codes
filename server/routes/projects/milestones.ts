@@ -4,7 +4,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
 import { getString } from '../../database/row-helpers.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -41,17 +41,17 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const milestones = await db.all(
@@ -109,12 +109,12 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { title, description, due_date, deliverables = [] } = req.body;
 
     if (!title) {
-      return errorResponse(res, 'Milestone title is required', 400, 'MISSING_TITLE');
+      return errorResponse(res, 'Milestone title is required', 400, ErrorCodes.MISSING_TITLE);
     }
 
     const db = getDatabase();
@@ -122,7 +122,7 @@ router.post(
     // Verify project exists
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const result = await db.run(
@@ -147,7 +147,7 @@ router.post(
         res,
         'Milestone created but could not retrieve details',
         500,
-        'MILESTONE_CREATION_ERROR'
+        ErrorCodes.MILESTONE_CREATION_ERROR
       );
     }
 
@@ -176,7 +176,7 @@ router.put(
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
-      return errorResponse(res, 'Invalid project or milestone ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project or milestone ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { title, description, due_date, deliverables, is_completed } = req.body;
 
@@ -189,7 +189,7 @@ router.put(
     ]);
 
     if (!milestone) {
-      return errorResponse(res, 'Milestone not found', 404, 'MILESTONE_NOT_FOUND');
+      return errorResponse(res, 'Milestone not found', 404, ErrorCodes.MILESTONE_NOT_FOUND);
     }
 
     const updates: string[] = [];
@@ -235,7 +235,7 @@ router.put(
     }
 
     if (updates.length === 0) {
-      return errorResponse(res, 'No valid fields to update', 400, 'NO_UPDATES');
+      return errorResponse(res, 'No valid fields to update', 400, ErrorCodes.NO_UPDATES);
     }
 
     values.push(milestoneId);
@@ -263,7 +263,7 @@ router.put(
         res,
         'Milestone updated but could not retrieve details',
         500,
-        'MILESTONE_UPDATE_ERROR'
+        ErrorCodes.MILESTONE_UPDATE_ERROR
       );
     }
 
@@ -292,7 +292,7 @@ router.delete(
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
-      return errorResponse(res, 'Invalid project or milestone ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project or milestone ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -303,7 +303,7 @@ router.delete(
     ]);
 
     if (!milestone) {
-      return errorResponse(res, 'Milestone not found', 404, 'MILESTONE_NOT_FOUND');
+      return errorResponse(res, 'Milestone not found', 404, ErrorCodes.MILESTONE_NOT_FOUND);
     }
 
     const adminEmail = req.user?.email || 'admin';

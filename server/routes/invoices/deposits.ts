@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseDeposit, toSnakeCaseInvoice } from './helpers.js';
 import { logger } from '../../services/logger.js';
 
@@ -33,13 +33,13 @@ router.post(
     const { projectId, clientId, amount, percentage, description } = req.body;
 
     if (!projectId || !clientId || !amount) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['projectId', 'clientId', 'amount']
       });
     }
 
     if (typeof amount !== 'number' || amount <= 0) {
-      return errorResponseWithPayload(res, 'Invalid amount', 400, 'INVALID_AMOUNT', {
+      return errorResponseWithPayload(res, 'Invalid amount', 400, ErrorCodes.INVALID_AMOUNT, {
         message: 'Amount must be a positive number'
       });
     }
@@ -58,7 +58,7 @@ router.post(
       logger.error('[Invoices] Error creating deposit invoice:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, 'CREATION_FAILED', {
+      errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, ErrorCodes.CREATION_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to create deposit invoice')
       });
     }
@@ -81,7 +81,7 @@ router.get(
     const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -95,7 +95,7 @@ router.get(
         res,
         'Failed to retrieve available deposits',
         500,
-        'RETRIEVAL_FAILED',
+        ErrorCodes.RETRIEVAL_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to retrieve available deposits')
         }

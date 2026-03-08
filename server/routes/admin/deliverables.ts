@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -84,7 +84,7 @@ router.post(
     const { deliverableIds } = req.body;
 
     if (!deliverableIds || !Array.isArray(deliverableIds) || deliverableIds.length === 0) {
-      return errorResponse(res, 'deliverableIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'deliverableIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const adminEmail = req.user?.email || 'admin';

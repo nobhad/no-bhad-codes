@@ -14,7 +14,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessInvoice } from '../../middleware/access-control.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -40,7 +40,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
+      return errorResponse(res, 'Authentication required', 401, ErrorCodes.AUTH_REQUIRED);
     }
 
     try {
@@ -75,7 +75,7 @@ router.get(
         }
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
       });
     }
@@ -99,19 +99,19 @@ router.get(
     try {
       const invoice = await getInvoiceService().getInvoiceByNumber(invoiceNumber);
       if (!invoice.id) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
       // Check access and return 404 to prevent information disclosure
       if (!(await canAccessInvoice(req, invoice.id))) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
       sendSuccess(res, { invoice });
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve invoice by number')
       });
     }
@@ -139,12 +139,12 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     // Check access BEFORE fetching to prevent timing attacks
     if (!(await canAccessInvoice(req, invoiceId))) {
-      return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     try {
@@ -153,9 +153,9 @@ router.get(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve invoice')
       });
     }

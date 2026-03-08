@@ -25,7 +25,7 @@ import {
   addPageNumbers,
   PAGE_MARGINS
 } from '../../utils/pdf-utils.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { logger } from '../../services/logger.js';
@@ -55,7 +55,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -70,11 +70,11 @@ router.get(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     // Cast project for helper functions
@@ -633,7 +633,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -647,7 +647,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;
@@ -660,7 +660,7 @@ router.post(
         res,
         'No client email associated with this project',
         400,
-        'MISSING_CLIENT_EMAIL'
+        ErrorCodes.MISSING_CLIENT_EMAIL
       );
     }
 
@@ -831,7 +831,7 @@ router.get(
     );
 
     if (!project) {
-      return errorResponse(res, 'Invalid or expired signature link', 404, 'INVALID_SIGNATURE_LINK');
+      return errorResponse(res, 'Invalid or expired signature link', 404, ErrorCodes.INVALID_SIGNATURE_LINK);
     }
 
     const p = project as Record<string, unknown>;
@@ -843,7 +843,7 @@ router.get(
         res,
         'This signature link has expired. Please request a new one.',
         410,
-        'SIGNATURE_LINK_EXPIRED'
+        ErrorCodes.SIGNATURE_LINK_EXPIRED
       );
     }
 
@@ -853,7 +853,7 @@ router.get(
         res,
         'This contract has already been signed.',
         400,
-        'CONTRACT_ALREADY_SIGNED'
+        ErrorCodes.CONTRACT_ALREADY_SIGNED
       );
     }
 
@@ -903,11 +903,11 @@ router.post(
     const db = getDatabase();
 
     if (!signatureData || !signerName) {
-      return errorResponse(res, 'Signature and name are required', 400, 'MISSING_SIGNATURE');
+      return errorResponse(res, 'Signature and name are required', 400, ErrorCodes.MISSING_SIGNATURE);
     }
 
     if (!agreedToTerms) {
-      return errorResponse(res, 'You must agree to the terms to sign', 400, 'TERMS_NOT_ACCEPTED');
+      return errorResponse(res, 'You must agree to the terms to sign', 400, ErrorCodes.TERMS_NOT_ACCEPTED);
     }
 
     // Get project by token
@@ -921,7 +921,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Invalid or expired signature link', 404, 'INVALID_SIGNATURE_LINK');
+      return errorResponse(res, 'Invalid or expired signature link', 404, ErrorCodes.INVALID_SIGNATURE_LINK);
     }
 
     const p = project as Record<string, unknown>;
@@ -937,7 +937,7 @@ router.post(
         res,
         'This signature link has expired. Please request a new one.',
         410,
-        'SIGNATURE_LINK_EXPIRED'
+        ErrorCodes.SIGNATURE_LINK_EXPIRED
       );
     }
 
@@ -947,7 +947,7 @@ router.post(
         res,
         'This contract has already been signed.',
         400,
-        'CONTRACT_ALREADY_SIGNED'
+        ErrorCodes.CONTRACT_ALREADY_SIGNED
       );
     }
 
@@ -1139,13 +1139,13 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { signatureData, signerName } = req.body;
     const db = getDatabase();
 
     if (!signerName) {
-      return errorResponse(res, 'Signer name is required', 400, 'MISSING_SIGNER_NAME');
+      return errorResponse(res, 'Signer name is required', 400, ErrorCodes.MISSING_SIGNER_NAME);
     }
 
     const project = await db.get(
@@ -1156,7 +1156,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;
@@ -1166,7 +1166,7 @@ router.post(
         res,
         'Client signature is required before countersigning.',
         400,
-        'CLIENT_SIGNATURE_REQUIRED'
+        ErrorCodes.CLIENT_SIGNATURE_REQUIRED
       );
     }
 
@@ -1254,7 +1254,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -1268,7 +1268,7 @@ router.get(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;

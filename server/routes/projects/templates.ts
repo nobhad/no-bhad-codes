@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -30,12 +30,12 @@ router.get(
   asyncHandler(async (req: express.Request, res: Response) => {
     const templateId = parseInt(req.params.templateId, 10);
     if (isNaN(templateId) || templateId <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const template = await projectService.getTemplate(templateId);
 
     if (!template) {
-      return errorResponse(res, 'Template not found', 404, 'TEMPLATE_NOT_FOUND');
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.TEMPLATE_NOT_FOUND);
     }
 
     sendSuccess(res, { template });
@@ -51,7 +51,7 @@ router.post(
     const { name } = req.body;
 
     if (!name) {
-      return errorResponse(res, 'Template name is required', 400, 'MISSING_NAME');
+      return errorResponse(res, 'Template name is required', 400, ErrorCodes.MISSING_NAME);
     }
 
     const template = await projectService.createTemplate(req.body);
@@ -72,7 +72,7 @@ router.post(
         res,
         'templateId, clientId, projectName, and startDate are required',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 

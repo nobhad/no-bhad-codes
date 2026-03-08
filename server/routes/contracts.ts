@@ -15,7 +15,7 @@ import { contractService, type ContractStatus } from '../services/contract-servi
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
-import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
+import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { getBaseUrl } from '../config/environment.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
@@ -165,7 +165,7 @@ router.get(
     let status: ContractStatus | undefined;
 
     if (statusParam && !contractService.isValidContractStatus(statusParam)) {
-      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (statusParam) {
@@ -222,7 +222,7 @@ router.post(
     const { contractIds } = req.body;
 
     if (!contractIds || !Array.isArray(contractIds) || contractIds.length === 0) {
-      return errorResponse(res, 'contractIds array is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'contractIds array is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     let deleted = 0;
@@ -301,7 +301,7 @@ router.post(
     }
 
     if (status && !contractService.isValidContractStatus(status)) {
-      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const contract = await contractService.createContractFromTemplate({
@@ -357,12 +357,12 @@ router.get(
 
     // Validate contractId is a valid number
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Authorization check: verify user can access this contract
     if (!(await canAccessContract(req, contractId))) {
-      return errorResponse(res, 'Contract not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Contract not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const contract = await contractService.getContract(contractId);
@@ -403,14 +403,14 @@ router.get(
 
     // Validate contract ID
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
 
     const contract = await db.get('SELECT project_id FROM contracts WHERE id = ?', [contractId]);
     if (!contract) {
-      return errorResponse(res, 'Contract not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Contract not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const projectId = getNumber(contract as Record<string, unknown>, 'project_id');
@@ -483,7 +483,7 @@ router.post(
     }
 
     if (status && !contractService.isValidContractStatus(status)) {
-      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const contract = await contractService.createContract(req.body);
@@ -544,11 +544,11 @@ router.put(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (req.body?.status && !contractService.isValidContractStatus(req.body.status)) {
-      return errorResponse(res, 'Invalid contract status', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract status', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const contract = await contractService.updateContract(contractId, req.body);
@@ -588,7 +588,7 @@ router.post(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -606,7 +606,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;
@@ -617,7 +617,7 @@ router.post(
     // Validate email exists and has valid format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!clientEmail || !emailRegex.test(clientEmail)) {
-      return errorResponse(res, 'No valid client email on file', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'No valid client email on file', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Generate signature token if not exists
@@ -721,7 +721,7 @@ router.post(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -737,13 +737,13 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;
     const signatureToken = p.contract_signature_token as string | null;
     if (!signatureToken) {
-      return errorResponse(res, 'No active signature token found', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'No active signature token found', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const clientEmail = getString(p, 'email');
@@ -753,7 +753,7 @@ router.post(
     // Validate email exists and has valid format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!clientEmail || !emailRegex.test(clientEmail)) {
-      return errorResponse(res, 'No valid client email on file', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'No valid client email on file', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const baseUrl = getBaseUrl();
@@ -841,7 +841,7 @@ router.post(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -909,7 +909,7 @@ router.post(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { content } = req.body;
@@ -961,7 +961,7 @@ router.post(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const db = getDatabase();
@@ -976,7 +976,7 @@ router.post(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;
@@ -988,7 +988,7 @@ router.post(
       : 'soon';
 
     if (!clientEmail) {
-      return errorResponse(res, 'No client email on file', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'No client email on file', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { emailService } = await import('../services/email-service.js');
@@ -1066,7 +1066,7 @@ router.delete(
     const contractId = parseInt(req.params.contractId, 10);
 
     if (isNaN(contractId) || contractId <= 0) {
-      return errorResponse(res, 'Invalid contract ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid contract ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const contract = await contractService.updateContract(contractId, { status: 'cancelled' });
@@ -1159,7 +1159,7 @@ router.get(
     const { type } = req.query;
 
     if (type && typeof type === 'string' && !contractService.isValidTemplateType(type)) {
-      return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const templates = await contractService.getTemplates(type as string | undefined);
@@ -1197,7 +1197,7 @@ router.get(
     const templateId = parseInt(req.params.templateId, 10);
 
     if (isNaN(templateId) || templateId <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await contractService.getTemplate(templateId);
@@ -1248,11 +1248,11 @@ router.post(
     const { name, type, content } = req.body;
 
     if (!name || !type || !content) {
-      return errorResponse(res, 'name, type, and content are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'name, type, and content are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!contractService.isValidTemplateType(type)) {
-      return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await contractService.createTemplate(req.body);
@@ -1291,11 +1291,11 @@ router.put(
     const templateId = parseInt(req.params.templateId, 10);
 
     if (isNaN(templateId) || templateId <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (req.body?.type && !contractService.isValidTemplateType(req.body.type)) {
-      return errorResponse(res, 'Invalid template type', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template type', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await contractService.updateTemplate(templateId, req.body);
@@ -1333,7 +1333,7 @@ router.delete(
     const templateId = parseInt(_req.params.templateId, 10);
 
     if (isNaN(templateId) || templateId <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await contractService.deleteTemplate(templateId);

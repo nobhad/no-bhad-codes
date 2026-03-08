@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { knowledgeBaseService } from '../services/knowledge-base-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -229,7 +229,7 @@ router.post(
     const { isHelpful, comment } = req.body;
 
     if (isNaN(articleId) || articleId <= 0) {
-      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid article ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (typeof isHelpful !== 'boolean') {
@@ -363,7 +363,7 @@ router.put(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid category ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid category ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const category = await knowledgeBaseService.updateCategory(id, req.body);
@@ -405,7 +405,7 @@ router.delete(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid category ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid category ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await knowledgeBaseService.deleteCategory(id);
@@ -485,7 +485,7 @@ router.get(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid article ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const article = await knowledgeBaseService.getArticleById(id);
@@ -594,7 +594,7 @@ router.put(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid article ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const article = await knowledgeBaseService.updateArticle(id, req.body);
@@ -636,7 +636,7 @@ router.delete(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid article ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid article ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await knowledgeBaseService.deleteArticle(id);

@@ -19,7 +19,7 @@ import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
-import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess, ErrorCodes } from '../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -239,7 +239,7 @@ Received: ${new Date().toISOString()}
       sendSuccess(res, { messageId }, 'Message received, thanks!');
     } catch (_error) {
       await logger.error('Contact form processing error');
-      errorResponse(res, 'Failed to process contact form', 500, 'CONTACT_PROCESSING_ERROR');
+      errorResponse(res, 'Failed to process contact form', 500, ErrorCodes.CONTACT_PROCESSING_ERROR);
     }
   }
 );
@@ -267,7 +267,7 @@ router.post(
     try {
       // Implement file upload handling
       if (!req.file) {
-        return errorResponse(res, 'No file uploaded', 400, 'NO_FILE');
+        return errorResponse(res, 'No file uploaded', 400, ErrorCodes.NO_FILE);
       }
 
       const fileInfo = {
@@ -309,7 +309,7 @@ router.post(
       });
     } catch (_error) {
       await logger.error('File upload error');
-      errorResponse(res, 'File upload failed', 500, 'UPLOAD_ERROR');
+      errorResponse(res, 'File upload failed', 500, ErrorCodes.UPLOAD_ERROR);
     }
   }
 );
@@ -349,7 +349,7 @@ router.get(
       sendSuccess(res, health);
     } catch (_error) {
       await logger.error('Health check error');
-      errorResponse(res, 'Health check failed', 500, 'HEALTH_CHECK_ERROR');
+      errorResponse(res, 'Health check failed', 500, ErrorCodes.HEALTH_CHECK_ERROR);
     }
   }
 );
@@ -433,7 +433,7 @@ router.get(
       sendSuccess(res, result);
     } catch (_error) {
       await logger.error('Data query error');
-      errorResponse(res, 'Data query failed', 500, 'DATA_QUERY_ERROR');
+      errorResponse(res, 'Data query failed', 500, ErrorCodes.DATA_QUERY_ERROR);
     }
   }
 );
@@ -516,7 +516,7 @@ router.get(
       sendSuccess(res, status);
     } catch (_error) {
       await logger.error('API status error');
-      errorResponse(res, 'Status check failed', 500, 'STATUS_ERROR');
+      errorResponse(res, 'Status check failed', 500, ErrorCodes.STATUS_ERROR);
     }
   }
 );
@@ -524,7 +524,7 @@ router.get(
 // Handle 404 for unmatched API routes
 router.use(async (req, res) => {
   await logger.error('API route not found');
-  errorResponseWithPayload(res, 'API endpoint not found', 404, 'ENDPOINT_NOT_FOUND', {
+  errorResponseWithPayload(res, 'API endpoint not found', 404, ErrorCodes.ENDPOINT_NOT_FOUND, {
     path: req.path
   });
 });
@@ -545,7 +545,7 @@ router.use(
 
     const status = (error as { status?: number })?.status ?? 500;
     const message = sanitizeErrorMessage(error, 'Internal server error');
-    const code = (error as { code?: string })?.code ?? 'INTERNAL_ERROR';
+    const code = (error as { code?: string })?.code ?? ErrorCodes.INTERNAL_ERROR;
     errorResponseWithPayload(res, message, status, code, {
       requestId: req.headers['x-request-id']
     });

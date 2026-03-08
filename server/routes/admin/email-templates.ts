@@ -15,7 +15,7 @@ import {
   emailTemplateService,
   type EmailTemplateCategory
 } from '../../services/email-template-service.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -54,13 +54,13 @@ router.get(
     const templateId = parseInt(req.params.id, 10);
 
     if (isNaN(templateId)) {
-      return errorResponse(res, 'Invalid template ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const template = await emailTemplateService.getTemplate(templateId);
 
     if (!template) {
-      return errorResponse(res, 'Template not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { template });
@@ -78,7 +78,7 @@ router.put(
     const templateId = parseInt(req.params.id, 10);
 
     if (isNaN(templateId)) {
-      return errorResponse(res, 'Invalid template ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const { subject, body_html, category, is_active } = req.body;
@@ -91,7 +91,7 @@ router.put(
     });
 
     if (!template) {
-      return errorResponse(res, 'Template not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { template });

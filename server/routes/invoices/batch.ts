@@ -11,7 +11,7 @@ import archiver from 'archiver';
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import { getInvoiceService, toSnakeCasePayment } from './helpers.js';
@@ -44,7 +44,7 @@ router.get(
         count: payments.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payments', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve payments', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve payment records')
       });
     }
@@ -64,7 +64,7 @@ router.post(
     const { invoiceIds } = req.body;
 
     if (!Array.isArray(invoiceIds) || invoiceIds.length === 0) {
-      return errorResponse(res, 'invoiceIds must be a non-empty array', 400, 'INVALID_INPUT');
+      return errorResponse(res, 'invoiceIds must be a non-empty array', 400, ErrorCodes.INVALID_INPUT);
     }
 
     if (invoiceIds.length > 100) {
@@ -72,7 +72,7 @@ router.post(
         res,
         'Maximum 100 invoices can be exported at once',
         400,
-        'TOO_MANY_INVOICES'
+        ErrorCodes.TOO_MANY_INVOICES
       );
     }
 
@@ -104,7 +104,7 @@ router.post(
     archive.on('error', (err) => {
       logger.error('[Invoices] ZIP archive error:', { error: err });
       if (!res.headersSent) {
-        errorResponse(res, 'Failed to create ZIP archive', 500, 'ZIP_FAILED');
+        errorResponse(res, 'Failed to create ZIP archive', 500, ErrorCodes.ZIP_FAILED);
       }
     });
 

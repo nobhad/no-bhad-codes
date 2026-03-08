@@ -3,7 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { cacheService } from '../../services/cache-service.js';
 import { errorTracker } from '../../services/error-tracking.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -25,7 +25,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!cacheService.isAvailable()) {
-      return errorResponse(res, 'Cache service not available', 503, 'CACHE_UNAVAILABLE');
+      return errorResponse(res, 'Cache service not available', 503, ErrorCodes.CACHE_UNAVAILABLE);
     }
 
     try {
@@ -38,7 +38,7 @@ router.get(
       logger.error('Error getting cache stats:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to retrieve cache statistics', 500, 'CACHE_STATS_ERROR');
+      errorResponse(res, 'Failed to retrieve cache statistics', 500, ErrorCodes.CACHE_STATS_ERROR);
     }
   })
 );
@@ -60,7 +60,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!cacheService.isAvailable()) {
-      return errorResponse(res, 'Cache service not available', 503, 'CACHE_UNAVAILABLE');
+      return errorResponse(res, 'Cache service not available', 503, ErrorCodes.CACHE_UNAVAILABLE);
     }
 
     try {
@@ -77,11 +77,11 @@ router.post(
           timestamp: new Date().toISOString()
         }, 'Cache cleared successfully');
       } else {
-        errorResponse(res, 'Failed to clear cache', 500, 'CACHE_CLEAR_FAILED');
+        errorResponse(res, 'Failed to clear cache', 500, ErrorCodes.CACHE_CLEAR_FAILED);
       }
     } catch (error) {
       logger.error('Error clearing cache:', { error: error instanceof Error ? error : undefined });
-      errorResponse(res, 'Failed to clear cache', 500, 'CACHE_CLEAR_ERROR');
+      errorResponse(res, 'Failed to clear cache', 500, ErrorCodes.CACHE_CLEAR_ERROR);
     }
   })
 );
@@ -118,11 +118,11 @@ router.post(
     const { tag, pattern } = req.body;
 
     if (!tag && !pattern) {
-      return errorResponse(res, 'Either tag or pattern is required', 400, 'MISSING_PARAMETERS');
+      return errorResponse(res, 'Either tag or pattern is required', 400, ErrorCodes.MISSING_PARAMETERS);
     }
 
     if (!cacheService.isAvailable()) {
-      return errorResponse(res, 'Cache service not available', 503, 'CACHE_UNAVAILABLE');
+      return errorResponse(res, 'Cache service not available', 503, ErrorCodes.CACHE_UNAVAILABLE);
     }
 
     try {
@@ -151,7 +151,7 @@ router.post(
       logger.error('Error invalidating cache:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to invalidate cache', 500, 'CACHE_INVALIDATE_ERROR');
+      errorResponse(res, 'Failed to invalidate cache', 500, ErrorCodes.CACHE_INVALIDATE_ERROR);
     }
   })
 );

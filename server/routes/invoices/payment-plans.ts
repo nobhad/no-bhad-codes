@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice, toSnakeCasePaymentPlan } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
 
@@ -75,7 +75,7 @@ router.get(
         res,
         'Failed to retrieve payment plan templates',
         500,
-        'RETRIEVAL_FAILED',
+        ErrorCodes.RETRIEVAL_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to retrieve payment plan templates')
         }
@@ -115,7 +115,7 @@ router.post(
         res,
         'Failed to create payment plan template',
         500,
-        'CREATION_FAILED',
+        ErrorCodes.CREATION_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to create payment plan template')
         }
@@ -140,7 +140,7 @@ router.delete(
     const templateId = parseInt(req.params.id, 10);
 
     if (isNaN(templateId)) {
-      return errorResponse(res, 'Invalid template ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -151,7 +151,7 @@ router.delete(
         res,
         'Failed to delete payment plan template',
         500,
-        'DELETION_FAILED',
+        ErrorCodes.DELETION_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to delete payment plan template')
         }
@@ -176,7 +176,7 @@ router.post(
     const { projectId, clientId, templateId, totalAmount } = req.body;
 
     if (!projectId || !clientId || !templateId || !totalAmount) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['projectId', 'clientId', 'templateId', 'totalAmount']
       });
     }
@@ -198,7 +198,7 @@ router.post(
         res,
         'Failed to generate invoices from plan',
         500,
-        'GENERATION_FAILED',
+        ErrorCodes.GENERATION_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to generate invoices from payment plan')
         }

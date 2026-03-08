@@ -10,7 +10,7 @@ import { getString, getNumber } from '../../database/row-helpers.js';
 import { notDeleted } from '../../database/query-helpers.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
@@ -131,7 +131,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
     const isAdmin = await isUserAdmin(req);
@@ -159,7 +159,7 @@ router.get(
     const project = await db.get(query, params);
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     // Get project files
@@ -211,7 +211,7 @@ router.post(
   validateRequest(ValidationSchemas.projectRequest),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     if (req.user!.type !== 'client') {
-      return errorResponse(res, 'Only clients can submit project requests', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Only clients can submit project requests', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const { name, projectType, budget, timeline, description } = req.body;
@@ -301,7 +301,7 @@ router.post(
     // Verify client exists
     const client = await db.get('SELECT id FROM clients WHERE id = ?', [client_id]);
     if (!client) {
-      return errorResponse(res, 'Invalid client ID', 400, 'INVALID_CLIENT');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_CLIENT);
     }
 
     const result = await db.run(
@@ -356,7 +356,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
     const isAdmin = await isUserAdmin(req);
@@ -373,7 +373,7 @@ router.put(
     }
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     // When updating status, validate against allowed project statuses (not lead pipeline statuses)
@@ -398,7 +398,7 @@ router.put(
           res,
           `Invalid status. Must be one of: ${projectStatuses.join(', ')}`,
           400,
-          'INVALID_STATUS',
+          ErrorCodes.INVALID_STATUS,
           { validStatuses: projectStatuses }
         );
       }
@@ -472,7 +472,7 @@ router.put(
     }
 
     if (updates.length === 0) {
-      return errorResponse(res, 'No valid fields to update', 400, 'NO_UPDATES');
+      return errorResponse(res, 'No valid fields to update', 400, ErrorCodes.NO_UPDATES);
     }
 
     values.push(projectId);
@@ -604,14 +604,14 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const deletedBy = req.user?.email || 'admin';
 
     const result = await softDeleteService.softDeleteProject(projectId, deletedBy);
 
     if (!result.success) {
-      return errorResponse(res, result.message, 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, result.message, 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     sendSuccess(res, {
@@ -629,7 +629,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { fetchProjectReportData, generateProjectReportPdf } =
@@ -637,7 +637,7 @@ router.get(
 
     const reportData = await fetchProjectReportData(projectId);
     if (!reportData) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const pdfBytes = await generateProjectReportPdf(reportData);
@@ -659,14 +659,14 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { fetchSowData, generateSowPdf } = await import('../../services/sow-service.js');
 
     const sowData = await fetchSowData(projectId);
     if (!sowData) {
-      return errorResponse(res, 'Project or proposal not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Project or proposal not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const pdfBytes = await generateSowPdf(sowData);
@@ -688,7 +688,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { fetchProjectReportData, generateProjectReportPdf } =
@@ -696,7 +696,7 @@ router.get(
 
     const reportData = await fetchProjectReportData(projectId);
     if (!reportData) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const pdfBytes = await generateProjectReportPdf(reportData);
@@ -717,14 +717,14 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { fetchSowData, generateSowPdf } = await import('../../services/sow-service.js');
 
     const sowData = await fetchSowData(projectId);
     if (!sowData) {
-      return errorResponse(res, 'Project or proposal not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Project or proposal not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const pdfBytes = await generateSowPdf(sowData);
@@ -745,7 +745,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -754,7 +754,7 @@ router.post(
 
     const reportData = await fetchProjectReportData(projectId);
     if (!reportData) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const pdfBytes = await generateProjectReportPdf(reportData);
@@ -811,7 +811,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -819,7 +819,7 @@ router.post(
 
     const sowData = await fetchSowData(projectId);
     if (!sowData) {
-      return errorResponse(res, 'Project or proposal not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Project or proposal not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const pdfBytes = await generateSowPdf(sowData);

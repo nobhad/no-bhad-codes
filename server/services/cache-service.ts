@@ -200,6 +200,7 @@ export class CacheService {
    */
   async delete(key: string): Promise<boolean> {
     if (!this.isConnected || !this.client) {
+      logger.warn('[Cache] Cache not available, skipping delete');
       return false;
     }
 
@@ -221,6 +222,7 @@ export class CacheService {
    */
   async exists(key: string): Promise<boolean> {
     if (!this.isConnected || !this.client) {
+      logger.warn('[Cache] Cache not available, skipping exists check');
       return false;
     }
 
@@ -241,6 +243,7 @@ export class CacheService {
    */
   async expire(key: string, ttl: number): Promise<boolean> {
     if (!this.isConnected || !this.client) {
+      logger.warn('[Cache] Cache not available, skipping expire');
       return false;
     }
 
@@ -294,6 +297,7 @@ export class CacheService {
    */
   async mset(keyValuePairs: Record<string, unknown>, ttl: number = 3600): Promise<boolean> {
     if (!this.isConnected || !this.client) {
+      logger.warn('[Cache] Cache not available, skipping mset');
       return false;
     }
 
@@ -424,6 +428,7 @@ export class CacheService {
    */
   async clear(): Promise<boolean> {
     if (!this.isConnected || !this.client) {
+      logger.warn('[Cache] Cache not available, skipping clear');
       return false;
     }
 
@@ -471,6 +476,7 @@ export class CacheService {
    */
   async testConnection(): Promise<boolean> {
     if (!this.client) {
+      logger.warn('[Cache] No client initialized, connection test failed');
       return false;
     }
 

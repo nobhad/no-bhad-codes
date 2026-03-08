@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -76,7 +76,7 @@ router.get(
     const conversationId = parseInt(req.params.conversationId, 10);
 
     if (isNaN(conversationId)) {
-      return errorResponse(res, 'Invalid conversation ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -94,7 +94,7 @@ router.get(
     `, [conversationId]);
 
     if (!conversation) {
-      return errorResponse(res, 'Conversation not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Conversation not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Get all messages in the conversation (including internal for admin view)
@@ -133,7 +133,7 @@ router.post(
     const conversationId = parseInt(req.params.conversationId, 10);
 
     if (isNaN(conversationId)) {
-      return errorResponse(res, 'Invalid conversation ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -163,11 +163,11 @@ router.post(
     const { content, attachments } = req.body;
 
     if (isNaN(conversationId)) {
-      return errorResponse(res, 'Invalid conversation ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!content || content.trim().length === 0) {
-      return errorResponse(res, 'Message content is required', 400, 'MISSING_CONTENT');
+      return errorResponse(res, 'Message content is required', 400, ErrorCodes.MISSING_CONTENT);
     }
 
     const db = getDatabase();
@@ -175,7 +175,7 @@ router.post(
     // Get thread info
     const thread = await db.get('SELECT client_id, project_id FROM message_threads WHERE id = ?', [conversationId]);
     if (!thread) {
-      return errorResponse(res, 'Conversation not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Conversation not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Insert the message
@@ -237,7 +237,7 @@ router.post(
     const { starred } = req.body;
 
     if (isNaN(conversationId)) {
-      return errorResponse(res, 'Invalid conversation ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();

@@ -6,7 +6,7 @@ import { emailService } from '../../services/email-service.js';
 import { errorTracker } from '../../services/error-tracking.js';
 import { getDatabase } from '../../database/init.js';
 import { leadService } from '../../services/lead-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -93,7 +93,7 @@ router.get(
       });
     } catch (error) {
       logger.error('Error fetching leads:', { error: error instanceof Error ? error : undefined });
-      errorResponse(res, 'Failed to fetch leads', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to fetch leads', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -164,7 +164,7 @@ router.get(
       logger.error('Error fetching contact submissions:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to fetch contact submissions', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to fetch contact submissions', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -190,7 +190,7 @@ router.put(
       const { status } = req.body;
 
       if (!['new', 'read', 'replied', 'archived'].includes(status)) {
-        return errorResponse(res, 'Invalid status value', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid status value', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       const db = getDatabase();
@@ -213,7 +213,7 @@ router.put(
       logger.error('Error updating contact submission status:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to update status', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to update status', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -244,7 +244,7 @@ router.post(
       const contact = await db.get(`SELECT ${CONTACT_SUBMISSION_COLUMNS} FROM contact_submissions WHERE id = ?`, [id]);
 
       if (!contact) {
-        return errorResponse(res, 'Contact submission not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Contact submission not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Check if already converted
@@ -253,7 +253,7 @@ router.post(
           res,
           'This contact has already been converted to a client',
           400,
-          'VALIDATION_ERROR'
+          ErrorCodes.VALIDATION_ERROR
         );
       }
 
@@ -359,7 +359,7 @@ router.post(
       logger.error('Error converting contact to client:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to convert contact to client', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to convert contact to client', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -411,7 +411,7 @@ router.put(
             ? `Invalid status "${status}". Must be one of: ${validStatuses.join(', ')}`
             : 'Missing or invalid status in request body',
           400,
-          'VALIDATION_ERROR'
+          ErrorCodes.VALIDATION_ERROR
         );
       }
 
@@ -423,7 +423,7 @@ router.put(
             res,
             'When cancelling, must specify cancelled_by as "admin" or "client"',
             400,
-            'VALIDATION_ERROR'
+            ErrorCodes.VALIDATION_ERROR
           );
         }
       }
@@ -433,7 +433,7 @@ router.put(
       // Check if project exists
       const project = await db.get('SELECT id, status FROM projects WHERE id = ?', [id]);
       if (!project) {
-        return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Update status and cancellation fields (clear them if not cancelling)
@@ -463,7 +463,7 @@ router.put(
       logger.error('Error updating lead status:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to update lead status', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to update lead status', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -512,7 +512,7 @@ router.post(
       );
 
       if (!lead) {
-        return errorResponse(res, 'Lead not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Lead not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       const leadEmail = typeof lead.email === 'string' ? lead.email : null;
@@ -521,7 +521,7 @@ router.post(
       const leadPhone = typeof lead.phone === 'string' ? lead.phone : null;
 
       if (!leadEmail) {
-        return errorResponse(res, 'Lead does not have an email address', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Lead does not have an email address', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       // Check if client already exists
@@ -574,7 +574,7 @@ router.post(
       // Validate email format before sending
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!leadEmail || !emailRegex.test(leadEmail)) {
-        return errorResponse(res, 'Invalid lead email format', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid lead email format', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       // Build invitation link
@@ -657,7 +657,7 @@ No Bhad Codes Team
       );
     } catch (error) {
       logger.error('Error inviting lead:', { error: error instanceof Error ? error : undefined });
-      errorResponse(res, 'Failed to send invitation', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to send invitation', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -686,11 +686,11 @@ router.post(
       const lead = await db.get('SELECT id, status, project_name FROM projects WHERE id = ?', [id]);
 
       if (!lead) {
-        return errorResponse(res, 'Lead not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Lead not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       if (lead.status === 'converted') {
-        return errorResponse(res, 'Lead is already converted', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Lead is already converted', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       // Update lead status to converted and set start_date
@@ -709,7 +709,7 @@ router.post(
       sendSuccess(res, { projectId: id }, 'Lead activated as project successfully');
     } catch (error) {
       logger.error('Error activating lead:', { error: error instanceof Error ? error : undefined });
-      errorResponse(res, 'Failed to activate lead', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to activate lead', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -747,7 +747,7 @@ router.post(
         res,
         'Name, fieldName, operator, thresholdValue, and points are required',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 
@@ -775,7 +775,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const ruleId = parseInt(req.params.id, 10);
     if (isNaN(ruleId) || ruleId <= 0) {
-      return errorResponse(res, 'Invalid rule ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid rule ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const rule = await leadService.updateScoringRule(ruleId, req.body);
     sendSuccess(res, { rule });
@@ -792,7 +792,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const ruleId = parseInt(req.params.id, 10);
     if (isNaN(ruleId) || ruleId <= 0) {
-      return errorResponse(res, 'Invalid rule ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid rule ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await leadService.deleteScoringRule(ruleId);
     sendSuccess(res, undefined, 'Scoring rule deleted');
@@ -809,7 +809,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const result = await leadService.calculateLeadScore(projectId);
     sendSuccess(res, result);
@@ -882,12 +882,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { stageId } = req.body;
 
     if (!stageId) {
-      return errorResponse(res, 'stageId is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'stageId is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     await leadService.moveToStage(projectId, stageId);
@@ -909,7 +909,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const tasks = await leadService.getTasks(projectId);
     sendSuccess(res, { tasks });
@@ -926,13 +926,13 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { title, description, taskType, dueDate, dueTime, assignedTo, priority, reminderAt } =
       req.body;
 
     if (!title) {
-      return errorResponse(res, 'Title is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'Title is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const task = await leadService.createTask(projectId, {
@@ -960,7 +960,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await leadService.updateTask(taskId, req.body);
     sendSuccess(res, { task });
@@ -977,7 +977,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await leadService.completeTask(taskId, req.user?.email);
     sendSuccess(res, { task });
@@ -1026,7 +1026,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const notes = await leadService.getNotes(projectId);
     sendSuccess(res, { notes });
@@ -1043,12 +1043,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { content } = req.body;
 
     if (!content) {
-      return errorResponse(res, 'Content is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'Content is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const note = await leadService.addNote(projectId, req.user?.email || 'admin', content);
@@ -1066,7 +1066,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId, 10);
     if (isNaN(noteId) || noteId <= 0) {
-      return errorResponse(res, 'Invalid note ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid note ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const note = await leadService.togglePinNote(noteId);
     sendSuccess(res, { note });
@@ -1083,7 +1083,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const noteId = parseInt(req.params.noteId, 10);
     if (isNaN(noteId) || noteId <= 0) {
-      return errorResponse(res, 'Invalid note ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid note ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await leadService.deleteNote(noteId);
     sendSuccess(res, undefined, 'Note deleted');
@@ -1118,12 +1118,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { sourceId } = req.body;
 
     if (!sourceId) {
-      return errorResponse(res, 'sourceId is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'sourceId is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     await leadService.setLeadSource(projectId, sourceId);
@@ -1145,12 +1145,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { assignee } = req.body;
 
     if (!assignee) {
-      return errorResponse(res, 'assignee is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'assignee is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     await leadService.assignLead(projectId, assignee);
@@ -1212,7 +1212,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const duplicates = await leadService.findDuplicates(projectId);
     sendSuccess(res, { duplicates });
@@ -1229,7 +1229,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const duplicateId = parseInt(req.params.id, 10);
     if (isNaN(duplicateId) || duplicateId <= 0) {
-      return errorResponse(res, 'Invalid duplicate ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid duplicate ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { status } = req.body;
 
@@ -1238,7 +1238,7 @@ router.post(
         res,
         'Valid status is required (merged, not_duplicate, dismissed)',
         400,
-        'INVALID_STATUS'
+        ErrorCodes.INVALID_STATUS
       );
     }
 
@@ -1266,7 +1266,7 @@ router.post(
         res,
         'projectIds array and status are required',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 
@@ -1290,7 +1290,7 @@ router.post(
         res,
         'projectIds array and assignee are required',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 
@@ -1314,7 +1314,7 @@ router.post(
         res,
         'projectIds array and stageId are required',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 
@@ -1338,7 +1338,7 @@ router.post(
         res,
         'leadIds array is required and must not be empty',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 

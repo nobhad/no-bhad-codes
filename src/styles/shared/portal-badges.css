@@ -284,20 +284,6 @@
     top: 0;
     right: 0;
     transform: none;
-  }
-}
-
-/* FALLBACK: Standard media query - only show badges with count > 0 */
-@media (--wide-down) {
-  .sidebar-badge:not(.has-count) {
-    display: none;
-  }
-
-  .sidebar-badge.has-count {
-    display: block;
-    top: 0;
-    right: 0;
-    transform: none;
     min-width: var(--icon-size-sm);
     height: var(--icon-size-sm);
     font-size: var(--font-size-2xs);

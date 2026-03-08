@@ -18,13 +18,18 @@
    FIELD LABEL - Base styling for all labels
    ===================================================== */
 .field-label,
-.meta-label {
-  display: block;
+.meta-label,
+.stat-label {
   font-size: var(--portal-label-size, var(--font-size-xs));
   font-weight: var(--portal-label-weight, var(--font-weight-medium));
   color: var(--portal-label-color, var(--color-text-secondary));
   text-transform: uppercase;
   letter-spacing: var(--portal-label-spacing, var(--letter-spacing-label));
+}
+
+.field-label,
+.meta-label {
+  display: block;
   margin-bottom: var(--portal-field-label-gap, 0.25rem);
   line-height: var(--line-height-tight);
 }
@@ -73,19 +78,9 @@
 
 /* =====================================================
    STAT LABEL - Compact variant for stat cards
+   Base typography shared above; only override needed here.
    ===================================================== */
 .stat-label {
-  font-size: var(--portal-label-size, var(--font-size-xs));
-  font-weight: var(--portal-label-weight, var(--font-weight-medium));
-  color: var(--portal-label-color, var(--color-text-secondary));
-  text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing, var(--letter-spacing-label));
   margin: 0;
 }
 
-.stat-value {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--portal-text-light, var(--color-text-inverse));
-  line-height: var(--line-height-tight);
-}

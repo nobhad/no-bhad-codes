@@ -139,6 +139,14 @@ export interface ProposalSignedClientData extends ProposalSignedData {
   supportEmail: string;
 }
 
+interface WelcomeEmailData {
+  name?: string;
+  accessToken?: string;
+  companyName?: string;
+  loginUrl?: string;
+  supportEmail?: string;
+}
+
 interface EmailConfig {
   host: string;
   port: number;
@@ -726,16 +734,14 @@ export const emailService = {
 
   async sendWelcomeEmail(
     email: string,
-    nameOrData: string | any,
-    accessTokenOrOptions?: string | any
+    nameOrData: string | WelcomeEmailData,
+    accessTokenOrOptions?: string
   ): Promise<EmailResult> {
-    if (typeof nameOrData === 'string' && typeof accessTokenOrOptions === 'string') {
-      // Original function signature
-      return sendWelcomeEmail(email, nameOrData, accessTokenOrOptions);
+    if (typeof nameOrData === 'string') {
+      return sendWelcomeEmail(email, nameOrData, accessTokenOrOptions ?? '');
     }
     // Object-based signature for compatibility
-    const data = nameOrData;
-    return sendWelcomeEmail(email, data.name || 'Valued Client', data.accessToken || '');
+    return sendWelcomeEmail(email, nameOrData.name || 'Valued Client', nameOrData.accessToken || '');
   },
 
   async sendNewIntakeNotification(intakeData: IntakeData, projectId: number): Promise<EmailResult> {

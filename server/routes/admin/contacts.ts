@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -134,7 +134,7 @@ router.patch(
     const { isPrimary, firstName, lastName, email, phone, role } = req.body;
 
     if (isNaN(contactId)) {
-      return errorResponse(res, 'Invalid contact ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -174,7 +174,7 @@ router.patch(
     }
 
     if (updates.length === 0) {
-      return errorResponse(res, 'No fields to update', 400, 'NO_FIELDS');
+      return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -205,12 +205,12 @@ router.post(
     const { contactIds } = req.body;
 
     if (!contactIds || !Array.isArray(contactIds) || contactIds.length === 0) {
-      return errorResponse(res, 'contactIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'contactIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const MAX_BATCH_SIZE = 100;
     if (contactIds.length > MAX_BATCH_SIZE) {
-      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} contacts at once`, 400, 'VALIDATION_ERROR');
+      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} contacts at once`, 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const validIds = contactIds

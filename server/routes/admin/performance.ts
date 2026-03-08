@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 
 const router = express.Router();
@@ -376,7 +376,7 @@ router.get(
       });
     } catch (error) {
       console.error('[Performance Error]', error);
-      return errorResponse(res, 'Failed to load performance data', 500, 'PERFORMANCE_ERROR');
+      return errorResponse(res, 'Failed to load performance data', 500, ErrorCodes.PERFORMANCE_ERROR);
     }
   })
 );

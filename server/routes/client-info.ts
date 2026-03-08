@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { clientInfoService, OnboardingStatus } from '../services/client-info-service.js';
-import { errorResponse, sendSuccess } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -298,7 +298,7 @@ router.get(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const status = await clientInfoService.getClientInfoStatus(clientId);
@@ -338,7 +338,7 @@ router.get(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const items = await clientInfoService.getMissingItems(clientId);
@@ -374,7 +374,7 @@ router.post(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const completeness = await clientInfoService.calculateCompleteness(clientId);
@@ -410,7 +410,7 @@ router.get(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
@@ -446,7 +446,7 @@ router.delete(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await clientInfoService.resetOnboarding(clientId);

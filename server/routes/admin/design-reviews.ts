@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const DELIVERABLE_COLUMNS = `
@@ -95,7 +95,7 @@ router.get(
     const reviewId = parseInt(req.params.reviewId, 10);
 
     if (isNaN(reviewId)) {
-      return errorResponse(res, 'Invalid review ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid review ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -121,7 +121,7 @@ router.get(
     `, [reviewId]);
 
     if (!review) {
-      return errorResponse(res, 'Design review not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Design review not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Get attachments
@@ -147,7 +147,7 @@ router.patch(
     const { status } = req.body;
 
     if (isNaN(reviewId)) {
-      return errorResponse(res, 'Invalid review ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid review ID', 400, ErrorCodes.INVALID_ID);
     }
 
     // Map frontend status to database status

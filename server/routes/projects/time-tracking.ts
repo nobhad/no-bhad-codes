@@ -4,7 +4,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -19,17 +19,17 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const { startDate, endDate, userName, taskId } = req.query;
@@ -62,17 +62,17 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const summary = await db.get(
@@ -103,13 +103,13 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     // Support both frontend format (duration_minutes, is_billable) and legacy format (hours, billable)
@@ -138,7 +138,7 @@ router.post(
         res,
         'hours (or duration_minutes) and date are required',
         400,
-        'MISSING_REQUIRED_FIELDS'
+        ErrorCodes.MISSING_REQUIRED_FIELDS
       );
     }
 
@@ -166,7 +166,7 @@ router.put(
   asyncHandler(async (req: express.Request, res: Response) => {
     const entryId = parseInt(req.params.entryId, 10);
     if (isNaN(entryId) || entryId <= 0) {
-      return errorResponse(res, 'Invalid entry ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid entry ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Support both frontend format and legacy format
@@ -211,7 +211,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const entryId = parseInt(req.params.entryId, 10);
     if (isNaN(entryId) || entryId <= 0) {
-      return errorResponse(res, 'Invalid entry ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid entry ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await projectService.deleteTimeEntry(entryId);
     messageResponse(res, 'Time entry deleted successfully');
@@ -225,7 +225,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const stats = await projectService.getProjectTimeStats(projectId);
     sendSuccess(res, { stats });
@@ -241,7 +241,7 @@ router.get(
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
-      return errorResponse(res, 'startDate and endDate are required', 400, 'MISSING_DATE_RANGE');
+      return errorResponse(res, 'startDate and endDate are required', 400, ErrorCodes.MISSING_DATE_RANGE);
     }
 
     const report = await projectService.getTeamTimeReport(startDate as string, endDate as string);

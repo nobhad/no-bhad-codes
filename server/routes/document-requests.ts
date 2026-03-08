@@ -12,7 +12,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { documentRequestService, RequestStatus } from '../services/document-request-service.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -181,7 +181,7 @@ router.post(
     const clientEmail = req.user?.email;
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!clientEmail) {
@@ -234,7 +234,7 @@ router.post(
     const uploaderEmail = req.user?.email;
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!fileId) {
@@ -416,7 +416,7 @@ router.get(
     const status = req.query.status as RequestStatus | undefined;
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const requests = await documentRequestService.getClientRequests(clientId, status);
@@ -453,7 +453,7 @@ router.get(
     const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const requests = await documentRequestService.getProjectPendingRequests(projectId);
@@ -490,7 +490,7 @@ router.get(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await documentRequestService.getRequest(id);
@@ -665,7 +665,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await documentRequestService.startReview(id, reviewerEmail);
@@ -711,7 +711,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Approve the request - this also copies the file to the Files tab
@@ -781,7 +781,7 @@ router.post(
     const reviewerEmail = req.user?.email || 'admin';
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!reason) {
@@ -834,7 +834,7 @@ router.post(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const request = await documentRequestService.sendReminder(id);
@@ -869,7 +869,7 @@ router.delete(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid request ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await documentRequestService.deleteRequest(id);
@@ -988,7 +988,7 @@ router.get(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await documentRequestService.getTemplate(id);
@@ -1091,7 +1091,7 @@ router.put(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await documentRequestService.updateTemplate(id, req.body);
@@ -1130,7 +1130,7 @@ router.delete(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await documentRequestService.deleteTemplate(id);

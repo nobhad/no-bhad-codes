@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROPOSAL_REQUEST_COLUMNS = `
@@ -84,7 +84,7 @@ router.post(
     const proposalId = parseInt(req.params.proposalId, 10);
 
     if (isNaN(proposalId)) {
-      return errorResponse(res, 'Invalid proposal ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -113,7 +113,7 @@ router.post(
     const proposalId = parseInt(req.params.proposalId, 10);
 
     if (isNaN(proposalId)) {
-      return errorResponse(res, 'Invalid proposal ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -121,7 +121,7 @@ router.post(
     // Get the original proposal
     const original = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
     if (!original) {
-      return errorResponse(res, 'Proposal not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Proposal not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Create a duplicate
@@ -155,7 +155,7 @@ router.delete(
     const proposalId = parseInt(req.params.proposalId, 10);
 
     if (isNaN(proposalId)) {
-      return errorResponse(res, 'Invalid proposal ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -182,7 +182,7 @@ router.post(
     const { proposalIds } = req.body;
 
     if (!proposalIds || !Array.isArray(proposalIds) || proposalIds.length === 0) {
-      return errorResponse(res, 'proposalIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'proposalIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const db = getDatabase();

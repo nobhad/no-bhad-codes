@@ -222,19 +222,19 @@
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"] {
   /* ----------------------------------------
-   * TEXT COLORS - ALL BLACK
+   * TEXT COLORS - ALL OFF-BLACK (#333333, matches main site --color-dark)
    * ---------------------------------------- */
-  --portal-text-light: #000000;
-  --portal-text-primary: #000000;
-  --portal-text-secondary: #000000;
-  --portal-text-muted: #000000;
+  --portal-text-light: #333333;
+  --portal-text-primary: #333333;
+  --portal-text-secondary: #333333;
+  --portal-text-muted: #333333;
   --portal-text-dark: #ffffff;
 
   /* ----------------------------------------
-   * BACKGROUND COLORS - WHITE BASE
+   * BACKGROUND COLORS - OFF-WHITE BASE (#fffefd, matches main site --color-off-white)
    * ---------------------------------------- */
-  --portal-bg-pitch: #ffffff;
-  --portal-bg-darkest: #ffffff;
+  --portal-bg-pitch: var(--color-off-white);
+  --portal-bg-darkest: var(--color-off-white);
   --portal-bg-darker: #f5f5f5;
   --portal-bg-dark: #e5e5e5;
   --portal-bg-medium: #d5d5d5;
@@ -244,19 +244,19 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --portal-bg-readonly: #f5f5f5;
 
   /* ----------------------------------------
-   * BORDER SYSTEM - BLACK BORDERS
+   * BORDER SYSTEM - OFF-BLACK BORDERS
    * ---------------------------------------- */
-  --portal-border-color: #000000;
+  --portal-border-color: #333333;
   --portal-border-subtle: rgba(0, 0, 0, 0.08);
 
   /* ----------------------------------------
    * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)
    * Light bg = dark text/icons
    * ---------------------------------------- */
-  --hover-bg-color: var(--portal-text-light);        /* Black bg on hover */
-  --hover-text-color: var(--portal-bg-pitch);        /* White text on hover */
-  --hover-icon-color: var(--portal-bg-pitch);        /* White icons on hover */
-  --hover-border-color: var(--portal-text-light);    /* Black border on hover */
+  --hover-bg-color: var(--portal-text-light);        /* Off-black bg on hover */
+  --hover-text-color: var(--portal-bg-pitch);        /* Off-white text on hover */
+  --hover-icon-color: var(--portal-bg-pitch);        /* Off-white icons on hover */
+  --hover-border-color: var(--portal-text-light);    /* Off-black border on hover */
 
   /* ----------------------------------------
    * FOCUS STATE COLORS (Light Mode)
@@ -269,64 +269,64 @@ html[data-theme="light"] body[data-page="client-portal"] {
    * BUTTON COLORS (Light Mode)
    * ---------------------------------------- */
   --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: #000000;
-  --btn-portal-primary-border: #000000;
-  --btn-portal-primary-hover-bg: #000000;
+  --btn-portal-primary-color: #333333;
+  --btn-portal-primary-border: #333333;
+  --btn-portal-primary-hover-bg: #333333;
   --btn-portal-primary-hover-color: #ffffff;
-  --btn-portal-primary-hover-border: #000000;
+  --btn-portal-primary-hover-border: #333333;
 
   --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: #000000;
-  --btn-portal-secondary-border: #000000;
-  --btn-portal-secondary-hover-bg: #000000;
+  --btn-portal-secondary-color: #333333;
+  --btn-portal-secondary-border: #333333;
+  --btn-portal-secondary-hover-bg: #333333;
   --btn-portal-secondary-hover-color: #ffffff;
-  --btn-portal-secondary-hover-border: #000000;
+  --btn-portal-secondary-hover-border: #333333;
 
-  --btn-portal-border-color: #000000;
-  --btn-portal-color: #000000;
-  --btn-portal-hover-bg: #000000;
+  --btn-portal-border-color: #333333;
+  --btn-portal-color: #333333;
+  --btn-portal-hover-bg: #333333;
   --btn-portal-hover-color: #ffffff;
-  --btn-portal-hover-border: #000000;
+  --btn-portal-hover-border: #333333;
 
   /* ----------------------------------------
    * OVERRIDE SEMANTIC COLOR TOKENS - INVERTED
    * ---------------------------------------- */
   --color-neutral-100: #f5f5f5;
-  --color-neutral-200: #ffffff;
-  --color-neutral-300: #ffffff;
-  --color-neutral-400: #000000;
-  --color-neutral-500: #000000;
-  --color-neutral-600: #000000;
-  --color-neutral-700: #000000;
-  --color-neutral-800: #000000;
-  --color-neutral-900: #000000;
-  --color-dark: #000000;
-  --color-light: #ffffff;
-  --color-text-primary: #000000;
-  --color-text-secondary: #000000;
-  --color-text-tertiary: #000000;
-  --color-border: #000000;
+  --color-neutral-200: var(--color-off-white);
+  --color-neutral-300: var(--color-off-white);
+  --color-neutral-400: #333333;
+  --color-neutral-500: #333333;
+  --color-neutral-600: #333333;
+  --color-neutral-700: #333333;
+  --color-neutral-800: #333333;
+  --color-neutral-900: #333333;
+  --color-dark: #333333;
+  --color-light: var(--color-off-white);
+  --color-text-primary: #333333;
+  --color-text-secondary: #333333;
+  --color-text-tertiary: #333333;
+  --color-border: #333333;
   --color-border-light: #787878;
-  --color-nav-text: #000000;
-  --color-white: #000000; /* Inverted for text that uses var(--color-white) */
-  --color-black: #ffffff;
+  --color-nav-text: #333333;
+  --color-white: #333333; /* Inverted for text that uses var(--color-white) */
+  --color-black: var(--color-off-white);
 
-  /* Gray scale - ALL BLACK for text in light mode */
-  --color-gray-100: #000000;
-  --color-gray-200: #000000;
-  --color-gray-300: #000000;
-  --color-gray-400: #000000;
-  --color-gray-500: #000000;
+  /* Gray scale - ALL OFF-BLACK for text in light mode */
+  --color-gray-100: #333333;
+  --color-gray-200: #333333;
+  --color-gray-300: #333333;
+  --color-gray-400: #333333;
+  --color-gray-500: #333333;
   --color-gray-600: #cccccc; /* Chart grid lines - light gray on white */
 
   /* App-level aliases for portal light mode */
-  --app-color-primary: #000000;
-  --app-color-primary-hover: #ffffff;
+  --app-color-primary: #333333;
+  --app-color-primary-hover: var(--color-off-white);
 
   /* Form variables for portal light mode */
-  --form-input-border: #000000;
+  --form-input-border: #333333;
   --form-input-placeholder: #787878;
-  --form-btn-bg: #000000;
+  --form-btn-bg: #333333;
   --form-btn-fg: #ffffff;
   --form-btn-shadow: rgba(0, 0, 0, 0.15);
 }
@@ -334,5 +334,5 @@ html[data-theme="light"] body[data-page="client-portal"] {
 /* Apply to html element as well for full coverage */
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: var(--portal-bg-pitch, #ffffff);
+  background-color: var(--portal-bg-pitch, var(--color-off-white));
 }
