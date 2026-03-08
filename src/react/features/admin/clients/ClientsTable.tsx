@@ -39,6 +39,13 @@ import { formatDate } from '@react/utils/formatDate';
 import { CLIENTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 
+// Status options for bulk actions (derived from constant config, computed once at module level)
+const BULK_STATUS_OPTIONS = Object.entries(CLIENT_STATUS_CONFIG).map(([value, config]) => ({
+  value,
+  label: config.label,
+  color: `var(--status-${value})`
+}));
+
 interface ClientsTableProps {
   /** Auth token getter for API calls */
   getAuthToken?: () => string | null;
@@ -279,16 +286,7 @@ export function ClientsTable({
     [sendInvite, showNotification]
   );
 
-  // Status options for bulk actions
-  const bulkStatusOptions = useMemo(
-    () =>
-      Object.entries(CLIENT_STATUS_CONFIG).map(([value, config]) => ({
-        value,
-        label: config.label,
-        color: `var(--status-${value})`
-      })),
-    []
-  );
+  const bulkStatusOptions = BULK_STATUS_OPTIONS;
 
   // Handle status change
   const handleStatusChange = useCallback(

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/factories';
 
@@ -38,7 +38,7 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
     };
   }, []);
 
-  const sharedProps = { onNavigate, getAuthToken, showNotification };
+  const sharedProps = useMemo(() => ({ onNavigate, getAuthToken, showNotification }), [onNavigate, getAuthToken, showNotification]);
 
   // Configuration subtab
   if (activeSubtab === 'configuration') {
