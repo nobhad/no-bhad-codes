@@ -22,9 +22,9 @@ import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { PortalModal, useModal } from '@react/components/portal/PortalModal';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { IconButton } from '@react/factories';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('IntegrationsManager');
 

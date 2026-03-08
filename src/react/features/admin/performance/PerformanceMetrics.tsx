@@ -16,9 +16,9 @@ import {
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/components/portal/EmptyState';
-import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 interface PerformanceKPI {
   id: string;
@@ -191,9 +191,9 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                   Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
                 </span>
               </div>
-              <div className="progress-track">
+              <div className="progress-bar-sm">
                 <div
-                  className="progress-bar"
+                  className="progress-fill"
                   style={{
                     width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
                     backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)'
@@ -262,9 +262,9 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                     <span>Budget: {formatCurrency(project.budget)}</span>
                     <span>{project.progress}%</span>
                   </div>
-                  <div className="progress-track">
+                  <div className="progress-bar-sm">
                     <div
-                      className="progress-bar"
+                      className="progress-fill"
                       style={{
                         width: `${project.progress}%`,
                         backgroundColor: getProgressColor(project.progress, project.onTrack)

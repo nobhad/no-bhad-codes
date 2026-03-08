@@ -14,13 +14,14 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { PORTAL_ADHOC_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { AdHocRequestCard } from './AdHocRequestCard';
 import { NewRequestForm } from './NewRequestForm';
 import type { AdHocRequest, NewAdHocRequestPayload } from './types';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalAdHocRequests');
 
@@ -36,7 +37,7 @@ export function PortalAdHocRequests({
   showNotification
 }: PortalAdHocRequestsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05, 0.1);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT, GSAP.STAGGER_DELAY_SHORT);
 
   // Primary data fetch via shared hook
   const {

@@ -13,6 +13,7 @@ import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilt
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { PORTAL_QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { QuestionnaireForm } from './QuestionnaireForm';
 import { QUESTIONNAIRE_STATUS_CONFIG } from './types';
 import type {
@@ -22,7 +23,7 @@ import type {
 } from './types';
 import { formatCardDate } from '@react/utils/cardFormatters';
 import { usePortalData } from '@react/hooks/usePortalFetch';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 /**
  * Get status icon based on questionnaire status
@@ -72,7 +73,7 @@ export function PortalQuestionnairesView({
   showNotification
 }: PortalQuestionnairesProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const cardsRef = useStaggerChildren<HTMLDivElement>(0.08, 0.1);
+  const cardsRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_SLOW, GSAP.STAGGER_DELAY_SHORT);
 
   const { data: responses, isLoading, error, refetch } = usePortalData<PortalQuestionnaireResponse[]>({
     getAuthToken,
@@ -222,9 +223,9 @@ export function PortalQuestionnairesView({
                 {/* Progress bar (if in progress) */}
                 {response.status === 'in_progress' && response.progress > 0 && (
                   <div className="portal-card-progress">
-                    <div className="progress-track">
+                    <div className="progress-bar-sm">
                       <div
-                        className="progress-bar"
+                        className="progress-fill"
                         style={{ width: `${response.progress}%` }}
                       />
                     </div>

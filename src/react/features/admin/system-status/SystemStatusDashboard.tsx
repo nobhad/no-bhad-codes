@@ -21,9 +21,9 @@ import { Checkbox } from '@react/components/ui/checkbox';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
-import { TIMING } from '../../../../constants/timing';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { TIMING } from '@/constants/timing';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 interface ServiceStatus {
   id: string;

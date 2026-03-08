@@ -15,8 +15,8 @@ import { EmptyState } from '@react/components/portal/EmptyState';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectFile } from '../../types';
-import { formatCurrency, formatDate } from '../../../../../utils/format-utils';
-import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { formatCurrency, formatDate } from '@/utils/format-utils';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface ContractTabProps {
   project: Project;

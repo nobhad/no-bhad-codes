@@ -41,9 +41,9 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ErrorState, LoadingState } from '@react/factories';
-import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 // Register Chart.js components + controllers
 ChartJS.register(

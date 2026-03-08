@@ -11,12 +11,13 @@ import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { getLucideIcon } from '@react/factories';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { BUSINESS_INFO } from '../../../../constants/business';
-import { TIMING } from '../../../../constants/timing';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { GSAP } from '@react/config/portal-constants';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { BUSINESS_INFO } from '@/constants/business';
+import { TIMING } from '@/constants/timing';
+import { unwrapApiData } from '@/utils/api-client';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
+import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('PortalHelp');
 
@@ -346,7 +347,7 @@ interface CategoriesSidebarProps {
 }
 
 function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesSidebarProps) {
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
   if (categories.length === 0) return null;
 
@@ -407,7 +408,7 @@ interface FeaturedArticlesProps {
 }
 
 function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
-  const gridRef = useStaggerChildren<HTMLDivElement>(0.06);
+  const gridRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_MEDIUM);
 
   if (articles.length === 0) return null;
 
@@ -447,7 +448,7 @@ interface SearchResultsProps {
 }
 
 function SearchResults({ results, query, isSearching, onArticleClick }: SearchResultsProps) {
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
   if (isSearching) {
     return <LoadingState message="Searching..." />;

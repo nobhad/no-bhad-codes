@@ -1,7 +1,22 @@
 /**
  * Centralized Table Filter Configurations
  * Eliminates duplication across table components
+ *
+ * Status labels are derived from the canonical *_CONFIG / *_LABELS
+ * definitions in ../types.ts so there is one source of truth.
  */
+
+import {
+  PROJECT_STATUS_CONFIG,
+  INVOICE_STATUS_CONFIG,
+  LEAD_STATUS_CONFIG,
+  CLIENT_STATUS_CONFIG,
+  configToFilterOptions,
+  labelsToFilterOptions,
+  LEAD_SOURCE_LABELS,
+  PROJECT_TYPE_LABELS,
+  CLIENT_TYPE_LABELS
+} from '../types';
 
 export interface FilterOption {
   value: string;
@@ -15,73 +30,79 @@ export interface FilterConfig {
 }
 
 // ============================================
-// STATUS FILTER OPTIONS (reusable across tables)
+// SHARED "ALL" OPTIONS
 // ============================================
 
 export const STATUS_ALL_OPTION: FilterOption = { value: 'all', label: 'All Statuses' };
+const TYPE_ALL_OPTION: FilterOption = { value: 'all', label: 'All Types' };
+const SOURCE_ALL_OPTION: FilterOption = { value: 'all', label: 'All Sources' };
+
+// ============================================
+// STATUS FILTER OPTIONS (derived from types.ts)
+// ============================================
 
 export const COMMON_STATUS_OPTIONS: FilterOption[] = [
   STATUS_ALL_OPTION,
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'pending', label: 'Pending' }
+  ...configToFilterOptions(CLIENT_STATUS_CONFIG)
 ];
 
+/** Invoice filter uses a subset of statuses relevant to admin filtering */
 export const INVOICE_STATUS_OPTIONS: FilterOption[] = [
   STATUS_ALL_OPTION,
-  { value: 'draft', label: 'Draft' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'overdue', label: 'Overdue' },
-  { value: 'cancelled', label: 'Cancelled' }
+  ...configToFilterOptions(INVOICE_STATUS_CONFIG, [
+    'draft',
+    'pending',
+    'sent',
+    'paid',
+    'overdue',
+    'cancelled'
+  ])
 ];
 
 export const LEAD_STATUS_OPTIONS: FilterOption[] = [
   STATUS_ALL_OPTION,
-  { value: 'new', label: 'New' },
-  { value: 'contacted', label: 'Contacted' },
-  { value: 'qualified', label: 'Qualified' },
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'converted', label: 'Converted' },
-  { value: 'lost', label: 'Lost' },
-  { value: 'on-hold', label: 'On Hold' }
+  ...configToFilterOptions(LEAD_STATUS_CONFIG, [
+    'new',
+    'contacted',
+    'qualified',
+    'in-progress',
+    'converted',
+    'lost',
+    'on-hold'
+  ])
 ];
 
 export const LEAD_SOURCE_OPTIONS: FilterOption[] = [
-  { value: 'all', label: 'All Sources' },
-  { value: 'website', label: 'Website' },
-  { value: 'referral', label: 'Referral' },
-  { value: 'social', label: 'Social Media' },
-  { value: 'direct', label: 'Direct' },
-  { value: 'ad-campaign', label: 'Ad Campaign' }
+  SOURCE_ALL_OPTION,
+  ...labelsToFilterOptions(LEAD_SOURCE_LABELS, [
+    'website',
+    'referral',
+    'social',
+    'direct',
+    'ad-campaign'
+  ])
 ];
 
 export const CLIENT_STATUS_OPTIONS: FilterOption[] = [
   STATUS_ALL_OPTION,
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'pending', label: 'Pending' }
+  ...configToFilterOptions(CLIENT_STATUS_CONFIG)
 ];
 
 export const PROJECT_STATUS_OPTIONS: FilterOption[] = [
   STATUS_ALL_OPTION,
-  { value: 'pending', label: 'Pending' },
-  { value: 'active', label: 'Active' },
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'on-hold', label: 'On Hold' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' }
+  ...configToFilterOptions(PROJECT_STATUS_CONFIG)
 ];
 
 export const PROJECT_TYPE_OPTIONS: FilterOption[] = [
-  { value: 'all', label: 'All Types' },
-  { value: 'simple-site', label: 'Simple Site' },
-  { value: 'business-site', label: 'Business Site' },
-  { value: 'portfolio', label: 'Portfolio' },
-  { value: 'e-commerce', label: 'E-Commerce' },
-  { value: 'web-app', label: 'Web App' },
-  { value: 'browser-extension', label: 'Browser Extension' }
+  TYPE_ALL_OPTION,
+  ...labelsToFilterOptions(PROJECT_TYPE_LABELS, [
+    'simple-site',
+    'business-site',
+    'portfolio',
+    'e-commerce',
+    'web-app',
+    'browser-extension'
+  ])
 ];
 
 export const QUESTIONNAIRE_STATUS_OPTIONS: FilterOption[] = [
@@ -170,9 +191,8 @@ export const WORKFLOW_STATUS_OPTIONS: FilterOption[] = [
 // ============================================
 
 export const CLIENT_TYPE_OPTIONS: FilterOption[] = [
-  { value: 'all', label: 'All Types' },
-  { value: 'personal', label: 'Personal' },
-  { value: 'business', label: 'Business' }
+  TYPE_ALL_OPTION,
+  ...labelsToFilterOptions(CLIENT_TYPE_LABELS, ['personal', 'business'])
 ];
 
 // ============================================

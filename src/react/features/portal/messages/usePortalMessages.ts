@@ -11,9 +11,9 @@ import type {
   SendMessageResponse,
   UpdateMessageResponse
 } from './types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 
 const logger = createLogger('usePortalMessages');
@@ -154,43 +154,53 @@ export function usePortalMessages({
   }, [selectedThread, fetchMessages]);
 
   /**
-   * Send a new message
+   * Send a new message.
+   * Uses portalFetch for JSON payloads; falls back to raw fetch for FormData
+   * (portalFetch JSON-serializes the body, which is incompatible with FormData).
    */
   const sendMessage = useCallback(
     async (content: string, attachments?: File[]): Promise<boolean> => {
       if (!selectedThread) return false;
 
+      const url = buildEndpoint.messageThreadMessages(selectedThread.id);
+
       try {
-        let body: FormData | string;
-        let headers: HeadersInit;
+        let data: SendMessageResponse;
 
         if (attachments && attachments.length > 0) {
+          // FormData path — raw fetch required (portalFetch JSON-serializes body)
           const formData = new FormData();
           formData.append('content', content);
           attachments.forEach((file) => {
             formData.append('attachments', file);
           });
-          body = formData;
-          // For FormData, only set Authorization (browser sets Content-Type with boundary)
+
+          // Only set Authorization (browser sets Content-Type with boundary for FormData)
           const authHeaders = buildHeaders();
-          headers = authHeaders.Authorization ? { Authorization: authHeaders.Authorization } : {};
+          const headers: Record<string, string> = {};
+          if (authHeaders['Authorization']) {
+            headers['Authorization'] = authHeaders['Authorization'];
+          }
+
+          const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: formData
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to send message');
+          }
+
+          data = unwrapApiData<SendMessageResponse>(await response.json());
         } else {
-          body = JSON.stringify({ content });
-          headers = buildHeaders();
+          // JSON path — use portalFetch
+          data = await portalFetch<SendMessageResponse>(url, {
+            method: 'POST',
+            body: { content }
+          });
         }
-
-        const response = await fetch(buildEndpoint.messageThreadMessages(selectedThread.id), {
-          method: 'POST',
-          headers,
-          credentials: 'include',
-          body
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to send message');
-        }
-
-        const data: SendMessageResponse = unwrapApiData<SendMessageResponse>(await response.json());
 
         // Optimistically add the message
         setMessages((prev) => [...prev, data.message]);
@@ -216,7 +226,7 @@ export function usePortalMessages({
         return false;
       }
     },
-    [selectedThread, buildHeaders]
+    [selectedThread, buildHeaders, portalFetch]
   );
 
   /**

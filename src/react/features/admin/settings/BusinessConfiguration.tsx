@@ -16,8 +16,8 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 interface BusinessInfo {
   name: string;

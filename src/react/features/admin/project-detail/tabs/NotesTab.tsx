@@ -3,8 +3,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { Save, StickyNote } from 'lucide-react';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Project } from '../../types';
-import { NOTIFICATIONS } from '../../../../../constants/notifications';
-import { isKeyCombo } from '../../../../../constants/keyboard';
+import { NOTIFICATIONS } from '@/constants/notifications';
+import { isKeyCombo } from '@/constants/keyboard';
 
 interface NotesTabProps {
   project: Project;

@@ -32,9 +32,9 @@ ChartJS.register(
 );
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { createLogger } from '@/utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('AdHocAnalytics');
 

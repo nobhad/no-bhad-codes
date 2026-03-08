@@ -28,7 +28,7 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { ARTICLES_FILTER_CONFIG, ARTICLE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 interface Article {
   id: number;

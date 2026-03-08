@@ -10,9 +10,9 @@ import { Eye, RefreshCw } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('ReviewTable');
 

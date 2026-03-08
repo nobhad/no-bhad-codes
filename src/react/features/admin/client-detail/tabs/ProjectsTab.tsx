@@ -4,7 +4,7 @@ import { EmptyState } from '@react/components/portal/EmptyState';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
-import { formatDate } from '../../../../../utils/format-utils';
+import { formatDate } from '@/utils/format-utils';
 
 interface ProjectsTabProps {
   projects: ClientProject[];
@@ -82,9 +82,9 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
                 {progress}%
               </span>
             </div>
-            <div className="progress-track">
+            <div className="progress-bar-sm">
               <div
-                className="progress-bar"
+                className="progress-fill"
                 style={{ width: `${progress}%` }}
               />
             </div>

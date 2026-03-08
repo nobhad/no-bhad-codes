@@ -17,6 +17,7 @@ import { IconButton } from '@react/factories';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter } from '@react/components/portal/TableFilters';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { usePortalMessages } from './usePortalMessages';
 import { MessageThread } from './MessageThread';
 import type { PortalMessagesProps, MessageThread as MessageThreadType } from './types';
@@ -124,7 +125,7 @@ function ThreadList({
   onSelectThread,
   onRefresh
 }: ThreadListProps) {
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
   // Loading state
   if (loading && threads.length === 0) {

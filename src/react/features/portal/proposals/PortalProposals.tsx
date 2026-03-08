@@ -13,12 +13,13 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { PORTAL_PROPOSALS_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
 import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { countByField } from '@react/utils/cardFormatters';
 import { ProposalCard } from './ProposalCard';
 import type { PortalProposal, PortalProposalsResponse } from './types';
 import type { PortalViewProps } from '../types';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 export interface PortalProposalsProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
@@ -31,7 +32,7 @@ export function PortalProposals({
   onNavigate
 }: PortalProposalsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
   const { data: proposals, isLoading, error, refetch } = usePortalData<PortalProposal[]>({
     getAuthToken,

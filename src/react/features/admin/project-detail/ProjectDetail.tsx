@@ -41,8 +41,8 @@ import { NotesTab } from './tabs/NotesTab';
 import { IntakeTab } from './tabs/IntakeTab';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
-import { buildEndpoint } from '../../../../constants/api-endpoints';
-import { NOTIFICATIONS, statusUpdatedMessage } from '../../../../constants/notifications';
+import { buildEndpoint } from '@/constants/api-endpoints';
+import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
 
 interface ProjectDetailProps {
   /** Project ID to display */

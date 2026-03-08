@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Check, X, Pencil, ChevronDown } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { KEYS } from '../../../constants/keyboard';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -168,10 +169,10 @@ export function InlineEdit({
   // Handle key events
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === KEYS.ENTER) {
         e.preventDefault();
         saveValue();
-      } else if (e.key === 'Escape') {
+      } else if (e.key === KEYS.ESCAPE) {
         e.preventDefault();
         cancelEditing();
       }
@@ -524,12 +525,12 @@ export function InlineTextarea({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === KEYS.ESCAPE) {
         e.preventDefault();
         cancelEditing();
       }
       // Ctrl/Cmd + Enter to save
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      if (e.key === KEYS.ENTER && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         saveValue();
       }

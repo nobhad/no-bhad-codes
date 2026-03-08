@@ -3,8 +3,6 @@
  * Base components from Shadcn - use Portal wrappers for consistent styling
  */
 
-export { Button, buttonVariants, type ButtonProps } from './button';
-export { Badge, badgeVariants, type BadgeProps } from './badge';
 export {
   Dialog,
   DialogPortal,
@@ -44,7 +42,6 @@ export {
   TableCell,
   TableCaption
 } from './table';
-export { Input } from './input';
 export {
   Select,
   SelectGroup,

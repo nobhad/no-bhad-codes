@@ -31,9 +31,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { createLogger } from '@/utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('QuestionnairesTable');
 

@@ -37,9 +37,10 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { SUCCESS_RATE } from '@/constants/thresholds';
 
 const logger = createLogger('WorkflowsTable');
 
@@ -506,9 +507,9 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                 <PortalTableCell className="count-cell">
                   <span
                     className={
-                      workflow.successRate >= 90
+                      workflow.successRate >= SUCCESS_RATE.EXCELLENT
                         ? 'text-success'
-                        : workflow.successRate >= 70
+                        : workflow.successRate >= SUCCESS_RATE.ACCEPTABLE
                           ? 'text-warning'
                           : 'text-danger'
                     }

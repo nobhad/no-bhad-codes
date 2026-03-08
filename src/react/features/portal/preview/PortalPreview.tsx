@@ -11,9 +11,9 @@ import { getLucideIcon } from '@/react/factories';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalPreview');
 

@@ -8,6 +8,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { UI_LIMITS } from '@react/config/portal-constants';
+import { KEYS } from '@/constants/keyboard';
 
 // Allowed file types (matches server validation)
 const ALLOWED_EXTENSIONS = /\.(jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar)$/i;
@@ -233,7 +234,7 @@ export function FileUploadDropzone({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if ((e.key === 'Enter' || e.key === ' ') && !disabled && !isUploading) {
+      if ((e.key === KEYS.ENTER || e.key === KEYS.SPACE) && !disabled && !isUploading) {
         e.preventDefault();
         fileInputRef.current?.click();
       }
@@ -269,8 +270,8 @@ export function FileUploadDropzone({
         <div className="dropzone-content">
           <RefreshCw className="icon-lg loading-spin" />
           <p className="dropzone-text text-muted">Uploading files...</p>
-          <div className="progress-track">
-            <div className="progress-bar" style={{ width: `${uploadProgress}%` }} />
+          <div className="progress-bar-sm">
+            <div className="progress-fill" style={{ width: `${uploadProgress}%` }} />
           </div>
         </div>
       </div>

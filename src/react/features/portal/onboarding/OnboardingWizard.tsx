@@ -29,9 +29,9 @@ import type {
 import { ONBOARDING_STEPS, DRAFT_STORAGE_KEY, DRAFT_SAVE_INTERVAL } from './types';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import { validateEmail } from '../../../../../shared/validation/validators';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('OnboardingWizard');
 

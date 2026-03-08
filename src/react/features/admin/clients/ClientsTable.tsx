@@ -32,7 +32,7 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useSelection } from '@react/hooks/useSelection';
 import { useExport } from '@react/hooks/useExport';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { CLIENTS_EXPORT_CONFIG } from '../../../../utils/table-export';
+import { CLIENTS_EXPORT_CONFIG } from '@/utils/table-export';
 import type { Client, ClientStatus, SortConfig } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';

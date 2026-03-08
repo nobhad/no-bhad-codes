@@ -11,7 +11,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { formatDate } from '@react/utils/formatDate';
-import { formatCurrency } from '../../../../utils/format-utils';
+import { formatCurrency } from '@/utils/format-utils';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import {
   PortalTable,
@@ -36,9 +36,9 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { PROPOSALS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('ProposalsTable');
 

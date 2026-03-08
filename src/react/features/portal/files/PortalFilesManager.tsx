@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Folder,
   File,
@@ -32,10 +32,10 @@ import { usePagination } from '@react/hooks/usePagination';
 import { FileUploadDropzone } from './FileUploadDropzone';
 import type { PortalViewProps } from '../types';
 import { formatCardDate, formatFileSize } from '@react/utils/cardFormatters';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { downloadFile } from '../../../../utils/file-download';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { usePortalData } from '@react/hooks/usePortalFetch';
+import { createLogger } from '@/utils/logger';
+import { downloadFile } from '@/utils/file-download';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalFilesManager');
 
@@ -86,6 +86,24 @@ interface FolderCategory {
   id: string;
   name: string;
   count: number;
+}
+
+/** Combined response shape from the files endpoint */
+interface FilesApiResponse {
+  files: PortalFile[];
+  projects: Project[];
+}
+
+/**
+ * Transform raw API response to FilesApiResponse.
+ * Converts snake_case file records to camelCase PortalFile interface.
+ */
+function transformFilesResponse(raw: unknown): FilesApiResponse {
+  const data = raw as { files?: Record<string, unknown>[]; projects?: Project[] };
+  return {
+    files: (data.files || []).map(transformFile),
+    projects: data.projects || []
+  };
 }
 
 export interface PortalFilesProps extends PortalViewProps {
@@ -235,13 +253,26 @@ export function PortalFilesManager({
 }: PortalFilesProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
-  // State
-  const [files, setFiles] = useState<PortalFile[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Primary data fetch via shared hook (handles auth, abort, error/loading state)
+  const {
+    data: filesData,
+    isLoading,
+    error,
+    refetch: fetchFiles,
+    buildHeaders,
+    portalFetch
+  } = usePortalData<FilesApiResponse>({
+    getAuthToken,
+    url: API_ENDPOINTS.FILES_CLIENT,
+    transform: transformFilesResponse
+  });
+
+  const files = filesData?.files ?? [];
+  const projects = filesData?.projects ?? [];
+
+  // Local state for upload, filters, and delete
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
 
   // Filters
   const [selectedFolder, setSelectedFolder] = useState('all');
@@ -252,16 +283,6 @@ export function PortalFilesManager({
   // Delete confirmation
   const deleteDialog = useConfirmDialog();
   const [fileToDelete, setFileToDelete] = useState<PortalFile | null>(null);
-
-  // AbortController ref for cleanup on unmount
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
 
   // Compute folder categories
   const folderCategories = useMemo(() => countFilesByFolder(files), [files]);
@@ -324,58 +345,9 @@ export function PortalFilesManager({
   // Check if any filters are active
   const hasActiveFilters = searchQuery !== '' || selectedProject !== 'all' || selectedFileType !== 'all';
 
-  // Fetch files
-  const fetchFiles = useCallback(async () => {
-    // Abort any in-flight request
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
+  // fetchFiles is provided by usePortalData as refetch
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(API_ENDPOINTS.FILES_CLIENT, {
-        headers,
-        credentials: 'include',
-        signal: abortControllerRef.current.signal
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch files');
-      }
-
-      const data = unwrapApiData<{ files?: Record<string, unknown>[]; projects?: Project[] }>(await response.json());
-      // Transform API response to match component interface (snake_case to camelCase)
-      const transformedFiles = (data.files || []).map(transformFile);
-      setFiles(transformedFiles);
-      setProjects(data.projects || []);
-    } catch (err) {
-      // Don't set error state if request was aborted (component unmounted)
-      if (err instanceof Error && err.name === 'AbortError') {
-        return;
-      }
-      logger.error('[PortalFilesManager] Error fetching files:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load files');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getAuthToken]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
-
-  // Handle file upload
+  // Handle file upload (FormData requires raw fetch — portalFetch JSON-serializes the body)
   const handleUpload = useCallback(
     async (filesToUpload: File[]) => {
       setIsUploading(true);
@@ -387,8 +359,16 @@ export function PortalFilesManager({
           formData.append('files', file);
         });
 
+        // Use buildHeaders for auth but omit Content-Type (browser sets it with boundary for FormData)
+        const authHeaders = buildHeaders();
+        const headers: Record<string, string> = {};
+        if (authHeaders['Authorization']) {
+          headers['Authorization'] = authHeaders['Authorization'];
+        }
+
         const response = await fetch(API_ENDPOINTS.FILES_MULTIPLE, {
           method: 'POST',
+          headers,
           credentials: 'include',
           body: formData
         });
@@ -402,7 +382,7 @@ export function PortalFilesManager({
         showNotification?.(`${filesToUpload.length} file(s) uploaded successfully`, 'success');
 
         // Refresh file list
-        await fetchFiles();
+        fetchFiles();
       } catch (err) {
         logger.error('[PortalFilesManager] Upload error:', err);
         showNotification?.(err instanceof Error ? err.message : 'Upload failed', 'error');
@@ -412,7 +392,7 @@ export function PortalFilesManager({
         setUploadProgress(0);
       }
     },
-    [fetchFiles, showNotification]
+    [fetchFiles, showNotification, buildHeaders]
   );
 
   // Handle file preview
@@ -440,26 +420,18 @@ export function PortalFilesManager({
     if (!fileToDelete) return;
 
     try {
-      const response = await fetch(buildEndpoint.fileDelete(fileToDelete.id), {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete file');
-      }
-
-      // Remove file from state
-      setFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
+      await portalFetch(buildEndpoint.fileDelete(fileToDelete.id), { method: 'DELETE' });
       showNotification?.('File deleted successfully', 'success');
+
+      // Refresh file list after successful delete
+      fetchFiles();
     } catch (err) {
       logger.error('[PortalFilesManager] Delete error:', err);
       showNotification?.(err instanceof Error ? err.message : 'Failed to delete file', 'error');
     }
 
     setFileToDelete(null);
-  }, [fileToDelete, showNotification]);
+  }, [fileToDelete, showNotification, portalFetch, fetchFiles]);
 
   // Clear filters
   const handleClearFilters = useCallback(() => {

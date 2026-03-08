@@ -6,9 +6,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { createLogger } from '../../../../utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import type {
   ClientProfile,

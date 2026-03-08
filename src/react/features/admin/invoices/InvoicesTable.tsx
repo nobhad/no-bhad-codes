@@ -26,11 +26,11 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useSelection } from '@react/hooks/useSelection';
 import { useExport } from '@react/hooks/useExport';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { INVOICES_EXPORT_CONFIG } from '../../../../utils/table-export';
+import { INVOICES_EXPORT_CONFIG } from '@/utils/table-export';
 import type { Invoice, InvoiceStatus, SortConfig } from '../types';
 import { INVOICE_STATUS_CONFIG } from '../types';
 import { formatDate } from '@react/utils/formatDate';
-import { formatCurrency } from '../../../../utils/format-utils';
+import { formatCurrency } from '@/utils/format-utils';
 import { INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 

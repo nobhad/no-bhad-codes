@@ -35,7 +35,7 @@ import { useExport, PROJECTS_EXPORT_CONFIG } from '@react/hooks/useExport';
 import type { Project, ProjectStatus, SortConfig } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
-import { formatCurrency } from '../../../../utils/format-utils';
+import { formatCurrency } from '@/utils/format-utils';
 import { PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 
