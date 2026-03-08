@@ -75,6 +75,12 @@ vi.mock('../../../server/middleware/auth', () => ({
       return res.status(403).json({ success: false, error: 'Admin access required' });
     }
     next();
+  },
+  requireClient: (req: any, res: any, next: () => void) => {
+    if (!req.user || req.user.type !== 'client') {
+      return res.status(403).json({ success: false, error: 'Client access required' });
+    }
+    next();
   }
 }));
 

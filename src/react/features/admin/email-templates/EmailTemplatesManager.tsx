@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import {
   Mail,
   Inbox,
@@ -23,13 +23,13 @@ import {
   PortalTableLoading,
   PortalTableError
 } from '@react/components/portal/PortalTable';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { EMAIL_TEMPLATES_FILTER_CONFIG, EMAIL_TEMPLATE_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 interface TemplateVariable {
   name: string;
@@ -114,26 +114,14 @@ function sortTemplates(a: EmailTemplate, b: EmailTemplate, sort: SortConfig): nu
 
 export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: EmailTemplatesManagerProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
-  const [stats, setStats] = useState<EmailTemplateStats>({
-    total: 0,
-    active: 0,
-    categories: []
+  const { data, isLoading, error, refetch } = useListFetch<EmailTemplate, EmailTemplateStats>({
+    endpoint: API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES,
+    getAuthToken,
+    defaultStats: { total: 0, active: 0, categories: [] },
+    itemsKey: 'templates'
   });
-
-  // Auth headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
+  const templates = data?.items ?? [];
+  const stats = data?.stats ?? { total: 0, active: 0, categories: [] };
 
   const {
     filterValues,
@@ -150,29 +138,6 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     filterFn: filterTemplate,
     sortFn: sortTemplates
   });
-
-  const loadTemplates = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.EMAIL_TEMPLATES, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load templates');
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setTemplates((data.templates as EmailTemplate[]) || []);
-      setStats((data.stats as EmailTemplateStats) || { total: 0, active: 0, categories: [] });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load templates');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadTemplates();
-  }, [loadTemplates]);
 
   // Dynamic category filter options built from stats
   const categoryFilterOptions = useMemo(() => {
@@ -268,7 +233,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={5} message={error} onRetry={loadTemplates} />
+            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedTemplates.length === 0 ? (
