@@ -210,18 +210,26 @@ export function formatProjectType(type: string | undefined | null): string {
 /**
  * Format date for display with optional format specification
  * @param dateString - ISO date string or Date object
- * @param format - 'short' (MM/DD/YYYY), 'datetime' (MM/DD/YYYY, h:mm AM/PM), or undefined (defaults to 'short')
+ * @param format - 'short' (MM/DD/YYYY), 'label' (Jan 1, 2026), 'datetime' (MM/DD/YYYY, h:mm AM/PM), or undefined (defaults to 'short')
  * @returns Formatted date string
  */
 export function formatDate(
   dateString: string | Date | undefined | null,
-  format?: 'short' | 'datetime'
+  format?: 'short' | 'label' | 'datetime'
 ): string {
   if (!dateString) return '';
 
   try {
     const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
     if (isNaN(date.getTime())) return '';
+
+    if (format === 'label') {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
 
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
