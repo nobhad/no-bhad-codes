@@ -123,6 +123,18 @@ export const errorHandler = (
     statusCode = 400;
     message = 'Invalid reference';
     code = 'INVALID_REFERENCE';
+  } else if (error.message.includes('CHECK constraint failed')) {
+    statusCode = 400;
+    message = 'Data validation failed';
+    code = 'CHECK_CONSTRAINT_FAILED';
+  } else if (error.message.includes('INDEX constraint failed')) {
+    statusCode = 409;
+    message = 'Resource conflicts with existing data';
+    code = 'INDEX_CONSTRAINT_FAILED';
+  } else if (error.message.includes('COLLATE constraint failed') || error.message.includes('collation')) {
+    statusCode = 400;
+    message = 'Invalid text encoding or collation';
+    code = 'COLLATION_ERROR';
   }
 
   // Don't leak error details in production

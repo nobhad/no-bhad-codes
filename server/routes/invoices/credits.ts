@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseCredit } from './helpers.js';
 
 const router = express.Router();
@@ -52,11 +52,13 @@ router.post(
 
       sendSuccess(res, { credit: toSnakeCaseCredit(credit) }, 'Credit applied successfully');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('Insufficient') || message.includes('Invalid')) {
-        return errorResponse(res, message, 400, 'INVALID_CREDIT');
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('Insufficient') || rawMessage.includes('Invalid')) {
+        return errorResponse(res, rawMessage, 400, 'INVALID_CREDIT');
       }
-      errorResponseWithPayload(res, 'Failed to apply credit', 500, 'CREDIT_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to apply credit', 500, 'CREDIT_FAILED', {
+        message: sanitizeErrorMessage(error, 'Failed to apply deposit credit')
+      });
     }
   })
 );
@@ -89,7 +91,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve credits', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice credits')
       });
     }
   })

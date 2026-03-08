@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseDeposit, toSnakeCaseInvoice } from './helpers.js';
 import { logger } from '../../services/logger.js';
 
@@ -59,7 +59,7 @@ router.post(
         error: error instanceof Error ? error : undefined
       });
       errorResponseWithPayload(res, 'Failed to create deposit invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to create deposit invoice')
       });
     }
   })
@@ -97,7 +97,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve available deposits')
         }
       );
     }

@@ -5,7 +5,7 @@
 
 import { Router, Response } from 'express';
 import { webhookService } from '../services/webhook-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -224,15 +224,15 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
     const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes('not found')) {
+    const rawMessage = error instanceof Error ? error.message : '';
+    if (rawMessage.includes('not found')) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
     }
     logger.error('[Webhooks] Failed to update webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to update webhook', 500, 'INTERNAL_ERROR');
+    errorResponse(res, sanitizeErrorMessage(error, 'Failed to update webhook'), 500, 'INTERNAL_ERROR');
   }
 }));
 
@@ -280,15 +280,15 @@ router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.to
     const { secret_key: _secret_key, ...safe } = webhook;
     sendSuccess(res, { webhook: safe });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes('not found')) {
+    const rawMessage = error instanceof Error ? error.message : '';
+    if (rawMessage.includes('not found')) {
       return errorResponse(res, 'Webhook not found', 404, 'RESOURCE_NOT_FOUND');
     }
     logger.error('[Webhooks] Failed to toggle webhook', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'WEBHOOK'
     });
-    errorResponse(res, 'Failed to toggle webhook', 500, 'INTERNAL_ERROR');
+    errorResponse(res, sanitizeErrorMessage(error, 'Failed to toggle webhook'), 500, 'INTERNAL_ERROR');
   }
 }));
 

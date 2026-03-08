@@ -8,7 +8,7 @@ import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../../config/upl
 import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -339,8 +339,7 @@ router.post(
           errors.push(`Project ${id}: ${result.message}`);
         }
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        errors.push(`Project ${id}: ${errorMsg}`);
+        errors.push(`Project ${id}: ${sanitizeErrorMessage(error, 'Failed to delete project')}`);
       }
     }
 

@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseScheduledInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -62,7 +62,7 @@ router.post(
       }, 'Invoice scheduled', 201);
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to schedule invoice', 500, 'SCHEDULING_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to schedule invoice')
       });
     }
   })
@@ -94,7 +94,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve scheduled invoices')
         }
       );
     }
@@ -133,7 +133,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve scheduled invoices')
         }
       );
     }
@@ -170,7 +170,7 @@ router.delete(
         500,
         'CANCELLATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to cancel scheduled invoice')
         }
       );
     }

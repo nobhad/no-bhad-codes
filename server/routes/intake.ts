@@ -22,7 +22,7 @@ import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../utils/api-response.js';
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -508,9 +508,8 @@ router.post(
         error: error instanceof Error ? error : undefined,
         category: 'INTAKE'
       });
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to process intake form', 500, 'INTERNAL_ERROR', {
-        details: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error'
+        details: sanitizeErrorMessage(error, 'Failed to process intake submission')
       });
     }
   }

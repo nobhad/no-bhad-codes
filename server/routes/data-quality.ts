@@ -32,7 +32,7 @@ import {
 } from '../services/validation-service.js';
 import { blockIP, unblockIP, getRateLimitStats } from '../middleware/rate-limiter.js';
 import { userService } from '../services/user-service.js';
-import { errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
+import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../utils/api-response.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -97,7 +97,7 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to scan for duplicates', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to scan for duplicate records')
     });
   }
 });
@@ -141,7 +141,7 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to check for duplicates', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to check for duplicate records')
     });
   }
 });
@@ -177,7 +177,7 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to merge records', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to merge duplicate records')
     });
   }
 });
@@ -215,7 +215,7 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to dismiss duplicate', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to dismiss duplicate record')
     });
   }
 });
@@ -243,7 +243,7 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to fetch duplicate detection history')
     });
   }
 });
@@ -271,7 +271,7 @@ router.post('/validate/email', (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
 });
@@ -287,7 +287,7 @@ router.post('/validate/phone', (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
 });
@@ -303,7 +303,7 @@ router.post('/validate/url', (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
 });
@@ -327,7 +327,7 @@ router.post('/validate/file', (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
 });
@@ -351,7 +351,7 @@ router.post('/validate/object', (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
 });
@@ -375,7 +375,7 @@ router.post('/sanitize', (req: Request, res: Response) => {
     sendSuccess(res, result);
   } catch (error) {
     errorResponseWithPayload(res, 'Sanitization failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Input sanitization failed')
     });
   }
 });
@@ -421,7 +421,7 @@ router.post('/security/check', async (req: Request, res: Response) => {
     });
   } catch (error) {
     errorResponseWithPayload(res, 'Security check failed', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Security threat detection failed')
     });
   }
 });
@@ -444,7 +444,7 @@ router.get('/metrics', async (_req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to fetch metrics', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to fetch data quality metrics')
     });
   }
 });
@@ -479,7 +479,7 @@ router.post('/metrics/calculate', async (_req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to calculate metrics', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to calculate data quality metrics')
     });
   }
 });
@@ -509,7 +509,7 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to fetch metrics history')
     });
   }
 });
@@ -532,7 +532,7 @@ router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to fetch rate limit statistics')
     });
   }
 });
@@ -561,7 +561,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to block IP', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to block IP address')
     });
   }
 });
@@ -590,7 +590,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to unblock IP', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to unblock IP address')
     });
   }
 });
@@ -625,7 +625,7 @@ router.get('/validation-errors', async (req: Request, res: Response) => {
       category: 'DATA_QUALITY'
     });
     errorResponseWithPayload(res, 'Failed to fetch validation errors', 500, 'INTERNAL_ERROR', {
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: sanitizeErrorMessage(error, 'Failed to fetch validation error logs')
     });
   }
 });
