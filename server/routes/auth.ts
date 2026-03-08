@@ -28,6 +28,7 @@ import {
 } from '../utils/auth-constants.js';
 import { generateSecureToken } from '../utils/token-utils.js';
 import { getBaseUrl } from '../config/environment.js';
+import { BUSINESS_INFO } from '../config/business.js';
 import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
 import {
   sendSuccess,
@@ -1484,13 +1485,14 @@ router.post(
       await db.run(
         `INSERT INTO messages
          (context_type, client_id, sender_type, sender_name, subject, message, message_type, priority, status)
-         VALUES ('general', ?, 'system', 'No Bhad Codes', ?, ?, 'system', 'normal', 'new')`,
+         VALUES ('general', ?, 'system', ?, ?, ?, 'system', 'normal', 'new')`,
         [
           clientId,
+          BUSINESS_INFO.name,
           'Welcome to Your Client Portal!',
           `Hi ${clientName},
 
-Welcome to your No Bhad Codes client portal! Your account is now active.
+Welcome to your ${BUSINESS_INFO.name} client portal! Your account is now active.
 
 **What you can do here:**
 - View your project status and milestones
@@ -1506,7 +1508,7 @@ Click on "Settings" in the sidebar to update your billing information.
 If you have any questions, feel free to send us a message through this portal.
 
 Best regards,
-No Bhad Codes Team`
+${BUSINESS_INFO.name} Team`
         ]
       );
       await logger.info(`[Auth] Created welcome message for client ${clientId}`, {

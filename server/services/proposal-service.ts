@@ -20,6 +20,7 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import * as crypto from 'crypto';
 import { logger } from './logger.js';
 import { getBaseUrl } from '../config/environment.js';
+import { BUSINESS_INFO } from '../config/business.js';
 import {
   validateJsonSchema,
   validateLineItems,
@@ -776,7 +777,7 @@ class ProposalService {
           ...notificationData,
           portalUrl: `${baseUrl}/client/portal`,
           supportEmail:
-            process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || 'support@nobhadcodes.com'
+            process.env.SUPPORT_EMAIL || process.env.ADMIN_EMAIL || BUSINESS_INFO.email
         };
 
         const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);

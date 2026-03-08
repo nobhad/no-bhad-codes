@@ -11,6 +11,7 @@
  */
 
 import { PDFDocument, PDFPage, PDFFont, rgb } from 'pdf-lib';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 
 // ============================================
 // PDF CACHING
@@ -246,7 +247,7 @@ export function drawWrappedText(
     x = ctx.leftMargin,
     fontSize = 10,
     font = ctx.fonts.regular,
-    color = rgb(0, 0, 0),
+    color = PDF_COLORS.black,
     lineHeight = fontSize * 1.2,
     maxWidth = ctx.contentWidth,
     onNewPage
@@ -313,8 +314,8 @@ export async function addPageNumbers(
   const totalPages = pages.length;
 
   const format = options?.format || ((p, t) => `Page ${p} of ${t}`);
-  const fontSize = options?.fontSize || 9;
-  const marginBottom = options?.marginBottom || 30;
+  const fontSize = options?.fontSize || PDF_TYPOGRAPHY.pageNumberSize;
+  const marginBottom = options?.marginBottom || PDF_SPACING.pageNumberMarginBottom;
 
   for (let i = 0; i < pages.length; i++) {
     const page = pages[i];
@@ -327,7 +328,7 @@ export async function addPageNumbers(
       y: marginBottom,
       size: fontSize,
       font,
-      color: rgb(0.5, 0.5, 0.5)
+      color: PDF_COLORS.faint
     });
   }
 }

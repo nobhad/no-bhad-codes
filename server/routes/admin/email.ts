@@ -12,6 +12,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { emailService } from '../../services/email-service.js';
 import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 const router = express.Router();
 
@@ -35,7 +36,7 @@ router.post(
 
     const result = await emailService.sendEmail({
       to: adminEmail,
-      subject: 'No Bhad Codes - Test Email',
+      subject: `${BUSINESS_INFO.name} - Test Email`,
       text: 'This is a test email from the admin dashboard. Email service is working correctly.',
       html: '<p>This is a test email from the admin dashboard.</p><p>Email service is working correctly.</p>'
     });

@@ -18,6 +18,7 @@ import { ErrorCodes, errorResponse, sendSuccess, sendCreated } from '../../utils
 import { logger } from '../../services/logger.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { MESSAGE_THREAD_COLUMNS, MESSAGE_COLUMNS, upload } from './helpers.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 const router = express.Router();
 
@@ -306,7 +307,7 @@ router.post(
               subject: thread.subject,
               message: message.trim(),
               threadId: threadId,
-              portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?thread=${threadId}`,
+              portalUrl: `${process.env.CLIENT_PORTAL_URL || `https://${BUSINESS_INFO.website}/client/portal.html`}?thread=${threadId}`,
               hasAttachments: attachments && attachments.length > 0
             });
           }

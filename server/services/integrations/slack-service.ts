@@ -9,6 +9,7 @@
  */
 
 import { getDatabase } from '../../database/init.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -196,7 +197,7 @@ export function formatSlackMessage(
     elements: [
       {
         type: 'mrkdwn',
-        text: `Sent from No Bhad Codes • ${new Date().toLocaleString()}`
+        text: `Sent from ${BUSINESS_INFO.name} • ${new Date().toLocaleString()}`
       }
     ]
   });
@@ -228,7 +229,7 @@ export function formatDiscordMessage(
     color: DISCORD_COLORS[color as keyof typeof DISCORD_COLORS] || DISCORD_COLORS.info,
     fields: fields.slice(0, 25), // Discord limit
     footer: {
-      text: 'No Bhad Codes'
+      text: BUSINESS_INFO.name
     },
     timestamp: new Date().toISOString()
   };

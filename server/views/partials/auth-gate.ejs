@@ -2,7 +2,7 @@
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-container">
     <div class="auth-gate-header">
-      <img src="/images/avatar.svg" alt="No Bhad Codes" class="auth-gate-logo" />
+      <img src="/images/avatar.svg" alt="<%= typeof businessName !== 'undefined' ? businessName : '' %>" class="auth-gate-logo" />
       <h1><%= config.authTitle %></h1>
       <p><%= config.authDescription %></p>
     </div>
@@ -18,7 +18,7 @@
           autocomplete="username"
           tabindex="-1"
           aria-hidden="true"
-          style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"
+          class="sr-only"
         />
         <div class="form-group">
           <label for="admin-password" class="sr-only">Admin Password</label>

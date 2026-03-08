@@ -8,6 +8,7 @@ import { getDatabase } from '../../database/init.js';
 import { leadService } from '../../services/lead-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const CONTACT_SUBMISSION_COLUMNS = `
@@ -315,7 +316,7 @@ router.post(
             try {
               await emailService.sendEmail({
                 to: contactEmail,
-                subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
+                subject: 'Welcome to ${BUSINESS_INFO.name} - Set Up Your Client Portal',
                 html: `
                 <h2>Welcome, ${contact.name}!</h2>
                 <p>You've been invited to set up your client portal account.</p>
@@ -587,11 +588,11 @@ router.post(
       // Send invitation email
       const emailResult = await emailService.sendEmail({
         to: leadEmail,
-        subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
+        subject: 'Welcome to ${BUSINESS_INFO.name} - Set Up Your Client Portal',
         text: `
 Hello ${leadContactName || 'there'},
 
-You've been invited to access the No Bhad Codes client portal for your project.
+You've been invited to access the ${BUSINESS_INFO.name} client portal for your project.
 
 Click the link below to set your password and access your dashboard:
 ${invitationLink}
@@ -601,7 +602,7 @@ This link will expire in 7 days.
 If you didn't expect this invitation, you can safely ignore this email.
 
 Best regards,
-No Bhad Codes Team
+${BUSINESS_INFO.name} Team
         `,
         html: `
 <!DOCTYPE html>
@@ -618,10 +619,10 @@ No Bhad Codes Team
 <body>
   <div class="container">
     <div class="header">
-      <h1>Welcome to No Bhad Codes</h1>
+      <h1>Welcome to ${BUSINESS_INFO.name}</h1>
     </div>
     <p>Hello ${leadContactName || 'there'},</p>
-    <p>You've been invited to access the No Bhad Codes client portal for your project.</p>
+    <p>You've been invited to access the ${BUSINESS_INFO.name} client portal for your project.</p>
     <p>Click the button below to set your password and access your dashboard:</p>
     <p style="text-align: center;">
       <a href="${invitationLink}" class="button">Set Up Your Account</a>
@@ -631,7 +632,7 @@ No Bhad Codes Team
     <p><strong>This link will expire in 7 days.</strong></p>
     <div class="footer">
       <p>If you didn't expect this invitation, you can safely ignore this email.</p>
-      <p>Best regards,<br>No Bhad Codes Team</p>
+      <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
     </div>
   </div>
 </body>

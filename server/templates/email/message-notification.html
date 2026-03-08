@@ -3,8 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>New Message - No Bhad Codes</title>
+    <title>New Message - {{companyName}}</title>
     <style>
+      /*
+       * EMAIL TEMPLATE COLOR SYSTEM
+       * ---------------------------
+       * Email clients strip external CSS, so these colors MUST be inline.
+       * Keep in sync with brand config (server/config/business.ts):
+       *   Primary gradient: #667eea → #764ba2 (message notification accent)
+       * If brand colors change, update ALL email templates:
+       *   - proposal-signed.html
+       *   - proposal-signed-client.html
+       *   - admin-notification.html
+       *   - message-notification.html
+       */
       * {
         margin: 0;
         padding: 0;
@@ -244,7 +256,7 @@
 
       <div class="footer">
         <p>
-          <strong>No Bhad Codes</strong><br />
+          <strong>{{companyName}}</strong><br />
           Professional Web Development Services
         </p>
         <p style="margin-top: 1rem">

@@ -14,6 +14,7 @@ import { getDatabase } from '../database/init.js';
 import { userService } from './user-service.js';
 import { logger } from './logger.js';
 import { parseIfString } from '../utils/safe-json.js';
+import { BUSINESS_INFO } from '../config/business.js';
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -537,7 +538,7 @@ class WorkflowTriggerService {
     if (config.to === 'client' && context.clientEmail) {
       toEmail = context.clientEmail as string;
     } else if (config.to === 'admin') {
-      toEmail = process.env.ADMIN_EMAIL || 'admin@nobhadcodes.com';
+      toEmail = process.env.ADMIN_EMAIL || BUSINESS_INFO.email;
     } else {
       toEmail = config.to;
     }

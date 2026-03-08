@@ -8,9 +8,10 @@
  * SOW includes: scope, deliverables, timeline, terms, and pricing.
  */
 
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { getDatabase } from '../database/init.js';
 import { BUSINESS_INFO, getPdfLogoBytes, CONTRACT_TERMS } from '../config/business.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import {
   createPdfContext,
   drawWrappedText,
@@ -272,9 +273,9 @@ function drawPageHeader(ctx: PdfPageContext, projectName: string): void {
   ctx.currentPage.drawText(`Statement of Work: ${projectName}`, {
     x: ctx.leftMargin,
     y: ctx.height - 30,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.5, 0.5, 0.5)
+    color: PDF_COLORS.pageHeader
   });
   ctx.y = ctx.height - ctx.topMargin - 20;
 }
@@ -301,9 +302,9 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
   currentPage.drawText('STATEMENT OF WORK', {
     x: leftMargin,
     y,
-    size: 22,
+    size: PDF_TYPOGRAPHY.titleLargeSize,
     font: fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.title
   });
   y -= 28;
 
@@ -311,9 +312,9 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
   currentPage.drawText(data.project.name, {
     x: leftMargin,
     y,
-    size: 14,
+    size: PDF_TYPOGRAPHY.sectionHeadingSize,
     font: fonts.bold,
-    color: rgb(0.2, 0.2, 0.2)
+    color: PDF_COLORS.subtitle
   });
   y -= 20;
 
@@ -321,9 +322,9 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
   currentPage.drawText(`Date: ${formatDate(new Date().toISOString())}`, {
     x: leftMargin,
     y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: fonts.regular,
-    color: rgb(0.4, 0.4, 0.4)
+    color: PDF_COLORS.muted
   });
   y -= 15;
 
@@ -331,8 +332,8 @@ async function drawSowHeader(ctx: PdfPageContext, data: SowData): Promise<void> 
   currentPage.drawLine({
     start: { x: leftMargin, y },
     end: { x: ctx.rightMargin, y },
-    thickness: 1,
-    color: rgb(0.8, 0.8, 0.8)
+    thickness: PDF_SPACING.dividerThickness,
+    color: PDF_COLORS.dividerLight
   });
 
   ctx.y = y - 10;
@@ -342,50 +343,50 @@ function drawSectionTitle(ctx: PdfPageContext, title: string): void {
   ctx.currentPage.drawText(title, {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 12,
+    size: PDF_TYPOGRAPHY.sowSectionSize,
     font: ctx.fonts.bold,
-    color: rgb(0.15, 0.15, 0.15)
+    color: PDF_COLORS.title
   });
   ctx.y -= 5;
 
   // Underline
   ctx.currentPage.drawLine({
     start: { x: ctx.leftMargin, y: ctx.y },
-    end: { x: ctx.leftMargin + 200, y: ctx.y },
-    thickness: 2,
-    color: rgb(0.5, 0.99, 0.04) // Brand green
+    end: { x: ctx.leftMargin + PDF_SPACING.underlineLength, y: ctx.y },
+    thickness: PDF_SPACING.underlineThickness,
+    color: PDF_COLORS.brandGreen
   });
-  ctx.y -= 15;
+  ctx.y -= PDF_SPACING.afterUnderline;
 }
 
 function drawParties(ctx: PdfPageContext, data: SowData): void {
-  const lineHeight = 14;
+  const lineHeight = PDF_SPACING.lineHeight;
 
   // Provider
   ctx.currentPage.drawText('Service Provider:', {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.bold,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
   ctx.y -= lineHeight;
 
   ctx.currentPage.drawText(BUSINESS_INFO.name, {
-    x: ctx.leftMargin + 20,
+    x: ctx.leftMargin + PDF_SPACING.indentDouble,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.y -= lineHeight;
 
   ctx.currentPage.drawText(BUSINESS_INFO.email, {
-    x: ctx.leftMargin + 20,
+    x: ctx.leftMargin + PDF_SPACING.indentDouble,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
   ctx.y -= lineHeight + 8;
 
@@ -393,38 +394,38 @@ function drawParties(ctx: PdfPageContext, data: SowData): void {
   ctx.currentPage.drawText('Client:', {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.bold,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
   ctx.y -= lineHeight;
 
   ctx.currentPage.drawText(data.client.name, {
-    x: ctx.leftMargin + 20,
+    x: ctx.leftMargin + PDF_SPACING.indentDouble,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.y -= lineHeight;
 
   if (data.client.company) {
     ctx.currentPage.drawText(data.client.company, {
-      x: ctx.leftMargin + 20,
+      x: ctx.leftMargin + PDF_SPACING.indentDouble,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     ctx.y -= lineHeight;
   }
 
   ctx.currentPage.drawText(data.client.email, {
-    x: ctx.leftMargin + 20,
+    x: ctx.leftMargin + PDF_SPACING.indentDouble,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
   ctx.y -= lineHeight;
 }
@@ -434,24 +435,24 @@ function drawProjectScope(
   data: SowData,
   onNewPage: (ctx: PdfPageContext) => void
 ): void {
-  const lineHeight = 14;
+  const lineHeight = PDF_SPACING.lineHeight;
 
   // Project type
   ctx.currentPage.drawText(`Project Type: ${formatProjectType(data.project.projectType)}`, {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.y -= lineHeight;
 
   ctx.currentPage.drawText(`Package: ${data.proposal.tierName}`, {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.y -= lineHeight + 8;
 
@@ -460,16 +461,16 @@ function drawProjectScope(
     ctx.currentPage.drawText('Project Description:', {
       x: ctx.leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     ctx.y -= lineHeight;
 
     drawWrappedText(ctx, data.project.description, {
-      fontSize: 10,
-      color: rgb(0.2, 0.2, 0.2),
-      lineHeight: 14,
+      fontSize: PDF_TYPOGRAPHY.bodySize,
+      color: PDF_COLORS.subtitle,
+      lineHeight: PDF_SPACING.lineHeight,
       onNewPage
     });
   }
@@ -488,22 +489,22 @@ function drawDeliverables(
     ctx.currentPage.drawText('Included in Package:', {
       x: ctx.leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
-    ctx.y -= 14;
+    ctx.y -= PDF_SPACING.lineHeight;
 
     for (const feature of includedFeatures) {
       ensureSpace(ctx, 16, onNewPage);
       ctx.currentPage.drawText(`- ${feature.name}`, {
-        x: ctx.leftMargin + 10,
+        x: ctx.leftMargin + PDF_SPACING.indent,
         y: ctx.y,
-        size: 10,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: ctx.fonts.regular,
-        color: rgb(0.1, 0.1, 0.1)
+        color: PDF_COLORS.body
       });
-      ctx.y -= 14;
+      ctx.y -= PDF_SPACING.lineHeight;
     }
   }
 
@@ -512,30 +513,30 @@ function drawDeliverables(
     ctx.currentPage.drawText('Additional Features:', {
       x: ctx.leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
-    ctx.y -= 14;
+    ctx.y -= PDF_SPACING.lineHeight;
 
     for (const feature of addons) {
       ensureSpace(ctx, 16, onNewPage);
       ctx.currentPage.drawText(`- ${feature.name}`, {
-        x: ctx.leftMargin + 10,
+        x: ctx.leftMargin + PDF_SPACING.indent,
         y: ctx.y,
-        size: 10,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: ctx.fonts.regular,
-        color: rgb(0.1, 0.1, 0.1)
+        color: PDF_COLORS.body
       });
 
       ctx.currentPage.drawText(`+${formatCurrency(feature.price)}`, {
         x: ctx.rightMargin - 60,
         y: ctx.y,
-        size: 10,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: ctx.fonts.regular,
-        color: rgb(0.4, 0.4, 0.4)
+        color: PDF_COLORS.muted
       });
-      ctx.y -= 14;
+      ctx.y -= PDF_SPACING.lineHeight;
     }
   }
 }
@@ -550,22 +551,22 @@ function drawTimeline(
     ctx.currentPage.drawText(`Start Date: ${formatDate(data.project.startDate)}`, {
       x: ctx.leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.body
     });
-    ctx.y -= 14;
+    ctx.y -= PDF_SPACING.lineHeight;
   }
 
   if (data.project.deadline) {
     ctx.currentPage.drawText(`Target Completion: ${formatDate(data.project.deadline)}`, {
       x: ctx.leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.body
     });
-    ctx.y -= 20;
+    ctx.y -= PDF_SPACING.sectionGap;
   }
 
   // Milestones
@@ -573,42 +574,42 @@ function drawTimeline(
     ctx.currentPage.drawText('Milestones:', {
       x: ctx.leftMargin,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.bold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
-    ctx.y -= 14;
+    ctx.y -= PDF_SPACING.lineHeight;
 
     for (let i = 0; i < data.milestones.length; i++) {
       const milestone = data.milestones[i];
       ensureSpace(ctx, 30, onNewPage);
 
       ctx.currentPage.drawText(`${i + 1}. ${milestone.title}`, {
-        x: ctx.leftMargin + 10,
+        x: ctx.leftMargin + PDF_SPACING.indent,
         y: ctx.y,
-        size: 10,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: ctx.fonts.bold,
-        color: rgb(0.1, 0.1, 0.1)
+        color: PDF_COLORS.body
       });
 
       if (milestone.dueDate) {
         ctx.currentPage.drawText(formatDate(milestone.dueDate), {
           x: ctx.rightMargin - 80,
           y: ctx.y,
-          size: 9,
+          size: PDF_TYPOGRAPHY.smallSize,
           font: ctx.fonts.regular,
-          color: rgb(0.5, 0.5, 0.5)
+          color: PDF_COLORS.faint
         });
       }
-      ctx.y -= 14;
+      ctx.y -= PDF_SPACING.lineHeight;
 
       if (milestone.description) {
         drawWrappedText(ctx, milestone.description, {
-          x: ctx.leftMargin + 20,
-          fontSize: 9,
-          color: rgb(0.3, 0.3, 0.3),
-          lineHeight: 12,
-          maxWidth: ctx.contentWidth - 20,
+          x: ctx.leftMargin + PDF_SPACING.indentDouble,
+          fontSize: PDF_TYPOGRAPHY.smallSize,
+          color: PDF_COLORS.bodyLight,
+          lineHeight: PDF_SPACING.lineHeightCompact,
+          maxWidth: ctx.contentWidth - PDF_SPACING.indentDouble,
           onNewPage
         });
         ctx.y -= 4;
@@ -622,24 +623,24 @@ function drawPricing(
   data: SowData,
   onNewPage: (ctx: PdfPageContext) => void
 ): void {
-  const lineHeight = 16;
+  const lineHeight = PDF_SPACING.pricingRowHeight;
   const labelX = ctx.leftMargin;
-  const valueX = ctx.leftMargin + 180;
+  const valueX = ctx.leftMargin + PDF_SPACING.pricingValueOffset;
 
   // Base price
   ctx.currentPage.drawText('Base Package Price:', {
     x: labelX,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
   ctx.currentPage.drawText(formatCurrency(data.proposal.basePrice), {
     x: valueX,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.regular,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.y -= lineHeight;
 
@@ -652,16 +653,16 @@ function drawPricing(
     ctx.currentPage.drawText('Additional Features:', {
       x: labelX,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     ctx.currentPage.drawText(formatCurrency(addonsTotal), {
       x: valueX,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.body
     });
     ctx.y -= lineHeight;
   }
@@ -671,16 +672,16 @@ function drawPricing(
     ctx.currentPage.drawText('Maintenance Plan:', {
       x: labelX,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     ctx.currentPage.drawText(formatMaintenanceOption(data.proposal.maintenanceOption), {
       x: valueX,
       y: ctx.y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: ctx.fonts.regular,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.body
     });
     ctx.y -= lineHeight;
   }
@@ -690,8 +691,8 @@ function drawPricing(
   ctx.currentPage.drawLine({
     start: { x: labelX, y: ctx.y },
     end: { x: valueX + 80, y: ctx.y },
-    thickness: 1,
-    color: rgb(0.7, 0.7, 0.7)
+    thickness: PDF_SPACING.dividerThickness,
+    color: PDF_COLORS.pricingDivider
   });
   ctx.y -= lineHeight;
 
@@ -699,16 +700,16 @@ function drawPricing(
   ctx.currentPage.drawText('TOTAL:', {
     x: labelX,
     y: ctx.y,
-    size: 12,
+    size: PDF_TYPOGRAPHY.subHeadingSize,
     font: ctx.fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.currentPage.drawText(formatCurrency(data.proposal.finalPrice), {
     x: valueX,
     y: ctx.y,
-    size: 12,
+    size: PDF_TYPOGRAPHY.subHeadingSize,
     font: ctx.fonts.bold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.body
   });
   ctx.y -= lineHeight + 10;
 
@@ -717,11 +718,11 @@ function drawPricing(
   ctx.currentPage.drawText('Payment Terms:', {
     x: ctx.leftMargin,
     y: ctx.y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: ctx.fonts.bold,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
-  ctx.y -= 14;
+  ctx.y -= PDF_SPACING.lineHeight;
 
   const paymentTerms = [
     '- 50% deposit required before work begins',
@@ -731,13 +732,13 @@ function drawPricing(
 
   for (const term of paymentTerms) {
     ctx.currentPage.drawText(term, {
-      x: ctx.leftMargin + 10,
+      x: ctx.leftMargin + PDF_SPACING.indent,
       y: ctx.y,
-      size: 9,
+      size: PDF_TYPOGRAPHY.smallSize,
       font: ctx.fonts.regular,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.subtitle
     });
-    ctx.y -= 12;
+    ctx.y -= PDF_SPACING.lineHeightCompact;
   }
 }
 
@@ -751,9 +752,9 @@ function drawTerms(ctx: PdfPageContext, onNewPage: (ctx: PdfPageContext) => void
     for (const term of termsStrings.slice(0, 5)) {
       ensureSpace(ctx, 30, onNewPage);
       drawWrappedText(ctx, term, {
-        fontSize: 9,
-        color: rgb(0.3, 0.3, 0.3),
-        lineHeight: 11,
+        fontSize: PDF_TYPOGRAPHY.smallSize,
+        color: PDF_COLORS.bodyLight,
+        lineHeight: PDF_SPACING.lineHeightTight,
         onNewPage
       });
       ctx.y -= 8;
@@ -766,16 +767,16 @@ function drawTerms(ctx: PdfPageContext, onNewPage: (ctx: PdfPageContext) => void
       ctx.currentPage.drawText(`${term.title}:`, {
         x: ctx.leftMargin,
         y: ctx.y,
-        size: 10,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: ctx.fonts.bold,
-        color: rgb(0.3, 0.3, 0.3)
+        color: PDF_COLORS.bodyLight
       });
-      ctx.y -= 12;
+      ctx.y -= PDF_SPACING.lineHeightCompact;
 
       drawWrappedText(ctx, term.content, {
-        fontSize: 9,
-        color: rgb(0.3, 0.3, 0.3),
-        lineHeight: 11,
+        fontSize: PDF_TYPOGRAPHY.smallSize,
+        color: PDF_COLORS.bodyLight,
+        lineHeight: PDF_SPACING.lineHeightTight,
         onNewPage
       });
       ctx.y -= 8;
