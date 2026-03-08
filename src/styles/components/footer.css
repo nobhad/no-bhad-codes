@@ -4,7 +4,7 @@
    But NOT the portal-footer or admin-footer which are specific to those pages */
 [data-page="client-portal"] .footer:not(.portal-footer),
 [data-page="admin"] .footer:not(.admin-footer) {
-  display: none !important;
+  display: none;
 }
 
 .footer {

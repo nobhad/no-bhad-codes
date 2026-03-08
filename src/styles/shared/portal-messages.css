@@ -568,7 +568,7 @@
 
 .messaging-search-container .input,
 .messaging-search-container input {
-  padding-left: 2.5rem !important;
+  padding-left: 2.5rem;
 }
 
 /* Filter tabs */

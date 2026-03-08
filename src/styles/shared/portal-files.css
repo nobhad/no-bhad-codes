@@ -614,7 +614,7 @@
 }
 
 /* Progress bar max width */
-.dropzone .progress-track {
+.dropzone .progress-bar-sm {
   width: 100%;
   max-width: 16rem;
 }

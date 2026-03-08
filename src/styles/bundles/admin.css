@@ -96,14 +96,14 @@ body.admin-logged-in[data-page="admin"] {
   overflow: hidden;
 }
 
-/* html background - hardcoded since portal variables are scoped to body, not html */
+/* html background - uses fallback since portal variables are scoped to body, not html */
 html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: #000000;
+  background-color: var(--portal-bg-pitch, #000000);
   height: 100%;
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: #ffffff;
+  background-color: var(--portal-bg-pitch, #ffffff);
 }
 
 /* Scrollbar styling */

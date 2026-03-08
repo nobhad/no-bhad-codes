@@ -172,8 +172,8 @@
 [data-page="admin"] .bulk-dropdown .bulk-dropdown-menu,
 [data-page="admin"] .bulk-dropdown.table-dropdown .custom-dropdown-menu.bulk-dropdown-menu {
   position: absolute;
-  right: 0 !important;
-  left: auto !important;
+  right: 0;
+  left: auto;
   top: calc(100% + var(--space-0-5));
   min-width: var(--table-col-md);
   max-height: var(--space-32);

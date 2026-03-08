@@ -377,7 +377,7 @@
 @media (--mobile) {
   /* Override any grid/block display — flex column, centered */
   .projects-section {
-    display: flex !important;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -386,12 +386,12 @@
 
   /* Hide CRT TV — definitive override */
   .projects-section .crt-tv {
-    display: none !important;
+    display: none;
   }
 
   /* Force single-column flex row */
   .projects-section .projects-flex-row {
-    flex-direction: column !important;
+    flex-direction: column;
     width: 100%;
     gap: 0;
   }

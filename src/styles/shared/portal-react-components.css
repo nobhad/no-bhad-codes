@@ -1,0 +1,90 @@
+/**
+ * ===============================================
+ * REACT COMPONENT SHARED STYLES
+ * ===============================================
+ * @file src/styles/shared/portal-react-components.css
+ *
+ * Styles used by React components: inline progress bars,
+ * basic dropdown menu, badge base, table row selected,
+ * status text color utilities, and card drag highlight.
+ */
+
+/* Progress bars -- small (4px) inline variant used inside React components.
+   The canonical 12px standalone .progress-bar lives in portal-progress.css. */
+.progress-bar-sm {
+  height: 4px;
+  background: var(--portal-alpha-white-20);
+  overflow: hidden;
+}
+
+.progress-bar-sm .progress-fill {
+  height: 100%;
+  background: var(--portal-text-light);
+  transition: width var(--transition-normal);
+}
+
+/* .list-item -- canonical definition is .portal .list-item (portal-utilities.css).
+   Removed unscoped duplicate to prevent cascade conflicts. */
+
+/* Modals/Popups -- see admin/modals.css for portal-modal-* definitions */
+
+/* Dropdown menus */
+.dropdown {
+  background: var(--portal-bg-pitch);
+  border: var(--border-width) solid var(--portal-alpha-white-30);
+  padding: var(--space-1) 0;
+}
+
+.dropdown-item {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm, 14px);
+  font-family: var(--font-family-mono, monospace);
+  color: var(--portal-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dropdown-item:hover {
+  background: var(--portal-alpha-white-10);
+  color: var(--portal-text-light);
+}
+
+.dropdown-item-active {
+  background: var(--portal-alpha-white-10);
+  color: var(--portal-text-light);
+}
+
+/* Badges/Status */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-0-5) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  background: transparent;
+  border: var(--border-width) solid currentColor;
+  border-radius: 0;
+}
+
+/* .status-dot base definition moved to portal-badges.css */
+
+/* Table row selected state */
+.table-row-selected {
+  background: var(--portal-alpha-white-10);
+}
+
+/* Status text color utilities - use instead of arbitrary TW values */
+.text-status-completed { color: var(--status-completed); }
+.text-status-active { color: var(--status-active); }
+.text-status-cancelled { color: var(--status-cancelled); }
+.text-status-pending { color: var(--status-pending); }
+.text-status-new { color: var(--status-new); }
+
+/* Card drag-over highlight state */
+.card-drag-highlight {
+  background: var(--portal-alpha-white-10);
+  border-color: var(--portal-text-light);
+}

@@ -104,7 +104,7 @@
 /* Universal: Any container with positioned icon + input - ensure proper left padding */
 .portal [class*="search-container"] input,
 .portal [class*="search-container"] .input {
-  padding-left: 2.5rem !important;
+  padding-left: 2.5rem;
 }
 
 /* Textarea - different height/padding */
@@ -599,7 +599,7 @@ input.search-bar-input {
 }
 
 .input-error {
-  border-color: var(--color-error) !important;
+  border-color: var(--color-error);
 }
 
 

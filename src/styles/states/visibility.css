@@ -113,4 +113,25 @@
     opacity: 1;
     pointer-events: auto;
   }
+
+  /* ============================================
+   * ACCESSIBILITY
+   * ============================================ */
+
+  /* Skip link - visually hidden, visible on focus */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: 8px 16px;
+    background-color: var(--app-color-surface, #000);
+    color: var(--app-color-text, #fff);
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
 }

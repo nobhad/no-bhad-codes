@@ -616,7 +616,7 @@ section.contact-section .contact-form textarea.error {
 @media (prefers-contrast: high) {
   .input-item input,
   .input-item textarea {
-    border-width: var(--border-width-thick) !important;
+    border-width: var(--border-width-thick);
   }
 
   .submit-button {
