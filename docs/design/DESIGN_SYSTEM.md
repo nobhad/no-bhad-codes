@@ -489,7 +489,7 @@ height: 48px;
 
 | Header Class | Cell Class | Purpose | Width | Alignment |
 |--------------|------------|---------|-------|-----------|
-| `.bulk-select-cell` | `.bulk-select-cell` | Checkbox column | 48px fixed | center |
+| `.col-checkbox` | `.col-checkbox` | Checkbox column | 48px fixed | center |
 | `.identity-col` | `.identity-cell` | Stacked name/email (primary identity) | auto, min 140px | left |
 | `.name-col` | `.name-cell` | Simple name/title fields | auto | left |
 | `.type-col` | `.type-cell` | Type/category badges | fit-content | left |
@@ -499,7 +499,7 @@ height: 48px;
 | `.count-col` | `.count-cell` | Numeric counts | fit-content | center |
 | `.email-col` | `.email-cell` | Standalone email | fit-content | left |
 | `.timeline-col` | `.timeline-cell` | Progress/timeline bars | min 100px | left |
-| `.actions-col` | `.actions-cell` | Action buttons | fit-content | right |
+| `.col-actions` | `.col-actions` | Action buttons | fit-content | right |
 
 **Aliases (backwards compatibility):**
 
@@ -845,7 +845,7 @@ On mobile (479px and below), table rows transform into stacked cards:
 | 2 | `.status-cell` | Status dropdown |
 | 3 | `.budget-cell` | Financial |
 | 6 | `.date-cell` | Dates |
-| 10 | `.actions-cell` | Action buttons |
+| 10 | `.col-actions` | Action buttons |
 
 ---
 
@@ -913,7 +913,7 @@ On mobile (479px and below), table rows transform into stacked cards:
 
 ```html
 <div class="empty-state">
-  <svg class="empty-state-icon"><!-- Lucide inbox icon --></svg>
+  <svg class="empty-icon"><!-- Lucide inbox icon --></svg>
   <span class="empty-state-message">No items found.</span>
 </div>
 ```
@@ -930,7 +930,7 @@ On mobile (479px and below), table rows transform into stacked cards:
 **Styling:**
 
 - `.empty-state` — Centered flex container, muted text color
-- `.empty-state-icon` — 24x24px, 60% opacity, Lucide inbox icon
+- `.empty-icon` — 24x24px, 60% opacity, Lucide inbox icon
 - `.empty-state-message` — `--font-size-sm`, `--portal-text-secondary`
 
 **Rules:**

@@ -541,7 +541,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .portal
   :is(.sidebar.collapsed, .sidebar.icon-only)
   .nav-btn:is(.active, :hover, :focus)
-  .btn-icon {
+  .nav-icon {
   color: var(--color-primary);
 }
 

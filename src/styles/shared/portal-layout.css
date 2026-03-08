@@ -443,13 +443,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* =====================================================
    SIDEBAR TOGGLE IN SIDEBAR
-   Uses same .btn .btn-secondary styling via portal-buttons.css
+   Toggle flip handled in portal-sidebar.css via svg selector
    ===================================================== */
-
-/* Rotate icon when sidebar is collapsed */
-.sidebar.collapsed .sidebar-toggle-btn .btn-icon {
-  transform: rotate(180deg);
-}
 
 /* Disable focus outline on ALL sidebar elements */
 .sidebar :is(:focus, :focus-visible),
