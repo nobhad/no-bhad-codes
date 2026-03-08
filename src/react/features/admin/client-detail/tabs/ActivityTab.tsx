@@ -140,7 +140,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
   return (
     <div className="section">
       {/* Header */}
-      <div className="tab-section-header">
+      <div className="layout-row-between">
         <h2 className="heading text-lg">
           Activity Log
         </h2>

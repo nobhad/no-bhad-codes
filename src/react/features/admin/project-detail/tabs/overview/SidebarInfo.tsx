@@ -25,7 +25,7 @@ export function SidebarInfo({
   onNavigate
 }: SidebarInfoProps) {
   return (
-    <div className="project-overview-sidebar">
+    <div className="layout-stack">
       {/* Client Info Card */}
       <div className="panel">
         <h3 className="section-title">Client</h3>

@@ -101,11 +101,11 @@ export function OverviewTab({
   return (
     <div className="client-overview-grid">
       {/* Left Column - Health & Stats */}
-      <div className="client-overview-main">
+      <div className="layout-stack">
         {/* Health Score Card */}
         {health && (
           <div className="panel">
-            <div className="panel-card-header">
+            <div className="layout-row-between">
               <div className="stat-card-header">
                 <Heart className="icon-lg text-muted" />
                 <h3 className="heading">
@@ -124,9 +124,9 @@ export function OverviewTab({
 
             {/* Health Factors */}
             {health.factors && (
-              <div className="health-factors-grid">
+              <div className="grid-2col">
                 {Object.entries(health.factors).map(([key, value]) => (
-                  <div key={key} className="health-factor-item">
+                  <div key={key} className="layout-form-field">
                     <div className="health-factor-header">
                       <span className="text-muted">
                         {key.replace('_', ' ')}
@@ -171,7 +171,7 @@ export function OverviewTab({
 
         {/* Tags Section */}
         <div className="panel">
-          <div className="panel-card-header">
+          <div className="layout-row-between">
             <div className="stat-card-header">
               <Tag className="icon-md text-muted" />
               <span className="heading">
@@ -203,7 +203,7 @@ export function OverviewTab({
             )}
           </div>
 
-          <div className="tags-list">
+          <div className="layout-row-wrap">
             {tags.length === 0 ? (
               <span className="text-muted text-italic">
                 No tags assigned
@@ -230,16 +230,16 @@ export function OverviewTab({
       </div>
 
       {/* Right Column - Client Info */}
-      <div className="client-overview-sidebar">
+      <div className="layout-stack">
         {/* Contact Info */}
         <div className="panel">
           <h3 className="section-title">
             Contact Information
           </h3>
 
-          <div className="contact-info-list">
+          <div className="layout-stack">
             {client.contact_name && (
-              <div className="contact-info-item">
+              <div className="layout-row">
                 <User className="icon-md text-muted" />
                 <span className="text-muted">
                   {client.contact_name}
@@ -248,7 +248,7 @@ export function OverviewTab({
             )}
 
             {client.company_name && (
-              <div className="contact-info-item">
+              <div className="layout-row">
                 <Building2 className="icon-md text-muted" />
                 <span className="text-muted">
                   {client.company_name}
@@ -257,7 +257,7 @@ export function OverviewTab({
             )}
 
             {client.email && (
-              <div className="contact-info-item">
+              <div className="layout-row">
                 <Mail className="icon-md text-muted" />
                 <a
                   href={`mailto:${client.email}`}
@@ -269,7 +269,7 @@ export function OverviewTab({
             )}
 
             {client.phone && (
-              <div className="contact-info-item">
+              <div className="layout-row">
                 <Phone className="icon-md text-muted" />
                 <a
                   href={`tel:${client.phone}`}
@@ -288,8 +288,8 @@ export function OverviewTab({
             Account Details
           </h3>
 
-          <div className="account-detail-list">
-            <div className="account-detail-row">
+          <div className="layout-stack">
+            <div className="layout-row-between">
               <span className="field-label">Created</span>
               <span className="text-muted">
                 {formatDate(client.created_at, 'label')}
@@ -297,7 +297,7 @@ export function OverviewTab({
             </div>
 
             {client.invitation_sent_at && (
-              <div className="account-detail-row">
+              <div className="layout-row-between">
                 <span className="field-label">Invited</span>
                 <span className="text-muted">
                   {formatDate(client.invitation_sent_at, 'label')}
@@ -305,7 +305,7 @@ export function OverviewTab({
               </div>
             )}
 
-            <div className="account-detail-row">
+            <div className="layout-row-between">
               <span className="field-label">Portal Access</span>
               <span
                 className={cn(

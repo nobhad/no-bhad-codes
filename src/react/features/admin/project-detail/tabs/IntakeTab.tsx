@@ -67,12 +67,12 @@ export function IntakeTab({
 
   return (
     <div className="project-overview-grid">
-      <div className="project-overview-main">
+      <div className="layout-stack">
         {/* Project Scope */}
         <div className="panel">
           <h3 className="section-title">Project Scope</h3>
-          <div className="project-info-grid">
-            <div className="project-info-field">
+          <div className="grid-2col">
+            <div className="layout-form-field">
               <span className="field-label">Features</span>
               <InlineTextarea
                 value={project.features || ''}
@@ -81,7 +81,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Page Count</span>
               <InlineEdit
                 value={project.page_count || ''}
@@ -91,7 +91,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Integrations</span>
               <InlineTextarea
                 value={project.integrations || ''}
@@ -100,7 +100,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Add-ons</span>
               <InlineTextarea
                 value={project.addons || ''}
@@ -114,8 +114,8 @@ export function IntakeTab({
         {/* Design & Content */}
         <div className="panel">
           <h3 className="section-title">Design & Content</h3>
-          <div className="project-info-grid">
-            <div className="project-info-field">
+          <div className="grid-2col">
+            <div className="layout-form-field">
               <span className="field-label">Design Level</span>
               <InlineSelect
                 value={project.design_level || ''}
@@ -125,7 +125,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Content Status</span>
               <InlineSelect
                 value={project.content_status || ''}
@@ -135,7 +135,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Brand Assets</span>
               <InlineSelect
                 value={project.brand_assets || ''}
@@ -150,8 +150,8 @@ export function IntakeTab({
         {/* Technical */}
         <div className="panel">
           <h3 className="section-title">Technical</h3>
-          <div className="project-info-grid">
-            <div className="project-info-field">
+          <div className="grid-2col">
+            <div className="layout-form-field">
               <span className="field-label">Tech Comfort</span>
               <InlineSelect
                 value={project.tech_comfort || ''}
@@ -161,7 +161,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Hosting Preference</span>
               <InlineSelect
                 value={project.hosting_preference || ''}
@@ -171,7 +171,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Current Site</span>
               <InlineEdit
                 value={project.current_site || ''}
@@ -185,11 +185,11 @@ export function IntakeTab({
       </div>
 
       {/* Right Column - Background */}
-      <div className="project-overview-sidebar">
+      <div className="layout-stack">
         <div className="panel">
           <h3 className="section-title">Background</h3>
-          <div className="project-info-grid">
-            <div className="project-info-field">
+          <div className="grid-2col">
+            <div className="layout-form-field">
               <span className="field-label">Inspiration</span>
               <InlineTextarea
                 value={project.inspiration || ''}
@@ -198,7 +198,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Challenges</span>
               <InlineTextarea
                 value={project.challenges || ''}
@@ -207,7 +207,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Additional Info</span>
               <InlineTextarea
                 value={project.additional_info || ''}
@@ -216,7 +216,7 @@ export function IntakeTab({
               />
             </div>
 
-            <div className="project-info-field">
+            <div className="layout-form-field">
               <span className="field-label">Referral Source</span>
               <InlineEdit
                 value={project.referral_source || ''}

@@ -192,7 +192,7 @@ export function InvoicesTab({
   return (
     <div className="section">
       {/* Header with stats and actions */}
-      <div className="pd-tab-header">
+      <div className="layout-row-between">
         <div className="invtab-stats">
           <div>
             <span className="text-muted">Outstanding: </span>
@@ -213,7 +213,7 @@ export function InvoicesTab({
           </div>
         </div>
 
-        <div className="pd-row-tight">
+        <div className="layout-row">
           {/* Status Filter */}
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
@@ -317,7 +317,7 @@ export function InvoicesTab({
                       </span>
                     </td>
                     <td className="pd-table-cell" onClick={(e) => e.stopPropagation()}>
-                      <div className="pd-row-end">
+                      <div className="layout-row-end">
                         <button
                           className="icon-btn"
                           onClick={() => onViewInvoice?.(invoice.id)}

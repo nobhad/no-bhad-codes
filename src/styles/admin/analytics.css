@@ -107,13 +107,7 @@
   letter-spacing: var(--letter-spacing-label);
 }
 
-.analytics-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.analytics-card-header svg {
+.analytics-view .layout-row-between svg {
   color: var(--portal-text-primary);
 }
 

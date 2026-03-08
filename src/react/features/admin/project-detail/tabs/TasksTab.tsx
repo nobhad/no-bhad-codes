@@ -81,8 +81,8 @@ export function TasksTab({
   return (
     <div className="section">
       {/* Header with progress */}
-      <div className="pd-tab-header">
-        <div className="pd-row">
+      <div className="layout-row-between">
+        <div className="layout-row gap-4">
           <div>
             <span className="text-muted">Progress: </span>
             <span className="pd-highlight-value">

@@ -138,7 +138,7 @@ export function MilestonesList({
   return (
     <>
       <div className="panel">
-        <div className="panel-card-header">
+        <div className="layout-row-between">
           <h3 className="section-title">Milestones</h3>
           <IconButton action="add" onClick={() => setShowAddMilestone(true)} title="Add Milestone" />
         </div>

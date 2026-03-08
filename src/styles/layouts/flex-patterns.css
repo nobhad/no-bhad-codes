@@ -4,284 +4,88 @@
  * ===============================================
  * @file src/styles/layouts/flex-patterns.css
  *
- * Common flexbox layout patterns.
- * More specific than utility classes, for complete layout solutions.
+ * Reusable flexbox layout classes.
+ * Default gaps baked in — override with gap-* utilities when needed.
  */
 
-@layer layouts {
-  /* ============================================
-   * HORIZONTAL LAYOUTS
-   * ============================================ */
+/* ============================================
+ * HORIZONTAL LAYOUTS
+ * ============================================ */
 
-  /* Row with items centered vertically */
-  .layout-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
+.layout-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
 
-  /* Row with space between items */
-  .layout-row-between {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+.layout-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
 
-  /* Row with items at start */
-  .layout-row-start {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-  }
+.layout-row-top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
 
-  /* Row with items at end */
-  .layout-row-end {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-  }
+.layout-row-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
 
-  /* Row with items centered */
-  .layout-row-center {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
+.layout-row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
 
-  /* ============================================
-   * VERTICAL LAYOUTS
-   * ============================================ */
+/* ============================================
+ * VERTICAL LAYOUTS
+ * ============================================ */
 
-  /* Column stack */
-  .layout-stack {
-    display: flex;
-    flex-direction: column;
-  }
+.layout-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
 
-  /* Column with items centered */
-  .layout-stack-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+.layout-stack-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
 
-  /* Column with items stretched */
-  .layout-stack-stretch {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
+/* ============================================
+ * GAP UTILITIES (override defaults)
+ * ============================================ */
 
-  /* ============================================
-   * CENTERING PATTERNS
-   * ============================================ */
+.gap-0 { gap: 0; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
 
-  /* Absolute center (both axes) */
-  .layout-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* ============================================
+ * FLEX ITEM UTILITIES
+ * ============================================ */
 
-  /* Full viewport center */
-  .layout-center-viewport {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-  }
+.flex-fill {
+  flex: 1;
+  min-width: 0;
+}
 
-  /* Center in available space */
-  .layout-center-fill {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-  }
+/* ============================================
+ * FORM FIELD
+ * ============================================ */
 
-  /* ============================================
-   * HEADER/CONTENT/FOOTER PATTERNS
-   * ============================================ */
-
-  /* Header with actions */
-  .layout-header-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-  }
-
-  /* Page header with title and actions */
-  .layout-page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-4);
-    gap: var(--space-4);
-  }
-
-  /* Sticky header */
-  .layout-header-sticky {
-    position: sticky;
-    top: 0;
-    z-index: var(--z-index-dropdown);
-    background: inherit;
-  }
-
-  /* ============================================
-   * SIDEBAR PATTERNS
-   * ============================================ */
-
-  /* Main with sidebar */
-  .layout-with-sidebar {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .layout-with-sidebar > .sidebar {
-    flex-shrink: 0;
-    width: var(--sidebar-width, 280px);
-  }
-
-  .layout-with-sidebar > .main-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* ============================================
-   * LIST/ITEM PATTERNS
-   * ============================================ */
-
-  /* List item with icon */
-  .layout-list-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-  }
-
-  /* List item with icon, title, and meta */
-  .layout-list-item-complex {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3);
-  }
-
-  .layout-list-item-complex > .item-icon {
-    flex-shrink: 0;
-  }
-
-  .layout-list-item-complex > .item-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .layout-list-item-complex > .item-meta {
-    flex-shrink: 0;
-  }
-
-  /* ============================================
-   * CARD PATTERNS
-   * ============================================ */
-
-  /* Card with header and body */
-  .layout-card {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .layout-card > .card-header {
-    flex-shrink: 0;
-  }
-
-  .layout-card > .card-body {
-    flex: 1;
-    min-height: 0;
-  }
-
-  .layout-card > .card-footer {
-    flex-shrink: 0;
-  }
-
-  /* ============================================
-   * FORM PATTERNS
-   * ============================================ */
-
-  /* Form field with label */
-  .layout-form-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  /* Inline form (label + input side by side) */
-  .layout-form-inline {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  /* Form actions (buttons at end) */
-  .layout-form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    padding-top: var(--space-4);
-  }
-
-  /* ============================================
-   * SPLIT PATTERNS
-   * ============================================ */
-
-  /* 50/50 split */
-  .layout-split {
-    display: flex;
-    gap: var(--space-4);
-  }
-
-  .layout-split > * {
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* 1/3 + 2/3 split */
-  .layout-split-asymmetric {
-    display: flex;
-    gap: var(--space-4);
-  }
-
-  .layout-split-asymmetric > :first-child {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .layout-split-asymmetric > :last-child {
-    flex: 2;
-    min-width: 0;
-  }
-
-  /* ============================================
-   * OVERFLOW PATTERNS
-   * ============================================ */
-
-  /* Scrollable container */
-  .layout-scroll {
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  /* Horizontal scroll */
-  .layout-scroll-x {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
+.layout-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }

@@ -247,7 +247,7 @@ export function NotesTab({
   return (
     <div className="section">
       {/* Header */}
-      <div className="tab-section-header">
+      <div className="layout-row-between">
         <h2 className="heading text-lg">
           Notes ({notes.length})
         </h2>
@@ -273,7 +273,7 @@ export function NotesTab({
               <h3 className="label section-label-block">
                 Pinned
               </h3>
-              <div className="card-grid-2col--compact">
+              <div className="grid-2col gap-3">
                 {pinnedNotes.map(renderNote)}
               </div>
             </div>
@@ -287,7 +287,7 @@ export function NotesTab({
                   Recent
                 </h3>
               )}
-              <div className="card-grid-2col--compact">
+              <div className="grid-2col gap-3">
                 {unpinnedNotes.map(renderNote)}
               </div>
             </div>

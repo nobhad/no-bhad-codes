@@ -104,7 +104,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
             {emptyMessage}
           </p>
         ) : (
-          <div className="card-grid-2col--compact">
+          <div className="grid-2col gap-3">
             {projectList.map(renderProjectCard)}
           </div>
         )}
@@ -115,7 +115,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
   return (
     <div className="section">
       {/* Header */}
-      <div className="tab-section-header">
+      <div className="layout-row-between">
         <h2 className="heading text-lg">
           Projects ({projects.length})
         </h2>

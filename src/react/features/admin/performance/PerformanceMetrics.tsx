@@ -134,7 +134,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       {/* Header */}
-      <div className="section-header-with-actions">
+      <div className="layout-row-between">
         <div className="view-toggle">
           {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
             <button
@@ -208,7 +208,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
       <div className="analytics-card-grid">
         {/* Team Performance */}
         <div className="portal-card">
-          <div className="section-header-with-actions">
+          <div className="layout-row-between">
             <h3 className="section-title">Team Performance</h3>
             <Award className="icon-md text-muted" />
           </div>
@@ -235,7 +235,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
 
         {/* Project Performance */}
         <div className="portal-card">
-          <div className="section-header-with-actions">
+          <div className="layout-row-between">
             <h3 className="section-title">Project Status</h3>
             <Briefcase className="icon-md text-muted" />
           </div>

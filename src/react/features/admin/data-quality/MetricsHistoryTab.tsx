@@ -80,7 +80,7 @@ export function MetricsHistoryTab({
   return (
     <>
       <div className="portal-card">
-        <div className="section-header-with-actions">
+        <div className="layout-row-between">
           <h3 className="section-title">Current Metrics</h3>
           <button
             className="btn btn-primary"
@@ -115,7 +115,7 @@ export function MetricsHistoryTab({
       </div>
 
       <div className="portal-card">
-        <div className="section-header-with-actions">
+        <div className="layout-row-between">
           <h3 className="section-title">Metric History</h3>
         </div>
 
