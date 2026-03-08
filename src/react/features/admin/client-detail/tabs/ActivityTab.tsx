@@ -138,7 +138,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
   }
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header */}
       <div className="tab-section-header">
         <h2 className="heading text-lg">
@@ -182,7 +182,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                       {/* Activity content */}
                       <div
                         className={cn(
-                          'activity-event-content tw-panel',
+                          'activity-event-content panel',
                           !isLast && 'item-spacing-bottom'
                         )}
                       >

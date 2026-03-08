@@ -187,7 +187,7 @@ export function InvoicesTab({
   );
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header with stats and actions */}
       <div className="pd-tab-header">
         <div className="invtab-stats">
@@ -215,7 +215,7 @@ export function InvoicesTab({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="tw-input invtab-filter"
+            className="input invtab-filter"
           >
             <option value="all">All Invoices</option>
             <option value="draft">Draft</option>
@@ -244,7 +244,7 @@ export function InvoicesTab({
           </span>
         </div>
       ) : (
-        <div className="tw-panel invtab-panel">
+        <div className="panel invtab-panel">
           <table className="pd-full-width">
             <thead>
               <tr className="invtab-header-row">
@@ -276,7 +276,7 @@ export function InvoicesTab({
                 return (
                   <tr
                     key={invoice.id}
-                    className="tw-list-item invtab-row"
+                    className="list-item invtab-row"
                     onClick={() => onViewInvoice?.(invoice.id)}
                   >
                     <td className="pd-table-cell">
@@ -290,7 +290,7 @@ export function InvoicesTab({
                       </span>
                     </td>
                     <td className="pd-table-cell">
-                      <span className="tw-badge">
+                      <span className="badge">
                         {INVOICE_STATUS_CONFIG[displayStatus]?.label || displayStatus}
                       </span>
                     </td>

@@ -63,7 +63,7 @@ export function NotesTab({
   );
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header */}
       <div className="pd-tab-header">
         <div className="pd-row-compact">
@@ -92,21 +92,21 @@ export function NotesTab({
       </div>
 
       {/* Notes Editor */}
-      <div className="tw-panel notes-panel">
+      <div className="panel notes-panel">
         <textarea
           value={notes}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Add internal notes about this project..."
           rows={15}
-          className="tw-textarea notes-textarea"
+          className="textarea notes-textarea"
         />
       </div>
 
       {/* Keyboard shortcut hint */}
       <div className="text-muted notes-hint">
-        Press <kbd className="tw-badge msgtab-kbd">Cmd+S</kbd> or{' '}
-        <kbd className="tw-badge msgtab-kbd">Ctrl+S</kbd> to save
+        Press <kbd className="badge msgtab-kbd">Cmd+S</kbd> or{' '}
+        <kbd className="badge msgtab-kbd">Ctrl+S</kbd> to save
       </div>
     </div>
   );

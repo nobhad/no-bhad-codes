@@ -132,7 +132,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       {/* Header */}
       <div className="section-header-with-actions">
         <div className="view-toggle">
@@ -191,9 +191,9 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                   Target: {kpi.unit === '$' ? formatCurrency(kpi.target) : `${kpi.target}${kpi.unit}`}
                 </span>
               </div>
-              <div className="tw-progress-track">
+              <div className="progress-track">
                 <div
-                  className="tw-progress-bar"
+                  className="progress-bar"
                   style={{
                     width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
                     backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)'
@@ -217,13 +217,13 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
           ) : (
             <div className="source-list">
               {data.teamMembers.map((member, index) => (
-                <div key={member.id} className="tw-list-item">
+                <div key={member.id} className="list-item">
                   <span className="text-muted">{index + 1}</span>
-                  <div className="tw-flex-1">
+                  <div className="flex-1">
                     <div>{member.name}</div>
                     <div className="text-muted">{member.role}</div>
                   </div>
-                  <div className="tw-text-right">
+                  <div className="text-right">
                     <div>{formatCurrency(member.revenueGenerated)}</div>
                     <div className="text-muted">{member.projectsCompleted} projects</div>
                   </div>
@@ -246,7 +246,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
               {data.projectPerformance.map((project) => (
                 <div
                   key={project.id}
-                  className="source-item tw-cursor-pointer"
+                  className="source-item cursor-pointer"
                   onClick={() => onNavigate?.('projects', String(project.id))}
                 >
                   <div className="source-row">
@@ -254,7 +254,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                       <div>{project.name}</div>
                       <div className="text-muted">{project.clientName}</div>
                     </div>
-                    <span className="tw-badge">
+                    <span className="badge">
                       {project.onTrack ? 'On Track' : 'At Risk'}
                     </span>
                   </div>
@@ -262,9 +262,9 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                     <span>Budget: {formatCurrency(project.budget)}</span>
                     <span>{project.progress}%</span>
                   </div>
-                  <div className="tw-progress-track">
+                  <div className="progress-track">
                     <div
-                      className="tw-progress-bar"
+                      className="progress-bar"
                       style={{
                         width: `${project.progress}%`,
                         backgroundColor: getProgressColor(project.progress, project.onTrack)

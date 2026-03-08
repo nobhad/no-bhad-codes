@@ -69,7 +69,7 @@ export function IntakeTab({
     <div className="project-overview-grid">
       <div className="project-overview-main">
         {/* Project Scope */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Project Scope</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
@@ -112,7 +112,7 @@ export function IntakeTab({
         </div>
 
         {/* Design & Content */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Design & Content</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
@@ -148,7 +148,7 @@ export function IntakeTab({
         </div>
 
         {/* Technical */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Technical</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
@@ -186,7 +186,7 @@ export function IntakeTab({
 
       {/* Right Column - Background */}
       <div className="project-overview-sidebar">
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Background</h3>
           <div className="project-info-grid">
             <div className="project-info-field">

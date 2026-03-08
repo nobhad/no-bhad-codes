@@ -164,7 +164,7 @@ export function NotesTab({
 
   // Render note form
   const renderForm = () => (
-    <div className="tw-panel panel-form-spacing">
+    <div className="panel panel-form-spacing">
       <div className="panel-header-row--compact">
         <h3 className="heading text-sm">
           {editingId ? 'Edit Note' : 'New Note'}
@@ -182,7 +182,7 @@ export function NotesTab({
         onChange={(e) => setNoteContent(e.target.value)}
         placeholder="Write a note..."
         rows={4}
-        className="tw-textarea"
+        className="textarea"
         autoFocus
       />
 
@@ -207,7 +207,7 @@ export function NotesTab({
     <div
       key={note.id}
       className={cn(
-        'portal-card tw-group',
+        'portal-card group',
         note.is_pinned && 'border-primary-accent'
       )}
     >
@@ -268,7 +268,7 @@ export function NotesTab({
   );
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header */}
       <div className="tab-section-header">
         <h2 className="heading text-lg">

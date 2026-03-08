@@ -229,7 +229,7 @@ export function ProjectDetail({
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Header */}
       <div className="detail-title-row">
         <div className="detail-title-group">
@@ -245,7 +245,7 @@ export function ProjectDetail({
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
                   <button className="btn-unstyled">
-                    <span className="tw-badge">
+                    <span className="badge">
                       {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
                     </span>
                   </button>
@@ -258,7 +258,7 @@ export function ProjectDetail({
                         key={status}
                         onClick={() => handleStatusChange(status as ProjectStatus)}
                       >
-                        <span className="tw-badge">{config.label}</span>
+                        <span className="badge">{config.label}</span>
                       </PortalDropdownItem>
                     ))}
                 </PortalDropdownContent>

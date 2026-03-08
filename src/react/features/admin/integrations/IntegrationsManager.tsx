@@ -141,23 +141,23 @@ function IntegrationCard({ integration }: { integration: IntegrationStatus }) {
   return (
     <div className="portal-card">
       <div className="stat-card">
-        <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
-          <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
             <span style={{ color: 'var(--portal-text-muted)' }}>{icon}</span>
-            <span className="tw-font-semibold">{integration.name}</span>
+            <span className="font-semibold">{integration.name}</span>
           </div>
           <span className={healthClass} />
         </div>
-        <div className="tw-space-y-1 tw-text-sm">
-          <div className="tw-flex tw-justify-between">
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between">
             <span className="text-muted">Configured</span>
             <span>{integration.configured ? 'Yes' : 'No'}</span>
           </div>
-          <div className="tw-flex tw-justify-between">
+          <div className="flex justify-between">
             <span className="text-muted">Active</span>
             <span>{integration.active ? 'Yes' : 'No'}</span>
           </div>
-          <div className="tw-flex tw-justify-between">
+          <div className="flex justify-between">
             <span className="text-muted">Last Activity</span>
             <span>{formatDate(integration.lastActivity)}</span>
           </div>
@@ -212,7 +212,7 @@ function NotificationFormModal({
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="tw-space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="form-group">
           <label className="field-label">Name</label>
           <input
@@ -250,7 +250,7 @@ function NotificationFormModal({
           </select>
         </div>
         <div className="form-group">
-          <label className="field-label tw-flex tw-items-center tw-gap-2">
+          <label className="field-label flex items-center gap-2">
             <input
               type="checkbox"
               checked={form.enabled}
@@ -584,7 +584,7 @@ export function IntegrationsManager({
                       </td>
                       <td>{formatDate(notif.createdAt)}</td>
                       <td>
-                        <div className="tw-flex tw-gap-1">
+                        <div className="flex gap-1">
                           <button
                             className="btn btn-secondary"
                             onClick={() => handleTestNotification(notif.id)}
@@ -592,7 +592,7 @@ export function IntegrationsManager({
                             title="Test notification"
                           >
                             {testingId === notif.id ? (
-                              <RefreshCw className="icon-sm tw-animate-spin" />
+                              <RefreshCw className="icon-sm animate-spin" />
                             ) : (
                               <Send className="icon-sm" />
                             )}
@@ -635,14 +635,14 @@ export function IntegrationsManager({
               <div className="stats-grid">
                 <div className="portal-card">
                   <div className="stat-card">
-                    <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
+                    <div className="flex items-center gap-2 mb-3">
                       <CreditCard className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
-                      <span className="tw-font-semibold">Stripe Payment Gateway</span>
+                      <span className="font-semibold">Stripe Payment Gateway</span>
                     </div>
-                    <div className="tw-space-y-1 tw-text-sm">
-                      <div className="tw-flex tw-justify-between">
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
                         <span className="text-muted">Connected</span>
-                        <span className={stripeStatus.connected ? 'tw-text-[var(--status-completed)]' : ''}>
+                        <span className={stripeStatus.connected ? 'text-[var(--status-completed)]' : ''}>
                           {stripeStatus.connected ? (
                             <CheckCircle className="icon-sm" style={{ color: 'var(--status-completed)' }} />
                           ) : (
@@ -651,18 +651,18 @@ export function IntegrationsManager({
                         </span>
                       </div>
                       {stripeStatus.accountId && (
-                        <div className="tw-flex tw-justify-between">
+                        <div className="flex justify-between">
                           <span className="text-muted">Account</span>
                           <span>{stripeStatus.accountId}</span>
                         </div>
                       )}
                       {stripeStatus.mode && (
-                        <div className="tw-flex tw-justify-between">
+                        <div className="flex justify-between">
                           <span className="text-muted">Mode</span>
                           <span className="status-badge">{stripeStatus.mode}</span>
                         </div>
                       )}
-                      <div className="tw-flex tw-justify-between">
+                      <div className="flex justify-between">
                         <span className="text-muted">Last Charge</span>
                         <span>{formatDate(stripeStatus.lastCharge)}</span>
                       </div>
@@ -685,12 +685,12 @@ export function IntegrationsManager({
               <div className="stats-grid">
                 <div className="portal-card">
                   <div className="stat-card">
-                    <div className="tw-flex tw-items-center tw-gap-2 tw-mb-3">
+                    <div className="flex items-center gap-2 mb-3">
                       <Calendar className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
-                      <span className="tw-font-semibold">Calendar Sync</span>
+                      <span className="font-semibold">Calendar Sync</span>
                     </div>
-                    <div className="tw-space-y-1 tw-text-sm">
-                      <div className="tw-flex tw-justify-between">
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
                         <span className="text-muted">Connected</span>
                         <span>
                           {calendarStatus.connected ? (
@@ -701,15 +701,15 @@ export function IntegrationsManager({
                         </span>
                       </div>
                       {calendarStatus.provider && (
-                        <div className="tw-flex tw-justify-between">
+                        <div className="flex justify-between">
                           <span className="text-muted">Provider</span>
                           <span>{calendarStatus.provider}</span>
                         </div>
                       )}
-                      <div className="tw-flex tw-justify-between">
+                      <div className="flex justify-between">
                         <span className="text-muted">Sync Enabled</span>
                         <button
-                          className="btn btn-secondary tw-p-0 tw-border-0"
+                          className="btn btn-secondary p-0 border-0"
                           onClick={handleToggleCalendarSync}
                           title={calendarStatus.syncEnabled ? 'Disable sync' : 'Enable sync'}
                         >
@@ -720,7 +720,7 @@ export function IntegrationsManager({
                           )}
                         </button>
                       </div>
-                      <div className="tw-flex tw-justify-between">
+                      <div className="flex justify-between">
                         <span className="text-muted">Last Sync</span>
                         <span>{formatDate(calendarStatus.lastSync)}</span>
                       </div>

@@ -255,7 +255,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
   return (
     <div
       ref={containerRef as React.RefObject<HTMLDivElement>}
-      className="tw-panel messaging-panel-container"
+      className="panel messaging-panel-container"
     >
       {/* Conversation List */}
       <div className="messaging-sidebar">
@@ -264,7 +264,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
           <h2 className="heading messaging-heading-with-badge">
             Messages
             {totalUnread > 0 && (
-              <span className="tw-badge tw-ml-2">
+              <span className="badge ml-2">
                 {totalUnread}
               </span>
             )}
@@ -278,12 +278,12 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="tw-input messaging-search-input"
+              className="input messaging-search-input"
             />
           </div>
 
           {/* Filter Tabs */}
-          <div className="tw-tab-list messaging-filter-tabs">
+          <div className="tab-list messaging-filter-tabs">
             {[
               { id: 'all', label: 'All', icon: Inbox },
               { id: 'unread', label: 'Unread', icon: Clock },
@@ -294,7 +294,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                 key={tab.id}
                 onClick={() => setFilter(tab.id as typeof filter)}
                 className={cn(
-                  filter === tab.id ? 'tw-tab-active' : 'tw-tab',
+                  filter === tab.id ? 'tab-active' : 'tab',
                   'messaging-filter-tab'
                 )}
               >
@@ -306,7 +306,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
         </div>
 
         {/* Conversation List */}
-        <div className="tw-scroll-container tw-flex-1">
+        <div className="scroll-container flex-1">
           {isLoading ? (
             <div className="loading-state">Loading conversations...</div>
           ) : filteredConversations.length === 0 ? (
@@ -320,8 +320,8 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                 key={conv.id}
                 onClick={() => setSelectedConversation(conv)}
                 className={cn(
-                  'tw-list-item',
-                  selectedConversation?.id === conv.id && 'tw-table-row-selected'
+                  'list-item',
+                  selectedConversation?.id === conv.id && 'table-row-selected'
                 )}
               >
                 <div className="messaging-conv-item-content">
@@ -343,13 +343,13 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                       </span>
                     )}
                     {conv.lastMessage && (
-                      <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'tw-text-primary' : 'text-muted')}>
+                      <p className={cn('messaging-conv-preview', conv.unreadCount > 0 ? 'text-primary' : 'text-muted')}>
                         {conv.lastMessage}
                       </p>
                     )}
                   </div>
                   {conv.unreadCount > 0 && (
-                    <span className="tw-badge">{conv.unreadCount}</span>
+                    <span className="badge">{conv.unreadCount}</span>
                   )}
                 </div>
               </div>
@@ -380,7 +380,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
               <div className="messaging-conv-actions">
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
-                  className={cn('icon-btn', selectedConversation.isStarred ? 'tw-text-primary' : 'text-muted')}
+                  className={cn('icon-btn', selectedConversation.isStarred ? 'text-primary' : 'text-muted')}
                 >
                   <Star
                     className="messaging-star-icon"
@@ -394,11 +394,11 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
             </div>
 
             {/* Messages */}
-            <div className="tw-scroll-container messaging-messages-container">
+            <div className="scroll-container messaging-messages-container">
               {messagesLoading ? (
                 <div className="loading-state">Loading messages...</div>
               ) : messages.length === 0 ? (
-                <div className="empty-state tw-h-full">
+                <div className="empty-state h-full">
                   <Inbox className="icon-xl" />
                   <span>No messages yet. Start the conversation!</span>
                 </div>
@@ -469,7 +469,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                     }}
                     placeholder="Type a message..."
                     rows={1}
-                    className="tw-textarea messaging-compose-textarea"
+                    className="textarea messaging-compose-textarea"
                   />
                 </div>
                 <button

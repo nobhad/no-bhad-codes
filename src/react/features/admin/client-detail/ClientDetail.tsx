@@ -222,7 +222,7 @@ export function ClientDetail({
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Header */}
       <div className="detail-title-row">
         <div className="detail-title-group">
@@ -238,7 +238,7 @@ export function ClientDetail({
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
                   <button className="btn-unstyled">
-                    <span className="tw-badge">
+                    <span className="badge">
                       {CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
                     </span>
                   </button>
@@ -251,7 +251,7 @@ export function ClientDetail({
                         key={status}
                         onClick={() => handleStatusChange(status as ClientStatus)}
                       >
-                        <span className="tw-badge">{config.label}</span>
+                        <span className="badge">{config.label}</span>
                       </PortalDropdownItem>
                     ))}
                 </PortalDropdownContent>

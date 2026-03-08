@@ -86,9 +86,9 @@ export function MessagesTab({
   );
 
   return (
-    <div className="tw-panel msgtab-container">
+    <div className="panel msgtab-container">
       {/* Messages List */}
-      <div className="tw-scroll-container msgtab-panel">
+      <div className="scroll-container msgtab-panel">
         {isLoading ? (
           <div className="loading-state">
             <span className="loading-spinner" />
@@ -168,7 +168,7 @@ export function MessagesTab({
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={2}
-            className="tw-textarea msgtab-textarea"
+            className="textarea msgtab-textarea"
           />
           <button
             className="btn-primary msgtab-send-btn"
@@ -180,7 +180,7 @@ export function MessagesTab({
           </button>
         </div>
         <div className="text-muted pd-hint pd-mt-2">
-          Press <kbd className="tw-badge msgtab-kbd">Cmd+Enter</kbd> to send
+          Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
         </div>
       </div>
     </div>

@@ -136,7 +136,7 @@ export function TasksTab({
   const totalCount = milestones.length;
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header with progress */}
       <div className="pd-tab-header">
         <div className="pd-row">
@@ -161,16 +161,16 @@ export function TasksTab({
       </div>
 
       {/* Progress Bar */}
-      <div className="tw-progress-track">
+      <div className="progress-track">
         <div
-          className="tw-progress-bar"
+          className="progress-bar"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Add Milestone Form */}
       {showAddForm && (
-        <div className="tw-panel">
+        <div className="panel">
           <h4 className="heading tasks-form-heading">
             New Milestone
           </h4>
@@ -182,7 +182,7 @@ export function TasksTab({
               value={newMilestoneTitle}
               onChange={(e) => setNewMilestoneTitle(e.target.value)}
               autoFocus
-              className="tw-input"
+              className="input"
             />
 
             <textarea
@@ -190,7 +190,7 @@ export function TasksTab({
               value={newMilestoneDescription}
               onChange={(e) => setNewMilestoneDescription(e.target.value)}
               rows={2}
-              className="tw-textarea tasks-textarea"
+              className="textarea tasks-textarea"
             />
 
             <div className="pd-row-compact">
@@ -199,7 +199,7 @@ export function TasksTab({
                 type="date"
                 value={newMilestoneDueDate}
                 onChange={(e) => setNewMilestoneDueDate(e.target.value)}
-                className="tw-input tasks-date-input"
+                className="input tasks-date-input"
               />
             </div>
 
@@ -245,11 +245,11 @@ export function TasksTab({
             return (
               <div
                 key={milestone.id}
-                className="tw-panel"
+                className="panel"
               >
                 {/* Milestone Header */}
                 <div
-                  className="tw-list-item"
+                  className="list-item"
                   onClick={() => toggleExpand(milestone.id)}
                 >
                   {/* Drag Handle */}
@@ -293,9 +293,9 @@ export function TasksTab({
 
                     {/* Task Progress Bar */}
                     {milestone.task_count !== undefined && milestone.task_count > 0 && (
-                      <div className="tw-progress-track tasks-progress-track">
+                      <div className="progress-track tasks-progress-track">
                         <div
-                          className="tw-progress-bar"
+                          className="progress-bar"
                           style={{ width: `${taskProgress}%` }}
                         />
                       </div>

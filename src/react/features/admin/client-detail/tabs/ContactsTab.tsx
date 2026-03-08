@@ -209,7 +209,7 @@ export function ContactsTab({
 
   // Render contact form
   const renderForm = () => (
-    <div className="tw-panel panel-form-spacing">
+    <div className="panel panel-form-spacing">
       <div className="panel-header-row">
         <h3 className="heading">
           {editingId ? 'Edit Contact' : 'Add Contact'}
@@ -261,7 +261,7 @@ export function ContactsTab({
           <select
             value={formData.role}
             onChange={(e) => handleFieldChange('role', e.target.value)}
-            className="tw-input"
+            className="input"
           >
             {Object.entries(CONTACT_ROLE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -309,7 +309,7 @@ export function ContactsTab({
   );
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header */}
       <div className="tab-section-header">
         <h2 className="heading text-lg">
