@@ -361,16 +361,16 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
               </div>
             </div>
             <div className="overview-panel-body ovdash-quick-actions">
-              <button onClick={() => onNavigate?.('projects')} className="btn btn-outline btn-sm">
+              <button onClick={() => onNavigate?.('projects')} className="btn-secondary btn-sm">
                 <Plus /> New Project
               </button>
-              <button onClick={() => onNavigate?.('clients')} className="btn btn-outline btn-sm">
+              <button onClick={() => onNavigate?.('clients')} className="btn-secondary btn-sm">
                 <Users /> Add Client
               </button>
-              <button onClick={() => onNavigate?.('invoices')} className="btn btn-outline btn-sm">
+              <button onClick={() => onNavigate?.('invoices')} className="btn-secondary btn-sm">
                 <FileUp /> Create Invoice
               </button>
-              <button onClick={() => onNavigate?.('messages')} className="btn btn-outline btn-sm">
+              <button onClick={() => onNavigate?.('messages')} className="btn-secondary btn-sm">
                 <Send /> Send Message
               </button>
             </div>
