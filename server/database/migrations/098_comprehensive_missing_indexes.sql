@@ -125,17 +125,6 @@ CREATE INDEX IF NOT EXISTS idx_invoices_payment_plan
   ON invoices(payment_plan_id);
 
 -- =====================================================
--- SECTION 9: Missing FK index on files.client_id
--- =====================================================
--- files table gained a client_id FK via 067_database_normalization
--- It is queried heavily via WHERE client_id = ? in file-service.ts
--- Existing: idx_files_project_id from 001
--- Missing: client_id (if column exists from normalization)
-
-CREATE INDEX IF NOT EXISTS idx_files_client
-  ON files(client_id);
-
--- =====================================================
 -- SECTION 10: Missing composite indexes for common query patterns
 -- =====================================================
 
@@ -333,7 +322,6 @@ DROP INDEX IF EXISTS idx_notification_history_type;
 DROP INDEX IF EXISTS idx_workflow_trigger_logs_result;
 DROP INDEX IF EXISTS idx_notification_digest_queue_created;
 DROP INDEX IF EXISTS idx_notification_log_created;
-DROP INDEX IF EXISTS idx_files_client;
 DROP INDEX IF EXISTS idx_invoices_payment_plan;
 DROP INDEX IF EXISTS idx_document_requests_file;
 DROP INDEX IF EXISTS idx_approval_history_step;
