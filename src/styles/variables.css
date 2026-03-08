@@ -496,40 +496,6 @@ img {
 
 /* Focus states handled globally in reset.css using box-shadow for rounded corners */
 
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-  :root {
-    --color-shadow: rgba(0, 0, 0, 0.8);
-  }
-}
-
-/* Print Styles */
-@media print {
-  * {
-    background: transparent !important;
-    color: black !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  body {
-    font-size: 12pt;
-    line-height: 1.5;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-}
+/* Reduced motion, high contrast, and print styles are defined in reset.css
+   (canonical source) and breakpoints.css (portal-specific overrides).
+   DO NOT duplicate them here. */

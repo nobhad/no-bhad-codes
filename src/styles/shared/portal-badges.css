@@ -443,6 +443,23 @@
 }
 
 /* =====================================================
+   STATUS DOT — CANONICAL BASE
+   Single source of truth for ALL .status-dot elements.
+   Standalone colored dot used in dropdowns, triggers,
+   status indicators, and list items.
+   ===================================================== */
+.status-dot {
+  display: inline-block;
+  width: var(--status-dot-size, 8px);
+  height: var(--status-dot-size, 8px);
+  min-width: var(--status-dot-size, 8px);
+  min-height: var(--status-dot-size, 8px);
+  border-radius: var(--portal-radius-full);
+  flex-shrink: 0;
+  background-color: var(--portal-text-muted);
+}
+
+/* =====================================================
    STATUS COLOR DOT
    Standalone colored dot for dropdowns and lists
    ===================================================== */

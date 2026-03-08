@@ -5,7 +5,7 @@
  * @file src/styles/shared/portal-cards.css
  *
  * Single source of truth for admin and client portal cards.
- * Uses .portal class on dashboard-container for scoping.
+ * Uses .portal scoping wrapper for CSS selectors.
  *
  * Related files:
  * - portal-stat-cards.css - Stat/KPI card system
@@ -145,7 +145,6 @@ html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) 
   .attention-label,
   /* Section labels */
   .section-title,
-  .sidebar-section-label,
   .milestone-title,
   /* Chart labels */
   .bar-chart-label,
@@ -187,7 +186,6 @@ html[data-theme="light"] .portal :is(
   .health-factor-label,
   .attention-label,
   .section-title,
-  .sidebar-section-label,
   .milestone-title,
   .bar-chart-label,
   .pie-chart-legend-label,
@@ -314,8 +312,13 @@ html[data-theme="light"] .portal :is(
   margin-top: var(--space-3);
 }
 
-/* Card header - Sans-serif font, uppercase */
+/* Card header — flex row with title + status
+   Canonical layout definition (merged from portal-components.css) */
 .portal .portal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);  /* 18px - card titles */
   font-weight: var(--font-weight-regular);
@@ -421,6 +424,38 @@ html[data-theme="light"] .portal :is(
 }
 
 /* Stat card styles: see portal-stat-cards.css */
+
+/* =====================================================
+   2-COLUMN CARD GRID (SHARED)
+   Replaces page-specific .card-grid-2col, .pd-grid-2
+   Gap is configurable via --card-grid-gap (default: --space-4)
+   ===================================================== */
+.portal .card-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--card-grid-gap, var(--space-4));
+}
+
+.portal .card-grid-2 > * {
+  min-width: 0;
+}
+
+@media (--mobile) {
+  .portal .card-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
+   BASE VIEW CONTAINER
+   Shared by all portal page views — flex column with
+   consistent section spacing.
+   ===================================================== */
+.portal-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-section-gap);
+}
 
 /* =====================================================
    OVERVIEW CARD

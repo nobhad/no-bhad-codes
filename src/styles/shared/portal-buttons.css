@@ -20,9 +20,9 @@ button:has(> svg) {
 
 /* Icon before text (default order).
    Exclude dropdown triggers — their SVG carets must stay AFTER text. */
-:is(.btn, .btn-primary, .btn-secondary, .btn-outline):not(.dropdown-trigger) > :is(svg, .btn-icon),
+:is(.btn, .btn-primary, .btn-secondary, .btn-outline):not(.dropdown-trigger):not(.date-range-trigger) > :is(svg, .btn-icon),
 .icon-btn > :is(svg, .icon-btn-svg),
-button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.modal-dropdown-trigger) > :is(.icon-wrap, .tab-icon, svg) {
+button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-trigger):not(.status-dropdown-trigger):not(.modal-dropdown-trigger):not(.date-range-trigger) > :is(.icon-wrap, .tab-icon, svg) {
   order: -1;
 }
 
