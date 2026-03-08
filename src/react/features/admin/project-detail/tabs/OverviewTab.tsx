@@ -25,7 +25,9 @@ import { EmptyState } from '@react/components/portal/EmptyState';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectMilestone } from '../../types';
 import { PROJECT_TYPE_LABELS } from '../../types';
-import { formatCurrency } from '../../../../../utils/format-utils';
+import { formatCurrency, formatDate } from '../../../../../utils/format-utils';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { KEYS } from '../../../../../constants/keyboard';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface OverviewTabProps {
@@ -36,23 +38,11 @@ interface OverviewTabProps {
   totalPaid: number;
   onUpdateProject: (updates: Partial<Project>) => Promise<boolean>;
   onAddMilestone: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
+  onUpdateMilestone: (id: number, updates: Partial<ProjectMilestone>) => Promise<boolean>;
   onToggleMilestone: (id: number) => Promise<boolean>;
   onDeleteMilestone: (id: number) => Promise<boolean>;
   onNavigate?: (tab: string, entityId?: string) => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
-
-/**
- * Format date for display
- */
-function formatDate(date: string | undefined): string {
-  if (!date) return '';
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${month}/${day}/${year}`;
 }
 
 /** Project type options for InlineSelect */
@@ -77,6 +67,7 @@ export function OverviewTab({
   totalPaid,
   onUpdateProject,
   onAddMilestone,
+  onUpdateMilestone,
   onToggleMilestone,
   onDeleteMilestone,
   onNavigate,
@@ -86,6 +77,11 @@ export function OverviewTab({
   const [showAddMilestone, setShowAddMilestone] = useState(false);
   const [newMilestoneTitle, setNewMilestoneTitle] = useState('');
   const [deletingMilestoneId, setDeletingMilestoneId] = useState<number | null>(null);
+
+  // Edit state
+  const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const deleteDialog = useConfirmDialog();
 
@@ -112,17 +108,46 @@ export function OverviewTab({
     if (success) {
       setNewMilestoneTitle('');
       setShowAddMilestone(false);
-      showNotification?.('Milestone added', 'success');
+      showNotification?.(NOTIFICATIONS.milestone.ADDED, 'success');
     } else {
-      showNotification?.('Failed to add milestone', 'error');
+      showNotification?.(NOTIFICATIONS.milestone.ADD_FAILED, 'error');
     }
   }, [newMilestoneTitle, onAddMilestone, showNotification]);
+
+  // Start editing a milestone (inline title edit)
+  const handleStartEdit = useCallback((milestone: ProjectMilestone) => {
+    setEditingMilestoneId(milestone.id);
+    setEditTitle(milestone.title);
+    setExpandedMilestones((prev) => new Set(prev).add(milestone.id));
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMilestoneId(null);
+    setEditTitle('');
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (editingMilestoneId === null || !editTitle.trim()) return;
+
+    setIsSavingEdit(true);
+    const success = await onUpdateMilestone(editingMilestoneId, {
+      title: editTitle.trim()
+    });
+    setIsSavingEdit(false);
+
+    if (success) {
+      handleCancelEdit();
+      showNotification?.(NOTIFICATIONS.milestone.UPDATED, 'success');
+    } else {
+      showNotification?.(NOTIFICATIONS.milestone.UPDATE_FAILED, 'error');
+    }
+  }, [editingMilestoneId, editTitle, onUpdateMilestone, showNotification, handleCancelEdit]);
 
   const handleToggleMilestone = useCallback(
     async (id: number) => {
       const success = await onToggleMilestone(id);
       if (!success) {
-        showNotification?.('Failed to update milestone', 'error');
+        showNotification?.(NOTIFICATIONS.milestone.UPDATE_FAILED, 'error');
       }
     },
     [onToggleMilestone, showNotification]
@@ -133,9 +158,9 @@ export function OverviewTab({
 
     const success = await onDeleteMilestone(deletingMilestoneId);
     if (success) {
-      showNotification?.('Milestone deleted', 'success');
+      showNotification?.(NOTIFICATIONS.milestone.DELETED, 'success');
     } else {
-      showNotification?.('Failed to delete milestone', 'error');
+      showNotification?.(NOTIFICATIONS.milestone.DELETE_FAILED, 'error');
     }
     setDeletingMilestoneId(null);
   }, [deletingMilestoneId, onDeleteMilestone, showNotification]);
@@ -144,9 +169,9 @@ export function OverviewTab({
     async (field: keyof Project, value: string): Promise<boolean> => {
       const success = await onUpdateProject({ [field]: value });
       if (success) {
-        showNotification?.('Updated successfully', 'success');
+        showNotification?.(NOTIFICATIONS.project.UPDATED, 'success');
       } else {
-        showNotification?.('Failed to update', 'error');
+        showNotification?.(NOTIFICATIONS.project.UPDATE_FAILED, 'error');
       }
       return success;
     },
@@ -311,10 +336,9 @@ export function OverviewTab({
         <div className="panel">
           <div className="panel-card-header">
             <h3 className="section-title">Milestones</h3>
-            <button className="btn-ghost" onClick={() => setShowAddMilestone(true)}>
-              <Plus className="icon-md" />
+            <PortalButton variant="ghost" onClick={() => setShowAddMilestone(true)} icon={<Plus className="icon-md" />}>
               Add
-            </button>
+            </PortalButton>
           </div>
 
           {/* Progress Bar */}
@@ -323,8 +347,8 @@ export function OverviewTab({
               <span className="field-label">Progress</span>
               <span className="text-muted">{progress}%</span>
             </div>
-            <div className="progress-bar progress-sm">
-              <div className="progress-fill" style={{ width: `${progress}%` }} />
+            <div className="progress-track progress-sm">
+              <div className="progress-bar" style={{ width: `${progress}%` }} />
             </div>
           </div>
 
@@ -336,8 +360,8 @@ export function OverviewTab({
                 value={newMilestoneTitle}
                 onChange={(e) => setNewMilestoneTitle(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddMilestone();
-                  if (e.key === 'Escape') {
+                  if (e.key === KEYS.ENTER) handleAddMilestone();
+                  if (e.key === KEYS.ESCAPE) {
                     setShowAddMilestone(false);
                     setNewMilestoneTitle('');
                   }
@@ -348,15 +372,15 @@ export function OverviewTab({
               <PortalButton variant="primary" size="sm" onClick={handleAddMilestone}>
                 Add
               </PortalButton>
-              <button
-                className="btn-ghost"
+              <PortalButton
+                variant="ghost"
                 onClick={() => {
                   setShowAddMilestone(false);
                   setNewMilestoneTitle('');
                 }}
               >
                 Cancel
-              </button>
+              </PortalButton>
             </div>
           )}
 
@@ -391,8 +415,9 @@ export function OverviewTab({
                       onClick={() => toggleMilestoneExpand(milestone.id)}
                       role="button"
                       tabIndex={0}
+                      aria-expanded={expandedMilestones.has(milestone.id)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
+                        if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
                           e.preventDefault();
                           toggleMilestoneExpand(milestone.id);
                         }
@@ -428,46 +453,71 @@ export function OverviewTab({
                   {/* Expanded Content */}
                   {expandedMilestones.has(milestone.id) && (
                     <div className="milestone-expanded-content">
-                      {milestone.description && (
-                        <p className="milestone-description">
-                          {decodeHtmlEntities(milestone.description)}
-                        </p>
-                      )}
+                      {editingMilestoneId === milestone.id ? (
+                        /* Inline edit form */
+                        <div className="milestone-add-form">
+                          <PortalInput
+                            placeholder="Milestone title..."
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === KEYS.ENTER) handleSaveEdit();
+                              if (e.key === KEYS.ESCAPE) handleCancelEdit();
+                            }}
+                            autoFocus
+                            className="flex-1"
+                          />
+                          <PortalButton variant="primary" size="sm" onClick={handleSaveEdit} loading={isSavingEdit}>
+                            Save
+                          </PortalButton>
+                          <PortalButton variant="ghost" onClick={handleCancelEdit}>
+                            Cancel
+                          </PortalButton>
+                        </div>
+                      ) : (
+                        <>
+                          {milestone.description && (
+                            <p className="milestone-description">
+                              {decodeHtmlEntities(milestone.description)}
+                            </p>
+                          )}
 
-                      {milestone.deliverables && milestone.deliverables.length > 0 && (
-                        <ul className="milestone-deliverables">
-                          {milestone.deliverables.map((deliverable, idx) => (
-                            <li key={idx} className="milestone-description">
-                              <span>•</span>
-                              {deliverable}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                          {milestone.deliverables && milestone.deliverables.length > 0 && (
+                            <ul className="milestone-deliverables">
+                              {milestone.deliverables.map((deliverable, idx) => (
+                                <li key={idx} className="milestone-description">
+                                  <span>•</span>
+                                  {deliverable}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
 
-                      <div className="milestone-actions">
-                        <button
-                          className="icon-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: wire up milestone edit
-                          }}
-                          aria-label="Edit milestone"
-                        >
-                          <Pencil className="icon-sm" />
-                        </button>
-                        <button
-                          className="icon-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeletingMilestoneId(milestone.id);
-                            deleteDialog.open();
-                          }}
-                          aria-label="Delete milestone"
-                        >
-                          <Trash2 className="icon-sm" />
-                        </button>
-                      </div>
+                          <div className="milestone-actions">
+                            <button
+                              className="icon-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartEdit(milestone);
+                              }}
+                              aria-label="Edit milestone"
+                            >
+                              <Pencil className="icon-sm" />
+                            </button>
+                            <button
+                              className="icon-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeletingMilestoneId(milestone.id);
+                                deleteDialog.open();
+                              }}
+                              aria-label="Delete milestone"
+                            >
+                              <Trash2 className="icon-sm" />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -531,24 +581,13 @@ export function OverviewTab({
         <div className="panel">
           <h3 className="section-title">Financials</h3>
 
-          <div>
-            <div className="financial-row">
-              <span className="financial-row-label">Outstanding Balance</span>
-              <span className="financial-row-value">{formatCurrency(outstandingBalance)}</span>
-            </div>
-
-            <div className="financial-row">
-              <span className="financial-row-label">Total Paid</span>
-              <span className="financial-row-value">{formatCurrency(totalPaid)}</span>
-            </div>
-
+          <StatsRow>
+            <StatCard label="Outstanding" value={formatCurrency(outstandingBalance)} />
+            <StatCard label="Total Paid" value={formatCurrency(totalPaid)} />
             {project.deposit_amount !== undefined && project.deposit_amount > 0 && (
-              <div className="financial-row">
-                <span className="financial-row-label">Deposit Amount</span>
-                <span className="financial-row-value">{formatCurrency(project.deposit_amount)}</span>
-              </div>
+              <StatCard label="Deposit" value={formatCurrency(project.deposit_amount)} />
             )}
-          </div>
+          </StatsRow>
         </div>
 
         {/* Quick Stats */}

@@ -324,10 +324,9 @@ export function ContactsTab({
           Contacts ({contacts.length})
         </h2>
         {!isAdding && !editingId && (
-          <button className="btn-secondary" onClick={handleStartAdd}>
-            <Plus className="icon-md" />
+          <PortalButton variant="secondary" onClick={handleStartAdd} icon={<Plus className="icon-md" />}>
             Add Contact
-          </button>
+          </PortalButton>
         )}
       </div>
 
@@ -375,7 +374,7 @@ export function ContactsTab({
 
                 <PortalDropdown>
                   <PortalDropdownTrigger asChild>
-                    <button className="icon-btn">
+                    <button className="icon-btn" aria-label="Contact actions">
                       <Pencil className="icon-md" />
                     </button>
                   </PortalDropdownTrigger>

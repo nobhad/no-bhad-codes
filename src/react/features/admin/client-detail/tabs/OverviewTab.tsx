@@ -22,7 +22,7 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Client, ClientHealth, ClientDetailStats, ClientTag } from '../../types';
-import { formatCurrency as formatCurrencyUtil } from '../../../../../utils/format-utils';
+import { formatCurrency as formatCurrencyUtil, formatDate } from '../../../../../utils/format-utils';
 
 interface OverviewTabProps {
   client: Client;
@@ -41,18 +41,6 @@ interface OverviewTabProps {
  */
 function formatCurrency(amount: number | undefined): string {
   return formatCurrencyUtil(amount, { fallback: '$0' });
-}
-
-/**
- * Format date
- */
-function formatDate(date: string | undefined): string {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
 }
 
 /**
@@ -302,7 +290,7 @@ export function OverviewTab({
             <div className="account-detail-row">
               <span className="field-label">Created</span>
               <span className="text-muted">
-                {formatDate(client.created_at)}
+                {formatDate(client.created_at, 'label')}
               </span>
             </div>
 
@@ -310,7 +298,7 @@ export function OverviewTab({
               <div className="account-detail-row">
                 <span className="field-label">Invited</span>
                 <span className="text-muted">
-                  {formatDate(client.invitation_sent_at)}
+                  {formatDate(client.invitation_sent_at, 'label')}
                 </span>
               </div>
             )}

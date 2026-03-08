@@ -540,8 +540,14 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   background: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.milestone-item:hover {
+  background: var(--portal-alpha-white-05);
 }
 
 /* Custom checkbox - wrapper div */
@@ -1629,6 +1635,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 /* Horizontal row: flex, align-center, gap-4 */
@@ -1757,6 +1765,10 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   text-align: right;
 }
 
+.pd-cell-center {
+  text-align: center;
+}
+
 /* Full-width element */
 .pd-full-width {
   width: 100%;
@@ -1865,9 +1877,61 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--color-primary);
 }
 
+/* Files table column widths */
+.files-col-name {
+  width: auto;
+}
+
+.files-col-size {
+  width: 100px;
+}
+
+.files-col-date {
+  width: 130px;
+}
+
+.files-col-shared {
+  width: 80px;
+}
+
+.files-col-actions {
+  width: 100px;
+}
+
 /* Table header row styling */
 .files-table-header {
   border-bottom: var(--border-width) solid var(--portal-border-color);
+}
+
+/* Table row — ensure table-row display (override any .list-item flex) */
+.files-table-row {
+  display: table-row;
+  transition: background-color var(--transition-fast);
+}
+
+.files-table-row:hover {
+  background: var(--portal-alpha-white-05);
+}
+
+/* Category dropdown trigger — clean button style matching InlineSelect pattern */
+.files-category-trigger {
+  height: 32px;
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: var(--border-width) solid var(--portal-border-color);
+  color: var(--portal-text-light);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.files-category-trigger:hover {
+  border-color: var(--portal-text-muted);
+}
+
+.files-category-trigger[data-state="open"] {
+  border-color: var(--color-primary);
 }
 
 /* --- Tasks Tab --- */
@@ -1900,9 +1964,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-size: var(--font-size-xs);
 }
 
-/* Tasks expanded content area */
-.tasks-expanded-content {
-  padding: 0 var(--space-4) var(--space-4);
+/* Tasks expanded content area — overrides milestone-expanded-content padding
+   to account for drag handle + checkbox indent */
+.milestone-expanded-content.tasks-expanded-content {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  padding-left: calc(var(--icon-size-md) + 20px + var(--space-1-5) * 3);
 }
 
 /* Tasks deliverable list */
@@ -1994,9 +2060,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   border-bottom: var(--border-width) solid var(--portal-border-color);
 }
 
-/* Invoice table row - clickable */
+/* Invoice table row - clickable, ensure table-row display */
 .invtab-row {
+  display: table-row;
   cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.invtab-row:hover {
+  background: var(--portal-alpha-white-05);
 }
 
 /* Invoice dropdown icon margin */

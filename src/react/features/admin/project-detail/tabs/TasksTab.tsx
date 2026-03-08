@@ -9,7 +9,8 @@ import {
   ChevronRight,
   Calendar,
   Inbox,
-  GripVertical
+  GripVertical,
+  X
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -17,6 +18,9 @@ import { PortalButton } from '@react/components/portal/PortalButton';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectMilestone } from '../../types';
+import { formatDate } from '../../../../../utils/format-utils';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { KEYS } from '../../../../../constants/keyboard';
 
 interface TasksTabProps {
   milestones: ProjectMilestone[];
@@ -29,18 +33,6 @@ interface TasksTabProps {
 }
 
 /**
- * Format date for display
- */
-function formatDate(date: string | undefined): string {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-/**
  * TasksTab
  * Milestone and task management for project
  */
@@ -48,7 +40,7 @@ export function TasksTab({
   milestones,
   progress,
   onAddMilestone,
-  onUpdateMilestone: _onUpdateMilestone,
+  onUpdateMilestone,
   onDeleteMilestone,
   onToggleMilestone,
   showNotification
@@ -62,6 +54,13 @@ export function TasksTab({
   const [newMilestoneDueDate, setNewMilestoneDueDate] = useState('');
   const [deletingMilestoneId, setDeletingMilestoneId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Edit state
+  const [editingMilestoneId, setEditingMilestoneId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const deleteDialog = useConfirmDialog();
 
@@ -81,7 +80,7 @@ export function TasksTab({
   // Handle add milestone
   const handleAddMilestone = useCallback(async () => {
     if (!newMilestoneTitle.trim()) {
-      showNotification?.('Please enter a title', 'error');
+      showNotification?.(NOTIFICATIONS.milestone.TITLE_REQUIRED, 'error');
       return;
     }
 
@@ -99,9 +98,9 @@ export function TasksTab({
       setNewMilestoneDescription('');
       setNewMilestoneDueDate('');
       setShowAddForm(false);
-      showNotification?.('Milestone added', 'success');
+      showNotification?.(NOTIFICATIONS.milestone.ADDED, 'success');
     } else {
-      showNotification?.('Failed to add milestone', 'error');
+      showNotification?.(NOTIFICATIONS.milestone.ADD_FAILED, 'error');
     }
   }, [
     newMilestoneTitle,
@@ -111,12 +110,54 @@ export function TasksTab({
     showNotification
   ]);
 
+  // Start editing a milestone
+  const handleStartEdit = useCallback((milestone: ProjectMilestone) => {
+    setEditingMilestoneId(milestone.id);
+    setEditTitle(milestone.title);
+    setEditDescription(milestone.description || '');
+    setEditDueDate(milestone.due_date || '');
+    // Ensure milestone is expanded
+    setExpandedMilestones((prev) => new Set(prev).add(milestone.id));
+  }, []);
+
+  // Cancel editing
+  const handleCancelEdit = useCallback(() => {
+    setEditingMilestoneId(null);
+    setEditTitle('');
+    setEditDescription('');
+    setEditDueDate('');
+  }, []);
+
+  // Save milestone edit
+  const handleSaveEdit = useCallback(async () => {
+    if (editingMilestoneId === null) return;
+    if (!editTitle.trim()) {
+      showNotification?.(NOTIFICATIONS.milestone.TITLE_REQUIRED, 'error');
+      return;
+    }
+
+    setIsSavingEdit(true);
+    const success = await onUpdateMilestone(editingMilestoneId, {
+      title: editTitle.trim(),
+      description: editDescription.trim() || undefined,
+      due_date: editDueDate || undefined
+    });
+    setIsSavingEdit(false);
+
+    if (success) {
+      handleCancelEdit();
+      showNotification?.(NOTIFICATIONS.milestone.UPDATED, 'success');
+    } else {
+      showNotification?.(NOTIFICATIONS.milestone.UPDATE_FAILED, 'error');
+    }
+  }, [editingMilestoneId, editTitle, editDescription, editDueDate, onUpdateMilestone, showNotification, handleCancelEdit]);
+
   // Handle toggle completion
   const handleToggle = useCallback(
     async (id: number) => {
       const success = await onToggleMilestone(id);
       if (!success) {
-        showNotification?.('Failed to update milestone', 'error');
+        showNotification?.(NOTIFICATIONS.milestone.UPDATE_FAILED, 'error');
       }
     },
     [onToggleMilestone, showNotification]
@@ -128,9 +169,9 @@ export function TasksTab({
 
     const success = await onDeleteMilestone(deletingMilestoneId);
     if (success) {
-      showNotification?.('Milestone deleted', 'success');
+      showNotification?.(NOTIFICATIONS.milestone.DELETED, 'success');
     } else {
-      showNotification?.('Failed to delete milestone', 'error');
+      showNotification?.(NOTIFICATIONS.milestone.DELETE_FAILED, 'error');
     }
     setDeletingMilestoneId(null);
   }, [deletingMilestoneId, onDeleteMilestone, showNotification]);
@@ -158,10 +199,9 @@ export function TasksTab({
           </div>
         </div>
 
-        <button className="btn-primary" onClick={() => setShowAddForm(true)}>
-          <Plus className="icon-md" />
+        <PortalButton onClick={() => setShowAddForm(true)} icon={<Plus className="icon-md" />}>
           Add Milestone
-        </button>
+        </PortalButton>
       </div>
 
       {/* Progress Bar */}
@@ -192,7 +232,7 @@ export function TasksTab({
               value={newMilestoneDescription}
               onChange={(e) => setNewMilestoneDescription(e.target.value)}
               rows={2}
-              className="textarea tasks-textarea"
+              className="textarea tasks-textarea" aria-label="Milestone description"
             />
 
             <PortalInput
@@ -229,9 +269,10 @@ export function TasksTab({
           message="No milestones yet. Add milestones to track project progress."
         />
       ) : (
-        <div className="pd-col-tight">
+        <div className="milestone-list">
           {milestones.map((milestone, index) => {
             const isExpanded = expandedMilestones.has(milestone.id);
+            const isEditing = editingMilestoneId === milestone.id;
             const taskProgress = milestone.task_count
               ? Math.round(((milestone.completed_task_count || 0) / milestone.task_count) * 100)
               : 0;
@@ -239,12 +280,21 @@ export function TasksTab({
             return (
               <div
                 key={milestone.id}
-                className="panel"
+                className="milestone-item-wrapper"
               >
                 {/* Milestone Header */}
                 <div
-                  className="list-item"
+                  className="milestone-item"
                   onClick={() => toggleExpand(milestone.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  onKeyDown={(e) => {
+                    if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+                      e.preventDefault();
+                      toggleExpand(milestone.id);
+                    }
+                  }}
                 >
                   {/* Drag Handle */}
                   <GripVertical className="icon-md tasks-drag-handle" />
@@ -259,6 +309,7 @@ export function TasksTab({
                       'tasks-checkbox',
                       milestone.is_completed && 'is-completed'
                     )}
+                    aria-label={milestone.is_completed ? 'Mark incomplete' : 'Mark complete'}
                   >
                     {milestone.is_completed && (
                       <Check className="icon-sm text-dark" />
@@ -267,12 +318,11 @@ export function TasksTab({
 
                   {/* Title and Progress */}
                   <div className="pd-flex-fill">
-                    <div className="pd-row-compact">
+                    <div className="milestone-content">
                       <span
                         className={cn(
-                          milestone.is_completed
-                            ? 'text-muted pd-completed-text'
-                            : 'pd-highlight-value'
+                          'milestone-title',
+                          milestone.is_completed && 'completed'
                         )}
                       >
                         {milestone.title}
@@ -300,7 +350,7 @@ export function TasksTab({
                   {milestone.due_date && (
                     <span className="text-muted pd-row-inline pd-text-xs">
                       <Calendar className="icon-sm" />
-                      {formatDate(milestone.due_date)}
+                      {formatDate(milestone.due_date, 'label')}
                     </span>
                   )}
 
@@ -311,73 +361,115 @@ export function TasksTab({
 
                   {/* Expand icon */}
                   {isExpanded ? (
-                    <ChevronDown className="icon-md" />
+                    <ChevronDown className="icon-sm" />
                   ) : (
-                    <ChevronRight className="icon-md" />
+                    <ChevronRight className="icon-sm" />
                   )}
                 </div>
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                  <div className="tasks-expanded-content">
-                    {/* Description */}
-                    {milestone.description && (
-                      <p className="text-muted pd-mt-3 tasks-description">
-                        {milestone.description}
-                      </p>
-                    )}
+                  <div className="milestone-expanded-content tasks-expanded-content">
+                    {isEditing ? (
+                      /* Edit Form */
+                      <div className="pd-col">
+                        <PortalInput
+                          placeholder="Milestone title..."
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === KEYS.ESCAPE) handleCancelEdit();
+                          }}
+                          autoFocus
+                        />
 
-                    {/* Deliverables */}
-                    {milestone.deliverables && milestone.deliverables.length > 0 && (
-                      <div className="pd-mt-3">
-                        <span className="field-label">
-                          Deliverables
-                        </span>
-                        <ul className="tasks-deliverable-list">
-                          {milestone.deliverables.map((deliverable, idx) => (
-                            <li
-                              key={idx}
-                              className="text-muted tasks-deliverable-item"
-                            >
-                              <span>•</span>
-                              {deliverable}
-                            </li>
-                          ))}
-                        </ul>
+                        <textarea
+                          placeholder="Description (optional)..."
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          rows={2}
+                          className="textarea tasks-textarea"
+                          aria-label="Edit milestone description"
+                        />
+
+                        <PortalInput
+                          type="date"
+                          value={editDueDate}
+                          onChange={(e) => setEditDueDate(e.target.value)}
+                          className="tasks-date-input"
+                        />
+
+                        <div className="pd-row-end pd-mt-2">
+                          <PortalButton variant="ghost" onClick={handleCancelEdit} icon={<X className="icon-md" />}>
+                            Cancel
+                          </PortalButton>
+                          <PortalButton onClick={handleSaveEdit} loading={isSavingEdit}>
+                            Save
+                          </PortalButton>
+                        </div>
                       </div>
-                    )}
+                    ) : (
+                      <>
+                        {/* Description */}
+                        {milestone.description && (
+                          <p className="text-muted tasks-description">
+                            {milestone.description}
+                          </p>
+                        )}
 
-                    {/* Completed Date */}
-                    {milestone.is_completed && milestone.completed_date && (
-                      <div className="pd-highlight-value pd-text-xs pd-mt-3">
-                        Completed on {formatDate(milestone.completed_date)}
-                      </div>
-                    )}
+                        {/* Deliverables */}
+                        {milestone.deliverables && milestone.deliverables.length > 0 && (
+                          <div className="pd-mt-3">
+                            <span className="field-label">
+                              Deliverables
+                            </span>
+                            <ul className="tasks-deliverable-list">
+                              {milestone.deliverables.map((deliverable, idx) => (
+                                <li
+                                  key={idx}
+                                  className="text-muted tasks-deliverable-item"
+                                >
+                                  <span>•</span>
+                                  {deliverable}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
 
-                    {/* Actions */}
-                    <div className="milestone-actions">
-                      <button
-                        className="icon-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // TODO: wire up milestone edit
-                        }}
-                        aria-label="Edit milestone"
-                      >
-                        <Pencil className="icon-sm" />
-                      </button>
-                      <button
-                        className="icon-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeletingMilestoneId(milestone.id);
-                          deleteDialog.open();
-                        }}
-                        aria-label="Delete milestone"
-                      >
-                        <Trash2 className="icon-sm" />
-                      </button>
-                    </div>
+                        {/* Completed Date */}
+                        {milestone.is_completed && milestone.completed_date && (
+                          <div className="pd-highlight-value pd-text-xs pd-mt-3">
+                            Completed on {formatDate(milestone.completed_date, 'label')}
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="milestone-actions">
+                          <button
+                            className="icon-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartEdit(milestone);
+                            }}
+                            aria-label="Edit milestone"
+                          >
+                            <Pencil className="icon-sm" />
+                          </button>
+                          <button
+                            className="icon-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletingMilestoneId(milestone.id);
+                              deleteDialog.open();
+                            }}
+                            aria-label="Delete milestone"
+                          >
+                            <Trash2 className="icon-sm" />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

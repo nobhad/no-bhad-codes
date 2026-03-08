@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
+import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -32,6 +33,7 @@ import { NotesTab } from './tabs/NotesTab';
 import type { ClientDetailTab, ClientStatus } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
+import { NOTIFICATIONS, statusUpdatedMessage } from '../../../../constants/notifications';
 
 interface ClientDetailProps {
   /** Client ID to display */
@@ -102,7 +104,6 @@ export function ClientDetail({
     addNote,
     updateNote,
     deleteNote,
-    toggleNotePin: _toggleNotePin,
     addTag,
     removeTag,
     sendInvitation
@@ -117,9 +118,9 @@ export function ClientDetail({
     async (newStatus: ClientStatus) => {
       const success = await updateClient({ status: newStatus });
       if (success) {
-        showNotification?.(`Status updated to ${CLIENT_STATUS_CONFIG[newStatus].label}`, 'success');
+        showNotification?.(statusUpdatedMessage(CLIENT_STATUS_CONFIG[newStatus].label), 'success');
       } else {
-        showNotification?.('Failed to update status', 'error');
+        showNotification?.(NOTIFICATIONS.client.STATUS_UPDATE_FAILED, 'error');
       }
     },
     [updateClient, showNotification]
@@ -129,10 +130,10 @@ export function ClientDetail({
   const handleArchive = useCallback(async () => {
     const success = await updateClient({ status: 'inactive' });
     if (success) {
-      showNotification?.('Client archived', 'success');
+      showNotification?.(NOTIFICATIONS.client.ARCHIVED, 'success');
       onBack?.();
     } else {
-      showNotification?.('Failed to archive client', 'error');
+      showNotification?.(NOTIFICATIONS.client.ARCHIVE_FAILED, 'error');
     }
   }, [updateClient, showNotification, onBack]);
 
@@ -154,13 +155,13 @@ export function ClientDetail({
       });
 
       if (response.ok) {
-        showNotification?.('Client deleted', 'success');
+        showNotification?.(NOTIFICATIONS.client.DELETED, 'success');
         onBack?.();
       } else {
-        showNotification?.('Failed to delete client', 'error');
+        showNotification?.(NOTIFICATIONS.client.DELETE_FAILED, 'error');
       }
     } catch {
-      showNotification?.('Failed to delete client', 'error');
+      showNotification?.(NOTIFICATIONS.client.DELETE_FAILED, 'error');
     }
   }, [clientId, getAuthToken, showNotification, onBack]);
 
@@ -168,9 +169,9 @@ export function ClientDetail({
   const handleSendInvitation = useCallback(async () => {
     const success = await sendInvitation();
     if (success) {
-      showNotification?.('Invitation sent', 'success');
+      showNotification?.(NOTIFICATIONS.client.INVITATION_SENT, 'success');
     } else {
-      showNotification?.('Failed to send invitation', 'error');
+      showNotification?.(NOTIFICATIONS.client.INVITATION_FAILED, 'error');
     }
   }, [sendInvitation, showNotification]);
 
@@ -272,16 +273,14 @@ export function ClientDetail({
           <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
           {!client.invitation_sent_at && (
-            <button className="btn-secondary" onClick={handleSendInvitation}>
-              <Mail className="icon-md" />
+            <PortalButton variant="secondary" onClick={handleSendInvitation} icon={<Mail className="icon-md" />}>
               Send Invite
-            </button>
+            </PortalButton>
           )}
 
-          <button className="btn-secondary" onClick={() => onEdit?.(clientId)}>
-            <Pencil className="icon-md" />
+          <PortalButton variant="secondary" onClick={() => onEdit?.(clientId)} icon={<Pencil className="icon-md" />}>
             Edit
-          </button>
+          </PortalButton>
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>

@@ -10,6 +10,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectMilestone } from '../../types';
+import { formatDate } from '../../../../../utils/format-utils';
 
 interface DeliverablesTabProps {
   milestones: ProjectMilestone[];
@@ -25,18 +26,6 @@ interface DeliverableItem {
   milestoneTitle: string;
   milestoneDueDate?: string;
   isCompleted: boolean;
-}
-
-/**
- * Format date for display
- */
-function formatDate(date: string | undefined): string {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
 }
 
 /**
@@ -163,7 +152,7 @@ export function DeliverablesTab({
                     {milestone.due_date && (
                       <span className="text-muted pd-row-inline pd-text-xs">
                         <Calendar className="icon-sm" />
-                        {formatDate(milestone.due_date)}
+                        {formatDate(milestone.due_date, 'label')}
                       </span>
                     )}
                   </div>

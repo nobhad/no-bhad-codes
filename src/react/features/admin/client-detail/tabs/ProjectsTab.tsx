@@ -1,23 +1,14 @@
 import * as React from 'react';
 import { FolderKanban, ExternalLink, Clock } from 'lucide-react';
 import { EmptyState } from '@react/components/portal/EmptyState';
+import { PortalButton } from '@react/components/portal/PortalButton';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
+import { formatDate } from '../../../../../utils/format-utils';
 
 interface ProjectsTabProps {
   projects: ClientProject[];
   onViewProject?: (projectId: number) => void;
-}
-
-/**
- * Format date
- */
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
 }
 
 /**
@@ -61,24 +52,25 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
               <h4 className="heading truncate">
                 {project.project_name}
               </h4>
-              <span className="badge text-xs">
+              <span className="badge">
                 {statusConfig?.label || project.status}
               </span>
             </div>
 
             <div className="project-date-row text-muted text-sm">
               <Clock className="icon-xs" />
-              <span>Created {formatDate(project.created_at)}</span>
+              <span>Created {formatDate(project.created_at, 'label')}</span>
             </div>
           </div>
 
-          <button
-            className="btn-ghost hover-reveal"
+          <PortalButton
+            variant="ghost"
+            className="hover-reveal"
             onClick={() => onViewProject?.(project.id)}
+            icon={<ExternalLink className="icon-md" />}
           >
-            <ExternalLink className="icon-md" />
             View
-          </button>
+          </PortalButton>
         </div>
 
         {/* Progress bar */}

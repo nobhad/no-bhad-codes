@@ -3,6 +3,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { Save, StickyNote } from 'lucide-react';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Project } from '../../types';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { isKeyCombo } from '../../../../../constants/keyboard';
 
 interface NotesTabProps {
   project: Project;
@@ -44,16 +46,16 @@ export function NotesTab({
 
     if (success) {
       setHasChanges(false);
-      showNotification?.('Notes saved', 'success');
+      showNotification?.(NOTIFICATIONS.project.NOTES_SAVED, 'success');
     } else {
-      showNotification?.('Failed to save notes', 'error');
+      showNotification?.(NOTIFICATIONS.project.NOTES_SAVE_FAILED, 'error');
     }
   }, [notes, onUpdateProject, showNotification]);
 
   // Handle keyboard shortcut (Ctrl/Cmd + S)
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      if (isKeyCombo(e, 's', 'cmd')) {
         e.preventDefault();
         if (hasChanges) {
           handleSave();
@@ -100,7 +102,7 @@ export function NotesTab({
           onKeyDown={handleKeyDown}
           placeholder="Add internal notes about this project..."
           rows={15}
-          className="textarea notes-textarea"
+          className="textarea notes-textarea" aria-label="Internal project notes"
         />
       </div>
 

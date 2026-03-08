@@ -441,22 +441,6 @@ export interface ProjectMilestone {
 }
 
 /**
- * Task within a milestone
- */
-export interface ProjectTask {
-  id: number;
-  milestone_id: number;
-  project_id: number;
-  title: string;
-  description?: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  assigned_to?: string;
-  due_date?: string;
-  completed_date?: string;
-  order_index?: number;
-}
-
-/**
  * Project file upload
  */
 export interface ProjectFile {
@@ -491,19 +475,6 @@ export const FILE_CATEGORY_OPTIONS = [
 ] as const;
 
 /**
- * Message thread
- */
-export interface MessageThread {
-  id: number;
-  project_id?: number;
-  client_id: number;
-  subject?: string;
-  last_message_at?: string;
-  unread_count?: number;
-  created_at: string;
-}
-
-/**
  * Message in a thread
  */
 export interface Message {
@@ -529,25 +500,6 @@ export type ProjectDetailTab =
   | 'contract'
   | 'notes'
   | 'intake';
-
-/**
- * Tab configuration for project detail
- */
-export const PROJECT_DETAIL_TABS: Array<{
-  id: ProjectDetailTab;
-  label: string;
-  icon: string;
-}> = [
-  { id: 'overview', label: 'Overview', icon: 'LayoutDashboard' },
-  { id: 'files', label: 'Files', icon: 'FolderOpen' },
-  { id: 'deliverables', label: 'Deliverables', icon: 'Package' },
-  { id: 'messages', label: 'Messages', icon: 'MessageSquare' },
-  { id: 'invoices', label: 'Invoices', icon: 'Receipt' },
-  { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
-  { id: 'contract', label: 'Contract', icon: 'FileSignature' },
-  { id: 'notes', label: 'Notes', icon: 'StickyNote' },
-  { id: 'intake', label: 'Intake', icon: 'ClipboardList' }
-];
 
 // ============================================================================
 // CLIENT DETAIL TYPES
@@ -651,21 +603,6 @@ export interface ClientTag {
  * Client detail tab IDs
  */
 export type ClientDetailTab = 'overview' | 'contacts' | 'activity' | 'projects' | 'notes';
-
-/**
- * Tab configuration for client detail
- */
-export const CLIENT_DETAIL_TABS: Array<{
-  id: ClientDetailTab;
-  label: string;
-  icon: string;
-}> = [
-  { id: 'overview', label: 'Overview', icon: 'LayoutDashboard' },
-  { id: 'contacts', label: 'Contacts', icon: 'Users' },
-  { id: 'activity', label: 'Activity', icon: 'Clock' },
-  { id: 'projects', label: 'Projects', icon: 'FolderKanban' },
-  { id: 'notes', label: 'Notes', icon: 'StickyNote' }
-];
 
 /**
  * Contact role display labels
