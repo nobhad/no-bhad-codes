@@ -187,8 +187,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 .custom-dropdown-trigger,
 .status-dropdown-trigger,
 .portal-dropdown-item,
-.portal-dropdown-sub-trigger,
-.custom-dropdown-menu-item {
+.portal-dropdown-sub-trigger {
   font-size: inherit;
   font-weight: inherit;
   font-family: inherit;
@@ -261,14 +260,12 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 /* Destructive/danger item variant */
-.portal-dropdown-item.destructive,
-.dropdown-item-danger {
+.portal-dropdown-item.destructive {
   color: var(--status-cancelled);
 }
 
 .portal-dropdown-item.destructive:focus,
-.portal-dropdown-item.destructive:hover,
-.dropdown-item-danger:hover {
+.portal-dropdown-item.destructive:hover {
   background-color: var(--color-danger);
   color: var(--color-white);
 }

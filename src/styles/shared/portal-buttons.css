@@ -54,18 +54,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border-color: var(--portal-btn-danger-hover-border);
 }
 
-/* Warning button */
-.btn-warning {
-  background: var(--color-black);
-  color: var(--color-warning-500);
-  border-color: var(--color-warning-500);
-}
-.btn-warning:hover {
-  background: var(--color-warning-500);
-  color: var(--portal-bg-pitch);
-  border-color: var(--color-warning-500);
-}
-
 /* Success button */
 .btn-success {
   background: var(--color-black);
@@ -104,13 +92,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   padding: var(--portal-btn-sm-padding-y) var(--portal-btn-sm-padding-x);
   font-size: var(--portal-btn-sm-font-size);
   min-height: var(--portal-btn-sm-min-height);
-}
-
-/* Extra small button - for table actions */
-.btn-xs {
-  padding: 0.375rem 0.75rem;
-  font-size: var(--font-size-xs, 0.75rem);
-  min-height: auto;
 }
 
 /* Outline button - transparent with border, uses button border tokens */
@@ -160,12 +141,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   line-height: var(--space-7);
 }
 
-/* Animated button - for GSAP/animation contexts */
-.btn-animated {
-  position: relative;
-  overflow: hidden;
-}
-
 /* Filled primary button - solid background with thick bottom border */
 .btn-filled {
   background: var(--color-primary);
@@ -184,28 +159,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   background: var(--portal-bg-lighter);
   color: var(--portal-text-muted);
   cursor: not-allowed;
-}
-
-/* Back button - navigation back action */
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap-md);
-  padding: var(--space-2) var(--space-3);
-  background: transparent;
-  border: var(--portal-border);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-.btn-back:hover {
-  background: var(--portal-bg-lighter);
-  border-color: var(--portal-border-light);
-}
-.btn-back svg {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
 }
 
 /* ============================================
@@ -672,11 +625,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* ============================================
  * TOGGLE BUTTON GROUP
  * ============================================ */
-.toggle-group {
-  display: flex;
-  border: var(--border-width) solid var(--portal-btn-border-color);
-  background: transparent;
-}
 .toggle-btn {
   flex: 1;
   padding: 0.75rem 1.25rem;

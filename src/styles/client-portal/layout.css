@@ -17,10 +17,9 @@ body[data-page="client-portal"] {
 
 /* Footer is hidden via footer.css [data-page="client-portal"] selector */
 
-/* LEGACY CLASSES — .client-portal-main, .client-dashboard, .dashboard-layout
+/* LEGACY CLASSES — .client-dashboard, .dashboard-layout
    are no longer in the DOM (portal.ejs uses .portal > .portal-body).
    Kept as minimal stubs in case any JS references them. */
-.client-portal-main,
 .client-dashboard,
 .dashboard-layout {
   width: 100%;
@@ -376,20 +375,6 @@ body[data-page="client-portal"] {
   text-transform: uppercase;
 }
 
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-/* Content Cards Grid */
-.content-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-
 /* Generic Card - uses shared portal styles from portal-cards.css */
 /* No overrides here - all card styling comes from shared styles */
 
@@ -400,21 +385,6 @@ body[data-page="client-portal"] {
   z-index: var(--z-index-20);
   background: transparent;
   border-bottom: var(--border-width) solid var(--portal-alpha-white-15);
-}
-
-.header-primary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2);
-}
-
-.header-divider {
-  width: 1px;
-  height: var(--space-2);
-  background: var(--portal-border-medium);
-  margin-right: var(--space-1);
-  flex-shrink: 0;
 }
 
 /* Toggle Icon */
@@ -440,37 +410,6 @@ body[data-page="client-portal"] {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.breadcrumb-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-0-5);
-}
-
-.breadcrumb-link {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  transition: color var(--transition-fast);
-  text-decoration: none;
-  padding: 0;
-  font-size: inherit;
-}
-
-.breadcrumb-link:hover {
-  color: var(--portal-text-light);
-}
-
-.breadcrumb-current {
-  color: var(--portal-text-light);
-  font-weight: var(--font-weight-medium);
-}
-
-.breadcrumb-separator {
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-xs);
 }
 
 /* Breadcrumb portal overrides moved to shared/portal-layout.css */

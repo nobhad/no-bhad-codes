@@ -68,15 +68,6 @@
   box-sizing: border-box;
 }
 
-.nbw-ui {
-  z-index: 0;
-  pointer-events: none;
-  display: flex;
-  flex-flow: column;
-  justify-content: space-between;
-  align-items: stretch;
-}
-
 .container {
   z-index: 1;
   max-width: var(--size-container);
@@ -90,15 +81,6 @@
 
 .container.is--full {
   max-width: 100%;
-}
-
-.cloneable {
-  padding: var(--section-padding) var(--container-padding);
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  display: flex;
-  position: relative;
 }
 
 li {
@@ -181,20 +163,6 @@ li {
 }
 
 /* Focus indicator inherited from global :focus-visible rule in reset.css */
-
-.nav-logo__wordmark {
-  width: 4em;
-  text-transform: uppercase;
-}
-
-.nav-logo__icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 4px var(--color-shadow));
-  display: inline-block;
-  vertical-align: middle;
-}
 
 .nav-row__right {
   display: flex;
@@ -473,16 +441,6 @@ html[data-theme="dark"] .coming-soon-banner {
 }
 
 /* =====================================================
-   9. MENU LINK CONTENT WRAPPER
-   ===================================================== */
-.menu-link-content {
-  display: flex;
-  align-items: center;
-  gap: 0.75em;
-  flex: 1;
-}
-
-/* =====================================================
    10. EYEBROW & DECORATIVE ELEMENTS
    ===================================================== */
 .menu-link .eyebrow {
@@ -532,10 +490,6 @@ html[data-theme="dark"] .coming-soon-banner {
     transform-origin: left center;
     transform: scaleX(1);
   }
-}
-
-.submenu-carrot {
-  order: 2;
 }
 
 /* =====================================================
@@ -679,10 +633,6 @@ html[data-theme="dark"] .coming-soon-banner {
 /* =====================================================
    12. ICONS & GRAPHICS
    ===================================================== */
-.nbw-icon-svg {
-  width: 8em;
-  filter: drop-shadow(0 4px 8px var(--color-shadow));
-}
 
 /* Theme Toggle Button Icons */
 .icon-wrap {
@@ -723,15 +673,6 @@ html[data-theme="dark"] .coming-soon-banner {
 
 [data-theme="dark"] .moon-icon {
   opacity: 1;
-}
-
-/* Social Links in Menu */
-.menu-social-links {
-  display: flex;
-  gap: var(--space-6);
-  justify-content: center;
-  padding: var(--space-8) 0;
-  margin-top: auto;
 }
 
 .social-link {

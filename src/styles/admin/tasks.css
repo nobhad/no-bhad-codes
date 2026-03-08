@@ -7,65 +7,39 @@
  * Styles for project tasks and time tracking features.
  */
 
-/* ============================================
-   Tasks Main Container
-   Uses .data-table-card background from shared/portal-cards.css
-   ============================================ */
-
-.tasks-main-container {
-  min-height: calc(100vh - 200px);
-}
-
 /* Global tasks tab content should fill available height */
-[data-page="admin"] #tab-tasks .tasks-main-container {
-  min-height: calc(100vh - 220px);
-}
-
-[data-page="admin"] #tab-tasks .tasks-main-container .kanban-board {
+[data-page="admin"] #tab-tasks .kanban-board {
   min-height: calc(100vh - 280px);
 }
 
-[data-page="admin"] #tab-tasks .tasks-main-container .kanban-column {
+[data-page="admin"] #tab-tasks .kanban-column {
   min-height: calc(100vh - 320px);
 }
 
 /* Global Tasks Kanban - ensure horizontal layout */
 @layer utilities {
-  #global-tasks-kanban-container .kanban-board,
-  .tasks-main-container .kanban-board {
+  #global-tasks-kanban-container .kanban-board {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     width: 100%;
   }
 
-  #global-tasks-kanban-container .kanban-column,
-  .tasks-main-container .kanban-column {
+  #global-tasks-kanban-container .kanban-column {
     flex: 1 1 0;
     min-width: 200px;
     max-width: none;
   }
 }
 
-/* Tasks table styling within main container */
-.tasks-main-container .data-table-scroll-wrapper {
-  overflow: visible;
-}
-
-.tasks-main-container .data-table {
-  margin: 0;
-}
-
 /* Only stack columns on mobile */
 @layer responsive {
   @media (--mobile) {
-    #global-tasks-kanban-container .kanban-board,
-    .tasks-main-container .kanban-board {
+    #global-tasks-kanban-container .kanban-board {
       flex-direction: column;
     }
 
-    #global-tasks-kanban-container .kanban-column,
-    .tasks-main-container .kanban-column {
+    #global-tasks-kanban-container .kanban-column {
       flex: 0 0 auto;
       min-width: 100%;
     }
@@ -73,71 +47,6 @@
 }
 
 /* View toggle: use shared .view-toggle (see shared/view-toggle.css) */
-
-/* ============================================
-   Tasks Stats Strip
-   Matches overview-stats-strip pattern
-   ============================================ */
-.tasks-stats-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-/* .tasks-stat-card - base styles in portal-cards.css */
-
-.tasks-stat-card .stat-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.tasks-stat-card .field-label {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  margin: 0;
-}
-
-/* Stat card icons - colors only, no backgrounds (unified with portal-cards.css) */
-.tasks-stat-card .stat-icon-muted {
-  color: var(--portal-text-secondary);
-}
-
-.tasks-stat-card .stat-icon-blue {
-  color: var(--app-color-primary);
-}
-
-.tasks-stat-card .stat-icon-warning {
-  color: var(--color-warning-500);
-}
-
-.tasks-stat-card .stat-icon-green {
-  color: var(--status-active);
-}
-
-/* .stat-card-value styling from unified rule in portal-cards.css */
-
-/* Blocked card highlight when has items */
-.tasks-stat-card--alert.has-items {
-  background: transparent;
-  border: var(--border-width) solid var(--color-warning-500);
-}
-
-/* .stat-card-value alert color from unified rule in portal-cards.css */
-
-/* Responsive: stack on smaller screens */
-@media (--tablet-landscape) {
-  .tasks-stats-strip {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (--small-mobile) {
-  .tasks-stats-strip {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* ============================================
    Task Card Enhancements (beyond Kanban default)
@@ -249,208 +158,12 @@
   gap: var(--space-0-5);
 }
 
-.task-checklist-count {
-  display: flex;
-  align-items: center;
-  gap: var(--space-0-5);
-}
-
 /* ============================================
    Task List View
    REMOVED: .tasks-table specific styles
    All table styles now in shared/portal-tables.css
    using .data-table class
    ============================================ */
-
-/* ============================================
-   Task Detail Modal
-   ============================================ */
-
-.task-detail-modal {
-  max-width: 600px;
-  width: 90vw;
-}
-
-.task-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--space-1-5);
-}
-
-.task-detail-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
-}
-
-.task-detail-section {
-  margin-bottom: var(--space-2);
-}
-
-.task-detail-section h4 {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-secondary);
-  margin-bottom: var(--space-1);
-  text-transform: uppercase;
-}
-
-/* Checklist in task detail */
-.task-checklist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.task-checklist-item {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  padding: var(--space-0-5) 0;
-  border-bottom: var(--border-width) solid var(--portal-border);
-}
-
-.task-checklist-item:last-child {
-  border-bottom: none;
-}
-
-.task-checklist-item input[type="checkbox"] {
-  width: var(--space-2);
-  height: var(--space-2);
-  cursor: pointer;
-}
-
-.task-checklist-item label {
-  flex: 1;
-  cursor: pointer;
-  color: var(--portal-text-primary);
-}
-
-.task-checklist-item.completed label {
-  text-decoration: line-through;
-  color: var(--portal-text-secondary);
-}
-
-.task-checklist-progress {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  margin-top: var(--space-1);
-}
-
-.task-checklist-progress-bar {
-  flex: 1;
-  height: var(--space-0-5);
-  background: var(--portal-alpha-white-10);
-  overflow: hidden;
-}
-
-.task-checklist-progress-fill {
-  height: 100%;
-  background: var(--status-active);
-  transition: width var(--transition-medium);
-}
-
-.task-checklist-progress-text {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-/* Task dependencies */
-.task-dependencies {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-0-5);
-}
-
-.task-dependency-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-0-5);
-  padding: var(--space-0-5) var(--space-1);
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-.task-dependency-pill.blocking {
-  background: transparent;
-  border-color: var(--status-cancelled);
-  color: var(--status-cancelled);
-}
-
-.task-comment {
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  padding: var(--space-1);
-}
-
-.task-comment-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--space-0-5);
-}
-
-.task-comment-author {
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
-}
-
-.task-comment-time {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-}
-
-.task-comment-body {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-  line-height: var(--line-height-normal);
-}
-
-/* ============================================
-   Time Tracking
-   ============================================ */
-
-.time-tracking-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-1-5);
-}
-
-.time-tracking-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.time-tracking-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-1-5);
-}
-
-.time-summary-card {
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  padding: var(--space-2);
-  text-align: center;
-}
-
-.time-summary-value {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--portal-text-primary);
-}
-
-.time-summary-label {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  text-transform: uppercase;
-  margin-top: var(--space-0-5);
-}
 
 /* Time Entries Table - Base styling from shared/portal-tables.css
    Only page-specific overrides here */
@@ -467,52 +180,7 @@
   border-bottom: none;
 }
 
-.time-entry-duration {
-  font-weight: inherit;
-  font-family: inherit;
-}
-
-.time-entry-billable {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-0-5);
-  padding: var(--space-0-5) var(--space-1);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-}
-
-.time-entry-billable.yes {
-  background: transparent;
-  border: var(--border-width) solid var(--status-active);
-  color: var(--status-active);
-}
-
-.time-entry-billable.no {
-  background: transparent;
-  border: var(--border-width) solid var(--portal-text-secondary);
-  color: var(--portal-text-secondary);
-}
-
 /* Uses universal empty state from loading.css */
-
-/* Time entry modal - flex layout from shared/portal-components.css */
-
-.time-entry-duration-inputs {
-  display: flex;
-  gap: var(--space-1);
-  align-items: center;
-}
-
-.time-entry-duration-inputs input {
-  width: 80px;
-  text-align: center;
-}
-
-.time-entry-duration-inputs span {
-  color: var(--portal-text-secondary);
-  font-size: var(--font-size-sm);
-}
 
 /* Weekly chart container */
 /* time-weekly-chart now uses portal-project-card for base styling */
@@ -538,159 +206,14 @@
    Milestone Tags on Task Cards
    ============================================ */
 
-/* Project Link */
-.task-project-link {
-  margin-bottom: var(--space-1);
-  padding-bottom: var(--space-1);
-  border-bottom: var(--border-width) solid var(--portal-border);
-}
-
-.task-project-name {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-0-5);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--portal-text-secondary);
-  text-decoration: none;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.task-project-name:hover {
-  color: var(--app-color-primary);
-}
-
-.task-project-name svg {
-  flex-shrink: 0;
-}
-
-/* Milestone Tags */
-.task-milestone-tag,
-.task-standalone-tag {
-  display: inline-block;
-  padding: var(--space-0-5) var(--space-1);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  margin-top: var(--space-1);
-  margin-bottom: var(--space-0-5);
-}
-
-.task-milestone-tag {
-  background: transparent;
-  color: var(--color-primary);
-  border: var(--border-width) solid var(--color-primary);
-}
-
-.task-standalone-tag {
-  background: transparent;
-  color: var(--portal-text-secondary);
-  border: var(--border-width) solid var(--portal-border);
-}
-
-/* Task Card Actions */
-.task-card-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-1);
-  margin-top: var(--space-1-5);
-  padding-top: var(--space-1-5);
-  border-top: var(--border-width) solid var(--portal-border);
-}
-
-/* .task-delete-btn uses .icon-btn.icon-btn-outline.icon-btn-danger from portal-buttons.css */
-.task-delete-btn {
-  padding: var(--space-1);
-  color: var(--portal-text-secondary);
-}
-
-/* Project Link Button in Table */
-.project-link-btn {
-  background: none;
-  border: none;
-  color: var(--portal-text-secondary);
-  font-size: inherit;
-  text-align: left;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  transition: color var(--transition-fast);
-}
-
-.project-link-btn:hover {
-  color: var(--app-color-primary);
-}
-
 /* .actions-cell styling from shared/portal-tables.css */
-
-.milestone-col {
-  width: 150px;
-}
 
 /* ============================================
    GlobalTasksTable React Component Styles
    ============================================ */
 
-/* Tasks stats bar - inline stats display */
-.tasks-stats-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  font-size: inherit;
-  color: inherit;
-  margin-bottom: var(--space-2);
-}
-
-.tasks-stats-bar .stat-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap);
-}
-
-.tasks-stats-bar .stat-value,
-.tasks-stats-bar .stat-pending,
-.tasks-stats-bar .stat-active,
-.tasks-stats-bar .stat-completed,
-.tasks-stats-bar .stat-overdue {
-  color: inherit;
-}
-
-/* Filter search expanded */
-.filter-search-expanded {
-  flex: 1;
-  min-width: 200px;
-  max-width: 400px;
-}
-
-/* Priority indicator wrapper */
-.priority-indicator-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .priority-label {
   font-size: var(--font-size-sm);
-}
-
-/* Status trigger button */
-.status-trigger-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-/* Error banner */
-.error-banner {
-  padding: var(--space-2);
-  background: transparent;
-  border: var(--border-width) solid var(--status-cancelled);
-  color: var(--status-cancelled);
-  margin-bottom: var(--space-2);
 }
 
 /* Text muted utility */
@@ -759,11 +282,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-/* Margin left utility */
-.ml-4 {
-  margin-left: var(--space-4);
 }
 
 /* Board view uses shared .kanban-* classes from portal-components.css */

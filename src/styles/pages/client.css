@@ -12,75 +12,6 @@
 @import "./client-auth.css";
 
 /* ===============================================
-   CLIENT LOGIN - MATCHES MAIN PAGE SECTIONS
-   =============================================== */
-
-/* Client login uses same structure as .about-section and .contact-section */
-/* Layout inherits from layout.css universal section system */
-.client-login {
-  background: var(--color-neutral-300); /* Same as main page background */
-  /* justify-content, min-height, flex inherited from layout.css */
-}
-
-/* Login wrapper matches .about-content from main page */
-.login-wrapper {
-  /* All container styling controlled from main.css */
-}
-
-/* Login header matches main page h2 styling */
-.login-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-/* Client content styling - vertical stack at top center */
-.client-content {
-  position: relative; /* Needed for absolute positioning of dynamic content */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(1rem, 2vw, 1.5rem);
-  text-align: center;
-  width: 100%;
-  max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px)));
-  flex: 1;
-  justify-content: flex-start;
-  padding: 0; /* No padding */
-  margin: 0; /* No margins */
-}
-
-/* Client buttons styling - horizontal row */
-.client-buttons {
-  position: relative; /* Needed for positioning dynamic content */
-  display: flex;
-  gap: clamp(1rem, 3vw, 2rem);
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Client buttons use .btn-animated class for GSAP compatibility */
-
-/* Hide focus state on buttons when dynamic content is present */
-.client-buttons:has(.dynamic-content) .btn:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-/* Fallback for browsers that don't support :has() */
-.client-buttons.has-dynamic-content .btn:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-/* Login title - uses same h1 styling as main page */
-.login-title {
-  /* All h tag styling controlled from main.css universal system */
-  /* Uses standard color like main page h tags */
-  margin-bottom: 0.5rem;
-}
-
-/* ===============================================
    DASHBOARD LAYOUT - TWO PANEL DESIGN
    =============================================== */
 
@@ -104,87 +35,6 @@ body[data-page="client"] .dashboard-layout {
   padding: clamp(0.5rem, 2vw, 1rem);
 }
 
-/* Project List Items */
-.project-item {
-  padding: clamp(0.75rem, 2vw, 1rem);
-  margin-bottom: clamp(0.5rem, 1vw, 0.75rem);
-  background: var(--color-neutral-100);
-  border-radius: var(--portal-radius-md);
-  border: var(--border-width) solid transparent;
-  cursor: pointer;
-  transition: all var(--transition-normal) ease;
-}
-
-.project-item:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-elevated-sm);
-}
-
-.project-item.active {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-}
-
-.project-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
-}
-
-.project-item-title {
-  font-weight: var(--font-weight-semibold);
-  font-size: clamp(0.9rem, 2vw, 1rem);
-  margin: 0;
-  color: var(--color-text-primary);
-}
-
-/* Legacy .project-item-status removed - use .status-badge from shared/portal-badges.css */
-
-.project-item-progress {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.project-item-progress-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--color-neutral-300);
-  border-radius: var(--portal-radius-xs);
-  overflow: hidden;
-}
-
-.project-item-progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  transition: width var(--transition-normal) ease;
-}
-
-.project-item-progress-text {
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-/* No Projects State */
-.no-projects {
-  text-align: center;
-  padding: clamp(1rem, 3vw, 2rem);
-  color: var(--color-text-primary);
-  opacity: 0.7;
-}
-
-.no-projects p {
-  margin-bottom: 0.5rem;
-}
-
-.no-projects .help-text {
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  opacity: 0.8;
-}
-
 /* Right Panel - Project Details (2/3 width) */
 body[data-page="client"] .project-details {
   width: 66.666%;
@@ -192,74 +42,6 @@ body[data-page="client"] .project-details {
   background: var(--color-neutral-100);
   display: flex;
   flex-direction: column;
-}
-
-/* Welcome View */
-.welcome-view {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  text-align: center;
-  padding: clamp(2rem, 5vw, 4rem);
-}
-
-.welcome-content h1 {
-  margin-bottom: 1rem;
-  color: var(--color-text-primary);
-}
-
-.welcome-content p {
-  color: var(--color-text-primary);
-  opacity: 0.7;
-  font-size: clamp(1rem, 2.5vw, 1.1rem);
-}
-
-/* Project Detail View */
-.project-detail-view {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.project-header {
-  padding: clamp(1rem, 3vw, 1.5rem);
-  border-bottom: var(--border-width) solid var(--color-neutral-400);
-  background: var(--color-neutral-200);
-}
-
-.project-title-section h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: clamp(1.3rem, 3vw, 1.6rem);
-}
-
-.project-meta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.progress-info {
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  color: var(--color-text-primary);
-  opacity: 0.8;
-}
-
-/* Project Content */
-.project-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: clamp(1rem, 3vw, 1.5rem);
-}
-
-.detail-section {
-  margin-bottom: clamp(2rem, 4vw, 3rem);
-}
-
-.detail-section h3 {
-  margin: 0 0 1rem 0;
-  font-size: clamp(1.1rem, 2.5vw, 1.2rem);
-  color: var(--color-text-primary);
 }
 
 /* Overview Grid */
@@ -297,12 +79,6 @@ body[data-page="client"] .project-details {
   .project-details {
     min-height: 60vh;
   }
-}
-
-.login-subtitle {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-lg);
-  margin: 0;
 }
 
 /* ===============================================
@@ -373,8 +149,6 @@ body[data-page="client-landing"] .client-login .client-content {
 
 /* .btn-loader: components/loading.css */
 
-/* Login footer styling now controlled from main.css universal system */
-
 /* Link button - matches main page text styling (no green color) */
 .link-btn {
   background: none;
@@ -406,114 +180,6 @@ body[data-page="client-landing"] .client-login .client-content {
 @media (--small-mobile) {
   .login-title {
     font-size: var(--font-size-2xl);
-  }
-}
-
-/* ===============================================
-   DYNAMIC CONTENT - INTAKE FORM & LOGIN PORTAL
-   =============================================== */
-
-.dynamic-content {
-  position: absolute;
-  top: 0; /* Start from where the buttons would be */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: min(800px, calc(100vw - 2 * var(--space-4, 16px))); /* Responsive max-width */
-  background: var(--color-neutral-100);
-  border: var(--border-width) solid var(--color-neutral-400);
-  border-radius: 0; /* No border radius - sharp corners */
-  overflow: hidden;
-  max-height: calc(
-    100dvh - var(--header-height) - var(--footer-height) - 120px
-  ); /* Use dvh for mobile, ensure bottom visible */
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-elevated-sm); /* Drop shadow */
-  z-index: var(--z-index-elevated); /* Ensure it covers the buttons */
-}
-
-.content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0; /* No padding */
-  background: var(--color-neutral-200);
-  border-bottom: var(--border-width) solid var(--color-neutral-400);
-}
-
-.content-header h2 {
-  margin: 0;
-  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-  color: var(--color-text-primary);
-}
-
-.close-content {
-  background: none;
-  border: none;
-  font-size: var(--font-size-xl);
-  cursor: pointer;
-  color: var(--color-text-primary);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--portal-radius-sm);
-  transition: background-color var(--transition-mouse) ease;
-}
-
-.close-content:hover {
-  background-color: var(--color-neutral-300);
-}
-
-.content-body {
-  padding: 0; /* No padding */
-  overflow-y: auto; /* Allow scrolling within the form if needed */
-  flex: 1; /* Take available space */
-}
-
-/* Dynamic content forms - override contact.css width constraints */
-body[data-page="client-landing"] .dynamic-content .contact-form {
-  max-width: none;
-  width: 100%;
-}
-
-/* Form Styling - Let main.css and contact.css handle all form styling */
-
-/* Login specific styling */
-.login-footer {
-  margin-top: 0.5rem;
-  text-align: center;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  opacity: 0.8;
-  border: none;
-}
-
-.login-footer p {
-  margin: 0;
-}
-
-/* Error messages */
-.error-message {
-  color: var(--color-danger-dark);
-  font-size: var(--font-size-xs);
-  margin-top: 0.25rem;
-  display: none;
-}
-
-.error-message.show {
-  display: block;
-}
-
-/* Password toggle - see earlier .password-input-wrapper definition in this file */
-
-/* Responsive adjustments */
-@media (--mobile) {
-  .dynamic-content .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .dynamic-content {
-    margin-left: 1rem;
-    margin-right: 1rem;
   }
 }
 

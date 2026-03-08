@@ -1046,27 +1046,6 @@ html[data-theme="light"] .portal .funnel-value {
   margin: 0;
 }
 
-.breadcrumb-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-0-5);
-}
-
-.breadcrumb-link {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  transition: color var(--transition-fast);
-  text-decoration: none;
-  padding: 0;
-  font-size: inherit;
-}
-
-.breadcrumb-link:hover {
-  color: var(--portal-text-light);
-}
-
 /* =====================================================
    ERROR AND LOADING STATES
    ===================================================== */
@@ -1136,50 +1115,6 @@ html[data-theme="light"] .portal .funnel-value {
   margin: var(--space-4) 0;
 }
 
-.divider-vertical {
-  width: 1px;
-  background: var(--portal-alpha-white-20);
-  margin: 0 var(--space-2);
-  align-self: stretch;
-}
-
-/* Grid layouts */
-/* 2→4 col stat summary grid */
-.stats-grid,
-.grid-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--portal-section-gap);
-}
-
-@media (--tablet) {
-  .stats-grid,
-  .grid-stats {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* 1→2→3 col card list grid */
-.cards-grid,
-.grid-cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--portal-section-gap);
-}
-
-@media (--tablet) {
-  .cards-grid,
-  .grid-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (--laptop-up) {
-  .cards-grid,
-  .grid-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 /* Scrolling container */
 .scroll-container {
@@ -1210,7 +1145,6 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Flexbox */
 .flex { display: flex; }
-.inline-flex { display: inline-flex; }
 .flex-col { flex-direction: column; }
 .flex-row { flex-direction: row; }
 .flex-1 { flex: 1 1 0%; }
@@ -1224,7 +1158,6 @@ html[data-theme="light"] .portal .funnel-value {
 .justify-between { justify-content: space-between; }
 .justify-end { justify-content: flex-end; }
 .justify-start { justify-content: flex-start; }
-.self-end { align-self: flex-end; }
 
 /* Grid */
 .grid { display: grid; }
@@ -1232,7 +1165,6 @@ html[data-theme="light"] .portal .funnel-value {
 .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.col-span-2 { grid-column: span 2 / span 2; }
 
 /* tw-* responsive grid aliases removed — use semantic class names directly */
 
@@ -1242,8 +1174,6 @@ html[data-theme="light"] .portal .funnel-value {
 .gap-2 { gap: var(--space-1, 0.5rem); }
 .gap-3 { gap: var(--space-1-5, 0.75rem); }
 .gap-4 { gap: var(--space-2, 1rem); }
-.gap-5 { gap: var(--space-2-5, 1.25rem); }
-.gap-6 { gap: var(--space-3, 1.5rem); }
 
 /* Margin */
 .m-0 { margin: 0; }
@@ -1255,11 +1185,7 @@ html[data-theme="light"] .portal .funnel-value {
 .mt-2 { margin-top: var(--space-1, 0.5rem); }
 .mt-3 { margin-top: var(--space-1-5, 0.75rem); }
 .mt-4 { margin-top: var(--space-2, 1rem); }
-.ml-1 { margin-left: var(--space-0-5, 0.25rem); }
 .ml-2 { margin-left: var(--space-1, 0.5rem); }
-.ml-8 { margin-left: var(--space-4, 2rem); }
-.mr-1 { margin-right: var(--space-0-5, 0.25rem); }
-.mr-2 { margin-right: var(--space-1, 0.5rem); }
 
 /* Padding */
 .p-0 { padding: 0; }
@@ -1267,21 +1193,13 @@ html[data-theme="light"] .portal .funnel-value {
 .p-2 { padding: var(--space-1, 0.5rem); }
 .p-3 { padding: var(--space-1-5, 0.75rem); }
 .p-4 { padding: var(--space-2, 1rem); }
-.px-1 { padding-left: var(--space-0-5, 0.25rem); padding-right: var(--space-0-5, 0.25rem); }
-.px-2 { padding-left: var(--space-1, 0.5rem); padding-right: var(--space-1, 0.5rem); }
 .px-3 { padding-left: var(--space-1-5, 0.75rem); padding-right: var(--space-1-5, 0.75rem); }
 .px-4 { padding-left: var(--space-2, 1rem); padding-right: var(--space-2, 1rem); }
-.px-6 { padding-left: var(--space-3, 1.5rem); padding-right: var(--space-3, 1.5rem); }
 .py-1 { padding-top: var(--space-0-5, 0.25rem); padding-bottom: var(--space-0-5, 0.25rem); }
 .py-2 { padding-top: var(--space-1, 0.5rem); padding-bottom: var(--space-1, 0.5rem); }
-.py-3 { padding-top: var(--space-1-5, 0.75rem); padding-bottom: var(--space-1-5, 0.75rem); }
-.py-4 { padding-top: var(--space-2, 1rem); padding-bottom: var(--space-2, 1rem); }
 .py-8 { padding-top: var(--space-4, 2rem); padding-bottom: var(--space-4, 2rem); }
-.pt-0 { padding-top: 0; }
 .pt-2 { padding-top: var(--space-1, 0.5rem); }
 .pt-3 { padding-top: var(--space-1-5, 0.75rem); }
-.pt-4 { padding-top: var(--space-2, 1rem); }
-.pb-3 { padding-bottom: var(--space-1-5, 0.75rem); }
 
 /* Width/Height */
 .w-full { width: 100%; }
@@ -1292,16 +1210,9 @@ html[data-theme="light"] .portal .funnel-value {
 .w-3 { width: var(--space-1-5, 0.75rem); }
 .w-4 { width: var(--space-2, 1rem); }
 .w-5 { width: var(--space-2-5, 1.25rem); }
-.w-6 { width: var(--space-3, 1.5rem); }
 .w-7 { width: var(--space-3-5, 1.75rem); }
 .w-8 { width: var(--space-4, 2rem); }
-.w-9 { width: 2.25rem; }
-.w-10 { width: 2.5rem; }
-.w-12 { width: var(--space-6, 3rem); }
-.w-16 { width: var(--space-8, 4rem); }
-.w-56 { width: 14rem; }
 .h-full { height: 100%; }
-.h-px { height: 1px; }
 .h-1 { height: var(--space-0-5, 0.25rem); }
 .h-2 { height: var(--space-1, 0.5rem); }
 .h-3 { height: var(--space-1-5, 0.75rem); }
@@ -1311,16 +1222,10 @@ html[data-theme="light"] .portal .funnel-value {
 .h-7 { height: var(--space-3-5, 1.75rem); }
 .h-8 { height: var(--space-4, 2rem); }
 .h-9 { height: 2.25rem; }
-.h-10 { height: 2.5rem; }
-.h-12 { height: var(--space-6, 3rem); }
-.h-64 { height: 16rem; }
 
 /* Space between children */
-.space-y-0 > * + * { margin-top: 0; }
 .space-y-1 > * + * { margin-top: var(--space-0-5, 0.25rem); }
 .space-y-2 > * + * { margin-top: var(--space-1, 0.5rem); }
-.space-y-3 > * + * { margin-top: var(--space-1-5, 0.75rem); }
-.space-x-2 > * + * { margin-left: var(--space-1, 0.5rem); }
 
 /* Additional margin utilities */
 .mt-0\.5 { margin-top: 0.125rem; }
@@ -1340,16 +1245,12 @@ html[data-theme="light"] .portal .funnel-value {
 .fixed { position: fixed; }
 .top-0 { top: 0; }
 .top-1 { top: var(--space-0-5, 0.25rem); }
-.right-1 { right: var(--space-0-5, 0.25rem); }
 .bottom-0 { bottom: 0; }
-.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-.z-50 { z-index: var(--z-index-50); }
 .-left-5 { left: -1.25rem; }
 
 /* Misc layout */
 .hidden { display: none; }
 .inline-block { display: inline-block; }
-.overflow-hidden { overflow: hidden; }
 .cursor-pointer { cursor: pointer; }
 .cursor-not-allowed { cursor: not-allowed; }
 
@@ -1360,8 +1261,6 @@ html[data-theme="light"] .portal .funnel-value {
               border-color var(--transition-fast);
 }
 .transition-all { transition: all var(--transition-fast); }
-.transition-opacity { transition: opacity var(--transition-fast); }
-.transition-transform { transition: transform var(--transition-fast); }
 
 /* Transform */
 .rotate-180 { transform: rotate(180deg); }
@@ -1448,21 +1347,10 @@ html[data-theme="light"] .portal .funnel-value {
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .whitespace-nowrap { white-space: nowrap; }
 .whitespace-pre-wrap { white-space: pre-wrap; }
-.break-words { word-wrap: break-word; }
 .line-through { text-decoration: line-through; }
 .italic,
 .text-italic { font-style: italic; }
 
-/* Status colors - semantic colors for status indicators */
-.text-green-400 { color: var(--status-active); }
-.text-yellow-400 { color: var(--status-pending); }
-.text-orange-400 { color: var(--status-on-hold); }
-.text-blue-400 { color: var(--color-primary); }
-.text-purple-400 { color: var(--color-purple); }
-.text-pink-400 { color: var(--color-pink); }
-.text-cyan-400 { color: var(--color-cyan); }
-.text-white { color: var(--portal-text-light); }
-.text-black { color: var(--portal-bg-pitch); }
 .text-secondary { color: var(--portal-text-secondary); }
 
 /* Background colors */
@@ -1478,36 +1366,20 @@ html[data-theme="light"] .portal .funnel-value {
 .border-b { border-bottom: var(--border-width) solid var(--portal-alpha-white-30); }
 .border-t { border-top: var(--border-width) solid var(--portal-alpha-white-30); }
 .border-r { border-right: var(--border-width) solid var(--portal-alpha-white-30); }
-.border-l-2 { border-left: var(--border-width) solid; }
-.border-l-white { border-left-color: var(--portal-border-color); }
-.border-none { border: none; }
 .border-dashed { border-style: dashed; }
-.border-current { border-color: currentColor; }
-.border-white { border-color: var(--portal-border-color); }
 .border-black { border-color: var(--portal-bg-pitch); }
-.border-t-transparent { border-top-color: transparent; }
 
 /* Border radius - brutalist style is 0 */
 .rounded { border-radius: 0; }
-.rounded-lg { border-radius: 0; }
 
 /* Ring (focus outline) */
-.ring-0 { box-shadow: none; }
-.ring-1 { box-shadow: 0 0 0 1px var(--portal-alpha-white-30); }
 .ring-2 { box-shadow: 0 0 0 2px var(--ring); }
 .ring-white { --ring: var(--portal-border-color); }
-
-/* =====================================================
-   SIZING UTILITY CLASSES
-   ===================================================== */
-.min-h-96 { min-height: 24rem; } /* 384px */
-.min-h-400 { min-height: 400px; }
 
 /* =====================================================
    MISC UTILITY CLASSES
    ===================================================== */
 .fill-current { fill: currentColor; }
-.resize-none { resize: none; }
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1715,12 +1587,3 @@ html[data-theme="light"] .portal .funnel-value {
   flex-direction: column;
 }
 
-/* GSAP animation targets */
-.gsap-fade-target {
-  opacity: 0;
-}
-
-.gsap-slide-target {
-  opacity: 0;
-  transform: translateY(20px);
-}

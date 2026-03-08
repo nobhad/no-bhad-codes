@@ -57,23 +57,6 @@ button[aria-busy="true"] .loading-spinner {
   font-size: inherit;
 }
 
-/* Button loader spinner - universal for all button loading states */
-.btn-loader {
-  display: none;
-  width: 16px;
-  height: 16px;
-  border: var(--border-width) solid transparent;
-  border-top-color: currentColor;
-  border-radius: var(--portal-radius-full, 50%);
-  /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
-}
-.btn.loading .btn-loader {
-  display: inline-block;
-}
-.btn.loading .btn-text {
-  visibility: hidden;
-}
-
 /* Loading state in table row */
 .loading-row.loading-state {
   text-align: center;
@@ -306,22 +289,6 @@ td.empty-row {
   padding: clamp(var(--space-2), 3vw, var(--space-3));
 }
 
-/* Small variant for inline/compact contexts (proposals, leads sidebars) */
-.empty-state-small,
-.loading-state-small,
-.error-state-small {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(6px, 1vw, 10px);
-  padding: var(--space-2);
-  min-height: 32px;
-  color: inherit;
-  font-size: inherit;
-  text-align: center;
-}
-
 /* Small variant icon - 16px - uses mask-image so color inherits */
 .empty-state-small::before {
   content: "";
@@ -499,8 +466,7 @@ p.empty-state {
 
 /* Empty state icon - for manual icon insertion (legacy support) */
 /* IMPORTANT: Uses inherit so Lucide SVGs get text color from parent */
-.empty-state-icon,
-.loading-state-icon {
+.empty-state-icon {
   width: 24px;
   height: 24px;
   color: inherit;
@@ -513,9 +479,7 @@ p.empty-state {
 .loading-state > svg,
 .error-state > svg,
 .empty-state-icon > svg,
-.loading-state-icon > svg,
-.error-state-icon > svg,
-.empty-state-content > svg {
+.error-state-icon > svg {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
@@ -523,37 +487,12 @@ p.empty-state {
   stroke: currentColor;
 }
 
-/* Backwards compatibility for empty-state-content wrapper */
-.empty-state-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(12px, 2vw, 20px);
-  padding: clamp(var(--space-2), 3vw, var(--space-4));
-  width: 100%;
-  height: 100%;
-  min-height: 60px;
-  box-sizing: border-box;
-  text-align: center;
-  margin: 0 auto;
-  color: inherit;
-  font-size: inherit;
-}
-
-/* Portal-specific adjustments for content wrapper */
-.portal .empty-state-content {
-  min-height: 48px;
-  padding: clamp(var(--space-2), 3vw, var(--space-3));
-}
-
 /* Portal-specific: Ensure SVG icons inherit text color (not muted gray) */
 /* Higher specificity to override any other rules */
 .portal .empty-state svg,
 .portal .loading-state svg,
 .portal .error-state svg,
-.portal .empty-state-icon svg,
-.portal .loading-state-icon svg {
+.portal .empty-state-icon svg {
   color: inherit;
   stroke: currentColor;
 }
@@ -663,25 +602,6 @@ p.empty-state {
   }
 }
 
-/* Dropzone error state */
-.dropzone-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(var(--space-2), 3vw, var(--space-4));
-  gap: clamp(12px, 2vw, 20px);
-  text-align: center;
-  color: inherit;
-  font-size: inherit;
-}
-
-.dropzone-error-actions {
-  display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
 /* ========================================
    STATE DISPLAY FACTORY CLASSES
    Used by StateDisplay.tsx factory components
@@ -727,22 +647,6 @@ p.empty-state {
   gap: var(--space-1);
   width: 100%;
   padding: var(--space-2);
-}
-
-/* Skeleton type variants */
-.skeleton-list {
-  /* Default column layout */
-}
-
-.skeleton-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-2);
-}
-
-.skeleton-table .skeleton-item {
-  padding: var(--space-1) 0;
-  border-bottom: var(--border-width) solid var(--portal-border-color, var(--color-border-primary));
 }
 
 /* Loading state skeleton modifier - hide default spinner */

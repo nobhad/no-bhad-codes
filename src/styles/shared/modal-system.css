@@ -8,68 +8,6 @@
  */
 
 /* =====================================================
-   MODAL CONTENT SCROLLABLE PATTERNS
-   Reusable max-height + overflow patterns for modal bodies.
-   ===================================================== */
-
-/* Standard scrollable modal content (60vh) */
-.modal-scroll-sm {
-  max-height: 60vh;
-  overflow-y: auto;
-}
-
-/* Medium scrollable modal content (70vh) */
-.modal-scroll-md {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-/* Large scrollable modal content (80vh) */
-.modal-scroll-lg {
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-/* =====================================================
-   MODAL BACKDROP
-   Full-screen overlay behind modals.
-   ===================================================== */
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-index-portal-modal);
-  background: var(--color-overlay-medium);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-/* =====================================================
-   MODAL SIZE VARIANTS
-   Width constraints for different modal sizes.
-   ===================================================== */
-
-.modal-size--sm {
-  max-width: 400px;
-}
-
-.modal-size--md {
-  max-width: 560px;
-}
-
-.modal-size--lg {
-  max-width: 860px;
-}
-
-.modal-size--xl {
-  max-width: 1000px;
-}
-
-.modal-size--full {
-  max-width: calc(100vw - 2rem);
-}
-
-/* =====================================================
    MODAL POSITIONING (for Radix Dialog)
    Fixed centered positioning for portal modals.
    ===================================================== */
@@ -87,13 +25,8 @@
 }
 
 /* =====================================================
-   MODAL HEADER TEXT CONTAINER
-   Wrapper for title and description.
+   MODAL TITLE AND DESCRIPTION
    ===================================================== */
-
-.modal-header-text {
-  flex: 1;
-}
 
 .modal-title {
   font-size: var(--font-size-base);
@@ -106,14 +39,4 @@
   font-size: var(--font-size-xs);
   margin-top: var(--space-0-5);
   color: var(--portal-text-muted);
-}
-
-/* =====================================================
-   MODAL CLOSE BUTTON
-   Close button styling for portal modals.
-   ===================================================== */
-
-.modal-close-icon {
-  width: 16px;
-  height: 16px;
 }

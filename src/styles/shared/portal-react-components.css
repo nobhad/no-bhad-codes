@@ -49,11 +49,6 @@
   color: var(--portal-text-light);
 }
 
-.dropdown-item-active {
-  background: var(--portal-alpha-white-10);
-  color: var(--portal-text-light);
-}
-
 /* Badges/Status */
 .badge {
   display: inline-flex;
@@ -80,8 +75,6 @@
 .text-status-completed { color: var(--status-completed); }
 .text-status-active { color: var(--status-active); }
 .text-status-cancelled { color: var(--status-cancelled); }
-.text-status-pending { color: var(--status-pending); }
-.text-status-new { color: var(--status-new); }
 
 /* Data-attribute driven priority colors for badges (CSS fallback) */
 .badge[data-priority="urgent"] { color: var(--status-cancelled); }

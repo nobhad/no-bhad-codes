@@ -114,27 +114,6 @@
   white-space: nowrap;
 }
 
-.audit-action-create {
-  color: var(--status-completed);
-  border-color: var(--status-completed);
-}
-
-.audit-action-update,
-.audit-action-setting {
-  color: var(--status-active);
-  border-color: var(--status-active);
-}
-
-.audit-action-delete {
-  color: var(--status-cancelled);
-  border-color: var(--status-cancelled);
-}
-
-.audit-action-login {
-  color: var(--app-color-primary);
-  border-color: var(--app-color-primary);
-}
-
 /* ================================================
    Entity & details
    ================================================ */

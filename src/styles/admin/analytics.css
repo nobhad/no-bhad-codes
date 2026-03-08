@@ -76,12 +76,6 @@
   max-width: 75%;
 }
 
-.vitals-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--portal-section-gap);
-}
-
 /* .health-check-grid base styles in shared/portal-cards.css */
 
 /* ============================================
@@ -147,19 +141,6 @@
 /* Non-canvas charts and placeholders */
 .chart {
   height: 320px;
-  background: transparent;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-primary);
-  font-style: italic;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-.timeline-chart {
-  height: 200px;
   background: transparent;
   border: none;
   display: flex;
@@ -333,188 +314,10 @@
 }
 
 /* ============================================
-   Vital Cards
-   ============================================ */
-
-/* .vital-card - base styles in portal-cards.css */
-.vital-card {
-  text-align: center;
-}
-
-.vital-card h4 {
-  color: var(--portal-text-secondary);
-  font-size: var(--portal-label-size);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing);
-  margin-bottom: var(--space-1);
-}
-
-.vital-value {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-0-5);
-}
-
-.vital-status {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: var(--space-1) var(--space-2);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
-
-.vital-status.good {
-  background: transparent;
-  border: var(--border-width) solid var(--color-success);
-  color: var(--color-success);
-}
-
-.vital-status.needs-improvement {
-  background: transparent;
-  border: var(--border-width) solid var(--color-warning);
-  color: var(--color-warning);
-}
-
-.vital-status.poor {
-  background: transparent;
-  border: var(--border-width) solid var(--color-danger);
-  color: var(--color-danger);
-}
-
-/* Info icon positioning for vital cards */
-[data-page="admin"] .vital-card .info-icon-wrapper {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
-
-[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::after {
-  left: auto;
-  right: 0;
-  transform: none;
-}
-
-[data-page="admin"] .vital-card .info-icon-wrapper[data-tooltip]::before {
-  left: auto;
-  right: 4px;
-  transform: none;
-}
-
-/* ============================================
-   Lead Funnel
-   ============================================ */
-
-.funnel-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-1-5) 0;
-  overflow-x: auto;
-}
-
-.funnel-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-0-5);
-  padding: var(--portal-card-padding);
-  background: transparent;
-  border: var(--portal-border);
-  min-width: 110px;
-  text-align: center;
-  transition: border-color var(--transition-fast);
-}
-
-.funnel-stage:hover {
-  border-color: var(--portal-alpha-white-30);
-}
-
-.funnel-stage[data-stage="new"] {
-  border-color: var(--status-new);
-}
-.funnel-stage[data-stage="contacted"] {
-  border-color: var(--status-pending);
-}
-.funnel-stage[data-stage="qualified"] {
-  border-color: var(--status-active);
-}
-.funnel-stage[data-stage="proposal"] {
-  border-color: var(--status-qualified);
-}
-
-.funnel-stage-value {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--portal-text-primary);
-}
-
-.funnel-stage[data-stage="new"] .funnel-stage-value {
-  color: var(--status-new);
-}
-.funnel-stage[data-stage="contacted"] .funnel-stage-value {
-  color: var(--status-pending);
-}
-.funnel-stage[data-stage="qualified"] .funnel-stage-value {
-  color: var(--status-active);
-}
-.funnel-stage[data-stage="proposal"] .funnel-stage-value {
-  color: var(--status-qualified);
-}
-
-.funnel-stage-success {
-  background: transparent;
-  border-color: var(--status-completed);
-}
-
-.funnel-stage-success .funnel-stage-value {
-  color: var(--status-completed);
-}
-
-.funnel-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--portal-text-primary);
-  flex-shrink: 0;
-}
-
-.funnel-arrow svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-  /* Ensure arrow points right (horizontal) */
-  transform: rotate(0deg);
-}
-
-.funnel-stats {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding-top: var(--space-1-5);
-  border-top: var(--border-width) solid var(--portal-border);
-  margin-top: var(--space-2);
-}
-
-.funnel-stat {
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
-}
-
-/* ============================================
    Data Lists
    ============================================ */
 
 /* Uses utility classes: flex flex-col gap-1 */
-
-/* Uses universal empty state from loading.css, only add background */
-.data-list-empty {
-  background: var(--portal-bg-dark);
-}
 
 .data-label {
   font-size: var(--font-size-sm);
@@ -528,17 +331,6 @@
 }
 
 /* Uses utility classes: flex flex-col gap-0-5 */
-
-.report-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary);
-}
-
-.report-meta {
-  font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
-}
 
 /* Uses utility classes: flex items-center gap-0-5 */
 
@@ -574,29 +366,6 @@
   .kpi-cards-row--3 {
     grid-template-columns: repeat(2, 1fr);
     max-width: 100%;
-  }
-
-  .funnel-container {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: var(--space-1);
-    justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .funnel-arrow {
-    display: flex;
-  }
-
-  .funnel-stage {
-    min-width: 90px;
-    flex-shrink: 0;
-  }
-
-  .funnel-stats {
-    flex-direction: column;
-    gap: var(--space-1);
   }
 
   .quick-actions-grid {

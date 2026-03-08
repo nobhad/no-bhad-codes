@@ -10,45 +10,6 @@
  * and grid column utilities.
  */
 
-/* Header row */
-.status-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-}
-
-.status-panel-header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.status-panel-badge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-}
-
-.status-panel-last-update {
-  font-size: var(--font-size-xs);
-}
-
-.status-panel-header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.status-panel-auto-refresh {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-xs);
-}
-
 .status-panel-refresh-icon {
   width: 1rem;
   height: 1rem;
@@ -66,12 +27,6 @@
   margin-bottom: var(--space-3);
 }
 
-.status-service-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .status-service-icon {
   width: 1.25rem;
   height: 1.25rem;
@@ -87,11 +42,6 @@
   flex-direction: column;
   gap: var(--space-1);
   font-size: var(--font-size-xs);
-}
-
-.status-service-row {
-  display: flex;
-  justify-content: space-between;
 }
 
 .status-text-capitalize {
@@ -122,24 +72,6 @@
   gap: var(--space-3);
 }
 
-.status-incident-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.status-incident-content {
-  flex: 1;
-}
-
-.status-incident-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
-}
-
 .status-incident-severity {
   text-transform: uppercase;
 }
@@ -162,37 +94,7 @@
   gap: var(--space-2);
 }
 
-.status-incident-status-text {
-  font-size: var(--font-size-xs);
-  text-transform: capitalize;
-}
-
 /* Section title with margin */
 .status-section-title {
   margin-bottom: var(--space-4);
-}
-
-/* Retry button */
-.status-retry-btn {
-  margin-left: var(--space-4);
-}
-
-/* Grid with 4 columns */
-.grid-4-cols {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Grid with 6 columns */
-.grid-6-cols {
-  grid-template-columns: repeat(6, 1fr);
-}
-
-/* Grid with 2 columns */
-.grid-2-cols {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-/* Span all columns */
-.col-span-full {
-  grid-column: 1 / -1;
 }

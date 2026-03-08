@@ -83,24 +83,9 @@
    BEM-STYLE STATUS BADGE MODIFIERS
    Alternative naming convention: .status-badge--{variant}
    ===================================================== */
-.status-badge--success {
-  border-color: var(--color-success);
-  color: var(--color-success);
-}
-
 .status-badge--danger {
   border-color: var(--color-danger);
   color: var(--color-danger);
-}
-
-.status-badge--warning {
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-}
-
-.status-badge--info {
-  border-color: var(--color-info);
-  color: var(--color-info);
 }
 
 .status-badge--muted {
@@ -243,23 +228,6 @@
 }
 
 /* =====================================================
-   STATUS BADGE BUTTON (Dropdown trigger)
-   Reset button styles to match table cell text
-   ===================================================== */
-.status-badge-btn {
-  display: inline-flex;
-  align-items: center;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-
-/* =====================================================
    SIDEBAR NOTIFICATION BADGES
    Small counter badges for sidebar nav items
    ===================================================== */
@@ -342,42 +310,13 @@
    INLINE TAG BADGES
    Small inline badges for tags, categories, systems
    ===================================================== */
-:is(.tag-badge, .system-badge, .category-badge) {
+:is(.tag-badge, .category-badge) {
   display: inline-block;
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   background: transparent;
   border: var(--border-width) solid;
-}
-
-/* System badge variant - purple */
-.system-badge {
-  margin-left: var(--space-1);
-  border-color: var(--color-admin-purple);
-  color: var(--color-admin-purple);
-}
-
-/* Category badge color variants */
-.category-notification {
-  border-color: var(--color-info);
-  color: var(--color-info);
-}
-.category-invoice {
-  border-color: var(--color-success);
-  color: var(--color-success);
-}
-.category-contract {
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-}
-.category-project {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-.category-reminder {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
 }
 
 /* =====================================================
@@ -457,17 +396,4 @@
   border-radius: var(--portal-radius-full);
   flex-shrink: 0;
   background-color: var(--portal-text-muted);
-}
-
-/* =====================================================
-   STATUS COLOR DOT
-   Standalone colored dot for dropdowns and lists
-   ===================================================== */
-.status-color-dot {
-  display: inline-block;
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
-  border-radius: var(--portal-radius-full);
-  flex-shrink: 0;
-  margin-right: var(--space-2);
 }
