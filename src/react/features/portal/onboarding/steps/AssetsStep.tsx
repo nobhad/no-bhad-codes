@@ -61,14 +61,14 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
     contentAccess: ''
   };
 
-  const handleChange = (field: keyof AssetData, value: UploadedFile[] | boolean | string) => {
+  const handleChange = useCallback((field: keyof AssetData, value: UploadedFile[] | boolean | string) => {
     onUpdate({
       assets: {
         ...assets,
         [field]: value
       }
     });
-  };
+  }, [assets, onUpdate]);
 
   const handleFileSelect = useCallback(
     (files: FileList | null) => {
