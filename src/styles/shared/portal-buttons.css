@@ -255,6 +255,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   align-items: center;
   gap: var(--icon-gap-sm, 8px);
   width: 100%;
+  min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
   padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent, 18px);
   font-family: var(--font-family-mono);
   font-size: var(--portal-nav-font-size);
@@ -608,8 +609,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* Icon sizing - SAME SIZE as open state, use --sidebar-icon-size */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon {
   margin: 0;
-  width: var(--sidebar-icon-size);
-  height: var(--sidebar-icon-size);
+  width: var(--sidebar-icon-size, 20px);
+  height: var(--sidebar-icon-size, 20px);
 }
 
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover) .btn-icon svg {
@@ -659,8 +660,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   /* Icon sizing - SAME SIZE regardless of sidebar state, use --sidebar-icon-size */
   .portal .sidebar .sidebar-btn .btn-icon {
     margin: 0;
-    width: var(--sidebar-icon-size);
-    height: var(--sidebar-icon-size);
+    width: var(--sidebar-icon-size, 20px);
+    height: var(--sidebar-icon-size, 20px);
   }
 
   .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon svg {
