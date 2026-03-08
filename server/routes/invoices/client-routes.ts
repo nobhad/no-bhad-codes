@@ -138,7 +138,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 

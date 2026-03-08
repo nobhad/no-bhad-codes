@@ -11,6 +11,7 @@ import type { Invoice, InvoicePayment, InvoicePaymentRow } from '../../types/inv
 import { getFloat } from '../../database/row-helpers.js';
 import { receiptService } from '../receipt-service.js';
 import { logger } from '../logger.js';
+import { getDatabase } from '../../database/init.js';
 import type { Database } from '../../database/init.js';
 
 type SqlValue = string | number | boolean | null;
@@ -34,17 +35,16 @@ const INVOICE_PAYMENT_COLUMNS = `
 `.replace(/\s+/g, ' ').trim();
 
 export class InvoicePaymentService {
-  private db: Database;
   private getInvoiceById: GetInvoiceById;
   private updateInvoiceStatus: UpdateInvoiceStatus;
 
-  constructor(
-    db: Database,
-    deps: { getInvoiceById: GetInvoiceById; updateInvoiceStatus: UpdateInvoiceStatus }
-  ) {
-    this.db = db;
+  constructor(deps: { getInvoiceById: GetInvoiceById; updateInvoiceStatus: UpdateInvoiceStatus }) {
     this.getInvoiceById = deps.getInvoiceById;
     this.updateInvoiceStatus = deps.updateInvoiceStatus;
+  }
+
+  private getDb(): Database {
+    return getDatabase();
   }
 
   /**
@@ -119,7 +119,7 @@ export class InvoicePaymentService {
       id
     ];
     const startUpdate = Date.now();
-    await this.db.run(updateInvoiceSql, updateInvoiceParams);
+    await this.getDb().run(updateInvoiceSql, updateInvoiceParams);
     logger.info('Query executed', {
       metadata: {
         sql: updateInvoiceSql,
@@ -134,7 +134,7 @@ export class InvoicePaymentService {
         'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?';
       const skipRemindersParams = ['skipped', id, 'pending'];
       const startSkip = Date.now();
-      await this.db.run(skipRemindersSql, skipRemindersParams);
+      await this.getDb().run(skipRemindersSql, skipRemindersParams);
       logger.info('Query executed', {
         metadata: {
           sql: skipRemindersSql,
@@ -172,7 +172,7 @@ export class InvoicePaymentService {
       ) VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       invoiceId,
       amount,
       paymentMethod,
@@ -227,7 +227,7 @@ export class InvoicePaymentService {
       ORDER BY payment_date DESC, created_at DESC
     `;
 
-    const rows = await this.db.all(sql, [invoiceId]);
+    const rows = await this.getDb().all(sql, [invoiceId]);
 
     return rows.map((row: InvoicePaymentRow) => ({
       id: row.id,
@@ -264,7 +264,7 @@ export class InvoicePaymentService {
 
     sql += ' ORDER BY payment_date DESC, created_at DESC';
 
-    const rows = await this.db.all(sql, params);
+    const rows = await this.getDb().all(sql, params);
 
     return rows.map((row: InvoicePaymentRow) => ({
       id: row.id,

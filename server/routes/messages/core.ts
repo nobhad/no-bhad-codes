@@ -431,6 +431,9 @@ router.get(
         try {
           msg.attachments = JSON.parse(attachmentsStr);
         } catch (_e) {
+          logger.debug('[Messages] Failed to parse attachments JSON', {
+            error: _e instanceof Error ? _e : undefined
+          });
           msg.attachments = [];
         }
       } else {

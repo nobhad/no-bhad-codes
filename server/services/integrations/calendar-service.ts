@@ -164,7 +164,7 @@ async function executeWithRetry(apiCall: () => Promise<Response>): Promise<Respo
 
       if (attempt < MAX_RETRIES) {
         logger.warn(
-          `[CALENDAR] Rate limited (429), retrying in ${retryAfterMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`
+          `[Calendar] Rate limited (429), retrying in ${retryAfterMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`
         );
         await sleep(retryAfterMs);
       } else {
@@ -178,14 +178,14 @@ async function executeWithRetry(apiCall: () => Promise<Response>): Promise<Respo
       if (attempt < MAX_RETRIES) {
         const delay = getBackoffDelay(attempt);
         logger.warn(
-          `[CALENDAR] API call failed, retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES}): ${lastError.message}`
+          `[Calendar] API call failed, retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES}): ${lastError.message}`
         );
         await sleep(delay);
       }
     }
   }
 
-  logger.error(`[CALENDAR] All ${MAX_RETRIES} retries exhausted`, {
+  logger.error(`[Calendar] All ${MAX_RETRIES} retries exhausted`, {
     error: lastError
   });
   throw lastError;
@@ -205,7 +205,7 @@ export async function ensureValidToken(
   }
 
   if (!refreshToken) {
-    logger.warn('[CALENDAR] Access token expired and no refresh token available');
+    logger.warn('[Calendar] Access token expired and no refresh token available');
     return null;
   }
 
@@ -213,7 +213,7 @@ export async function ensureValidToken(
     const newToken = await refreshAccessToken(refreshToken);
     return newToken.access_token;
   } catch (error) {
-    logger.error('[CALENDAR] Token refresh failed, gracefully degrading', {
+    logger.error('[Calendar] Token refresh failed, gracefully degrading', {
       error: error instanceof Error ? error : undefined
     });
     return null;

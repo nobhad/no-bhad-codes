@@ -14,13 +14,13 @@
   align-items: center;
   gap: var(--space-1-5);
   padding: var(--space-1-5);
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
   border-top: var(--border-width-thick) solid var(--color-primary);
 }
 
 .kpi-card-icon {
   font-size: var(--font-size-xl);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .kpi-card-change {

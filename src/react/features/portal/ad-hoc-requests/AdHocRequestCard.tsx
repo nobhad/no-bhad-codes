@@ -132,7 +132,7 @@ export function AdHocRequestCard({
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="section border-t border-[var(--portal-border-color)] mt-3 pt-3">
+          <div className="section border-t border-[var(--color-border-primary)] mt-3 pt-3">
             {/* Description */}
             <div>
               <label className="field-label">Description</label>
@@ -223,7 +223,7 @@ export function AdHocRequestCard({
                   )}
 
                   {/* Total */}
-                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--portal-border-color)]">
+                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--color-border-primary)]">
                     <span className="text-primary text-xs font-semibold">
                       Total
                     </span>

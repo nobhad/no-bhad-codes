@@ -133,7 +133,7 @@ router.patch(
     const contactId = parseInt(req.params.contactId, 10);
     const { isPrimary, firstName, lastName, email, phone, role } = req.body;
 
-    if (isNaN(contactId)) {
+    if (isNaN(contactId) || contactId <= 0) {
       return errorResponse(res, 'Invalid contact ID', 400, ErrorCodes.INVALID_ID);
     }
 

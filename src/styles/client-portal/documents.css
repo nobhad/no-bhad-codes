@@ -5,7 +5,7 @@
 
 .portal .documents-intro {
   margin: 0 0 var(--space-2) 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -45,14 +45,14 @@
 .portal .documents-card-due {
   display: block;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .documents-empty,
 .portal .documents-loading,
 .portal .documents-error {
   margin: 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -72,14 +72,14 @@
 .portal .documents-detail-description,
 .portal .documents-detail-meta {
   margin: 0 0 var(--space-1-5) 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
 .portal .documents-detail-upload {
   margin-top: var(--space-2);
   padding-top: var(--space-1-5);
-  border-top: var(--border-width) solid var(--portal-border-light);
+  border-top: var(--border-width) solid var(--color-border-secondary);
 }
 
 /* Label styling from unified rule in portal-forms.css - only layout here */
@@ -100,7 +100,7 @@
 .portal .documents-upload-hint {
   margin: 0;
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .documents-upload-error {

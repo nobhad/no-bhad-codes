@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -37,7 +37,7 @@ router.post(
     }
 
     await projectService.addTagToProject(projectId, tagId);
-    sendSuccess(res, undefined, 'Tag added to project successfully', 201);
+    sendCreated(res, undefined, 'Tag added to project successfully');
   })
 );
 

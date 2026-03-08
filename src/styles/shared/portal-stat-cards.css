@@ -62,7 +62,7 @@
     .overview-stat-card,
     .vital-card
   ):hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 /* =====================================================
@@ -97,7 +97,7 @@
   font-size: var(--font-size-xl, 1.25rem);
   font-weight: var(--font-weight-medium);
   line-height: 1;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
   margin: 0;
 }
@@ -121,7 +121,7 @@
   justify-content: center;
   width: 1em;  /* Matches adjacent text size */
   height: 1em;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   flex-shrink: 0;
 }
 
@@ -144,7 +144,7 @@
 
 .portal .stat-card-clickable:hover,
 .portal a.stat-card:hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 .portal .stat-card-clickable:hover :is(.stat-number, .stat-value) {
@@ -168,7 +168,7 @@
 
 .portal .stat-card :is(.stat-secondary, .stat-change, .stat-meta) {
   font-size: var(--font-size-2xs);  /* 10px */
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   letter-spacing: var(--letter-spacing-normal);
   margin: 0;
   line-height: var(--line-height-snug);

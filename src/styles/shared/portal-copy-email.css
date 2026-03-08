@@ -37,7 +37,7 @@
   font-size: var(--font-size-sm);
   line-height: 1;
   vertical-align: middle;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   background: none;
   border: none;
   cursor: pointer;

@@ -225,7 +225,7 @@ body[data-page="client-landing"] .intake-modal-content {
   flex-shrink: 0;
   padding: 0;
   box-sizing: border-box;
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--border-radius-md);
 }
 
 /* Mobile: full screen */

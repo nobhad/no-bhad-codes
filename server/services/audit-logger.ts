@@ -264,7 +264,7 @@ async function createAuditLog(entry: AuditLogEntry): Promise<void> {
     );
 
     logger.info(
-      `[AUDIT] ${entry.action.toUpperCase()} ${entry.entityType}${entry.entityId ? `:${entry.entityId}` : ''} by ${entry.userEmail || 'system'}`
+      `[Audit] ${entry.action.toUpperCase()} ${entry.entityType}${entry.entityId ? `:${entry.entityId}` : ''} by ${entry.userEmail || 'system'}`
     );
   } catch (error) {
     // COMPLIANCE CRITICAL: Audit failures must be visible, not silent
@@ -274,7 +274,7 @@ async function createAuditLog(entry: AuditLogEntry): Promise<void> {
       error instanceof Error ? error : undefined
     );
 
-    logger.error('[AUDIT] CRITICAL - Audit log creation failed:', {
+    logger.error('[Audit] CRITICAL - Audit log creation failed:', {
       error: auditError,
       metadata: {
         action: entry.action,

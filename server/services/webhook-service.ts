@@ -24,15 +24,10 @@ const WEBHOOK_DELIVERY_COLUMNS = `
 `.replace(/\s+/g, ' ').trim();
 
 export class WebhookService {
-  private db: Database;
   private signingAlgorithm = 'sha256';
 
-  constructor(db?: Database) {
-    if (!db) {
-      this.db = getDatabase();
-    } else {
-      this.db = db;
-    }
+  private getDb(): Database {
+    return getDatabase();
   }
 
   /**
@@ -56,7 +51,7 @@ export class WebhookService {
     const headers = JSON.stringify(options?.headers || {});
     const eventString = events.join(',');
 
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO webhooks (name, url, method, headers, payload_template, events, secret_key, 
        retry_enabled, retry_max_attempts, retry_backoff_seconds)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -84,7 +79,7 @@ export class WebhookService {
    * Get webhook by ID
    */
   async getWebhookById(id: number): Promise<WebhookConfig | null> {
-    const row = await this.db.get(`SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatWebhook(row);
   }
@@ -96,7 +91,7 @@ export class WebhookService {
     const query = activeOnly
       ? `SELECT ${WEBHOOK_COLUMNS} FROM webhooks WHERE is_active = 1 ORDER BY created_at DESC`
       : `SELECT ${WEBHOOK_COLUMNS} FROM webhooks ORDER BY created_at DESC`;
-    const rows = await this.db.all(query);
+    const rows = await this.getDb().all(query);
     return rows.map((row: Record<string, unknown>) => this.formatWebhook(row));
   }
 
@@ -126,7 +121,7 @@ export class WebhookService {
     const eventString = Array.isArray(events) ? events.join(',') : events;
     const headerString = JSON.stringify(headers || {});
 
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE webhooks SET name=?, url=?, method=?, headers=?, payload_template=?, events=?, 
        is_active=?, retry_enabled=?, retry_max_attempts=?, retry_backoff_seconds=?, updated_at=CURRENT_TIMESTAMP
        WHERE id=?`,
@@ -154,14 +149,14 @@ export class WebhookService {
    * Delete webhook
    */
   async deleteWebhook(id: number): Promise<void> {
-    await this.db.run('DELETE FROM webhooks WHERE id = ?', [id]);
+    await this.getDb().run('DELETE FROM webhooks WHERE id = ?', [id]);
   }
 
   /**
    * Toggle webhook active status
    */
   async toggleWebhook(id: number, active: boolean): Promise<WebhookConfig> {
-    await this.db.run('UPDATE webhooks SET is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [
+    await this.getDb().run('UPDATE webhooks SET is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [
       active ? 1 : 0,
       id
     ]);
@@ -195,7 +190,7 @@ export class WebhookService {
     const signature = this.generateSignature(payload, webhook.secret_key);
 
     // Create delivery record
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO webhook_deliveries (webhook_id, event_type, event_data, signature, status, attempt_number)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [webhook.id, eventType, JSON.stringify(payload), signature, 'pending', 1]
@@ -239,7 +234,7 @@ export class WebhookService {
       const responseBody = await response.text();
       const success = response.ok;
 
-      await this.db.run(
+      await this.getDb().run(
         `UPDATE webhook_deliveries 
          SET status=?, response_status=?, response_body=?, delivered_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP
          WHERE id=?`,
@@ -252,7 +247,7 @@ export class WebhookService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      await this.db.run(
+      await this.getDb().run(
         `UPDATE webhook_deliveries 
          SET status='failed', error_message=?, updated_at=CURRENT_TIMESTAMP
          WHERE id=?`,
@@ -276,7 +271,7 @@ export class WebhookService {
     const attempt = delivery.attempt_number + 1;
     if (attempt > webhook.retry_max_attempts) {
       // Max retries exceeded
-      await this.db.run(
+      await this.getDb().run(
         'UPDATE webhook_deliveries SET status=\'failed\', updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [deliveryId]
       );
@@ -287,7 +282,7 @@ export class WebhookService {
     const backoffMs = webhook.retry_backoff_seconds * 1000 * Math.pow(2, attempt - 1);
     const nextRetryTime = new Date(Date.now() + backoffMs).toISOString();
 
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE webhook_deliveries 
        SET status='retrying', attempt_number=?, next_retry_at=?, updated_at=CURRENT_TIMESTAMP
        WHERE id=?`,
@@ -300,7 +295,7 @@ export class WebhookService {
    * Should be called periodically (e.g., every minute by a background job)
    */
   async processPendingRetries(): Promise<void> {
-    const deliveries = await this.db.all(
+    const deliveries = await this.getDb().all(
       `SELECT d.*, w.* FROM webhook_deliveries d
        JOIN webhooks w ON d.webhook_id = w.id
        WHERE d.status = 'retrying' AND d.next_retry_at <= CURRENT_TIMESTAMP
@@ -362,7 +357,7 @@ export class WebhookService {
    * Get delivery by ID
    */
   async getDeliveryById(id: number): Promise<WebhookDelivery | null> {
-    const row = await this.db.get(`SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${WEBHOOK_DELIVERY_COLUMNS} FROM webhook_deliveries WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatDelivery(row);
   }
@@ -393,7 +388,7 @@ export class WebhookService {
     }
 
     // Get total count
-    const countResult = await this.db.get(
+    const countResult = await this.getDb().get(
       `SELECT COUNT(*) as count FROM webhook_deliveries WHERE webhook_id = ?
        ${options?.status ? 'AND status = ?' : ''}
        ${options?.eventType ? 'AND event_type = ?' : ''}`,
@@ -407,7 +402,7 @@ export class WebhookService {
       params.push(options.limit, options?.offset || 0);
     }
 
-    const rows = await this.db.all(query, params);
+    const rows = await this.getDb().all(query, params);
     return {
       deliveries: rows.map((row: Record<string, unknown>) => this.formatDelivery(row)),
       total: Number(countResult?.count) || 0
@@ -424,7 +419,7 @@ export class WebhookService {
     retrying: number;
     successRate: number;
   }> {
-    const result = await this.db.get(
+    const result = await this.getDb().get(
       `SELECT 
         COUNT(*) as total,
         SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as success,
@@ -449,7 +444,7 @@ export class WebhookService {
    */
   async regenerateSecret(webhookId: number): Promise<string> {
     const newSecret = this.generateSecretKey();
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE webhooks SET secret_key = ?, updated_at=CURRENT_TIMESTAMP WHERE id = ?',
       [newSecret, webhookId]
     );

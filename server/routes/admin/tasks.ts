@@ -69,7 +69,7 @@ router.put(
     const taskId = parseInt(req.params.taskId, 10);
     const { title, description, status, priority, dueDate, assignedTo } = req.body;
 
-    if (isNaN(taskId)) {
+    if (isNaN(taskId) || taskId <= 0) {
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 

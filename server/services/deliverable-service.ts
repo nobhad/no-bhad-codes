@@ -121,14 +121,8 @@ const DELIVERABLE_REVIEW_COLUMNS = `
 `.replace(/\s+/g, ' ').trim();
 
 export class DeliverableService {
-  private db: Database;
-
-  constructor(db?: Database) {
-    if (!db) {
-      this.db = getDatabase();
-    } else {
-      this.db = db;
-    }
+  private getDb(): Database {
+    return getDatabase();
   }
 
   // ===== DELIVERABLE CRUD =====
@@ -146,7 +140,7 @@ export class DeliverableService {
   ): Promise<Deliverable> {
     const roundNumber = options?.roundNumber || 1;
 
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO deliverables (project_id, type, title, description, created_by_id, round_number, tags, review_deadline)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -171,7 +165,7 @@ export class DeliverableService {
    * Get deliverable by ID
    */
   async getDeliverableById(id: number): Promise<Deliverable | null> {
-    const row = await this.db.get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatDeliverable(row as DeliverableRow);
   }
@@ -197,7 +191,7 @@ export class DeliverableService {
     }
 
     // Get total count
-    const countResult = await this.db.get(
+    const countResult = await this.getDb().get(
       `SELECT COUNT(*) as count FROM deliverables 
        WHERE project_id = ? 
        ${options?.status ? 'AND status = ?' : ''}
@@ -212,7 +206,7 @@ export class DeliverableService {
       params.push(Number(options.limit), Number(options?.offset || 0));
     }
 
-    const rows = await this.db.all(query, params);
+    const rows = await this.getDb().all(query, params);
     return {
       deliverables: rows.map((row: unknown) => this.formatDeliverable(row as DeliverableRow)),
       total: Number(countResult?.count) || 0
@@ -235,7 +229,7 @@ export class DeliverableService {
       tags = existing.tags
     } = updates;
 
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE deliverables SET title=?, description=?, status=?, approval_status=?, review_deadline=?, tags=?, updated_at=CURRENT_TIMESTAMP
        WHERE id=?`,
       [title, description, status, approval_status, review_deadline, tags, id]
@@ -250,7 +244,7 @@ export class DeliverableService {
    * Lock deliverable (final approval)
    */
   async lockDeliverable(id: number, reviewedById: number): Promise<Deliverable> {
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE deliverables SET locked=1, status='approved', approval_status='approved', reviewed_by_id=?, approved_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP
        WHERE id=?`,
       [reviewedById, id]
@@ -265,7 +259,7 @@ export class DeliverableService {
    * Update deliverable with archived file ID after archiving to Files tab
    */
   async setArchivedFileId(deliverableId: number, fileId: number): Promise<void> {
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE deliverables SET archived_file_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [fileId, deliverableId]
     );
@@ -275,7 +269,7 @@ export class DeliverableService {
    * Get archived file ID for a deliverable
    */
   async getArchivedFileId(deliverableId: number): Promise<number | null> {
-    const row = (await this.db.get('SELECT archived_file_id FROM deliverables WHERE id = ?', [
+    const row = (await this.getDb().get('SELECT archived_file_id FROM deliverables WHERE id = ?', [
       deliverableId
     ])) as { archived_file_id: number | null } | undefined;
     return row?.archived_file_id ?? null;
@@ -285,7 +279,7 @@ export class DeliverableService {
    * Request revision
    */
   async requestRevision(id: number, reason: string, reviewedById: number): Promise<Deliverable> {
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE deliverables SET status='revision_requested', approval_status='revision_needed', reviewed_by_id=?, updated_at=CURRENT_TIMESTAMP
        WHERE id=?`,
       [reviewedById, id]
@@ -300,7 +294,7 @@ export class DeliverableService {
    * Delete deliverable (soft delete)
    */
   async deleteDeliverable(id: number): Promise<void> {
-    await this.db.run('UPDATE deliverables SET status=? WHERE id=?', ['archived', id]);
+    await this.getDb().run('UPDATE deliverables SET status=? WHERE id=?', ['archived', id]);
   }
 
   // ===== VERSION MANAGEMENT =====
@@ -321,13 +315,13 @@ export class DeliverableService {
     if (!deliverable) throw new Error('Deliverable not found');
 
     // Get next version number
-    const lastVersion = await this.db.get(
+    const lastVersion = await this.getDb().get(
       'SELECT MAX(version_number) as max_version FROM deliverable_versions WHERE deliverable_id = ?',
       [deliverableId]
     );
     const nextVersion = (Number(lastVersion?.max_version) || 0) + 1;
 
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO deliverable_versions (deliverable_id, version_number, file_path, file_name, file_size, file_type, uploaded_by_id, change_notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -357,7 +351,7 @@ export class DeliverableService {
    * Get version by ID
    */
   async getVersionById(id: number): Promise<DeliverableVersion | null> {
-    const row = await this.db.get(`SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE id = ?`, [id]);
     if (!row) return null;
     return row as unknown as DeliverableVersion;
   }
@@ -366,7 +360,7 @@ export class DeliverableService {
    * Get all versions for deliverable
    */
   async getDeliverableVersions(deliverableId: number): Promise<DeliverableVersion[]> {
-    const rows = await this.db.all(
+    const rows = await this.getDb().all(
       `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC`,
       [deliverableId]
     );
@@ -377,7 +371,7 @@ export class DeliverableService {
    * Get latest version
    */
   async getLatestVersion(deliverableId: number): Promise<DeliverableVersion | null> {
-    const row = await this.db.get(
+    const row = await this.getDb().get(
       `SELECT ${DELIVERABLE_VERSION_COLUMNS} FROM deliverable_versions WHERE deliverable_id = ? ORDER BY version_number DESC LIMIT 1`,
       [deliverableId]
     );
@@ -396,7 +390,7 @@ export class DeliverableService {
     text: string,
     options?: CommentOptions
   ): Promise<DeliverableComment> {
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO deliverable_comments (deliverable_id, author_id, comment_text, x_position, y_position, annotation_type, element_id)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -420,7 +414,7 @@ export class DeliverableService {
    * Get comment by ID
    */
   async getCommentById(id: number): Promise<DeliverableComment | null> {
-    const row = await this.db.get(`SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatComment(row as CommentRow);
   }
@@ -447,7 +441,7 @@ export class DeliverableService {
 
     query += ' ORDER BY created_at DESC';
 
-    const rows = await this.db.all(query, params);
+    const rows = await this.getDb().all(query, params);
     return rows.map((row: unknown) => this.formatComment(row as CommentRow));
   }
 
@@ -455,7 +449,7 @@ export class DeliverableService {
    * Mark comment as resolved
    */
   async resolveComment(id: number): Promise<DeliverableComment> {
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE deliverable_comments SET resolved=1, resolved_at=CURRENT_TIMESTAMP WHERE id=?',
       [id]
     );
@@ -469,7 +463,7 @@ export class DeliverableService {
    * Delete comment
    */
   async deleteComment(id: number): Promise<void> {
-    await this.db.run('DELETE FROM deliverable_comments WHERE id=?', [id]);
+    await this.getDb().run('DELETE FROM deliverable_comments WHERE id=?', [id]);
   }
 
   // ===== DESIGN ELEMENTS =====
@@ -482,7 +476,7 @@ export class DeliverableService {
     name: string,
     description?: string
   ): Promise<DesignElement> {
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO design_elements (deliverable_id, name, description)
        VALUES (?, ?, ?)`,
       [deliverableId, name, description || null]
@@ -498,7 +492,7 @@ export class DeliverableService {
    * Get design element by ID
    */
   async getDesignElementById(id: number): Promise<DesignElement | null> {
-    const row = await this.db.get(`SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE id = ?`, [id]);
     if (!row) return null;
     return row as unknown as DesignElement;
   }
@@ -507,7 +501,7 @@ export class DeliverableService {
    * Get all design elements for deliverable
    */
   async getDeliverableElements(deliverableId: number): Promise<DesignElement[]> {
-    const rows = await this.db.all(
+    const rows = await this.getDb().all(
       `SELECT ${DESIGN_ELEMENT_COLUMNS} FROM design_elements WHERE deliverable_id = ? ORDER BY created_at ASC`,
       [deliverableId]
     );
@@ -522,12 +516,12 @@ export class DeliverableService {
     status: 'pending' | 'approved' | 'revision_needed'
   ): Promise<DesignElement> {
     if (status === 'revision_needed') {
-      await this.db.run(
+      await this.getDb().run(
         'UPDATE design_elements SET approval_status=?, revision_count=revision_count+1, updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [status, elementId]
       );
     } else {
-      await this.db.run(
+      await this.getDb().run(
         'UPDATE design_elements SET approval_status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [status, elementId]
       );
@@ -550,7 +544,7 @@ export class DeliverableService {
     feedback?: string,
     elementsReviewed?: number[]
   ): Promise<DeliverableReview> {
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `INSERT INTO deliverable_reviews (deliverable_id, reviewer_id, decision, feedback, design_elements_reviewed)
        VALUES (?, ?, ?, ?, ?)`,
       [
@@ -572,7 +566,7 @@ export class DeliverableService {
    * Get review by ID
    */
   async getReviewById(id: number): Promise<DeliverableReview | null> {
-    const row = await this.db.get(`SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`, [id]);
+    const row = await this.getDb().get(`SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`, [id]);
     if (!row) return null;
     return this.formatReview(row as ReviewRow);
   }
@@ -581,7 +575,7 @@ export class DeliverableService {
    * Get all reviews for deliverable
    */
   async getDeliverableReviews(deliverableId: number): Promise<DeliverableReview[]> {
-    const rows = await this.db.all(
+    const rows = await this.getDb().all(
       `SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE deliverable_id = ? ORDER BY created_at DESC`,
       [deliverableId]
     );

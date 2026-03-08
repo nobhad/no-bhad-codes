@@ -39,7 +39,7 @@
   gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1-5);
   cursor: pointer;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   transition: all var(--transition-faster);
   margin-bottom: var(--space-0-5);
@@ -47,7 +47,7 @@
 
 .folder-item:hover {
   background: transparent;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .folder-item.active {
@@ -112,7 +112,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   flex-shrink: 0;
 }
 
@@ -136,7 +136,7 @@
 .file-name {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,7 +147,7 @@
 
 .file-meta {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin-top: var(--space-0-5);
 }
 

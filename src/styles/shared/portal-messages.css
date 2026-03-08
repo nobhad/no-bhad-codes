@@ -79,7 +79,7 @@
 }
 
 .portal .thread-item.active {
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
 }
 
 /* Thread item content - consistent text color and font */
@@ -127,7 +127,7 @@
   height: 18px;
   padding: 0 var(--space-1);
   background: var(--color-primary);
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
 }
@@ -194,7 +194,7 @@
 }
 
 .portal .message-time {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Message body text */
@@ -226,9 +226,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--portal-radius-full);
-  background: var(--portal-text-light);
-  color: var(--portal-bg-pitch);
+  border-radius: var(--border-radius-full);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
 }
@@ -240,11 +240,11 @@
   gap: var(--icon-gap);
   margin-top: var(--space-1);
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .message-sent .message-status {
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
 }
 
 .portal .message-status.read {
@@ -274,7 +274,7 @@
   border: none;
   padding: var(--space-0-5);
   cursor: pointer;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0.7;
 }
 
@@ -283,7 +283,7 @@
 }
 
 .portal .message-sent .message-actions button {
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
 }
 
 /* Reaction picker */
@@ -291,7 +291,7 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
   border: var(--portal-border);
   padding: var(--space-1);
   display: flex;
@@ -321,7 +321,7 @@
   align-items: center;
   gap: var(--space-0-5);
   padding: var(--space-0-5) var(--space-1);
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
   border: var(--portal-border);
   font-size: var(--font-size-xs);
   cursor: pointer;
@@ -348,7 +348,7 @@
   align-items: center;
   gap: var(--icon-gap);
   padding: var(--space-1) var(--space-2);
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
   border: var(--portal-border);
   font-size: var(--font-size-xs);
   text-decoration: none;
@@ -356,12 +356,12 @@
 }
 
 .portal .message-attachment:hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .portal .message-sent .message-attachment {
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .portal .message-attachment-icon,
@@ -378,7 +378,7 @@
 
 .portal .message-attachment-size {
   flex-shrink: 0;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Compose area - fixed at bottom */
@@ -402,7 +402,7 @@
 }
 
 .portal .message-compose textarea::placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0.5;
 }
 
@@ -542,13 +542,13 @@
 .messaging-sidebar {
   width: 320px;
   flex-shrink: 0;
-  border-right: var(--border-width) solid var(--portal-border-color);
+  border-right: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Section header with border */
 .messaging-section-header {
   padding: 1rem;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Heading with badge */
@@ -569,7 +569,7 @@
   transform: translateY(-50%);
   width: var(--icon-size-md);
   height: var(--icon-size-md);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   pointer-events: none;
   z-index: var(--z-index-content);
 }
@@ -603,7 +603,7 @@
 .messaging-avatar {
   width: 2.5rem;
   height: 2.5rem;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -618,7 +618,7 @@
 .messaging-avatar-icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .messaging-avatar-icon-sm {
@@ -682,7 +682,7 @@
 /* Conversation header */
 .messaging-conv-header {
   padding: 1rem;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -730,17 +730,17 @@
 .messaging-message-bubble {
   max-width: 70%;
   padding: 0.5rem 1rem;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .messaging-message-bubble-admin {
-  background: var(--portal-text-light);
-  color: var(--portal-bg-dark);
+  background: var(--color-text-primary);
+  color: var(--color-bg-tertiary);
 }
 
 .messaging-message-bubble-client {
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .messaging-message-content {
@@ -758,11 +758,11 @@
 }
 
 .messaging-message-meta-admin {
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
 }
 
 .messaging-message-meta-client {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .messaging-status-icon {
@@ -773,7 +773,7 @@
 /* Compose area */
 .messaging-compose {
   padding: 1rem;
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 .messaging-compose-row {
@@ -882,12 +882,12 @@
 
 .message-bubble.own {
   background: var(--color-brand-primary);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .message-bubble.other {
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-primary);
+  background: var(--color-bg-raised);
+  color: var(--color-text-primary);
 }
 
 /* Message bubble text */
@@ -900,7 +900,7 @@
 /* Message sender name */
 .message-sender-name {
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin-left: var(--space-0-5);
 }
 
@@ -914,12 +914,12 @@
 
 .message-time {
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .message-edited {
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-style: italic;
 }
 
@@ -933,9 +933,9 @@
   min-height: 60px;
   padding: var(--space-1);
   font-size: var(--font-size-xs);
-  background: var(--portal-bg-darkest);
-  color: var(--portal-text-primary);
-  border: var(--border-width) solid var(--portal-border-dark);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width) solid var(--color-border-primary);
   resize: none;
 }
 
@@ -977,7 +977,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .attachment-preview-info {
@@ -987,19 +987,19 @@
 
 .attachment-preview-name {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .attachment-preview-size {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Composer container - border-top only (sits at bottom of card) */
 .message-composer {
   gap: var(--space-1);
   padding: var(--space-1-5);
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Composer attachments preview */
@@ -1017,7 +1017,7 @@
   gap: 0.375rem;
   padding: var(--space-0-5) var(--space-1);
   font-size: var(--font-size-sm);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Composer input row */

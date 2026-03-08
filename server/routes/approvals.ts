@@ -12,7 +12,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
 import { getDatabase } from '../database/init.js';
-import { errorResponse, sanitizeErrorMessage, sendSuccess, ErrorCodes } from '../utils/api-response.js';
+import { errorResponse, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -252,7 +252,7 @@ router.post(
       is_default
     });
 
-    sendSuccess(res, { workflow }, 'Workflow created', 201);
+    sendCreated(res, { workflow }, 'Workflow created');
   })
 );
 
@@ -323,7 +323,7 @@ router.post(
       auto_approve_after_hours
     });
 
-    sendSuccess(res, { step }, 'Step added', 201);
+    sendCreated(res, { step }, 'Step added');
   })
 );
 
@@ -381,7 +381,7 @@ router.post(
         notes
       );
 
-      sendSuccess(res, { instance }, 'Approval workflow started', 201);
+      sendCreated(res, { instance }, 'Approval workflow started');
     } catch (error) {
       return errorResponse(res, sanitizeErrorMessage(error, 'Failed to start workflow'), 400);
     }

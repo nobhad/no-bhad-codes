@@ -115,7 +115,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId, 10);
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -155,7 +155,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const scheduledId = parseInt(req.params.id, 10);
 
-    if (isNaN(scheduledId)) {
+    if (isNaN(scheduledId) || scheduledId <= 0) {
       return errorResponse(res, 'Invalid scheduled invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 

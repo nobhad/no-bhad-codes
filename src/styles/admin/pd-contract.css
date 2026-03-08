@@ -40,10 +40,10 @@
 
 #pd-contract-status-badge.status-pending {
   background: var(--color-warning);
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
 }
 
 #pd-contract-status-badge.status-not-signed {
-  background: var(--portal-text-muted);
+  background: var(--color-text-tertiary);
   color: var(--color-white);
 }

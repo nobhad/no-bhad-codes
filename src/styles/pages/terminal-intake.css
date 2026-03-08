@@ -132,7 +132,7 @@ body[data-page="client-intake"] .terminal-window {
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   text-align: left;
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
 }
 
 .terminal .confirm-btn:hover {

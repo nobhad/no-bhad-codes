@@ -23,7 +23,7 @@ import {
 import { BUSINESS_INFO } from '../config/business.js';
 import { emailService } from '../services/email-service.js';
 import { projectService } from '../services/project-service.js';
-import { InvoiceService, type InvoiceLineItem } from '../services/invoice-service.js';
+import { invoiceService, type InvoiceLineItem } from '../services/invoice-service.js';
 import {
   errorResponse,
   errorResponseWithPayload,
@@ -146,7 +146,7 @@ const AdHocValidationSchemas = {
 };
 
 function getInvoiceService() {
-  return InvoiceService.getInstance();
+  return invoiceService;
 }
 
 function mapTaskPriority(priority?: string | null): 'low' | 'medium' | 'high' | 'urgent' {
@@ -519,7 +519,7 @@ router.post(
       return errorResponse(res, 'Not authenticated', 401, ErrorCodes.UNAUTHORIZED);
     }
 
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -574,7 +574,7 @@ router.post(
       return errorResponse(res, 'Not authenticated', 401, ErrorCodes.UNAUTHORIZED);
     }
 
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -703,7 +703,7 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -767,7 +767,7 @@ router.post(
   validateRequest(AdHocValidationSchemas.logTime, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -1089,7 +1089,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
 
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -1243,7 +1243,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -1517,7 +1517,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
 
-    if (Number.isNaN(requestId)) {
+    if (Number.isNaN(requestId) || requestId <= 0) {
       return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
@@ -1630,7 +1630,7 @@ router.post(
 
     for (const requestId of requestIds) {
       const id = typeof requestId === 'string' ? parseInt(requestId, 10) : requestId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       try {
         await adHocRequestService.softDeleteRequest(id, deletedBy);

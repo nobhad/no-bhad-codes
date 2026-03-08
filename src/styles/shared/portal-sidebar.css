@@ -11,7 +11,7 @@
 .portal .sidebar {
   width: clamp(200px, 18vw, 240px);
   min-width: 56px; /* Allow collapse to icon-only at breakpoints */
-  background: var(--portal-bg-pitch);
+  background: var(--color-bg-primary);
   border-right: none;
   display: flex;
   flex-direction: column;
@@ -84,7 +84,7 @@
 /* Badge color on hover/active - shared for both portals */
 .portal .sidebar-buttons .sidebar-btn:hover .sidebar-badge,
 .portal .sidebar-buttons .sidebar-btn.active .sidebar-badge {
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
 }
 
 /* Collapsed state - layout only (button styles in shared/portal-buttons.css) */
@@ -134,7 +134,7 @@
   margin: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 1;
   cursor: pointer;
   transition: color var(--transition-fast);
@@ -219,7 +219,7 @@
     height: var(--icon-size-sm);
     font-size: var(--font-size-2xs);
     padding: 0 var(--space-0-5);
-    border-radius: var(--portal-radius-full);
+    border-radius: var(--border-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -361,10 +361,10 @@
   font-weight: var(--font-weight-bold);
   line-height: 1;
   transform: none;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   background: var(--color-danger);
   color: var(--color-white);
-  box-shadow: 0 0 0 var(--border-width) var(--portal-bg-dark);
+  box-shadow: 0 0 0 var(--border-width) var(--color-bg-tertiary);
 }
 
 /* Collapsed - no scale on hover */
@@ -387,7 +387,7 @@
     font-weight: var(--font-weight-bold);
     background: var(--color-danger);
     color: var(--color-white);
-    box-shadow: 0 0 0 var(--border-width) var(--portal-bg-dark);
+    box-shadow: 0 0 0 var(--border-width) var(--color-bg-tertiary);
   }
 }
 
@@ -406,7 +406,7 @@
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-family: inherit;
   font-size: var(--font-size-2xs);
   line-height: 1;

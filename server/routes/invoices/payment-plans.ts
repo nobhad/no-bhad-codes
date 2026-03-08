@@ -139,7 +139,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const templateId = parseInt(req.params.id, 10);
 
-    if (isNaN(templateId)) {
+    if (isNaN(templateId) || templateId <= 0) {
       return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.INVALID_ID);
     }
 

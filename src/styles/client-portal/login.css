@@ -94,7 +94,7 @@ body[data-page="client-portal"] #client-dashboard.hidden {
 }
 
 .set-password-card {
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: clamp(1.5rem, 4vw, 2.5rem);
 }
 
@@ -107,12 +107,12 @@ body[data-page="client-portal"] #client-dashboard.hidden {
   font-family: var(--font-family-mono);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-transform: uppercase;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .set-password-subtitle {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
   margin: 0;
 }

@@ -15,7 +15,7 @@
    ============================================================================ */
 
 .signature-status {
-  background-color: var(--portal-bg-dark);
+  background-color: var(--color-bg-tertiary);
   padding: var(--space-1-5);
 }
 
@@ -25,7 +25,7 @@
 
 .item-description {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 /* ============================================================================
@@ -37,7 +37,7 @@
   align-items: center;
   gap: var(--space-0-5);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
@@ -58,7 +58,7 @@
   align-items: center;
   gap: var(--icon-gap);
   padding: var(--space-0-5) 0;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 .activity-item:last-child {
@@ -67,12 +67,12 @@
 
 .activity-type {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .activity-date {
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin-left: auto;
 }
 

@@ -150,38 +150,55 @@ export function auditMiddleware() {
       const entityId =
         getEntityId(req) || body?.id?.toString() || (body?.data as Record<string, unknown> | undefined)?.id?.toString();
 
-      // Fire and forget audit log - errors are caught internally
-      auditLogger
-        .log({
-          userId: req.user?.id,
-          userEmail: req.user?.email,
-          userType: req.user?.type === 'admin' ? 'admin' : req.user ? 'client' : 'system',
-          action,
-          entityType,
-          entityId,
-          entityName:
-            (body?.name as string) ||
-            (body?.email as string) ||
-            (body?.subject as string) ||
-            req.body?.name,
-          newValue: req.method === 'DELETE' ? undefined : req.body,
-          ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
-          userAgent: req.get('user-agent'),
-          requestPath: req.path,
-          requestMethod: req.method,
+      // Build the full audit entry before logging so it can be
+      // captured in structured logs if DB persistence fails
+      const auditEntry = {
+        userId: req.user?.id,
+        userEmail: req.user?.email,
+        userType: req.user?.type === 'admin' ? 'admin' : req.user ? 'client' : 'system',
+        action,
+        entityType,
+        entityId,
+        entityName:
+          (body?.name as string) ||
+          (body?.email as string) ||
+          (body?.subject as string) ||
+          req.body?.name,
+        newValue: req.method === 'DELETE' ? undefined : req.body,
+        ipAddress: (req.ip || req.socket?.remoteAddress || '').replace('::ffff:', ''),
+        userAgent: req.get('user-agent'),
+        requestPath: req.path,
+        requestMethod: req.method,
+        metadata: {
+          statusCode: res.statusCode,
+          responseId: body?.id || (body?.data as Record<string, unknown> | undefined)?.id
+        }
+      } as const;
+
+      // Fire and forget - response already sent, so we log the full
+      // audit entry to structured logs on failure to preserve the trail
+      auditLogger.log(auditEntry).catch((err) => {
+        const error = err instanceof Error ? err : new Error(String(err));
+        logger.error('[Audit] Failed to persist audit entry', {
+          error,
           metadata: {
-            statusCode: res.statusCode,
-            responseId: body?.id || (body?.data as Record<string, unknown> | undefined)?.id
+            userId: auditEntry.userId,
+            userEmail: auditEntry.userEmail,
+            userType: auditEntry.userType,
+            action: auditEntry.action,
+            entityType: auditEntry.entityType,
+            entityId: auditEntry.entityId,
+            entityName: auditEntry.entityName,
+            ipAddress: auditEntry.ipAddress,
+            requestPath: auditEntry.requestPath,
+            requestMethod: auditEntry.requestMethod,
+            statusCode: auditEntry.metadata.statusCode,
+            responseId: auditEntry.metadata.responseId
           }
-        })
-        .catch((err) => {
-          // Log but don't throw - response already sent
-          logger.error('[AUDIT] Failed to log', { error: err });
         });
+      });
     });
 
     next();
   };
 }
-
-export default auditMiddleware;

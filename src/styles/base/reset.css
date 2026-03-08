@@ -237,7 +237,7 @@ a {
 
 /* Details/Summary */
 details {
-  border-radius: var(--portal-radius-lg, 12px);
+  border-radius: var(--border-radius-lg, 12px);
 }
 
 summary {
@@ -345,7 +345,7 @@ details > summary:focus-visible {
 
 /* Dropdowns - focus wraps entire dropdown when open */
 .custom-dropdown {
-  border-radius: var(--portal-radius-lg, 12px);
+  border-radius: var(--border-radius-lg, 12px);
 }
 
 /* Modal/form dropdowns - wrapper outline when open */

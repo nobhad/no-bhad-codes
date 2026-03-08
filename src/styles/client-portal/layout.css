@@ -10,9 +10,9 @@
 
 /* Client portal body defaults - match admin portal */
 body[data-page="client-portal"] {
-  background: var(--portal-bg-pitch);
+  background: var(--color-bg-primary);
   font-weight: var(--font-weight-base, 500);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 /* Footer is hidden via footer.css [data-page="client-portal"] selector */
@@ -91,7 +91,7 @@ body[data-page="client-portal"] {
   body[data-active-tab="messages"] .portal .messages-container,
   body.messages-tab-active .portal .messages-container {
     margin: 0;
-    /* Keep border-radius per design docs - main containers use --portal-radius-md */
+    /* Keep border-radius per design docs - main containers use --border-radius-md */
   }
 }
 
@@ -110,7 +110,7 @@ body[data-page="client-portal"] {
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -129,7 +129,7 @@ body[data-page="client-portal"] {
 
 /* Portal Dashboard - uses shared portal styles */
 .portal .dashboard-content {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Portal theme variables are defined in variables.css */
@@ -147,7 +147,7 @@ body[data-page="client-portal"] {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
   letter-spacing: var(--letter-spacing-tightest, -0.09em);
   text-shadow: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Portal page header specific */
@@ -170,7 +170,7 @@ body[data-page="client-portal"] {
 .portal hr {
   height: 2px;
   border-radius: 0;
-  background-color: var(--portal-text-light);
+  background-color: var(--color-text-primary);
 }
 
 /* ================================================
@@ -260,7 +260,7 @@ body[data-page="client-portal"] {
 .portal .portal-global-header .header-page-title {
   font-family: var(--font-family-mono);
   font-size: clamp(1rem, 3vw, 1.25rem);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title, 0.02em);
@@ -295,7 +295,7 @@ body[data-page="client-portal"] {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   transition:
     color var(--transition-fast),
     background var(--transition-fast);
@@ -303,8 +303,8 @@ body[data-page="client-portal"] {
 }
 
 .header-toggle-button:hover {
-  background: var(--portal-bg-hover);
-  color: var(--portal-text-light);
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .header-toggle-button:focus-visible {
@@ -360,7 +360,7 @@ body[data-page="client-portal"] {
 .page-title h2 {
   font-family: var(--font-family-mono);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0;
   text-transform: uppercase;
 }
@@ -370,7 +370,7 @@ body[data-page="client-portal"] {
 .page-header:not(.primary-header-row) h2 {
   font-family: var(--font-family-mono);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0;
   text-transform: uppercase;
 }
@@ -406,7 +406,7 @@ body[data-page="client-portal"] {
   gap: var(--space-0-5);
   flex-wrap: wrap;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   list-style: none;
   padding: 0;
   margin: 0;

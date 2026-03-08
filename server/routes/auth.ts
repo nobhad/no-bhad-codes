@@ -1509,11 +1509,11 @@ Best regards,
 No Bhad Codes Team`
         ]
       );
-      await logger.info(`[AUTH] Created welcome message for client ${clientId}`, {
+      await logger.info(`[Auth] Created welcome message for client ${clientId}`, {
         category: 'AUTH'
       });
     } catch (messageError) {
-      await logger.error('[AUTH] Failed to create welcome message:', {
+      await logger.error('[Auth] Failed to create welcome message:', {
         error: messageError instanceof Error ? messageError : undefined,
         category: 'AUTH'
       });
@@ -1535,11 +1535,11 @@ No Bhad Codes Team`
         verificationToken,
         name: clientName
       });
-      logger.info(`[AUTH] Sent email verification for client ${clientId}`, {
+      logger.info(`[Auth] Sent email verification for client ${clientId}`, {
         category: 'AUTH'
       });
     } catch (verificationError) {
-      logger.error('[AUTH] Failed to send email verification on account activation', {
+      logger.error('[Auth] Failed to send email verification on account activation', {
         error: verificationError instanceof Error ? verificationError : undefined,
         category: 'AUTH'
       });
@@ -1563,7 +1563,7 @@ No Bhad Codes Team`
     // 5. Generate JWT token for auto-login
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      await logger.error('[AUTH] JWT_SECRET not configured for auto-login after set-password', {
+      await logger.error('[Auth] JWT_SECRET not configured for auto-login after set-password', {
         category: 'AUTH'
       });
       return sendSuccess(
@@ -1584,7 +1584,7 @@ No Bhad Codes Team`
       { expiresIn: JWT_CONFIG.USER_TOKEN_EXPIRY } as SignOptions
     );
 
-    await logger.info(`[AUTH] Generated auto-login token for client ${clientId}`, {
+    await logger.info(`[Auth] Generated auto-login token for client ${clientId}`, {
       category: 'AUTH'
     });
 
@@ -1593,13 +1593,20 @@ No Bhad Codes Team`
 );
 
 /**
- * POST /api/auth/portal-login
- * Unified login endpoint for the /portal login page.
- * Accepts email + password and routes to admin or client authentication
- * based on whether the email matches ADMIN_EMAIL.
- *
- * Returns the same response structure as /api/auth/login so the
- * client-side authStore can handle it uniformly.
+ * @swagger
+ * /api/auth/portal-login:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: POST /api/auth/portal-login
+ *     description: Unified login endpoint for the portal login page.
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ *       429:
+ *         description: Too many attempts
  */
 router.post(
   '/portal-login',
@@ -1853,10 +1860,24 @@ router.post(
 // ============================================
 
 /**
- * GET /api/auth/verify-email/:token
- * Verify a client's email address using the token from the verification email.
- * Marks email_verified = true and clears the token.
- * Tokens expire after EMAIL_VERIFICATION_CONFIG.TOKEN_EXPIRY_MS (24 hours).
+ * @swagger
+ * /api/auth/verify-email/{token}:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: GET /api/auth/verify-email/:token
+ *     description: Verify a client email address using the token from the verification email.
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       302:
+ *         description: Redirect to portal on success
+ *       400:
+ *         description: Invalid or expired token
  */
 router.get(
   '/verify-email/:token',
@@ -1929,7 +1950,7 @@ router.get(
       userAgent: req.get('user-agent') || 'unknown'
     });
 
-    logger.info(`[AUTH] Email verified for client ${clientId}`, { category: 'AUTH' });
+    logger.info(`[Auth] Email verified for client ${clientId}`, { category: 'AUTH' });
 
     // Redirect to portal with success indicator
     const portalUrl = getBaseUrl();
@@ -1938,10 +1959,20 @@ router.get(
 );
 
 /**
- * POST /api/auth/resend-verification
- * Resend the email verification email for a client.
- * Rate limited to 1 request per EMAIL_VERIFICATION_CONFIG.RESEND_COOLDOWN_MS (5 minutes)
- * per email address, enforced via the email_verification_sent_at timestamp.
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: POST /api/auth/resend-verification
+ *     description: Resend the email verification email for a client.
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ *       400:
+ *         description: Invalid email or already verified
+ *       429:
+ *         description: Too many requests
  */
 router.post(
   '/resend-verification',
@@ -2020,7 +2051,7 @@ router.post(
         name: clientName || undefined
       });
     } catch (emailError) {
-      logger.error('[AUTH] Failed to send verification email on resend', {
+      logger.error('[Auth] Failed to send verification email on resend', {
         error: emailError instanceof Error ? emailError : undefined,
         category: 'AUTH'
       });

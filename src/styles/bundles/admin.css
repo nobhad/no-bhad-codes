@@ -78,7 +78,7 @@
    the inline <style> in admin/index.html (which is also unlayered).
    Layered styles cannot beat unlayered styles regardless of specificity. */
 body.admin-logged-in[data-page="admin"] {
-  background-color: var(--portal-bg-pitch);
+  background-color: var(--color-bg-primary);
   /* Fixed height prevents body from growing beyond viewport */
   height: 100vh;
   height: 100dvh;
@@ -98,12 +98,12 @@ body.admin-logged-in[data-page="admin"] {
 
 /* html background - uses fallback since portal variables are scoped to body, not html */
 html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-pitch, #000000);
+  background-color: var(--color-bg-primary, var(--portal-neutral-0));
   height: 100%;
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-pitch, #ffffff);
+  background-color: var(--color-bg-primary, var(--color-off-white));
 }
 
 /* Scrollbar styling */
@@ -117,7 +117,7 @@ html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-400);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--border-radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {

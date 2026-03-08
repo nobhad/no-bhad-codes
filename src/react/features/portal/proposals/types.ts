@@ -30,7 +30,7 @@ export const PROPOSAL_STATUS_CONFIG: Record<string, { label: string; color: stri
   viewed: { label: 'Viewed', color: 'var(--status-in-progress)' },
   accepted: { label: 'Accepted', color: 'var(--status-completed)' },
   declined: { label: 'Declined', color: 'var(--status-cancelled)' },
-  expired: { label: 'Expired', color: 'var(--portal-text-muted)' },
+  expired: { label: 'Expired', color: 'var(--color-text-tertiary)' },
   pending: { label: 'Pending', color: 'var(--status-pending)' },
-  draft: { label: 'Draft', color: 'var(--portal-text-muted)' }
+  draft: { label: 'Draft', color: 'var(--color-text-tertiary)' }
 };

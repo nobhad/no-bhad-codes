@@ -12,7 +12,7 @@
   background: transparent;
   border: none;
   padding: var(--space-4);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   box-shadow: none;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
   background: transparent;
   border: none;
   padding: var(--space-3);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   box-shadow: none;
 }
 
@@ -47,11 +47,11 @@
    Drag-and-drop file upload area
    ===================================================== */
 .portal .upload-dropzone {
-  border: var(--border-width) dashed var(--portal-text-light);
+  border: var(--border-width) dashed var(--color-text-primary);
   padding: var(--space-4);
   text-align: center;
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition:
     border-color var(--transition-mouse) ease,
@@ -60,12 +60,12 @@
 
 .portal .upload-dropzone:is(:hover, .dragover) {
   border-color: var(--color-primary);
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
 }
 
 .portal .upload-dropzone p {
   margin: 0 0 var(--space-2) 0;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Desktop/mobile text variants */
@@ -95,7 +95,7 @@
   background: transparent;
   border: none;
   padding: var(--space-4);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
   gap: var(--space-1-5);
@@ -141,7 +141,7 @@
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -156,7 +156,7 @@
   align-items: center;
   gap: var(--icon-gap);
   padding: var(--space-1) var(--space-1-5);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast) ease;
   font-size: var(--font-size-sm);
@@ -165,7 +165,7 @@
 
 .portal .folder-item:hover {
   background: transparent;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .portal .folder-item.active {
@@ -197,7 +197,7 @@
 
 .portal .files-path {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .files-panel .files-list {
@@ -264,7 +264,7 @@
   padding: var(--space-1) var(--space-1-5);
   background: transparent;
   border: var(--portal-border);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   height: 36px;
 }
 
@@ -339,19 +339,19 @@
   padding: var(--space-1-5);
   background: transparent;
   border: var(--border-width) solid transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   transition: border-color var(--transition-fast) ease;
 }
 
 .portal .file-icon {
   width: 36px;
   height: 36px;
-  background: var(--portal-bg-darker);
+  background: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .file-icon.image {
@@ -377,7 +377,7 @@
 .portal .file-name {
   flex: 1;
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -385,12 +385,12 @@
 
 .portal .file-date {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .file-meta {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* =====================================================
@@ -442,7 +442,7 @@
 .portal .no-files {
   text-align: center;
   padding: var(--space-4);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -522,7 +522,7 @@
 .dropzone {
   border-style: dashed;
   border-width: 2px;
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -535,7 +535,7 @@
 
 .dropzone:hover,
 .dropzone.is-drag-active {
-  border-color: var(--portal-text-light);
+  border-color: var(--color-text-primary);
 }
 
 .dropzone.is-error {
@@ -543,7 +543,7 @@
 }
 
 .dropzone.is-success {
-  border-color: var(--portal-text-light);
+  border-color: var(--color-text-primary);
 }
 
 .dropzone-content {
@@ -560,7 +560,7 @@
 
 .dropzone-hint {
   font-size: var(--font-size-2xs, 11px);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .dropzone-actions {

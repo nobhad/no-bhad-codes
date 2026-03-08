@@ -75,7 +75,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const conversationId = parseInt(req.params.conversationId, 10);
 
-    if (isNaN(conversationId)) {
+    if (isNaN(conversationId) || conversationId <= 0) {
       return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -132,7 +132,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const conversationId = parseInt(req.params.conversationId, 10);
 
-    if (isNaN(conversationId)) {
+    if (isNaN(conversationId) || conversationId <= 0) {
       return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -162,7 +162,7 @@ router.post(
     const conversationId = parseInt(req.params.conversationId, 10);
     const { content, attachments } = req.body;
 
-    if (isNaN(conversationId)) {
+    if (isNaN(conversationId) || conversationId <= 0) {
       return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -236,7 +236,7 @@ router.post(
     const conversationId = parseInt(req.params.conversationId, 10);
     const { starred } = req.body;
 
-    if (isNaN(conversationId)) {
+    if (isNaN(conversationId) || conversationId <= 0) {
       return errorResponse(res, 'Invalid conversation ID', 400, ErrorCodes.INVALID_ID);
     }
 

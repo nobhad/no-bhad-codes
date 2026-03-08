@@ -196,7 +196,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
                   className="progress-fill"
                   style={{
                     width: `${Math.min((kpi.value / kpi.target) * 100, 100)}%`,
-                    backgroundColor: kpi.value >= kpi.target ? 'var(--portal-text-light)' : 'var(--portal-text-muted)'
+                    backgroundColor: kpi.value >= kpi.target ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)'
                   }}
                 />
               </div>

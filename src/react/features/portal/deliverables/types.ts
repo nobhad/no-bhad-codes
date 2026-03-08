@@ -26,7 +26,7 @@ export interface PortalDeliverablesResponse {
 
 /** Deliverable status display config */
 export const DELIVERABLE_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  draft: { label: 'Draft', color: 'var(--portal-text-muted)' },
+  draft: { label: 'Draft', color: 'var(--color-text-tertiary)' },
   in_review: { label: 'In Review', color: 'var(--status-pending)' },
   approved: { label: 'Approved', color: 'var(--status-completed)' },
   revision_requested: { label: 'Revision Requested', color: 'var(--status-overdue)' },

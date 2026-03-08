@@ -18,7 +18,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const parentId = req.query.parent_id ? parseInt(req.query.parent_id as string) : undefined;
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -39,7 +39,7 @@ router.post(
     const projectId = parseInt(req.params.id, 10);
     const { name, description, parent_folder_id, color, icon } = req.body;
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -71,7 +71,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId, 10);
     const { name, description, color, icon, sort_order } = req.body;
-    if (isNaN(folderId)) {
+    if (isNaN(folderId) || folderId <= 0) {
       return errorResponse(res, 'Invalid folder ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -115,7 +115,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const { folder_id } = req.body;
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -135,7 +135,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId, 10);
     const { parent_folder_id } = req.body;
-    if (isNaN(folderId)) {
+    if (isNaN(folderId) || folderId <= 0) {
       return errorResponse(res, 'Invalid folder ID', 400, ErrorCodes.INVALID_ID);
     }
 

@@ -877,7 +877,7 @@ router.get(
           const sigY = sigBoxY - sigBoxHeight / 2 - sigHeight / 2 + 10;
           page().drawImage(sigImage, { x: sigX, y: sigY, width: sigWidth, height: sigHeight });
         } catch (sigError) {
-          await logger.error('[PDF] Failed to embed signature image:', {
+          await logger.error('[Pdf] Failed to embed signature image:', {
             error: sigError instanceof Error ? sigError : undefined,
             category: 'PROPOSALS'
           });

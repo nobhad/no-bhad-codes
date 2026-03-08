@@ -246,7 +246,7 @@ export async function checkIntegrationHealth(): Promise<IntegrationHealthReport>
 
     return { overall, integrations, checkedAt };
   } catch (error) {
-    logger.error('[INTEGRATIONS] Health check failed:', {
+    logger.error('[Integrations] Health check failed:', {
       error: error instanceof Error ? error : undefined
     });
 

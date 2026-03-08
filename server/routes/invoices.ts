@@ -107,7 +107,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const milestoneId = parseInt(req.params.milestoneId, 10);
 
-    if (isNaN(milestoneId)) {
+    if (isNaN(milestoneId) || milestoneId <= 0) {
       return errorResponse(res, 'Invalid milestone ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -151,7 +151,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const milestoneId = parseInt(req.params.milestoneId, 10);
 
-    if (isNaN(milestoneId)) {
+    if (isNaN(milestoneId) || milestoneId <= 0) {
       return errorResponse(res, 'Invalid milestone ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -193,7 +193,7 @@ router.put(
     const invoiceId = parseInt(req.params.id, 10);
     const { milestoneId } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -242,7 +242,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -316,7 +316,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -371,7 +371,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -429,7 +429,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -500,7 +500,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
     const { amount, paymentMethod, paymentReference } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -716,7 +716,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
     const { termsId } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -761,7 +761,7 @@ router.put(
     const invoiceId = parseInt(req.params.id, 10);
     const { taxRate, discountType, discountValue } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -804,7 +804,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -845,7 +845,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -909,7 +909,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -940,7 +940,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
     const { amount, paymentMethod, paymentReference, notes } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -995,7 +995,7 @@ router.put(
     const invoiceId = parseInt(req.params.id, 10);
     const { internalNotes } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 

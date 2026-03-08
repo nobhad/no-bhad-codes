@@ -50,7 +50,7 @@
 
 /* Expanded content border */
 .tasks-expanded-content {
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Description with pre-wrap */
@@ -70,7 +70,7 @@
 
 /* Header with bottom border */
 .contract-files-header {
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Empty state with custom padding */
@@ -108,7 +108,7 @@
 
 /* Description text below header */
 .portal-card-description {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
 }
 
@@ -123,7 +123,7 @@
 
 /* Milestone header border */
 .deliv-milestone-header {
-  border-bottom: var(--border-width) solid var(--portal-border-subtle);
+  border-bottom: var(--border-width) solid var(--color-border-secondary);
 }
 
 /* Milestone description */
@@ -138,7 +138,7 @@
 
 /* Spinner */
 .files-spinner {
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
 }
 
 /* Files table styles moved to project-detail.css */
@@ -198,12 +198,12 @@
 
 /* Horizontal divider line */
 .activity-divider-line {
-  background-color: var(--portal-border-color);
+  background-color: var(--color-border-primary);
 }
 
 /* Vertical timeline line */
 .activity-timeline-line {
-  background-color: var(--portal-border-color);
+  background-color: var(--color-border-primary);
 }
 
 /* Timeline dot container */
@@ -214,7 +214,7 @@
 
 /* Metadata border top */
 .activity-border-top {
-  border-top: var(--border-width) solid var(--portal-border-subtle);
+  border-top: var(--border-width) solid var(--color-border-secondary);
 }
 
 /* ============================================
@@ -286,7 +286,7 @@
 
 /* Input panel with top border */
 .msgtab-input-panel {
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
 }
 
@@ -297,7 +297,7 @@
 
 /* Keyboard shortcut badge */
 .msgtab-kbd {
-  font-size: var(--portal-label-size);
+  font-size: var(--label-font-size);
   padding: var(--space-px) var(--icon-gap-xs);
 }
 
@@ -313,7 +313,7 @@
 /* Notes with border top */
 .contacts-notes {
   font-size: var(--font-size-xs);
-  border-top: var(--border-width) solid var(--portal-border-subtle);
+  border-top: var(--border-width) solid var(--color-border-secondary);
 }
 
 /* ============================================
@@ -338,7 +338,7 @@
 
 /* Header row border */
 .invtab-header-row {
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Table row display */

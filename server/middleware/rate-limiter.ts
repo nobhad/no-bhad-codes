@@ -365,14 +365,3 @@ export async function getRateLimitStats(): Promise<{
     blockedIPs: blockedIPs || []
   };
 }
-
-export default {
-  createRateLimiter,
-  rateLimiters,
-  blockIP,
-  unblockIP,
-  getRateLimitStats,
-  RATE_LIMIT_PRESETS,
-  userKeyGenerator,
-  combinedKeyGenerator
-};

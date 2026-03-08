@@ -90,7 +90,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 

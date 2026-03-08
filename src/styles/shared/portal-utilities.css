@@ -148,7 +148,7 @@ svg.lucide {
 .portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin-bottom: var(--space-0-5);
 }
 
@@ -167,7 +167,7 @@ svg.lucide {
 .portal
   :is(.activity-list, .notes-list, .files-list, .tasks-list)
   > li:is(.clickable, .clickable-activity):hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 /* =====================================================
@@ -180,13 +180,13 @@ svg.lucide {
   align-items: center;
   gap: var(--space-1-5);
   padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
 .portal .list-item:hover {
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
 }
 
 /* Compact list item variant */
@@ -195,13 +195,13 @@ svg.lucide {
   align-items: center;
   gap: var(--icon-gap);
   padding: var(--space-1-5) var(--space-2);
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
 .portal .list-item-compact:hover {
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
 }
 
 /* =====================================================
@@ -209,13 +209,13 @@ svg.lucide {
    ===================================================== */
 
 .bg-darker {
-  background: var(--portal-bg-darker);
+  background: var(--color-bg-secondary);
 }
 .bg-dark {
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
 }
 .bg-medium {
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
 }
 
 /* =====================================================
@@ -267,7 +267,7 @@ a.text-danger:hover {
 }
 
 .text-secondary {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .text-primary {

@@ -3,7 +3,7 @@ import { getDatabase } from '../../database/init.js';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -93,7 +93,7 @@ router.post(
       [result.lastID]
     );
 
-    sendSuccess(res, newMessage, undefined, 201);
+    sendCreated(res, newMessage, 'Message sent');
   })
 );
 

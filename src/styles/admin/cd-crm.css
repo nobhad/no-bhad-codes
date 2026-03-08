@@ -32,7 +32,7 @@
 /* Tags Section */
 /* Tag input in client detail: fit overview card, match portal form look */
 #tab-client-detail #cd-tags-container .tag-input-wrapper {
-  background: var(--portal-bg-readonly);
+  background: var(--color-bg-readonly);
   border: var(--border-width) solid var(--portal-border);
   border-radius: var(--border-radius-md);
   min-height: 40px;
@@ -45,12 +45,12 @@
 }
 
 #tab-client-detail #cd-tags-container .tag-input-field {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
 }
 
 #tab-client-detail #cd-tags-container .tag-input-field::placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Contacts Tab */
@@ -61,9 +61,9 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: var(--space-4);
-  background: var(--portal-bg-lighter);
+  background: var(--color-bg-prominent);
   border-radius: var(--border-radius-md);
-  border: var(--border-width) solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .contact-card.primary {
@@ -73,7 +73,7 @@
 .contact-name {
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-base);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin-bottom: var(--space-0-5);
 }
 
@@ -89,7 +89,7 @@
 
 .contact-title {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-1);
 }
 
@@ -104,7 +104,7 @@
   align-items: center;
   gap: var(--icon-gap);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .contact-detail svg {
@@ -123,19 +123,19 @@
 
 .note-card {
   padding: var(--space-4);
-  background: var(--portal-bg-lighter);
+  background: var(--color-bg-prominent);
   border-radius: var(--border-radius-md);
-  border: var(--border-width) solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .note-card.pinned {
   border-color: var(--portal-accent);
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
 }
 
 .note-meta {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .note-actions {
@@ -145,7 +145,7 @@
 
 .note-content {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
 }

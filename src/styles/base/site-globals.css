@@ -43,7 +43,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-400);
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
 }
 
 ::-webkit-scrollbar-thumb:hover {

@@ -632,7 +632,7 @@ router.post(
 
     for (const questionnaireId of questionnaireIds) {
       const id = typeof questionnaireId === 'string' ? parseInt(questionnaireId, 10) : questionnaireId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       try {
         await questionnaireService.deleteQuestionnaire(id);

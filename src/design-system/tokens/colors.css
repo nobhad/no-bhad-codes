@@ -72,6 +72,11 @@
   --color-bg-primary: var(--color-off-white);
   --color-bg-secondary: var(--color-gray-100);
   --color-bg-tertiary: var(--color-gray-200);
+  --color-bg-raised: var(--color-gray-300);    /* Slightly raised surface (cards, panels) */
+  --color-bg-elevated: var(--color-gray-400);  /* More elevated (nested panels) */
+  --color-bg-prominent: var(--color-gray-500); /* Most prominent background level */
+  --color-bg-hover: var(--color-gray-100);     /* Solid hover background */
+  --color-bg-readonly: var(--color-gray-100);  /* Readonly input/field background */
   --color-bg-inverse: var(--color-gray-900);
   --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
@@ -116,6 +121,12 @@
   --color-state-selected: rgba(0, 0, 0, 0.08);
   --color-state-disabled: var(--color-gray-400);
   --color-primary-10: rgba(var(--color-brand-primary-rgb), 0.1);
+
+  /* Hover Element Colors — for components with inverted hover (solid bg flip) */
+  --color-hover-bg: var(--color-gray-900);     /* Solid bg on hover (inverted) */
+  --color-hover-text: var(--color-off-white);  /* Text color on hover bg */
+  --color-hover-icon: var(--color-off-white);  /* Icon color on hover bg */
+  --color-hover-border: var(--color-gray-900); /* Border color on hover */
 
   /* Shadow Colors */
   --color-shadow-sm: rgba(0, 0, 0, 0.05);

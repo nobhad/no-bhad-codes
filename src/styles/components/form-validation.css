@@ -59,7 +59,7 @@
 
 .form-message {
   padding: 0.5rem 0.75rem;
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
   margin-bottom: 1rem;
   font-weight: var(--font-weight-medium);
 }
@@ -96,7 +96,7 @@
   height: 1rem;
   border: var(--border-width) solid transparent;
   border-top-color: currentColor;
-  border-radius: var(--portal-radius-full, 50%);
+  border-radius: var(--border-radius-full, 50%);
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 

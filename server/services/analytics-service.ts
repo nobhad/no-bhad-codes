@@ -958,7 +958,7 @@ class AnalyticsService {
       }
     });
 
-    logger.info(`[ANALYTICS] KPI snapshot captured for ${today}: ${kpis.length} metrics`, {
+    logger.info(`[Analytics] KPI snapshot captured for ${today}: ${kpis.length} metrics`, {
       category: 'analytics',
       metadata: { date: today, metricCount: kpis.length, mode: existing ? 'update' : 'insert' }
     });

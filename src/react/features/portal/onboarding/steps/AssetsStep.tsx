@@ -163,8 +163,8 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           'py-8 px-4',
           'border-2 border-dashed transition-colors duration-200',
           isDragging
-            ? 'border-primary bg-[var(--portal-bg-hover)]'
-            : 'border-[var(--portal-border-color)] hover:border-primary'
+            ? 'border-primary bg-[var(--color-bg-hover)]'
+            : 'border-[var(--color-border-primary)] hover:border-primary'
         )}
       >
         <input
@@ -248,7 +248,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
 
       {/* Logo Checkbox */}
       <div className="mt-6">
-        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--portal-border-color)] w-fit">
+        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--color-border-primary)] w-fit">
           <Checkbox
             checked={assets.logoProvided}
             onCheckedChange={(checked) => handleChange('logoProvided', checked === true)}

@@ -468,6 +468,9 @@ export function requestFingerprint(req: Request, res: Response, next: NextFuncti
     next();
   } catch (_error) {
     // Don't block request on fingerprinting error
+    logger.debug('[RequestFingerprint] Fingerprinting failed, continuing request', {
+      error: _error instanceof Error ? _error : undefined
+    });
     next();
   }
 }

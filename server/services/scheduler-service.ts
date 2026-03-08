@@ -8,7 +8,7 @@
  * payment reminders, and recurring invoices using node-cron.
  */
 
-import { InvoiceService } from './invoice-service.js';
+import { invoiceService, type InvoiceService } from './invoice-service.js';
 import { emailService, processEmailRetryQueue } from './email-service.js';
 import { getDatabase, Database } from '../database/init.js';
 import { softDeleteService } from './soft-delete-service.js';
@@ -163,7 +163,6 @@ interface ApprovalRequestRow {
 export class SchedulerService {
   private static instance: SchedulerService;
   private invoiceService: InvoiceService;
-  private db: Database;
   private config: SchedulerConfig;
   private reminderJob: SimpleTask | null = null;
   private invoiceGenerationJob: SimpleTask | null = null;
@@ -173,9 +172,12 @@ export class SchedulerService {
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
-    this.invoiceService = InvoiceService.getInstance();
-    this.db = getDatabase();
+    this.invoiceService = invoiceService;
     this.config = { ...DEFAULT_CONFIG, ...config };
+  }
+
+  private getDb(): Database {
+    return getDatabase();
   }
 
   /**
@@ -442,12 +444,12 @@ export class SchedulerService {
     const cutoffISO = cutoffDate.toISOString();
 
     // Delete old page views
-    const pageViewsResult = await this.db.run('DELETE FROM page_views WHERE created_at < ?', [
+    const pageViewsResult = await this.getDb().run('DELETE FROM page_views WHERE created_at < ?', [
       cutoffISO
     ]);
 
     // Delete old interaction events
-    const interactionEventsResult = await this.db.run(
+    const interactionEventsResult = await this.getDb().run(
       'DELETE FROM interaction_events WHERE created_at < ?',
       [cutoffISO]
     );
@@ -487,7 +489,7 @@ export class SchedulerService {
         const invoice = await this.invoiceService.getInvoiceById(reminder.invoiceId);
 
         // Get client email from database
-        const client = (await this.db.get('SELECT email, contact_name FROM clients WHERE id = ?', [
+        const client = (await this.getDb().get('SELECT email, contact_name FROM clients WHERE id = ?', [
           invoice.clientId
         ])) as ClientRow | undefined;
 
@@ -565,7 +567,7 @@ export class SchedulerService {
         AND p.contract_reminders_enabled = TRUE
     `;
 
-    const dueReminders = (await this.db.all(sql, [today])) as unknown as ContractReminderRow[];
+    const dueReminders = (await this.getDb().all(sql, [today])) as unknown as ContractReminderRow[];
 
     for (const reminder of dueReminders) {
       try {
@@ -592,7 +594,7 @@ export class SchedulerService {
         sentCount++;
 
         // Log to audit trail
-        await this.db.run(
+        await this.getDb().run(
           `INSERT INTO contract_signature_log (project_id, action, actor_email, details)
            VALUES (?, 'reminder_sent', ?, ?)`,
           [reminder.project_id, 'system', JSON.stringify({ reminderType: reminder.reminder_type })]
@@ -622,7 +624,7 @@ export class SchedulerService {
     const today = new Date();
 
     // Clear any existing pending reminders for this project
-    await this.db.run('DELETE FROM contract_reminders WHERE project_id = ? AND status = ?', [
+    await this.getDb().run('DELETE FROM contract_reminders WHERE project_id = ? AND status = ?', [
       projectId,
       'pending'
     ]);
@@ -639,7 +641,7 @@ export class SchedulerService {
       const scheduledDate = new Date(today);
       scheduledDate.setDate(scheduledDate.getDate() + reminder.daysFromNow);
 
-      await this.db.run(
+      await this.getDb().run(
         'INSERT INTO contract_reminders (project_id, reminder_type, scheduled_date) VALUES (?, ?, ?)',
         [projectId, reminder.type, scheduledDate.toISOString().split('T')[0]]
       );
@@ -652,7 +654,7 @@ export class SchedulerService {
    * Cancel contract reminders when contract is signed
    */
   async cancelContractReminders(projectId: number): Promise<void> {
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE contract_reminders SET status = ? WHERE project_id = ? AND status = ?',
       ['skipped', projectId, 'pending']
     );
@@ -663,7 +665,7 @@ export class SchedulerService {
    * Mark a contract reminder as sent
    */
   private async markContractReminderSent(reminderId: number): Promise<void> {
-    await this.db.run('UPDATE contract_reminders SET status = ?, sent_at = ? WHERE id = ?', [
+    await this.getDb().run('UPDATE contract_reminders SET status = ?, sent_at = ? WHERE id = ?', [
       'sent',
       new Date().toISOString(),
       reminderId
@@ -674,7 +676,7 @@ export class SchedulerService {
    * Mark a contract reminder as skipped
    */
   private async markContractReminderSkipped(reminderId: number): Promise<void> {
-    await this.db.run('UPDATE contract_reminders SET status = ? WHERE id = ?', [
+    await this.getDb().run('UPDATE contract_reminders SET status = ? WHERE id = ?', [
       'skipped',
       reminderId
     ]);
@@ -684,7 +686,7 @@ export class SchedulerService {
    * Mark a contract reminder as failed
    */
   private async markContractReminderFailed(reminderId: number): Promise<void> {
-    await this.db.run('UPDATE contract_reminders SET status = ? WHERE id = ?', [
+    await this.getDb().run('UPDATE contract_reminders SET status = ? WHERE id = ?', [
       'failed',
       reminderId
     ]);
@@ -952,7 +954,7 @@ No Bhad Codes Team
         AND wi.status IN ('pending', 'in_progress')
     `;
 
-    const pendingRequests = (await this.db.all(sql)) as unknown as ApprovalRequestRow[];
+    const pendingRequests = (await this.getDb().all(sql)) as unknown as ApprovalRequestRow[];
 
     for (const request of pendingRequests) {
       try {
@@ -983,7 +985,7 @@ No Bhad Codes Team
           });
 
           // Update reminder tracking
-          await this.db.run(
+          await this.getDb().run(
             'UPDATE approval_requests SET reminder_sent_at = ?, reminder_count = reminder_count + 1 WHERE id = ?',
             [now.toISOString(), request.request_id]
           );
@@ -1014,7 +1016,7 @@ No Bhad Codes Team
             });
 
             // Update to prevent repeated notifications
-            await this.db.run('UPDATE approval_requests SET reminder_sent_at = ? WHERE id = ?', [
+            await this.getDb().run('UPDATE approval_requests SET reminder_sent_at = ? WHERE id = ?', [
               now.toISOString(),
               request.request_id
             ]);

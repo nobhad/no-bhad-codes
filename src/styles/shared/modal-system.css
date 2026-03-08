@@ -19,7 +19,7 @@
   transform: translate(-50%, -50%);
   z-index: var(--z-index-portal-modal);
   width: calc(100% - 2rem);
-  background: var(--portal-bg-pitch);
+  background: var(--color-bg-primary);
   border: var(--portal-border);
   box-shadow: none;
 }
@@ -31,12 +31,12 @@
 .modal-title {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .modal-description {
   font-size: var(--font-size-xs);
   margin-top: var(--space-0-5);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }

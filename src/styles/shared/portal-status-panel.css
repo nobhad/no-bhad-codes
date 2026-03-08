@@ -61,7 +61,7 @@
 }
 
 .status-metric-threshold {
-  font-size: var(--portal-label-size);
+  font-size: var(--label-font-size);
   margin-top: var(--space-1);
 }
 

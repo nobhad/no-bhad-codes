@@ -80,7 +80,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId, 10);
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 

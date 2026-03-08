@@ -10,8 +10,8 @@
  * CSS Variables (defined in variables.css):
  * - --portal-field-label-gap: Gap between label and value (0.25rem)
  * - --portal-field-group-gap: Gap between field groups (1rem)
- * - --portal-text-secondary: Label text color
- * - --portal-text-light: Value text color
+ * - --color-text-secondary: Label text color
+ * - --color-text-primary: Value text color
  */
 
 /* =====================================================
@@ -20,11 +20,11 @@
 .field-label,
 .meta-label,
 .stat-label {
-  font-size: var(--portal-label-size, var(--font-size-xs));
-  font-weight: var(--portal-label-weight, var(--font-weight-medium));
-  color: var(--portal-label-color, var(--color-text-secondary));
+  font-size: var(--label-font-size, var(--font-size-xs));
+  font-weight: var(--label-font-weight, var(--font-weight-medium));
+  color: var(--label-color, var(--color-text-secondary));
   text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing, var(--letter-spacing-label));
+  letter-spacing: var(--label-letter-spacing, var(--letter-spacing-label));
 }
 
 .field-label,
@@ -45,7 +45,7 @@
 .meta-value {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-light, var(--color-text-inverse));
+  color: var(--color-text-primary, var(--color-text-inverse));
   line-height: var(--line-height-snug);
 }
 

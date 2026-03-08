@@ -68,12 +68,12 @@
 
 .invoice-info strong {
   display: block;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .invoice-date {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* Deposit Invoice Styling */
@@ -134,7 +134,7 @@
 }
 
 #view-project-invoice-modal .field-value {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-base);
 }
 
@@ -156,8 +156,8 @@
   text-align: left;
   padding: var(--space-1);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  color: var(--color-text-secondary);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 #view-project-invoice-modal .invoice-line-items th.text-right {
@@ -167,7 +167,7 @@
 #view-project-invoice-modal .invoice-line-items td {
   padding: var(--space-1);
   border-bottom: var(--border-width) solid var(--portal-alpha-white-20);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 #view-project-invoice-modal .invoice-line-items td.text-right {
@@ -176,7 +176,7 @@
 
 #view-project-invoice-modal .invoice-totals {
   padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 #view-project-invoice-modal .total-row {
@@ -200,11 +200,11 @@
 #view-project-invoice-modal .invoice-notes-section {
   margin-top: var(--space-3);
   padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 #view-project-invoice-modal .invoice-notes-section p {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   line-height: var(--line-height-normal);
   margin: 0;
 }

@@ -44,5 +44,5 @@ export const APPROVAL_STATUS_CONFIG: Record<ApprovalStatus, { label: string; col
   pending: { label: 'Pending', color: 'var(--status-pending)' },
   approved: { label: 'Approved', color: 'var(--status-completed)' },
   rejected: { label: 'Rejected', color: 'var(--status-cancelled)' },
-  expired: { label: 'Expired', color: 'var(--portal-text-muted)' }
+  expired: { label: 'Expired', color: 'var(--color-text-tertiary)' }
 };

@@ -27,37 +27,24 @@
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"],
 html[data-theme="light"] body[data-page="client-portal"] .portal {
-  background-color: var(--portal-bg-pitch);
-  color: var(--portal-text-primary);
-}
-
-/* ============================================
- * ADMIN-ONLY LIGHT MODE EXTENSIONS
- * Alpha overlays that invert from white to black for light mode.
- * These are NOT defined in portal-theme.css.
- * ============================================ */
-html[data-theme="light"] body[data-page="admin"] {
-  --portal-alpha-white-08: rgba(0, 0, 0, 0.08);
-  --portal-alpha-white-10: rgba(0, 0, 0, 0.1);
-  --portal-alpha-white-15: rgba(0, 0, 0, 0.15);
-  --portal-alpha-white-20: rgba(0, 0, 0, 0.2);
-  --portal-alpha-white-30: rgba(0, 0, 0, 0.3);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-pitch, var(--color-off-white));
+  background-color: var(--color-bg-primary, var(--color-off-white));
 }
 
 /* ============================================
  * CLIENT PORTAL-ONLY LIGHT MODE - ELEMENT STYLES
  * ============================================ */
 
-/* Light mode sidebar text uses portal text variable */
+/* Light mode sidebar text */
 html[data-theme="light"] body[data-page="client-portal"] .sidebar,
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn,
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn .btn-text,
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn .btn-icon {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn:hover,
@@ -67,5 +54,5 @@ html[data-theme="light"] body[data-page="client-portal"] .sidebar-btn.active {
 
 /* Light mode dashboard content */
 html[data-theme="light"] body[data-page="client-portal"] .dashboard-content {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }

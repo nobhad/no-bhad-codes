@@ -131,7 +131,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -151,7 +151,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const tagId = parseInt(req.params.tagId, 10);
-    if (isNaN(fileId) || isNaN(tagId)) {
+    if (isNaN(fileId) || fileId <= 0 || isNaN(tagId) || tagId <= 0) {
       return errorResponse(res, 'Invalid file or tag ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -160,7 +160,7 @@ router.post(
     }
 
     await fileService.addTag(fileId, tagId);
-    sendSuccess(res, undefined, 'Tag added');
+    sendCreated(res, undefined, 'Tag added');
   })
 );
 
@@ -171,7 +171,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const tagId = parseInt(req.params.tagId, 10);
-    if (isNaN(fileId) || isNaN(tagId)) {
+    if (isNaN(fileId) || fileId <= 0 || isNaN(tagId) || tagId <= 0) {
       return errorResponse(res, 'Invalid file or tag ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -191,7 +191,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const tagId = parseInt(req.params.tagId, 10);
-    if (isNaN(projectId) || isNaN(tagId)) {
+    if (isNaN(projectId) || projectId <= 0 || isNaN(tagId) || tagId <= 0) {
       return errorResponse(res, 'Invalid project or tag ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -212,7 +212,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { access_type } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -258,7 +258,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -277,7 +277,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -296,7 +296,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -315,7 +315,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -373,7 +373,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -393,7 +393,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     const isAdmin = req.user!.type === 'admin';
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -414,7 +414,7 @@ router.put(
     const fileId = parseInt(req.params.fileId, 10);
     const { category } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -454,7 +454,7 @@ router.get(
       | 'document'
       | 'contract'
       | 'invoice';
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -473,7 +473,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -494,7 +494,7 @@ router.get(
     const projectId = parseInt(req.params.id, 10);
     const query = req.query.q as string;
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 

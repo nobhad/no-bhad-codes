@@ -29,8 +29,8 @@
 
   /* Table colors - from portal variables */
   --table-bg: transparent;
-  --table-header-color: var(--portal-text-secondary);
-  --table-cell-color: var(--portal-text-primary, var(--portal-text-light));
+  --table-header-color: var(--color-text-secondary);
+  --table-cell-color: var(--color-text-primary, var(--color-text-primary));
 
   /* Table column sizing */
   --table-identity-max-width: calc(var(--space-base) * 27.5);
@@ -91,7 +91,7 @@
 .data-table th {
   text-align: left;
   padding: var(--table-cell-padding-y) var(--table-cell-padding-x);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: inherit;
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
@@ -140,7 +140,7 @@
    ============================================== */
 
 .data-table tbody tr:hover td {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 /* Ensure actions cell inherits row hover - no exceptions */
@@ -148,7 +148,7 @@
 .data-table tbody tr:hover td:last-child,
 .data-table tbody tr:hover td[class*="actions"],
 .portal .data-table tbody tr:hover td {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 /* No hover effect for empty state rows */
@@ -160,12 +160,12 @@
 }
 
 .data-table tbody tr:active td {
-  background: var(--portal-bg-active);
+  background: var(--color-bg-active);
 }
 
 .data-table tbody tr.row-focused td,
 .data-table tbody tr[data-focused="true"] td {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .data-table tbody tr.row-focused td:first-child,
@@ -176,7 +176,7 @@
 
 .data-table tbody tr.row-selected td,
 .data-table tbody tr[data-selected="true"] td {
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
 }
 
 /* ==============================================
@@ -310,7 +310,7 @@
 .data-table-header h3 {
   order: 0;
   margin: 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
@@ -333,7 +333,7 @@
   align-items: center;
   gap: var(--space-2);
   margin-left: var(--space-3);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   flex-wrap: wrap;
 }
@@ -347,7 +347,7 @@
 .stats-summary-item:not(:last-child)::after {
   content: "•";
   margin-left: var(--space-2);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .stats-summary-item.stats-pending,
@@ -473,8 +473,8 @@
 }
 
 .pagination-btn:disabled {
-  color: var(--portal-text-muted);
-  border-color: var(--portal-border-color);
+  color: var(--color-text-tertiary);
+  border-color: var(--color-border-primary);
   cursor: not-allowed;
 }
 
@@ -571,7 +571,7 @@
 /* Empty cell placeholder — muted dash across all tables */
 .data-table .cell-empty,
 .cell-empty {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* ==============================================
@@ -671,7 +671,7 @@
 .data-table .priority-stacked .priority-indicator {
   width: 6px;
   height: 6px;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   flex-shrink: 0;
 }
 
@@ -979,7 +979,7 @@
 }
 
 .data-table th.sortable:hover {
-  background-color: var(--portal-bg-hover);
+  background-color: var(--color-bg-hover);
 }
 
 .sort-header-btn {
@@ -999,7 +999,7 @@
 }
 
 .sort-header-btn:hover {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .sort-header-btn .sort-indicator {
@@ -1021,13 +1021,13 @@
 .data-table th.sortable .data-table-sort-icon svg {
   width: var(--table-icon-size);
   height: var(--table-icon-size);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   transition: color var(--duration-faster);
 }
 
 .data-table th.sortable:hover .sort-icon svg,
 .data-table th.sortable:hover .data-table-sort-icon svg {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .data-table th.sortable .sort-icon svg.sort-asc,
@@ -1042,7 +1042,7 @@
    Clickable text links in table cells
    ============================================== */
 .table-link {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   text-decoration: none;
   transition: text-decoration var(--transition-faster);
@@ -1288,7 +1288,7 @@
     background: transparent;
     padding: var(--table-mobile-card-padding);
     margin-bottom: var(--table-mobile-card-gap);
-    border: var(--border-width) solid var(--portal-border-color);
+    border: var(--border-width) solid var(--color-border-primary);
     border-radius: var(--radius-sm, 4px);
   }
 
@@ -1545,7 +1545,7 @@
 .cell-secondary {
   display: block;
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin-top: var(--space-px);
 }
 
@@ -1584,7 +1584,7 @@
       display: flex;
       justify-content: flex-end;
       padding-top: var(--space-2);
-      border-top: var(--border-width) solid var(--portal-border-color);
+      border-top: var(--border-width) solid var(--color-border-primary);
       margin-top: var(--space-2);
     }
   }
@@ -1606,7 +1606,7 @@
 /* Table title inside EJS header */
 .table-title {
   margin: 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
@@ -1617,7 +1617,7 @@
 /* Stats badge in EJS header */
 .table-stats-badge {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   white-space: nowrap;
 }
 
@@ -1643,8 +1643,8 @@
   padding: 0 var(--space-2);
   font-size: var(--font-size-sm);
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-light);
+  border: var(--border-width) solid var(--color-border-primary);
+  color: var(--color-text-primary);
   transition: border-color var(--transition-fast);
 }
 
@@ -1654,7 +1654,7 @@
 }
 
 .table-search-input::placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Filter select in EJS header */
@@ -1663,8 +1663,8 @@
   padding: 0 var(--space-4) 0 var(--space-2);
   font-size: var(--font-size-sm);
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-light);
+  border: var(--border-width) solid var(--color-border-primary);
+  color: var(--color-text-primary);
   cursor: pointer;
   appearance: none;
 }
@@ -1677,7 +1677,7 @@
 /* Bulk selected count text */
 .bulk-selected-count {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -1688,7 +1688,7 @@
   gap: var(--space-2);
   padding: var(--space-1) var(--table-cell-padding-x, 14px);
   border-bottom: var(--portal-border);
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
 }
 
 /* ==============================================
@@ -1704,13 +1704,13 @@
   gap: clamp(12px, 2vw, 20px);
   padding: clamp(var(--space-4), 5vw, var(--space-8));
   text-align: center;
-  color: var(--portal-text-primary, inherit);
+  color: var(--color-text-primary, inherit);
 }
 
 .empty-state-text {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary, inherit);
+  color: var(--color-text-primary, inherit);
   margin: 0;
 }
 
@@ -1736,7 +1736,7 @@
 }
 
 .sort-button:hover {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Sort indicator in EJS sort buttons */
@@ -1752,12 +1752,12 @@
 
 .pagination-showing {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .pagination-current {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
   min-width: max-content;
 }
@@ -1832,7 +1832,7 @@
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   cursor: pointer;
   opacity: 0;
   transition: opacity var(--transition-fast), color var(--transition-fast);
@@ -1859,7 +1859,7 @@
 
 /* Count label - text after number */
 .count-label {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-size: inherit;
 }
 
@@ -1886,7 +1886,7 @@
   align-items: center;
   gap: var(--space-4);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .data-table-stat-item {
@@ -1919,7 +1919,7 @@
   left: var(--space-2);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .data-table-search-input {
@@ -1941,7 +1941,7 @@
 .data-table-pagination {
   margin-top: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .data-table-pagination-layout {
@@ -1954,7 +1954,7 @@
 
 .data-table-pagination-info {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .data-table-pagination-controls {

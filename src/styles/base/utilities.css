@@ -263,19 +263,19 @@
    ============================================ */
 
 .text-primary {
-  color: var(--portal-text-primary, var(--color-text-primary));
+  color: var(--color-text-primary, var(--color-text-primary));
 }
 .text-secondary {
-  color: var(--portal-text-secondary, var(--color-text-secondary));
+  color: var(--color-text-secondary, var(--color-text-secondary));
 }
 .text-muted {
-  color: var(--portal-text-muted, var(--color-text-tertiary));
+  color: var(--color-text-tertiary, var(--color-text-tertiary));
 }
 .text-light {
-  color: var(--portal-text-light, var(--color-text-inverse));
+  color: var(--color-text-primary, var(--color-text-inverse));
 }
 .text-dark {
-  color: var(--portal-text-dark, var(--color-text-primary));
+  color: var(--color-text-inverse, var(--color-text-primary));
 }
 .text-accent {
   color: var(--portal-accent, var(--color-brand-primary));
@@ -319,19 +319,19 @@
   background: transparent;
 }
 .bg-darkest {
-  background: var(--portal-bg-darkest, var(--color-bg-primary));
+  background: var(--color-bg-primary, var(--color-bg-primary));
 }
 .bg-darker {
-  background: var(--portal-bg-darker, var(--color-bg-secondary));
+  background: var(--color-bg-secondary, var(--color-bg-secondary));
 }
 .bg-dark {
-  background: var(--portal-bg-dark, var(--color-bg-tertiary));
+  background: var(--color-bg-tertiary, var(--color-bg-tertiary));
 }
 .bg-medium {
-  background: var(--portal-bg-medium, var(--color-surface-tertiary));
+  background: var(--color-bg-raised, var(--color-surface-tertiary));
 }
 .bg-hover {
-  background: var(--portal-bg-hover, var(--color-state-hover));
+  background: var(--color-bg-hover, var(--color-state-hover));
 }
 
 /* ============================================

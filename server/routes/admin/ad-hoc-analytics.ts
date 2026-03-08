@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -209,7 +209,7 @@ router.post(
       WHERE id = ?
     `, [result.lastID]);
 
-    sendSuccess(res, { query: savedQuery });
+    sendCreated(res, { query: savedQuery }, 'Query saved');
   })
 );
 
@@ -223,7 +223,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const queryId = parseInt(req.params.queryId, 10);
 
-    if (isNaN(queryId)) {
+    if (isNaN(queryId) || queryId <= 0) {
       return errorResponse(res, 'Invalid query ID', 400, ErrorCodes.INVALID_ID);
     }
 

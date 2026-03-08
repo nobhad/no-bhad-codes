@@ -71,7 +71,7 @@
 /* Portal background - shared between admin and client */
 body[data-page="admin"],
 body[data-page="client-portal"] {
-  background-color: var(--portal-bg-pitch);
+  background-color: var(--color-bg-primary);
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -79,13 +79,13 @@ body[data-page="client-portal"] {
 
 html:has(body[data-page="admin"]),
 html:has(body[data-page="client-portal"]) {
-  background-color: var(--portal-bg-pitch, #000000);
+  background-color: var(--color-bg-primary, var(--portal-neutral-0));
   height: 100%;
 }
 
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: var(--portal-bg-pitch, #ffffff);
+  background-color: var(--color-bg-primary, var(--color-off-white));
 }
 
 /* Portal scoping wrapper — NOT a layout container.
@@ -118,7 +118,7 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-400);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--border-radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {
