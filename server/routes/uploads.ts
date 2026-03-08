@@ -1363,7 +1363,7 @@ router.post(
     const db = getDatabase();
 
     // Verify file exists
-    const file = await db.get('SELECT id, project_id FROM files WHERE id = ?', [fileId]);
+    const file = await db.get('SELECT id, project_id FROM files WHERE id = ? AND deleted_at IS NULL', [fileId]);
     if (!file) {
       return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
     }
@@ -1406,7 +1406,7 @@ router.post(
     const db = getDatabase();
 
     // Verify file exists
-    const file = await db.get('SELECT id FROM files WHERE id = ?', [fileId]);
+    const file = await db.get('SELECT id FROM files WHERE id = ? AND deleted_at IS NULL', [fileId]);
     if (!file) {
       return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
     }

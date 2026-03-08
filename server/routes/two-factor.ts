@@ -120,9 +120,21 @@ async function isTwoFactorEnabled(): Promise<boolean> {
 // ============================================
 
 /**
- * POST /auth/2fa/setup
- * Generate a TOTP secret and provisioning URI for the admin.
- * Does NOT enable 2FA yet -- that requires verification.
+ * @swagger
+ * /api/auth/2fa/setup:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Initiate 2FA setup
+ *     description: Generates a TOTP secret and provisioning URI for the admin. Does not enable 2FA until verified.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 2FA setup initiated with secret and provisioning URI
+ *       400:
+ *         description: 2FA already enabled
+ *       401:
+ *         description: Admin access required
  */
 router.post(
   '/setup',
@@ -186,8 +198,32 @@ router.post(
 );
 
 /**
- * POST /auth/2fa/verify
- * Verify a TOTP code to enable 2FA. Generates backup codes on success.
+ * @swagger
+ * /api/auth/2fa/verify:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Verify TOTP code to enable 2FA
+ *     description: Verifies a TOTP code during setup to enable 2FA. Returns backup codes on success.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: TOTP verification code
+ *     responses:
+ *       200:
+ *         description: 2FA enabled with backup codes
+ *       400:
+ *         description: Invalid code or already enabled
+ *       401:
+ *         description: Admin access required
  */
 router.post(
   '/verify',
@@ -282,9 +318,31 @@ router.post(
 );
 
 /**
- * POST /auth/2fa/login
- * Complete the 2FA step during admin login.
- * Accepts a short-lived temp token + TOTP code (or backup code).
+ * @swagger
+ * /api/auth/2fa/login:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Complete 2FA login verification
+ *     description: Completes the 2FA step during admin login using a temp token and TOTP or backup code.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [tempToken, code]
+ *             properties:
+ *               tempToken:
+ *                 type: string
+ *                 description: Short-lived temporary token from initial login
+ *               code:
+ *                 type: string
+ *                 description: TOTP code or backup code
+ *     responses:
+ *       200:
+ *         description: Admin login successful with JWT token
+ *       401:
+ *         description: Invalid code or expired session
  */
 router.post(
   '/login',
@@ -435,8 +493,32 @@ router.post(
 );
 
 /**
- * POST /auth/2fa/disable
- * Disable 2FA for the admin. Requires current TOTP code for confirmation.
+ * @swagger
+ * /api/auth/2fa/disable:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Disable 2FA
+ *     description: Disables two-factor authentication for the admin. Requires current TOTP code for confirmation.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: Current TOTP code for confirmation
+ *     responses:
+ *       200:
+ *         description: 2FA disabled
+ *       400:
+ *         description: Invalid code or 2FA not enabled
+ *       401:
+ *         description: Admin access required
  */
 router.post(
   '/disable',
@@ -525,8 +607,19 @@ router.post(
 );
 
 /**
- * GET /auth/2fa/status
- * Check whether 2FA is enabled for the admin account.
+ * @swagger
+ * /api/auth/2fa/status:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Get 2FA status
+ *     description: Checks whether 2FA is enabled for the admin account and returns remaining backup codes count.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 2FA status with enabled flag and remaining backup codes
+ *       401:
+ *         description: Admin access required
  */
 router.get(
   '/status',

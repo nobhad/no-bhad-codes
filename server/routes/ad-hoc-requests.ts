@@ -356,7 +356,7 @@ router.post(
     }
 
     if (attachmentFileId) {
-      const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ?', [
+      const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ? AND deleted_at IS NULL', [
         Number(attachmentFileId),
         Number(projectId)
       ]);
@@ -656,7 +656,7 @@ router.post(
 
     if (attachmentFileId && projectId) {
       const db = getDatabase();
-      const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ?', [
+      const attachment = await db.get('SELECT id FROM files WHERE id = ? AND project_id = ? AND deleted_at IS NULL', [
         Number(attachmentFileId),
         Number(projectId)
       ]);
