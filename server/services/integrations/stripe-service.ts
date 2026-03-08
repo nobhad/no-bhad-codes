@@ -13,6 +13,7 @@
  * 3. Configure webhook endpoint in Stripe Dashboard
  */
 
+import crypto from 'crypto';
 import { getDatabase } from '../../database/init';
 import { logger } from '../logger.js';
 import { getBaseUrl } from '../../config/environment.js';
@@ -322,9 +323,8 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
 
     // Compute expected signature
     const signedPayload = `${timestamp}.${payload}`;
-    const crypto = require('crypto');
     const expectedSignature = crypto
-      .createHmac('sha256', STRIPE_WEBHOOK_SECRET)
+      .createHmac('sha256', STRIPE_WEBHOOK_SECRET!)
       .update(signedPayload)
       .digest('hex');
 
