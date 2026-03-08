@@ -6,6 +6,7 @@ import { canAccessProject } from '../../middleware/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const MILESTONE_COLUMNS = `
@@ -68,8 +69,8 @@ router.get(
       COUNT(t.id) as task_count,
       SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_task_count
     FROM milestones m
-    LEFT JOIN project_tasks t ON m.id = t.milestone_id
-    WHERE m.project_id = ?
+    LEFT JOIN project_tasks t ON m.id = t.milestone_id AND t.deleted_at IS NULL
+    WHERE m.project_id = ? AND m.deleted_at IS NULL
     GROUP BY m.id
     ORDER BY m.due_date ASC, m.created_at ASC
   `,
@@ -287,7 +288,7 @@ router.delete(
   '/:id/milestones/:milestoneId',
   authenticateToken,
   requireAdmin,
-  asyncHandler(async (req: express.Request, res: Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     const milestoneId = parseInt(req.params.milestoneId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(milestoneId) || milestoneId <= 0) {
@@ -296,7 +297,7 @@ router.delete(
     const db = getDatabase();
 
     // Verify milestone belongs to project
-    const milestone = await db.get('SELECT id FROM milestones WHERE id = ? AND project_id = ?', [
+    const milestone = await db.get('SELECT id FROM milestones WHERE id = ? AND project_id = ? AND deleted_at IS NULL', [
       milestoneId,
       projectId
     ]);
@@ -305,7 +306,8 @@ router.delete(
       return errorResponse(res, 'Milestone not found', 404, 'MILESTONE_NOT_FOUND');
     }
 
-    await db.run('DELETE FROM milestones WHERE id = ?', [milestoneId]);
+    const adminEmail = req.user?.email || 'admin';
+    await softDeleteService.softDelete('milestone', milestoneId, adminEmail);
 
     messageResponse(res, 'Milestone deleted successfully');
   })

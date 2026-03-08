@@ -369,7 +369,7 @@ class ProjectService {
       JOIN projects p ON t.project_id = p.id
       LEFT JOIN users u ON t.assigned_to_user_id = u.id
       LEFT JOIN milestones m ON t.milestone_id = m.id
-      WHERE t.project_id = ?
+      WHERE t.project_id = ? AND t.deleted_at IS NULL
     `;
     const params: SqlValue[] = [projectId];
 
@@ -432,7 +432,7 @@ class ProjectService {
       `SELECT t.*, u.display_name as assigned_to_name
        FROM project_tasks t
        LEFT JOIN users u ON t.assigned_to_user_id = u.id
-       WHERE t.id = ?`,
+       WHERE t.id = ? AND t.deleted_at IS NULL`,
       [taskId]
     );
 
@@ -445,7 +445,7 @@ class ProjectService {
       `SELECT t.*, u.display_name as assigned_to_name
        FROM project_tasks t
        LEFT JOIN users u ON t.assigned_to_user_id = u.id
-       WHERE t.parent_task_id = ?
+       WHERE t.parent_task_id = ? AND t.deleted_at IS NULL
        ORDER BY t.sort_order ASC`,
       [taskId]
     );
@@ -575,9 +575,10 @@ class ProjectService {
    */
   async deleteTask(taskId: number): Promise<void> {
     const db = getDatabase();
+    const now = new Date().toISOString();
 
-    // Get task info before deleting to update milestone/project progress
-    const task = (await db.get('SELECT milestone_id, project_id FROM project_tasks WHERE id = ?', [
+    // Get task info before soft-deleting to update milestone/project progress
+    const task = (await db.get('SELECT milestone_id, project_id FROM project_tasks WHERE id = ? AND deleted_at IS NULL', [
       taskId
     ])) as { milestone_id: number | null; project_id: number } | undefined;
 
@@ -585,7 +586,10 @@ class ProjectService {
       throw new Error('Task not found');
     }
 
-    await db.run('DELETE FROM project_tasks WHERE id = ?', [taskId]);
+    await db.run(
+      'UPDATE project_tasks SET deleted_at = ?, deleted_by = ? WHERE id = ?',
+      [now, 'admin', taskId]
+    );
 
     // Update milestone completion status if task belonged to a milestone
     if (task.milestone_id) {

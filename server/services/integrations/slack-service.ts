@@ -8,7 +8,7 @@
  * using incoming webhooks.
  */
 
-import { getDatabase } from '../../database/init';
+import { getDatabase } from '../../database/init.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries

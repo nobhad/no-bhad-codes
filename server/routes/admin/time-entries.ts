@@ -17,6 +17,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
 import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 // Matches the actual time_entries schema after migration 070
 const TIME_ENTRY_COLUMNS = `
@@ -53,7 +54,7 @@ router.get(
       break;
     }
 
-    let whereClause = 'WHERE 1=1';
+    let whereClause = 'WHERE te.deleted_at IS NULL';
     const params: (string | number)[] = [];
 
     if (projectId) {
@@ -250,12 +251,13 @@ router.delete(
 
     const db = getDatabase();
 
-    const existing = await db.get('SELECT id FROM time_entries WHERE id = ?', [entryId]);
+    const existing = await db.get('SELECT id FROM time_entries WHERE id = ? AND deleted_at IS NULL', [entryId]);
     if (!existing) {
       return errorResponse(res, 'Time entry not found', 404, 'NOT_FOUND');
     }
 
-    await db.run('DELETE FROM time_entries WHERE id = ?', [entryId]);
+    const adminEmail = req.user?.email || 'admin';
+    await softDeleteService.softDelete('time_entry', entryId, adminEmail);
 
     sendSuccess(res);
   })

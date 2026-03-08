@@ -82,7 +82,7 @@ router.get(
         MIN(date) AS first_entry,
         MAX(date) AS last_entry
        FROM time_entries
-       WHERE project_id = ?`,
+       WHERE project_id = ? AND deleted_at IS NULL`,
       [projectId]
     );
 

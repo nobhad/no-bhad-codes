@@ -9,7 +9,7 @@
  */
 
 import * as crypto from 'crypto';
-import { getDatabase } from '../../database/init';
+import { getDatabase } from '../../database/init.js';
 
 // Zapier-compatible event payload formats
 export interface ZapierPayload {

@@ -20,7 +20,7 @@ import { logger } from './logger.js';
 // TYPES
 // =====================================================
 
-export type SoftDeleteEntityType = 'client' | 'project' | 'invoice' | 'lead' | 'proposal' | 'message_thread' | 'document_request' | 'contract' | 'deliverable';
+export type SoftDeleteEntityType = 'client' | 'project' | 'invoice' | 'lead' | 'proposal' | 'message_thread' | 'document_request' | 'contract' | 'deliverable' | 'task' | 'milestone' | 'file' | 'time_entry' | 'contact';
 
 export interface DeletedItem {
   id: number;
@@ -43,6 +43,11 @@ export interface DeletedItemStats {
   document_requests: number;
   contracts: number;
   deliverables: number;
+  tasks: number;
+  milestones: number;
+  files: number;
+  time_entries: number;
+  contacts: number;
   total: number;
 }
 
@@ -74,7 +79,12 @@ const TABLE_MAP: Record<SoftDeleteEntityType, string> = {
   message_thread: 'message_threads',
   document_request: 'document_requests',
   contract: 'contracts',
-  deliverable: 'deliverables'
+  deliverable: 'deliverables',
+  task: 'project_tasks',
+  milestone: 'milestones',
+  file: 'files',
+  time_entry: 'time_entries',
+  contact: 'client_contacts'
 };
 
 // =====================================================
@@ -489,6 +499,110 @@ class SoftDeleteService {
   }
 
   // ===================================================
+  // GENERIC SOFT DELETE (for simple entities)
+  // ===================================================
+
+  /**
+   * Generic soft delete for entities without cascade logic.
+   * Works for: task, milestone, file, time_entry, contact, deliverable
+   */
+  async softDelete(
+    entityType: SoftDeleteEntityType,
+    entityId: number,
+    deletedBy: string
+  ): Promise<SoftDeleteResult> {
+    const db = getDatabase();
+    const table = TABLE_MAP[entityType];
+    const now = new Date().toISOString();
+
+    try {
+      const entity = await db.get(
+        `SELECT id FROM ${table} WHERE id = ? AND deleted_at IS NULL`,
+        [entityId]
+      );
+
+      if (!entity) {
+        return { success: false, message: `${entityType} not found or already deleted` };
+      }
+
+      await db.run(
+        `UPDATE ${table} SET deleted_at = ?, deleted_by = ? WHERE id = ?`,
+        [now, deletedBy, entityId]
+      );
+
+      await auditLogger.log({
+        action: `${entityType}_deleted`,
+        entityType,
+        entityId: String(entityId),
+        entityName: `${entityType} #${entityId}`,
+        userId: 0,
+        userEmail: deletedBy,
+        userType: 'admin',
+        metadata: {},
+        ipAddress: 'system',
+        userAgent: 'soft-delete-service'
+      });
+
+      logger.info(`Soft deleted ${entityType} ${entityId}`);
+
+      return {
+        success: true,
+        message: `${entityType.charAt(0).toUpperCase() + entityType.slice(1).replace('_', ' ')} moved to trash. Will be permanently deleted in ${RETENTION_DAYS} days.`
+      };
+    } catch (error) {
+      logger.error(`Error soft deleting ${entityType}:`, {
+        error: error instanceof Error ? error : new Error(String(error))
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Bulk soft delete multiple entities of the same type.
+   * Returns the count of successfully soft-deleted items.
+   */
+  async bulkSoftDelete(
+    entityType: SoftDeleteEntityType,
+    entityIds: number[],
+    deletedBy: string
+  ): Promise<{ deleted: number }> {
+    const db = getDatabase();
+    const table = TABLE_MAP[entityType];
+    const now = new Date().toISOString();
+
+    if (entityIds.length === 0) {
+      return { deleted: 0 };
+    }
+
+    const placeholders = entityIds.map(() => '?').join(',');
+    const result = await db.run(
+      `UPDATE ${table} SET deleted_at = ?, deleted_by = ? WHERE id IN (${placeholders}) AND deleted_at IS NULL`,
+      [now, deletedBy, ...entityIds]
+    );
+
+    const deleted = result.changes || 0;
+
+    if (deleted > 0) {
+      await auditLogger.log({
+        action: `${entityType}_bulk_deleted`,
+        entityType,
+        entityId: entityIds.join(','),
+        entityName: `${deleted} ${entityType}(s)`,
+        userId: 0,
+        userEmail: deletedBy,
+        userType: 'admin',
+        metadata: { ids: entityIds, count: deleted },
+        ipAddress: 'system',
+        userAgent: 'soft-delete-service'
+      });
+
+      logger.info(`Bulk soft deleted ${deleted} ${entityType}(s)`);
+    }
+
+    return { deleted };
+  }
+
+  // ===================================================
   // RESTORE OPERATIONS
   // ===================================================
 
@@ -575,7 +689,7 @@ class SoftDeleteService {
 
     const types = entityType
       ? [entityType]
-      : (['client', 'project', 'invoice', 'lead', 'proposal', 'message_thread', 'document_request', 'contract', 'deliverable'] as SoftDeleteEntityType[]);
+      : (['client', 'project', 'invoice', 'lead', 'proposal', 'message_thread', 'document_request', 'contract', 'deliverable', 'task', 'milestone', 'file', 'time_entry', 'contact'] as SoftDeleteEntityType[]);
 
     for (const type of types) {
       const table = TABLE_MAP[type];
@@ -609,6 +723,21 @@ class SoftDeleteService {
         break;
       case 'deliverable':
         nameColumn = 'COALESCE(title, name, \'Deliverable #\' || id)';
+        break;
+      case 'task':
+        nameColumn = 'COALESCE(title, \'Task #\' || id)';
+        break;
+      case 'milestone':
+        nameColumn = 'COALESCE(title, \'Milestone #\' || id)';
+        break;
+      case 'file':
+        nameColumn = 'COALESCE(original_filename, filename, \'File #\' || id)';
+        break;
+      case 'time_entry':
+        nameColumn = 'COALESCE(description, \'Time Entry #\' || id)';
+        break;
+      case 'contact':
+        nameColumn = 'COALESCE(first_name || \' \' || last_name, email, \'Contact #\' || id)';
         break;
       default:
         nameColumn = '\'Unknown\'';
@@ -667,6 +796,11 @@ class SoftDeleteService {
       document_requests: 0,
       contracts: 0,
       deliverables: 0,
+      tasks: 0,
+      milestones: 0,
+      files: 0,
+      time_entries: 0,
+      contacts: 0,
       total: 0
     };
 
@@ -718,8 +852,34 @@ class SoftDeleteService {
     )) as { count: number };
     stats.deliverables = deliverableCount.count;
 
+    const taskCount = (await db.get(
+      'SELECT COUNT(*) as count FROM project_tasks WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.tasks = taskCount.count;
+
+    const milestoneCount = (await db.get(
+      'SELECT COUNT(*) as count FROM milestones WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.milestones = milestoneCount.count;
+
+    const fileCount = (await db.get(
+      'SELECT COUNT(*) as count FROM files WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.files = fileCount.count;
+
+    const timeEntryCount = (await db.get(
+      'SELECT COUNT(*) as count FROM time_entries WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.time_entries = timeEntryCount.count;
+
+    const contactCount = (await db.get(
+      'SELECT COUNT(*) as count FROM client_contacts WHERE deleted_at IS NOT NULL'
+    )) as { count: number };
+    stats.contacts = contactCount.count;
+
     stats.total = stats.clients + stats.projects + stats.invoices + stats.leads + stats.proposals
-      + stats.message_threads + stats.document_requests + stats.contracts + stats.deliverables;
+      + stats.message_threads + stats.document_requests + stats.contracts + stats.deliverables
+      + stats.tasks + stats.milestones + stats.files + stats.time_entries + stats.contacts;
 
     return stats;
   }
@@ -751,6 +911,11 @@ class SoftDeleteService {
       document_requests: 0,
       contracts: 0,
       deliverables: 0,
+      tasks: 0,
+      milestones: 0,
+      files: 0,
+      time_entries: 0,
+      contacts: 0,
       total: 0
     };
     const errors: string[] = [];
@@ -870,6 +1035,34 @@ class SoftDeleteService {
       );
       deleted.deliverables = deliverableResult.changes || 0;
 
+      // 5f. Delete expired tasks (individually soft-deleted ones)
+      const taskResult = await db.run(
+        'DELETE FROM project_tasks WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.tasks = taskResult.changes || 0;
+
+      // 5g. Delete expired milestones (individually soft-deleted ones)
+      const milestoneResult = await db.run(
+        'DELETE FROM milestones WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.milestones = milestoneResult.changes || 0;
+
+      // 5h. Delete expired files (individually soft-deleted ones)
+      const fileResult = await db.run(
+        'DELETE FROM files WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.files = fileResult.changes || 0;
+
+      // 5i. Delete expired time entries
+      const timeEntryResult = await db.run(
+        'DELETE FROM time_entries WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.time_entries = timeEntryResult.changes || 0;
+
       // 6. Delete projects
       const projectResult = await db.run(
         'DELETE FROM projects WHERE deleted_at IS NOT NULL AND deleted_at < ?',
@@ -889,14 +1082,21 @@ class SoftDeleteService {
       deleted.leads = leadCount.count;
       // Note: Actual deletion happens in step 6 (projects deletion)
 
+      // 7b. Delete expired contacts (individually soft-deleted ones)
+      const contactResult = await db.run(
+        'DELETE FROM client_contacts WHERE deleted_at IS NOT NULL AND deleted_at < ?',
+        [cutoffDateStr]
+      );
+      deleted.contacts = contactResult.changes || 0;
+
       // 8. Delete client children
-      // Contacts
+      // Contacts (cascade from parent client deletion)
       await db.run(
         `DELETE FROM client_contacts
          WHERE client_id IN (
            SELECT id FROM clients
            WHERE deleted_at IS NOT NULL AND deleted_at < ?
-         )`,
+         ) AND deleted_at IS NULL`,
         [cutoffDateStr]
       );
 
@@ -949,7 +1149,8 @@ class SoftDeleteService {
 
       deleted.total =
         deleted.clients + deleted.projects + deleted.invoices + deleted.leads + deleted.proposals
-        + deleted.message_threads + deleted.document_requests + deleted.contracts + deleted.deliverables;
+        + deleted.message_threads + deleted.document_requests + deleted.contracts + deleted.deliverables
+        + deleted.tasks + deleted.milestones + deleted.files + deleted.time_entries + deleted.contacts;
 
       if (deleted.total > 0) {
         await auditLogger.log({

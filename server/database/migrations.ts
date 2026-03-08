@@ -8,7 +8,7 @@
  */
 
 import Database from 'sqlite3';
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, existsSync, writeFileSync } from 'fs';
 import { join, resolve as pathResolve } from 'path';
 import { logger } from '../services/logger.js';
 
@@ -293,7 +293,7 @@ export class MigrationManager {
 -- DROP TABLE IF EXISTS example;
 `;
 
-    require('fs').writeFileSync(filepath, template);
+    writeFileSync(filepath, template);
     logger.info(`Created migration: ${filepath}`);
 
     return filepath;

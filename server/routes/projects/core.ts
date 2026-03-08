@@ -61,6 +61,7 @@ router.get(
       LEFT JOIN (
         SELECT project_id, COUNT(*) as file_count
         FROM files
+        WHERE deleted_at IS NULL
         GROUP BY project_id
       ) f_stats ON p.id = f_stats.project_id
       LEFT JOIN (
@@ -87,6 +88,7 @@ router.get(
       LEFT JOIN (
         SELECT project_id, COUNT(*) as file_count
         FROM files
+        WHERE deleted_at IS NULL
         GROUP BY project_id
       ) f_stats ON p.id = f_stats.project_id
       LEFT JOIN (
@@ -164,8 +166,8 @@ router.get(
     const files = await db.all(
       `
     SELECT id, filename, original_filename, file_size, mime_type, uploaded_by, created_at
-    FROM files 
-    WHERE project_id = ?
+    FROM files
+    WHERE project_id = ? AND deleted_at IS NULL
     ORDER BY created_at DESC
   `,
       [projectId]

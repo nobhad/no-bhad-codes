@@ -71,18 +71,13 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <meta name="theme-color" content="#e0e0e0" />
-<% if (portalType === 'client') { %>
-<!-- Inline: sync auth check prevents flash of login form -->
+<% if (portalType === 'client' || portalType === 'admin') { %>
+<!--
+  Server already validated the JWT cookie before rendering this page.
+  Always set auth-checked so the dashboard is visible immediately.
+-->
 <script>
-  (function() {
-    var p = new URLSearchParams(window.location.search);
-    if (p.get('session') === 'expired') return;
-    var u = sessionStorage.getItem('nbw_auth_user');
-    var e = sessionStorage.getItem('nbw_auth_expiry');
-    if (u && e && Date.now() < parseInt(e, 10)) {
-      document.documentElement.classList.add('auth-checked');
-    }
-  })();
+  document.documentElement.classList.add('auth-checked');
 </script>
 <!-- Module: session expiry handling (runs on DOMContentLoaded) -->
 <script type="module">

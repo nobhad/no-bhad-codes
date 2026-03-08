@@ -12,6 +12,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const CLIENT_CONTACT_COLUMNS = `
   id, client_id, first_name, last_name, email, phone, title, department,
@@ -49,6 +50,7 @@ router.get(
       FROM client_contacts cc
       JOIN clients c ON cc.client_id = c.id
       WHERE c.deleted_at IS NULL
+        AND cc.deleted_at IS NULL
       ORDER BY cc.is_primary DESC, cc.created_at DESC
     `);
 
@@ -211,7 +213,6 @@ router.post(
       return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} contacts at once`, 400, 'VALIDATION_ERROR');
     }
 
-    const db = getDatabase();
     const validIds = contactIds
       .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
       .filter((id: number) => !isNaN(id) && id > 0);
@@ -220,13 +221,10 @@ router.post(
       return sendSuccess(res, { deleted: 0 });
     }
 
-    const placeholders = validIds.map(() => '?').join(',');
-    const result = await db.run(
-      `DELETE FROM client_contacts WHERE id IN (${placeholders})`,
-      validIds
-    );
+    const adminEmail = req.user?.email || 'admin';
+    const result = await softDeleteService.bulkSoftDelete('contact', validIds, adminEmail);
 
-    sendSuccess(res, { deleted: result.changes || 0 });
+    sendSuccess(res, { deleted: result.deleted });
   })
 );
 

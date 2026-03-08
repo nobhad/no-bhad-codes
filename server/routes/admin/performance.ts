@@ -126,14 +126,14 @@ router.get(
       const currentTasksCompleted = await safeQuery<{ value: number }>(
         db,
         `SELECT COUNT(*) as value FROM project_tasks
-         WHERE status = 'completed' AND DATE(completed_at) >= ? AND DATE(completed_at) <= ?`,
+         WHERE status = 'completed' AND deleted_at IS NULL AND DATE(completed_at) >= ? AND DATE(completed_at) <= ?`,
         [currentStartStr, nowStr],
         { value: 0 }
       );
       const previousTasksCompleted = await safeQuery<{ value: number }>(
         db,
         `SELECT COUNT(*) as value FROM project_tasks
-         WHERE status = 'completed' AND DATE(completed_at) >= ? AND DATE(completed_at) < ?`,
+         WHERE status = 'completed' AND deleted_at IS NULL AND DATE(completed_at) >= ? AND DATE(completed_at) < ?`,
         [previousStartStr, currentStartStr],
         { value: 0 }
       );
@@ -288,7 +288,7 @@ router.get(
            COALESCE((SELECT SUM(te.hours) FROM time_entries te WHERE te.user_name = pt.assigned_to), 0) as total_hours
          FROM project_tasks pt
          LEFT JOIN projects p ON pt.project_id = p.id AND p.deleted_at IS NULL
-         WHERE pt.assigned_to IS NOT NULL AND pt.assigned_to != ''
+         WHERE pt.assigned_to IS NOT NULL AND pt.assigned_to != '' AND pt.deleted_at IS NULL
          GROUP BY pt.assigned_to
          ORDER BY tasks_completed DESC
          LIMIT 20`
@@ -302,7 +302,7 @@ router.get(
            COALESCE(SUM(i.amount_paid), 0) as revenue
          FROM project_tasks pt
          JOIN invoices i ON i.project_id = pt.project_id AND i.status = 'paid' AND i.deleted_at IS NULL
-         WHERE pt.assigned_to IS NOT NULL AND pt.assigned_to != ''
+         WHERE pt.assigned_to IS NOT NULL AND pt.assigned_to != '' AND pt.deleted_at IS NULL
          GROUP BY pt.assigned_to`
       );
 

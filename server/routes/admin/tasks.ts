@@ -13,6 +13,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const PROJECT_TASK_COLUMNS = `
   id, project_id, milestone_id, title, description, status, priority, assigned_to,
@@ -41,7 +42,6 @@ router.post(
       return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} tasks at once`, 400, 'VALIDATION_ERROR');
     }
 
-    const db = getDatabase();
     const validIds = taskIds
       .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
       .filter((id: number) => !isNaN(id) && id > 0);
@@ -50,13 +50,10 @@ router.post(
       return sendSuccess(res, { deleted: 0 });
     }
 
-    const placeholders = validIds.map(() => '?').join(',');
-    const result = await db.run(
-      `DELETE FROM project_tasks WHERE id IN (${placeholders})`,
-      validIds
-    );
+    const adminEmail = req.user?.email || 'admin';
+    const result = await softDeleteService.bulkSoftDelete('task', validIds, adminEmail);
 
-    sendSuccess(res, { deleted: result.changes || 0 });
+    sendSuccess(res, { deleted: result.deleted });
   })
 );
 

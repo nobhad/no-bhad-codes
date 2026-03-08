@@ -431,7 +431,7 @@ router.get(
           f.id as entity_id
         FROM files f
         JOIN active_projects p ON f.project_id = p.id
-        WHERE p.client_id = ?
+        WHERE p.client_id = ? AND f.deleted_at IS NULL
 
         UNION ALL
 
@@ -2048,7 +2048,7 @@ router.get(
 
     const db = getDatabase();
     const contacts = await db.all(
-      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE client_id = ? ORDER BY is_primary DESC, first_name ASC`,
+      `SELECT ${CONTACT_COLUMNS} FROM client_contacts WHERE client_id = ? AND deleted_at IS NULL ORDER BY is_primary DESC, first_name ASC`,
       [clientId]
     );
 
@@ -2174,14 +2174,15 @@ router.delete(
 
     // Verify ownership
     const existing = await db.get(
-      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ?',
+      'SELECT id FROM client_contacts WHERE id = ? AND client_id = ? AND deleted_at IS NULL',
       [contactId, clientId]
     );
     if (!existing) {
       return errorResponse(res, 'Contact not found', 404, 'NOT_FOUND');
     }
 
-    await db.run('DELETE FROM client_contacts WHERE id = ? AND client_id = ?', [contactId, clientId]);
+    const deletedBy = req.user?.email || 'client';
+    await softDeleteService.softDelete('contact', contactId, deletedBy);
 
     sendSuccess(res, undefined, 'Contact deleted');
   })

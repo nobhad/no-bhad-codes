@@ -8,20 +8,20 @@
  * Includes a unified health check for all integrations.
  */
 
-export * from './zapier-service';
-export * from './slack-service';
-export * from './stripe-service';
-export * from './calendar-service';
+export * from './zapier-service.js';
+export * from './slack-service.js';
+export * from './stripe-service.js';
+export * from './calendar-service.js';
 
 // Default exports for convenience
-import zapierService from './zapier-service';
-import slackService from './slack-service';
-import stripeService from './stripe-service';
-import calendarService from './calendar-service';
-import { isStripeConfigured, getStripeStatus } from './stripe-service';
-import { isGoogleCalendarConfigured } from './calendar-service';
-import { getNotificationConfigs } from './slack-service';
-import { getDatabase } from '../../database/init';
+import zapierService from './zapier-service.js';
+import slackService from './slack-service.js';
+import stripeService from './stripe-service.js';
+import calendarService from './calendar-service.js';
+import { isStripeConfigured, getStripeStatus } from './stripe-service.js';
+import { isGoogleCalendarConfigured } from './calendar-service.js';
+import { getNotificationConfigs } from './slack-service.js';
+import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
 
 export { zapierService, slackService, stripeService, calendarService };

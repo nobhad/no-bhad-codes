@@ -12,6 +12,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ router.get(
       LEFT JOIN projects p ON d.project_id = p.id
       LEFT JOIN clients c ON p.client_id = c.id
       WHERE p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
     `;
     const params: (string | number)[] = [];
 
@@ -85,20 +87,14 @@ router.post(
       return errorResponse(res, 'deliverableIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
     }
 
-    const db = getDatabase();
-    let deleted = 0;
+    const adminEmail = req.user?.email || 'admin';
+    const validIds = deliverableIds
+      .map((id: string | number) => typeof id === 'string' ? parseInt(id, 10) : id)
+      .filter((id: number) => !isNaN(id) && id > 0);
 
-    for (const deliverableId of deliverableIds) {
-      const id = typeof deliverableId === 'string' ? parseInt(deliverableId, 10) : deliverableId;
-      if (isNaN(id)) continue;
+    const result = await softDeleteService.bulkSoftDelete('deliverable', validIds, adminEmail);
 
-      const result = await db.run('DELETE FROM deliverables WHERE id = ?', [id]);
-      if (result.changes && result.changes > 0) {
-        deleted++;
-      }
-    }
-
-    sendSuccess(res, { deleted });
+    sendSuccess(res, { deleted: result.deleted });
   })
 );
 

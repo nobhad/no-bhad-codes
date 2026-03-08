@@ -23,7 +23,26 @@ const router = express.Router();
 // =====================================================
 
 /**
- * Get all triggers
+ * @swagger
+ * /api/triggers:
+ *   get:
+ *     tags:
+ *       - Triggers
+ *     summary: List all workflow triggers
+ *     description: Retrieve all workflow triggers with optional event type filter. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: eventType
+ *         schema:
+ *           type: string
+ *         description: Filter by event type
+ *     responses:
+ *       200:
+ *         description: List of triggers
+ *       401:
+ *         description: Not authenticated
  */
 router.get(
   '/',
@@ -37,7 +56,18 @@ router.get(
 );
 
 /**
- * Get available event types and action types
+ * @swagger
+ * /api/triggers/options:
+ *   get:
+ *     tags:
+ *       - Triggers
+ *     summary: Get trigger event and action types
+ *     description: Retrieve available event types and action types for trigger configuration. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Event types and action types
  */
 router.get(
   '/options',
@@ -52,7 +82,26 @@ router.get(
 );
 
 /**
- * Get a specific trigger
+ * @swagger
+ * /api/triggers/{id}:
+ *   get:
+ *     tags:
+ *       - Triggers
+ *     summary: Get a trigger by ID
+ *     description: Retrieve a specific workflow trigger. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Trigger details
+ *       404:
+ *         description: Trigger not found
  */
 router.get(
   '/:id',
@@ -74,7 +123,48 @@ router.get(
 );
 
 /**
- * Create a new trigger
+ * @swagger
+ * /api/triggers:
+ *   post:
+ *     tags:
+ *       - Triggers
+ *     summary: Create a workflow trigger
+ *     description: Create a new automated workflow trigger. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - event_type
+ *               - action_type
+ *               - action_config
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               event_type:
+ *                 type: string
+ *               conditions:
+ *                 type: object
+ *               action_type:
+ *                 type: string
+ *               action_config:
+ *                 type: object
+ *               is_active:
+ *                 type: boolean
+ *               priority:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Trigger created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/',
@@ -117,7 +207,26 @@ router.post(
 );
 
 /**
- * Update a trigger
+ * @swagger
+ * /api/triggers/{id}:
+ *   put:
+ *     tags:
+ *       - Triggers
+ *     summary: Update a workflow trigger
+ *     description: Update an existing workflow trigger. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Trigger updated
+ *       404:
+ *         description: Trigger not found
  */
 router.put(
   '/:id',
@@ -139,7 +248,26 @@ router.put(
 );
 
 /**
- * Delete a trigger
+ * @swagger
+ * /api/triggers/{id}:
+ *   delete:
+ *     tags:
+ *       - Triggers
+ *     summary: Delete a workflow trigger
+ *     description: Delete a workflow trigger by ID. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Trigger deleted
+ *       400:
+ *         description: Invalid trigger ID
  */
 router.delete(
   '/:id',
@@ -157,7 +285,26 @@ router.delete(
 );
 
 /**
- * Toggle trigger active state
+ * @swagger
+ * /api/triggers/{id}/toggle:
+ *   post:
+ *     tags:
+ *       - Triggers
+ *     summary: Toggle trigger active state
+ *     description: Activate or deactivate a workflow trigger. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Trigger toggled
+ *       404:
+ *         description: Trigger not found
  */
 router.post(
   '/:id/toggle',
@@ -183,7 +330,28 @@ router.post(
 // =====================================================
 
 /**
- * Get trigger execution logs
+ * @swagger
+ * /api/triggers/logs/executions:
+ *   get:
+ *     tags:
+ *       - Triggers
+ *     summary: Get trigger execution logs
+ *     description: Retrieve execution logs for workflow triggers. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: triggerId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *     responses:
+ *       200:
+ *         description: Execution logs
  */
 router.get(
   '/logs/executions',
@@ -199,7 +367,28 @@ router.get(
 );
 
 /**
- * Get system events
+ * @swagger
+ * /api/triggers/logs/events:
+ *   get:
+ *     tags:
+ *       - Triggers
+ *     summary: Get system events
+ *     description: Retrieve system events that can trigger workflows. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: eventType
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *     responses:
+ *       200:
+ *         description: System events
  */
 router.get(
   '/logs/events',
@@ -215,7 +404,33 @@ router.get(
 );
 
 /**
- * Test emit an event (for debugging)
+ * @swagger
+ * /api/triggers/test-emit:
+ *   post:
+ *     tags:
+ *       - Triggers
+ *     summary: Test emit a workflow event
+ *     description: Emit a test event for debugging trigger workflows. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - event_type
+ *             properties:
+ *               event_type:
+ *                 type: string
+ *               context:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Event emitted
+ *       400:
+ *         description: event_type is required
  */
 router.post(
   '/test-emit',

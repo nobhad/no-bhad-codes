@@ -14,7 +14,7 @@
  */
 
 import crypto from 'crypto';
-import { getDatabase } from '../../database/init';
+import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
 import { getBaseUrl } from '../../config/environment.js';
 import {

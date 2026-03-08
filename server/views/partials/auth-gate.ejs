@@ -8,7 +8,7 @@
     </div>
     <% if (portalType === 'admin') { %>
       <!-- Admin Login Form -->
-      <form class="auth-gate-form" id="admin-login-form" method="post" action="/api/auth/admin/login" autocomplete="off" novalidate>
+      <form class="auth-gate-form" id="admin-login-form" autocomplete="off" novalidate>
         <!-- Hidden username field for accessibility and password managers -->
         <input
           type="email"
@@ -51,7 +51,7 @@
       </script>
     <% } else { %>
       <!-- Client Portal Login Form -->
-      <form class="auth-gate-form" id="portal-login-form" method="post" action="/api/auth/portal-login" novalidate>
+      <form class="auth-gate-form" id="portal-login-form" novalidate>
         <div class="form-group">
           <label for="portal-email" class="sr-only">Email Address</label>
           <input
@@ -122,6 +122,10 @@
         <span class="auth-divider">|</span>
         <a href="#" id="magic-link-toggle" class="auth-link">Use magic link instead</a>
       </div>
+      <script type="module">
+        import { initPortalAuthForm } from '/src/features/auth/portal-auth-form.ts';
+        document.addEventListener('DOMContentLoaded', () => initPortalAuthForm());
+      </script>
     <% } %>
   </div>
 </div>

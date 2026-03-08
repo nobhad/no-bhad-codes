@@ -8,7 +8,7 @@
  * with similarity scoring and merge capabilities.
  */
 
-import { getDatabase } from '../database/init';
+import { getDatabase } from '../database/init.js';
 
 // Similarity thresholds
 const EXACT_MATCH_THRESHOLD = 1.0;
