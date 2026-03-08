@@ -402,7 +402,8 @@ describe('Stripe Service', () => {
     });
 
     it('handles charge.refunded event for full refund', async () => {
-      mockDb.get.mockResolvedValue({ id: 1 });
+      // First get: idempotency check (not processed), second get: invoice lookup
+      mockDb.get.mockResolvedValueOnce(undefined).mockResolvedValueOnce({ id: 1 });
       mockDb.run.mockResolvedValue({});
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');
@@ -427,7 +428,8 @@ describe('Stripe Service', () => {
     });
 
     it('handles charge.refunded event for partial refund', async () => {
-      mockDb.get.mockResolvedValue({ id: 1 });
+      // First get: idempotency check (not processed), second get: invoice lookup
+      mockDb.get.mockResolvedValueOnce(undefined).mockResolvedValueOnce({ id: 1 });
       mockDb.run.mockResolvedValue({});
       const { handleWebhookEvent } =
         await import('../../../server/services/integrations/stripe-service');

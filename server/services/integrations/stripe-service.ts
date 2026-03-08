@@ -40,27 +40,59 @@ const STRIPE_API_BASE = 'https://api.stripe.com/v1';
 // Webhook Idempotency - Prevents duplicate event processing
 // =====================================================
 
-/** Map of processed Stripe event IDs to their processing timestamps */
+/** In-memory cache for fast-path idempotency checks (backed by database) */
 const processedWebhookEvents = new Map<string, number>();
 
 /**
- * Check if a webhook event has already been processed
+ * Check if a webhook event has already been processed.
+ * Uses in-memory cache as fast path, falls back to database for persistence.
  */
-function isEventAlreadyProcessed(eventId: string): boolean {
-  return processedWebhookEvents.has(eventId);
+async function isEventAlreadyProcessed(eventId: string): Promise<boolean> {
+  // Fast path: check in-memory cache
+  if (processedWebhookEvents.has(eventId)) {
+    return true;
+  }
+
+  // Slow path: check database for persistence across restarts
+  try {
+    const db = getDatabase();
+    const row = await db.get(
+      'SELECT event_id FROM webhook_processed_events WHERE event_id = ?',
+      [eventId]
+    );
+    if (row) {
+      // Populate cache for future fast-path hits
+      processedWebhookEvents.set(eventId, Date.now());
+      return true;
+    }
+  } catch {
+    // If table doesn't exist yet (pre-migration), fall back to cache-only
+  }
+
+  return false;
 }
 
 /**
- * Mark a webhook event as processed with the current timestamp
+ * Mark a webhook event as processed in both cache and database.
  */
-function markEventProcessed(eventId: string): void {
+async function markEventProcessed(eventId: string): Promise<void> {
   processedWebhookEvents.set(eventId, Date.now());
+
+  try {
+    const db = getDatabase();
+    await db.run(
+      'INSERT OR IGNORE INTO webhook_processed_events (event_id, source, processed_at) VALUES (?, ?, datetime(\'now\'))',
+      [eventId, 'stripe']
+    );
+  } catch {
+    // Pre-migration graceful degradation: cache-only is still functional
+  }
 }
 
 /**
  * Remove expired event IDs older than the TTL threshold
  */
-function cleanupExpiredEvents(): void {
+async function cleanupExpiredEvents(): Promise<void> {
   const expirationThreshold = Date.now() - STRIPE_IDEMPOTENCY_TTL_MS;
   let removedCount = 0;
 
@@ -71,13 +103,24 @@ function cleanupExpiredEvents(): void {
     }
   }
 
+  // Also clean up database entries older than TTL
+  try {
+    const db = getDatabase();
+    const ttlSeconds = Math.floor(STRIPE_IDEMPOTENCY_TTL_MS / 1000);
+    await db.run(
+      `DELETE FROM webhook_processed_events WHERE processed_at < datetime('now', '-${ttlSeconds} seconds')`
+    );
+  } catch {
+    // Pre-migration graceful degradation
+  }
+
   if (removedCount > 0) {
     logger.info(`Cleaned up ${removedCount} expired Stripe webhook event IDs`);
   }
 }
 
 // Schedule periodic cleanup of expired event IDs
-setInterval(cleanupExpiredEvents, STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS);
+setInterval(() => { cleanupExpiredEvents().catch(() => {}); }, STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS);
 
 /**
  * Validate Stripe configuration before any operation
@@ -343,7 +386,7 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
  */
 export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<{ alreadyProcessed: boolean }> {
   // Idempotency check: skip events that have already been processed
-  if (isEventAlreadyProcessed(event.id)) {
+  if (await isEventAlreadyProcessed(event.id)) {
     logger.info(`Stripe webhook event ${event.id} already processed, skipping`);
     return { alreadyProcessed: true };
   }
@@ -462,7 +505,7 @@ export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<{ a
   }
 
   // Mark event as processed after successful handling
-  markEventProcessed(event.id);
+  await markEventProcessed(event.id);
   return { alreadyProcessed: false };
 }
 
