@@ -1,0 +1,226 @@
+/**
+ * ===============================================
+ * COMMAND PALETTE STYLES
+ * ===============================================
+ * @file src/styles/shared/command-palette.css
+ *
+ * Cmd+K command palette overlay for quick navigation.
+ * Uses portal z-index tokens and theme variables.
+ */
+
+/* ============================================
+ * OVERLAY
+ * ============================================ */
+
+.command-palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-portal-modal);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+  background: var(--portal-alpha-black-50, rgba(0, 0, 0, 0.5));
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================
+ * PANEL
+ * ============================================ */
+
+.command-palette {
+  width: min(560px, calc(100vw - 2rem));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-primary);
+  border: var(--portal-border);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-lg, 0 10px 40px rgba(0, 0, 0, 0.3));
+  overflow: hidden;
+}
+
+/* ============================================
+ * SEARCH INPUT
+ * ============================================ */
+
+.command-palette-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+}
+
+.command-palette-search-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.command-palette-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: var(--font-size-base, 14px);
+  color: var(--color-text-primary);
+  font-family: inherit;
+}
+
+.command-palette-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.command-palette-kbd {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs, 11px);
+  font-family: inherit;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm, 4px);
+  padding: 2px 6px;
+  line-height: 1.4;
+}
+
+/* ============================================
+ * DIVIDER
+ * ============================================ */
+
+.command-palette-divider {
+  height: 1px;
+  background: var(--color-border-primary);
+}
+
+/* ============================================
+ * RESULTS LIST
+ * ============================================ */
+
+.command-palette-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1, 0.25rem);
+  overflow-y: auto;
+  max-height: 50vh;
+}
+
+.command-palette-empty {
+  padding: var(--space-6, 1.5rem) var(--space-4, 1rem);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm, 13px);
+}
+
+/* ============================================
+ * RESULT ITEM
+ * ============================================ */
+
+.command-palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm, 13px);
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.command-palette-item.selected,
+.command-palette-item:hover {
+  background: var(--color-bg-hover, rgba(255, 255, 255, 0.06));
+  color: var(--color-text-primary);
+}
+
+.command-palette-item-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.command-palette-item.selected .command-palette-item-icon,
+.command-palette-item:hover .command-palette-item-icon {
+  opacity: 1;
+}
+
+.command-palette-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-palette-item-group {
+  font-size: var(--font-size-xs, 11px);
+  color: var(--color-text-tertiary);
+  text-transform: capitalize;
+}
+
+.command-palette-item-shortcut {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs, 11px);
+  font-family: inherit;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm, 4px);
+  padding: 1px 5px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ============================================
+ * FOOTER HINTS
+ * ============================================ */
+
+.command-palette-footer {
+  display: flex;
+  gap: var(--space-4, 1rem);
+  padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
+  border-top: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.03));
+}
+
+.command-palette-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 0.25rem);
+  font-size: var(--font-size-xs, 11px);
+  color: var(--color-text-tertiary);
+}
+
+.command-palette-hint kbd {
+  font-family: inherit;
+  font-size: var(--font-size-xs, 11px);
+  background: var(--color-bg-secondary, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm, 4px);
+  padding: 0 4px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ============================================
+ * RESPONSIVE
+ * ============================================ */
+
+@media (max-width: 640px) {
+  .command-palette-overlay {
+    padding-top: 5vh;
+  }
+
+  .command-palette {
+    width: calc(100vw - 1rem);
+    max-height: 80vh;
+  }
+
+  .command-palette-footer {
+    display: none;
+  }
+}
