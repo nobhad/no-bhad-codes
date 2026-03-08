@@ -24,8 +24,8 @@ import {
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectFile } from '../../types';
 import { FILE_CATEGORY_OPTIONS } from '../../types';
-import { formatDate, formatFileSize } from '../../../../../utils/format-utils';
-import { NOTIFICATIONS, fileUploadMessage } from '../../../../../constants/notifications';
+import { formatDate, formatFileSize } from '@/utils/format-utils';
+import { NOTIFICATIONS, fileUploadMessage } from '@/constants/notifications';
 
 interface FilesTabProps {
   files: ProjectFile[];

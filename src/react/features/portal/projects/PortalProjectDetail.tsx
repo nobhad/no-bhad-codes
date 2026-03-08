@@ -23,6 +23,7 @@ import { IconButton, TabList, TabPanel, formatRelativeTime, formatCurrency } fro
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import type {
   PortalProject,
@@ -31,8 +32,8 @@ import type {
   PortalProjectUpdate,
   PortalViewProps
 } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalProjectDetail');
 
@@ -126,8 +127,8 @@ export function PortalProjectDetail({
   showNotification: _showNotification
 }: PortalProjectDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const milestonesRef = useStaggerChildren<HTMLDivElement>(0.06, 0.15);
-  const updatesRef = useStaggerChildren<HTMLDivElement>(0.06, 0.2);
+  const milestonesRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_MEDIUM, GSAP.STAGGER_DELAY_MEDIUM);
+  const updatesRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_MEDIUM, GSAP.STAGGER_DELAY_LONG);
 
   const [project, setProject] = React.useState<PortalProject | null>(null);
   const [milestones, setMilestones] = React.useState<PortalProjectMilestone[]>([]);
@@ -376,9 +377,9 @@ export function PortalProjectDetail({
               <span className="field-label">Overall Progress</span>
               <span className="text-primary">{progress}%</span>
             </div>
-            <div className="progress-track">
+            <div className="progress-bar-sm">
               <div
-                className="progress-bar"
+                className="progress-fill"
                 style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
               />
             </div>

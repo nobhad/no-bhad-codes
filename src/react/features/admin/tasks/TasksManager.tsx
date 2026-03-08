@@ -24,8 +24,8 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 interface Task {
   id: number;

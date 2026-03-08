@@ -27,9 +27,9 @@ import { PORTAL_INVOICE_STATUS_CONFIG } from '../types';
 import { PORTAL_INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalInvoice, PortalViewProps } from '../types';
 import { formatCardDate, formatCurrency } from '@react/utils/cardFormatters';
-import { createLogger } from '../../../../utils/logger';
-import { downloadInvoicePdf } from '../../../../utils/file-download';
-import { buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { downloadInvoicePdf } from '@/utils/file-download';
+import { buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('PortalInvoicesTable');
 

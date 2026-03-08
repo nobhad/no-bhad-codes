@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { Search, X, Filter } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { KEYS } from '../../../constants/keyboard';
 
 /**
  * SearchFilter
@@ -59,7 +60,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
           onChange={(e) => onChange(e.target.value)}
           className="search-bar-input"
           onKeyDown={(e) => {
-            if (e.key === 'Escape') setIsOpen(false);
+            if (e.key === KEYS.ESCAPE) setIsOpen(false);
           }}
         />
         {value && (

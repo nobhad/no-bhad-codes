@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '@react/lib/utils';
 import { useStaggerChildren } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 
 /**
  * PortalTable
@@ -46,7 +47,7 @@ interface PortalTableBodyProps extends React.HTMLAttributes<HTMLTableSectionElem
 
 const PortalTableBody = React.forwardRef<HTMLTableSectionElement, PortalTableBodyProps>(
   ({ className, animate = false, ...props }, ref) => {
-    const animationRef = useStaggerChildren<HTMLTableSectionElement>(0.05, 0.1);
+    const animationRef = useStaggerChildren<HTMLTableSectionElement>(GSAP.STAGGER_DEFAULT, GSAP.STAGGER_DELAY_SHORT);
     const combinedRef = animate ? animationRef : ref;
 
     return (

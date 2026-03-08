@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { EmptyState } from '@react/components/portal/EmptyState';
-import { formatTimeAgo } from '../../../../../utils/time-utils';
+import { formatTimeAgo, MS_PER_DAY } from '@/utils/time-utils';
 import type { ClientActivity } from '../../types';
 
 interface ActivityTabProps {
@@ -99,7 +99,7 @@ function groupActivitiesByDate(
 
   const now = new Date();
   const today = now.toISOString().split('T')[0];
-  const yesterday = new Date(now.getTime() - 86400000).toISOString().split('T')[0];
+  const yesterday = new Date(now.getTime() - MS_PER_DAY).toISOString().split('T')[0];
 
   return Array.from(groups.entries())
     .sort(([a], [b]) => b.localeCompare(a))

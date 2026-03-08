@@ -11,16 +11,15 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import { PORTAL_PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalProject, PortalProjectStatus, PortalViewProps } from '../types';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { formatCardDate } from '@react/utils/cardFormatters';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-
-const logger = createLogger('PortalProjectsList');
+import { usePortalData } from '@react/hooks/usePortalFetch';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { KEYS } from '@/constants/keyboard';
 
 /**
  * Transform API response to PortalProject interface
@@ -60,7 +59,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       role="button"
       tabIndex={0}
       onClick={onClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      onKeyDown={(e) => { if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) { e.preventDefault(); onClick(); } }}
       className="portal-card card-clickable"
     >
       {/* Header: Name and Status */}
@@ -90,9 +89,9 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
           <span className="field-label">Progress</span>
           <span className="text-primary text-sm">{project.progress}%</span>
         </div>
-        <div className="progress-track">
+        <div className="progress-bar-sm">
           <div
-            className="progress-bar"
+            className="progress-fill"
             style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
           />
         </div>
@@ -165,91 +164,45 @@ function sortProjects(
 /**
  * PortalProjectsList Component
  */
+/**
+ * Transform raw API response to PortalProject array.
+ * Handles { projects: [...] } and bare array responses.
+ */
+function transformProjectsResponse(raw: unknown): PortalProject[] {
+  const data = raw as Record<string, unknown>;
+
+  let rawProjects: Record<string, unknown>[] = [];
+
+  if (data.projects && Array.isArray(data.projects)) {
+    rawProjects = data.projects;
+  } else if (Array.isArray(data)) {
+    rawProjects = data as Record<string, unknown>[];
+  }
+
+  return rawProjects.map(transformProject);
+}
+
 export function PortalProjectsList({
   getAuthToken,
   onSelectProject,
   showNotification: _showNotification
 }: PortalProjectsListProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const cardsRef = useStaggerChildren<HTMLDivElement>(0.08, 0.1);
+  const cardsRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_SLOW, GSAP.STAGGER_DELAY_SHORT);
 
-  const [projects, setProjects] = React.useState<PortalProject[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  // Fetch projects via shared hook (handles auth, abort, error/loading state)
+  const {
+    data: projects,
+    isLoading,
+    error,
+    refetch: fetchProjects
+  } = usePortalData<PortalProject[]>({
+    getAuthToken,
+    url: API_ENDPOINTS.PORTAL.PROJECTS,
+    transform: transformProjectsResponse
+  });
 
-  // AbortController ref for cleanup on unmount
-  const abortControllerRef = React.useRef<AbortController | null>(null);
-
-  // Cleanup on unmount
-  React.useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
-  // Fetch projects from API
-  const fetchProjects = React.useCallback(async () => {
-    // Abort any in-flight request
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const token = getAuthToken?.();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(API_ENDPOINTS.PORTAL.PROJECTS, {
-        method: 'GET',
-        headers,
-        credentials: 'include',
-        signal: abortControllerRef.current.signal
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch projects: ${response.statusText}`);
-      }
-
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-
-      // Handle various response formats and transform to PortalProject interface
-      let rawProjects: Record<string, unknown>[] = [];
-
-      if (data.projects && Array.isArray(data.projects)) {
-        rawProjects = data.projects;
-      } else if (Array.isArray(data)) {
-        rawProjects = data as Record<string, unknown>[];
-      } else {
-        throw new Error((data.error as string) || 'Failed to load projects');
-      }
-
-      // Transform API response to match PortalProject interface (maps project_name to name)
-      const transformedProjects = rawProjects.map(transformProject);
-      setProjects(transformedProjects);
-    } catch (err) {
-      // Don't set error state if request was aborted (component unmounted)
-      if (err instanceof Error && err.name === 'AbortError') {
-        return;
-      }
-      const message = err instanceof Error ? err.message : 'An error occurred';
-      setError(message);
-      logger.error('[PortalProjectsList] Error:', message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getAuthToken]);
-
-  // Fetch on mount
-  React.useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+  const items = projects ?? [];
 
   // Table filters
   const {
@@ -268,7 +221,7 @@ export function PortalProjectsList({
     defaultSort: { column: 'name', direction: 'asc' }
   });
 
-  const filteredProjects = React.useMemo(() => applyFilters(projects), [applyFilters, projects]);
+  const filteredProjects = React.useMemo(() => applyFilters(items), [applyFilters, items]);
 
   // Handle project selection
   const handleProjectClick = (project: PortalProject) => {
@@ -284,8 +237,8 @@ export function PortalProjectsList({
   };
 
   // Group projects by status for summary
-  const activeCount = projects.filter(p => p.status === 'active' || p.status === 'in-progress').length;
-  const completedCount = projects.filter(p => p.status === 'completed').length;
+  const activeCount = items.filter(p => p.status === 'active' || p.status === 'in-progress').length;
+  const completedCount = items.filter(p => p.status === 'completed').length;
 
   return (
     <TableLayout
@@ -293,7 +246,7 @@ export function PortalProjectsList({
       title="PROJECTS"
       stats={
         <TableStats items={[
-          { value: projects.length, label: 'total' },
+          { value: items.length, label: 'total' },
           { value: activeCount, label: 'active', variant: 'active' },
           { value: completedCount, label: 'completed', variant: 'completed' }
         ]} />
@@ -317,7 +270,7 @@ export function PortalProjectsList({
       ) : filteredProjects.length === 0 ? (
         <EmptyState
           icon={<FolderOpen className="icon-lg" />}
-          message={projects.length === 0
+          message={items.length === 0
             ? 'No projects yet. Your projects will appear here once they begin.'
             : 'No projects match the current filters.'
           }

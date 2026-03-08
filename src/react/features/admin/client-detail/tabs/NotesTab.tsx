@@ -5,9 +5,10 @@ import { cn } from '@react/lib/utils';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { EmptyState } from '@react/components/portal/EmptyState';
+import { useFormState } from '@react/hooks/useFormState';
 import type { ClientNote } from '../../types';
-import { formatRelativeTime } from '../../../../../utils/format-utils';
-import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { formatRelativeTime } from '@/utils/format-utils';
+import { NOTIFICATIONS } from '@/constants/notifications';
 
 interface NotesTabProps {
   notes: ClientNote[];
@@ -23,6 +24,8 @@ function formatNoteDate(dateString: string): string {
   return formatRelativeTime(dateString);
 }
 
+const EMPTY_NOTE = '';
+
 /**
  * NotesTab
  * Internal notes for client
@@ -35,10 +38,18 @@ export function NotesTab({
   onTogglePin,
   showNotification
 }: NotesTabProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [noteContent, setNoteContent] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    isAdding,
+    editingId,
+    formData: noteContent,
+    isSubmitting,
+    startAdd: handleStartAdd,
+    startEdit,
+    cancelForm: handleCancel,
+    setFormData: setNoteContent,
+    setIsSubmitting,
+    isFormOpen
+  } = useFormState<string>({ initialData: EMPTY_NOTE });
 
   const deleteDialog = useConfirmDialog();
   const [noteToDelete, setNoteToDelete] = useState<ClientNote | null>(null);
@@ -53,26 +64,10 @@ export function NotesTab({
   const pinnedNotes = sortedNotes.filter((n) => n.is_pinned);
   const unpinnedNotes = sortedNotes.filter((n) => !n.is_pinned);
 
-  // Start adding
-  const handleStartAdd = useCallback(() => {
-    setNoteContent('');
-    setEditingId(null);
-    setIsAdding(true);
-  }, []);
-
-  // Start editing
+  // Start editing — maps ClientNote to string content
   const handleStartEdit = useCallback((note: ClientNote) => {
-    setNoteContent(note.content);
-    setEditingId(note.id);
-    setIsAdding(false);
-  }, []);
-
-  // Cancel
-  const handleCancel = useCallback(() => {
-    setNoteContent('');
-    setEditingId(null);
-    setIsAdding(false);
-  }, []);
+    startEdit(note.id, note.content);
+  }, [startEdit]);
 
   // Submit
   const handleSubmit = useCallback(async () => {
@@ -252,7 +247,7 @@ export function NotesTab({
         <h2 className="heading text-lg">
           Notes ({notes.length})
         </h2>
-        {!isAdding && !editingId && (
+        {!isFormOpen && (
           <PortalButton variant="secondary" onClick={handleStartAdd} icon={<Plus className="icon-md" />}>
             Add Note
           </PortalButton>
@@ -260,10 +255,10 @@ export function NotesTab({
       </div>
 
       {/* Add/Edit Form */}
-      {(isAdding || editingId) && renderForm()}
+      {isFormOpen && renderForm()}
 
       {/* Notes List */}
-      {notes.length === 0 && !isAdding ? (
+      {notes.length === 0 && !isFormOpen ? (
         <EmptyState
           icon={<StickyNote className="icon-lg" />}
           message="No notes yet. Add internal notes about this client."

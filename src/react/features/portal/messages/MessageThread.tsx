@@ -20,8 +20,9 @@ import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/E
 import { IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
-import { UI_LIMITS } from '@react/config/portal-constants';
+import { UI_LIMITS, GSAP } from '@react/config/portal-constants';
 import { formatFileSize } from '@react/utils/cardFormatters';
+import { KEYS } from '@/constants/keyboard';
 import type { Message, MessageThread as MessageThreadType, MessageAttachment } from './types';
 
 // ============================================================================
@@ -232,11 +233,11 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
                 onChange={(e) => setEditContent(e.target.value)}
                 className="message-edit-textarea"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === KEYS.ENTER && !e.shiftKey) {
                     e.preventDefault();
                     handleSaveEdit();
                   }
-                  if (e.key === 'Escape') {
+                  if (e.key === KEYS.ESCAPE) {
                     handleCancelEdit();
                   }
                 }}
@@ -362,7 +363,7 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
   }, [content, attachments, onSend, showNotification]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === KEYS.ENTER && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -460,7 +461,7 @@ export function MessageThread({
   showNotification
 }: MessageThreadProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const messagesRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const messagesRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change

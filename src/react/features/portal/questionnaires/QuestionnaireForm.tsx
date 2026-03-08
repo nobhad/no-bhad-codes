@@ -15,7 +15,7 @@ import type {
   ConditionalRule,
   QuestionType
 } from './types';
-import { buildEndpoint } from '../../../../constants/api-endpoints';
+import { buildEndpoint } from '@/constants/api-endpoints';
 
 // ============================================================================
 // CONSTANTS
@@ -644,9 +644,9 @@ export function QuestionnaireForm({
       {/* Progress bar */}
       {!isReadOnly && (
         <div className="qform-progress-row">
-          <div className="progress-track flex-1">
+          <div className="progress-bar-sm flex-1">
             <div
-              className="progress-bar"
+              className="progress-fill"
               style={{ width: `${progress}%` }}
             />
           </div>

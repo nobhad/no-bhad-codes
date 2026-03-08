@@ -16,7 +16,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { DocumentRequestCard, type DocumentRequest } from './DocumentRequestCard';
 import type { PortalViewProps } from '../types';
 import { usePortalData } from '@react/hooks/usePortalFetch';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 export interface PortalDocumentRequestsProps extends PortalViewProps {}
 

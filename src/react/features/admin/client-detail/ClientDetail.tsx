@@ -32,8 +32,8 @@ import { ProjectsTab } from './tabs/ProjectsTab';
 import { NotesTab } from './tabs/NotesTab';
 import type { ClientDetailTab, ClientStatus } from '../types';
 import { CLIENT_STATUS_CONFIG, CLIENT_TYPE_LABELS } from '../types';
-import { buildEndpoint } from '../../../../constants/api-endpoints';
-import { NOTIFICATIONS, statusUpdatedMessage } from '../../../../constants/notifications';
+import { buildEndpoint } from '@/constants/api-endpoints';
+import { NOTIFICATIONS, statusUpdatedMessage } from '@/constants/notifications';
 
 interface ClientDetailProps {
   /** Client ID to display */

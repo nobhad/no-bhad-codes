@@ -14,6 +14,7 @@ import { usePortalRole } from '../../stores/portal-store';
 import { usePortalAuth } from '../../hooks/usePortalAuth';
 import { apiGet, apiPut } from '../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
+import { KEYS } from '../../../constants/keyboard';
 import { formatTimeAgo } from '../../../utils/time-utils';
 
 // ============================================
@@ -100,7 +101,7 @@ export function NotificationBell() {
     if (!open) return;
 
     function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === KEYS.ESCAPE) setOpen(false);
     }
 
     document.addEventListener('keydown', handleKey);

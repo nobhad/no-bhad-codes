@@ -22,7 +22,8 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Client, ClientHealth, ClientDetailStats, ClientTag } from '../../types';
-import { formatCurrency as formatCurrencyUtil, formatDate } from '../../../../../utils/format-utils';
+import { formatCurrency as formatCurrencyUtil, formatDate } from '@/utils/format-utils';
+import { HEALTH_SCORE } from '@/constants/thresholds';
 
 interface OverviewTabProps {
   client: Client;
@@ -47,8 +48,8 @@ function formatCurrency(amount: number | undefined): string {
  * Get health status label
  */
 function getHealthStatusLabel(score: number): string {
-  if (score >= 70) return 'Healthy';
-  if (score >= 40) return 'At Risk';
+  if (score >= HEALTH_SCORE.HEALTHY) return 'Healthy';
+  if (score >= HEALTH_SCORE.AT_RISK) return 'At Risk';
   return 'Critical';
 }
 
@@ -132,9 +133,9 @@ export function OverviewTab({
                       </span>
                       <span className="text-muted">{value}%</span>
                     </div>
-                    <div className="progress-track">
+                    <div className="progress-bar-sm">
                       <div
-                        className="progress-bar"
+                        className="progress-fill"
                         style={{ width: `${value}%` }}
                       />
                     </div>

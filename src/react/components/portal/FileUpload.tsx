@@ -3,6 +3,7 @@ import { useCallback, useState, useRef } from 'react';
 import { Upload, X, File, AlertCircle } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { KEYS } from '../../../constants/keyboard';
 
 const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const DEFAULT_MAX_FILES = 5;
@@ -203,7 +204,7 @@ export function FileUpload({
         role="button"
         tabIndex={disabled ? -1 : 0}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
             e.preventDefault();
             handleClick();
           }

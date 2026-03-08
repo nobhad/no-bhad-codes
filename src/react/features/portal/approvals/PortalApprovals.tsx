@@ -14,12 +14,13 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { PORTAL_APPROVALS_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
 import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { countByField } from '@react/utils/cardFormatters';
 import { ApprovalCard } from './ApprovalCard';
 import type { PendingApproval, PendingApprovalsResponse } from './types';
 import type { PortalViewProps } from '../types';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 export interface PortalApprovalsProps extends PortalViewProps {
   /** Callback to navigate to entity detail */
@@ -45,7 +46,7 @@ export function PortalApprovals({
   showNotification
 }: PortalApprovalsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
   const { data: approvals, isLoading, error, refetch, portalFetch } = usePortalData<PendingApproval[]>({
     getAuthToken,

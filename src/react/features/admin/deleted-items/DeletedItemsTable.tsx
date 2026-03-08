@@ -38,9 +38,9 @@ import { useSelection } from '@react/hooks/useSelection';
 import { formatDate } from '@react/utils/formatDate';
 import { DELETED_ITEMS_FILTER_CONFIG } from '@react/features/admin/shared/filterConfigs';
 import type { SortConfig } from '@react/features/admin/types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('DeletedItemsTable');
 

@@ -23,7 +23,8 @@ import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/E
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import type { PortalViewProps } from '../types';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { KEYS } from '@/constants/keyboard';
 
 // ============================================================================
 // CONSTANTS
@@ -124,7 +125,7 @@ function ActivityList({ activities, onNavigate }: ActivityListProps) {
           onKeyDown={
             item.entityId && onNavigate
               ? (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
                   e.preventDefault();
                   onNavigate(item.type, item.entityId);
                 }

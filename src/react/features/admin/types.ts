@@ -3,6 +3,44 @@
  * Type definitions for React admin components
  */
 
+import type { FilterOption } from './shared/filterConfigs';
+
+// ============================================================================
+// UTILITY: Convert config records to filter option arrays
+// ============================================================================
+
+/**
+ * Converts a status config record into a FilterOption array.
+ * If `keys` is provided, only those keys are included (in order).
+ * Otherwise all keys are included in their natural object order.
+ */
+export function configToFilterOptions<K extends string>(
+  config: Record<K, { label: string }>,
+  keys?: K[]
+): FilterOption[] {
+  const entries = keys
+    ? keys.map((k) => ({ value: k, label: config[k].label }))
+    : (Object.entries(config) as [string, { label: string }][]).map(([value, { label }]) => ({
+      value,
+      label
+    }));
+  return entries;
+}
+
+/**
+ * Converts a labels record (value -> display label) into a FilterOption array.
+ * Only includes keys matching `keys` param; falls back to all keys if omitted.
+ */
+export function labelsToFilterOptions(
+  labels: Record<string, string>,
+  keys?: string[]
+): FilterOption[] {
+  const selectedKeys = keys ?? Object.keys(labels);
+  return selectedKeys
+    .filter((k) => labels[k] !== undefined)
+    .map((k) => ({ value: k, label: labels[k] }));
+}
+
 /**
  * Project status values
  */

@@ -8,6 +8,7 @@ import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Pencil, Loader2, Check, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { KEYS } from '../../../constants/keyboard';
 
 /** Delay before saving on blur, allows button click events to register first */
 const BLUR_SAVE_DELAY_MS = 150;
@@ -140,10 +141,10 @@ export function InlineEditField({
 
   // Handle key down
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === KEYS.ENTER) {
       e.preventDefault();
       saveValue();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === KEYS.ESCAPE) {
       e.preventDefault();
       cancelEditing();
     }
@@ -231,7 +232,7 @@ export function InlineEditField({
           role={readOnly ? undefined : 'button'}
           tabIndex={readOnly ? undefined : 0}
           onKeyDown={(e) => {
-            if (!readOnly && (e.key === 'Enter' || e.key === ' ')) {
+            if (!readOnly && (e.key === KEYS.ENTER || e.key === KEYS.SPACE)) {
               e.preventDefault();
               startEditing();
             }
@@ -352,7 +353,7 @@ export function InlineEditSelect({
             }}
             onBlur={cancelEditing}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') {
+              if (e.key === KEYS.ESCAPE) {
                 e.preventDefault();
                 cancelEditing();
               }
@@ -378,7 +379,7 @@ export function InlineEditSelect({
           role={readOnly ? undefined : 'button'}
           tabIndex={readOnly ? undefined : 0}
           onKeyDown={(e) => {
-            if (!readOnly && (e.key === 'Enter' || e.key === ' ')) {
+            if (!readOnly && (e.key === KEYS.ENTER || e.key === KEYS.SPACE)) {
               e.preventDefault();
               startEditing();
             }

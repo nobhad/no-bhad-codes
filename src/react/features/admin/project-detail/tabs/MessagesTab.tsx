@@ -5,8 +5,8 @@ import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Message } from '../../types';
-import { NOTIFICATIONS } from '../../../../../constants/notifications';
-import { KEYS } from '../../../../../constants/keyboard';
+import { NOTIFICATIONS } from '@/constants/notifications';
+import { KEYS } from '@/constants/keyboard';
 
 interface MessagesTabProps {
   messages: Message[];

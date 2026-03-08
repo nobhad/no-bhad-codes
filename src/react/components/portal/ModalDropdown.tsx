@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useEffect, useId } from 'react';
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useScaleIn } from '@react/hooks/useGsap';
+import { KEYS } from '../../../constants/keyboard';
 
 /** Delay before focusing search input, allows open animation to start */
 const SEARCH_FOCUS_DELAY_MS = 100;
@@ -138,7 +139,7 @@ export function ModalDropdown({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (!isOpen) {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        if (e.key === KEYS.ENTER || e.key === KEYS.SPACE || e.key === KEYS.ARROW_DOWN) {
           e.preventDefault();
           handleOpen();
         }
@@ -146,32 +147,32 @@ export function ModalDropdown({
       }
 
       switch (e.key) {
-      case 'Escape':
+      case KEYS.ESCAPE:
         e.preventDefault();
         handleClose();
         break;
-      case 'ArrowDown':
+      case KEYS.ARROW_DOWN:
         e.preventDefault();
         setFocusedIndex((prev) =>
           prev < filteredOptions.length - 1 ? prev + 1 : prev
         );
         break;
-      case 'ArrowUp':
+      case KEYS.ARROW_UP:
         e.preventDefault();
         setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
         break;
-      case 'Enter':
-      case ' ':
+      case KEYS.ENTER:
+      case KEYS.SPACE:
         e.preventDefault();
         if (filteredOptions[focusedIndex]) {
           handleSelect(filteredOptions[focusedIndex].value);
         }
         break;
-      case 'Home':
+      case KEYS.HOME:
         e.preventDefault();
         setFocusedIndex(0);
         break;
-      case 'End':
+      case KEYS.END:
         e.preventDefault();
         setFocusedIndex(filteredOptions.length - 1);
         break;
@@ -210,13 +211,13 @@ export function ModalDropdown({
     const FOCUSABLE_SELECTOR = 'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
     const handleTrapFocus = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === KEYS.ESCAPE) {
         e.preventDefault();
         handleClose();
         return;
       }
 
-      if (e.key !== 'Tab') return;
+      if (e.key !== KEYS.TAB) return;
 
       const modal = dropdownRef.current;
       if (!modal) return;

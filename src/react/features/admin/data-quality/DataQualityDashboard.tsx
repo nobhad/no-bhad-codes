@@ -27,9 +27,9 @@ import {
   Filter
 } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { unwrapApiData } from '@/utils/api-client';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('DataQualityDashboard');
 

@@ -9,8 +9,8 @@ import { Upload, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 import { cn } from '@react/lib/utils';
 import { formatCardDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
 import { IconButton } from '@react/factories';
-import { createLogger } from '../../../../utils/logger';
-import { buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('DocumentRequestCard');
 

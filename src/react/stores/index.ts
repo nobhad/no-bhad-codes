@@ -13,8 +13,6 @@ export {
   type AdminState
 } from './admin';
 
-export { initStateBridge, destroyStateBridge, isBridgeInitialized } from './bridge';
-
 // Portal store (React SPA)
 export {
   usePortalStore,

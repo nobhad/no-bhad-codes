@@ -13,12 +13,13 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { PORTAL_CONTRACTS_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
 import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
+import { GSAP } from '@react/config/portal-constants';
 import { usePortalData } from '@react/hooks/usePortalFetch';
 import { countByField } from '@react/utils/cardFormatters';
 import { ContractCard } from './ContractCard';
 import type { PortalContract, PortalContractsResponse } from './types';
 import type { PortalViewProps } from '../types';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 export interface PortalContractsProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
@@ -31,7 +32,7 @@ export function PortalContracts({
   onNavigate
 }: PortalContractsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const listRef = useStaggerChildren<HTMLDivElement>(0.05);
+  const listRef = useStaggerChildren<HTMLDivElement>(GSAP.STAGGER_DEFAULT);
 
   const { data: contracts, isLoading, error, refetch } = usePortalData<PortalContract[]>({
     getAuthToken,

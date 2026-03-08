@@ -10,7 +10,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectMilestone } from '../../types';
-import { formatDate } from '../../../../../utils/format-utils';
+import { formatDate } from '@/utils/format-utils';
 
 interface DeliverablesTabProps {
   milestones: ProjectMilestone[];
@@ -96,9 +96,9 @@ export function DeliverablesTab({
       </div>
 
       {/* Progress Bar */}
-      <div className="progress-track">
+      <div className="progress-bar-sm">
         <div
-          className="progress-bar"
+          className="progress-fill"
           style={{ width: `${progress}%` }}
         />
       </div>

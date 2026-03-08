@@ -23,9 +23,9 @@ import {
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Invoice, InvoiceStatus } from '../../types';
 import { INVOICE_STATUS_CONFIG } from '../../types';
-import { formatCurrency, formatDate } from '../../../../../utils/format-utils';
-import { NOTIFICATIONS } from '../../../../../constants/notifications';
-import { KEYS } from '../../../../../constants/keyboard';
+import { formatCurrency, formatDate } from '@/utils/format-utils';
+import { NOTIFICATIONS } from '@/constants/notifications';
+import { KEYS } from '@/constants/keyboard';
 
 const STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'All Invoices' },

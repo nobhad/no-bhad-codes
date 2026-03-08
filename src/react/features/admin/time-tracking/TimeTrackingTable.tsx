@@ -10,7 +10,7 @@ import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDateShort } from '@react/utils/formatDate';
-import { formatCurrency } from '../../../../utils/format-utils';
+import { formatCurrency } from '@/utils/format-utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalTable,
@@ -28,9 +28,9 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { TIME_TRACKING_FILTER_CONFIG, TIME_TRACKING_DATE_RANGE_OPTIONS, TIME_TRACKING_BILLABLE_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { createLogger } from '@/utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('TimeTrackingTable');
 

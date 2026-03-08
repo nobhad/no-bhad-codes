@@ -1,9 +1,17 @@
 /**
  * Portal Table Filter Configurations
  * Mirrors admin pattern from admin/shared/filterConfigs.ts
+ *
+ * Where portal statuses overlap with admin, options are derived from
+ * the canonical *_CONFIG definitions in admin/types.ts.
  */
 
 import type { FilterConfig } from '../../admin/shared/filterConfigs';
+import {
+  INVOICE_STATUS_CONFIG,
+  PROJECT_STATUS_CONFIG,
+  configToFilterOptions
+} from '../../admin/types';
 
 export type { FilterConfig };
 export type { FilterOption } from '../../admin/shared/filterConfigs';
@@ -60,13 +68,15 @@ const TYPE_ALL_OPTION = { value: 'all', label: 'All Types' };
 
 export const PORTAL_INVOICE_STATUS_OPTIONS = [
   STATUS_ALL_OPTION,
-  { value: 'draft', label: 'Draft' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'viewed', label: 'Viewed' },
-  { value: 'partial', label: 'Partial' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'overdue', label: 'Overdue' },
-  { value: 'cancelled', label: 'Cancelled' }
+  ...configToFilterOptions(INVOICE_STATUS_CONFIG, [
+    'draft',
+    'sent',
+    'viewed',
+    'partial',
+    'paid',
+    'overdue',
+    'cancelled'
+  ])
 ];
 
 export const PORTAL_INVOICES_FILTER_CONFIG: FilterConfig[] = [
@@ -79,11 +89,13 @@ export const PORTAL_INVOICES_FILTER_CONFIG: FilterConfig[] = [
 
 export const PORTAL_PROJECT_STATUS_OPTIONS = [
   STATUS_ALL_OPTION,
-  { value: 'active', label: 'Active' },
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'on-hold', label: 'On Hold' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'pending', label: 'Pending' }
+  ...configToFilterOptions(PROJECT_STATUS_CONFIG, [
+    'active',
+    'in-progress',
+    'on-hold',
+    'completed',
+    'pending'
+  ])
 ];
 
 export const PORTAL_PROJECTS_FILTER_CONFIG: FilterConfig[] = [

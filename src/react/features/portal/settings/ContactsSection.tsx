@@ -8,8 +8,8 @@ import * as React from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { Users, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
 import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
-import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { createLogger } from '@/utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('ContactsSection');
 

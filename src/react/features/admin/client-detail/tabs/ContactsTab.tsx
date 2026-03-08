@@ -25,6 +25,7 @@ import {
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { EmptyState } from '@react/components/portal/EmptyState';
+import { useFormState } from '@react/hooks/useFormState';
 import type { ClientContact } from '../../types';
 import { CONTACT_ROLE_LABELS } from '../../types';
 
@@ -77,10 +78,18 @@ export function ContactsTab({
   onDeleteContact,
   showNotification
 }: ContactsTabProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState<ContactFormData>(EMPTY_FORM);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    isAdding,
+    editingId,
+    formData,
+    isSubmitting,
+    startAdd: handleStartAdd,
+    startEdit,
+    cancelForm: handleCancel,
+    updateField,
+    setIsSubmitting,
+    isFormOpen
+  } = useFormState<ContactFormData>({ initialData: EMPTY_FORM });
 
   const deleteDialog = useConfirmDialog();
   const [contactToDelete, setContactToDelete] = useState<ClientContact | null>(null);
@@ -92,16 +101,9 @@ export function ContactsTab({
     return getContactDisplayName(a).localeCompare(getContactDisplayName(b));
   });
 
-  // Start adding new contact
-  const handleStartAdd = useCallback(() => {
-    setFormData(EMPTY_FORM);
-    setEditingId(null);
-    setIsAdding(true);
-  }, []);
-
-  // Start editing contact
+  // Start editing contact — maps ClientContact to ContactFormData
   const handleStartEdit = useCallback((contact: ClientContact) => {
-    setFormData({
+    startEdit(contact.id, {
       name: getContactDisplayName(contact),
       email: contact.email || '',
       phone: contact.phone || '',
@@ -110,23 +112,14 @@ export function ContactsTab({
       is_primary: contact.isPrimary,
       notes: contact.notes || ''
     });
-    setEditingId(contact.id);
-    setIsAdding(false);
-  }, []);
-
-  // Cancel form
-  const handleCancel = useCallback(() => {
-    setFormData(EMPTY_FORM);
-    setEditingId(null);
-    setIsAdding(false);
-  }, []);
+  }, [startEdit]);
 
   // Update form field
   const handleFieldChange = useCallback(
     (field: keyof ContactFormData, value: string | boolean) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
+      updateField(field, value as ContactFormData[keyof ContactFormData]);
     },
-    []
+    [updateField]
   );
 
   // Submit form — split name into firstName/lastName for backend
@@ -323,7 +316,7 @@ export function ContactsTab({
         <h2 className="heading text-lg">
           Contacts ({contacts.length})
         </h2>
-        {!isAdding && !editingId && (
+        {!isFormOpen && (
           <PortalButton variant="secondary" onClick={handleStartAdd} icon={<Plus className="icon-md" />}>
             Add Contact
           </PortalButton>
@@ -331,7 +324,7 @@ export function ContactsTab({
       </div>
 
       {/* Add/Edit Form */}
-      {(isAdding || editingId) && renderForm()}
+      {isFormOpen && renderForm()}
 
       {/* Contacts List */}
       {sortedContacts.length === 0 ? (

@@ -30,9 +30,10 @@ import type { Lead, LeadStatus } from '../types';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_LABELS, PROJECT_TYPE_LABELS } from '../types';
 import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
-import { createLogger } from '../../../../utils/logger';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { KEYS } from '@/constants/keyboard';
+import { unwrapApiData } from '@/utils/api-client';
+import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('LeadDetailPanel');
 
@@ -155,7 +156,7 @@ export function LeadDetailPanel({
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === KEYS.ESCAPE) onClose();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);

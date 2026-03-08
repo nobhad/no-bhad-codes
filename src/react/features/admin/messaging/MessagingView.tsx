@@ -16,10 +16,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useFadeIn } from '@react/hooks/useGsap';
-import { formatTimeAgo } from '../../../../utils/time-utils';
-import { createLogger } from '../../../../utils/logger';
-import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { formatTimeAgo } from '@/utils/time-utils';
+import { createLogger } from '@/utils/logger';
+import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { KEYS } from '@/constants/keyboard';
+import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('MessagingView');
 
@@ -462,7 +463,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
+                      if (e.key === KEYS.ENTER && !e.shiftKey) {
                         e.preventDefault();
                         sendMessage();
                       }

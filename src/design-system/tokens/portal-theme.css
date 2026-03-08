@@ -334,5 +334,5 @@ html[data-theme="light"] body[data-page="client-portal"] {
 /* Apply to html element as well for full coverage */
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: #ffffff;
+  background-color: var(--portal-bg-pitch, #ffffff);
 }

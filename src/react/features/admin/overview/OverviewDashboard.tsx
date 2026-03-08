@@ -26,10 +26,10 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/factories';
 import { cn } from '@react/lib/utils';
-import { formatTimeAgo } from '../../../../utils/time-utils';
-import { formatCurrency } from '../../../../utils/format-utils';
-import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { formatTimeAgo } from '@/utils/time-utils';
+import { formatCurrency } from '@/utils/format-utils';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { unwrapApiData } from '@/utils/api-client';
 
 interface OverviewDashboardProps {
   onNavigate?: (tab: string, entityId?: string) => void;
