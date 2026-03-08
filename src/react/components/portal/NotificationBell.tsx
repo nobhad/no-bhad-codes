@@ -11,6 +11,7 @@
 import * as React from 'react';
 import { Bell } from 'lucide-react';
 import { usePortalRole } from '../../stores/portal-store';
+import { usePortalAuth } from '../../hooks/usePortalAuth';
 import { apiGet, apiPut } from '../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
 import { formatTimeAgo } from '../../../utils/time-utils';
@@ -42,6 +43,7 @@ const MAX_BADGE_DISPLAY = 99;
 
 export function NotificationBell() {
   const role = usePortalRole();
+  const { isAuthenticated } = usePortalAuth();
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -58,6 +60,7 @@ export function NotificationBell() {
 
   // Fetch notifications
   const fetchNotifications = React.useCallback(async () => {
+    if (!isAuthenticated) return;
     try {
       const res = await apiGet(endpoint);
       if (!res.ok) return;
@@ -68,14 +71,15 @@ export function NotificationBell() {
     } catch {
       // Silently fail - notifications are non-critical
     }
-  }, [endpoint]);
+  }, [endpoint, isAuthenticated]);
 
   // Initial fetch + polling
   React.useEffect(() => {
+    if (!isAuthenticated) return;
     fetchNotifications();
     const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  }, [fetchNotifications, isAuthenticated]);
 
   // Close dropdown on outside click
   React.useEffect(() => {
@@ -130,6 +134,9 @@ export function NotificationBell() {
 
   const badgeText =
     unreadCount > MAX_BADGE_DISPLAY ? `${MAX_BADGE_DISPLAY}+` : `${unreadCount}`;
+
+  // Don't render the bell when not authenticated
+  if (!isAuthenticated) return null;
 
   return (
     <div className="notification-bell-container" ref={containerRef}>

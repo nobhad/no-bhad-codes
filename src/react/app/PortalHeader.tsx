@@ -88,7 +88,7 @@ export function PortalHeader() {
             aria-label="Toggle dark/light theme"
             onClick={toggleTheme}
           >
-            {theme === 'dark' ? (
+            {theme === 'light' ? (
               <Sun aria-hidden="true" />
             ) : (
               <Moon aria-hidden="true" />
