@@ -25,6 +25,9 @@ export { useClientDetail } from './useClientDetail';
 export { usePortalFetch, usePortalData } from './usePortalFetch';
 export { usePortalInvoices } from './usePortalInvoices';
 
+// Form state hooks
+export { useFormState } from './useFormState';
+
 // Table/UI hooks
 export { useTableFilters } from './useTableFilters';
 export { usePagination } from './usePagination';
