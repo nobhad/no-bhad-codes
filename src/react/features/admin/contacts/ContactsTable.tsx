@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Inbox,
   Star,
@@ -471,17 +472,20 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                   </div>
                 </PortalTableCell>
                 <PortalTableCell className="client-cell">
-                  {contact.clientName && (
-                    <button
+                  {contact.clientName && contact.clientId != null ? (
+                    <Link
+                      to={`/clients/${contact.clientId}`}
+                      className="cell-link"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onNavigate?.('clients', contact.clientId != null ? String(contact.clientId) : undefined);
+                        onNavigate?.('clients', String(contact.clientId));
                       }}
-                      className="cell-link-btn"
                     >
                       {contact.clientName}
-                    </button>
-                  )}
+                    </Link>
+                  ) : contact.clientName ? (
+                    <span className="cell-text">{contact.clientName}</span>
+                  ) : null}
                 </PortalTableCell>
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>

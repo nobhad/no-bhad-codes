@@ -86,7 +86,7 @@ export function DeliverablesTab({
   const totalCount = deliverables.length;
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header with stats */}
       <div className="pd-tab-header">
         <div className="pd-row">
@@ -106,9 +106,9 @@ export function DeliverablesTab({
       </div>
 
       {/* Progress Bar */}
-      <div className="tw-progress-track">
+      <div className="progress-track">
         <div
-          className="tw-progress-bar"
+          className="progress-bar"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -130,7 +130,7 @@ export function DeliverablesTab({
               return (
                 <div
                   key={milestone.id}
-                  className="tw-panel"
+                  className="panel"
                 >
                   {/* Milestone Header */}
                   <div className="pd-tab-header deliv-milestone-header">

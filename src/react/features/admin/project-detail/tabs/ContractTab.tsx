@@ -96,9 +96,9 @@ export function ContractTab({
   };
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Contract Status Card */}
-      <div className="tw-panel">
+      <div className="panel">
         <div className="contract-status-layout">
           <div className="pd-row-start-wide">
             {isSigned ? (
@@ -112,7 +112,7 @@ export function ContractTab({
                 <h3 className="heading pd-text-lg">
                   Contract Status
                 </h3>
-                <span className="tw-badge">
+                <span className="badge">
                   {contractStatus.label}
                 </span>
               </div>
@@ -201,7 +201,7 @@ export function ContractTab({
       </div>
 
       {/* Contract Files */}
-      <div className="tw-panel contract-panel-no-padding">
+      <div className="panel contract-panel-no-padding">
         <div className="pd-tab-header contract-files-header">
           <div className="pd-row-compact">
             <FileText className="icon-md" />
@@ -227,7 +227,7 @@ export function ContractTab({
             {contractFiles.map((file) => (
               <div
                 key={file.id}
-                className="tw-list-item"
+                className="list-item"
               >
                 <div className="pd-row-tight">
                   <FileText className="icon-lg" />

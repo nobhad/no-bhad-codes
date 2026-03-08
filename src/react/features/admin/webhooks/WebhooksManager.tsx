@@ -717,7 +717,7 @@ export function WebhooksManager({
           actions={
             <>
               <button className="btn btn-secondary" onClick={navigateToList}>
-                <ArrowLeft className="tw-h-4 tw-w-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Back
               </button>
               <FilterDropdown
@@ -814,7 +814,7 @@ export function WebhooksManager({
                             onClick={() => handleRetryDelivery(selectedWebhook.id)}
                             title="Retry"
                           >
-                            <RotateCcw className="tw-h-3 tw-w-3" />
+                            <RotateCcw className="h-3 w-3" />
                           </button>
                         )}
                       </div>
@@ -881,12 +881,12 @@ export function WebhooksManager({
   if (view === 'stats' && selectedWebhook) {
     return (
       <div ref={containerRef as React.RefObject<HTMLDivElement>} className="portal-card">
-        <div className="tw-flex tw-items-center tw-gap-3 tw-mb-6">
+        <div className="flex items-center gap-3 mb-6">
           <button className="btn btn-secondary" onClick={navigateToList}>
-            <ArrowLeft className="tw-h-4 tw-w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          <h3 className="tw-text-lg tw-font-semibold">Stats: {selectedWebhook.name}</h3>
+          <h3 className="text-lg font-semibold">Stats: {selectedWebhook.name}</h3>
           <IconButton
             action="refresh"
             onClick={() => loadStats(selectedWebhook.id)}
@@ -956,7 +956,7 @@ export function WebhooksManager({
               onChange={handleFilterChange}
             />
             <button className="btn btn-primary" onClick={openAddModal}>
-              <Plus className="tw-h-4 tw-w-4" />
+              <Plus className="h-4 w-4" />
               Add Webhook
             </button>
             <IconButton
@@ -1054,9 +1054,9 @@ export function WebhooksManager({
                       title={webhook.is_active ? 'Deactivate' : 'Activate'}
                     >
                       {webhook.is_active ? (
-                        <ToggleRight className="tw-h-5 tw-w-5 text-success" />
+                        <ToggleRight className="h-5 w-5 text-success" />
                       ) : (
-                        <ToggleLeft className="tw-h-5 tw-w-5 text-muted" />
+                        <ToggleLeft className="h-5 w-5 text-muted" />
                       )}
                     </button>
                   </PortalTableCell>
@@ -1077,21 +1077,21 @@ export function WebhooksManager({
                         onClick={() => openTestModal(webhook)}
                         title="Test"
                       >
-                        <Play className="tw-h-3.5 tw-w-3.5" />
+                        <Play className="h-3.5 w-3.5" />
                       </button>
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => navigateToDeliveries(webhook)}
                         title="View Deliveries"
                       >
-                        <History className="tw-h-3.5 tw-w-3.5" />
+                        <History className="h-3.5 w-3.5" />
                       </button>
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => navigateToStats(webhook)}
                         title="View Stats"
                       >
-                        <BarChart3 className="tw-h-3.5 tw-w-3.5" />
+                        <BarChart3 className="h-3.5 w-3.5" />
                       </button>
                       <IconButton
                         action="delete"
@@ -1132,7 +1132,7 @@ export function WebhooksManager({
           </>
         }
       >
-        <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="flex flex-col gap-4">
           {formError && (
             <div className="form-error-message">{formError}</div>
           )}
@@ -1161,7 +1161,7 @@ export function WebhooksManager({
 
           <div className="form-group">
             <label className="field-label">Events</label>
-            <div className="tw-flex tw-flex-wrap tw-gap-2 tw-mt-1">
+            <div className="flex flex-wrap gap-2 mt-1">
               {AVAILABLE_EVENTS.map((event) => (
                 <button
                   key={event}
@@ -1199,7 +1199,7 @@ export function WebhooksManager({
             />
           </div>
 
-          <div className="tw-grid tw-grid-cols-2 tw-gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="form-group">
               <label className="field-label">Max Retry Attempts</label>
               <input
@@ -1256,7 +1256,7 @@ export function WebhooksManager({
           </>
         }
       >
-        <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="flex flex-col gap-4">
           <div className="form-group">
             <label className="field-label">Event Type</label>
             <select

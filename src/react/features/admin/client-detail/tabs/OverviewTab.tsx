@@ -114,7 +114,7 @@ export function OverviewTab({
       <div className="client-overview-main">
         {/* Health Score Card */}
         {health && (
-          <div className="tw-panel">
+          <div className="panel">
             <div className="panel-card-header">
               <div className="stat-card-header">
                 <Heart className="icon-lg text-muted" />
@@ -143,9 +143,9 @@ export function OverviewTab({
                       </span>
                       <span className="text-muted">{value}%</span>
                     </div>
-                    <div className="tw-progress-track">
+                    <div className="progress-track">
                       <div
-                        className="tw-progress-bar"
+                        className="progress-bar"
                         style={{ width: `${value}%` }}
                       />
                     </div>
@@ -201,7 +201,7 @@ export function OverviewTab({
         )}
 
         {/* Tags Section */}
-        <div className="tw-panel">
+        <div className="panel">
           <div className="panel-card-header">
             <div className="stat-card-header">
               <Tag className="icon-md text-muted" />
@@ -242,7 +242,7 @@ export function OverviewTab({
               tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="tw-badge"
+                  className="badge"
                   style={{ backgroundColor: tag.color }}
                 >
                   {tag.name}
@@ -262,7 +262,7 @@ export function OverviewTab({
       {/* Right Column - Client Info */}
       <div className="client-overview-sidebar">
         {/* Contact Info */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">
             Contact Information
           </h3>
@@ -313,7 +313,7 @@ export function OverviewTab({
         </div>
 
         {/* Account Details */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">
             Account Details
           </h3>

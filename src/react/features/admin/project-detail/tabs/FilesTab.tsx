@@ -187,11 +187,11 @@ export function FilesTab({
   }, []);
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Upload Section */}
       <div
         className={cn(
-          'tw-panel files-dropzone',
+          'panel files-dropzone',
           isDragging && 'is-dragging'
         )}
         onDragOver={handleDragOver}
@@ -203,7 +203,7 @@ export function FilesTab({
           ref={fileInputRef}
           type="file"
           multiple
-          className="tw-hidden"
+          className="hidden"
           onChange={(e) => handleFileSelect(e.target.files)}
         />
 
@@ -229,7 +229,7 @@ export function FilesTab({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="tw-input files-category-select"
+              className="input files-category-select"
             >
               <option value="">None</option>
               {FILE_CATEGORY_OPTIONS.map((opt) => (
@@ -256,7 +256,7 @@ export function FilesTab({
           <span>No files uploaded yet</span>
         </div>
       ) : (
-        <div className="tw-panel contract-panel-no-padding">
+        <div className="panel contract-panel-no-padding">
           <table className="pd-full-width">
             <thead>
               <tr className="files-table-header">
@@ -281,7 +281,7 @@ export function FilesTab({
               {files.map((file) => (
                 <tr
                   key={file.id}
-                  className="tw-list-item files-table-row"
+                  className="list-item files-table-row"
                 >
                   <td className="pd-table-cell">
                     <div className="pd-row-tight">

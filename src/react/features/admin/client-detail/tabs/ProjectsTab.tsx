@@ -55,7 +55,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
     return (
       <div
         key={project.id}
-        className="portal-card tw-group"
+        className="portal-card group"
       >
         <div className="project-card-header">
           <div className="project-card-info">
@@ -63,7 +63,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
               <h4 className="heading truncate">
                 {project.project_name}
               </h4>
-              <span className="tw-badge text-xs">
+              <span className="badge text-xs">
                 {statusConfig?.label || project.status}
               </span>
             </div>
@@ -92,9 +92,9 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
                 {progress}%
               </span>
             </div>
-            <div className="tw-progress-track">
+            <div className="progress-track">
               <div
-                className="tw-progress-bar"
+                className="progress-bar"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -130,7 +130,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
   };
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Header */}
       <div className="tab-section-header">
         <h2 className="heading text-lg">

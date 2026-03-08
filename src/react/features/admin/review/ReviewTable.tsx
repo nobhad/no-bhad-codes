@@ -111,7 +111,7 @@ export function ReviewTable({ getAuthToken, showNotification: _showNotification,
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="perf-header">
         <h2 className="heading perf-heading">Design Reviews</h2>
         <button className="btn btn-secondary" onClick={fetchReviews}>
@@ -125,30 +125,30 @@ export function ReviewTable({ getAuthToken, showNotification: _showNotification,
           message="You have no design reviews assigned at this time."
         />
       ) : (
-        <div className="tw-panel">
+        <div className="panel">
           <div className="analytics-table-container">
-            <table className="tw-table">
+            <table className="table">
               <thead>
                 <tr>
-                  <th className="tw-table-header">Project</th>
-                  <th className="tw-table-header">Review Title</th>
-                  <th className="tw-table-header">Status</th>
-                  <th className="tw-table-header">Date</th>
-                  <th className="tw-table-header">Action</th>
+                  <th className="table-header">Project</th>
+                  <th className="table-header">Review Title</th>
+                  <th className="table-header">Status</th>
+                  <th className="table-header">Date</th>
+                  <th className="table-header">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {reviews.map((item) => (
-                  <tr key={item.id} className="tw-table-row">
-                    <td className="tw-table-cell">{item.projectName}</td>
-                    <td className="tw-table-cell">{item.title}</td>
-                    <td className="tw-table-cell">
+                  <tr key={item.id} className="table-row">
+                    <td className="table-cell">{item.projectName}</td>
+                    <td className="table-cell">{item.title}</td>
+                    <td className="table-cell">
                       <span className={STATUS_CLASS_MAP[item.status] || 'status-badge'}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="tw-table-cell">{formatDate(item.date)}</td>
-                    <td className="tw-table-cell">
+                    <td className="table-cell">{formatDate(item.date)}</td>
+                    <td className="table-cell">
                       <button
                         className="btn btn-primary btn-sm"
                         onClick={() => handleViewReview(item)}

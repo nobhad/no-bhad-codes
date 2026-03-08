@@ -154,7 +154,7 @@ export function OverviewTab({
       {/* Left Column - Project Info */}
       <div className="project-overview-main">
         {/* Project Details Card */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Project Details</h3>
 
           <div className="project-info-grid">
@@ -247,7 +247,7 @@ export function OverviewTab({
         </div>
 
         {/* URLs Card */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Links</h3>
           <div className="project-info-grid">
             <div className="project-info-field">
@@ -304,7 +304,7 @@ export function OverviewTab({
         </div>
 
         {/* Milestones Card */}
-        <div className="tw-panel">
+        <div className="panel">
           <div className="panel-card-header">
             <h3 className="section-title">Milestones</h3>
             <button className="btn-ghost" onClick={() => setShowAddMilestone(true)}>
@@ -468,7 +468,7 @@ export function OverviewTab({
       {/* Right Column - Sidebar */}
       <div className="project-overview-sidebar">
         {/* Client Info Card */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Client</h3>
 
           <div className="link-list">
@@ -516,7 +516,7 @@ export function OverviewTab({
         </div>
 
         {/* Financial Summary Card */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Financials</h3>
 
           <div>
@@ -540,7 +540,7 @@ export function OverviewTab({
         </div>
 
         {/* Quick Stats */}
-        <div className="tw-panel">
+        <div className="panel">
           <h3 className="section-title">Quick Stats</h3>
 
           <div className="quick-stats-grid">

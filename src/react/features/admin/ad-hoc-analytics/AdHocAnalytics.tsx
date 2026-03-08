@@ -201,16 +201,16 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       {/* Header */}
       <div className="perf-header">
         <h2 className="heading perf-heading">Custom Analytics</h2>
-        <div className="tw-tab-list perf-tab-list">
+        <div className="tab-list perf-tab-list">
           {(['7d', '30d', '90d', 'custom'] as const).map((range) => (
             <button
               key={range}
               onClick={() => setDateRange(range)}
-              className={dateRange === range ? 'tw-tab-active' : 'tw-tab'}
+              className={dateRange === range ? 'tab-active' : 'tab'}
             >
               {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : range === '90d' ? '90 Days' : 'Custom'}
             </button>
@@ -221,7 +221,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
       <div className="analytics-grid">
         {/* Saved Queries Sidebar */}
         <div>
-          <div className="tw-panel">
+          <div className="panel">
             <h3 className="section-title analytics-section-title">Saved Queries</h3>
             {savedQueries.length === 0 ? (
               <p className="text-muted analytics-empty-text">No saved queries yet</p>
@@ -262,7 +262,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
         {/* Main Content */}
         <div className="analytics-main">
           {/* Query Editor */}
-          <div className="tw-panel">
+          <div className="panel">
             <div className="analytics-editor-header">
               <div className="analytics-editor-title">
                 <Code className="analytics-editor-icon" />
@@ -274,7 +274,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                   placeholder="Query name..."
                   value={queryName}
                   onChange={(e) => setQueryName(e.target.value)}
-                  className="tw-input analytics-name-input"
+                  className="input analytics-name-input"
                 />
                 <button className="btn-secondary" onClick={saveQuery} disabled={!query || !queryName}>
                   <Save className="analytics-action-icon" />
@@ -287,7 +287,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Enter your analytics query here..."
               rows={6}
-              className="tw-textarea"
+              className="textarea"
             />
             <div className="analytics-editor-footer">
               <span className="text-muted analytics-hint">
@@ -312,23 +312,23 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
 
           {/* Results */}
           {result && (
-            <div className="tw-panel">
+            <div className="panel">
               <div className="analytics-results-header">
                 <div className="analytics-results-stats">
                   <span>{result.rowCount} rows</span>
                   <span className="text-muted">Executed in {result.executionTime}ms</span>
                 </div>
                 <div className="analytics-results-actions">
-                  <div className="tw-tab-list perf-tab-list">
+                  <div className="tab-list perf-tab-list">
                     <button
                       onClick={() => setViewMode('table')}
-                      className={cn(viewMode === 'table' ? 'tw-tab-active' : 'tw-tab', 'analytics-view-toggle')}
+                      className={cn(viewMode === 'table' ? 'tab-active' : 'tab', 'analytics-view-toggle')}
                     >
                       <Table className="analytics-action-icon" />
                     </button>
                     <button
                       onClick={() => setViewMode('chart')}
-                      className={cn(viewMode === 'chart' ? 'tw-tab-active' : 'tw-tab', 'analytics-view-toggle')}
+                      className={cn(viewMode === 'chart' ? 'tab-active' : 'tab', 'analytics-view-toggle')}
                     >
                       <BarChart3 className="analytics-action-icon" />
                     </button>
@@ -342,19 +342,19 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
 
               {viewMode === 'table' ? (
                 <div className="analytics-table-container">
-                  <table className="tw-table">
+                  <table className="table">
                     <thead>
                       <tr>
                         {result.columns.map((col) => (
-                          <th key={col} className="tw-table-header">{col}</th>
+                          <th key={col} className="table-header">{col}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {result.rows.slice(0, 100).map((row, i) => (
-                        <tr key={i} className="tw-table-row">
+                        <tr key={i} className="table-row">
                           {result.columns.map((col) => (
-                            <td key={col} className="tw-table-cell">{row[col] != null ? String(row[col]) : ''}</td>
+                            <td key={col} className="table-cell">{row[col] != null ? String(row[col]) : ''}</td>
                           ))}
                         </tr>
                       ))}

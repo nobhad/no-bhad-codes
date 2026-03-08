@@ -124,7 +124,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="perf-header">
         <h2 className="heading perf-heading">Help Center</h2>
         <button className="btn btn-secondary" onClick={fetchArticles}>
@@ -134,7 +134,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="tw-panel">
+      <div className="panel">
         <div className="form-row">
           <div className="form-group form-group-grow">
             <div className="input-with-icon">

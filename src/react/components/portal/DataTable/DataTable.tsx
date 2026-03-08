@@ -263,7 +263,7 @@ export function DataTable<T extends { id: number }>({
   );
 
   return (
-    <div ref={containerRef} className={cn('tw-section', className)}>
+    <div ref={containerRef} className={cn('section', className)}>
       {/* Stats Bar */}
       {stats.length > 0 && (
         <div className="data-table-stats">
@@ -514,7 +514,7 @@ export function DataTable<T extends { id: number }>({
                 </button>
 
                 <div className="data-table-page-indicator">
-                  <span className="tw-badge">
+                  <span className="badge">
                     {pagination.page}
                   </span>
                   <span className="text-muted">of {pagination.totalPages}</span>

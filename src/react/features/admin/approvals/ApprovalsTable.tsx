@@ -122,7 +122,7 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
   }
 
   return (
-    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="tw-section">
+    <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="perf-header">
         <h2 className="heading perf-heading">Pending Approvals</h2>
         <button className="btn btn-secondary" onClick={fetchApprovals}>
@@ -136,32 +136,32 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
           message="You have no items awaiting your approval."
         />
       ) : (
-        <div className="tw-panel">
+        <div className="panel">
           <div className="analytics-table-container">
-            <table className="tw-table">
+            <table className="table">
               <thead>
                 <tr>
-                  <th className="tw-table-header">Type</th>
-                  <th className="tw-table-header">Title</th>
-                  <th className="tw-table-header">Requester</th>
-                  <th className="tw-table-header">Date</th>
-                  <th className="tw-table-header">Status</th>
-                  <th className="tw-table-header">Actions</th>
+                  <th className="table-header">Type</th>
+                  <th className="table-header">Title</th>
+                  <th className="table-header">Requester</th>
+                  <th className="table-header">Date</th>
+                  <th className="table-header">Status</th>
+                  <th className="table-header">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {approvals.map((item) => (
-                  <tr key={item.id} className="tw-table-row">
-                    <td className="tw-table-cell">{item.type}</td>
-                    <td className="tw-table-cell">{item.title}</td>
-                    <td className="tw-table-cell">{item.requester}</td>
-                    <td className="tw-table-cell">{formatDate(item.date)}</td>
-                    <td className="tw-table-cell">
+                  <tr key={item.id} className="table-row">
+                    <td className="table-cell">{item.type}</td>
+                    <td className="table-cell">{item.title}</td>
+                    <td className="table-cell">{item.requester}</td>
+                    <td className="table-cell">{formatDate(item.date)}</td>
+                    <td className="table-cell">
                       <span className={STATUS_CLASS_MAP[item.status] || 'status-badge'}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="tw-table-cell">
+                    <td className="table-cell">
                       {item.status === 'pending' && (
                         <div className="btn-group">
                           <button
