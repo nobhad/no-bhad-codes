@@ -10,7 +10,6 @@
 
 import * as React from 'react';
 import { Bell } from 'lucide-react';
-import { usePortalRole } from '../../stores/portal-store';
 import { usePortalAuth } from '../../hooks/usePortalAuth';
 import { apiGet, apiPut } from '../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../constants/api-endpoints';
@@ -43,13 +42,12 @@ const MAX_BADGE_DISPLAY = 99;
 // ============================================
 
 export function NotificationBell() {
-  const role = usePortalRole();
-  const { isAuthenticated } = usePortalAuth();
+  const { isAuthenticated, isAdmin: isAdminAuth } = usePortalAuth();
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const isAdmin = role === 'admin';
+  const isAdmin = isAdminAuth;
 
   const endpoint = isAdmin
     ? `${API_ENDPOINTS.ADMIN.NOTIFICATIONS}/history`

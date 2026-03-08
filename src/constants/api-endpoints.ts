@@ -187,11 +187,8 @@ export const API_ENDPOINTS = {
   // Client contacts (nested under clients)
   CLIENT_CONTACTS: '/api/clients/contacts',
 
-  // Notes
-  NOTES: '/api/notes',
-
-  // Milestones
-  MILESTONES: '/api/milestones'
+  // Client notes (update/delete by noteId)
+  CLIENT_NOTES: '/api/clients/notes'
 } as const;
 
 /**

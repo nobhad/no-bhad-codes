@@ -70,7 +70,7 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
   const updateNote = useCallback(
     async (id: number, updates: Partial<ClientNote>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.NOTES}/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`, {
           method: 'PUT',
           headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
@@ -96,7 +96,7 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
   const deleteNote = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.NOTES}/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`, {
           method: 'DELETE',
           headers: buildAuthHeaders(getAuthToken),
           credentials: 'include'
