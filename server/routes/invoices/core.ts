@@ -26,7 +26,8 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated
+  sendCreated,
+  sanitizeErrorMessage
 } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
@@ -174,7 +175,7 @@ router.get(
       sendSuccess(res, { invoices: invoices.map(toSnakeCaseInvoice) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve invoices')
       });
     }
   })
@@ -241,13 +242,12 @@ if (process.env.NODE_ENV === 'development') {
 
         sendCreated(res, { invoice }, 'Test invoice created successfully');
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
         errorResponseWithPayload(
           res,
           'Failed to create test invoice',
           500,
           'TEST_CREATION_FAILED',
-          { message }
+          { message: sanitizeErrorMessage(error, 'Failed to create test invoice') }
         );
       }
     })
@@ -280,12 +280,12 @@ if (process.env.NODE_ENV === 'development') {
         const invoice = await getInvoiceService().getInvoiceById(invoiceId);
         sendSuccess(res, { invoice });
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        if (message.includes('not found')) {
+        const rawMessage = error instanceof Error ? error.message : '';
+        if (rawMessage.includes('not found')) {
           return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
         errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve test invoice')
         });
       }
     })
@@ -416,9 +416,8 @@ router.post(
 
       sendCreated(res, { invoice }, 'Invoice created successfully');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
       errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to create invoice')
       });
     }
   })
@@ -619,7 +618,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to search invoices', 500, 'SEARCH_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to search invoices')
       });
     }
   })
@@ -653,7 +652,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve client invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
       });
     }
   })
@@ -692,7 +691,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve project invoices')
         }
       );
     }
@@ -809,12 +808,12 @@ router.get(
 
       return sendPdfResponse(res, pdfBytes, { filename, disposition, cacheStatus: 'MISS' });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to generate invoice PDF', 500, 'PDF_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to generate invoice PDF')
       });
     }
   })
@@ -846,12 +845,12 @@ router.put(
       const invoice = await getInvoiceService().updateInvoiceStatus(invoiceId, status, paymentData);
       sendSuccess(res, { invoice }, 'Invoice status updated successfully');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to update invoice status', 500, 'UPDATE_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to update invoice status')
       });
     }
   })
@@ -983,12 +982,12 @@ router.post(
 
       sendSuccess(res, { invoice }, 'Invoice sent successfully');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to send invoice', 500, 'SEND_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to send invoice')
       });
     }
   })
@@ -1074,12 +1073,12 @@ router.post(
         'Invoice marked as paid'
       );
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to process payment', 500, 'PAYMENT_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to process invoice payment')
       });
     }
   })
@@ -1104,7 +1103,7 @@ router.get(
       sendSuccess(res, { stats });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, 'STATS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice statistics')
       });
     }
   })

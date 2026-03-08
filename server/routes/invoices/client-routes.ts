@@ -14,7 +14,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessInvoice } from '../../middleware/access-control.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 
 const router = express.Router();
@@ -76,7 +76,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
       });
     }
   })
@@ -107,12 +107,12 @@ router.get(
       }
       sendSuccess(res, { invoice });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice by number')
       });
     }
   })
@@ -151,12 +151,12 @@ router.get(
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
       sendSuccess(res, { invoice });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice')
       });
     }
   })

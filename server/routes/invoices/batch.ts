@@ -11,7 +11,7 @@ import archiver from 'archiver';
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import { getInvoiceService, toSnakeCasePayment } from './helpers.js';
@@ -45,7 +45,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payments', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve payment records')
       });
     }
   })
@@ -175,7 +175,7 @@ router.post(
         errorCount++;
         errors.push({
           id: invoiceId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: sanitizeErrorMessage(error, 'Failed to generate invoice PDF')
         });
       }
     }

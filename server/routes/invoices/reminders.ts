@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
@@ -46,7 +46,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve reminders', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve invoice reminders')
       });
     }
   })
@@ -77,7 +77,7 @@ router.post(
       sendSuccess(res, undefined, 'Reminder skipped');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to skip reminder', 500, 'SKIP_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to skip invoice reminder')
       });
     }
   })
@@ -232,13 +232,13 @@ ${BUSINESS_INFO.name}
         sentTo: clientEmail
       }, 'Payment reminder sent successfully');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const rawMessage = error instanceof Error ? error.message : '';
 
-      if (message.includes('not found')) {
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to send reminder', 500, 'SEND_REMINDER_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to send payment reminder')
       });
     }
   })

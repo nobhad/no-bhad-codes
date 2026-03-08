@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, messageResponse, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseInvoice, toSnakeCasePaymentPlan } from './helpers.js';
 import { validateRequest } from '../../middleware/validation.js';
 
@@ -74,7 +74,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve payment plan templates')
         }
       );
     }
@@ -114,7 +114,7 @@ router.post(
         500,
         'CREATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to create payment plan template')
         }
       );
     }
@@ -150,7 +150,7 @@ router.delete(
         500,
         'DELETION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to delete payment plan template')
         }
       );
     }
@@ -197,7 +197,7 @@ router.post(
         500,
         'GENERATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to generate invoices from payment plan')
         }
       );
     }

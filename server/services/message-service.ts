@@ -17,6 +17,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { getString, getNumber, getBoolean } from '../database/row-helpers.js';
+import { logger } from './logger.js';
 import {
   type Mention,
   type Reaction,
@@ -847,8 +848,11 @@ class MessageService {
       try {
         await this.markAsRead(messageId, userEmail, userType);
         count++;
-      } catch (_err) {
-        // Skip messages that fail
+      } catch (err) {
+        logger.warn(`[MessageService] Failed to mark message ${messageId} as read`, {
+          error: err instanceof Error ? err : new Error(String(err)),
+          category: 'MESSAGES'
+        });
       }
     }
     return count;
