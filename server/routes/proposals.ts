@@ -147,11 +147,23 @@ interface FeatureRow {
 }
 
 /**
- * GET /api/proposals/config/:projectType
- * Get tier configuration for a specific project type
- *
- * Note: Tier configurations are defined on the frontend in proposal-builder-data.ts
- * This endpoint is for future server-side configuration if needed
+ * @swagger
+ * /api/proposals/config/{projectType}:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals/config/:projectType
+ *     description: GET /api/proposals/config/:projectType.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectType
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/config/:projectType',
@@ -171,8 +183,17 @@ router.get(
 );
 
 /**
- * POST /api/proposals
- * Create a new proposal request
+ * @swagger
+ * /api/proposals:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: POST /api/proposals
+ *     description: POST /api/proposals.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/',
@@ -323,9 +344,23 @@ router.post(
 );
 
 /**
- * GET /api/proposals/:id
- * Get a specific proposal by ID
- * Requires authentication - only admin or owning client can view
+ * @swagger
+ * /api/proposals/{id}:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals/:id
+ *     description: GET /api/proposals/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id',
@@ -406,8 +441,23 @@ router.get(
 );
 
 /**
- * DELETE /api/proposals/:id
- * Soft delete a proposal (admin only) - 30-day recovery period
+ * @swagger
+ * /api/proposals/{id}:
+ *   delete:
+ *     tags: [Proposals]
+ *     summary: DELETE /api/proposals/:id
+ *     description: DELETE /api/proposals/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/:id',
@@ -433,8 +483,17 @@ router.delete(
 );
 
 /**
- * GET /api/admin/proposals
- * List all proposals (admin only)
+ * @swagger
+ * /api/proposals/admin/list:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/admin/proposals
+ *     description: GET /api/admin/proposals.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/admin/list',
@@ -509,8 +568,23 @@ router.get(
 );
 
 /**
- * PUT /api/admin/proposals/:id
- * Update proposal status (admin only)
+ * @swagger
+ * /api/proposals/admin/{id}:
+ *   put:
+ *     tags: [Proposals]
+ *     summary: PUT /api/admin/proposals/:id
+ *     description: PUT /api/admin/proposals/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/admin/:id',
@@ -587,8 +661,23 @@ router.put(
 );
 
 /**
- * POST /api/admin/proposals/:id/convert
- * Convert approved proposal to invoice (admin only)
+ * @swagger
+ * /api/proposals/admin/{id}/convert:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: POST /api/admin/proposals/:id/convert
+ *     description: POST /api/admin/proposals/:id/convert.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/admin/:id/convert',
@@ -684,8 +773,23 @@ router.post(
 );
 
 /**
- * GET /api/proposals/:id/pdf
- * Generate PDF for a proposal
+ * @swagger
+ * /api/proposals/{id}/pdf:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals/:id/pdf
+ *     description: GET /api/proposals/:id/pdf.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/pdf',
@@ -1663,7 +1767,19 @@ router.get(
 // TEMPLATE ENDPOINTS
 // ===================================
 
-// Get all templates
+/**
+ * @swagger
+ * /api/proposals/templates:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get all templates
+ *     description: Get all templates.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/templates',
   authenticateToken,
@@ -1675,7 +1791,25 @@ router.get(
   })
 );
 
-// Get single template
+/**
+ * @swagger
+ * /api/proposals/templates/{templateId}:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get single template
+ *     description: Get single template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/templates/:templateId',
   authenticateToken,
@@ -1692,7 +1826,19 @@ router.get(
   })
 );
 
-// Create template
+/**
+ * @swagger
+ * /api/proposals/templates:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Create template
+ *     description: Create template.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/templates',
   authenticateToken,
@@ -1707,7 +1853,25 @@ router.post(
   })
 );
 
-// Update template
+/**
+ * @swagger
+ * /api/proposals/templates/{templateId}:
+ *   put:
+ *     tags: [Proposals]
+ *     summary: Update template
+ *     description: Update template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/templates/:templateId',
   authenticateToken,
@@ -1724,7 +1888,25 @@ router.put(
   })
 );
 
-// Delete template
+/**
+ * @swagger
+ * /api/proposals/templates/{templateId}:
+ *   delete:
+ *     tags: [Proposals]
+ *     summary: Delete template
+ *     description: Delete template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/templates/:templateId',
   authenticateToken,
@@ -1745,7 +1927,25 @@ router.delete(
 // VERSIONING ENDPOINTS
 // ===================================
 
-// Get versions for a proposal
+/**
+ * @swagger
+ * /api/proposals/{id}/versions:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get versions for a proposal
+ *     description: Get versions for a proposal.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id/versions',
   authenticateToken,
@@ -1766,7 +1966,25 @@ router.get(
   })
 );
 
-// Create a new version
+/**
+ * @swagger
+ * /api/proposals/{id}/versions:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Create a new version
+ *     description: Create a new version.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/versions',
   authenticateToken,
@@ -1784,7 +2002,30 @@ router.post(
   })
 );
 
-// Restore a version
+/**
+ * @swagger
+ * /api/proposals/{id}/versions/{versionId}/restore:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Restore a version
+ *     description: Restore a version.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: versionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/versions/:versionId/restore',
   authenticateToken,
@@ -1802,7 +2043,19 @@ router.post(
   })
 );
 
-// Compare two versions
+/**
+ * @swagger
+ * /api/proposals/versions/compare:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Compare two versions
+ *     description: Compare two versions.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/versions/compare',
   authenticateToken,
@@ -1829,7 +2082,25 @@ router.get(
 // E-SIGNATURE ENDPOINTS
 // ===================================
 
-// Request a signature
+/**
+ * @swagger
+ * /api/proposals/{id}/request-signature:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Request a signature
+ *     description: Request a signature.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/request-signature',
   authenticateToken,
@@ -1855,7 +2126,25 @@ router.post(
   })
 );
 
-// Record a signature (public endpoint with rate limiting)
+/**
+ * @swagger
+ * /api/proposals/{id}/sign:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Record a signature (public endpoint with rate limiting)
+ *     description: Record a signature (public endpoint with rate limiting).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/sign',
   signatureRateLimiter,
@@ -1893,7 +2182,25 @@ router.post(
   })
 );
 
-// Get signature status
+/**
+ * @swagger
+ * /api/proposals/{id}/signature-status:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get signature status
+ *     description: Get signature status.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id/signature-status',
   authenticateToken,
@@ -1914,7 +2221,25 @@ router.get(
   })
 );
 
-// Get signature by token (public with rate limiting)
+/**
+ * @swagger
+ * /api/proposals/sign/{token}:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get signature by token (public with rate limiting)
+ *     description: Get signature by token (public with rate limiting).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/sign/:token',
   signatureRateLimiter,
@@ -1950,7 +2275,25 @@ router.get(
   })
 );
 
-// Decline signature (public with rate limiting)
+/**
+ * @swagger
+ * /api/proposals/sign/{token}/decline:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Decline signature (public with rate limiting)
+ *     description: Decline signature (public with rate limiting).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/sign/:token/decline',
   signatureRateLimiter,
@@ -1978,7 +2321,25 @@ router.post(
 // COMMENT ENDPOINTS
 // ===================================
 
-// Get comments for a proposal
+/**
+ * @swagger
+ * /api/proposals/{id}/comments:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get comments for a proposal
+ *     description: Get comments for a proposal.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id/comments',
   authenticateToken,
@@ -2000,7 +2361,25 @@ router.get(
   })
 );
 
-// Add comment
+/**
+ * @swagger
+ * /api/proposals/{id}/comments:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Add comment
+ *     description: Add comment.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/comments',
   authenticateToken,
@@ -2033,7 +2412,25 @@ router.post(
   })
 );
 
-// Delete comment
+/**
+ * @swagger
+ * /api/proposals/comments/{commentId}:
+ *   delete:
+ *     tags: [Proposals]
+ *     summary: Delete comment
+ *     description: Delete comment.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/comments/:commentId',
   authenticateToken,
@@ -2054,7 +2451,25 @@ router.delete(
 // ACTIVITY ENDPOINTS
 // ===================================
 
-// Get activities for a proposal
+/**
+ * @swagger
+ * /api/proposals/{id}/activities:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get activities for a proposal
+ *     description: Get activities for a proposal.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id/activities',
   authenticateToken,
@@ -2072,7 +2487,25 @@ router.get(
   })
 );
 
-// Track view (public with rate limiting)
+/**
+ * @swagger
+ * /api/proposals/{id}/track-view:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Track view (public with rate limiting)
+ *     description: Track view (public with rate limiting).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/track-view',
   signatureRateLimiter,
@@ -2095,7 +2528,25 @@ router.post(
 // CUSTOM ITEMS ENDPOINTS
 // ===================================
 
-// Get custom items for a proposal
+/**
+ * @swagger
+ * /api/proposals/{id}/custom-items:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get custom items for a proposal
+ *     description: Get custom items for a proposal.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id/custom-items',
   authenticateToken,
@@ -2116,7 +2567,25 @@ router.get(
   })
 );
 
-// Add custom item
+/**
+ * @swagger
+ * /api/proposals/{id}/custom-items:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Add custom item
+ *     description: Add custom item.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/custom-items',
   authenticateToken,
@@ -2137,7 +2606,25 @@ router.post(
   })
 );
 
-// Update custom item
+/**
+ * @swagger
+ * /api/proposals/custom-items/{itemId}:
+ *   put:
+ *     tags: [Proposals]
+ *     summary: Update custom item
+ *     description: Update custom item.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/custom-items/:itemId',
   authenticateToken,
@@ -2154,7 +2641,25 @@ router.put(
   })
 );
 
-// Delete custom item
+/**
+ * @swagger
+ * /api/proposals/custom-items/{itemId}:
+ *   delete:
+ *     tags: [Proposals]
+ *     summary: Delete custom item
+ *     description: Delete custom item.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/custom-items/:itemId',
   authenticateToken,
@@ -2175,7 +2680,25 @@ router.delete(
 // DISCOUNT ENDPOINTS
 // ===================================
 
-// Apply discount
+/**
+ * @swagger
+ * /api/proposals/{id}/discount:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Apply discount
+ *     description: Apply discount.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/discount',
   authenticateToken,
@@ -2199,7 +2722,25 @@ router.post(
   })
 );
 
-// Remove discount
+/**
+ * @swagger
+ * /api/proposals/{id}/discount:
+ *   delete:
+ *     tags: [Proposals]
+ *     summary: Remove discount
+ *     description: Remove discount.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/:id/discount',
   authenticateToken,
@@ -2220,7 +2761,25 @@ router.delete(
 // EXPIRATION & SEND ENDPOINTS
 // ===================================
 
-// Set expiration date
+/**
+ * @swagger
+ * /api/proposals/{id}/expiration:
+ *   put:
+ *     tags: [Proposals]
+ *     summary: Set expiration date
+ *     description: Set expiration date.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/:id/expiration',
   authenticateToken,
@@ -2241,7 +2800,25 @@ router.put(
   })
 );
 
-// Mark proposal as sent
+/**
+ * @swagger
+ * /api/proposals/{id}/send:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Mark proposal as sent
+ *     description: Mark proposal as sent.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/send',
   authenticateToken,
@@ -2258,7 +2835,25 @@ router.post(
   })
 );
 
-// Generate access token for client viewing
+/**
+ * @swagger
+ * /api/proposals/{id}/access-token:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Generate access token for client viewing
+ *     description: Generate access token for client viewing.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/access-token',
   authenticateToken,
@@ -2275,7 +2870,25 @@ router.post(
   })
 );
 
-// Get proposal by access token (public)
+/**
+ * @swagger
+ * /api/proposals/view/{token}:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get proposal by access token (public)
+ *     description: Get proposal by access token (public).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/view/:token',
   asyncHandler(async (req: Request, res: Response) => {
@@ -2291,7 +2904,19 @@ router.get(
   })
 );
 
-// Process expired proposals (admin or scheduler)
+/**
+ * @swagger
+ * /api/proposals/process-expired:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Process expired proposals (admin or scheduler)
+ *     description: Process expired proposals (admin or scheduler).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/process-expired',
   authenticateToken,
@@ -2302,7 +2927,19 @@ router.post(
   })
 );
 
-// Get proposals due for reminder
+/**
+ * @swagger
+ * /api/proposals/due-for-reminder:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: Get proposals due for reminder
+ *     description: Get proposals due for reminder.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/due-for-reminder',
   authenticateToken,
@@ -2315,7 +2952,25 @@ router.get(
   })
 );
 
-// Mark reminder sent
+/**
+ * @swagger
+ * /api/proposals/{id}/reminder-sent:
+ *   post:
+ *     tags: [Proposals]
+ *     summary: Mark reminder sent
+ *     description: Mark reminder sent.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/reminder-sent',
   authenticateToken,
@@ -2337,7 +2992,17 @@ router.post(
 // ===================================
 
 /**
- * GET /api/proposals/my - Get proposals for the authenticated client
+ * @swagger
+ * /api/proposals/my:
+ *   get:
+ *     tags: [Proposals]
+ *     summary: GET /api/proposals/my - Get proposals for the authenticated client
+ *     description: GET /api/proposals/my - Get proposals for the authenticated client.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/my',

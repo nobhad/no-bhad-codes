@@ -175,8 +175,19 @@ async function canAccessDeliverable(
 // ===== CLIENT-SCOPED ROUTES =====
 
 /**
- * GET /api/v1/deliverables/my
- * Get all deliverables for the authenticated client across all their projects
+ * @swagger
+ * /api/deliverables/my:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get client deliverables
+ *     description: Returns all deliverables for the authenticated client across all their projects.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of client deliverables
+ *       403:
+ *         description: Admin users should use admin endpoint
  */
 router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -214,8 +225,45 @@ router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
 // ===== DELIVERABLE CRUD =====
 
 /**
- * POST /api/v1/deliverables
- * Create new deliverable
+ * @swagger
+ * /api/deliverables:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Create a new deliverable
+ *     description: Creates a new deliverable for a project.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [projectId, title, type, createdById]
+ *             properties:
+ *               projectId:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *               createdById:
+ *                 type: integer
+ *               description:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               reviewDeadline:
+ *                 type: string
+ *               roundNumber:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Deliverable created
+ *       404:
+ *         description: Project not found
  */
 router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -261,8 +309,25 @@ router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnk
 });
 
 /**
- * GET /api/v1/deliverables/:id
- * Get deliverable by ID
+ * @swagger
+ * /api/deliverables/{id}:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get deliverable by ID
+ *     description: Returns a specific deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deliverable details
+ *       404:
+ *         description: Deliverable not found
  */
 router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -294,8 +359,41 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 /**
- * GET /api/v1/projects/:projectId/deliverables
- * List project deliverables
+ * @swagger
+ * /api/deliverables/projects/{projectId}/list:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: List project deliverables
+ *     description: Returns paginated deliverables for a specific project.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: roundNumber
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Paginated list of deliverables
+ *       404:
+ *         description: Project not found
  */
 router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -333,8 +431,25 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
 });
 
 /**
- * PUT /api/v1/deliverables/:id
- * Update deliverable
+ * @swagger
+ * /api/deliverables/{id}:
+ *   put:
+ *     tags: [Deliverables]
+ *     summary: Update a deliverable
+ *     description: Updates an existing deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deliverable updated
+ *       404:
+ *         description: Deliverable not found
  */
 router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -364,9 +479,35 @@ router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowU
 });
 
 /**
- * POST /api/v1/deliverables/:id/lock
- * Approve and lock deliverable (final approval)
- * Also archives the deliverable file to the Files tab
+ * @swagger
+ * /api/deliverables/{id}/lock:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Approve and lock deliverable
+ *     description: Final approval that locks a deliverable and archives the file to the Files tab.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [reviewedById]
+ *             properties:
+ *               reviewedById:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Deliverable approved and locked
+ *       404:
+ *         description: Deliverable not found
  */
 router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDeliverable, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -460,8 +601,37 @@ router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDelive
 });
 
 /**
- * POST /api/v1/deliverables/:id/revision
- * Request revision on deliverable
+ * @swagger
+ * /api/deliverables/{id}/revision:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Request revision on deliverable
+ *     description: Requests a revision on a deliverable with a reason.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [reason, reviewedById]
+ *             properties:
+ *               reason:
+ *                 type: string
+ *               reviewedById:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Revision requested
+ *       404:
+ *         description: Deliverable not found
  */
 router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.requestRevision, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -509,8 +679,25 @@ router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.reques
 });
 
 /**
- * DELETE /api/v1/deliverables/:id
- * Archive deliverable (soft delete)
+ * @swagger
+ * /api/deliverables/{id}:
+ *   delete:
+ *     tags: [Deliverables]
+ *     summary: Archive a deliverable
+ *     description: Soft-deletes a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deliverable archived
+ *       404:
+ *         description: Deliverable not found
  */
 router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -539,8 +726,45 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
 // ===== VERSIONS =====
 
 /**
- * POST /api/v1/deliverables/:id/versions
- * Upload new version
+ * @swagger
+ * /api/deliverables/{id}/versions:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Upload new version
+ *     description: Uploads a new version of a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [filePath, fileName, uploadedById]
+ *             properties:
+ *               filePath:
+ *                 type: string
+ *               fileName:
+ *                 type: string
+ *               fileSize:
+ *                 type: number
+ *               fileType:
+ *                 type: string
+ *               uploadedById:
+ *                 type: integer
+ *               changeNotes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Version uploaded
+ *       404:
+ *         description: Deliverable not found
  */
 router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.uploadVersion, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -585,8 +809,23 @@ router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.upload
 });
 
 /**
- * GET /api/v1/deliverables/:id/versions
- * Get all versions
+ * @swagger
+ * /api/deliverables/{id}/versions:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get all versions
+ *     description: Returns all versions of a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of versions
  */
 router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -613,8 +852,25 @@ router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => 
 });
 
 /**
- * GET /api/v1/deliverables/:id/versions/latest
- * Get latest version
+ * @swagger
+ * /api/deliverables/{id}/versions/latest:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get latest version
+ *     description: Returns the latest version of a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Latest version details
+ *       404:
+ *         description: No versions found
  */
 router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -648,8 +904,43 @@ router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Respon
 // ===== COMMENTS & ANNOTATIONS =====
 
 /**
- * POST /api/v1/deliverables/:id/comments
- * Add comment or annotation
+ * @swagger
+ * /api/deliverables/{id}/comments:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Add comment or annotation
+ *     description: Adds a comment or visual annotation to a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [authorId, text]
+ *             properties:
+ *               authorId:
+ *                 type: integer
+ *               text:
+ *                 type: string
+ *               x:
+ *                 type: number
+ *               y:
+ *                 type: number
+ *               annotationType:
+ *                 type: string
+ *               elementId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Comment added
  */
 router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addComment, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -691,8 +982,31 @@ router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addCom
 });
 
 /**
- * GET /api/v1/deliverables/:id/comments
- * Get all comments
+ * @swagger
+ * /api/deliverables/{id}/comments:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get all comments
+ *     description: Returns all comments and annotations for a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: resolved
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: elementId
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of comments
  */
 router.get('/:id/comments', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -725,8 +1039,30 @@ router.get('/:id/comments', async (req: AuthenticatedRequest, res: Response) => 
 });
 
 /**
- * PATCH /api/v1/deliverables/:deliverableId/comments/:commentId/resolve
- * Mark comment as resolved
+ * @swagger
+ * /api/deliverables/{deliverableId}/comments/{commentId}/resolve:
+ *   patch:
+ *     tags: [Deliverables]
+ *     summary: Resolve a comment
+ *     description: Marks a comment as resolved.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: deliverableId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Comment resolved
+ *       404:
+ *         description: Comment not found
  */
 router.patch(
   '/:deliverableId/comments/:commentId/resolve',
@@ -771,8 +1107,30 @@ router.patch(
 );
 
 /**
- * DELETE /api/v1/deliverables/:deliverableId/comments/:commentId
- * Delete comment
+ * @swagger
+ * /api/deliverables/{deliverableId}/comments/{commentId}:
+ *   delete:
+ *     tags: [Deliverables]
+ *     summary: Delete a comment
+ *     description: Deletes a comment from a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: deliverableId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Comment deleted
+ *       404:
+ *         description: Comment not found
  */
 router.delete(
   '/:deliverableId/comments/:commentId',
@@ -816,8 +1174,35 @@ router.delete(
 // ===== DESIGN ELEMENTS =====
 
 /**
- * POST /api/v1/deliverables/:id/elements
- * Create design element
+ * @swagger
+ * /api/deliverables/{id}/elements:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Create design element
+ *     description: Creates a new design element for a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Design element created
  */
 router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.createElement, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -853,8 +1238,23 @@ router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.create
 });
 
 /**
- * GET /api/v1/deliverables/:id/elements
- * Get all design elements
+ * @swagger
+ * /api/deliverables/{id}/elements:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get all design elements
+ *     description: Returns all design elements for a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of design elements
  */
 router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -881,8 +1281,41 @@ router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => 
 });
 
 /**
- * PATCH /api/v1/deliverables/:deliverableId/elements/:elementId/approval
- * Update element approval status
+ * @swagger
+ * /api/deliverables/{deliverableId}/elements/{elementId}/approval:
+ *   patch:
+ *     tags: [Deliverables]
+ *     summary: Update element approval status
+ *     description: Updates the approval status of a design element.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: deliverableId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: elementId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, approved, revision_needed]
+ *     responses:
+ *       200:
+ *         description: Element approval status updated
+ *       404:
+ *         description: Element not found
  */
 router.patch(
   '/:deliverableId/elements/:elementId/approval',
@@ -936,8 +1369,42 @@ router.patch(
 // ===== REVIEWS =====
 
 /**
- * POST /api/v1/deliverables/:id/reviews
- * Create review
+ * @swagger
+ * /api/deliverables/{id}/reviews:
+ *   post:
+ *     tags: [Deliverables]
+ *     summary: Create a review
+ *     description: Creates a review for a deliverable with a decision.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [reviewerId, decision]
+ *             properties:
+ *               reviewerId:
+ *                 type: integer
+ *               decision:
+ *                 type: string
+ *                 enum: [approved, revision_needed, rejected]
+ *               feedback:
+ *                 type: string
+ *               elementsReviewed:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *     responses:
+ *       201:
+ *         description: Review created
  */
 router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createReview, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -980,8 +1447,23 @@ router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createR
 });
 
 /**
- * GET /api/v1/deliverables/:id/reviews
- * Get all reviews
+ * @swagger
+ * /api/deliverables/{id}/reviews:
+ *   get:
+ *     tags: [Deliverables]
+ *     summary: Get all reviews
+ *     description: Returns all reviews for a deliverable.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of reviews
  */
 router.get('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => {
   try {

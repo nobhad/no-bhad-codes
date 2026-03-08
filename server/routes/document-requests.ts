@@ -117,7 +117,24 @@ const DocRequestValidationSchemas = {
 // =====================================================
 
 /**
- * Get all document requests for the authenticated client
+ * @swagger
+ * /api/document-requests/my-requests:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get client document requests
+ *     description: Returns all document requests for the authenticated client with stats.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Client document requests with stats
+ *       401:
+ *         description: Not authenticated
  */
 router.get(
   '/my-requests',
@@ -138,7 +155,23 @@ router.get(
 );
 
 /**
- * Mark a request as viewed by client
+ * @swagger
+ * /api/document-requests/{id}/view:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Mark request as viewed
+ *     description: Marks a document request as viewed by the client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Request marked as viewed
  */
 router.post(
   '/:id/view',
@@ -161,7 +194,35 @@ router.post(
 );
 
 /**
- * Upload a document for a request
+ * @swagger
+ * /api/document-requests/{id}/upload:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Upload document for a request
+ *     description: Uploads a document to fulfill a document request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [fileId]
+ *             properties:
+ *               fileId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Document uploaded
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/:id/upload',
@@ -190,7 +251,19 @@ router.post(
 );
 
 /**
- * Get pending document requests for the authenticated client (unfulfilled)
+ * @swagger
+ * /api/document-requests/my-pending:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get pending client requests
+ *     description: Returns unfulfilled document requests for the authenticated client.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending requests
+ *       401:
+ *         description: Not authenticated
  */
 router.get(
   '/my-pending',
@@ -212,8 +285,22 @@ router.get(
 // =====================================================
 
 /**
- * Get all document requests (admin)
- * Supports filtering by status and pagination
+ * @swagger
+ * /api/document-requests:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get all document requests (admin)
+ *     description: Returns all document requests with optional status filtering and stats.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: All document requests with stats
  */
 router.get(
   '/',
@@ -229,7 +316,17 @@ router.get(
 );
 
 /**
- * Get all pending document requests (admin)
+ * @swagger
+ * /api/document-requests/pending:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get all pending requests (admin)
+ *     description: Returns all pending document requests.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending requests
  */
 router.get(
   '/pending',
@@ -242,7 +339,17 @@ router.get(
 );
 
 /**
- * Get requests needing review (admin)
+ * @swagger
+ * /api/document-requests/for-review:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get requests needing review (admin)
+ *     description: Returns document requests that need admin review.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of requests needing review
  */
 router.get(
   '/for-review',
@@ -255,7 +362,17 @@ router.get(
 );
 
 /**
- * Get overdue requests (admin)
+ * @swagger
+ * /api/document-requests/overdue:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get overdue requests (admin)
+ *     description: Returns document requests that are past their due date.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of overdue requests
  */
 router.get(
   '/overdue',
@@ -268,7 +385,27 @@ router.get(
 );
 
 /**
- * Get requests for a specific client (admin)
+ * @swagger
+ * /api/document-requests/client/{clientId}:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get requests for a specific client (admin)
+ *     description: Returns document requests for a specific client with stats.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: clientId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Client document requests with stats
  */
 router.get(
   '/client/:clientId',
@@ -290,7 +427,23 @@ router.get(
 );
 
 /**
- * Get pending document requests for a specific project (admin)
+ * @swagger
+ * /api/document-requests/project/{projectId}/pending:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get pending requests for a project (admin)
+ *     description: Returns pending document requests for a specific project.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of pending requests for project
  */
 router.get(
   '/project/:projectId/pending',
@@ -309,7 +462,25 @@ router.get(
 );
 
 /**
- * Get a specific request (admin)
+ * @swagger
+ * /api/document-requests/{id}:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get a specific request (admin)
+ *     description: Returns a specific document request with its history.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Document request with history
+ *       404:
+ *         description: Request not found
  */
 router.get(
   '/:id',
@@ -334,7 +505,44 @@ router.get(
 );
 
 /**
- * Create a new document request (admin)
+ * @swagger
+ * /api/document-requests:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Create a new document request (admin)
+ *     description: Creates a new document request for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [client_id, title]
+ *             properties:
+ *               client_id:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               project_id:
+ *                 type: integer
+ *               description:
+ *                 type: string
+ *               document_type:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *                 enum: [low, normal, high, urgent]
+ *               due_date:
+ *                 type: string
+ *               is_required:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Document request created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/',
@@ -376,7 +584,33 @@ router.post(
 );
 
 /**
- * Create requests from templates (admin)
+ * @swagger
+ * /api/document-requests/from-templates:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Create requests from templates (admin)
+ *     description: Creates document requests from selected templates for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [client_id, template_ids]
+ *             properties:
+ *               client_id:
+ *                 type: integer
+ *               template_ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *               project_id:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Document requests created from templates
  */
 router.post(
   '/from-templates',
@@ -404,7 +638,23 @@ router.post(
 );
 
 /**
- * Start review of a request (admin)
+ * @swagger
+ * /api/document-requests/{id}/start-review:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Start review of a request (admin)
+ *     description: Starts the review process for a document request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Review started
  */
 router.post(
   '/:id/start-review',
@@ -424,10 +674,31 @@ router.post(
 );
 
 /**
- * Approve a request (admin)
- * - Copies uploaded file to Files tab (Forms folder)
- * - Marks original request complete with file reference
- * - Emits document_request.approved workflow event
+ * @swagger
+ * /api/document-requests/{id}/approve:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Approve a document request (admin)
+ *     description: Approves a document request, copies file to Files tab, and emits workflow event.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document request approved
  */
 router.post(
   '/:id/approve',
@@ -469,8 +740,35 @@ router.post(
 );
 
 /**
- * Reject a request (admin)
- * - Emits document_request.rejected workflow event
+ * @swagger
+ * /api/document-requests/{id}/reject:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Reject a document request (admin)
+ *     description: Rejects a document request with a required reason and emits workflow event.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [reason]
+ *             properties:
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document request rejected
+ *       400:
+ *         description: Reason required
  */
 router.post(
   '/:id/reject',
@@ -510,7 +808,23 @@ router.post(
 );
 
 /**
- * Send reminder for a request (admin)
+ * @swagger
+ * /api/document-requests/{id}/remind:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Send reminder for a request (admin)
+ *     description: Sends a reminder notification for a document request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Reminder sent
  */
 router.post(
   '/:id/remind',
@@ -529,7 +843,23 @@ router.post(
 );
 
 /**
- * Delete a request (admin)
+ * @swagger
+ * /api/document-requests/{id}:
+ *   delete:
+ *     tags: [Documents]
+ *     summary: Delete a document request (admin)
+ *     description: Deletes a specific document request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Document request deleted
  */
 router.delete(
   '/:id',
@@ -548,7 +878,29 @@ router.delete(
 );
 
 /**
- * Bulk delete requests (admin)
+ * @swagger
+ * /api/document-requests/bulk-delete:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Bulk delete requests (admin)
+ *     description: Deletes multiple document requests at once.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [requestIds]
+ *             properties:
+ *               requestIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: Document requests deleted
  */
 router.post(
   '/bulk-delete',
@@ -585,7 +937,17 @@ router.post(
 // =====================================================
 
 /**
- * Get all templates
+ * @swagger
+ * /api/document-requests/templates/list:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get all document request templates
+ *     description: Returns all available document request templates.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of templates
  */
 router.get(
   '/templates/list',
@@ -598,7 +960,25 @@ router.get(
 );
 
 /**
- * Get a template
+ * @swagger
+ * /api/document-requests/templates/{id}:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get a document request template
+ *     description: Returns a specific document request template by ID.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template details
+ *       404:
+ *         description: Template not found
  */
 router.get(
   '/templates/:id',
@@ -621,7 +1001,37 @@ router.get(
 );
 
 /**
- * Create a template
+ * @swagger
+ * /api/document-requests/templates:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Create a document request template
+ *     description: Creates a new document request template.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, title]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               document_type:
+ *                 type: string
+ *               is_required:
+ *                 type: boolean
+ *               days_until_due:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Template created
  */
 router.post(
   '/templates',
@@ -652,7 +1062,25 @@ router.post(
 );
 
 /**
- * Update a template
+ * @swagger
+ * /api/document-requests/templates/{id}:
+ *   put:
+ *     tags: [Documents]
+ *     summary: Update a document request template
+ *     description: Updates an existing document request template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template updated
+ *       404:
+ *         description: Template not found
  */
 router.put(
   '/templates/:id',
@@ -676,7 +1104,23 @@ router.put(
 );
 
 /**
- * Delete a template
+ * @swagger
+ * /api/document-requests/templates/{id}:
+ *   delete:
+ *     tags: [Documents]
+ *     summary: Delete a document request template
+ *     description: Deletes a document request template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template deleted
  */
 router.delete(
   '/templates/:id',
@@ -699,7 +1143,17 @@ router.delete(
 // =====================================================
 
 /**
- * Get templates grouped by category
+ * @swagger
+ * /api/document-requests/templates/by-category:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get templates by category
+ *     description: Returns document request templates grouped by category.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Templates grouped by category
  */
 router.get(
   '/templates/by-category',
@@ -712,7 +1166,23 @@ router.get(
 );
 
 /**
- * Get templates for a specific project type
+ * @swagger
+ * /api/document-requests/templates/by-project-type/{projectType}:
+ *   get:
+ *     tags: [Documents]
+ *     summary: Get templates for a project type
+ *     description: Returns document request templates applicable to a specific project type.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectType
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Templates for project type
  */
 router.get(
   '/templates/by-project-type/:projectType',
@@ -726,7 +1196,33 @@ router.get(
 );
 
 /**
- * Bulk request documents by project type
+ * @swagger
+ * /api/document-requests/bulk-request:
+ *   post:
+ *     tags: [Documents]
+ *     summary: Bulk request documents by project type
+ *     description: Creates document requests from all templates matching a project type.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [client_id, project_type]
+ *             properties:
+ *               client_id:
+ *                 type: integer
+ *               project_type:
+ *                 type: string
+ *               project_id:
+ *                 type: integer
+ *               required_only:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Document requests created
  */
 router.post(
   '/bulk-request',

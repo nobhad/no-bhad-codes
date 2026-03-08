@@ -253,8 +253,17 @@ router.post('/track', trackingRateLimit, async (req: Request, res: Response) => 
 });
 
 /**
- * GET /api/analytics/summary
- * Get analytics summary (admin only)
+ * @swagger
+ * /api/analytics/summary:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/summary
+ *     description: GET /api/analytics/summary.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/summary',
@@ -389,8 +398,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/realtime
- * Get realtime visitor data (admin only)
+ * @swagger
+ * /api/analytics/realtime:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/realtime
+ *     description: GET /api/analytics/realtime.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/realtime',
@@ -446,8 +464,17 @@ router.get(
 );
 
 /**
- * DELETE /api/analytics/data
- * Clear analytics data older than specified days (admin only)
+ * @swagger
+ * /api/analytics/data:
+ *   delete:
+ *     tags: [Analytics]
+ *     summary: DELETE /api/analytics/data
+ *     description: DELETE /api/analytics/data.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/data',
@@ -499,17 +526,17 @@ router.delete(
 );
 
 /**
- * GET /api/analytics/sessions
- * List visitor sessions with pagination (admin only)
- *
- * Query params:
- * - page: Page number (default: 1)
- * - limit: Results per page (default: 50, max: 100)
- * - days: Filter sessions from last N days (default: 7)
- *
- * Response:
- * - sessions: Array of session objects
- * - pagination: { page, limit, total, totalPages }
+ * @swagger
+ * /api/analytics/sessions:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/sessions
+ *     description: GET /api/analytics/sessions.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/sessions',
@@ -581,13 +608,23 @@ router.get(
 );
 
 /**
- * GET /api/analytics/sessions/:sessionId
- * Get detailed session information (admin only)
- *
- * Response:
- * - session: Session object with full details
- * - pageViews: Array of page views in this session
- * - interactions: Array of interactions in this session
+ * @swagger
+ * /api/analytics/sessions/{sessionId}:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/sessions/:sessionId
+ *     description: GET /api/analytics/sessions/:sessionId.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/sessions/:sessionId',
@@ -643,15 +680,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/export
- * Export analytics data as JSON (admin only)
- *
- * Query params:
- * - days: Export data from last N days (default: 30, max: 365)
- * - format: Export format ('json' only for now)
- *
- * Response:
- * - JSON file download with sessions, page views, and interactions
+ * @swagger
+ * /api/analytics/export:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/export
+ *     description: GET /api/analytics/export.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/export',
@@ -723,8 +762,17 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/analytics/reports
- * Get all saved reports
+ * @swagger
+ * /api/analytics/reports:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports
+ *     description: GET /api/analytics/reports.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports',
@@ -741,8 +789,17 @@ router.get(
 );
 
 /**
- * POST /api/analytics/reports
- * Create a new saved report
+ * @swagger
+ * /api/analytics/reports:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/reports
+ *     description: POST /api/analytics/reports.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/reports',
@@ -759,8 +816,23 @@ router.post(
 );
 
 /**
- * GET /api/analytics/reports/:id
- * Get a specific saved report
+ * @swagger
+ * /api/analytics/reports/{id}:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports/:id
+ *     description: GET /api/analytics/reports/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports/:id',
@@ -782,8 +854,23 @@ router.get(
 );
 
 /**
- * PUT /api/analytics/reports/:id
- * Update a saved report
+ * @swagger
+ * /api/analytics/reports/{id}:
+ *   put:
+ *     tags: [Analytics]
+ *     summary: PUT /api/analytics/reports/:id
+ *     description: PUT /api/analytics/reports/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/reports/:id',
@@ -801,8 +888,23 @@ router.put(
 );
 
 /**
- * DELETE /api/analytics/reports/:id
- * Delete a saved report
+ * @swagger
+ * /api/analytics/reports/{id}:
+ *   delete:
+ *     tags: [Analytics]
+ *     summary: DELETE /api/analytics/reports/:id
+ *     description: DELETE /api/analytics/reports/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/reports/:id',
@@ -820,8 +922,23 @@ router.delete(
 );
 
 /**
- * POST /api/analytics/reports/:id/favorite
- * Toggle report favorite status
+ * @swagger
+ * /api/analytics/reports/{id}/favorite:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/reports/:id/favorite
+ *     description: POST /api/analytics/reports/:id/favorite.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/reports/:id/favorite',
@@ -839,8 +956,23 @@ router.post(
 );
 
 /**
- * POST /api/analytics/reports/:id/run
- * Run a saved report and get results
+ * @swagger
+ * /api/analytics/reports/{id}/run:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/reports/:id/run
+ *     description: POST /api/analytics/reports/:id/run.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/reports/:id/run',
@@ -862,8 +994,23 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/analytics/reports/:reportId/schedules
- * Get schedules for a report
+ * @swagger
+ * /api/analytics/reports/{reportId}/schedules:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports/:reportId/schedules
+ *     description: GET /api/analytics/reports/:reportId/schedules.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reportId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports/:reportId/schedules',
@@ -881,8 +1028,23 @@ router.get(
 );
 
 /**
- * POST /api/analytics/reports/:reportId/schedules
- * Create a schedule for a report
+ * @swagger
+ * /api/analytics/reports/{reportId}/schedules:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/reports/:reportId/schedules
+ *     description: POST /api/analytics/reports/:reportId/schedules.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reportId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/reports/:reportId/schedules',
@@ -905,8 +1067,23 @@ router.post(
 );
 
 /**
- * PUT /api/analytics/schedules/:id
- * Update a report schedule
+ * @swagger
+ * /api/analytics/schedules/{id}:
+ *   put:
+ *     tags: [Analytics]
+ *     summary: PUT /api/analytics/schedules/:id
+ *     description: PUT /api/analytics/schedules/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/schedules/:id',
@@ -924,8 +1101,23 @@ router.put(
 );
 
 /**
- * DELETE /api/analytics/schedules/:id
- * Delete a report schedule
+ * @swagger
+ * /api/analytics/schedules/{id}:
+ *   delete:
+ *     tags: [Analytics]
+ *     summary: DELETE /api/analytics/schedules/:id
+ *     description: DELETE /api/analytics/schedules/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/schedules/:id',
@@ -943,8 +1135,17 @@ router.delete(
 );
 
 /**
- * POST /api/analytics/schedules/process
- * Process all due scheduled reports
+ * @swagger
+ * /api/analytics/schedules/process:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/schedules/process
+ *     description: POST /api/analytics/schedules/process.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/schedules/process',
@@ -961,8 +1162,17 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/analytics/widgets
- * Get user's dashboard widgets
+ * @swagger
+ * /api/analytics/widgets:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/widgets
+ *     description: GET /api/analytics/widgets.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/widgets',
@@ -976,8 +1186,17 @@ router.get(
 );
 
 /**
- * POST /api/analytics/widgets
- * Create a dashboard widget
+ * @swagger
+ * /api/analytics/widgets:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/widgets
+ *     description: POST /api/analytics/widgets.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/widgets',
@@ -994,8 +1213,23 @@ router.post(
 );
 
 /**
- * PUT /api/analytics/widgets/:id
- * Update a dashboard widget
+ * @swagger
+ * /api/analytics/widgets/{id}:
+ *   put:
+ *     tags: [Analytics]
+ *     summary: PUT /api/analytics/widgets/:id
+ *     description: PUT /api/analytics/widgets/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/widgets/:id',
@@ -1013,8 +1247,23 @@ router.put(
 );
 
 /**
- * DELETE /api/analytics/widgets/:id
- * Delete a dashboard widget
+ * @swagger
+ * /api/analytics/widgets/{id}:
+ *   delete:
+ *     tags: [Analytics]
+ *     summary: DELETE /api/analytics/widgets/:id
+ *     description: DELETE /api/analytics/widgets/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/widgets/:id',
@@ -1032,8 +1281,17 @@ router.delete(
 );
 
 /**
- * PUT /api/analytics/widgets/layout
- * Update widget layout (positions/sizes)
+ * @swagger
+ * /api/analytics/widgets/layout:
+ *   put:
+ *     tags: [Analytics]
+ *     summary: PUT /api/analytics/widgets/layout
+ *     description: PUT /api/analytics/widgets/layout.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/widgets/layout',
@@ -1048,8 +1306,17 @@ router.put(
 );
 
 /**
- * GET /api/analytics/widgets/presets
- * Get available dashboard presets
+ * @swagger
+ * /api/analytics/widgets/presets:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/widgets/presets
+ *     description: GET /api/analytics/widgets/presets.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/widgets/presets',
@@ -1062,8 +1329,23 @@ router.get(
 );
 
 /**
- * POST /api/analytics/widgets/presets/:id/apply
- * Apply a dashboard preset
+ * @swagger
+ * /api/analytics/widgets/presets/{id}/apply:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/widgets/presets/:id/apply
+ *     description: POST /api/analytics/widgets/presets/:id/apply.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/widgets/presets/:id/apply',
@@ -1086,8 +1368,17 @@ router.post(
 // =====================================================
 
 /**
- * POST /api/analytics/kpis/snapshot
- * Capture a KPI snapshot
+ * @swagger
+ * /api/analytics/kpis/snapshot:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/kpis/snapshot
+ *     description: POST /api/analytics/kpis/snapshot.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/kpis/snapshot',
@@ -1100,8 +1391,17 @@ router.post(
 );
 
 /**
- * GET /api/analytics/kpis/latest
- * Get latest KPI values
+ * @swagger
+ * /api/analytics/kpis/latest:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/kpis/latest
+ *     description: GET /api/analytics/kpis/latest.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/kpis/latest',
@@ -1114,8 +1414,23 @@ router.get(
 );
 
 /**
- * GET /api/analytics/kpis/:type/trend
- * Get KPI trend over time
+ * @swagger
+ * /api/analytics/kpis/{type}/trend:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/kpis/:type/trend
+ *     description: GET /api/analytics/kpis/:type/trend.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/kpis/:type/trend',
@@ -1142,8 +1457,17 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/analytics/alerts
- * Get all metric alerts
+ * @swagger
+ * /api/analytics/alerts:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/alerts
+ *     description: GET /api/analytics/alerts.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/alerts',
@@ -1156,8 +1480,17 @@ router.get(
 );
 
 /**
- * POST /api/analytics/alerts
- * Create a metric alert
+ * @swagger
+ * /api/analytics/alerts:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/alerts
+ *     description: POST /api/analytics/alerts.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/alerts',
@@ -1174,8 +1507,23 @@ router.post(
 );
 
 /**
- * PUT /api/analytics/alerts/:id
- * Update a metric alert
+ * @swagger
+ * /api/analytics/alerts/{id}:
+ *   put:
+ *     tags: [Analytics]
+ *     summary: PUT /api/analytics/alerts/:id
+ *     description: PUT /api/analytics/alerts/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/alerts/:id',
@@ -1193,8 +1541,23 @@ router.put(
 );
 
 /**
- * DELETE /api/analytics/alerts/:id
- * Delete a metric alert
+ * @swagger
+ * /api/analytics/alerts/{id}:
+ *   delete:
+ *     tags: [Analytics]
+ *     summary: DELETE /api/analytics/alerts/:id
+ *     description: DELETE /api/analytics/alerts/:id.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/alerts/:id',
@@ -1212,8 +1575,17 @@ router.delete(
 );
 
 /**
- * POST /api/analytics/alerts/check
- * Check all alerts for triggers
+ * @swagger
+ * /api/analytics/alerts/check:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: POST /api/analytics/alerts/check
+ *     description: POST /api/analytics/alerts/check.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/alerts/check',
@@ -1230,8 +1602,17 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/analytics/quick/revenue
- * Quick revenue analytics
+ * @swagger
+ * /api/analytics/quick/revenue:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/quick/revenue
+ *     description: GET /api/analytics/quick/revenue.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/quick/revenue',
@@ -1245,8 +1626,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/quick/pipeline
- * Quick pipeline analytics
+ * @swagger
+ * /api/analytics/quick/pipeline:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/quick/pipeline
+ *     description: GET /api/analytics/quick/pipeline.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/quick/pipeline',
@@ -1259,8 +1649,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/quick/projects
- * Quick project analytics
+ * @swagger
+ * /api/analytics/quick/projects:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/quick/projects
+ *     description: GET /api/analytics/quick/projects.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/quick/projects',
@@ -1274,8 +1673,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/quick/clients
- * Quick client analytics
+ * @swagger
+ * /api/analytics/quick/clients:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/quick/clients
+ *     description: GET /api/analytics/quick/clients.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/quick/clients',
@@ -1288,8 +1696,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/quick/team
- * Quick team performance analytics
+ * @swagger
+ * /api/analytics/quick/team:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/quick/team
+ *     description: GET /api/analytics/quick/team.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/quick/team',
@@ -1303,8 +1720,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/report-runs
- * Get report run history
+ * @swagger
+ * /api/analytics/report-runs:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/report-runs
+ *     description: GET /api/analytics/report-runs.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/report-runs',
@@ -1325,8 +1751,23 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/analytics/bi/revenue/:period
- * Get revenue breakdown by time period
+ * @swagger
+ * /api/analytics/bi/revenue/{period}:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/bi/revenue/:period
+ *     description: GET /api/analytics/bi/revenue/:period.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: period
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/bi/revenue/:period',
@@ -1345,8 +1786,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/bi/pipeline
- * Get project pipeline value
+ * @swagger
+ * /api/analytics/bi/pipeline:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/bi/pipeline
+ *     description: GET /api/analytics/bi/pipeline.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/bi/pipeline',
@@ -1359,8 +1809,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/bi/funnel
- * Get client acquisition funnel
+ * @swagger
+ * /api/analytics/bi/funnel:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/bi/funnel
+ *     description: GET /api/analytics/bi/funnel.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/bi/funnel',
@@ -1377,8 +1836,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/bi/project-stats
- * Get project statistics
+ * @swagger
+ * /api/analytics/bi/project-stats:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/bi/project-stats
+ *     description: GET /api/analytics/bi/project-stats.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/bi/project-stats',
@@ -1395,8 +1863,17 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/analytics/clients/ltv
- * Get client lifetime value
+ * @swagger
+ * /api/analytics/clients/ltv:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/clients/ltv
+ *     description: GET /api/analytics/clients/ltv.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/clients/ltv',
@@ -1410,8 +1887,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/clients/activity-scores
- * Get client activity scores
+ * @swagger
+ * /api/analytics/clients/activity-scores:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/clients/activity-scores
+ *     description: GET /api/analytics/clients/activity-scores.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/clients/activity-scores',
@@ -1425,8 +1911,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/clients/upsell
- * Get upsell opportunities
+ * @swagger
+ * /api/analytics/clients/upsell:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/clients/upsell
+ *     description: GET /api/analytics/clients/upsell.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/clients/upsell',
@@ -1443,8 +1938,17 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/analytics/reports/overdue-invoices
- * Get overdue invoices report
+ * @swagger
+ * /api/analytics/reports/overdue-invoices:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports/overdue-invoices
+ *     description: GET /api/analytics/reports/overdue-invoices.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports/overdue-invoices',
@@ -1457,8 +1961,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/reports/pending-approvals
- * Get pending approvals aging report
+ * @swagger
+ * /api/analytics/reports/pending-approvals:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports/pending-approvals
+ *     description: GET /api/analytics/reports/pending-approvals.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports/pending-approvals',
@@ -1471,8 +1984,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/reports/document-requests
- * Get document requests status report
+ * @swagger
+ * /api/analytics/reports/document-requests:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports/document-requests
+ *     description: GET /api/analytics/reports/document-requests.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports/document-requests',
@@ -1485,8 +2007,17 @@ router.get(
 );
 
 /**
- * GET /api/analytics/reports/project-health
- * Get project health summary
+ * @swagger
+ * /api/analytics/reports/project-health:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: GET /api/analytics/reports/project-health
+ *     description: GET /api/analytics/reports/project-health.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/reports/project-health',

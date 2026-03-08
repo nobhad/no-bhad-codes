@@ -152,7 +152,19 @@ const upload = multer({
 // GENERAL MESSAGE ENDPOINTS
 // ===================================
 
-// Get all message threads for client
+/**
+ * @swagger
+ * /api/messages/threads:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get all message threads for client
+ *     description: Get all message threads for client.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/threads',
   authenticateToken,
@@ -204,7 +216,19 @@ router.get(
   })
 );
 
-// Create new message thread
+/**
+ * @swagger
+ * /api/messages/threads:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Create new message thread
+ *     description: Create new message thread.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/threads',
   authenticateToken,
@@ -251,7 +275,25 @@ router.post(
   })
 );
 
-// Send message in thread
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/messages:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Send message in thread
+ *     description: Send message in thread.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/threads/:threadId/messages',
   authenticateToken,
@@ -423,7 +465,25 @@ router.post(
   })
 );
 
-// Get messages in thread
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/messages:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get messages in thread
+ *     description: Get messages in thread.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/threads/:threadId/messages',
   authenticateToken,
@@ -512,7 +572,25 @@ router.get(
   })
 );
 
-// Mark thread messages as read
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/read:
+ *   put:
+ *     tags: [Messages]
+ *     summary: Mark thread messages as read
+ *     description: Mark thread messages as read.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/threads/:threadId/read',
   authenticateToken,
@@ -559,7 +637,19 @@ router.put(
 // QUICK MESSAGE ENDPOINTS
 // ===================================
 
-// Send quick inquiry (creates thread automatically)
+/**
+ * @swagger
+ * /api/messages/inquiry:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Send quick inquiry (creates thread automatically)
+ *     description: Send quick inquiry (creates thread automatically).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/inquiry',
   authenticateToken,
@@ -659,7 +749,19 @@ router.post(
 // NOTIFICATION PREFERENCES
 // ===================================
 
-// Get notification preferences
+/**
+ * @swagger
+ * /api/messages/preferences:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get notification preferences
+ *     description: Get notification preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/preferences',
   authenticateToken,
@@ -687,7 +789,19 @@ router.get(
   })
 );
 
-// Update notification preferences
+/**
+ * @swagger
+ * /api/messages/preferences:
+ *   put:
+ *     tags: [Messages]
+ *     summary: Update notification preferences
+ *     description: Update notification preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/preferences',
   authenticateToken,
@@ -750,7 +864,25 @@ router.put(
 // MENTIONS
 // ---------------
 
-// Get mentions in a message
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/mentions:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get mentions in a message
+ *     description: Get mentions in a message.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/messages/:messageId/mentions',
   authenticateToken,
@@ -769,7 +901,19 @@ router.get(
   })
 );
 
-// Get my mentions (messages where I'm mentioned)
+/**
+ * @swagger
+ * /api/messages/mentions/me:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get my mentions (messages where I'm mentioned)
+ *     description: Get my mentions (messages where I'm mentioned).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/mentions/me',
   authenticateToken,
@@ -787,7 +931,25 @@ router.get(
 // REACTIONS
 // ---------------
 
-// Get reactions for a message
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/reactions:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get reactions for a message
+ *     description: Get reactions for a message.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/messages/:messageId/reactions',
   authenticateToken,
@@ -806,7 +968,25 @@ router.get(
   })
 );
 
-// Add reaction to a message
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/reactions:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Add reaction to a message
+ *     description: Add reaction to a message.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/messages/:messageId/reactions',
   authenticateToken,
@@ -837,7 +1017,30 @@ router.post(
   })
 );
 
-// Remove reaction from a message
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/reactions/{reaction}:
+ *   delete:
+ *     tags: [Messages]
+ *     summary: Remove reaction from a message
+ *     description: Remove reaction from a message.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: reaction
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/messages/:messageId/reactions/:reaction',
   authenticateToken,
@@ -863,7 +1066,25 @@ router.delete(
 // SUBSCRIPTIONS
 // ---------------
 
-// Get subscription for a project
+/**
+ * @swagger
+ * /api/messages/projects/{projectId}/subscription:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get subscription for a project
+ *     description: Get subscription for a project.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/projects/:projectId/subscription',
   authenticateToken,
@@ -882,7 +1103,25 @@ router.get(
   })
 );
 
-// Update subscription preferences
+/**
+ * @swagger
+ * /api/messages/projects/{projectId}/subscription:
+ *   put:
+ *     tags: [Messages]
+ *     summary: Update subscription preferences
+ *     description: Update subscription preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/projects/:projectId/subscription',
   authenticateToken,
@@ -907,7 +1146,25 @@ router.put(
   })
 );
 
-// Mute a project
+/**
+ * @swagger
+ * /api/messages/projects/{projectId}/mute:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Mute a project
+ *     description: Mute a project.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/projects/:projectId/mute',
   authenticateToken,
@@ -933,7 +1190,25 @@ router.post(
   })
 );
 
-// Unmute a project
+/**
+ * @swagger
+ * /api/messages/projects/{projectId}/unmute:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Unmute a project
+ *     description: Unmute a project.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/projects/:projectId/unmute',
   authenticateToken,
@@ -953,7 +1228,25 @@ router.post(
 // READ RECEIPTS
 // ---------------
 
-// Mark message as read (with receipt tracking)
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/read:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Mark message as read (with receipt tracking)
+ *     description: Mark message as read (with receipt tracking).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/messages/:messageId/read',
   authenticateToken,
@@ -969,7 +1262,19 @@ router.post(
   })
 );
 
-// Mark multiple messages as read
+/**
+ * @swagger
+ * /api/messages/messages/read-bulk:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Mark multiple messages as read
+ *     description: Mark multiple messages as read.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/messages/read-bulk',
   authenticateToken,
@@ -985,7 +1290,25 @@ router.post(
   })
 );
 
-// Get read receipts for a message (admin only)
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/read-receipts:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get read receipts for a message (admin only)
+ *     description: Get read receipts for a message (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/messages/:messageId/read-receipts',
   authenticateToken,
@@ -1002,7 +1325,19 @@ router.get(
   })
 );
 
-// Get unread count for user
+/**
+ * @swagger
+ * /api/messages/unread-count:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get unread count for user
+ *     description: Get unread count for user.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/unread-count',
   authenticateToken,
@@ -1012,7 +1347,25 @@ router.get(
   })
 );
 
-// Get unread count for a specific thread
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/unread-count:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get unread count for a specific thread
+ *     description: Get unread count for a specific thread.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/threads/:threadId/unread-count',
   authenticateToken,
@@ -1032,7 +1385,25 @@ router.get(
 // PINNED MESSAGES
 // ---------------
 
-// Get pinned messages in a thread
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/pinned:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get pinned messages in a thread
+ *     description: Get pinned messages in a thread.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/threads/:threadId/pinned',
   authenticateToken,
@@ -1048,7 +1419,25 @@ router.get(
   })
 );
 
-// Pin a message (admin only)
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/pin:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Pin a message (admin only)
+ *     description: Pin a message (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/messages/:messageId/pin',
   authenticateToken,
@@ -1072,7 +1461,25 @@ router.post(
   })
 );
 
-// Unpin a message (admin only)
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}/pin:
+ *   delete:
+ *     tags: [Messages]
+ *     summary: Unpin a message (admin only)
+ *     description: Unpin a message (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/messages/:messageId/pin',
   authenticateToken,
@@ -1100,7 +1507,25 @@ router.delete(
 // MESSAGE EDITING/DELETION
 // ---------------
 
-// Edit a message
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}:
+ *   put:
+ *     tags: [Messages]
+ *     summary: Edit a message
+ *     description: Edit a message.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/messages/:messageId',
   authenticateToken,
@@ -1129,7 +1554,25 @@ router.put(
   })
 );
 
-// Soft delete a message
+/**
+ * @swagger
+ * /api/messages/messages/{messageId}:
+ *   delete:
+ *     tags: [Messages]
+ *     summary: Soft delete a message
+ *     description: Soft delete a message.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/messages/:messageId',
   authenticateToken,
@@ -1156,7 +1599,25 @@ router.delete(
 // THREAD ARCHIVING
 // ---------------
 
-// Archive a thread (admin only)
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/archive:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Archive a thread (admin only)
+ *     description: Archive a thread (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/threads/:threadId/archive',
   authenticateToken,
@@ -1174,7 +1635,25 @@ router.post(
   })
 );
 
-// Unarchive a thread (admin only)
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/unarchive:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Unarchive a thread (admin only)
+ *     description: Unarchive a thread (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/threads/:threadId/unarchive',
   authenticateToken,
@@ -1192,7 +1671,19 @@ router.post(
   })
 );
 
-// Get archived threads (admin only)
+/**
+ * @swagger
+ * /api/messages/threads/archived:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get archived threads (admin only)
+ *     description: Get archived threads (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/threads/archived',
   authenticateToken,
@@ -1207,7 +1698,19 @@ router.get(
 // SEARCH
 // ---------------
 
-// Search messages
+/**
+ * @swagger
+ * /api/messages/search:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Search messages
+ *     description: Search messages.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/search',
   authenticateToken,
@@ -1237,7 +1740,25 @@ router.get(
 // INTERNAL MESSAGES (Admin Only)
 // ---------------
 
-// Send internal message (admin-only, not visible to clients)
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/internal:
+ *   post:
+ *     tags: [Messages]
+ *     summary: Send internal message (admin-only, not visible to clients)
+ *     description: Send internal message (admin-only, not visible to clients).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/threads/:threadId/internal',
   authenticateToken,
@@ -1284,7 +1805,25 @@ router.post(
   })
 );
 
-// Get internal messages for a thread (admin only)
+/**
+ * @swagger
+ * /api/messages/threads/{threadId}/internal:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get internal messages for a thread (admin only)
+ *     description: Get internal messages for a thread (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: threadId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/threads/:threadId/internal',
   authenticateToken,
@@ -1313,7 +1852,19 @@ router.get(
 // ADMIN ENDPOINTS
 // ===================================
 
-// Get message analytics (admin only)
+/**
+ * @swagger
+ * /api/messages/analytics:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Get message analytics (admin only)
+ *     description: Get message analytics (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/analytics',
   authenticateToken,
@@ -1359,7 +1910,25 @@ router.get(
 // ATTACHMENT DOWNLOAD
 // ===================================
 
-// Download a message attachment
+/**
+ * @swagger
+ * /api/messages/attachments/{filename}/download:
+ *   get:
+ *     tags: [Messages]
+ *     summary: Download a message attachment
+ *     description: Download a message attachment.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/attachments/:filename/download',
   authenticateToken,
