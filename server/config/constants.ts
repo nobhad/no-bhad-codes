@@ -288,6 +288,16 @@ export const FILE_UPLOAD = {
 } as const;
 
 // ============================================
+// STRIPE WEBHOOK IDEMPOTENCY
+// ============================================
+
+/** Time-to-live for processed webhook event IDs (24 hours) */
+export const STRIPE_IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** Interval between cleanup sweeps of expired event IDs (1 hour) */
+export const STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+// ============================================
 // VALIDATION HELPERS
 // ============================================
 

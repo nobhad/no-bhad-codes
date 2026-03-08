@@ -29,8 +29,119 @@ import {
   sendSuccess,
   sendCreated
 } from '../utils/api-response.js';
+import { getBaseUrl } from '../config/environment.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const AD_HOC_TITLE_MAX_LENGTH = 200;
+const AD_HOC_DESCRIPTION_MAX_LENGTH = 10000;
+const AD_HOC_TYPE_VALUES = [
+  'bug-fix', 'feature', 'content-update', 'design-change',
+  'performance', 'security', 'maintenance', 'other'
+];
+const AD_HOC_STATUS_VALUES = [
+  'submitted', 'reviewing', 'quoted', 'approved', 'declined',
+  'in-progress', 'completed', 'cancelled'
+];
+const AD_HOC_PRIORITY_VALUES = ['low', 'medium', 'high', 'urgent'];
+const AD_HOC_URGENCY_VALUES = ['low', 'normal', 'high', 'critical'];
+const MAX_ESTIMATED_HOURS = 10000;
+const MAX_RATE = 10000;
+const MAX_QUOTED_PRICE = 1000000;
+const TIME_ENTRY_USERNAME_MAX_LENGTH = 100;
+const TIME_ENTRY_DESCRIPTION_MAX_LENGTH = 5000;
+
+const AdHocValidationSchemas = {
+  clientSubmit: {
+    projectId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    title: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: AD_HOC_TITLE_MAX_LENGTH }
+    ],
+    description: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: AD_HOC_DESCRIPTION_MAX_LENGTH }
+    ],
+    requestType: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: AD_HOC_TYPE_VALUES }
+    ],
+    priority: { type: 'string' as const, allowedValues: AD_HOC_PRIORITY_VALUES },
+    urgency: { type: 'string' as const, allowedValues: AD_HOC_URGENCY_VALUES },
+    attachmentFileId: { type: 'number' as const, min: 1 }
+  } as ValidationSchema,
+
+  adminCreate: {
+    projectId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    clientId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    title: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: AD_HOC_TITLE_MAX_LENGTH }
+    ],
+    description: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: AD_HOC_DESCRIPTION_MAX_LENGTH }
+    ],
+    requestType: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: AD_HOC_TYPE_VALUES }
+    ],
+    status: { type: 'string' as const, allowedValues: AD_HOC_STATUS_VALUES },
+    priority: { type: 'string' as const, allowedValues: AD_HOC_PRIORITY_VALUES },
+    urgency: { type: 'string' as const, allowedValues: AD_HOC_URGENCY_VALUES },
+    estimatedHours: { type: 'number' as const, min: 0, max: MAX_ESTIMATED_HOURS },
+    flatRate: { type: 'number' as const, min: 0, max: MAX_QUOTED_PRICE },
+    hourlyRate: { type: 'number' as const, min: 0, max: MAX_RATE },
+    quotedPrice: { type: 'number' as const, min: 0, max: MAX_QUOTED_PRICE },
+    attachmentFileId: { type: 'number' as const, min: 1 }
+  } as ValidationSchema,
+
+  adminUpdate: {
+    status: { type: 'string' as const, allowedValues: AD_HOC_STATUS_VALUES },
+    requestType: { type: 'string' as const, allowedValues: AD_HOC_TYPE_VALUES },
+    priority: { type: 'string' as const, allowedValues: AD_HOC_PRIORITY_VALUES },
+    urgency: { type: 'string' as const, allowedValues: AD_HOC_URGENCY_VALUES },
+    title: { type: 'string' as const, maxLength: AD_HOC_TITLE_MAX_LENGTH },
+    description: { type: 'string' as const, maxLength: AD_HOC_DESCRIPTION_MAX_LENGTH },
+    estimatedHours: { type: 'number' as const, min: 0, max: MAX_ESTIMATED_HOURS },
+    flatRate: { type: 'number' as const, min: 0, max: MAX_QUOTED_PRICE },
+    hourlyRate: { type: 'number' as const, min: 0, max: MAX_RATE },
+    quotedPrice: { type: 'number' as const, min: 0, max: MAX_QUOTED_PRICE },
+    autoCreateInvoice: { type: 'boolean' as const }
+  } as ValidationSchema,
+
+  logTime: {
+    userName: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: TIME_ENTRY_USERNAME_MAX_LENGTH }
+    ],
+    hours: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 0.01, max: MAX_ESTIMATED_HOURS }
+    ],
+    date: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: 20 }
+    ],
+    description: { type: 'string' as const, maxLength: TIME_ENTRY_DESCRIPTION_MAX_LENGTH },
+    billable: { type: 'boolean' as const },
+    hourlyRate: { type: 'number' as const, min: 0, max: MAX_RATE }
+  } as ValidationSchema
+};
 
 function getInvoiceService() {
   return InvoiceService.getInstance();
@@ -202,6 +313,7 @@ router.get(
 router.post(
   '/my-requests',
   authenticateToken,
+  validateRequest(AdHocValidationSchemas.clientSubmit, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const clientId = req.user?.id;
     const { projectId, title, description, requestType, priority, urgency, attachmentFileId } =
@@ -413,6 +525,7 @@ router.post(
   '/:requestId/time-entries',
   authenticateToken,
   requireAdmin,
+  validateRequest(AdHocValidationSchemas.logTime, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     if (Number.isNaN(requestId)) {
@@ -460,6 +573,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(AdHocValidationSchemas.adminCreate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const {
       projectId,
@@ -543,6 +657,7 @@ router.put(
   '/:requestId',
   authenticateToken,
   requireAdmin,
+  validateRequest(AdHocValidationSchemas.adminUpdate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const requestId = Number(req.params.requestId);
     const {
@@ -669,7 +784,7 @@ router.post(
 
     const clientName = request.clientName || 'there';
     const projectName = request.projectName || 'your project';
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const portalUrl = `${baseUrl}/client/portal`;
 
     const { emailService } = await import('../services/email-service.js');

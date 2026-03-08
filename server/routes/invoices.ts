@@ -33,8 +33,46 @@ import { clientRoutesRouter } from './invoices/client-routes.js';
 import { batchRouter } from './invoices/batch.js';
 import { agingRouter } from './invoices/aging.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './invoices/helpers.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const INVOICE_STATUS_VALUES = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
+
+const InvoiceParentValidationSchemas = {
+  milestoneInvoice: {
+    projectId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    clientId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    lineItems: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1 }
+    ]
+  } as ValidationSchema,
+
+  linkMilestone: {
+    milestoneId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ]
+  } as ValidationSchema,
+
+  updateInvoice: {
+    status: {
+      type: 'string' as const,
+      allowedValues: INVOICE_STATUS_VALUES
+    }
+  } as ValidationSchema
+};
 
 router.use(coreRouter);
 router.use(depositsRouter);
@@ -63,6 +101,7 @@ router.post(
   '/milestone/:milestoneId',
   authenticateToken,
   requireAdmin,
+  validateRequest(InvoiceParentValidationSchemas.milestoneInvoice, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const milestoneId = parseInt(req.params.milestoneId, 10);
 
@@ -147,6 +186,7 @@ router.put(
   '/:id/link-milestone',
   authenticateToken,
   requireAdmin,
+  validateRequest(InvoiceParentValidationSchemas.linkMilestone),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
     const { milestoneId } = req.body;
@@ -196,6 +236,7 @@ router.put(
   '/:id',
   authenticateToken,
   requireAdmin,
+  validateRequest(InvoiceParentValidationSchemas.updateInvoice, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 

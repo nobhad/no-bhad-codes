@@ -11,7 +11,7 @@
  */
 
 // Environment configuration (validated env vars)
-export { default as environment, validateConfig, getConfigSummary } from './environment.js';
+export { default as environment, validateConfig, getConfigSummary, getBaseUrl, getAdminUrl, getPortalUrl } from './environment.js';
 export type { AppConfig } from './environment.js';
 
 // Business configuration (company info, branding)

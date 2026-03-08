@@ -17,8 +17,101 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { BUSINESS_INFO } from '../config/business.js';
 import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
+import { getBaseUrl } from '../config/environment.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const CONTRACT_CONTENT_MAX_LENGTH = 100000;
+const CONTRACT_NAME_MAX_LENGTH = 200;
+const CONTRACT_STATUS_VALUES = ['draft', 'sent', 'signed', 'expired', 'cancelled', 'active', 'renewed'];
+const TEMPLATE_TYPE_VALUES = ['service-agreement', 'nda', 'scope-of-work', 'maintenance', 'custom'];
+const BULK_DELETE_MAX_IDS = 100;
+
+const ContractValidationSchemas = {
+  create: {
+    projectId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    clientId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    content: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: CONTRACT_CONTENT_MAX_LENGTH }
+    ],
+    status: {
+      type: 'string' as const,
+      allowedValues: CONTRACT_STATUS_VALUES
+    }
+  } as ValidationSchema,
+
+  update: {
+    content: { type: 'string' as const, maxLength: CONTRACT_CONTENT_MAX_LENGTH },
+    status: {
+      type: 'string' as const,
+      allowedValues: CONTRACT_STATUS_VALUES
+    }
+  } as ValidationSchema,
+
+  fromTemplate: {
+    templateId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    projectId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    clientId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    status: {
+      type: 'string' as const,
+      allowedValues: CONTRACT_STATUS_VALUES
+    },
+    expiresAt: { type: 'string' as const, maxLength: 30 }
+  } as ValidationSchema,
+
+  bulkDelete: {
+    contractIds: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: BULK_DELETE_MAX_IDS }
+    ]
+  } as ValidationSchema,
+
+  createTemplate: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: CONTRACT_NAME_MAX_LENGTH }
+    ],
+    type: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: TEMPLATE_TYPE_VALUES }
+    ],
+    content: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: CONTRACT_CONTENT_MAX_LENGTH }
+    ]
+  } as ValidationSchema,
+
+  updateTemplate: {
+    name: { type: 'string' as const, minLength: 1, maxLength: CONTRACT_NAME_MAX_LENGTH },
+    type: { type: 'string' as const, allowedValues: TEMPLATE_TYPE_VALUES },
+    content: { type: 'string' as const, maxLength: CONTRACT_CONTENT_MAX_LENGTH }
+  } as ValidationSchema,
+
+  amendment: {
+    content: { type: 'string' as const, maxLength: CONTRACT_CONTENT_MAX_LENGTH }
+  } as ValidationSchema
+};
 
 // ===================================
 // CONTRACT ENDPOINTS
@@ -58,6 +151,7 @@ router.post(
   '/bulk-delete',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.bulkDelete),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { contractIds } = req.body;
 
@@ -87,6 +181,7 @@ router.post(
   '/from-template',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.fromTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { templateId, projectId, clientId, status, expiresAt } = req.body;
 
@@ -185,6 +280,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.create, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { projectId, clientId, content, status } = req.body;
 
@@ -220,6 +316,7 @@ router.put(
   '/:contractId',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.update, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -292,7 +389,7 @@ router.post(
       );
     }
 
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
     const contractPreviewUrl = `${baseUrl}/api/projects/${contract.projectId}/contract/pdf`;
 
@@ -390,7 +487,7 @@ router.post(
       return errorResponse(res, 'No valid client email on file', 400, 'VALIDATION_ERROR');
     }
 
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = getBaseUrl();
     const signatureUrl = `${baseUrl}/sign-contract.html?token=${signatureToken}`;
     const contractPreviewUrl = `${baseUrl}/api/projects/${contract.projectId}/contract/pdf`;
     const expiresAt = p.contract_signature_expires_at as string | null;
@@ -488,6 +585,7 @@ router.post(
   '/:contractId/amendment',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.amendment, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const contractId = parseInt(req.params.contractId, 10);
 
@@ -694,6 +792,7 @@ router.post(
   '/templates',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.createTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { name, type, content } = req.body;
 
@@ -715,6 +814,7 @@ router.put(
   '/templates/:templateId',
   authenticateToken,
   requireAdmin,
+  validateRequest(ContractValidationSchemas.updateTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const templateId = parseInt(req.params.templateId, 10);
 

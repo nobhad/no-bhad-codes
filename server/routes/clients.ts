@@ -55,6 +55,27 @@ const ClientValidationSchemas = {
   },
   invite: {
     // No body params needed - client info comes from DB via :id param
+  },
+  updateProfile: {
+    contact_name: { type: 'string' as const, maxLength: 100 },
+    company_name: { type: 'string' as const, maxLength: 200 },
+    phone: { type: 'string' as const, maxLength: 30 }
+  },
+  changePassword: {
+    currentPassword: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: 128 }
+    ],
+    newPassword: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 8, maxLength: 128 }
+    ]
+  },
+  updateNotifications: {
+    messages: { type: 'boolean' as const },
+    status: { type: 'boolean' as const },
+    invoices: { type: 'boolean' as const },
+    weekly: { type: 'boolean' as const }
   }
 };
 
@@ -97,6 +118,7 @@ router.get(
 router.put(
   '/me',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.updateProfile, { allowUnknownFields: true }),
   invalidateCache(['clients']),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
@@ -139,6 +161,7 @@ router.put(
 router.put(
   '/me/password',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.changePassword),
   // Rate limit: 5 password change attempts per hour per user to prevent abuse
   rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -193,6 +216,7 @@ router.put(
 router.put(
   '/me/notifications',
   authenticateToken,
+  validateRequest(ClientValidationSchemas.updateNotifications, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user!.type !== 'client') {
       return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');

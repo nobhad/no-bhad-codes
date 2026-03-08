@@ -12,8 +12,144 @@ import { logger } from '../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
 import { canAccessProject, isUserAdmin } from '../middleware/access-control.js';
 import { getDatabase } from '../database/init.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const DELIVERABLE_TITLE_MAX_LENGTH = 200;
+const DELIVERABLE_DESCRIPTION_MAX_LENGTH = 5000;
+const FILE_NAME_MAX_LENGTH = 255;
+const FILE_PATH_MAX_LENGTH = 500;
+const FILE_TYPE_MAX_LENGTH = 100;
+const COMMENT_TEXT_MAX_LENGTH = 5000;
+const ELEMENT_NAME_MAX_LENGTH = 200;
+const REVIEW_FEEDBACK_MAX_LENGTH = 10000;
+const CHANGE_NOTES_MAX_LENGTH = 2000;
+const REVISION_REASON_MAX_LENGTH = 5000;
+const DELIVERABLE_TYPE_VALUES = [
+  'mockup', 'wireframe', 'prototype', 'design', 'logo',
+  'icon', 'illustration', 'document', 'code', 'other'
+];
+const APPROVAL_STATUS_VALUES = ['pending', 'approved', 'revision_needed'];
+const REVIEW_DECISION_VALUES = ['approved', 'revision_needed', 'rejected'];
+
+const DeliverableValidationSchemas = {
+  create: {
+    projectId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    title: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: DELIVERABLE_TITLE_MAX_LENGTH }
+    ],
+    type: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: DELIVERABLE_TYPE_VALUES }
+    ],
+    createdById: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    description: { type: 'string' as const, maxLength: DELIVERABLE_DESCRIPTION_MAX_LENGTH },
+    tags: { type: 'array' as const, maxLength: 20 },
+    reviewDeadline: { type: 'string' as const, maxLength: 30 },
+    roundNumber: { type: 'number' as const, min: 1, max: 100 }
+  } as ValidationSchema,
+
+  update: {
+    title: { type: 'string' as const, minLength: 1, maxLength: DELIVERABLE_TITLE_MAX_LENGTH },
+    description: { type: 'string' as const, maxLength: DELIVERABLE_DESCRIPTION_MAX_LENGTH },
+    type: { type: 'string' as const, allowedValues: DELIVERABLE_TYPE_VALUES },
+    status: {
+      type: 'string' as const,
+      allowedValues: ['draft', 'in_review', 'revision_needed', 'approved', 'locked']
+    }
+  } as ValidationSchema,
+
+  uploadVersion: {
+    filePath: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: FILE_PATH_MAX_LENGTH }
+    ],
+    fileName: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: FILE_NAME_MAX_LENGTH }
+    ],
+    uploadedById: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    fileSize: { type: 'number' as const, min: 0 },
+    fileType: { type: 'string' as const, maxLength: FILE_TYPE_MAX_LENGTH },
+    changeNotes: { type: 'string' as const, maxLength: CHANGE_NOTES_MAX_LENGTH }
+  } as ValidationSchema,
+
+  addComment: {
+    authorId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    text: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: COMMENT_TEXT_MAX_LENGTH }
+    ],
+    x: { type: 'number' as const },
+    y: { type: 'number' as const },
+    annotationType: { type: 'string' as const, maxLength: 50 },
+    elementId: { type: 'string' as const, maxLength: 50 }
+  } as ValidationSchema,
+
+  createElement: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: ELEMENT_NAME_MAX_LENGTH }
+    ],
+    description: { type: 'string' as const, maxLength: DELIVERABLE_DESCRIPTION_MAX_LENGTH }
+  } as ValidationSchema,
+
+  updateElementApproval: {
+    status: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: APPROVAL_STATUS_VALUES }
+    ]
+  } as ValidationSchema,
+
+  createReview: {
+    reviewerId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    decision: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: REVIEW_DECISION_VALUES }
+    ],
+    feedback: { type: 'string' as const, maxLength: REVIEW_FEEDBACK_MAX_LENGTH },
+    elementsReviewed: { type: 'array' as const, maxLength: 100 }
+  } as ValidationSchema,
+
+  requestRevision: {
+    reason: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: REVISION_REASON_MAX_LENGTH }
+    ],
+    reviewedById: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ]
+  } as ValidationSchema,
+
+  lockDeliverable: {
+    reviewedById: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ]
+  } as ValidationSchema
+};
 
 // All deliverable routes require authentication
 router.use(authenticateToken);
@@ -81,14 +217,10 @@ router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/deliverables
  * Create new deliverable
  */
-router.post('/', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { projectId, title, description, type, createdById, tags, reviewDeadline, roundNumber } =
       req.body;
-
-    if (!projectId || !title || !type || !createdById) {
-      return errorResponse(res, 'Missing required fields', 400, 'VALIDATION_ERROR');
-    }
 
     const parsedProjectId = parseInt(projectId, 10);
     if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
@@ -206,7 +338,7 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
  * PUT /api/v1/deliverables/:id
  * Update deliverable
  */
-router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -238,7 +370,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
  * Approve and lock deliverable (final approval)
  * Also archives the deliverable file to the Files tab
  */
-router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDeliverable, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -333,7 +465,7 @@ router.post('/:id/lock', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/deliverables/:id/revision
  * Request revision on deliverable
  */
-router.post('/:id/revision', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.requestRevision, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -412,7 +544,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/deliverables/:id/versions
  * Upload new version
  */
-router.post('/:id/versions', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.uploadVersion, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -521,7 +653,7 @@ router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Respon
  * POST /api/v1/deliverables/:id/comments
  * Add comment or annotation
  */
-router.post('/:id/comments', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addComment, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -689,7 +821,7 @@ router.delete(
  * POST /api/v1/deliverables/:id/elements
  * Create design element
  */
-router.post('/:id/elements', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.createElement, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
@@ -756,6 +888,7 @@ router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => 
  */
 router.patch(
   '/:deliverableId/elements/:elementId/approval',
+  validateRequest(DeliverableValidationSchemas.updateElementApproval),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { deliverableId, elementId } = req.params;
@@ -808,7 +941,7 @@ router.patch(
  * POST /api/v1/deliverables/:id/reviews
  * Create review
  */
-router.post('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createReview, { allowUnknownFields: true }), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);

@@ -41,10 +41,16 @@ export interface LogEntry {
 }
 
 /**
+ * Log output format type
+ */
+export type LogFormat = 'json' | 'text';
+
+/**
  * Logger configuration interface
  */
 export interface LoggerConfig {
   level: LogLevelType;
+  format: LogFormat;
   console: boolean;
   file: boolean;
   filePath?: string;
@@ -63,15 +69,19 @@ export class LoggerService {
   private currentLogLevel: number;
 
   constructor() {
+    const isProduction = config.NODE_ENV === 'production';
+    const defaultFormat: LogFormat = isProduction ? 'json' : 'text';
+
     this.config = {
       level: this.parseLogLevel(config.LOG_LEVEL || 'info'),
+      format: (config.LOG_FORMAT as LogFormat) || defaultFormat,
       console: true,
       file: true,
       filePath: config.LOG_FILE || './logs/app.log',
       errorFilePath: config.LOG_ERROR_FILE || './logs/error.log',
       maxFileSize: config.LOG_MAX_SIZE || '10m',
       maxFiles: config.LOG_MAX_FILES || '14d',
-      enableColors: config.NODE_ENV === 'development'
+      enableColors: !isProduction
     };
 
     this.currentLogLevel = LogLevel[this.config.level];
@@ -109,9 +119,18 @@ export class LoggerService {
   }
 
   /**
-   * Format log entry for output
+   * Format log entry based on configured format (json or text)
    */
-  private formatLogEntry(entry: LogEntry): string {
+  private formatEntry(entry: LogEntry): string {
+    return this.config.format === 'json'
+      ? this.formatJsonEntry(entry)
+      : this.formatTextEntry(entry);
+  }
+
+  /**
+   * Format log entry as human-readable text (development)
+   */
+  private formatTextEntry(entry: LogEntry): string {
     const { timestamp, level, message, category, metadata, error } = entry;
 
     let formatted = `${timestamp} [${level}]`;
@@ -131,6 +150,52 @@ export class LoggerService {
     }
 
     return formatted;
+  }
+
+  /**
+   * Format log entry as structured JSON (production)
+   */
+  private formatJsonEntry(entry: LogEntry): string {
+    const { timestamp, level, message, category, metadata, error, userId, requestId, ip, userAgent } = entry;
+
+    const jsonObj: Record<string, unknown> = {
+      timestamp,
+      level,
+      message
+    };
+
+    if (category) {
+      jsonObj.category = category;
+    }
+
+    if (requestId) {
+      jsonObj.requestId = requestId;
+    }
+
+    if (userId) {
+      jsonObj.userId = userId;
+    }
+
+    if (ip) {
+      jsonObj.ip = ip;
+    }
+
+    if (userAgent) {
+      jsonObj.userAgent = userAgent;
+    }
+
+    if (metadata && Object.keys(metadata).length > 0) {
+      jsonObj.metadata = metadata;
+    }
+
+    if (error) {
+      jsonObj.error = {
+        message: error.message,
+        stack: error.stack
+      };
+    }
+
+    return JSON.stringify(jsonObj);
   }
 
   /**
@@ -156,7 +221,7 @@ export class LoggerService {
   private async writeToFile(entry: LogEntry): Promise<void> {
     if (!this.config.file) return;
 
-    const formatted = this.formatLogEntry(entry);
+    const formatted = this.formatEntry(entry);
     const filePath =
       entry.level === 'ERROR' && this.config.errorFilePath
         ? this.config.errorFilePath
@@ -272,15 +337,17 @@ export class LoggerService {
 
     // Console output
     if (this.config.console) {
-      const formatted = this.formatLogEntry(entry);
-      const colorized = this.colorizeLevel(entry.level, formatted);
+      const formatted = this.formatEntry(entry);
+      const output = this.config.format === 'json'
+        ? formatted
+        : this.colorizeLevel(entry.level, formatted);
 
       if (entry.level === 'ERROR') {
-        console.error(colorized);
+        console.error(output);
       } else if (entry.level === 'WARN') {
-        console.warn(colorized);
+        console.warn(output);
       } else {
-        console.log(colorized);
+        console.log(output);
       }
     }
 
