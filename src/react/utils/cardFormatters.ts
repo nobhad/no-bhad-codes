@@ -74,3 +74,23 @@ export function getDueDaysText(dueDate: string | undefined): string {
   }
   return `Due in ${diffDays} days`;
 }
+
+/**
+ * Count items grouped by a status field
+ * @param items - Array of objects with a status-like field
+ * @param key - The field name to group by (default: 'status')
+ * @returns Record mapping each status value to its count
+ */
+export function countByField<T extends object>(
+  items: T[],
+  key: keyof T = 'status' as keyof T
+): Record<string, number> {
+  return items.reduce(
+    (acc, item) => {
+      const value = String(item[key] ?? 'unknown');
+      acc[value] = (acc[value] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+}

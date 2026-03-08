@@ -9,6 +9,45 @@ export type { FilterConfig };
 export type { FilterOption } from '../../admin/shared/filterConfigs';
 
 // ============================================
+// FILTER FACTORY
+// ============================================
+
+/**
+ * Creates a reusable filter function for portal list views.
+ * Checks search text against specified string fields and
+ * matches filter values against item properties.
+ *
+ * @param searchFields - Array of field names to search against
+ * @param filterMappings - Map of filter key to item field (default: { status: 'status' })
+ */
+export function createFilterFn<T>(
+  searchFields: (keyof T)[],
+  filterMappings: Record<string, keyof T> = { status: 'status' as keyof T }
+): (item: T, filters: Record<string, string>, search: string) => boolean {
+  return (item: T, filters: Record<string, string>, search: string): boolean => {
+    // Search filter
+    if (search) {
+      const s = search.toLowerCase();
+      const matchesSearch = searchFields.some((field) => {
+        const value = item[field];
+        return typeof value === 'string' && value.toLowerCase().includes(s);
+      });
+      if (!matchesSearch) return false;
+    }
+
+    // Filter key matching
+    for (const [filterKey, itemField] of Object.entries(filterMappings)) {
+      const filterValue = filters[filterKey];
+      if (filterValue && filterValue !== 'all') {
+        if (String(item[itemField]) !== filterValue) return false;
+      }
+    }
+
+    return true;
+  };
+}
+
+// ============================================
 // SHARED OPTIONS
 // ============================================
 
