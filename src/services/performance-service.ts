@@ -533,9 +533,10 @@ export class PerformanceService {
   }
 
   /**
-   * Clear metrics and alerts
+   * Clear metrics and alerts, stopping any active monitoring
    */
   reset(): void {
+    this.stopMonitoring();
     this.metrics = {};
     this.alerts = [];
 

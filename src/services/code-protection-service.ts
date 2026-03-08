@@ -675,4 +675,16 @@ export class CodeProtectionService {
       this.setupProtection();
     }
   }
+
+  /**
+   * Full cleanup: tears down protection, clears all intervals, and resets state.
+   * Call this when the service is no longer needed to prevent memory leaks.
+   */
+  dispose(): void {
+    this.teardownProtection();
+    this.stopMonitoring();
+    this.isEnabled = false;
+    this.config.enabled = false;
+    this.violations = [];
+  }
 }
