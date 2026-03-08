@@ -19,6 +19,7 @@ import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
 import { getMetricsSummary } from '../observability/metrics.js';
 import { getCurrentTraceId } from '../observability/tracing.js';
+import { getApiMetrics } from '../middleware/logger.js';
 
 const router = Router();
 
@@ -254,6 +255,26 @@ router.get('/db', async (_req: Request, res: Response) => {
       error: (err as Error).message
     });
   }
+});
+
+/**
+ * API metrics endpoint
+ * GET /health/metrics
+ *
+ * Returns P50/P95/P99 latency percentiles and error rates
+ * from a rolling 10-minute window. Broken down by route.
+ */
+router.get('/metrics', (_req: Request, res: Response) => {
+  const startTime = Date.now();
+  const system = getMetricsSummary();
+  const api = getApiMetrics();
+
+  res.set('X-Response-Time', `${Date.now() - startTime}ms`);
+  res.status(200).json({
+    timestamp: new Date().toISOString(),
+    system,
+    api
+  });
 });
 
 export default router;
