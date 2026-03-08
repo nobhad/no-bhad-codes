@@ -21,6 +21,7 @@ import { IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { useFadeIn, useStaggerChildren } from '@react/hooks/useGsap';
 import { UI_LIMITS } from '@react/config/portal-constants';
+import { formatFileSize } from '@react/utils/cardFormatters';
 import type { Message, MessageThread as MessageThreadType, MessageAttachment } from './types';
 
 // ============================================================================
@@ -57,14 +58,6 @@ function formatMessageTime(dateString: string): string {
   }
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
 /**

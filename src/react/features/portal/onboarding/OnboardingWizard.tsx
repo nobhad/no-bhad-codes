@@ -27,6 +27,8 @@ import type {
   StepValidationResult
 } from './types';
 import { ONBOARDING_STEPS, DRAFT_STORAGE_KEY, DRAFT_SAVE_INTERVAL } from './types';
+import { usePortalFetch } from '@react/hooks/usePortalFetch';
+import { validateEmail } from '../../../../../shared/validation/validators';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -47,8 +49,11 @@ function validateStep(step: OnboardingStep, data: Partial<OnboardingFormData>): 
     }
     if (!basicInfo?.contactEmail?.trim()) {
       errors.push({ field: 'contactEmail', message: 'Email address is required' });
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(basicInfo.contactEmail)) {
-      errors.push({ field: 'contactEmail', message: 'Please enter a valid email address' });
+    } else {
+      const emailResult = validateEmail(basicInfo.contactEmail, { allowDisposable: true });
+      if (!emailResult.isValid) {
+        errors.push({ field: 'contactEmail', message: emailResult.error || 'Please enter a valid email address' });
+      }
     }
     break;
   }
@@ -109,6 +114,7 @@ export function OnboardingWizard({
 }: OnboardingWizardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const stepContainerRef = useRef<HTMLDivElement>(null);
+  const { buildHeaders } = usePortalFetch({ getAuthToken });
 
   // State
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('basic-info');
@@ -136,13 +142,7 @@ export function OnboardingWizard({
 
     try {
       // Try to load from API first
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      const headers = buildHeaders();
 
       const response = await fetch(API_ENDPOINTS.ONBOARDING, {
         method: 'GET',
@@ -191,7 +191,7 @@ export function OnboardingWizard({
     } finally {
       setIsLoading(false);
     }
-  }, [getAuthToken]);
+  }, [buildHeaders]);
 
   /**
    * Save progress to localStorage
@@ -218,13 +218,7 @@ export function OnboardingWizard({
       }
 
       try {
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-        const token = getAuthToken?.();
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
+        const headers = buildHeaders();
 
         const progress: OnboardingProgress = {
           currentStep,
@@ -266,7 +260,7 @@ export function OnboardingWizard({
         setIsSaving(false);
       }
     },
-    [currentStep, completedSteps, formData, getAuthToken, saveDraftToLocal, showNotification]
+    [currentStep, completedSteps, formData, buildHeaders, saveDraftToLocal, showNotification]
   );
 
   /**
@@ -284,13 +278,7 @@ export function OnboardingWizard({
     setIsSubmitting(true);
 
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      const headers = buildHeaders();
 
       const response = await fetch(API_ENDPOINTS.ONBOARDING_COMPLETE, {
         method: 'POST',
@@ -317,7 +305,7 @@ export function OnboardingWizard({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, getAuthToken, onComplete, showNotification]);
+  }, [formData, buildHeaders, onComplete, showNotification]);
 
   /**
    * Update form data for a step

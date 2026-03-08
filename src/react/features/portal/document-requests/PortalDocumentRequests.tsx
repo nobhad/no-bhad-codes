@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FileText } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
@@ -15,11 +15,8 @@ import { PORTAL_DOCREQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { DocumentRequestCard, type DocumentRequest } from './DocumentRequestCard';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { usePortalData } from '@react/hooks/usePortalFetch';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-
-const logger = createLogger('PortalDocumentRequests');
 
 export interface PortalDocumentRequestsProps extends PortalViewProps {}
 
@@ -29,70 +26,6 @@ interface DocumentRequestSummary {
   submitted: number;
   approved: number;
   rejected: number;
-}
-
-interface ApiResponse {
-  success?: boolean;
-  requests?: DocumentRequest[];
-  error?: string;
-}
-
-/**
- * Custom hook for fetching document requests
- */
-function useDocumentRequests(getAuthToken?: () => string | null) {
-  const [requests, setRequests] = useState<DocumentRequest[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRequests = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_REQUESTS_MY, {
-        headers,
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch document requests');
-      }
-
-      const data: ApiResponse = unwrapApiData<ApiResponse>(await response.json());
-
-      if (data.requests) {
-        setRequests(data.requests);
-      } else {
-        setRequests([]);
-      }
-    } catch (err) {
-      logger.error('[useDocumentRequests] Error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load document requests');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getAuthToken]);
-
-  useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
-
-  return {
-    requests,
-    isLoading,
-    error,
-    refetch: fetchRequests
-  };
 }
 
 /**
@@ -139,8 +72,13 @@ export function PortalDocumentRequests({
   showNotification
 }: PortalDocumentRequestsProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const { requests, isLoading, error, refetch } = useDocumentRequests(getAuthToken);
-  const summary = calculateSummary(requests);
+  const { data: requests, isLoading, error, refetch } = usePortalData<DocumentRequest[]>({
+    getAuthToken,
+    url: API_ENDPOINTS.DOCUMENT_REQUESTS_MY,
+    transform: (raw) => (raw as { requests?: DocumentRequest[] }).requests || []
+  });
+  const items = requests ?? [];
+  const summary = calculateSummary(items);
 
   // Table filters
   const {
@@ -155,7 +93,7 @@ export function PortalDocumentRequests({
     filterFn: filterDocRequest
   });
 
-  const filteredRequests = useMemo(() => applyFilters(requests), [applyFilters, requests]);
+  const filteredRequests = useMemo(() => applyFilters(items), [applyFilters, items]);
 
   // Handle upload success
   const handleUploadSuccess = useCallback((_requestId: number) => {
@@ -199,7 +137,7 @@ export function PortalDocumentRequests({
       ) : filteredRequests.length === 0 ? (
         <EmptyState
           icon={<FileText className="icon-lg" />}
-          message={requests.length === 0
+          message={items.length === 0
             ? 'No document requests yet. Requests will appear here when your project team needs documents from you.'
             : 'No document requests match the current filters.'
           }

@@ -4,47 +4,27 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { FileText } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { useTableFilters } from '@react/hooks/useTableFilters';
-import { PORTAL_PROPOSALS_FILTER_CONFIG } from '../shared/filterConfigs';
+import { PORTAL_PROPOSALS_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
 import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
+import { usePortalData } from '@react/hooks/usePortalFetch';
+import { countByField } from '@react/utils/cardFormatters';
 import { ProposalCard } from './ProposalCard';
 import type { PortalProposal, PortalProposalsResponse } from './types';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-
-const logger = createLogger('PortalProposals');
 
 export interface PortalProposalsProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-function filterProposal(
-  proposal: PortalProposal,
-  filters: Record<string, string>,
-  search: string
-): boolean {
-  if (search) {
-    const s = search.toLowerCase();
-    const matchesSearch =
-      proposal.title?.toLowerCase().includes(s) ||
-      proposal.projectType?.toLowerCase().includes(s) ||
-      proposal.selectedTier?.toLowerCase().includes(s);
-    if (!matchesSearch) return false;
-  }
-
-  if (filters.status && filters.status !== 'all') {
-    if (proposal.status !== filters.status) return false;
-  }
-
-  return true;
-}
+const filterProposal = createFilterFn<PortalProposal>(['title', 'projectType', 'selectedTier']);
 
 export function PortalProposals({
   getAuthToken,
@@ -53,9 +33,12 @@ export function PortalProposals({
   const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(0.05);
 
-  const [proposals, setProposals] = useState<PortalProposal[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: proposals, isLoading, error, refetch } = usePortalData<PortalProposal[]>({
+    getAuthToken,
+    url: API_ENDPOINTS.PROPOSALS_MY,
+    transform: (raw) => (raw as PortalProposalsResponse).proposals || []
+  });
+  const items = proposals ?? [];
 
   const {
     filterValues,
@@ -69,47 +52,9 @@ export function PortalProposals({
     filterFn: filterProposal
   });
 
-  const fetchProposals = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const filteredProposals = useMemo(() => applyFilters(items), [applyFilters, items]);
 
-    try {
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      const token = getAuthToken?.();
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const response = await fetch(API_ENDPOINTS.PROPOSALS_MY, {
-        method: 'GET',
-        headers,
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch proposals');
-
-      const json = await response.json();
-      const data: PortalProposalsResponse = json.data || json;
-      setProposals(data.proposals || []);
-    } catch (err) {
-      logger.error('Error fetching proposals:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load proposals');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getAuthToken]);
-
-  useEffect(() => {
-    fetchProposals();
-  }, [fetchProposals]);
-
-  const filteredProposals = useMemo(() => applyFilters(proposals), [applyFilters, proposals]);
-
-  const countByStatus = proposals.reduce(
-    (acc, p) => {
-      acc[p.status] = (acc[p.status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const countByStatus = countByField(items);
 
   return (
     <TableLayout
@@ -118,7 +63,7 @@ export function PortalProposals({
       stats={
         <TableStats
           items={[
-            { value: proposals.length, label: 'total' },
+            { value: items.length, label: 'total' },
             { value: countByStatus.sent || 0, label: 'sent', variant: 'pending' },
             { value: countByStatus.viewed || 0, label: 'viewed' },
             { value: countByStatus.accepted || 0, label: 'accepted', variant: 'completed' },
@@ -134,19 +79,19 @@ export function PortalProposals({
             values={filterValues}
             onChange={(key, value) => setFilter(key, value)}
           />
-          <IconButton action="refresh" onClick={fetchProposals} title="Refresh" loading={isLoading} />
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
         </>
       }
     >
       {isLoading ? (
         <LoadingState message="Loading proposals..." />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchProposals} />
+        <ErrorState message={error} onRetry={refetch} />
       ) : filteredProposals.length === 0 ? (
         <EmptyState
           icon={<FileText className="icon-lg" />}
           message={
-            proposals.length === 0
+            items.length === 0
               ? 'No proposals yet. Proposals will appear here once they are sent to you.'
               : 'No proposals match the current filters.'
           }

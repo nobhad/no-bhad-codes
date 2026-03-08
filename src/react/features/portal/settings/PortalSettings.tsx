@@ -59,7 +59,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
     profile,
     billing,
     notifications,
-    buildHeaders,
+    portalFetch,
     fetchProfile,
     handleProfileUpdate,
     handleBillingUpdate,
@@ -95,7 +95,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
         {/* Contacts sub-section under profile */}
         <div className="mt-6 pt-6 border-t border-[var(--portal-border)]">
           <ContactsSection
-            buildHeaders={buildHeaders}
+            portalFetch={portalFetch}
             showNotification={showNotification}
           />
         </div>

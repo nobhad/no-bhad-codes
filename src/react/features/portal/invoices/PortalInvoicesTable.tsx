@@ -26,6 +26,7 @@ import { usePortalInvoices } from '@react/hooks/usePortalInvoices';
 import { PORTAL_INVOICE_STATUS_CONFIG } from '../types';
 import { PORTAL_INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalInvoice, PortalViewProps } from '../types';
+import { formatCardDate, formatCurrency } from '@react/utils/cardFormatters';
 import { createLogger } from '../../../../utils/logger';
 import { downloadInvoicePdf } from '../../../../utils/file-download';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
@@ -33,28 +34,6 @@ import { buildEndpoint } from '../../../../constants/api-endpoints';
 const logger = createLogger('PortalInvoicesTable');
 
 interface PortalInvoicesTableProps extends PortalViewProps {}
-
-/**
- * Format currency for display
- */
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount);
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}
 
 /**
  * Filter invoice by search and status
@@ -271,11 +250,11 @@ export function PortalInvoicesTable({
                         {/* Stacked content for responsive */}
                         <span className="invoice-stacked">{invoice.invoice_number}</span>
                         <span className="amount-stacked">{formatCurrency(invoice.amount_total)}</span>
-                        <span className="date-stacked">{formatDate(invoice.created_at)}</span>
+                        <span className="date-stacked">{formatCardDate(invoice.created_at)}</span>
                       </div>
                     </PortalTableCell>
                     <PortalTableCell className="date-cell" label="Date">
-                      {formatDate(invoice.created_at)}
+                      {formatCardDate(invoice.created_at)}
                     </PortalTableCell>
                     <PortalTableCell className="amount-cell" label="Amount">
                       {formatCurrency(invoice.amount_total)}

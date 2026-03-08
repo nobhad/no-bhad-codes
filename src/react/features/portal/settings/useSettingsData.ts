@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
 import { createLogger } from '../../../../utils/logger';
+import { usePortalFetch } from '@react/hooks/usePortalFetch';
 import type {
   ClientProfile,
   BillingAddress,
@@ -40,28 +41,12 @@ interface UseSettingsDataReturn {
   profile: ClientProfile | null;
   billing: BillingAddress;
   notifications: NotificationPreferences;
-  buildHeaders: () => Record<string, string>;
+  portalFetch: <T>(url: string, options?: { method?: string; body?: unknown; headers?: Record<string, string>; unwrap?: boolean }) => Promise<T>;
   fetchProfile: () => Promise<void>;
   handleProfileUpdate: (updates: Partial<ClientProfile>) => Promise<boolean>;
   handleBillingUpdate: (updates: BillingAddress) => Promise<boolean>;
   handleNotificationsUpdate: (updates: NotificationPreferences) => Promise<boolean>;
 }
-
-/**
- * Builds request headers, optionally including an auth Bearer token.
- */
-const createBuildHeaders = (
-  getAuthTokenRef: React.RefObject<(() => string | null) | undefined>
-) => (): Record<string, string> => {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
-  };
-  const token = getAuthTokenRef.current?.();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-};
 
 /**
  * Checks whether a string is a valid settings tab.
@@ -79,16 +64,14 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   const [billing, setBilling] = useState<BillingAddress>({});
   const [notifications, setNotifications] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
 
-  // Stable refs for callback props to avoid dependency churn
-  const getAuthTokenRef = useRef(getAuthToken);
+  const { buildHeaders, portalFetch } = usePortalFetch({ getAuthToken });
+
+  // Stable ref for showNotification to avoid dependency churn
   const showNotificationRef = useRef(showNotification);
 
   useEffect(() => {
-    getAuthTokenRef.current = getAuthToken;
     showNotificationRef.current = showNotification;
-  }, [getAuthToken, showNotification]);
-
-  const buildHeaders = useCallback(createBuildHeaders(getAuthTokenRef), []);
+  }, [showNotification]);
 
   // --- Fetch profile data ---
   const fetchProfile = useCallback(async () => {
@@ -148,17 +131,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   // --- Update handlers ---
   const handleProfileUpdate = useCallback(async (updates: Partial<ClientProfile>): Promise<boolean> => {
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS_ME, {
-        method: 'PUT',
-        headers: buildHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(updates)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
+      await portalFetch(API_ENDPOINTS.CLIENTS_ME, { method: 'PUT', body: updates });
       setProfile(prev => prev ? { ...prev, ...updates } : null);
       showNotificationRef.current?.('Profile updated', 'success');
       return true;
@@ -167,21 +140,11 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
       showNotificationRef.current?.('Failed to update profile', 'error');
       return false;
     }
-  }, [buildHeaders]);
+  }, [portalFetch]);
 
   const handleBillingUpdate = useCallback(async (updates: BillingAddress): Promise<boolean> => {
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS_ME_BILLING, {
-        method: 'PUT',
-        headers: buildHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(updates)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update billing');
-      }
-
+      await portalFetch(API_ENDPOINTS.CLIENTS_ME_BILLING, { method: 'PUT', body: updates });
       setBilling(updates);
       showNotificationRef.current?.('Billing address updated', 'success');
       return true;
@@ -190,21 +153,11 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
       showNotificationRef.current?.('Failed to update billing address', 'error');
       return false;
     }
-  }, [buildHeaders]);
+  }, [portalFetch]);
 
   const handleNotificationsUpdate = useCallback(async (updates: NotificationPreferences): Promise<boolean> => {
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS_ME, {
-        method: 'PUT',
-        headers: buildHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ notification_preferences: updates })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update notification preferences');
-      }
-
+      await portalFetch(API_ENDPOINTS.CLIENTS_ME, { method: 'PUT', body: { notification_preferences: updates } });
       setNotifications(updates);
       showNotificationRef.current?.('Notification preferences updated', 'success');
       return true;
@@ -213,7 +166,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
       showNotificationRef.current?.('Failed to update notification preferences', 'error');
       return false;
     }
-  }, [buildHeaders]);
+  }, [portalFetch]);
 
   return {
     activeTab,
@@ -222,7 +175,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
     profile,
     billing,
     notifications,
-    buildHeaders,
+    portalFetch,
     fetchProfile,
     handleProfileUpdate,
     handleBillingUpdate,

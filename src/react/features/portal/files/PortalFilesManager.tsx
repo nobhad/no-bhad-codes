@@ -31,6 +31,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { FileUploadDropzone } from './FileUploadDropzone';
 import type { PortalViewProps } from '../types';
+import { formatCardDate, formatFileSize } from '@react/utils/cardFormatters';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { downloadFile } from '../../../../utils/file-download';
@@ -122,29 +123,6 @@ const FOLDER_NAMES: Record<string, string> = {
 // ============================================================================
 // UTILITIES
 // ============================================================================
-
-/**
- * Format file size for display
- */
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}
 
 /**
  * Get folder category for a file
@@ -621,7 +599,7 @@ export function PortalFilesManager({
                           </PortalTableCell>
                           <PortalTableCell className="date-cell" label="Uploaded">
                             <span className="text-muted">
-                              {formatDate(file.uploadedAt)}
+                              {formatCardDate(file.uploadedAt)}
                             </span>
                           </PortalTableCell>
                           <PortalTableCell className="actions-cell">

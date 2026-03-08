@@ -14,6 +14,7 @@ import type {
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '../../../../constants/api-endpoints';
+import { usePortalFetch } from '@react/hooks/usePortalFetch';
 
 const logger = createLogger('usePortalMessages');
 
@@ -59,28 +60,11 @@ export function usePortalMessages({
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [messagesError, setMessagesError] = useState<string | null>(null);
 
-  // Refs for cleanup and stable callbacks
+  // Shared authenticated fetch
+  const { buildHeaders, portalFetch } = usePortalFetch({ getAuthToken });
+
+  // Refs for cleanup
   const abortControllerRef = useRef<AbortController | null>(null);
-  const getAuthTokenRef = useRef(getAuthToken);
-
-  // Keep ref in sync with prop
-  useEffect(() => {
-    getAuthTokenRef.current = getAuthToken;
-  }, [getAuthToken]);
-
-  /**
-   * Build request headers with auth token
-   */
-  const getHeaders = useCallback((): HeadersInit => {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthTokenRef.current?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, []);
 
   /**
    * Fetch all threads
@@ -90,17 +74,7 @@ export function usePortalMessages({
     setThreadsError(null);
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.MESSAGES}/threads`, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch threads');
-      }
-
-      const data: ThreadsResponse = unwrapApiData<ThreadsResponse>(await response.json());
+      const data = await portalFetch<ThreadsResponse>(`${API_ENDPOINTS.MESSAGES}/threads`);
       setThreads(data.threads ?? []);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load threads';
@@ -108,7 +82,7 @@ export function usePortalMessages({
     } finally {
       setThreadsLoading(false);
     }
-  }, [getHeaders]);
+  }, [portalFetch]);
 
   /**
    * Fetch messages for selected thread
@@ -127,7 +101,7 @@ export function usePortalMessages({
       try {
         const response = await fetch(buildEndpoint.messageThreadMessages(threadId), {
           method: 'GET',
-          headers: getHeaders(),
+          headers: buildHeaders(),
           credentials: 'include',
           signal: abortControllerRef.current.signal
         });
@@ -148,7 +122,7 @@ export function usePortalMessages({
         setMessagesLoading(false);
       }
     },
-    [getHeaders]
+    [buildHeaders]
   );
 
   /**
@@ -197,12 +171,12 @@ export function usePortalMessages({
             formData.append('attachments', file);
           });
           body = formData;
-          // Let browser set Content-Type for FormData
-          const token = getAuthTokenRef.current?.();
-          headers = token ? { Authorization: `Bearer ${token}` } : {};
+          // For FormData, only set Authorization (browser sets Content-Type with boundary)
+          const authHeaders = buildHeaders();
+          headers = authHeaders.Authorization ? { Authorization: authHeaders.Authorization } : {};
         } else {
           body = JSON.stringify({ content });
-          headers = getHeaders();
+          headers = buildHeaders();
         }
 
         const response = await fetch(buildEndpoint.messageThreadMessages(selectedThread.id), {
@@ -242,7 +216,7 @@ export function usePortalMessages({
         return false;
       }
     },
-    [selectedThread, getHeaders]
+    [selectedThread, buildHeaders]
   );
 
   /**
@@ -253,21 +227,10 @@ export function usePortalMessages({
       if (!selectedThread) return false;
 
       try {
-        const response = await fetch(
+        const data = await portalFetch<UpdateMessageResponse>(
           `${buildEndpoint.messageThreadMessages(selectedThread.id)}/${messageId}`,
-          {
-            method: 'PATCH',
-            headers: getHeaders(),
-            credentials: 'include',
-            body: JSON.stringify({ content })
-          }
+          { method: 'PATCH', body: { content } }
         );
-
-        if (!response.ok) {
-          throw new Error('Failed to edit message');
-        }
-
-        const data: UpdateMessageResponse = unwrapApiData<UpdateMessageResponse>(await response.json());
 
         // Update message in state
         setMessages((prev) => prev.map((m) => (m.id === messageId ? data.message : m)));
@@ -278,7 +241,7 @@ export function usePortalMessages({
         return false;
       }
     },
-    [selectedThread, getHeaders]
+    [selectedThread, portalFetch]
   );
 
   /**
@@ -289,18 +252,10 @@ export function usePortalMessages({
       if (!selectedThread) return false;
 
       try {
-        const response = await fetch(
+        await portalFetch(
           `${buildEndpoint.messageThreadMessages(selectedThread.id)}/${messageId}`,
-          {
-            method: 'DELETE',
-            headers: getHeaders(),
-            credentials: 'include'
-          }
+          { method: 'DELETE' }
         );
-
-        if (!response.ok) {
-          throw new Error('Failed to delete message');
-        }
 
         // Remove message from state
         setMessages((prev) => prev.filter((m) => m.id !== messageId));
@@ -311,7 +266,7 @@ export function usePortalMessages({
         return false;
       }
     },
-    [selectedThread, getHeaders]
+    [selectedThread, portalFetch]
   );
 
   // Fetch threads on mount
