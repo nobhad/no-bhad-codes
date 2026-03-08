@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, User, Clock } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
+import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Message } from '../../types';
 
 interface MessagesTabProps {
@@ -90,16 +92,12 @@ export function MessagesTab({
       {/* Messages List */}
       <div className="scroll-container msgtab-panel">
         {isLoading ? (
-          <div className="loading-state">
-            <span className="loading-spinner" />
-            Loading messages...
-          </div>
+          <LoadingState message="Loading messages..." />
         ) : messages.length === 0 ? (
-          <div className="empty-state">
-            <MessageSquare className="icon-xl" />
-            <span>No messages yet</span>
-            <span className="pd-hint">Start a conversation with your client</span>
-          </div>
+          <EmptyState
+            icon={<MessageSquare className="icon-lg" />}
+            message="No messages yet. Start a conversation with your client."
+          />
         ) : (
           <div className="msgtab-thread">
             {messages.map((message) => {
@@ -169,14 +167,15 @@ export function MessagesTab({
             rows={2}
             className="textarea msgtab-textarea"
           />
-          <button
-            className="btn-primary msgtab-send-btn"
+          <PortalButton
+            className="msgtab-send-btn"
             onClick={handleSend}
-            disabled={!newMessage.trim() || isSending}
+            disabled={!newMessage.trim()}
+            loading={isSending}
+            icon={<Send className="icon-md" />}
           >
-            <Send className="icon-md" />
-            {isSending ? 'Sending...' : 'Send'}
-          </button>
+            Send
+          </PortalButton>
         </div>
         <div className="text-muted pd-hint pd-mt-2">
           Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send

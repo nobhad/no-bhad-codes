@@ -12,6 +12,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import { formatTimeAgo } from '../../../../../utils/time-utils';
 import type { ClientActivity } from '../../types';
 
@@ -129,11 +130,10 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
   if (activities.length === 0) {
     return (
-      <div className="empty-state">
-        <Clock className="icon-xl" />
-        <span>No activity yet</span>
-        <span className="empty-state-hint">Activity will appear here as you interact with this client</span>
-      </div>
+      <EmptyState
+        icon={<Clock className="icon-lg" />}
+        message="No activity yet. Activity will appear here as you interact with this client."
+      />
     );
   }
 

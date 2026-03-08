@@ -10,10 +10,18 @@ import {
   Image,
   File,
   FileArchive,
-  Inbox
+  Inbox,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import {
+  PortalDropdown,
+  PortalDropdownTrigger,
+  PortalDropdownContent,
+  PortalDropdownItem
+} from '@react/components/portal/PortalDropdown';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectFile } from '../../types';
 import { FILE_CATEGORY_OPTIONS } from '../../types';
 
@@ -226,18 +234,33 @@ export function FilesTab({
           {/* Category Selector */}
           <div className="pd-row-compact pd-mt-2" onClick={(e) => e.stopPropagation()}>
             <span className="text-muted pd-hint">Category:</span>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="input files-category-select"
-            >
-              <option value="">None</option>
-              {FILE_CATEGORY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <PortalDropdown>
+              <PortalDropdownTrigger asChild>
+                <button className="form-input files-category-select dropdown-trigger" type="button">
+                  {selectedCategory
+                    ? FILE_CATEGORY_OPTIONS.find((o) => o.value === selectedCategory)?.label || selectedCategory
+                    : 'None'}
+                  <ChevronDown className="dropdown-caret" />
+                </button>
+              </PortalDropdownTrigger>
+              <PortalDropdownContent align="start" sideOffset={0}>
+                <PortalDropdownItem
+                  className={cn(!selectedCategory && 'is-active')}
+                  onSelect={() => setSelectedCategory('')}
+                >
+                  None
+                </PortalDropdownItem>
+                {FILE_CATEGORY_OPTIONS.map((opt) => (
+                  <PortalDropdownItem
+                    key={opt.value}
+                    className={cn(selectedCategory === opt.value && 'is-active')}
+                    onSelect={() => setSelectedCategory(opt.value)}
+                  >
+                    {opt.label}
+                  </PortalDropdownItem>
+                ))}
+              </PortalDropdownContent>
+            </PortalDropdown>
           </div>
 
           {isUploading && (
@@ -251,10 +274,10 @@ export function FilesTab({
 
       {/* Files List */}
       {files.length === 0 ? (
-        <div className="empty-state">
-          <Inbox className="icon-xl pd-mb-2" />
-          <span>No files uploaded yet</span>
-        </div>
+        <EmptyState
+          icon={<Inbox className="icon-lg" />}
+          message="No files uploaded yet."
+        />
       ) : (
         <div className="panel contract-panel-no-padding">
           <table className="pd-full-width">

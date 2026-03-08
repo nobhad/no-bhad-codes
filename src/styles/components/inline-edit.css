@@ -206,6 +206,27 @@
   color-scheme: dark;
 }
 
+/* Inline select trigger — dropdown variant of inline edit */
+.portal .inline-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  min-width: 100px;
+  width: 100%;
+  padding: 0 var(--dropdown-padding-x);
+  background: var(--portal-bg-darkest);
+  color: var(--portal-text-primary);
+  border: var(--border-width) solid var(--portal-border-color);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.portal .inline-select-trigger[data-state="open"] {
+  border-bottom-color: transparent;
+}
+
 /* Textarea wrapper — stacks input and actions vertically */
 .portal .inline-edit-wrapper--textarea {
   flex-direction: column;

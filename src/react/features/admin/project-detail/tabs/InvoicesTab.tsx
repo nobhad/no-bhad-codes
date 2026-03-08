@@ -8,9 +8,11 @@ import {
   Download,
   Trash2,
   MoreHorizontal,
-  Inbox
+  Inbox,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -22,6 +24,19 @@ import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/Confir
 import type { Invoice, InvoiceStatus } from '../../types';
 import { INVOICE_STATUS_CONFIG } from '../../types';
 import { formatCurrency } from '../../../../../utils/format-utils';
+
+const STATUS_FILTER_OPTIONS = [
+  { value: 'all', label: 'All Invoices' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'sent', label: 'Sent' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'overdue', label: 'Overdue' }
+] as const;
+
+const STATUS_FILTER_LABELS: Record<string, string> = Object.fromEntries(
+  STATUS_FILTER_OPTIONS.map((o) => [o.value, o.label])
+);
 
 interface InvoicesTabProps {
   invoices: Invoice[];
@@ -212,18 +227,25 @@ export function InvoicesTab({
 
         <div className="pd-row-tight">
           {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="input invtab-filter"
-          >
-            <option value="all">All Invoices</option>
-            <option value="draft">Draft</option>
-            <option value="sent">Sent</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
+          <PortalDropdown>
+            <PortalDropdownTrigger asChild>
+              <button className="btn-secondary dropdown-trigger invtab-filter" type="button">
+                {STATUS_FILTER_LABELS[statusFilter] || 'All Invoices'}
+                <ChevronDown className="dropdown-caret" />
+              </button>
+            </PortalDropdownTrigger>
+            <PortalDropdownContent align="start" sideOffset={0}>
+              {STATUS_FILTER_OPTIONS.map((opt) => (
+                <PortalDropdownItem
+                  key={opt.value}
+                  className={cn(statusFilter === opt.value && 'is-active')}
+                  onSelect={() => setStatusFilter(opt.value)}
+                >
+                  {opt.label}
+                </PortalDropdownItem>
+              ))}
+            </PortalDropdownContent>
+          </PortalDropdown>
 
           {/* Create Invoice */}
           {onCreateInvoice && (
@@ -237,12 +259,10 @@ export function InvoicesTab({
 
       {/* Invoices List */}
       {filteredInvoices.length === 0 ? (
-        <div className="empty-state">
-          <Inbox className="icon-xl pd-mb-2" />
-          <span>
-            {statusFilter === 'all' ? 'No invoices yet' : `No ${statusFilter} invoices`}
-          </span>
-        </div>
+        <EmptyState
+          icon={<Inbox className="icon-lg" />}
+          message={statusFilter === 'all' ? 'No invoices yet.' : `No ${statusFilter} invoices.`}
+        />
       ) : (
         <div className="panel invtab-panel">
           <table className="pd-full-width">

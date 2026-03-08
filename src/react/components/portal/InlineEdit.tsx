@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Check, X, Pencil } from 'lucide-react';
+import { Check, X, Pencil, ChevronDown } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import {
+  PortalDropdown,
+  PortalDropdownTrigger,
+  PortalDropdownContent,
+  PortalDropdownItem
+} from './PortalDropdown';
 
 // ============================================================================
 // Constants
@@ -392,33 +398,15 @@ export function InlineSelect({
     saveValue
   } = useInlineEditState({ value, disabled, onSave });
 
-  const selectRef = useRef<HTMLSelectElement>(null);
-
   const displayValue = formatDisplay
     ? formatDisplay(value)
     : options.find((o) => o.value === value)?.label || value || placeholder;
 
-  useEffect(() => {
-    if (isEditing && selectRef.current) {
-      selectRef.current.focus();
-    }
-  }, [isEditing]);
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      saveValue(e.target.value);
+  const handleSelect = useCallback(
+    (optionValue: string) => {
+      saveValue(optionValue);
     },
     [saveValue]
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        cancelEditing();
-      }
-    },
-    [cancelEditing]
   );
 
   if (isEditing) {
@@ -427,31 +415,25 @@ export function InlineSelect({
         className={cn('inline-edit-wrapper', className)}
         onClick={(e) => e.stopPropagation()}
       >
-        <select
-          ref={selectRef}
-          value={editValue}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          onBlur={cancelEditing}
-          disabled={isSaving}
-          className="inline-edit-input-compact"
-        >
-          <option value="">{placeholder}</option>
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={cancelEditing}
-          disabled={isSaving}
-          className="inline-edit-btn inline-edit-btn-cancel"
-          title="Cancel"
-        >
-          <X />
-        </button>
+        <PortalDropdown defaultOpen onOpenChange={(open) => { if (!open) cancelEditing(); }}>
+          <PortalDropdownTrigger asChild>
+            <button className="inline-select-trigger dropdown-trigger" disabled={isSaving}>
+              {editValue ? (options.find((o) => o.value === editValue)?.label || editValue) : placeholder}
+              <ChevronDown className="dropdown-caret" />
+            </button>
+          </PortalDropdownTrigger>
+          <PortalDropdownContent align="start" sideOffset={0}>
+            {options.map((opt) => (
+              <PortalDropdownItem
+                key={opt.value}
+                className={cn(editValue === opt.value && 'is-active')}
+                onSelect={() => handleSelect(opt.value)}
+              >
+                {opt.label}
+              </PortalDropdownItem>
+            ))}
+          </PortalDropdownContent>
+        </PortalDropdown>
       </div>
     );
   }

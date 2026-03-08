@@ -18,8 +18,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
+import { PortalInput } from '@react/components/portal/PortalInput';
 import { InlineEdit, InlineSelect, InlineTextarea, formatCurrencyDisplay, parseCurrencyInput } from '@react/components/portal/InlineEdit';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectMilestone } from '../../types';
 import { PROJECT_TYPE_LABELS } from '../../types';
 import { formatCurrency } from '../../../../../utils/format-utils';
@@ -328,8 +331,7 @@ export function OverviewTab({
           {/* Add Milestone Form */}
           {showAddMilestone && (
             <div className="milestone-add-form">
-              <input
-                type="text"
+              <PortalInput
                 placeholder="Milestone title..."
                 value={newMilestoneTitle}
                 onChange={(e) => setNewMilestoneTitle(e.target.value)}
@@ -341,7 +343,7 @@ export function OverviewTab({
                   }
                 }}
                 autoFocus
-                className="form-input flex-1"
+                className="flex-1"
               />
               <PortalButton variant="primary" size="sm" onClick={handleAddMilestone}>
                 Add
@@ -360,10 +362,10 @@ export function OverviewTab({
 
           {/* Milestones List */}
           {milestones.length === 0 ? (
-            <div className="empty-state">
-              <ListTodo className="icon-xl" />
-              <span>No milestones yet</span>
-            </div>
+            <EmptyState
+              icon={<ListTodo className="icon-lg" />}
+              message="No milestones yet."
+            />
           ) : (
             <div className="milestone-list">
               {milestones.map((milestone) => (
@@ -553,34 +555,25 @@ export function OverviewTab({
         <div className="panel">
           <h3 className="section-title">Quick Stats</h3>
 
-          <div className="quick-stats-grid">
-            <div className="stat-card">
-              <span className="stat-label">Files</span>
-              <span className="stat-value">{project.file_count ?? 0}</span>
-            </div>
-
-            <div className="stat-card">
-              <span className="stat-label">Messages</span>
-              <span className="stat-value">
-                {project.message_count ?? 0}
-                {(project.unread_count ?? 0) > 0 && (
-                  <span className="text-muted"> ({project.unread_count} new)</span>
-                )}
-              </span>
-            </div>
-
-            <div className="stat-card">
-              <span className="stat-label">Milestones</span>
-              <span className="stat-value">
-                {milestones.filter((m) => m.is_completed).length}/{milestones.length}
-              </span>
-            </div>
-
-            <div className="stat-card">
-              <span className="stat-label">Created</span>
-              <span className="text-muted">{formatDate(project.created_at)}</span>
-            </div>
-          </div>
+          <StatsRow className="quick-stats-grid">
+            <StatCard
+              label="Files"
+              value={project.file_count ?? 0}
+            />
+            <StatCard
+              label="Messages"
+              value={project.message_count ?? 0}
+              meta={(project.unread_count ?? 0) > 0 ? `${project.unread_count} new` : undefined}
+            />
+            <StatCard
+              label="Milestones"
+              value={`${milestones.filter((m) => m.is_completed).length}/${milestones.length}`}
+            />
+            <StatCard
+              label="Created"
+              value={formatDate(project.created_at)}
+            />
+          </StatsRow>
         </div>
       </div>
 

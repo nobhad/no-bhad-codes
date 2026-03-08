@@ -9,7 +9,9 @@ import {
   Pencil,
   Trash2,
   Star,
-  X
+  X,
+  ChevronDown,
+  Inbox
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalInput } from '@react/components/portal/PortalInput';
@@ -21,6 +23,8 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ClientContact } from '../../types';
 import { CONTACT_ROLE_LABELS } from '../../types';
 
@@ -258,17 +262,25 @@ export function ContactsTab({
           <label className="field-label">
             Role
           </label>
-          <select
-            value={formData.role}
-            onChange={(e) => handleFieldChange('role', e.target.value)}
-            className="input"
-          >
-            {Object.entries(CONTACT_ROLE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <PortalDropdown>
+            <PortalDropdownTrigger asChild>
+              <button className="form-input dropdown-trigger" type="button">
+                {CONTACT_ROLE_LABELS[formData.role as keyof typeof CONTACT_ROLE_LABELS] || formData.role}
+                <ChevronDown className="dropdown-caret" />
+              </button>
+            </PortalDropdownTrigger>
+            <PortalDropdownContent align="start" sideOffset={0}>
+              {Object.entries(CONTACT_ROLE_LABELS).map(([value, label]) => (
+                <PortalDropdownItem
+                  key={value}
+                  className={cn(formData.role === value && 'is-active')}
+                  onSelect={() => handleFieldChange('role', value)}
+                >
+                  {label}
+                </PortalDropdownItem>
+              ))}
+            </PortalDropdownContent>
+          </PortalDropdown>
         </div>
 
         <div className="align-end">
@@ -294,16 +306,12 @@ export function ContactsTab({
       </div>
 
       <div className="form-actions">
-        <button className="btn-ghost" onClick={handleCancel}>
+        <PortalButton variant="ghost" onClick={handleCancel}>
           Cancel
-        </button>
-        <button
-          className="btn-primary"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving...' : (editingId ? 'Save Changes' : 'Add Contact')}
-        </button>
+        </PortalButton>
+        <PortalButton onClick={handleSubmit} loading={isSubmitting}>
+          {editingId ? 'Save Changes' : 'Add Contact'}
+        </PortalButton>
       </div>
     </div>
   );
@@ -328,11 +336,10 @@ export function ContactsTab({
 
       {/* Contacts List */}
       {sortedContacts.length === 0 ? (
-        <div className="empty-state">
-          <User className="icon-xl" />
-          <span>No contacts yet</span>
-          <span className="empty-state-hint">Add contacts to keep track of key people</span>
-        </div>
+        <EmptyState
+          icon={<Inbox className="icon-lg" />}
+          message="No contacts yet. Add contacts to keep track of key people."
+        />
       ) : (
         <div className="card-grid-2col">
           {sortedContacts.map((contact) => (
