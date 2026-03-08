@@ -17,7 +17,7 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { getPortalConfig, ADMIN_TAB_IDS, CLIENT_TAB_IDS, ICONS } from '../config/navigation.js';
 import { COOKIE_CONFIG } from '../utils/auth-constants.js';
-import { sendUnauthorized, sendNotFound, sendServerError } from '../utils/api-response.js';
+import { sendUnauthorized, sendNotFound, sendServerError, ErrorCodes } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import { createRateLimiter } from '../middleware/rate-limiter.js';
 
@@ -130,7 +130,7 @@ router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res
   const decoded = decodePortalJwt(req);
 
   if (!decoded) {
-    return sendUnauthorized(res, 'Authentication required');
+    return sendUnauthorized(res, 'Authentication required', ErrorCodes.UNAUTHORIZED);
   }
 
   const { tabId } = req.params;
@@ -144,20 +144,20 @@ router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res
     const userId = (decodedPayload.id as number) ?? (decodedPayload.clientId as number);
 
     if (!userId || typeof userId !== 'number' || userId <= 0) {
-      return sendUnauthorized(res, 'Invalid token: missing user ID');
+      return sendUnauthorized(res, 'Invalid token: missing user ID', ErrorCodes.INVALID_TOKEN);
     }
 
     // Validate tab exists, has a table definition for this portal, and user role matches.
     // All checks return the same generic "not found" to prevent tab enumeration.
     const tableDef = getServerTableDef(tabId);
     if (!hasTabDataFetcher(tabId) || !tableDef || tableDef.portal !== decoded.type) {
-      return sendNotFound(res, 'Tab not found');
+      return sendNotFound(res, 'Tab not found', ErrorCodes.NOT_FOUND);
     }
 
     const data = await fetchTabData(tabId, decoded.type as 'admin' | 'client', userId);
 
     if (!data) {
-      return sendServerError(res, 'Failed to fetch tab data');
+      return sendServerError(res, 'Failed to fetch tab data', ErrorCodes.INTERNAL_ERROR);
     }
 
     // Render the table partial as an HTML fragment
@@ -169,7 +169,7 @@ router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res
     }, (err: Error | null, html: string) => {
       if (err) {
         logger.error('EJS render error:', { error: err });
-        return sendServerError(res, 'Render failed');
+        return sendServerError(res, 'Render failed', ErrorCodes.INTERNAL_ERROR);
       }
       res.type('html').send(html);
     });

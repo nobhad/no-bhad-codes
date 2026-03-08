@@ -12,7 +12,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
-import { errorResponseWithPayload } from '../utils/api-response.js';
+import { errorResponseWithPayload, ErrorCodes } from '../utils/api-response.js';
 
 // Validation error interface
 export interface ValidationError {
