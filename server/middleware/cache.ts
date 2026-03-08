@@ -13,6 +13,23 @@ import { cacheService } from '../services/cache-service.js';
 import { logger } from '../services/logger.js';
 import type { JWTAuthRequest } from '../types/request.js';
 
+/** Shape of a cached HTTP response */
+interface CachedResponse {
+  body: unknown;
+  headers: Record<string, string>;
+  status: number;
+}
+
+/** Type guard for cached response objects */
+function isCachedResponse(value: unknown): value is CachedResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'body' in value &&
+    'headers' in value
+  );
+}
+
 /** Extended request with cache invalidation tags */
 interface CacheRequest extends Request {
   cacheInvalidateTags?: string[];
@@ -100,11 +117,11 @@ export function cache(
       // Try to get cached response
       const cached = await cacheService.get(cacheKey);
 
-      if (cached && typeof cached === 'object' && cached.body && cached.headers) {
+      if (isCachedResponse(cached)) {
         logger.info(`Cache HIT: ${cacheKey}`);
 
         // Set cached headers
-        Object.entries(cached.headers as Record<string, string>).forEach(([key, value]) => {
+        Object.entries(cached.headers).forEach(([key, value]) => {
           res.set(key, value);
         });
 
@@ -194,7 +211,7 @@ export function cache(
  */
 async function cacheResponse(
   key: string,
-  response: { status: number; headers: Record<string, string>; body: any },
+  response: { status: number; headers: Record<string, string>; body: unknown },
   ttl: number,
   tags: string[] | ((req: Request) => string[]) | undefined,
   req: Request,
@@ -335,7 +352,7 @@ export class QueryCache {
    */
   static generateKey(
     table: string,
-    conditions: Record<string, any> = {},
+    conditions: Record<string, unknown> = {},
     suffix: string = ''
   ): string {
     const conditionsStr =

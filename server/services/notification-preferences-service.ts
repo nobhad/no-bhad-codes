@@ -38,6 +38,73 @@ const NOTIFICATION_DIGEST_QUEUE_COLUMNS = `
 // TYPES
 // =====================================================
 
+/** Database row shape from notification_preferences table */
+interface NotificationPreferencesRow {
+  id: number;
+  user_id: number;
+  user_type: string;
+  email_enabled: number | boolean;
+  email_frequency: string;
+  digest_time: string;
+  digest_day: string;
+  notify_new_message: number | boolean;
+  notify_message_reply: number | boolean;
+  notify_invoice_created: number | boolean;
+  notify_invoice_reminder: number | boolean;
+  notify_invoice_paid: number | boolean;
+  notify_project_update: number | boolean;
+  notify_project_milestone: number | boolean;
+  notify_document_request: number | boolean;
+  notify_document_approved: number | boolean;
+  notify_document_rejected: number | boolean;
+  notify_deliverable_ready: number | boolean;
+  notify_proposal_created: number | boolean;
+  notify_contract_ready: number | boolean;
+  notify_file_uploaded: number | boolean;
+  quiet_hours_enabled: number | boolean;
+  quiet_hours_start: string;
+  quiet_hours_end: string;
+  marketing_emails: number | boolean;
+  newsletter_emails: number | boolean;
+  product_updates: number | boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Database row shape from notification_log table */
+interface NotificationLogRow {
+  id: number;
+  user_id: number;
+  user_type: string;
+  notification_type: string;
+  channel: string;
+  subject: string | null;
+  message_preview: string | null;
+  status: string;
+  error_message: string | null;
+  sent_at: string | null;
+  delivered_at: string | null;
+  read_at: string | null;
+  metadata: string | null;
+  created_at: string;
+}
+
+/** Database row shape from notification_digest_queue table */
+interface DigestQueueRow {
+  id: number;
+  user_id: number;
+  user_type: string;
+  notification_type: string;
+  title: string;
+  message: string | null;
+  entity_type: string | null;
+  entity_id: number | null;
+  priority: number;
+  processed: number | boolean;
+  processed_at: string | null;
+  created_at: string;
+}
+
 export type UserType = 'client' | 'admin';
 export type EmailFrequency = 'immediate' | 'daily_digest' | 'weekly_digest' | 'none';
 export type NotificationChannel = 'email' | 'push' | 'in_app';
@@ -400,7 +467,7 @@ class NotificationPreferencesService {
       [userId, userType, limit]
     );
 
-    return logs.map((log: any) => ({
+    return logs.map((log: NotificationLogRow) => ({
       ...log,
       metadata: safeJsonParseOrNull(log.metadata, 'notification log metadata')
     })) as NotificationLog[];
@@ -445,7 +512,7 @@ class NotificationPreferencesService {
   /**
    * Get pending digest items for a user
    */
-  async getPendingDigestItems(userId: number, userType: UserType): Promise<any[]> {
+  async getPendingDigestItems(userId: number, userType: UserType): Promise<DigestQueueRow[]> {
     const db = await getDatabase();
 
     return db.all(
@@ -499,13 +566,13 @@ class NotificationPreferencesService {
   /**
    * Map database row to NotificationPreferences type
    */
-  private mapPreferences(row: any): NotificationPreferences {
+  private mapPreferences(row: NotificationPreferencesRow): NotificationPreferences {
     return {
       id: row.id,
       user_id: row.user_id,
-      user_type: row.user_type,
+      user_type: row.user_type as UserType,
       email_enabled: Boolean(row.email_enabled),
-      email_frequency: row.email_frequency,
+      email_frequency: row.email_frequency as EmailFrequency,
       digest_time: row.digest_time,
       digest_day: row.digest_day,
       notify_new_message: Boolean(row.notify_new_message),

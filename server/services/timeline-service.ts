@@ -69,7 +69,7 @@ class TimelineService {
     const projectParams = projectId ? [projectId] : [];
 
     // Aggregate events from multiple sources
-    const queries: Promise<any[]>[] = [];
+    const queries: Promise<Record<string, unknown>[]>[] = [];
 
     // 1. Project updates/milestones
     if (!types || types.includes('project_update') || types.includes('milestone')) {
@@ -251,18 +251,18 @@ class TimelineService {
     const results = await Promise.all(queries);
 
     // Flatten and sort all events by date
-    let allEvents: TimelineEvent[] = results.flat().map((event) => ({
-      id: event.id,
-      type: event.type,
-      title: event.title,
-      description: event.description,
-      project_id: event.project_id,
-      project_name: event.project_name,
-      entity_id: event.entity_id,
-      entity_type: event.entity_type,
-      created_at: event.created_at,
-      actor_name: event.actor_name,
-      actor_type: event.actor_type
+    let allEvents: TimelineEvent[] = results.flat().map((event: Record<string, unknown>) => ({
+      id: String(event.id),
+      type: event.type as TimelineEventType,
+      title: String(event.title),
+      description: event.description as string | undefined,
+      project_id: event.project_id as number | undefined,
+      project_name: event.project_name as string | undefined,
+      entity_id: event.entity_id as number | undefined,
+      entity_type: event.entity_type as string | undefined,
+      created_at: String(event.created_at),
+      actor_name: event.actor_name as string | undefined,
+      actor_type: event.actor_type as 'client' | 'admin' | 'system' | undefined
     }));
 
     // Filter by types if specified

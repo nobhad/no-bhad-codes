@@ -50,10 +50,10 @@ export abstract class BaseComponent<
   private stateUnsubscribe: (() => void) | null = null;
 
 
-  private propWatchers: Map<keyof P, ((newVal: any, oldVal: any) => void)[]> = new Map();
+  private propWatchers: Map<keyof P, ((newVal: unknown, oldVal: unknown) => void)[]> = new Map();
 
 
-  private stateWatchers: Map<keyof S, ((newVal: any, oldVal: any) => void)[]> = new Map();
+  private stateWatchers: Map<keyof S, ((newVal: unknown, oldVal: unknown) => void)[]> = new Map();
 
   constructor(name: string, props: P, initialState: S, options: ModuleOptions = {}) {
     super(name, options);
@@ -129,12 +129,13 @@ export abstract class BaseComponent<
     callback: (newVal: P[K], oldVal: P[K]) => void
   ): () => void {
     const watchers = this.propWatchers.get(prop) || [];
-    watchers.push(callback);
+    const wrappedCallback = callback as (newVal: unknown, oldVal: unknown) => void;
+    watchers.push(wrappedCallback);
     this.propWatchers.set(prop, watchers);
 
     return () => {
       const currentWatchers = this.propWatchers.get(prop) || [];
-      const index = currentWatchers.indexOf(callback);
+      const index = currentWatchers.indexOf(wrappedCallback);
       if (index > -1) {
         currentWatchers.splice(index, 1);
       }
@@ -149,12 +150,13 @@ export abstract class BaseComponent<
     callback: (newVal: S[K], oldVal: S[K]) => void
   ): () => void {
     const watchers = this.stateWatchers.get(stateKey) || [];
-    watchers.push(callback);
+    const wrappedCallback = callback as (newVal: unknown, oldVal: unknown) => void;
+    watchers.push(wrappedCallback);
     this.stateWatchers.set(stateKey, watchers);
 
     return () => {
       const currentWatchers = this.stateWatchers.get(stateKey) || [];
-      const index = currentWatchers.indexOf(callback);
+      const index = currentWatchers.indexOf(wrappedCallback);
       if (index > -1) {
         currentWatchers.splice(index, 1);
       }

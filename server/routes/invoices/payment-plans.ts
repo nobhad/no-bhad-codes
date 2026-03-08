@@ -27,14 +27,17 @@ const PaymentPlanValidationSchemas = {
         type: 'array' as const,
         minLength: 1,
         maxLength: 12,
-        customValidator: (items: Array<{ percentage?: number; daysAfterInvoice?: number }>) => {
+        customValidator: (items: unknown) => {
+          if (!Array.isArray(items)) return 'Payments must be an array';
           let totalPercentage = 0;
           for (const item of items) {
-            if (typeof item.percentage !== 'number' || item.percentage <= 0 || item.percentage > 100) {
+            if (typeof item !== 'object' || item === null) return 'Each payment must be an object';
+            const entry = item as Record<string, unknown>;
+            if (typeof entry.percentage !== 'number' || entry.percentage <= 0 || entry.percentage > 100) {
               return 'Each payment must have a valid percentage between 0 and 100';
             }
-            totalPercentage += item.percentage;
-            if (typeof item.daysAfterInvoice !== 'number' || item.daysAfterInvoice < 0) {
+            totalPercentage += entry.percentage;
+            if (typeof entry.daysAfterInvoice !== 'number' || entry.daysAfterInvoice < 0) {
               return 'Each payment must have valid daysAfterInvoice';
             }
           }

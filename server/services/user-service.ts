@@ -33,6 +33,19 @@ export interface User {
   updated_at: string;
 }
 
+/** Database row shape returned from the users table */
+interface UserRow {
+  id: number;
+  email: string;
+  display_name: string;
+  role: string;
+  avatar_url: string | null;
+  is_active: number | boolean;
+  last_active_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CreateUserData {
   email: string;
   displayName: string;
@@ -142,7 +155,7 @@ class UserService {
   async getActiveUsers(): Promise<User[]> {
     const db = await getDatabase();
     const users = await db.all(`SELECT ${USER_COLUMNS} FROM users WHERE is_active = 1 ORDER BY display_name`);
-    return users.map((u: any) => this.mapUser(u));
+    return users.map((u: UserRow) => this.mapUser(u));
   }
 
   /**
@@ -151,7 +164,7 @@ class UserService {
   async getAllUsers(): Promise<User[]> {
     const db = await getDatabase();
     const users = await db.all(`SELECT ${USER_COLUMNS} FROM users ORDER BY display_name`);
-    return users.map((u: any) => this.mapUser(u));
+    return users.map((u: UserRow) => this.mapUser(u));
   }
 
   /**
@@ -237,7 +250,7 @@ class UserService {
   /**
    * Map database row to User type
    */
-  private mapUser(row: any): User {
+  private mapUser(row: UserRow): User {
     return {
       id: row.id,
       email: row.email,

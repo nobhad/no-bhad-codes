@@ -342,7 +342,7 @@ export class InvoiceRecurringService {
 
     // Batch update all successful recurring invoices in a single transaction
     if (successfulRecurring.length > 0) {
-      await this.db.transaction(async (ctx: any) => {
+      await this.db.transaction(async (ctx) => {
         // Update each recurring invoice individually with parameterized queries
         for (const r of successfulRecurring) {
           await ctx.run(

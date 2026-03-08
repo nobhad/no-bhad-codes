@@ -301,7 +301,7 @@ class ApprovalService {
   /**
    * Get all active workflows (for admin dashboard)
    */
-  async getActiveWorkflows(): Promise<any[]> {
+  async getActiveWorkflows(): Promise<(WorkflowInstance & { workflow_name: string; workflow_type: WorkflowType })[]> {
     const db = getDatabase();
     return db.all(
       `SELECT wi.*, wd.name as workflow_name, wd.workflow_type
@@ -309,13 +309,13 @@ class ApprovalService {
        JOIN approval_workflow_definitions wd ON wi.workflow_definition_id = wd.id
        WHERE wi.status IN ('pending', 'in_progress')
        ORDER BY wi.initiated_at DESC`
-    );
+    ) as unknown as Promise<(WorkflowInstance & { workflow_name: string; workflow_type: WorkflowType })[]>;
   }
 
   /**
    * Get pending approvals for a user
    */
-  async getPendingApprovalsForUser(email: string): Promise<any[]> {
+  async getPendingApprovalsForUser(email: string): Promise<(ApprovalRequest & { entity_type: EntityType; entity_id: number; workflow_name: string })[]> {
     const db = getDatabase();
     return db.all(
       `SELECT ar.*, wi.entity_type, wi.entity_id, wd.name as workflow_name
@@ -325,7 +325,7 @@ class ApprovalService {
        WHERE ar.approver_email = ? AND ar.status = 'pending' AND wi.status = 'in_progress'
        ORDER BY ar.created_at ASC`,
       [email]
-    );
+    ) as unknown as Promise<(ApprovalRequest & { entity_type: EntityType; entity_id: number; workflow_name: string })[]>;
   }
 
   // ============================================
@@ -565,12 +565,12 @@ class ApprovalService {
   /**
    * Get approval history for a workflow instance
    */
-  async getApprovalHistory(instanceId: number): Promise<any[]> {
+  async getApprovalHistory(instanceId: number): Promise<{ id: number; workflow_instance_id: number; action: string; actor_email: string; step_id: number | null; comment: string | null; created_at: string }[]> {
     const db = getDatabase();
     return db.all(
       `SELECT ${APPROVAL_HISTORY_COLUMNS} FROM approval_history WHERE workflow_instance_id = ? ORDER BY created_at DESC`,
       [instanceId]
-    );
+    ) as unknown as Promise<{ id: number; workflow_instance_id: number; action: string; actor_email: string; step_id: number | null; comment: string | null; created_at: string }[]>;
   }
 
   /**

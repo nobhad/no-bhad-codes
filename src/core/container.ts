@@ -9,7 +9,7 @@
  */
 
 
-export type ServiceFactory<T = unknown> = (...args: any[]) => T | Promise<T>;
+export type ServiceFactory<T = unknown> = (...args: never[]) => T | Promise<T>;
 export type ServiceInstance<T = unknown> = T;
 
 export interface ServiceDefinition<T = unknown> {
@@ -89,7 +89,7 @@ export class Container {
         );
 
         // Create instance
-        const instance = await service.factory(...(dependencies as unknown[]));
+        const instance = await (service.factory as (...args: unknown[]) => unknown | Promise<unknown>)(...dependencies);
 
         // Cache singleton instance
         if (service.singleton) {

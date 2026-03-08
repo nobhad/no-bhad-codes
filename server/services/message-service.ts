@@ -875,7 +875,7 @@ class MessageService {
     return result ? getNumber(result as Record<string, unknown>, 'count') : 0;
   }
 
-  async getArchivedThreads(): Promise<any[]> {
+  async getArchivedThreads(): Promise<Record<string, unknown>[]> {
     const db = getDatabase();
     return db.all(`
       SELECT mt.*, p.project_name

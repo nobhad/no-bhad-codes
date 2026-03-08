@@ -128,7 +128,7 @@ export class CacheService {
   /**
    * Get value from cache
    */
-  async get<T = any>(key: string): Promise<T | null> {
+  async get<T = unknown>(key: string): Promise<T | null> {
     if (!this.isConnected || !this.client) {
       logger.warn('[Cache] Cache not available, skipping get');
       this.stats.misses++;
@@ -259,7 +259,7 @@ export class CacheService {
   /**
    * Get multiple keys at once
    */
-  async mget<T = any>(keys: string[]): Promise<(T | null)[]> {
+  async mget<T = unknown>(keys: string[]): Promise<(T | null)[]> {
     if (!this.isConnected || !this.client || keys.length === 0) {
       return keys.map(() => null);
     }
@@ -292,7 +292,7 @@ export class CacheService {
   /**
    * Set multiple key-value pairs
    */
-  async mset(keyValuePairs: Record<string, any>, ttl: number = 3600): Promise<boolean> {
+  async mset(keyValuePairs: Record<string, unknown>, ttl: number = 3600): Promise<boolean> {
     if (!this.isConnected || !this.client) {
       return false;
     }

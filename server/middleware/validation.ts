@@ -39,9 +39,9 @@ export type ValidationRule = {
   max?: number;
   pattern?: RegExp;
 
-  customValidator?: (value: any) => boolean | string;
+  customValidator?: (value: unknown) => boolean | string;
 
-  customSanitizer?: (value: any) => unknown;
+  customSanitizer?: (value: unknown) => unknown;
   allowedValues?: unknown[];
   description?: string;
 };
@@ -256,8 +256,10 @@ export class ApiValidator {
       });
     }
 
-    // Sanitize HTML/XSS
-    sanitized = this.sanitizeHtml(sanitized);
+    // NOTE: HTML/XSS sanitization is handled by the global sanitizeInputs middleware.
+    // Do NOT apply sanitizeHtml here — it HTML-encodes characters like & ' / which
+    // corrupts passwords and causes double-encoding for display fields (React/EJS
+    // handle output escaping).
 
     return sanitized;
   }
@@ -670,13 +672,14 @@ export const ValidationSchemas = {
         type: 'string' as const,
         minLength: 10,
         maxLength: 5000,
-        customValidator: (value: string) => {
+        customValidator: (value: unknown) => {
+          const str = String(value);
           // Check for spam patterns using shared pattern
-          if (VALIDATION_PATTERNS.SPAM_PATTERNS.test(value)) {
+          if (VALIDATION_PATTERNS.SPAM_PATTERNS.test(str)) {
             return 'Message appears to contain spam';
           }
           // Also check for URLs in message
-          if (VALIDATION_PATTERNS.URL_HTTP.test(value)) {
+          if (VALIDATION_PATTERNS.URL_HTTP.test(str)) {
             return 'Message appears to contain spam';
           }
           return true;
@@ -729,7 +732,8 @@ export const ValidationSchemas = {
     features: {
       type: 'array' as const,
       maxLength: 20,
-      customValidator: (features: string[]) => {
+      customValidator: (features: unknown) => {
+        if (!Array.isArray(features)) return 'Features must be an array';
         const validFeatures = [
           'contact-form',
           'user-auth',
@@ -743,7 +747,7 @@ export const ValidationSchemas = {
           'booking'
         ];
         return (
-          features.every((feature) => validFeatures.includes(feature)) || 'Invalid feature selected'
+          features.every((feature: unknown) => typeof feature === 'string' && validFeatures.includes(feature)) || 'Invalid feature selected'
         );
       }
     }
