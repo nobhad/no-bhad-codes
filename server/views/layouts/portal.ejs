@@ -7,11 +7,13 @@
   <!-- Skip to main content link for accessibility -->
   <a href="#dashboard-content" class="skip-link">Skip to main content</a>
 
-  <!-- Site Header (always rendered — same as main site) -->
-  <%- include('../partials/header', { portalType }) %>
+  <% if (portalType === 'login') { %>
+    <!-- Site Header (login page only) -->
+    <%- include('../partials/header', { portalType }) %>
 
-  <!-- Mobile/Overlay Navigation -->
-  <%- include('../partials/mobile-nav', { portalType }) %>
+    <!-- Mobile/Overlay Navigation -->
+    <%- include('../partials/mobile-nav', { portalType }) %>
+  <% } %>
 
   <% if (portalType !== 'login') { %>
   <!-- Dashboard Layout -->
@@ -69,8 +71,10 @@
 
   <% } %> <!-- end portalType !== 'login' -->
 
-  <!-- Footer (always rendered) -->
-  <%- include('../partials/footer', { portalType }) %>
+  <!-- Footer (login page only — not shown on dashboard) -->
+  <% if (portalType === 'login') { %>
+    <%- include('../partials/footer', { portalType }) %>
+  <% } %>
 
   <% if (isDev) { %>
     <!-- Vite client for HMR in development -->

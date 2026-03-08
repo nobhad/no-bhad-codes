@@ -20,6 +20,7 @@ import {
   PortalDropdownContent,
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
+import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Client, ClientHealth, ClientDetailStats, ClientTag } from '../../types';
 import { formatCurrency as formatCurrencyUtil } from '../../../../../utils/format-utils';
 
@@ -158,46 +159,25 @@ export function OverviewTab({
 
         {/* Stats Grid */}
         {stats && (
-          <div className="client-stats-grid">
-            {/* Projects */}
-            <div className="stat-card">
-              <div className="stat-card-header">
-                <FolderKanban className="icon-md text-muted" />
-                <span className="stat-label">Projects</span>
-              </div>
-              <div className="stat-value">
-                {stats.totalProjects || 0}
-              </div>
-              <div className="text-muted stat-meta">
-                {stats.activeProjects || 0} active, {stats.completedProjects || 0} completed
-              </div>
-            </div>
-
-            {/* Revenue */}
-            <div className="stat-card">
-              <div className="stat-card-header">
-                <TrendingUp className="icon-md text-muted" />
-                <span className="stat-label">Revenue</span>
-              </div>
-              <div className="stat-value">
-                {formatCurrency(stats.totalPaid)}
-              </div>
-              <div className="text-muted stat-meta">
-                {formatCurrency(stats.totalInvoiced)} invoiced
-              </div>
-            </div>
-
-            {/* Outstanding */}
-            <div className="stat-card">
-              <div className="stat-card-header">
-                <DollarSign className="icon-md text-muted" />
-                <span className="stat-label">Outstanding</span>
-              </div>
-              <div className="stat-value">
-                {formatCurrency(stats.totalOutstanding)}
-              </div>
-            </div>
-          </div>
+          <StatsRow className="client-stats-grid">
+            <StatCard
+              label="Projects"
+              value={stats.totalProjects || 0}
+              icon={<FolderKanban className="icon-md text-muted" />}
+              meta={`${stats.activeProjects || 0} active, ${stats.completedProjects || 0} completed`}
+            />
+            <StatCard
+              label="Revenue"
+              value={formatCurrency(stats.totalPaid)}
+              icon={<TrendingUp className="icon-md text-muted" />}
+              meta={`${formatCurrency(stats.totalInvoiced)} invoiced`}
+            />
+            <StatCard
+              label="Outstanding"
+              value={formatCurrency(stats.totalOutstanding)}
+              icon={<DollarSign className="icon-md text-muted" />}
+            />
+          </StatsRow>
         )}
 
         {/* Tags Section */}

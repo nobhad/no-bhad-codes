@@ -22,6 +22,10 @@ export interface StatCardProps {
   onClick?: () => void;
   /** Whether this card is the active/selected filter */
   isActive?: boolean;
+  /** Icon displayed in the header beside label */
+  icon?: React.ReactNode;
+  /** Secondary text displayed below value */
+  meta?: string;
   /** Additional className */
   className?: string;
 }
@@ -34,7 +38,7 @@ export interface StatCardProps {
  * <StatCard label="Outstanding" value={formatCurrency(1200)} />
  * <StatCard label="New" value={5} variant="warning" onClick={() => setFilter('status', 'new')} isActive={filter === 'new'} />
  */
-export function StatCard({ label, value, variant = 'default', onClick, isActive, className }: StatCardProps) {
+export function StatCard({ label, value, variant = 'default', onClick, isActive, icon, meta, className }: StatCardProps) {
   const classes = cn(
     'stat-card',
     variant !== 'default' && `stat-card--${variant}`,
@@ -43,21 +47,30 @@ export function StatCard({ label, value, variant = 'default', onClick, isActive,
     className
   );
 
+  const content = (
+    <>
+      {icon ? (
+        <div className="stat-card-header">
+          {icon}
+          <span className="stat-label">{label}</span>
+        </div>
+      ) : (
+        <span className="stat-label">{label}</span>
+      )}
+      <span className="stat-value">{value}</span>
+      {meta && <span className="text-muted stat-meta">{meta}</span>}
+    </>
+  );
+
   if (onClick) {
     return (
       <button type="button" className={classes} onClick={onClick}>
-        <span className="stat-label">{label}</span>
-        <span className="stat-value">{value}</span>
+        {content}
       </button>
     );
   }
 
-  return (
-    <div className={classes}>
-      <span className="stat-label">{label}</span>
-      <span className="stat-value">{value}</span>
-    </div>
-  );
+  return <div className={classes}>{content}</div>;
 }
 
 // ============================================

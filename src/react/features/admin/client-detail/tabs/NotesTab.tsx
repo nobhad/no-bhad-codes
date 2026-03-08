@@ -3,6 +3,8 @@ import { useState, useCallback } from 'react';
 import { StickyNote, Plus, Pin, Pencil, Trash2, X, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { PortalButton } from '@react/components/portal/PortalButton';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ClientNote } from '../../types';
 
 interface NotesTabProps {
@@ -187,17 +189,16 @@ export function NotesTab({
       />
 
       <div className="form-actions--compact">
-        <button className="btn-ghost" onClick={handleCancel}>
+        <PortalButton variant="ghost" onClick={handleCancel}>
           Cancel
-        </button>
-        <button
-          className="btn-primary"
+        </PortalButton>
+        <PortalButton
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          loading={isSubmitting}
+          icon={<Check className="icon-md" />}
         >
-          <Check className="icon-md" />
-          {isSubmitting ? 'Saving...' : (editingId ? 'Save' : 'Add Note')}
-        </button>
+          {editingId ? 'Save' : 'Add Note'}
+        </PortalButton>
       </div>
     </div>
   );
@@ -287,11 +288,10 @@ export function NotesTab({
 
       {/* Notes List */}
       {notes.length === 0 && !isAdding ? (
-        <div className="empty-state">
-          <StickyNote className="icon-xl" />
-          <span>No notes yet</span>
-          <span className="empty-state-hint">Add internal notes about this client</span>
-        </div>
+        <EmptyState
+          icon={<StickyNote className="icon-lg" />}
+          message="No notes yet. Add internal notes about this client."
+        />
       ) : (
         <div className="detail-list--spaced">
           {/* Pinned notes section */}

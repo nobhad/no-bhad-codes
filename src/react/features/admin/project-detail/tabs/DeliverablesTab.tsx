@@ -8,6 +8,7 @@ import {
   Inbox
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectMilestone } from '../../types';
 
 interface DeliverablesTabProps {
@@ -115,11 +116,10 @@ export function DeliverablesTab({
 
       {/* Deliverables List */}
       {totalCount === 0 ? (
-        <div className="empty-state">
-          <Inbox className="icon-xl pd-mb-2" />
-          <span>No deliverables defined yet</span>
-          <span className="pd-text-xs">Add deliverables to milestones in the Tasks tab</span>
-        </div>
+        <EmptyState
+          icon={<Inbox className="icon-lg" />}
+          message="No deliverables defined yet. Add deliverables to milestones in the Tasks tab."
+        />
       ) : (
         <div className="pd-col-wide">
           {milestones

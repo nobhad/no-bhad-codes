@@ -13,6 +13,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -184,25 +185,18 @@ export function ClientDetail({
 
   // Loading state
   if (isLoading && !client) {
-    return (
-      <div className="loading-state">
-        <span className="loading-spinner" />
-        <span>Loading client...</span>
-      </div>
-    );
+    return <LoadingState message="Loading client..." />;
   }
 
   // Error state
   if (error && !client) {
     return (
-      <div className="portal-card">
-        <div className="error-state">
-          <p>{error}</p>
-          <button className="btn-secondary" onClick={refetch}>
-            Retry
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        message={error}
+        type="general"
+        retryLabel="Retry"
+        onRetry={refetch}
+      />
     );
   }
 
@@ -210,13 +204,12 @@ export function ClientDetail({
   if (!client) {
     return (
       <div className="portal-card">
-        <div className="empty-state">
-          <Users className="icon-xl" />
-          <span>Client not found</span>
-          <button className="btn-secondary" onClick={onBack}>
-            Go Back
-          </button>
-        </div>
+        <EmptyState
+          icon={<Users className="icon-lg" />}
+          message="Client not found."
+          ctaLabel="Go Back"
+          onCtaClick={onBack}
+        />
       </div>
     );
   }

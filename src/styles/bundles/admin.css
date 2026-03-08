@@ -124,3 +124,9 @@ html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
   background: var(--color-neutral-500);
 }
 
+/* Sidebar spacing — unlayered to guarantee cascade priority.
+   padding-bottom on sidebar-content creates space below SIGN OUT. */
+.portal .sidebar-content {
+  padding-bottom: var(--space-2);
+}
+

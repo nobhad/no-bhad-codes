@@ -19,6 +19,7 @@ import {
   FolderKanban
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
+import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -191,25 +192,18 @@ export function ProjectDetail({
 
   // Loading state
   if (isLoading && !project) {
-    return (
-      <div className="loading-state">
-        <span className="loading-spinner" />
-        <span>Loading project...</span>
-      </div>
-    );
+    return <LoadingState message="Loading project..." />;
   }
 
   // Error state
   if (error && !project) {
     return (
-      <div className="portal-card">
-        <div className="error-state">
-          <p>{error}</p>
-          <button className="btn-secondary" onClick={refetch}>
-            Retry
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        message={error}
+        type="general"
+        retryLabel="Retry"
+        onRetry={refetch}
+      />
     );
   }
 
@@ -217,13 +211,12 @@ export function ProjectDetail({
   if (!project) {
     return (
       <div className="portal-card">
-        <div className="empty-state">
-          <FolderKanban className="icon-xl" />
-          <span>Project not found</span>
-          <button className="btn-secondary" onClick={onBack}>
-            Go Back
-          </button>
-        </div>
+        <EmptyState
+          icon={<FolderKanban className="icon-lg" />}
+          message="Project not found."
+          ctaLabel="Go Back"
+          onCtaClick={onBack}
+        />
       </div>
     );
   }

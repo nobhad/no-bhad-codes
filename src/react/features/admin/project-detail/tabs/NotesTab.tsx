@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useCallback, useState, useEffect } from 'react';
 import { Save, StickyNote } from 'lucide-react';
+import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Project } from '../../types';
 
 interface NotesTabProps {
@@ -80,14 +81,14 @@ export function NotesTab({
           {hasChanges && (
             <span className="text-muted pd-hint">Unsaved changes</span>
           )}
-          <button
-            className="btn-primary"
+          <PortalButton
             onClick={handleSave}
-            disabled={!hasChanges || isSaving}
+            disabled={!hasChanges}
+            loading={isSaving}
+            icon={<Save className="icon-md" />}
           >
-            <Save className="icon-md" />
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
+            Save
+          </PortalButton>
         </div>
       </div>
 

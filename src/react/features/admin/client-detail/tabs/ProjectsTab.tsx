@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { FolderKanban, ExternalLink, Clock } from 'lucide-react';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
 
@@ -38,13 +39,10 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
 
   if (projects.length === 0) {
     return (
-      <div className="empty-state">
-        <FolderKanban className="icon-xl mb-3" />
-        <p>No projects yet</p>
-        <p>
-          Projects associated with this client will appear here
-        </p>
-      </div>
+      <EmptyState
+        icon={<FolderKanban className="icon-lg" />}
+        message="No projects yet. Projects associated with this client will appear here."
+      />
     );
   }
 

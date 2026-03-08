@@ -4,6 +4,7 @@ import {
   Plus,
   Check,
   Trash2,
+  Pencil,
   ChevronDown,
   ChevronRight,
   Calendar,
@@ -12,6 +13,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { PortalButton } from '@react/components/portal/PortalButton';
+import { PortalInput } from '@react/components/portal/PortalInput';
+import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectMilestone } from '../../types';
 
 interface TasksTabProps {
@@ -176,13 +180,11 @@ export function TasksTab({
           </h4>
 
           <div className="pd-col">
-            <input
-              type="text"
+            <PortalInput
               placeholder="Milestone title..."
               value={newMilestoneTitle}
               onChange={(e) => setNewMilestoneTitle(e.target.value)}
               autoFocus
-              className="input"
             />
 
             <textarea
@@ -193,19 +195,16 @@ export function TasksTab({
               className="textarea tasks-textarea"
             />
 
-            <div className="pd-row-compact">
-              <Calendar className="icon-md" />
-              <input
-                type="date"
-                value={newMilestoneDueDate}
-                onChange={(e) => setNewMilestoneDueDate(e.target.value)}
-                className="input tasks-date-input"
-              />
-            </div>
+            <PortalInput
+              type="date"
+              value={newMilestoneDueDate}
+              onChange={(e) => setNewMilestoneDueDate(e.target.value)}
+              className="tasks-date-input"
+            />
 
             <div className="pd-row-end pd-mt-2">
-              <button
-                className="btn-ghost"
+              <PortalButton
+                variant="ghost"
                 onClick={() => {
                   setShowAddForm(false);
                   setNewMilestoneTitle('');
@@ -214,14 +213,10 @@ export function TasksTab({
                 }}
               >
                 Cancel
-              </button>
-              <button
-                className="btn-primary"
-                onClick={handleAddMilestone}
-                disabled={isAdding}
-              >
-                {isAdding ? 'Adding...' : 'Add Milestone'}
-              </button>
+              </PortalButton>
+              <PortalButton onClick={handleAddMilestone} loading={isAdding}>
+                Add Milestone
+              </PortalButton>
             </div>
           </div>
         </div>
@@ -229,11 +224,10 @@ export function TasksTab({
 
       {/* Milestones List */}
       {milestones.length === 0 ? (
-        <div className="empty-state">
-          <Inbox className="icon-xl pd-mb-2" />
-          <span>No milestones yet</span>
-          <span className="pd-text-xs">Add milestones to track project progress</span>
-        </div>
+        <EmptyState
+          icon={<Inbox className="icon-lg" />}
+          message="No milestones yet. Add milestones to track project progress."
+        />
       ) : (
         <div className="pd-col-tight">
           {milestones.map((milestone, index) => {
@@ -361,17 +355,27 @@ export function TasksTab({
                     )}
 
                     {/* Actions */}
-                    <div className="pd-row-end pd-mt-4">
+                    <div className="milestone-actions">
                       <button
-                        className="btn-ghost"
+                        className="icon-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: wire up milestone edit
+                        }}
+                        aria-label="Edit milestone"
+                      >
+                        <Pencil className="icon-sm" />
+                      </button>
+                      <button
+                        className="icon-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeletingMilestoneId(milestone.id);
                           deleteDialog.open();
                         }}
+                        aria-label="Delete milestone"
                       >
                         <Trash2 className="icon-sm" />
-                        Delete
                       </button>
                     </div>
                   </div>

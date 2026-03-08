@@ -11,6 +11,9 @@ import {
   ExternalLink,
   Inbox
 } from 'lucide-react';
+import { EmptyState } from '@react/components/portal/EmptyState';
+import { PortalButton } from '@react/components/portal/PortalButton';
+import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectFile } from '../../types';
 import { formatCurrency } from '../../../../../utils/format-utils';
 
@@ -138,20 +141,19 @@ export function ContractTab({
           <div className="pd-row-compact">
             {!isSigned && (
               <>
-                <button
-                  className="btn-secondary"
+                <PortalButton
+                  variant="secondary"
                   onClick={handleGenerateContract}
+                  icon={<FileText className="icon-md" />}
                 >
-                  <FileText className="icon-md" />
                   Generate
-                </button>
-                <button
-                  className="btn-primary"
+                </PortalButton>
+                <PortalButton
                   onClick={handleSendForSignature}
+                  icon={<ExternalLink className="icon-md" />}
                 >
-                  <ExternalLink className="icon-md" />
                   Send for Signature
-                </button>
+                </PortalButton>
               </>
             )}
           </div>
@@ -159,46 +161,23 @@ export function ContractTab({
       </div>
 
       {/* Contract Terms */}
-      <div className="pd-grid-2">
-        {/* Project Value */}
-        <div className="stat-card">
-          <div className="contract-stat-header">
-            <DollarSign className="icon-md" />
-            <span className="field-label">
-              Contract Value
-            </span>
-          </div>
-          <div className="stat-value">
-            {formatCurrency(project.price || project.budget)}
-          </div>
-          {project.deposit_amount && (
-            <div className="text-muted pd-mt-1">
-              Deposit: {formatCurrency(project.deposit_amount)}
-            </div>
-          )}
-        </div>
-
-        {/* Timeline */}
-        <div className="stat-card">
-          <div className="contract-stat-header">
-            <Calendar className="icon-md" />
-            <span className="field-label">
-              Project Timeline
-            </span>
-          </div>
-          <div className="pd-highlight-value pd-text-lg">
-            {project.start_date && project.end_date ? (
-              <>
-                {formatDate(project.start_date)} - {formatDate(project.end_date)}
-              </>
-            ) : project.timeline ? (
-              project.timeline
-            ) : (
-              <span className="text-muted">Not specified</span>
-            )}
-          </div>
-        </div>
-      </div>
+      <StatsRow className="pd-grid-2">
+        <StatCard
+          label="Contract Value"
+          value={formatCurrency(project.price || project.budget)}
+          icon={<DollarSign className="icon-md" />}
+          meta={project.deposit_amount ? `Deposit: ${formatCurrency(project.deposit_amount)}` : undefined}
+        />
+        <StatCard
+          label="Project Timeline"
+          value={
+            project.start_date && project.end_date
+              ? `${formatDate(project.start_date)} - ${formatDate(project.end_date)}`
+              : project.timeline || 'Not specified'
+          }
+          icon={<Calendar className="icon-md" />}
+        />
+      </StatsRow>
 
       {/* Contract Files */}
       <div className="panel contract-panel-no-padding">
@@ -215,13 +194,11 @@ export function ContractTab({
         </div>
 
         {contractFiles.length === 0 ? (
-          <div className="empty-state contract-empty-state">
-            <Inbox className="icon-xl pd-mb-2" />
-            <span>No contract documents</span>
-            <span className="pd-hint">
-              Upload contracts in the Files tab or generate one above
-            </span>
-          </div>
+          <EmptyState
+            icon={<Inbox className="icon-lg" />}
+            message="No contract documents. Upload contracts in the Files tab or generate one above."
+            className="contract-empty-state"
+          />
         ) : (
           <div>
             {contractFiles.map((file) => (
