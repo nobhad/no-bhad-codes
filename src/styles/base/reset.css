@@ -275,8 +275,8 @@ summary::-webkit-details-marker {
  * ============================================ */
 
 /* Universal: SVGs next to text in buttons/links match text size */
-.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.sidebar-btn) > svg,
-.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.sidebar-btn) > .btn-icon {
+.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn) > svg,
+.portal :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn) > .btn-icon {
   width: 1em;
   height: 1em;
   flex-shrink: 0;
