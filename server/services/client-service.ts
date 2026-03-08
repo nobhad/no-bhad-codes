@@ -8,7 +8,7 @@
  * custom fields, tags, and health scoring.
  */
 
-import { getDatabase, type SqlParam } from '../database/init.js';
+import { getDatabase } from '../database/init.js';
 import { userService } from './user-service.js';
 import {
   toContact,
@@ -24,9 +24,7 @@ import {
   type TagRow,
   type ClientNoteRow
 } from '../database/entities/index.js';
-
-// Type alias for backward compatibility
-type SqlValue = SqlParam;
+import { buildSafeUpdate, type SqlValue } from '../database/query-helpers.js';
 
 // =====================================================
 // INTERFACES - Contacts
@@ -378,51 +376,29 @@ class ClientService {
       ]);
     }
 
-    const updates: string[] = [];
-    const values: SqlValue[] = [];
+    const ALLOWED_FIELDS = [
+      'first_name', 'last_name', 'email', 'phone', 'title',
+      'department', 'role', 'is_primary', 'notes'
+    ] as const;
 
-    if (data.firstName !== undefined) {
-      updates.push('first_name = ?');
-      values.push(data.firstName);
-    }
-    if (data.lastName !== undefined) {
-      updates.push('last_name = ?');
-      values.push(data.lastName);
-    }
-    if (data.email !== undefined) {
-      updates.push('email = ?');
-      values.push(data.email || null);
-    }
-    if (data.phone !== undefined) {
-      updates.push('phone = ?');
-      values.push(data.phone || null);
-    }
-    if (data.title !== undefined) {
-      updates.push('title = ?');
-      values.push(data.title || null);
-    }
-    if (data.department !== undefined) {
-      updates.push('department = ?');
-      values.push(data.department || null);
-    }
-    if (data.role !== undefined) {
-      updates.push('role = ?');
-      values.push(data.role);
-    }
-    if (data.isPrimary !== undefined) {
-      updates.push('is_primary = ?');
-      values.push(data.isPrimary ? 1 : 0);
-    }
-    if (data.notes !== undefined) {
-      updates.push('notes = ?');
-      values.push(data.notes || null);
-    }
+    const fieldUpdates: Record<string, SqlValue> = {};
+    if (data.firstName !== undefined) fieldUpdates.first_name = data.firstName;
+    if (data.lastName !== undefined) fieldUpdates.last_name = data.lastName;
+    if (data.email !== undefined) fieldUpdates.email = data.email || null;
+    if (data.phone !== undefined) fieldUpdates.phone = data.phone || null;
+    if (data.title !== undefined) fieldUpdates.title = data.title || null;
+    if (data.department !== undefined) fieldUpdates.department = data.department || null;
+    if (data.role !== undefined) fieldUpdates.role = data.role;
+    if (data.isPrimary !== undefined) fieldUpdates.is_primary = data.isPrimary ? 1 : 0;
+    if (data.notes !== undefined) fieldUpdates.notes = data.notes || null;
 
-    if (updates.length > 0) {
-      updates.push('updated_at = CURRENT_TIMESTAMP');
-      values.push(contactId);
+    const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
-      await db.run(`UPDATE client_contacts SET ${updates.join(', ')} WHERE id = ?`, values);
+    if (setClause) {
+      await db.run(
+        `UPDATE client_contacts SET ${setClause} WHERE id = ?`,
+        [...params, contactId]
+      );
     }
 
     const updated = (await db.get(`SELECT ${CLIENT_CONTACT_COLUMNS} FROM client_contacts WHERE id = ?`, [
@@ -735,43 +711,27 @@ class ClientService {
   ): Promise<CustomField> {
     const db = getDatabase();
 
-    const updates: string[] = [];
-    const values: SqlValue[] = [];
+    const ALLOWED_FIELDS = [
+      'field_label', 'options', 'is_required', 'placeholder',
+      'default_value', 'display_order', 'is_active'
+    ] as const;
 
-    if (data.fieldLabel !== undefined) {
-      updates.push('field_label = ?');
-      values.push(data.fieldLabel);
-    }
-    if (data.options !== undefined) {
-      updates.push('options = ?');
-      values.push(data.options ? JSON.stringify(data.options) : null);
-    }
-    if (data.isRequired !== undefined) {
-      updates.push('is_required = ?');
-      values.push(data.isRequired ? 1 : 0);
-    }
-    if (data.placeholder !== undefined) {
-      updates.push('placeholder = ?');
-      values.push(data.placeholder || null);
-    }
-    if (data.defaultValue !== undefined) {
-      updates.push('default_value = ?');
-      values.push(data.defaultValue || null);
-    }
-    if (data.displayOrder !== undefined) {
-      updates.push('display_order = ?');
-      values.push(data.displayOrder);
-    }
-    if (data.isActive !== undefined) {
-      updates.push('is_active = ?');
-      values.push(data.isActive ? 1 : 0);
-    }
+    const fieldUpdates: Record<string, SqlValue> = {};
+    if (data.fieldLabel !== undefined) fieldUpdates.field_label = data.fieldLabel;
+    if (data.options !== undefined) fieldUpdates.options = data.options ? JSON.stringify(data.options) : null;
+    if (data.isRequired !== undefined) fieldUpdates.is_required = data.isRequired ? 1 : 0;
+    if (data.placeholder !== undefined) fieldUpdates.placeholder = data.placeholder || null;
+    if (data.defaultValue !== undefined) fieldUpdates.default_value = data.defaultValue || null;
+    if (data.displayOrder !== undefined) fieldUpdates.display_order = data.displayOrder;
+    if (data.isActive !== undefined) fieldUpdates.is_active = data.isActive ? 1 : 0;
 
-    if (updates.length > 0) {
-      updates.push('updated_at = CURRENT_TIMESTAMP');
-      values.push(fieldId);
+    const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
-      await db.run(`UPDATE client_custom_fields SET ${updates.join(', ')} WHERE id = ?`, values);
+    if (setClause) {
+      await db.run(
+        `UPDATE client_custom_fields SET ${setClause} WHERE id = ?`,
+        [...params, fieldId]
+      );
     }
 
     const field = (await db.get(`SELECT ${CLIENT_CUSTOM_FIELD_COLUMNS} FROM client_custom_fields WHERE id = ?`, [
@@ -899,25 +859,17 @@ class ClientService {
   async updateTag(tagId: number, data: Partial<TagData>): Promise<Tag> {
     const db = getDatabase();
 
-    const updates: string[] = [];
-    const values: SqlValue[] = [];
+    const ALLOWED_FIELDS = ['name', 'color', 'description'] as const;
 
-    if (data.name !== undefined) {
-      updates.push('name = ?');
-      values.push(data.name);
-    }
-    if (data.color !== undefined) {
-      updates.push('color = ?');
-      values.push(data.color);
-    }
-    if (data.description !== undefined) {
-      updates.push('description = ?');
-      values.push(data.description || null);
-    }
+    const fieldUpdates: Record<string, SqlValue> = {};
+    if (data.name !== undefined) fieldUpdates.name = data.name;
+    if (data.color !== undefined) fieldUpdates.color = data.color;
+    if (data.description !== undefined) fieldUpdates.description = data.description || null;
 
-    if (updates.length > 0) {
-      values.push(tagId);
-      await db.run(`UPDATE tags SET ${updates.join(', ')} WHERE id = ?`, values);
+    const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS, { addTimestamp: false });
+
+    if (setClause) {
+      await db.run(`UPDATE tags SET ${setClause} WHERE id = ?`, [...params, tagId]);
     }
 
     const tag = (await db.get(`SELECT ${TAG_COLUMNS} FROM tags WHERE id = ?`, [tagId])) as unknown as
@@ -1298,43 +1250,24 @@ class ClientService {
   ): Promise<void> {
     const db = getDatabase();
 
-    const updates: string[] = [];
-    const values: SqlValue[] = [];
+    const ALLOWED_FIELDS = [
+      'acquisition_source', 'industry', 'company_size', 'website',
+      'next_follow_up_date', 'notes', 'preferred_contact_method'
+    ] as const;
 
-    if (data.acquisitionSource !== undefined) {
-      updates.push('acquisition_source = ?');
-      values.push(data.acquisitionSource || null);
-    }
-    if (data.industry !== undefined) {
-      updates.push('industry = ?');
-      values.push(data.industry || null);
-    }
-    if (data.companySize !== undefined) {
-      updates.push('company_size = ?');
-      values.push(data.companySize || null);
-    }
-    if (data.website !== undefined) {
-      updates.push('website = ?');
-      values.push(data.website || null);
-    }
-    if (data.nextFollowUpDate !== undefined) {
-      updates.push('next_follow_up_date = ?');
-      values.push(data.nextFollowUpDate || null);
-    }
-    if (data.notes !== undefined) {
-      updates.push('notes = ?');
-      values.push(data.notes || null);
-    }
-    if (data.preferredContactMethod !== undefined) {
-      updates.push('preferred_contact_method = ?');
-      values.push(data.preferredContactMethod || null);
-    }
+    const fieldUpdates: Record<string, SqlValue> = {};
+    if (data.acquisitionSource !== undefined) fieldUpdates.acquisition_source = data.acquisitionSource || null;
+    if (data.industry !== undefined) fieldUpdates.industry = data.industry || null;
+    if (data.companySize !== undefined) fieldUpdates.company_size = data.companySize || null;
+    if (data.website !== undefined) fieldUpdates.website = data.website || null;
+    if (data.nextFollowUpDate !== undefined) fieldUpdates.next_follow_up_date = data.nextFollowUpDate || null;
+    if (data.notes !== undefined) fieldUpdates.notes = data.notes || null;
+    if (data.preferredContactMethod !== undefined) fieldUpdates.preferred_contact_method = data.preferredContactMethod || null;
 
-    if (updates.length > 0) {
-      updates.push('updated_at = CURRENT_TIMESTAMP');
-      values.push(clientId);
+    const { setClause, params } = buildSafeUpdate(fieldUpdates, ALLOWED_FIELDS);
 
-      await db.run(`UPDATE clients SET ${updates.join(', ')} WHERE id = ?`, values);
+    if (setClause) {
+      await db.run(`UPDATE clients SET ${setClause} WHERE id = ?`, [...params, clientId]);
     }
   }
 

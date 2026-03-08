@@ -59,6 +59,7 @@ export interface AppConfig {
   // Admin
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
+  ADMIN_PASSWORD_HASH?: string;
 
   // Business Info (for invoices, PDFs, emails)
   BUSINESS_NAME: string;
@@ -165,6 +166,9 @@ const configSchema: ConfigSchema = {
   // Admin
   ADMIN_EMAIL: { required: true, type: 'email' },
   ADMIN_PASSWORD: { required: true, minLength: 8 },
+  // Pre-computed bcrypt hash used for admin login verification.
+  // Generate with: node -e "require('bcryptjs').hash('yourpassword', 12).then(h => console.log(h))"
+  ADMIN_PASSWORD_HASH: { required: false, minLength: 50 },
 
   // Business Info (for invoices, PDFs, emails) - MUST be set in .env
   // No hardcoded defaults - these must come from environment
@@ -394,6 +398,16 @@ function generateDerivedConfig(): void {
       configRecord.SESSION_SECRET =
         `dev-session-secret-${crypto.randomBytes(32).toString('hex')}`;
     }
+  }
+
+  // Validate ADMIN_PASSWORD_HASH format if provided
+  if (configRecord.ADMIN_PASSWORD_HASH) {
+    const hash = String(configRecord.ADMIN_PASSWORD_HASH);
+    if (!hash.startsWith('$2a$') && !hash.startsWith('$2b$') && !hash.startsWith('$2y$')) {
+      console.warn('⚠️  ADMIN_PASSWORD_HASH does not appear to be a valid bcrypt hash');
+    }
+  } else if (configRecord.NODE_ENV === 'production') {
+    console.warn('⚠️  ADMIN_PASSWORD_HASH is not set. Admin login requires this environment variable.');
   }
 
   // Derive API base URL from port if not set
