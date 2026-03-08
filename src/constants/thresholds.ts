@@ -51,3 +51,12 @@ export const CURRENCY_COMPACT = {
   MILLION: 1_000_000,
   THOUSAND: 1_000
 } as const;
+
+/**
+ * Input validation thresholds
+ * Used for client-side input length and size limits
+ */
+export const INPUT_LIMITS = {
+  /** Maximum character count before flagging as potential DoS */
+  MAX_INPUT_LENGTH: 5000
+} as const;

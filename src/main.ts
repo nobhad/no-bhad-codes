@@ -15,6 +15,7 @@ import './styles/main.css';
 import { inject } from '@vercel/analytics';
 import { injectSpeedInsights } from '@vercel/speed-insights';
 import { createLogger } from './utils/logger';
+import { TIMING } from './constants/timing';
 
 const logger = createLogger('Main');
 
@@ -24,7 +25,7 @@ if (import.meta.env?.PROD) {
   injectSpeedInsights();
 }
 
-// Failsafe: Ensure page content is visible after 10 seconds
+// Failsafe: Ensure page content is visible after timeout
 // This catches cases where intro animation fails or takes too long
 if (typeof window !== 'undefined') {
   setTimeout(() => {
@@ -34,7 +35,7 @@ if (typeof window !== 'undefined') {
       html.classList.remove('intro-loading');
       html.classList.add('intro-complete', 'intro-finished');
     }
-  }, 10000);
+  }, TIMING.INTRO_LOADING_FAILSAFE);
 }
 
 // Import and initialize application
