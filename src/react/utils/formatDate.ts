@@ -1,66 +1,17 @@
 /**
- * Unified date formatting utilities
- * Use these functions across all React components for consistent date display
- * Standard format: MM/DD/YYYY
+ * Date formatting utilities - re-exports from canonical source
+ * @see src/utils/format-utils.ts for implementations
  *
- * Re-exports from canonical source for consistency.
- * Additional React-specific formatters maintained here.
+ * This file exists as a convenience re-export for React components.
+ * All implementations live in format-utils.ts (single source of truth).
  */
 
-// Re-export core formatters from canonical source
 export {
   formatDate,
   formatDateTime,
   formatDateForInput,
-  formatRelativeTime
+  formatRelativeTime,
+  formatDateShort,
+  formatDateISO,
+  formatDateRelative
 } from '../../utils/format-utils';
-
-/**
- * Format date as "MM/DD/YYYY" - standard date display
- * Empty string for null/invalid dates (no placeholders)
- */
-export function formatDateShort(date: string | Date | undefined | null): string {
-  if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${month}/${day}/${year}`;
-}
-
-/**
- * Format date as "2026-02-11" (ISO format)
- * Empty string for null/invalid dates (no placeholders)
- */
-export function formatDateISO(date: string | Date | undefined | null): string {
-  if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  return d.toISOString().split('T')[0];
-}
-
-/**
- * Format relative date - "Today", "Yesterday", "MM/DD/YYYY"
- * Empty string for null/invalid dates (no placeholders)
- */
-export function formatDateRelative(date: string | Date | undefined | null): string {
-  if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const targetDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-
-  if (targetDate.getTime() === today.getTime()) {
-    return 'Today';
-  }
-  if (targetDate.getTime() === yesterday.getTime()) {
-    return 'Yesterday';
-  }
-
-  return formatDateShort(d);
-}

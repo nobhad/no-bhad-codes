@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project, ProjectStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -54,24 +54,16 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
   };
 
   // Fetch projects from API
-  const fetchProjects = useCallback(async () => {
+  const fetchProjects = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const token = getAuthToken?.();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       const response = await fetch(API_ENDPOINTS.PROJECTS, {
         method: 'GET',
-        headers,
-        credentials: 'include'
+        headers: buildAuthHeaders(getAuthToken),
+        credentials: 'include',
+        signal
       });
 
       if (!response.ok) {
@@ -85,6 +77,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       // Decode HTML entities in text fields to prevent double-encoding
       setProjects(decodeArrayFields(projectsArray, PROJECT_TEXT_FIELDS));
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
       logger.error('[useProjects] Error:', message);
@@ -97,18 +90,9 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
   const updateProject = useCallback(
     async (id: number, updates: Partial<Project>): Promise<boolean> => {
       try {
-        const token = getAuthToken?.();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${id}`, {
           method: 'PUT',
-          headers,
+          headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
           body: JSON.stringify(updates)
         });
@@ -138,14 +122,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       let failed = 0;
 
       try {
-        const token = getAuthToken?.();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
+        const headers = buildAuthHeaders(getAuthToken);
 
         // Try bulk endpoint first
         const response = await fetch(API_ENDPOINTS.ADMIN.PROJECTS_BULK_DELETE, {
@@ -190,11 +167,12 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
     [getAuthToken]
   );
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (autoFetch) {
-      fetchProjects();
-    }
+    if (!autoFetch) return;
+    const controller = new AbortController();
+    fetchProjects(controller.signal);
+    return () => controller.abort();
   }, [autoFetch, fetchProjects]);
 
   return {
