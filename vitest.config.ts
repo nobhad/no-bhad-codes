@@ -72,15 +72,50 @@ export default defineConfig({
         'src/features/**',
         // Core app (browser lifecycle, DOM-heavy)
         'src/core/app.ts',
+        // Core browser modules - module registry, debug tooling, browser service wiring
+        'src/core/modules-config.ts',
+        'src/core/debug.ts',
+        'src/core/services-config.ts',
+        // UI components - require real DOM rendering (not jsdom-compatible)
+        'src/components/**',
+        // UI factories - build DOM button/badge/icon elements
+        'src/factories/**',
+        // Browser-only utilities
+        'src/utils/api-wrappers.ts',
+        'src/utils/logging/**',
+        'src/utils/obfuscation-plugin.ts',
+        'src/utils/file-download.ts',
+        // Constants with parameterized function returns (browser-side API endpoint builders)
+        'src/constants/api-endpoints.ts',
+        'src/constants/icons.ts',
+        'src/constants/notifications.ts',
+        'src/constants/keyboard.ts',
+        // Animation config - GSAP-dependent
+        'src/config/animation-constants.ts',
         // React UI components and features (require rendering setup not configured)
         'src/react/features/**',
         'src/react/components/**',
         'src/react/app/**',
         'src/react/stores/**',
-        // React hooks that use GSAP or complex browser APIs
-        'src/react/hooks/useGsap.ts',
-        'src/react/hooks/usePortalAuth.ts',
-        'src/react/hooks/usePortalFetch.ts'
+        // React hooks - require React Testing Library (not installed) or portal-specific setup
+        'src/react/hooks/**',
+        // React factories, config, utils, lib - browser/portal context dependent
+        'src/react/factories/**',
+        'src/react/config/**',
+        'src/react/utils/**',
+        'src/react/lib/**',
+        // Server route handlers - integration-test territory (HTTP request lifecycle)
+        'server/routes/**',
+        // Server scripts - one-off migration and development utilities
+        'server/scripts/**',
+        // Server environment config - process.env bootstrapping, not unit-testable
+        'server/config/environment.ts',
+        // Logging transports - file system and console I/O dependent
+        'server/services/logging/**',
+        // Database initialization - requires real SQLite driver, integration-test territory
+        'server/database/init.ts',
+        // Database migrations - run-once scripts, not unit-testable
+        'server/database/migrations.ts'
       ],
       include: ['src/**/*.{js,ts}', 'server/**/*.{js,ts}'],
       thresholds: {
