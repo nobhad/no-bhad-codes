@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import {
   TAB_CONFIG,
@@ -26,7 +26,7 @@ export function DataQualityDashboard({ getAuthToken, showNotification, onNavigat
   const containerRef = useFadeIn();
   const [activeTab, setActiveTab] = useState<DataQualityTab>('duplicates');
 
-  const sharedProps = { getAuthToken, showNotification, onNavigate };
+  const sharedProps = useMemo(() => ({ getAuthToken, showNotification, onNavigate }), [getAuthToken, showNotification, onNavigate]);
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="data-quality-panel">
