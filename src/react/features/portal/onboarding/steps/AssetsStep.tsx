@@ -142,13 +142,13 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Section Header */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Upload Assets
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Share any files, logos, or resources for your project.
         </p>
       </div>
@@ -159,12 +159,12 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          'tw-relative tw-flex tw-flex-col tw-items-center tw-justify-center',
-          'tw-py-8 tw-px-4',
-          'tw-border-2 tw-border-dashed tw-transition-colors tw-duration-200',
+          'relative flex flex-col items-center justify-center',
+          'py-8 px-4',
+          'border-2 border-dashed transition-colors duration-200',
           isDragging
-            ? 'tw-border-primary tw-bg-[var(--portal-bg-hover)]'
-            : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
+            ? 'border-primary bg-[var(--portal-bg-hover)]'
+            : 'border-[var(--portal-border-color)] hover:border-primary'
         )}
       >
         <input
@@ -173,20 +173,20 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           multiple
           accept={ALLOWED_FILE_TYPES.join(',')}
           onChange={(e) => handleFileSelect(e.target.files)}
-          className="tw-hidden"
+          className="hidden"
         />
 
         <Upload
           className={cn(
-            'tw-h-8 tw-w-8 tw-mb-3',
-            isDragging ? 'tw-text-primary' : 'text-muted'
+            'h-8 w-8 mb-3',
+            isDragging ? 'text-primary' : 'text-muted'
           )}
         />
 
-        <p className="tw-text-sm tw-text-primary tw-font-mono tw-mb-1">
+        <p className="text-sm text-primary font-mono mb-1">
           Drag and drop files here
         </p>
-        <p className="tw-text-xs text-muted tw-mb-3">
+        <p className="text-xs text-muted mb-3">
           or click to browse
         </p>
 
@@ -194,39 +194,39 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
           Browse Files
         </button>
 
-        <p className="tw-text-xs text-muted tw-mt-3">
+        <p className="text-xs text-muted mt-3">
           Max 25MB per file. Supports images, PDFs, and documents.
         </p>
       </div>
 
       {/* Upload Error */}
       {uploadError && (
-        <div className="error-state tw-mt-4">
+        <div className="error-state mt-4">
           {uploadError}
         </div>
       )}
 
       {/* Uploaded Files List */}
       {assets.files.length > 0 && (
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-mt-4">
-          <label className="label tw-flex tw-items-center tw-gap-1">
+        <div className="flex flex-col gap-2 mt-4">
+          <label className="label flex items-center gap-1">
             <FolderOpen className="icon-xs" />
             Uploaded Files ({assets.files.length})
           </label>
-          <div className="tw-flex tw-flex-col tw-gap-1">
+          <div className="flex flex-col gap-1">
             {assets.files.map((file) => {
               const FileIcon = getFileIcon(file.type);
               return (
                 <div
                   key={file.id}
-                  className="tw-list-item"
+                  className="list-item"
                 >
-                  <FileIcon className="icon-sm text-muted tw-flex-shrink-0" />
-                  <div className="tw-flex-1 tw-min-w-0">
-                    <p className="tw-text-sm tw-text-primary tw-font-mono tw-truncate">
+                  <FileIcon className="icon-sm text-muted flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-primary font-mono truncate">
                       {file.name}
                     </p>
-                    <p className="tw-text-xs text-muted">
+                    <p className="text-xs text-muted">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -246,53 +246,53 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
       )}
 
       {/* Logo Checkbox */}
-      <div className="tw-mt-6">
-        <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-px-3 tw-py-2 tw-border tw-border-[var(--portal-border-color)] tw-w-fit">
+      <div className="mt-6">
+        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--portal-border-color)] w-fit">
           <Checkbox
             checked={assets.logoProvided}
             onCheckedChange={(checked) => handleChange('logoProvided', checked === true)}
           />
-          <span className="tw-text-sm tw-font-mono">
+          <span className="text-sm font-mono">
             Logo included in uploaded files
           </span>
         </label>
       </div>
 
-      <div className="tw-divider" />
+      <div className="divider" />
 
       {/* Additional Asset Information */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Additional Resources
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Tell us about any other assets or content access we may need.
         </p>
       </div>
 
       {/* Existing Assets */}
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="flex flex-col gap-1">
         <label className="field-label">Existing Assets</label>
         <textarea
           value={assets.existingAssets}
           onChange={(e) => handleChange('existingAssets', e.target.value)}
           placeholder="Do you have existing assets like photography, icons, or illustrations? Where can we access them?"
           rows={2}
-          className="tw-textarea"
+          className="textarea"
         />
       </div>
 
       {/* Content Access */}
-      <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
+      <div className="flex flex-col gap-1 mt-4">
         <label className="field-label">Content & Access Details</label>
         <textarea
           value={assets.contentAccess}
           onChange={(e) => handleChange('contentAccess', e.target.value)}
           placeholder="Any login credentials, API keys, or access details we'll need? (You can also share these securely later)"
           rows={2}
-          className="tw-textarea"
+          className="textarea"
         />
-        <span className="tw-text-xs text-muted">
+        <span className="text-xs text-muted">
           Never share passwords directly. We'll provide a secure way to share credentials if needed.
         </span>
       </div>

@@ -37,14 +37,14 @@ interface SummarySectionProps {
 function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: SummarySectionProps) {
   return (
     <div className="portal-card">
-      <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <Icon className="icon-sm tw-text-primary" />
-          <h4 className="tw-text-sm tw-font-mono tw-text-primary">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Icon className="icon-sm text-primary" />
+          <h4 className="text-sm font-mono text-primary">
             {title}
           </h4>
           {stepNumber && (
-            <span className="tw-badge">
+            <span className="badge">
               Step {stepNumber}
             </span>
           )}
@@ -53,20 +53,20 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
           <button
             type="button"
             onClick={onEdit}
-            className="btn-ghost tw-text-xs"
+            className="btn-ghost text-xs"
           >
             <Edit3 className="icon-xs" />
             Edit
           </button>
         )}
       </div>
-      <div className="tw-space-y-2">
+      <div className="space-y-2">
         {items.map((item, index) => (
-          <div key={index} className="tw-flex tw-gap-2 tw-text-sm tw-font-mono">
-            <span className="text-muted tw-min-w-[100px] tw-flex-shrink-0">
+          <div key={index} className="flex gap-2 text-sm font-mono">
+            <span className="text-muted min-w-[100px] flex-shrink-0">
               {item.label}:
             </span>
-            <span className="tw-text-primary">{item.value || '-'}</span>
+            <span className="text-primary">{item.value || '-'}</span>
           </div>
         ))}
       </div>
@@ -95,28 +95,28 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
     assets?.files && assets.files.length > 0 ? `${assets.files.length} file(s)` : 'No files uploaded';
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Section Header */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Review Your Information
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Please review all the information below before submitting.
         </p>
       </div>
 
       {/* Validation Errors Banner */}
       {hasErrors && (
-        <div className="error-state tw-flex tw-items-start tw-gap-3">
-          <AlertCircle className="icon-sm tw-flex-shrink-0 tw-mt-0.5" />
+        <div className="error-state flex items-start gap-3">
+          <AlertCircle className="icon-sm flex-shrink-0 mt-0.5" />
           <div>
-            <p className="tw-text-sm tw-font-bold tw-font-mono">
+            <p className="text-sm font-bold font-mono">
               Please fix the following issues:
             </p>
-            <ul className="tw-mt-1 tw-space-y-1">
+            <ul className="mt-1 space-y-1">
               {errors.map((error, index) => (
-                <li key={index} className="tw-text-sm tw-font-mono">
+                <li key={index} className="text-sm font-mono">
                   {error.message}
                 </li>
               ))}
@@ -171,10 +171,10 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
       {/* Project Description */}
       {projectOverview?.projectDescription && (
         <div className="portal-card">
-          <h4 className="label tw-mb-2">
+          <h4 className="label mb-2">
             Project Description
           </h4>
-          <p className="tw-text-sm tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
+          <p className="text-sm text-primary font-mono whitespace-pre-wrap">
             {projectOverview.projectDescription}
           </p>
         </div>
@@ -192,7 +192,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           {
             label: 'Brand Guide',
             value: requirements?.brandGuidelines ? (
-              <span className="tw-flex tw-items-center tw-gap-1">
+              <span className="flex items-center gap-1">
                 <Check className="icon-xs text-status-active" />
                 Yes
               </span>
@@ -203,7 +203,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           {
             label: 'Content Ready',
             value: requirements?.contentReady ? (
-              <span className="tw-flex tw-items-center tw-gap-1">
+              <span className="flex items-center gap-1">
                 <Check className="icon-xs text-status-active" />
                 Yes
               </span>
@@ -236,7 +236,7 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
           {
             label: 'Logo',
             value: assets?.logoProvided ? (
-              <span className="tw-flex tw-items-center tw-gap-1">
+              <span className="flex items-center gap-1">
                 <Check className="icon-xs text-status-active" />
                 Included
               </span>
@@ -250,23 +250,23 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
       {/* Additional Notes */}
       {requirements?.additionalNotes && (
         <div className="portal-card">
-          <h4 className="label tw-mb-2">
+          <h4 className="label mb-2">
             Additional Notes
           </h4>
-          <p className="tw-text-sm tw-text-primary tw-font-mono tw-whitespace-pre-wrap">
+          <p className="text-sm text-primary font-mono whitespace-pre-wrap">
             {requirements.additionalNotes}
           </p>
         </div>
       )}
 
       {/* Submission Notice */}
-      <div className="portal-card tw-flex tw-items-start tw-gap-3 tw-mt-2 tw-border-primary">
-        <Check className="icon-sm tw-text-primary tw-flex-shrink-0 tw-mt-0.5" />
+      <div className="portal-card flex items-start gap-3 mt-2 border-primary">
+        <Check className="icon-sm text-primary flex-shrink-0 mt-0.5" />
         <div>
-          <p className="tw-text-sm tw-font-bold tw-font-mono tw-text-primary">
+          <p className="text-sm font-bold font-mono text-primary">
             Ready to submit
           </p>
-          <p className="tw-text-sm text-muted tw-mt-1 tw-font-mono">
+          <p className="text-sm text-muted mt-1 font-mono">
             Click "Complete Onboarding" below to submit your information. We'll review everything and
             get back to you within 1-2 business days.
           </p>

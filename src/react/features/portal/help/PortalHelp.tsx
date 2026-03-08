@@ -351,9 +351,9 @@ function CategoriesSidebar({ categories, onToggle, onArticleClick }: CategoriesS
   if (categories.length === 0) return null;
 
   return (
-    <div ref={listRef} className="tw-section">
+    <div ref={listRef} className="section">
       <h3 className="section-title">Categories</h3>
-      <div className="tw-section">
+      <div className="section">
         {categories.map((category) => {
           const isExpanded = category.articles.length > 0;
 
@@ -412,9 +412,9 @@ function FeaturedArticles({ articles, onArticleClick }: FeaturedArticlesProps) {
   if (articles.length === 0) return null;
 
   return (
-    <div className="tw-section">
+    <div className="section">
       <h3 className="section-title">Featured Articles</h3>
-      <div ref={gridRef} className="tw-section">
+      <div ref={gridRef} className="section">
         {articles.map((article) => (
           <button
             key={article.id}
@@ -467,7 +467,7 @@ function SearchResults({ results, query, isSearching, onArticleClick }: SearchRe
       <h3 className="section-title">
         {results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
       </h3>
-      <div ref={listRef} className="tw-section">
+      <div ref={listRef} className="section">
         {results.map((article) => (
           <button
             key={article.id}
@@ -600,7 +600,7 @@ export function PortalHelp({
   // Article detail view
   if (viewMode === 'article' && selectedArticle) {
     return (
-      <div ref={containerRef} className="tw-section">
+      <div ref={containerRef} className="section">
         <div className="table-layout">
           <div className="data-table-card">
             <div className="data-table-header">
@@ -619,7 +619,7 @@ export function PortalHelp({
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       <div className="table-layout">
         <div className="data-table-card">
           <div className="data-table-header">

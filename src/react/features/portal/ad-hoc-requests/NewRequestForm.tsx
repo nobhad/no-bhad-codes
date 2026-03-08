@@ -171,9 +171,9 @@ export function NewRequestForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="tw-section">
+    <form onSubmit={handleSubmit} className="section">
       {/* Title */}
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="flex flex-col gap-1">
         <label className="field-label">
           Title
           <span className="form-required">*</span>
@@ -189,7 +189,7 @@ export function NewRequestForm({
             }
           }}
           disabled={loading}
-          className={cn('tw-input', errors.title && 'tw-input-error')}
+          className={cn('input', errors.title && 'input-error')}
         />
         {errors.title && (
           <span className="form-error-text">{errors.title}</span>
@@ -197,7 +197,7 @@ export function NewRequestForm({
       </div>
 
       {/* Description */}
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="flex flex-col gap-1">
         <label className="field-label">
           Description
           <span className="form-required">*</span>
@@ -213,7 +213,7 @@ export function NewRequestForm({
           }}
           disabled={loading}
           rows={4}
-          className={cn('tw-textarea form-textarea-resizable', errors.description && 'tw-input-error')}
+          className={cn('textarea form-textarea-resizable', errors.description && 'input-error')}
         />
         {errors.description && (
           <span className="form-error-text">{errors.description}</span>
@@ -221,16 +221,16 @@ export function NewRequestForm({
       </div>
 
       {/* Priority */}
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="flex flex-col gap-1">
         <label className="field-label">Priority</label>
-        <div className="tw-flex tw-gap-2">
+        <div className="flex gap-2">
           {PRIORITY_OPTIONS.map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setPriority(p)}
               disabled={loading}
-              className={cn('tw-flex-1 tw-text-xs', priority === p ? 'btn-primary' : 'btn-secondary')}
+              className={cn('flex-1 text-xs', priority === p ? 'btn-primary' : 'btn-secondary')}
               style={{
                 color: priority === p ? 'var(--portal-text-light)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
                 backgroundColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
@@ -245,13 +245,13 @@ export function NewRequestForm({
 
       {/* Project (Optional) */}
       {projects.length > 0 && (
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Related Project (Optional)</label>
           <select
             value={projectId || ''}
             onChange={(e) => setProjectId(e.target.value ? Number(e.target.value) : undefined)}
             disabled={loading}
-            className="tw-select"
+            className="select"
           >
             <option value="">Select a project...</option>
             {projects.map((project) => (
@@ -264,27 +264,27 @@ export function NewRequestForm({
       )}
 
       {/* File Upload */}
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="flex flex-col gap-1">
         <label className="field-label">Attachments (Optional)</label>
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className={cn('tw-dropzone', loading && 'tw-cursor-not-allowed')}
+          className={cn('dropzone', loading && 'cursor-not-allowed')}
           style={{ opacity: loading ? 0.5 : 1 }}
         >
           <Upload className="icon-sm" />
-          <div className="tw-text-center">
-            <p className="tw-text-secondary tw-text-xs">
+          <div className="text-center">
+            <p className="text-secondary text-xs">
               Drop files here or{' '}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="tw-text-primary tw-underline"
+                className="text-primary underline"
               >
                 browse
               </button>
             </p>
-            <p className="text-muted tw-text-xs tw-mt-0.5">
+            <p className="text-muted text-xs mt-0.5">
               Max {maxFiles} files, {formatFileSize(maxFileSize)} each
             </p>
           </div>
@@ -293,13 +293,13 @@ export function NewRequestForm({
             type="file"
             multiple
             onChange={handleFileSelect}
-            className="tw-hidden"
+            className="hidden"
           />
         </div>
 
         {/* File Error */}
         {fileError && (
-          <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs form-error-text">
+          <div className="flex items-center gap-1.5 text-xs form-error-text">
             <AlertCircle className="icon-xs" />
             {fileError}
           </div>
@@ -307,18 +307,18 @@ export function NewRequestForm({
 
         {/* File List */}
         {files.length > 0 && (
-          <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-2">
+          <div className="flex flex-col gap-1 mt-2">
             {files.map((file, index) => (
               <div
                 key={`${file.name}-${index}`}
-                className="tw-list-item tw-justify-between"
+                className="list-item justify-between"
               >
-                <div className="tw-flex tw-items-center tw-gap-2 card-content-truncate">
-                  <Paperclip className="icon-xs tw-flex-shrink-0" />
-                  <span className="tw-text-primary tw-text-xs">
+                <div className="flex items-center gap-2 card-content-truncate">
+                  <Paperclip className="icon-xs flex-shrink-0" />
+                  <span className="text-primary text-xs">
                     {file.name}
                   </span>
-                  <span className="text-muted tw-text-xs">
+                  <span className="text-muted text-xs">
                     ({formatFileSize(file.size)})
                   </span>
                 </div>
@@ -337,7 +337,7 @@ export function NewRequestForm({
       </div>
 
       {/* Actions */}
-      <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-2">
+      <div className="flex items-center justify-end gap-2 pt-2">
         {onCancel && (
           <button
             type="button"
@@ -350,7 +350,7 @@ export function NewRequestForm({
         )}
         <button
           type="submit"
-          className="btn-primary tw-flex tw-items-center tw-gap-1.5"
+          className="btn-primary flex items-center gap-1.5"
           disabled={loading}
         >
           {loading && <RefreshCw className="icon-xs loading-spin" />}

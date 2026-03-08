@@ -33,10 +33,10 @@ export function ProposalCard({ proposal, onNavigate }: ProposalCardProps) {
       <div className="portal-card-header">
         <div className="portal-card-title-group">
           <div className="text-muted"><FileText className="icon-xs" /></div>
-          <div className="tw-flex tw-flex-col tw-gap-0.5">
-            <span className="tw-text-primary tw-text-sm">{proposal.title}</span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-primary text-sm">{proposal.title}</span>
             {proposal.projectType && (
-              <span className="label tw-text-xs">{proposal.projectType}</span>
+              <span className="label text-xs">{proposal.projectType}</span>
             )}
           </div>
         </div>
@@ -47,39 +47,39 @@ export function ProposalCard({ proposal, onNavigate }: ProposalCardProps) {
       </div>
 
       {/* Meta row */}
-      <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap tw-mb-3">
+      <div className="flex items-center gap-3 flex-wrap mb-3">
         {proposal.amount != null && (
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+          <div className="flex items-center gap-1 text-muted">
             <DollarSign className="icon-xs" />
-            <span className="tw-text-xs">{formatCurrency(proposal.amount)}</span>
+            <span className="text-xs">{formatCurrency(proposal.amount)}</span>
           </div>
         )}
 
         {proposal.selectedTier && (
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+          <div className="flex items-center gap-1 text-muted">
             <Layers className="icon-xs" />
-            <span className="tw-text-xs">{proposal.selectedTier}</span>
+            <span className="text-xs">{proposal.selectedTier}</span>
           </div>
         )}
 
         {proposal.sentAt && (
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+          <div className="flex items-center gap-1 text-muted">
             <Calendar className="icon-xs" />
-            <span className="tw-text-xs">Sent {formatCardDate(proposal.sentAt)}</span>
+            <span className="text-xs">Sent {formatCardDate(proposal.sentAt)}</span>
           </div>
         )}
 
         {dueDaysText && (
-          <div className={cn('tw-flex tw-items-center tw-gap-1', overdue ? 'tw-text-primary' : 'text-muted')}>
-            <span className="tw-text-xs">{dueDaysText}</span>
+          <div className={cn('flex items-center gap-1', overdue ? 'text-primary' : 'text-muted')}>
+            <span className="text-xs">{dueDaysText}</span>
           </div>
         )}
       </div>
 
       {/* Actions */}
       {onNavigate && (
-        <div className="tw-flex tw-justify-end">
-          <button className="btn-ghost tw-text-sm" onClick={handleClick}>
+        <div className="flex justify-end">
+          <button className="btn-ghost text-sm" onClick={handleClick}>
             View Proposal
             <ChevronRight className="icon-xs" />
           </button>

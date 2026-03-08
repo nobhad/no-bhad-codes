@@ -112,47 +112,47 @@ export function ApprovalCard({
             {/* Entity type icon */}
             <div className="text-muted">{entityIcon}</div>
 
-            <div className="tw-flex tw-flex-col tw-gap-0.5">
-              <span className="tw-text-primary tw-text-sm">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-primary text-sm">
                 {approval.entity_name || `${entityLabel} #${approval.entity_id}`}
               </span>
-              <span className="label tw-text-xs">{entityLabel}</span>
+              <span className="label text-xs">{entityLabel}</span>
             </div>
           </div>
 
           {/* Status badge */}
           <div className="portal-card-status-group">
-            <span className="tw-badge">{approval.status}</span>
+            <span className="badge">{approval.status}</span>
           </div>
         </div>
 
         {/* Description */}
         {approval.description && (
-          <p className="text-muted tw-text-sm tw-mb-2">
+          <p className="text-muted text-sm mb-2">
             {approval.description}
           </p>
         )}
 
         {/* Meta info row */}
-        <div className="tw-flex tw-items-center tw-gap-3 tw-mb-3">
+        <div className="flex items-center gap-3 mb-3">
           {/* Requested date */}
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+          <div className="flex items-center gap-1 text-muted">
             <Clock className="icon-xs" />
-            <span className="tw-text-xs">Requested {formatCardDate(approval.requested_at)}</span>
+            <span className="text-xs">Requested {formatCardDate(approval.requested_at)}</span>
           </div>
 
           {/* Due date indicator */}
           {dueDaysText && (
-            <div className={cn('tw-flex tw-items-center tw-gap-1', overdue ? 'tw-text-primary' : 'text-muted')}>
+            <div className={cn('flex items-center gap-1', overdue ? 'text-primary' : 'text-muted')}>
               {overdue && <AlertCircle className="icon-xs" />}
-              <span className="tw-text-xs">{dueDaysText}</span>
+              <span className="text-xs">{dueDaysText}</span>
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2" onClick={(e) => e.stopPropagation()}>
-          <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-2">
             <button className="btn-primary" disabled={disabled} onClick={() => setShowApproveDialog(true)}>
               <Check className="icon-xs" />
               Approve
@@ -165,7 +165,7 @@ export function ApprovalCard({
 
           {/* View detail link */}
           {onNavigate && (
-            <button className="btn-ghost tw-text-sm" onClick={handleCardClick}>
+            <button className="btn-ghost text-sm" onClick={handleCardClick}>
               View Details
               <ChevronRight className="icon-xs" />
             </button>

@@ -483,18 +483,18 @@ export function OnboardingWizard({
   return (
     <div ref={containerRef} className="portal-main-container">
       {/* Header with Step Indicator */}
-      <div className="tw-flex tw-flex-col tw-gap-4">
-        <div className="tw-flex tw-items-center tw-justify-between">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="heading tw-text-xl">
+            <h2 className="heading text-xl">
               Client Onboarding
             </h2>
-            <p className="text-muted tw-text-sm tw-mt-0.5">
+            <p className="text-muted text-sm mt-0.5">
               {currentStepConfig?.description}
             </p>
           </div>
           {lastSavedAt && (
-            <div className="tw-flex tw-items-center tw-gap-1.5 label">
+            <div className="flex items-center gap-1.5 label">
               <Save className="icon-xs" />
               <span>
                 Saved{' '}
@@ -515,13 +515,13 @@ export function OnboardingWizard({
       {/* Step Content */}
       <div
         ref={stepContainerRef}
-        className="tw-panel tw-min-h-[400px]"
+        className="panel min-h-[400px]"
       >
         {renderStepContent()}
       </div>
 
       {/* Navigation Footer */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-pt-2">
+      <div className="flex items-center justify-between pt-2">
         <div>
           {!isFirstStep && (
             <button
@@ -535,7 +535,7 @@ export function OnboardingWizard({
           )}
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="flex items-center gap-2">
           {/* Save Progress Button */}
           <button
             className="btn-ghost"

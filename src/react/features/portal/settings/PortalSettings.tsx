@@ -68,7 +68,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
 
   if (isLoading) {
     return (
-      <div ref={containerRef} className="tw-section">
+      <div ref={containerRef} className="section">
         <LoadingState message="Loading settings..." />
       </div>
     );
@@ -76,14 +76,14 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
 
   if (error) {
     return (
-      <div ref={containerRef} className="tw-section">
+      <div ref={containerRef} className="section">
         <ErrorState message={error} onRetry={fetchProfile} />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       <TabPanel tabId="profile" isActive={activeTab === 'profile'}>
         {profile && (
           <ProfileForm
@@ -93,7 +93,7 @@ export function PortalSettings({ getAuthToken, showNotification }: PortalSetting
         )}
 
         {/* Contacts sub-section under profile */}
-        <div className="tw-mt-6 tw-pt-6 tw-border-t tw-border-[var(--portal-border)]">
+        <div className="mt-6 pt-6 border-t border-[var(--portal-border)]">
           <ContactsSection
             buildHeaders={buildHeaders}
             showNotification={showNotification}

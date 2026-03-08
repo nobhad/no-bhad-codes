@@ -41,26 +41,26 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Section Header */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Contact Information
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Tell us how to reach you during the project.
         </p>
       </div>
 
       {/* Contact Fields */}
-      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Contact Name */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">
-            Contact Name <span className="tw-text-primary">*</span>
+            Contact Name <span className="text-primary">*</span>
           </label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <User className="icon-xs" />
             </div>
             <input
@@ -68,21 +68,21 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="Your full name"
               value={basicInfo.contactName}
               onChange={(e) => handleChange('contactName', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('contactName') && 'tw-border-primary')}
+              className={cn('input pl-10', getFieldError('contactName') && 'border-primary')}
             />
           </div>
           {getFieldError('contactName') && (
-            <span className="tw-text-xs tw-text-primary">{getFieldError('contactName')}</span>
+            <span className="text-xs text-primary">{getFieldError('contactName')}</span>
           )}
         </div>
 
         {/* Contact Email */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">
-            Email Address <span className="tw-text-primary">*</span>
+            Email Address <span className="text-primary">*</span>
           </label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Mail className="icon-xs" />
             </div>
             <input
@@ -90,19 +90,19 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="your@email.com"
               value={basicInfo.contactEmail}
               onChange={(e) => handleChange('contactEmail', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('contactEmail') && 'tw-border-primary')}
+              className={cn('input pl-10', getFieldError('contactEmail') && 'border-primary')}
             />
           </div>
           {getFieldError('contactEmail') && (
-            <span className="tw-text-xs tw-text-primary">{getFieldError('contactEmail')}</span>
+            <span className="text-xs text-primary">{getFieldError('contactEmail')}</span>
           )}
         </div>
 
         {/* Contact Phone */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Phone Number</label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Phone className="icon-xs" />
             </div>
             <input
@@ -110,25 +110,25 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="(555) 123-4567"
               value={basicInfo.contactPhone}
               onChange={(e) => handleChange('contactPhone', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('contactPhone') && 'tw-border-primary')}
+              className={cn('input pl-10', getFieldError('contactPhone') && 'border-primary')}
             />
           </div>
           {getFieldError('contactPhone') && (
-            <span className="tw-text-xs tw-text-primary">{getFieldError('contactPhone')}</span>
+            <span className="text-xs text-primary">{getFieldError('contactPhone')}</span>
           )}
         </div>
 
         {/* Timezone */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Timezone</label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Clock className="icon-xs" />
             </div>
             <select
               value={basicInfo.timezone}
               onChange={(e) => handleChange('timezone', e.target.value)}
-              className="tw-select tw-w-full tw-pl-10"
+              className="select w-full pl-10"
             >
               {TIMEZONES.map((tz) => (
                 <option key={tz.value} value={tz.value}>
@@ -140,24 +140,24 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
         </div>
       </div>
 
-      <div className="tw-divider" />
+      <div className="divider" />
 
       {/* Company Section */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Company Details
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Help us understand your business.
         </p>
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Company Name */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Company Name</label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Building2 className="icon-xs" />
             </div>
             <input
@@ -165,16 +165,16 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="Your company name"
               value={basicInfo.companyName}
               onChange={(e) => handleChange('companyName', e.target.value)}
-              className="tw-input tw-pl-10"
+              className="input pl-10"
             />
           </div>
         </div>
 
         {/* Company Website */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Current Website</label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Globe className="icon-xs" />
             </div>
             <input
@@ -182,31 +182,31 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               placeholder="https://yoursite.com"
               value={basicInfo.companyWebsite}
               onChange={(e) => handleChange('companyWebsite', e.target.value)}
-              className="tw-input tw-pl-10"
+              className="input pl-10"
             />
           </div>
-          <span className="tw-text-xs text-muted">
+          <span className="text-xs text-muted">
             Leave blank if this is a new business
           </span>
         </div>
       </div>
 
       {/* Preferred Contact Method */}
-      <div className="tw-mt-6">
+      <div className="mt-6">
         <label className="field-label">
           Preferred Contact Method
         </label>
-        <div className="tw-flex tw-gap-4 tw-mt-2">
+        <div className="flex gap-4 mt-2">
           {(['email', 'phone', 'either'] as const).map((method) => (
             <label
               key={method}
               className={cn(
-                'tw-flex tw-items-center tw-gap-2 tw-cursor-pointer',
-                'tw-px-3 tw-py-2',
-                'tw-border tw-transition-colors',
+                'flex items-center gap-2 cursor-pointer',
+                'px-3 py-2',
+                'border transition-colors',
                 basicInfo.preferredContactMethod === method
-                  ? 'tw-border-primary tw-bg-white tw-text-[var(--portal-text-dark)]'
-                  : 'tw-border-[var(--portal-border-color)] hover:tw-border-primary'
+                  ? 'border-primary bg-white text-dark'
+                  : 'border border-default hover-border-primary'
               )}
             >
               <input
@@ -215,23 +215,23 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
                 value={method}
                 checked={basicInfo.preferredContactMethod === method}
                 onChange={(e) => handleChange('preferredContactMethod', e.target.value)}
-                className="tw-sr-only"
+                className="sr-only"
               />
               <span
                 className={cn(
-                  'tw-w-3 tw-h-3 tw-border tw-flex tw-items-center tw-justify-center',
+                  'w-3 h-3 border flex items-center justify-center',
                   basicInfo.preferredContactMethod === method
-                    ? 'tw-border-black tw-bg-black'
-                    : 'tw-border-primary'
+                    ? 'border-black bg-black'
+                    : 'border-primary'
                 )}
               >
                 {basicInfo.preferredContactMethod === method && (
-                  <span className="tw-w-1.5 tw-h-1.5 tw-bg-white" />
+                  <span className="w-1.5 h-1.5 bg-white" />
                 )}
               </span>
               <span className={cn(
-                'tw-text-sm tw-font-mono tw-capitalize',
-                basicInfo.preferredContactMethod === method ? 'tw-text-[var(--portal-text-dark)]' : 'tw-text-primary'
+                'text-sm font-mono capitalize',
+                basicInfo.preferredContactMethod === method ? 'text-dark' : 'text-primary'
               )}>
                 {method}
               </span>

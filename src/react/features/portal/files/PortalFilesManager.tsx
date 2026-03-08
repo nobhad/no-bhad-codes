@@ -222,7 +222,7 @@ function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: Fol
         onClick={() => onSelectFolder('all')}
       >
         <Folder className="icon-sm" />
-        <span className="tw-flex-1">All Files</span>
+        <span className="flex-1">All Files</span>
         <span className="text-muted">{totalCount}</span>
       </button>
 
@@ -235,7 +235,7 @@ function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: Fol
           onClick={() => onSelectFolder(folder.id)}
         >
           <Folder className="icon-sm" />
-          <span className="tw-flex-1">{folder.name}</span>
+          <span className="flex-1">{folder.name}</span>
           <span className="text-muted">{folder.count}</span>
         </button>
       ))}
@@ -491,7 +491,7 @@ export function PortalFilesManager({
   }, []);
 
   return (
-    <div className="tw-section">
+    <div className="section">
       {/* Upload dropzone */}
       <FileUploadDropzone
         onUpload={handleUpload}
@@ -513,7 +513,7 @@ export function PortalFilesManager({
           <>
             <SearchFilter value={searchQuery} onChange={setSearchQuery} placeholder="Search files..." />
             <select
-              className="tw-select"
+              className="select"
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
             >
@@ -525,7 +525,7 @@ export function PortalFilesManager({
               ))}
             </select>
             <select
-              className="tw-select"
+              className="select"
               value={selectedFileType}
               onChange={(e) => setSelectedFileType(e.target.value)}
             >
@@ -562,7 +562,7 @@ export function PortalFilesManager({
               {/* Mobile folder selector */}
               <div className="files-mobile-select">
                 <select
-                  className="tw-select tw-w-full"
+                  className="select w-full"
                   value={selectedFolder}
                   onChange={(e) => setSelectedFolder(e.target.value)}
                 >

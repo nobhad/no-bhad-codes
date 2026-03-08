@@ -40,26 +40,26 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
   };
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Section Header */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Project Details
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Tell us about your project goals and timeline.
         </p>
       </div>
 
       {/* Project Name & Type */}
-      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Project Name */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">
-            Project Name <span className="tw-text-primary">*</span>
+            Project Name <span className="text-primary">*</span>
           </label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <FolderKanban className="icon-xs" />
             </div>
             <input
@@ -67,23 +67,23 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               placeholder="My Awesome Project"
               value={projectOverview.projectName}
               onChange={(e) => handleChange('projectName', e.target.value)}
-              className={cn('tw-input tw-pl-10', getFieldError('projectName') && 'tw-border-primary')}
+              className={cn('input pl-10', getFieldError('projectName') && 'border-primary')}
             />
           </div>
           {getFieldError('projectName') && (
-            <span className="tw-text-xs tw-text-primary">{getFieldError('projectName')}</span>
+            <span className="text-xs text-primary">{getFieldError('projectName')}</span>
           )}
         </div>
 
         {/* Project Type */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">
-            Project Type <span className="tw-text-primary">*</span>
+            Project Type <span className="text-primary">*</span>
           </label>
           <select
             value={projectOverview.projectType}
             onChange={(e) => handleChange('projectType', e.target.value)}
-            className={cn('tw-select tw-w-full', getFieldError('projectType') && 'tw-border-primary')}
+            className={cn('select w-full', getFieldError('projectType') && 'border-primary')}
           >
             <option value="">Select project type...</option>
             {PROJECT_TYPES.map((type) => (
@@ -93,71 +93,71 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             ))}
           </select>
           {getFieldError('projectType') && (
-            <span className="tw-text-xs tw-text-primary">{getFieldError('projectType')}</span>
+            <span className="text-xs text-primary">{getFieldError('projectType')}</span>
           )}
         </div>
       </div>
 
       {/* Project Description */}
-      <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
+      <div className="flex flex-col gap-1 mt-4">
         <label className="field-label">
-          Project Description <span className="tw-text-primary">*</span>
+          Project Description <span className="text-primary">*</span>
         </label>
         <textarea
           value={projectOverview.projectDescription}
           onChange={(e) => handleChange('projectDescription', e.target.value)}
           placeholder="Describe your project goals, what you want to achieve, and any specific requirements..."
           rows={4}
-          className={cn('tw-textarea', getFieldError('projectDescription') && 'tw-border-primary')}
+          className={cn('textarea', getFieldError('projectDescription') && 'border-primary')}
         />
         {getFieldError('projectDescription') && (
-          <span className="tw-text-xs tw-text-primary">{getFieldError('projectDescription')}</span>
+          <span className="text-xs text-primary">{getFieldError('projectDescription')}</span>
         )}
       </div>
 
-      <div className="tw-divider" />
+      <div className="divider" />
 
       {/* Timeline & Budget Section */}
-      <div className="tw-mb-4">
-        <h3 className="heading tw-text-lg">
+      <div className="mb-4">
+        <h3 className="heading text-lg">
           Timeline & Budget
         </h3>
-        <p className="text-muted tw-text-sm tw-mt-1">
+        <p className="text-muted text-sm mt-1">
           Help us understand your constraints.
         </p>
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Target Launch Date */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Target Launch Date</label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Calendar className="icon-xs" />
             </div>
             <input
               type="date"
               value={projectOverview.targetLaunchDate}
               onChange={(e) => handleChange('targetLaunchDate', e.target.value)}
-              className="tw-input tw-pl-10"
+              className="input pl-10"
             />
           </div>
-          <span className="tw-text-xs text-muted">
+          <span className="text-xs text-muted">
             When do you want to launch?
           </span>
         </div>
 
         {/* Budget Range */}
-        <div className="tw-flex tw-flex-col tw-gap-1">
+        <div className="flex flex-col gap-1">
           <label className="field-label">Budget Range</label>
-          <div className="tw-relative">
-            <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <DollarSign className="icon-xs" />
             </div>
             <select
               value={projectOverview.budget}
               onChange={(e) => handleChange('budget', e.target.value)}
-              className="tw-select tw-w-full tw-pl-10"
+              className="select w-full pl-10"
             >
               <option value="">Select budget range...</option>
               {BUDGET_RANGES.map((range) => (
@@ -167,17 +167,17 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               ))}
             </select>
           </div>
-          <span className="tw-text-xs text-muted">
+          <span className="text-xs text-muted">
             This helps us recommend the right scope
           </span>
         </div>
       </div>
 
       {/* Target Audience */}
-      <div className="tw-flex tw-flex-col tw-gap-1 tw-mt-4">
+      <div className="flex flex-col gap-1 mt-4">
         <label className="field-label">Target Audience</label>
-        <div className="tw-relative">
-          <div className="tw-absolute tw-left-3 tw-top-1/2 tw-transform tw--translate-y-1/2 text-muted">
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
             <Users className="icon-xs" />
           </div>
           <input
@@ -185,7 +185,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
             placeholder="Who is this project for? (e.g., small business owners, tech enthusiasts)"
             value={projectOverview.targetAudience}
             onChange={(e) => handleChange('targetAudience', e.target.value)}
-            className="tw-input tw-pl-10"
+            className="input pl-10"
           />
         </div>
       </div>

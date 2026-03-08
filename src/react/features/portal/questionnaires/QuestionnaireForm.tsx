@@ -137,7 +137,7 @@ function TextInput({ question, value, onChange, disabled }: QuestionInputProps) 
       onChange={(e) => onChange(e.target.value || null)}
       placeholder={question.placeholder}
       disabled={disabled}
-      className="tw-input"
+      className="input"
     />
   );
 }
@@ -153,7 +153,7 @@ function TextareaInput({ question, value, onChange, disabled }: QuestionInputPro
       placeholder={question.placeholder}
       disabled={disabled}
       rows={4}
-      className="tw-textarea form-textarea-resizable"
+      className="textarea form-textarea-resizable"
     />
   );
 }
@@ -184,19 +184,19 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className="tw-select qform-select-btn"
+        className="select qform-select-btn"
       >
-        <span className={!selectedOption ? 'text-muted' : 'tw-text-primary'}>
+        <span className={!selectedOption ? 'text-muted' : 'text-primary'}>
           {selectedOption?.label || question.placeholder || 'Select an option'}
         </span>
         <ChevronDown className={cn(
           'icon-sm qform-chevron-icon',
-          isOpen && 'tw-rotate-180'
+          isOpen && 'rotate-180'
         )} />
       </button>
 
       {isOpen && (
-        <div className="tw-panel qform-select-dropdown">
+        <div className="panel qform-select-dropdown">
           {question.options?.map((option) => (
             <button
               key={option.value}
@@ -205,7 +205,7 @@ function SelectInput({ question, value, onChange, disabled }: QuestionInputProps
                 onChange(option.value);
                 setIsOpen(false);
               }}
-              className={cn('tw-list-item qform-select-option', option.value === value && 'tw-table-row-selected')}
+              className={cn('list-item qform-select-option', option.value === value && 'table-row-selected')}
             >
               {option.label}
             </button>
@@ -269,7 +269,7 @@ function NumberInput({ question, value, onChange, disabled }: QuestionInputProps
       min={question.min}
       max={question.max}
       disabled={disabled}
-      className="tw-input"
+      className="input"
     />
   );
 }
@@ -341,7 +341,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         <div className="portal-card qform-file-selected">
           <div className="qform-file-info">
             <Check className="icon-xs qform-check-success" />
-            <span className="tw-text-primary qform-file-name">
+            <span className="text-primary qform-file-name">
               {fileMetadata.filename}
             </span>
             <span className="text-muted qform-file-size">
@@ -372,7 +372,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         >
           <Upload className="icon-sm" />
           <div className="qform-dropzone-text">
-            <span className="tw-text-primary qform-dropzone-label">
+            <span className="text-primary qform-dropzone-label">
               Drop file here or click to upload
             </span>
             <div className="text-muted qform-dropzone-hint">
@@ -390,7 +390,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
         accept={question.acceptedFileTypes}
         onChange={handleInputChange}
         disabled={disabled}
-        className="tw-hidden"
+        className="hidden"
       />
     </div>
   );
@@ -596,7 +596,7 @@ export function QuestionnaireForm({
   };
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {/* Header */}
       <div className="qform-header">
         <div className="qform-header-left">
@@ -644,9 +644,9 @@ export function QuestionnaireForm({
       {/* Progress bar */}
       {!isReadOnly && (
         <div className="qform-progress-row">
-          <div className="tw-progress-track tw-flex-1">
+          <div className="progress-track flex-1">
             <div
-              className="tw-progress-bar"
+              className="progress-bar"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -657,7 +657,7 @@ export function QuestionnaireForm({
       )}
 
       {/* Questions */}
-      <div className="tw-section">
+      <div className="section">
         {visibleQuestions.map((question, index) => {
           const InputComponent = QUESTION_COMPONENTS[question.type];
           const value = getAnswerValue(question.id, answers);
