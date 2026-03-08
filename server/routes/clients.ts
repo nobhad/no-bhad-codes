@@ -19,7 +19,7 @@ import { getString, getNumber } from '../database/row-helpers.js';
 
 import { softDeleteService } from '../services/soft-delete-service.js';
 import { notificationPreferencesService } from '../services/notification-preferences-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, sendPaginated, parsePaginationQuery } from '../utils/api-response.js';
 import { clientService } from '../services/client-service.js';
 import { validateRequest } from '../middleware/validation.js';
 import { rateLimit } from '../middleware/security.js';
@@ -1869,12 +1869,14 @@ router.get(
     }
 
     const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
-    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
 
-    if ((projectId !== undefined && isNaN(projectId)) || isNaN(limit) || isNaN(offset)) {
+    if (projectId !== undefined && isNaN(projectId)) {
       return errorResponse(res, 'Invalid query parameters', 400, 'VALIDATION_ERROR');
     }
+
+    const { page, perPage, limit, offset } = parsePaginationQuery(
+      req.query as Record<string, unknown>
+    );
 
     const { events, total } = await timelineService.getClientTimeline(req.user!.id, {
       projectId,
@@ -1882,7 +1884,7 @@ router.get(
       offset
     });
 
-    sendSuccess(res, { events, total, limit, offset });
+    sendPaginated(res, events, { page, perPage, total });
   })
 );
 

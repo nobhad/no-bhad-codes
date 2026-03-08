@@ -358,6 +358,76 @@ export function sendPaginated<T>(
 }
 
 // ============================================
+// PAGINATION QUERY HELPERS
+// ============================================
+
+/** Default pagination values */
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 50;
+const MAX_PER_PAGE = 500;
+
+/**
+ * Parsed pagination parameters from query string
+ */
+export interface ParsedPagination {
+  page: number;
+  perPage: number;
+  offset: number;
+  limit: number;
+}
+
+/**
+ * Parse and validate pagination query parameters.
+ * Supports both page-based (?page=2&perPage=25) and
+ * offset-based (?limit=25&offset=25) query params.
+ *
+ * Page-based params take priority when both are present.
+ *
+ * @example
+ *   const pagination = parsePaginationQuery(req.query);
+ *   // Use pagination.limit and pagination.offset in SQL
+ *   // Use pagination.page and pagination.perPage in sendPaginated()
+ */
+export function parsePaginationQuery(
+  query: Record<string, unknown>,
+  defaults: { perPage?: number } = {}
+): ParsedPagination {
+  const defaultPerPage = defaults.perPage ?? DEFAULT_PER_PAGE;
+
+  // Prefer page-based params, fall back to offset-based
+  const hasPageParams = query.page !== undefined;
+  const hasOffsetParams = query.offset !== undefined || query.limit !== undefined;
+
+  let page: number;
+  let perPage: number;
+
+  if (hasPageParams) {
+    page = Math.max(DEFAULT_PAGE, parseInt(String(query.page), 10) || DEFAULT_PAGE);
+    perPage = Math.min(
+      MAX_PER_PAGE,
+      Math.max(1, parseInt(String(query.perPage ?? query.limit ?? defaultPerPage), 10) || defaultPerPage)
+    );
+  } else if (hasOffsetParams) {
+    const offset = Math.max(0, parseInt(String(query.offset), 10) || 0);
+    perPage = Math.min(
+      MAX_PER_PAGE,
+      Math.max(1, parseInt(String(query.limit ?? defaultPerPage), 10) || defaultPerPage)
+    );
+    page = Math.floor(offset / perPage) + 1;
+  } else {
+    page = DEFAULT_PAGE;
+    perPage = defaultPerPage;
+  }
+
+  return {
+    page,
+    perPage,
+    offset: (page - 1) * perPage,
+    limit: perPage
+  };
+}
+
+// ============================================
 // UTILITIES
 // ============================================
 

@@ -6,7 +6,7 @@
 import { Router, Response } from 'express';
 import { deliverableService } from '../services/deliverable-service.js';
 import { fileService } from '../services/file-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, sendPaginated, parsePaginationQuery } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { logger } from '../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
@@ -310,21 +310,19 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
       return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
     }
 
-    const { status, roundNumber, limit = '50', offset = '0' } = req.query;
-    const parsedLimit = parseInt(limit as string, 10);
-    const parsedOffset = parseInt(offset as string, 10);
-    if (isNaN(parsedLimit) || isNaN(parsedOffset)) {
-      return errorResponse(res, 'Invalid pagination parameters', 400, 'VALIDATION_ERROR');
-    }
+    const { status, roundNumber } = req.query;
+    const { page, perPage, limit, offset } = parsePaginationQuery(
+      req.query as Record<string, unknown>
+    );
 
     const result = await deliverableService.getProjectDeliverables(parsedProjectId, {
       status: status as string | undefined,
       roundNumber: roundNumber ? parseInt(roundNumber as string, 10) : undefined,
-      limit: parsedLimit,
-      offset: parsedOffset
+      limit,
+      offset
     });
 
-    sendSuccess(res, { deliverables: result.deliverables, pagination: { total: result.total } });
+    sendPaginated(res, result.deliverables, { page, perPage, total: result.total });
   } catch (error) {
     logger.error('[Deliverables] Failed to list deliverables', {
       error: error instanceof Error ? error : new Error(String(error)),

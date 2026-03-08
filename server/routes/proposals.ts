@@ -53,7 +53,9 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated
+  sendCreated,
+  sendPaginated,
+  parsePaginationQuery
 } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 
@@ -440,7 +442,10 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const db = getDatabase();
-    const { status, limit = '50', offset = '0' } = req.query;
+    const { status } = req.query;
+    const { page, perPage, limit, offset } = parsePaginationQuery(
+      req.query as Record<string, unknown>
+    );
 
     let query = `
       SELECT pr.*, p.project_name, c.contact_name as client_name, c.email as client_email, c.company_name
@@ -457,7 +462,7 @@ router.get(
     }
 
     query += ' ORDER BY pr.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit as string, 10), parseInt(offset as string, 10));
+    params.push(limit, offset);
 
     const proposals = (await db.all(query, params)) as unknown as ProposalRow[];
 
@@ -470,34 +475,35 @@ router.get(
     }
     const countResult = (await db.get(countQuery, countParams)) as { count: number };
 
-    sendSuccess(res, {
-      proposals: proposals.map((proposal) => {
-        const p = proposal as unknown as Record<string, unknown>;
-        return {
-          id: getNumber(p, 'id'),
-          projectId: getNumber(p, 'project_id'),
-          clientId: getNumber(p, 'client_id'),
-          projectType: getString(p, 'project_type'),
-          selectedTier: getString(p, 'selected_tier'),
-          basePrice: getNumber(p, 'base_price'),
-          finalPrice: getNumber(p, 'final_price'),
-          maintenanceOption: proposal.maintenance_option,
-          status: getString(p, 'status'),
-          createdAt: getString(p, 'created_at'),
-          reviewedAt: proposal.reviewed_at,
-          project: {
-            name: getString(p, 'project_name')
-          },
-          client: {
-            name: getString(p, 'client_name'),
-            email: getString(p, 'client_email'),
-            company: proposal.company_name
-          }
-        };
-      }),
-      total: countResult.count,
-      limit: parseInt(limit as string, 10),
-      offset: parseInt(offset as string, 10)
+    const mappedProposals = proposals.map((proposal) => {
+      const p = proposal as unknown as Record<string, unknown>;
+      return {
+        id: getNumber(p, 'id'),
+        projectId: getNumber(p, 'project_id'),
+        clientId: getNumber(p, 'client_id'),
+        projectType: getString(p, 'project_type'),
+        selectedTier: getString(p, 'selected_tier'),
+        basePrice: getNumber(p, 'base_price'),
+        finalPrice: getNumber(p, 'final_price'),
+        maintenanceOption: proposal.maintenance_option,
+        status: getString(p, 'status'),
+        createdAt: getString(p, 'created_at'),
+        reviewedAt: proposal.reviewed_at,
+        project: {
+          name: getString(p, 'project_name')
+        },
+        client: {
+          name: getString(p, 'client_name'),
+          email: getString(p, 'client_email'),
+          company: proposal.company_name
+        }
+      };
+    });
+
+    sendPaginated(res, mappedProposals, {
+      page,
+      perPage,
+      total: countResult.count
     });
   })
 );

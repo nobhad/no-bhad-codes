@@ -202,17 +202,24 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to load proposals');
-      const payload = unwrapApiData<{ proposals?: Proposal[]; stats?: ProposalStats }>(await response.json());
-      setProposals(payload.proposals || []);
-      setStats(payload.stats || {
-        total: 0,
-        draft: 0,
-        sent: 0,
-        accepted: 0,
-        declined: 0,
-        totalValue: 0,
-        acceptanceRate: 0
-      });
+      const json = await response.json();
+      // sendPaginated puts array directly in data; unwrapApiData extracts it
+      const fetchedProposals = unwrapApiData<Proposal[]>(json);
+      setProposals(Array.isArray(fetchedProposals) ? fetchedProposals : []);
+      // Stats are computed client-side from the proposals list
+      const proposalList = Array.isArray(fetchedProposals) ? fetchedProposals : [];
+      const computedStats: ProposalStats = {
+        total: proposalList.length,
+        draft: proposalList.filter(p => p.status === 'draft').length,
+        sent: proposalList.filter(p => p.status === 'sent').length,
+        accepted: proposalList.filter(p => p.status === 'accepted').length,
+        declined: proposalList.filter(p => p.status === 'declined').length,
+        totalValue: proposalList.reduce((sum, p) => sum + (p.amount || 0), 0),
+        acceptanceRate: proposalList.length > 0
+          ? (proposalList.filter(p => p.status === 'accepted').length / proposalList.length) * 100
+          : 0
+      };
+      setStats(computedStats);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load proposals');
     } finally {
