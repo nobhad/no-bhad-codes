@@ -9,7 +9,7 @@
  */
 
 import { getTracer, SpanStatusCode } from './index.js';
-import { Span, SpanKind, context, propagation } from '@opentelemetry/api';
+import { Span, SpanKind, context, propagation, trace } from '@opentelemetry/api';
 import type { Request } from 'express';
 
 // Semantic convention attributes for database operations
@@ -193,7 +193,6 @@ export function getCurrentSpanId(): string | undefined {
  * Get the currently active span
  */
 export function getActiveSpan(): Span | undefined {
-  const { trace } = require('@opentelemetry/api');
   return trace.getActiveSpan();
 }
 
