@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   GitBranch,
   Inbox,
   ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -37,7 +38,6 @@ import { useSelection } from '@react/hooks/useSelection';
 import { WORKFLOW_STATUS_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 const logger = createLogger('WorkflowsTable');
@@ -125,30 +125,37 @@ function sortWorkflows(a: Workflow, b: Workflow, sort: SortConfig): number {
   }
 }
 
+const DEFAULT_STATS: WorkflowStats = {
+  total: 0,
+  active: 0,
+  inactive: 0,
+  totalRuns: 0,
+  avgSuccessRate: 0
+};
+
 export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: WorkflowsTableProps) {
   const containerRef = useFadeIn();
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
+  const { data, isLoading, error, refetch, setData } = useListFetch<Workflow, WorkflowStats>({
+    endpoint: API_ENDPOINTS.ADMIN.WORKFLOWS,
+    getAuthToken,
+    defaultStats: DEFAULT_STATS,
+    itemsKey: 'workflows'
+  });
+  const workflows = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_STATS, [data]);
+
+  const getHeaders = useCallback((): Record<string, string> => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     };
+    const token = getAuthToken?.();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
     return headers;
   }, [getAuthToken]);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [stats, setStats] = useState<WorkflowStats>({
-    total: 0,
-    active: 0,
-    inactive: 0,
-    totalRuns: 0,
-    avgSuccessRate: 0
-  });
   const [bulkLoading, setBulkLoading] = useState(false);
 
   const {
@@ -191,36 +198,6 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     [setFilter]
   );
 
-  const loadWorkflows = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.WORKFLOWS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load workflows');
-      const payload = unwrapApiData<{ workflows?: Workflow[]; stats?: WorkflowStats }>(await response.json());
-      setWorkflows(payload.workflows || []);
-      setStats(payload.stats || {
-        total: 0,
-        active: 0,
-        inactive: 0,
-        totalRuns: 0,
-        avgSuccessRate: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load workflows');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadWorkflows();
-  }, [loadWorkflows]);
-
   const updateWorkflowStatus = useCallback(async (workflowId: number, newStatus: string) => {
     try {
       const response = await fetch(API_ENDPOINTS.ADMIN.WORKFLOWS_BULK_STATUS, {
@@ -230,17 +207,17 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         body: JSON.stringify({ workflowIds: [workflowId], status: newStatus })
       });
       if (!response.ok) throw new Error('Failed to update workflow status');
-      setWorkflows((prev) =>
-        prev.map((w) =>
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.map((w) =>
           w.id === workflowId ? { ...w, status: newStatus as Workflow['status'] } : w
-        )
+        ) } : prev
       );
       showNotification?.('Workflow status updated', 'success');
     } catch (err) {
       logger.error('Failed to update workflow status:', err);
       showNotification?.('Failed to update workflow status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handleBulkStatusChange = useCallback(async (newStatus: string) => {
     if (selection.selectedCount === 0) return;
@@ -255,12 +232,12 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         body: JSON.stringify({ workflowIds, status: newStatus })
       });
       if (!response.ok) throw new Error('Failed to update workflow statuses');
-      setWorkflows((prev) =>
-        prev.map((w) =>
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.map((w) =>
           selection.selectedIds.has(w.id)
             ? { ...w, status: newStatus as Workflow['status'] }
             : w
-        )
+        ) } : prev
       );
       selection.clearSelection();
       showNotification?.(`Updated ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, 'success');
@@ -270,7 +247,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   const handleBulkDelete = useCallback(async () => {
     if (selection.selectedCount === 0) return;
@@ -289,7 +266,9 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
         body: JSON.stringify({ workflowIds })
       });
       if (!response.ok) throw new Error('Failed to delete workflows');
-      setWorkflows((prev) => prev.filter((w) => !selection.selectedIds.has(w.id)));
+      setData((prev) =>
+        prev ? { ...prev, items: prev.items.filter((w) => !selection.selectedIds.has(w.id)) } : prev
+      );
       selection.clearSelection();
       showNotification?.(`Deleted ${workflowIds.length} workflow${workflowIds.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -298,7 +277,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
     } finally {
       setBulkLoading(false);
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   const filterSections = WORKFLOWS_FILTER_CONFIG.map((config) => ({
     key: config.key,
@@ -339,7 +318,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
           />
           <IconButton
             action="refresh"
-            onClick={loadWorkflows}
+            onClick={refetch}
             disabled={isLoading}
             title="Refresh"
           />
@@ -409,7 +388,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={5} message={error} onRetry={loadWorkflows} />
+            <PortalTableError colSpan={5} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedWorkflows.length === 0 ? (
