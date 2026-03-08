@@ -114,7 +114,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   // Initial fetch on mount
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [fetchProfile]);
 
   // Listen for EJS subtab changes
   useEffect(() => {
