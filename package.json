@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:server": "tsx server/app.ts",
+    "dev:server": "tsx watch server/app.ts",
     "dev:full": "concurrently --kill-others \"npm run dev\" \"npm run dev:server\" \"npm run tailwind:watch\"",
     "tailwind:build": "tailwindcss -i ./src/react/styles/globals.css -o ./src/react/styles/tailwind-generated.css --config ./tailwind.config.js",
     "tailwind:watch": "tailwindcss -i ./src/react/styles/globals.css -o ./src/react/styles/tailwind-generated.css --config ./tailwind.config.js --watch",

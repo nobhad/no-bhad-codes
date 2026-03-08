@@ -87,7 +87,7 @@ export function useProjectMilestones({
   const updateMilestone = useCallback(
     async (id: number, updates: Partial<ProjectMilestone>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.MILESTONES}/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`, {
           method: 'PUT',
           headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
@@ -107,13 +107,13 @@ export function useProjectMilestones({
         return false;
       }
     },
-    [getAuthToken]
+    [projectId, getAuthToken]
   );
 
   const deleteMilestone = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.MILESTONES}/${id}`, {
+        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/milestones/${id}`, {
           method: 'DELETE',
           headers: buildAuthHeaders(getAuthToken),
           credentials: 'include'
@@ -130,7 +130,7 @@ export function useProjectMilestones({
         return false;
       }
     },
-    [getAuthToken]
+    [projectId, getAuthToken]
   );
 
   const toggleMilestoneComplete = useCallback(
