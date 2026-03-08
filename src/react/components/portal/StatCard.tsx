@@ -38,7 +38,7 @@ export interface StatCardProps {
  * <StatCard label="Outstanding" value={formatCurrency(1200)} />
  * <StatCard label="New" value={5} variant="warning" onClick={() => setFilter('status', 'new')} isActive={filter === 'new'} />
  */
-export function StatCard({ label, value, variant = 'default', onClick, isActive, icon, meta, className }: StatCardProps) {
+export const StatCard = React.memo(function StatCard({ label, value, variant = 'default', onClick, isActive, icon, meta, className }: StatCardProps) {
   const classes = cn(
     'stat-card',
     variant !== 'default' && `stat-card--${variant}`,
@@ -71,7 +71,7 @@ export function StatCard({ label, value, variant = 'default', onClick, isActive,
   }
 
   return <div className={classes}>{content}</div>;
-}
+});
 
 // ============================================
 // STATS ROW
@@ -93,6 +93,6 @@ export interface StatsRowProps {
  *   <StatCard label="Active" value={3} />
  * </StatsRow>
  */
-export function StatsRow({ children, className }: StatsRowProps) {
+export const StatsRow = React.memo(function StatsRow({ children, className }: StatsRowProps) {
   return <div className={cn('stats-grid', className)}>{children}</div>;
-}
+});

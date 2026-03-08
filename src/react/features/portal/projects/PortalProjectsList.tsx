@@ -236,9 +236,16 @@ export function PortalProjectsList({
     }
   };
 
-  // Group projects by status for summary
-  const activeCount = items.filter(p => p.status === 'active' || p.status === 'in-progress').length;
-  const completedCount = items.filter(p => p.status === 'completed').length;
+  // Group projects by status for summary - single pass
+  const { activeCount, completedCount } = React.useMemo(() => {
+    let active = 0;
+    let completed = 0;
+    for (const p of items) {
+      if (p.status === 'active' || p.status === 'in-progress') active++;
+      else if (p.status === 'completed') completed++;
+    }
+    return { activeCount: active, completedCount: completed };
+  }, [items]);
 
   return (
     <TableLayout

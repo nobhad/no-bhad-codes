@@ -13,7 +13,7 @@ import type { StepIndicatorProps, OnboardingStep } from './types';
  * StepIndicator Component
  * Displays progress through the wizard steps
  */
-export function StepIndicator({
+export const StepIndicator = React.memo(function StepIndicator({
   steps,
   currentStep,
   completedSteps,
@@ -104,14 +104,14 @@ export function StepIndicator({
       })}
     </div>
   );
-}
+});
 
 /**
  * StepIndicatorDetailed
  * A more detailed version showing step titles (for larger screens)
  * Brutalist design: transparent backgrounds, no border-radius, monospace font
  */
-export function StepIndicatorDetailed({
+export const StepIndicatorDetailed = React.memo(function StepIndicatorDetailed({
   steps,
   currentStep,
   completedSteps,
@@ -219,4 +219,4 @@ export function StepIndicatorDetailed({
       </ol>
     </nav>
   );
-}
+});

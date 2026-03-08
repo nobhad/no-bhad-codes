@@ -136,10 +136,18 @@ export function PortalQuestionnairesView({
     );
   }
 
-  // Calculate summary stats
-  const completedCount = items.filter(r => r.status === 'submitted' || r.status === 'approved').length;
-  const pendingCount = items.filter(r => r.status === 'pending' || r.status === 'in_progress').length;
-  const needsRevisionCount = items.filter(r => r.status === 'rejected').length;
+  // Calculate summary stats - single pass instead of 3 separate filters
+  const { completedCount, pendingCount, needsRevisionCount } = useMemo(() => {
+    let completed = 0;
+    let pending = 0;
+    let revision = 0;
+    for (const r of items) {
+      if (r.status === 'submitted' || r.status === 'approved') completed++;
+      else if (r.status === 'pending' || r.status === 'in_progress') pending++;
+      else if (r.status === 'rejected') revision++;
+    }
+    return { completedCount: completed, pendingCount: pending, needsRevisionCount: revision };
+  }, [items]);
 
   return (
     <TableLayout

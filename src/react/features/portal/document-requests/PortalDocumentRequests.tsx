@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { FileText } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
@@ -29,16 +29,17 @@ interface DocumentRequestSummary {
 }
 
 /**
- * Calculate summary statistics from requests
+ * Calculate summary statistics from requests - single pass
  */
 function calculateSummary(requests: DocumentRequest[]): DocumentRequestSummary {
-  return {
-    total: requests.length,
-    pending: requests.filter(r => r.status === 'pending').length,
-    submitted: requests.filter(r => r.status === 'submitted').length,
-    approved: requests.filter(r => r.status === 'approved').length,
-    rejected: requests.filter(r => r.status === 'rejected').length
-  };
+  const summary: DocumentRequestSummary = { total: requests.length, pending: 0, submitted: 0, approved: 0, rejected: 0 };
+  for (const r of requests) {
+    if (r.status === 'pending') summary.pending++;
+    else if (r.status === 'submitted') summary.submitted++;
+    else if (r.status === 'approved') summary.approved++;
+    else if (r.status === 'rejected') summary.rejected++;
+  }
+  return summary;
 }
 
 /**
@@ -78,7 +79,7 @@ export function PortalDocumentRequests({
     transform: (raw) => (raw as { requests?: DocumentRequest[] }).requests || []
   });
   const items = requests ?? [];
-  const summary = calculateSummary(items);
+  const summary = useMemo(() => calculateSummary(items), [items]);
 
   // Table filters
   const {
@@ -96,15 +97,25 @@ export function PortalDocumentRequests({
   const filteredRequests = useMemo(() => applyFilters(items), [applyFilters, items]);
 
   // Handle upload success
-  const handleUploadSuccess = useCallback((_requestId: number) => {
+  const handleUploadSuccess = (_requestId: number) => {
     // Refetch to get updated status
     refetch();
-  }, [refetch]);
+  };
 
-  // Separate requests by action needed
-  const actionNeeded = filteredRequests.filter(r => r.status === 'pending' || r.status === 'rejected');
-  const inReview = filteredRequests.filter(r => r.status === 'submitted');
-  const completed = filteredRequests.filter(r => r.status === 'approved');
+  // Separate requests by action needed - single pass instead of 3 separate filters
+  const { actionNeeded, inReview, completed } = useMemo(() => {
+    const groups: { actionNeeded: DocumentRequest[]; inReview: DocumentRequest[]; completed: DocumentRequest[] } = {
+      actionNeeded: [],
+      inReview: [],
+      completed: []
+    };
+    for (const r of filteredRequests) {
+      if (r.status === 'pending' || r.status === 'rejected') groups.actionNeeded.push(r);
+      else if (r.status === 'submitted') groups.inReview.push(r);
+      else if (r.status === 'approved') groups.completed.push(r);
+    }
+    return groups;
+  }, [filteredRequests]);
 
   return (
     <TableLayout
