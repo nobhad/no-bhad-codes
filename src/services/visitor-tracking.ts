@@ -199,6 +199,7 @@ export class VisitorTrackingService {
   private scrollDepth = 0;
   private pageInteractions = 0;
   private pageStartTime = 0;
+  private boundListeners: Array<{ target: EventTarget; event: string; handler: EventListener }> = [];
 
   constructor(config: Partial<VisitorTrackingConfig> = {}) {
     this.config = {
@@ -392,6 +393,17 @@ export class VisitorTrackingService {
    */
   private addEventListener(target: EventTarget, event: string, handler: EventListener): void {
     target.addEventListener(event, handler, { passive: true });
+    this.boundListeners.push({ target, event, handler });
+  }
+
+  /**
+   * Remove all tracked event listeners
+   */
+  private removeAllEventListeners(): void {
+    for (const { target, event, handler } of this.boundListeners) {
+      target.removeEventListener(event, handler);
+    }
+    this.boundListeners = [];
   }
 
   /**
@@ -817,6 +829,7 @@ export class VisitorTrackingService {
       this.flushTimer = null;
     }
 
+    this.removeAllEventListeners();
     this.isTracking = false;
   }
 

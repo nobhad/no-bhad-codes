@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Invoice, InvoiceStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useInvoices');
@@ -92,28 +92,17 @@ export function useInvoices({
     return result;
   }, [invoices]);
 
-  // Build headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Fetch invoices from API
-  const fetchInvoices = useCallback(async () => {
+  const fetchInvoices = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await fetch(API_ENDPOINTS.INVOICES, {
         method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
+        headers: buildAuthHeaders(getAuthToken),
+        credentials: 'include',
+        signal
       });
 
       if (!response.ok) {
@@ -124,13 +113,14 @@ export function useInvoices({
       const data = unwrapApiData<{ invoices: Invoice[] }>(json);
       setInvoices(data.invoices || []);
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
       logger.error('[useInvoices] Error:', message);
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, [getAuthToken]);
 
   // Update a single invoice
   const updateInvoice = useCallback(
@@ -138,7 +128,7 @@ export function useInvoices({
       try {
         const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}`, {
           method: 'PUT',
-          headers: getHeaders(),
+          headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
           body: JSON.stringify(updates)
         });
@@ -159,7 +149,7 @@ export function useInvoices({
         return false;
       }
     },
-    [getHeaders]
+    [getAuthToken]
   );
 
   // Mark invoice as paid
@@ -237,7 +227,7 @@ export function useInvoices({
         try {
           const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}`, {
             method: 'DELETE',
-            headers: getHeaders(),
+            headers: buildAuthHeaders(getAuthToken),
             credentials: 'include'
           });
 
@@ -258,7 +248,7 @@ export function useInvoices({
 
       return { success, failed };
     },
-    [getHeaders]
+    [getAuthToken]
   );
 
   // Bulk mark as paid
@@ -301,11 +291,12 @@ export function useInvoices({
     [sendInvoice]
   );
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (autoFetch) {
-      fetchInvoices();
-    }
+    if (!autoFetch) return;
+    const controller = new AbortController();
+    fetchInvoices(controller.signal);
+    return () => controller.abort();
   }, [autoFetch, fetchInvoices]);
 
   return {

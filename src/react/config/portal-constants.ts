@@ -85,6 +85,16 @@ export const GSAP = {
   SCROLL_Y_OFFSET: 50,
   /** Scale-in start value */
   SCALE_START: 0.9,
-  /** Default stagger timing between items */
-  STAGGER_DEFAULT: 0.05
+  /** Default stagger timing between items (fast lists, tables) */
+  STAGGER_DEFAULT: 0.05,
+  /** Medium stagger timing (card grids, feature lists) */
+  STAGGER_MEDIUM: 0.06,
+  /** Slow stagger timing (project cards, prominent items) */
+  STAGGER_SLOW: 0.08,
+  /** Default initial delay before stagger begins */
+  STAGGER_DELAY_SHORT: 0.1,
+  /** Medium initial delay before stagger begins */
+  STAGGER_DELAY_MEDIUM: 0.15,
+  /** Long initial delay before stagger begins */
+  STAGGER_DELAY_LONG: 0.2
 } as const;

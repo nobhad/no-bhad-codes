@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Lead, LeadStatus, LeadStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -85,24 +85,16 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
   }, [leads]);
 
   // Fetch leads from API
-  const fetchLeads = useCallback(async () => {
+  const fetchLeads = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const token = getAuthToken?.();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       const response = await fetch(API_ENDPOINTS.ADMIN.LEADS, {
         method: 'GET',
-        headers,
-        credentials: 'include'
+        headers: buildAuthHeaders(getAuthToken),
+        credentials: 'include',
+        signal
       });
 
       if (!response.ok) {
@@ -116,6 +108,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
       // Decode HTML entities in text fields to prevent double-encoding
       setLeads(decodeArrayFields(leadsArray, LEAD_TEXT_FIELDS));
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
       logger.error('[useLeads] Error:', message);
@@ -128,15 +121,6 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
   const updateLead = useCallback(
     async (id: number, updates: Partial<Lead>): Promise<boolean> => {
       try {
-        const token = getAuthToken?.();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
         // Use status endpoint if only updating status
         const endpoint =
           Object.keys(updates).length === 1 && 'status' in updates
@@ -145,7 +129,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
 
         const response = await fetch(endpoint, {
           method: 'PUT',
-          headers,
+          headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
           body: JSON.stringify(updates)
         });
@@ -171,18 +155,9 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
   const bulkUpdateStatus = useCallback(
     async (ids: number[], status: LeadStatus): Promise<boolean> => {
       try {
-        const token = getAuthToken?.();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
         const response = await fetch(API_ENDPOINTS.ADMIN.LEADS_BULK_STATUS, {
           method: 'POST',
-          headers,
+          headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
           body: JSON.stringify({ projectIds: ids, status })
         });
@@ -213,14 +188,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
       let failed = 0;
 
       try {
-        const token = getAuthToken?.();
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
+        const headers = buildAuthHeaders(getAuthToken);
 
         // Try bulk endpoint first
         const response = await fetch(API_ENDPOINTS.ADMIN.LEADS_BULK_DELETE, {
@@ -265,11 +233,12 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
     [getAuthToken]
   );
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (autoFetch) {
-      fetchLeads();
-    }
+    if (!autoFetch) return;
+    const controller = new AbortController();
+    fetchLeads(controller.signal);
+    return () => controller.abort();
   }, [autoFetch, fetchLeads]);
 
   return {

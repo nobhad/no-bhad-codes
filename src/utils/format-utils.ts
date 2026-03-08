@@ -7,6 +7,9 @@
  * Shared formatting functions used across admin and client portals.
  */
 
+import { CURRENCY_COMPACT } from '../constants/thresholds';
+import { MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY } from './time-utils';
+
 /**
  * Format bytes into human-readable file size
  * @param bytes - Number of bytes
@@ -64,11 +67,11 @@ export function formatCurrency(
  */
 export function formatCurrencyCompact(amount: number | null | undefined): string {
   const value = amount || 0;
-  if (value >= 1000000) {
-    return `$${(value / 1000000).toFixed(1)}M`;
+  if (value >= CURRENCY_COMPACT.MILLION) {
+    return `$${(value / CURRENCY_COMPACT.MILLION).toFixed(1)}M`;
   }
-  if (value >= 1000) {
-    return `$${(value / 1000).toFixed(1)}K`;
+  if (value >= CURRENCY_COMPACT.THOUSAND) {
+    return `$${(value / CURRENCY_COMPACT.THOUSAND).toFixed(1)}K`;
   }
   return `$${value.toLocaleString()}`;
 }
@@ -323,9 +326,9 @@ export function formatRelativeTime(dateString: string | Date | undefined | null)
 
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    const diffMins = Math.floor(diffMs / MS_PER_MINUTE);
+    const diffHours = Math.floor(diffMs / MS_PER_HOUR);
+    const diffDays = Math.floor(diffMs / MS_PER_DAY);
 
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
@@ -337,6 +340,160 @@ export function formatRelativeTime(dateString: string | Date | undefined | null)
   } catch {
     return '';
   }
+}
+
+// ============================================
+// DATE ALIASES & VARIANTS
+// ============================================
+
+/**
+ * Alias for formatDate() with no format arg - returns MM/DD/YYYY
+ * Kept for backward compatibility with existing imports
+ * @param date - ISO date string or Date object
+ * @returns Formatted date string in MM/DD/YYYY format
+ */
+export function formatDateShort(date: string | Date | undefined | null): string {
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '';
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${month}/${day}/${year}`;
+}
+
+/**
+ * Format date as ISO string (YYYY-MM-DD)
+ * @param date - ISO date string or Date object
+ * @returns Date in YYYY-MM-DD format, empty string for null/invalid
+ */
+export function formatDateISO(date: string | Date | undefined | null): string {
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().split('T')[0];
+}
+
+/**
+ * Format relative date - "Today", "Yesterday", or MM/DD/YYYY
+ * @param date - ISO date string or Date object
+ * @returns Relative date label or formatted date string
+ */
+export function formatDateRelative(date: string | Date | undefined | null): string {
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '';
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const targetDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+  if (targetDate.getTime() === today.getTime()) {
+    return 'Today';
+  }
+  if (targetDate.getTime() === yesterday.getTime()) {
+    return 'Yesterday';
+  }
+
+  return formatDateShort(d);
+}
+
+/**
+ * Format date for card displays (e.g., "Feb 27, 2026")
+ * Equivalent to formatDate(date, 'label') but accepts only strings
+ * @param dateString - ISO date string to format
+ * @returns Formatted date string
+ */
+export function formatCardDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+// ============================================
+// DUE DATE UTILITIES
+// ============================================
+
+/**
+ * Check if a due date is in the past (overdue)
+ * @param dueDate - ISO date string or undefined
+ * @returns true if the date is in the past, false otherwise
+ */
+export function isOverdue(dueDate: string | undefined): boolean {
+  if (!dueDate) return false;
+  const due = new Date(dueDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return due < today;
+}
+
+/**
+ * Get the number of days until a due date
+ * @param dueDate - ISO date string or undefined
+ * @returns Number of days until due (negative if overdue), or null if no due date
+ */
+export function getDaysUntilDue(dueDate: string | undefined): number | null {
+  if (!dueDate) return null;
+  const due = new Date(dueDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  due.setHours(0, 0, 0, 0);
+  const diffTime = due.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Get human readable text for days until due date
+ * @param dueDate - ISO date string or undefined
+ * @returns Human readable string like "3 days left", "2 days overdue", "Due today", etc.
+ */
+export function getDueDaysText(dueDate: string | undefined): string {
+  if (!dueDate) return '';
+
+  const now = new Date();
+  const due = new Date(dueDate);
+  const diffTime = due.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return `${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''} overdue`;
+  }
+  if (diffDays === 0) {
+    return 'Due today';
+  }
+  if (diffDays === 1) {
+    return 'Due tomorrow';
+  }
+  return `Due in ${diffDays} days`;
+}
+
+// ============================================
+// DATA UTILITIES
+// ============================================
+
+/**
+ * Count items grouped by a status field
+ * @param items - Array of objects with a status-like field
+ * @param key - The field name to group by (default: 'status')
+ * @returns Record mapping each status value to its count
+ */
+export function countByField<T extends object>(
+  items: T[],
+  key: keyof T = 'status' as keyof T
+): Record<string, number> {
+  return items.reduce(
+    (acc, item) => {
+      const value = String(item[key] ?? 'unknown');
+      acc[value] = (acc[value] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 }
 
 // ============================================

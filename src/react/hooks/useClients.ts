@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Client, ClientStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -76,28 +76,17 @@ export function useClients({
     return result;
   }, [clients]);
 
-  // Build headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Fetch clients from API
-  const fetchClients = useCallback(async () => {
+  const fetchClients = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await fetch(API_ENDPOINTS.CLIENTS, {
         method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
+        headers: buildAuthHeaders(getAuthToken),
+        credentials: 'include',
+        signal
       });
 
       if (!response.ok) {
@@ -110,13 +99,14 @@ export function useClients({
       const fetchedClients = data.clients || [];
       setClients(decodeArrayFields(fetchedClients, CLIENT_TEXT_FIELDS));
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
       logger.error('[useClients] Error:', message);
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, [getAuthToken]);
 
   // Update a single client
   const updateClient = useCallback(
@@ -124,7 +114,7 @@ export function useClients({
       try {
         const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}`, {
           method: 'PUT',
-          headers: getHeaders(),
+          headers: buildAuthHeaders(getAuthToken),
           credentials: 'include',
           body: JSON.stringify(updates)
         });
@@ -145,7 +135,7 @@ export function useClients({
         return false;
       }
     },
-    [getHeaders]
+    [getAuthToken]
   );
 
   // Archive multiple clients (set status to inactive)
@@ -178,7 +168,7 @@ export function useClients({
         for (const id of ids) {
           const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}`, {
             method: 'DELETE',
-            headers: getHeaders(),
+            headers: buildAuthHeaders(getAuthToken),
             credentials: 'include'
           });
 
@@ -200,7 +190,7 @@ export function useClients({
 
       return { success, failed };
     },
-    [getHeaders]
+    [getAuthToken]
   );
 
   // Send invitation to client
@@ -209,7 +199,7 @@ export function useClients({
       try {
         const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}/send-invite`, {
           method: 'POST',
-          headers: getHeaders(),
+          headers: buildAuthHeaders(getAuthToken),
           credentials: 'include'
         });
 
@@ -233,14 +223,15 @@ export function useClients({
         return false;
       }
     },
-    [getHeaders]
+    [getAuthToken]
   );
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount with AbortController cleanup
   useEffect(() => {
-    if (autoFetch) {
-      fetchClients();
-    }
+    if (!autoFetch) return;
+    const controller = new AbortController();
+    fetchClients(controller.signal);
+    return () => controller.abort();
   }, [autoFetch, fetchClients]);
 
   return {

@@ -78,6 +78,28 @@ function addCsrfHeader(options: RequestInit): RequestInit {
 }
 
 /**
+ * Build standard auth headers for API requests.
+ * Includes Content-Type: application/json and optional Bearer token.
+ *
+ * Use this instead of duplicating header construction in every hook.
+ *
+ * @param getAuthToken - Optional function that returns the auth token
+ * @returns Headers record ready for fetch calls
+ */
+export function buildAuthHeaders(
+  getAuthToken?: () => string | null
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  const token = getAuthToken?.();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+/**
  * Error codes returned by the API
  */
 export const API_ERROR_CODES = {
