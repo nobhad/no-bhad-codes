@@ -18,6 +18,7 @@
 import * as React from 'react';
 import { PortalProviders } from './PortalProviders';
 import { PortalRoutes } from './PortalRoutes';
+import { ErrorBoundary } from '../components/portal/ErrorBoundary';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
 import type { UserRole } from '../../../server/config/unified-navigation';
@@ -91,11 +92,13 @@ function AdminKeyboardShortcuts() {
 
 export function PortalApp() {
   return (
-    <PortalProviders>
-      <AuthInitializer>
-        <AdminKeyboardShortcuts />
-        <PortalRoutes />
-      </AuthInitializer>
-    </PortalProviders>
+    <ErrorBoundary componentName="Portal">
+      <PortalProviders>
+        <AuthInitializer>
+          <AdminKeyboardShortcuts />
+          <PortalRoutes />
+        </AuthInitializer>
+      </PortalProviders>
+    </ErrorBoundary>
   );
 }

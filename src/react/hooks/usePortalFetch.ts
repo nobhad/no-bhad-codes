@@ -164,6 +164,14 @@ export function usePortalData<T>({
 
   const { buildHeaders, portalFetch } = usePortalFetch({ getAuthToken });
 
+  // Store transform in a ref to avoid re-creating fetchData when
+  // callers pass an unmemoized inline function. Without this,
+  // an unstable transform reference causes infinite re-fetches.
+  const transformRef = useRef(transform);
+  useEffect(() => {
+    transformRef.current = transform;
+  }, [transform]);
+
   const fetchData = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
@@ -184,7 +192,8 @@ export function usePortalData<T>({
 
       const json = await response.json();
       const unwrapped = unwrapApiData<unknown>(json);
-      setData(transform ? transform(unwrapped) : unwrapped as T);
+      const currentTransform = transformRef.current;
+      setData(currentTransform ? currentTransform(unwrapped) : unwrapped as T);
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
       const message = err instanceof Error ? err.message : 'Failed to load data';
@@ -193,7 +202,7 @@ export function usePortalData<T>({
     } finally {
       setIsLoading(false);
     }
-  }, [url, buildHeaders, transform]);
+  }, [url, buildHeaders]);
 
   // Fetch on mount with AbortController cleanup
   useEffect(() => {
