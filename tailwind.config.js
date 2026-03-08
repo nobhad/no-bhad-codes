@@ -19,30 +19,27 @@ export default {
           accent: 'var(--color-brand-accent)'
         },
 
-        // Portal background colors
+        // Portal background colors (maps to --color-bg-* overrides in portal scope)
         portal: {
-          'bg-darkest': 'var(--portal-bg-darkest)',
-          'bg-darker': 'var(--portal-bg-darker)',
-          'bg-dark': 'var(--portal-bg-dark)',
-          'bg-medium': 'var(--portal-bg-medium)',
-          'bg-light': 'var(--portal-bg-light)',
-          'bg-lighter': 'var(--portal-bg-lighter)',
-          'bg-hover': 'var(--portal-bg-hover)',
-          'bg-readonly': 'var(--portal-bg-readonly)',
+          'bg-primary': 'var(--color-bg-primary)',
+          'bg-secondary': 'var(--color-bg-secondary)',
+          'bg-tertiary': 'var(--color-bg-tertiary)',
+          'bg-raised': 'var(--color-bg-raised)',
+          'bg-elevated': 'var(--color-bg-elevated)',
+          'bg-prominent': 'var(--color-bg-prominent)',
+          'bg-hover': 'var(--color-bg-hover)',
+          'bg-readonly': 'var(--color-bg-readonly)',
 
           // Portal text colors
-          'text-primary': 'var(--portal-text-primary)',
-          'text-secondary': 'var(--portal-text-secondary)',
-          'text-muted': 'var(--portal-text-muted)',
-          'text-dark': 'var(--portal-text-dark)',
-          'text-light': 'var(--portal-text-light)',
+          'text-primary': 'var(--color-text-primary)',
+          'text-secondary': 'var(--color-text-secondary)',
+          'text-tertiary': 'var(--color-text-tertiary)',
+          'text-inverse': 'var(--color-text-inverse)',
 
-          // Portal border colors (all variants)
+          // Portal border colors
           border: 'var(--portal-border)',
-          'border-dark': 'var(--portal-border-dark)',
-          'border-medium': 'var(--portal-border-medium)',
-          'border-light': 'var(--portal-border-light)',
-          'border-subtle': 'var(--portal-border-subtle)'
+          'border-primary': 'var(--color-border-primary)',
+          'border-secondary': 'var(--color-border-secondary)'
         },
 
         // Status colors

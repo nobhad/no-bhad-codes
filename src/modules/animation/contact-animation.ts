@@ -25,6 +25,7 @@ import type { ModuleOptions } from '../../types/modules';
 import { ANIMATION_CONSTANTS } from '../../config/animation-constants';
 import { getDebugMode } from '../../core/env';
 import { createDOMCache } from '../../utils/dom-cache';
+import { Z_INDEX_CONTACT_FORM } from '../../constants/z-index';
 
 // DOM element keys for caching
 type ContactAnimationDOMKeys = Record<string, string>;
@@ -295,14 +296,14 @@ export class ContactAnimationModule extends BaseModule {
     gsap.set(this.container, { minHeight: finalSectionHeight });
 
     // Set up z-index - name on TOP of stack (highest z-index)
-    if (nameField) gsap.set(nameField, { zIndex: 5, position: 'relative' });
-    if (companyField) gsap.set(companyField, { zIndex: 4, position: 'relative' });
-    if (emailField) gsap.set(emailField, { zIndex: 3, position: 'relative' });
-    if (messageField) gsap.set(messageField, { zIndex: 2, position: 'relative' });
+    if (nameField) gsap.set(nameField, { zIndex: Z_INDEX_CONTACT_FORM.NAME_FIELD, position: 'relative' });
+    if (companyField) gsap.set(companyField, { zIndex: Z_INDEX_CONTACT_FORM.COMPANY_FIELD, position: 'relative' });
+    if (emailField) gsap.set(emailField, { zIndex: Z_INDEX_CONTACT_FORM.EMAIL_FIELD, position: 'relative' });
+    if (messageField) gsap.set(messageField, { zIndex: Z_INDEX_CONTACT_FORM.MESSAGE_FIELD, position: 'relative' });
     // Button needs higher z-index to stay visible during form width animation
     if (submitButton) {
       gsap.set(submitButton, {
-        zIndex: 10,
+        zIndex: Z_INDEX_CONTACT_FORM.SUBMIT_BUTTON,
         opacity: 0,
         scale: 0.8,
         filter: `blur(${blurAmount}px)`
@@ -765,6 +766,13 @@ export class ContactAnimationModule extends BaseModule {
         this.container.querySelector('textarea')?.closest('.input-item')
     ];
 
+    const fieldZIndices = [
+      Z_INDEX_CONTACT_FORM.NAME_FIELD,
+      Z_INDEX_CONTACT_FORM.COMPANY_FIELD,
+      Z_INDEX_CONTACT_FORM.EMAIL_FIELD,
+      Z_INDEX_CONTACT_FORM.MESSAGE_FIELD
+    ];
+
     fields.forEach((field, i) => {
       if (!field) return;
 
@@ -773,7 +781,7 @@ export class ContactAnimationModule extends BaseModule {
         width: startWidth,
         overflow: 'hidden',
         borderRadius: fieldBorderRadius,
-        zIndex: 5 - i,
+        zIndex: fieldZIndices[i],
         position: 'relative'
       });
 
@@ -797,7 +805,7 @@ export class ContactAnimationModule extends BaseModule {
     const submitButton = this.container.querySelector('.submit-button, button[type="submit"]');
     if (submitButton) {
       gsap.set(submitButton, {
-        zIndex: 10,
+        zIndex: Z_INDEX_CONTACT_FORM.SUBMIT_BUTTON,
         opacity: 0,
         scale: 0.8,
         filter: `blur(${blurAmount}px)`

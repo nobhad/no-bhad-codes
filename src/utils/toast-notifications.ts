@@ -8,6 +8,8 @@
  * Replaces excessive success dialogs with non-intrusive toasts.
  */
 
+import { TIMING } from '../constants/timing';
+
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastOptions {
@@ -32,7 +34,7 @@ export function showToast(
   type: ToastType = 'info',
   options: ToastOptions = {}
 ): void {
-  const { duration = 3000, showIcon = true, actionLabel, actionHref } = options;
+  const { duration = TIMING.TOAST_DURATION, showIcon = true, actionLabel, actionHref } = options;
 
   // Create toast container if it doesn't exist
   let container = document.getElementById('toast-container');
@@ -88,7 +90,7 @@ export function showToast(
       if (container && container.children.length === 0) {
         container.remove();
       }
-    }, 300);
+    }, TIMING.TOAST_ANIMATION);
   };
 
   // Close button
@@ -114,7 +116,7 @@ export function showSuccessToast(message: string, options?: ToastOptions): void 
  * Shorthand for error toast
  */
 export function showErrorToast(message: string, options?: ToastOptions): void {
-  showToast(message, 'error', { duration: 5000, ...options });
+  showToast(message, 'error', { duration: TIMING.TOAST_DURATION_ERROR, ...options });
 }
 
 /**
@@ -128,7 +130,7 @@ export function showInfoToast(message: string, options?: ToastOptions): void {
  * Shorthand for warning toast
  */
 export function showWarningToast(message: string, options?: ToastOptions): void {
-  showToast(message, 'warning', { duration: 4000, ...options });
+  showToast(message, 'warning', { duration: TIMING.TOAST_DURATION_WARNING, ...options });
 }
 
 /**

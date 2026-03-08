@@ -534,11 +534,11 @@ describe('getPriorityColor', () => {
   });
 
   it('returns secondary text CSS var for unknown priority', () => {
-    expect(getPriorityColor('unknown')).toBe('var(--portal-text-secondary)');
+    expect(getPriorityColor('unknown')).toBe('var(--color-text-secondary)');
   });
 
   it('returns secondary text CSS var for empty string', () => {
-    expect(getPriorityColor('')).toBe('var(--portal-text-secondary)');
+    expect(getPriorityColor('')).toBe('var(--color-text-secondary)');
   });
 
   it('all returned values are CSS variable strings', () => {

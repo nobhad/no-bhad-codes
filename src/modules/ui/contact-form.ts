@@ -23,6 +23,8 @@ import type { ModuleOptions } from '../../types/modules';
 import { gsap } from 'gsap';
 import { getDebugMode } from '../../core/env';
 import { validateEmail } from '../../../shared/validation/validators';
+import { TIMING } from '../../constants/timing';
+import { INPUT_LIMITS } from '../../constants/thresholds';
 
 export interface ContactFormModuleOptions extends ModuleOptions {
   backend?: ContactBackend;
@@ -488,13 +490,13 @@ export class ContactFormModule extends BaseModule {
 
     this.form!.appendChild(messageDiv);
 
-    // Auto-hide success messages after 5 seconds
+    // Auto-hide success messages after delay
     if (type === 'success') {
       setTimeout(() => {
         if (messageDiv.parentNode) {
           messageDiv.remove();
         }
-      }, 5000);
+      }, TIMING.FORM_SUCCESS_AUTO_HIDE);
     }
   }
 
@@ -654,7 +656,7 @@ export class ContactFormModule extends BaseModule {
     }
 
     // Check for extremely long input (potential DoS)
-    if (value.length > 5000) {
+    if (value.length > INPUT_LIMITS.MAX_INPUT_LENGTH) {
       errors.push('Input too long. Please shorten your message.');
       this.showFieldError(field, '');
       SanitizationUtils.logSecurityViolation(

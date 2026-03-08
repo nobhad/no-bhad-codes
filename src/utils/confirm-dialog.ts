@@ -8,6 +8,8 @@
  * that matches the admin portal theme.
  */
 
+import { TIMING } from '../constants/timing';
+
 export interface ConfirmDialogOptions {
   /** Dialog title */
   title?: string;
@@ -101,7 +103,7 @@ export function confirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
           previouslyFocused.focus();
         }
         resolve(confirmed);
-      }, 150);
+      }, TIMING.DIALOG_CLOSE_ANIMATION);
     };
 
     // Event handlers
@@ -253,7 +255,7 @@ export function alertDialog(options: AlertDialogOptions): Promise<void> {
           previouslyFocused.focus();
         }
         resolve();
-      }, 150);
+      }, TIMING.DIALOG_CLOSE_ANIMATION);
     };
 
     // Event handlers
@@ -418,7 +420,7 @@ export function promptDialog(options: PromptDialogOptions): Promise<string | nul
           previouslyFocused.focus();
         }
         resolve(value);
-      }, 150);
+      }, TIMING.DIALOG_CLOSE_ANIMATION);
     };
 
     // Event handlers
@@ -641,7 +643,7 @@ export function multiPromptDialog(
           previouslyFocused.focus();
         }
         resolve(result);
-      }, 150);
+      }, TIMING.DIALOG_CLOSE_ANIMATION);
     };
 
     // Validate and get values

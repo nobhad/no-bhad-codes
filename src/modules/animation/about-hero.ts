@@ -22,6 +22,7 @@ import { BaseHeroAnimation } from './base-hero-animation';
 import { gsap } from 'gsap';
 import type { ModuleOptions } from '../../types/modules';
 import { showAvatarIntro } from './avatar-intro';
+import { Z_INDEX_ABOUT_HERO_AVATAR } from '../../constants/z-index';
 
 interface AboutHeroOptions extends ModuleOptions {
   /** Selector for the hero container */
@@ -161,7 +162,7 @@ export class AboutHeroModule extends BaseHeroAnimation {
         bottom: 2rem;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 10;
+        z-index: ${Z_INDEX_ABOUT_HERO_AVATAR};
         width: 100%;
         display: flex;
         justify-content: center;

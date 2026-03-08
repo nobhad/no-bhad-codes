@@ -13,19 +13,14 @@ import { apiPost } from '../../utils/api-client';
 import { initPasswordToggle } from '../../components/password-toggle';
 import { createLogger } from '../../utils/logger';
 import { API_ENDPOINTS, ROUTES } from '../../constants/api-endpoints';
+import { AUTH_STORAGE_KEYS } from '../../auth/auth-constants';
+import { TIME_MS } from '../../constants/thresholds';
 
 const logger = createLogger('PortalAuthForm');
 
 // --- Constants ---
 
-const AUTH_STORAGE_KEYS = {
-  USER: 'nbw_auth_user',
-  ROLE: 'nbw_auth_role',
-  EXPIRY: 'nbw_auth_expiry',
-  SESSION_ID: 'nbw_auth_session_id'
-} as const;
-
-const DEFAULT_SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const DEFAULT_SESSION_EXPIRY_MS = TIME_MS.DAY; // 24 hours
 
 const FORM_ID = 'portal-login-form';
 const EMAIL_INPUT_ID = 'portal-email';
@@ -102,10 +97,10 @@ function storeAuthSession(data: LoginResponseData): void {
   const expiresAt = Date.now() + expiryMs;
   const sessionId = `sess_${Math.random().toString(36).substring(2)}`;
 
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(user));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.ROLE, user.role || (user.isAdmin ? 'admin' : 'client'));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.EXPIRY, expiresAt.toString());
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION_ID, sessionId);
+  sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.USER, JSON.stringify(user));
+  sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.ROLE, user.role || (user.isAdmin ? 'admin' : 'client'));
+  sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.EXPIRY, expiresAt.toString());
+  sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.SESSION_ID, sessionId);
 }
 
 // --- Form Handlers ---

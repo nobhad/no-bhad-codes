@@ -48,7 +48,19 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <!-- Meta theme-color: hex fallback required (meta tags cannot use CSS vars).
+         Source of truth: META_THEME_COLOR in server/config/navigation.ts.
+         The script below syncs this with the CSS variable after styles load. -->
     <meta name="theme-color" content="#e0e0e0" />
+    <script>
+      window.addEventListener('load', function() {
+        var bg = getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-300').trim();
+        if (bg) {
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', bg);
+        }
+      });
+    </script>
     <script type="module" src="/src/main-site.ts"></script>
     <link rel="stylesheet" href="/src/styles/pages/terminal-intake.css" />
   </head>
@@ -195,6 +207,7 @@
     </script>
     <script type="module">
       import { mountOnboardingWizard } from '/src/react/features/portal/onboarding/mount.tsx';
+      import { BRANDING } from '/src/config/branding.ts';
 
       document.addEventListener('DOMContentLoaded', () => {
         const container = document.querySelector('.terminal-intake-container');
@@ -206,7 +219,7 @@
             container.innerHTML = `
             <div style="text-align: center; padding: 2rem; color: var(--app-color-danger, #ff4444);">
               <h2>Unable to load intake form</h2>
-              <p>Please try refreshing the page or contact nobhaduri@gmail.com</p>
+              <p>Please try refreshing the page or contact <a href="mailto:${BRANDING.CONTACT_EMAIL}">${BRANDING.CONTACT_EMAIL}</a></p>
             </div>
           `;
           }
