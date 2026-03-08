@@ -8,7 +8,6 @@
  * payment reminders, and recurring invoices using node-cron.
  */
 
-import cron, { ScheduledTask } from 'node-cron';
 import { InvoiceService } from './invoice-service.js';
 import { emailService, processEmailRetryQueue } from './email-service.js';
 import { getDatabase, Database } from '../database/init.js';
@@ -16,6 +15,85 @@ import { softDeleteService } from './soft-delete-service.js';
 import { escalateAllProjects, EscalationResult } from './priority-escalation-service.js';
 import { logger } from './logger.js';
 import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
+
+/**
+ * Lightweight cron scheduler using setTimeout instead of node-cron.
+ * node-cron v4's heartbeat mechanism has a bug that blocks the event loop
+ * with cascading "missed execution" warnings on startup.
+ * This replacement parses standard cron expressions and schedules callbacks
+ * using setTimeout, which is simpler and avoids the heartbeat issue.
+ */
+interface SimpleTask {
+  start(): void;
+  stop(): void;
+}
+
+function parseCronExpression(expression: string): { minute: number; hour: number; isHourly: boolean } {
+  const parts = expression.split(' ');
+  // Format: minute hour day-of-month month day-of-week
+  const minute = parseInt(parts[0], 10);
+  const hourPart = parts[1];
+  const isHourly = hourPart === '*';
+  const hour = isHourly ? 0 : parseInt(hourPart, 10);
+  return { minute, hour, isHourly };
+}
+
+function getNextRunTime(expression: string): Date {
+  const { minute, hour, isHourly } = parseCronExpression(expression);
+  const now = new Date();
+  const next = new Date(now);
+
+  if (isHourly) {
+    // Runs at :minute every hour
+    next.setMinutes(minute, 0, 0);
+    if (next <= now) {
+      next.setHours(next.getHours() + 1);
+    }
+  } else {
+    // Runs at hour:minute daily
+    next.setHours(hour, minute, 0, 0);
+    if (next <= now) {
+      next.setDate(next.getDate() + 1);
+    }
+  }
+
+  return next;
+}
+
+function createSimpleTask(expression: string, callback: () => Promise<void>): SimpleTask {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let running = false;
+
+  const scheduleNext = () => {
+    if (!running) return;
+    const next = getNextRunTime(expression);
+    const delay = next.getTime() - Date.now();
+    timer = setTimeout(async () => {
+      try {
+        await callback();
+      } catch (error) {
+        logger.error('[Scheduler] Task execution error:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+      scheduleNext();
+    }, delay);
+  };
+
+  return {
+    start() {
+      running = true;
+      scheduleNext();
+    },
+    stop() {
+      running = false;
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    }
+  };
+}
 
 interface SchedulerConfig {
   enableReminders: boolean;
@@ -87,11 +165,11 @@ export class SchedulerService {
   private invoiceService: InvoiceService;
   private db: Database;
   private config: SchedulerConfig;
-  private reminderJob: ScheduledTask | null = null;
-  private invoiceGenerationJob: ScheduledTask | null = null;
-  private softDeleteCleanupJob: ScheduledTask | null = null;
-  private analyticsCleanupJob: ScheduledTask | null = null;
-  private priorityEscalationJob: ScheduledTask | null = null;
+  private reminderJob: SimpleTask | null = null;
+  private invoiceGenerationJob: SimpleTask | null = null;
+  private softDeleteCleanupJob: SimpleTask | null = null;
+  private analyticsCleanupJob: SimpleTask | null = null;
+  private priorityEscalationJob: SimpleTask | null = null;
   private isRunning = false;
 
   private constructor(config: Partial<SchedulerConfig> = {}) {
@@ -146,8 +224,21 @@ export class SchedulerService {
       this.schedulePriorityEscalation();
     }
 
+    // Start all scheduled jobs
+    const jobs = [
+      this.reminderJob,
+      this.invoiceGenerationJob,
+      this.softDeleteCleanupJob,
+      this.analyticsCleanupJob,
+      this.priorityEscalationJob
+    ].filter(Boolean);
+
+    for (const job of jobs) {
+      job!.start();
+    }
+
     this.isRunning = true;
-    logger.info('[Scheduler] Scheduler service started');
+    logger.info(`[Scheduler] Scheduler service started with ${jobs.length} cron jobs`);
   }
 
   /**
@@ -191,7 +282,7 @@ export class SchedulerService {
   private scheduleReminderCheck(): void {
     logger.info(`[Scheduler] Scheduling reminder checks: ${this.config.reminderCheckInterval}`);
 
-    this.reminderJob = cron.schedule(this.config.reminderCheckInterval, async () => {
+    this.reminderJob = createSimpleTask(this.config.reminderCheckInterval, async () => {
       try {
         await this.processReminders();
       } catch (error) {
@@ -222,7 +313,7 @@ export class SchedulerService {
   private scheduleInvoiceGeneration(): void {
     logger.info(`[Scheduler] Scheduling invoice generation: ${this.config.invoiceGenerationTime}`);
 
-    this.invoiceGenerationJob = cron.schedule(this.config.invoiceGenerationTime, async () => {
+    this.invoiceGenerationJob = createSimpleTask(this.config.invoiceGenerationTime, async () => {
       try {
         // Check and mark overdue invoices first
         await this.checkOverdueInvoices();
@@ -248,7 +339,7 @@ export class SchedulerService {
   private scheduleSoftDeleteCleanup(): void {
     logger.info(`[Scheduler] Scheduling soft delete cleanup: ${this.config.softDeleteCleanupTime}`);
 
-    this.softDeleteCleanupJob = cron.schedule(this.config.softDeleteCleanupTime, async () => {
+    this.softDeleteCleanupJob = createSimpleTask(this.config.softDeleteCleanupTime, async () => {
       try {
         logger.info('[Scheduler] Running soft delete cleanup...');
         const { deleted, errors } = await softDeleteService.permanentlyDeleteExpired();
@@ -277,7 +368,7 @@ export class SchedulerService {
   private scheduleAnalyticsCleanup(): void {
     logger.info(`[Scheduler] Scheduling analytics cleanup: ${this.config.analyticsCleanupTime}`);
 
-    this.analyticsCleanupJob = cron.schedule(this.config.analyticsCleanupTime, async () => {
+    this.analyticsCleanupJob = createSimpleTask(this.config.analyticsCleanupTime, async () => {
       try {
         logger.info('[Scheduler] Running analytics data cleanup...');
         const deleted = await this.cleanupAnalyticsData();
@@ -304,7 +395,7 @@ export class SchedulerService {
       `[Scheduler] Scheduling priority escalation: ${this.config.priorityEscalationTime}`
     );
 
-    this.priorityEscalationJob = cron.schedule(this.config.priorityEscalationTime, async () => {
+    this.priorityEscalationJob = createSimpleTask(this.config.priorityEscalationTime, async () => {
       try {
         logger.info('[Scheduler] Running priority escalation...');
         const result = await this.processPriorityEscalation();

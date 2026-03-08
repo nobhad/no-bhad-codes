@@ -439,12 +439,15 @@ export function isOverdue(dueDate: string | undefined): boolean {
  */
 export function getDaysUntilDue(dueDate: string | undefined): number | null {
   if (!dueDate) return null;
-  const due = new Date(dueDate);
+  // Parse due date parts to avoid UTC vs local timezone mismatch
+  // new Date('YYYY-MM-DD') parses as UTC, but we need local dates for comparison
+  const [year, month, day] = dueDate.split('T')[0].split('-').map(Number);
+  const due = new Date(year, month - 1, day);
+  due.setHours(0, 0, 0, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  due.setHours(0, 0, 0, 0);
   const diffTime = due.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.round(diffTime / MS_PER_DAY);
 }
 
 /**
