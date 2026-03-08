@@ -12,6 +12,7 @@ import { Request, Response, NextFunction } from 'express';
 import { getDatabase } from '../database/init.js';
 import { errorResponseWithPayload } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
+import type { JWTAuthRequest } from '../types/request.js';
 
 // Rate limit configuration
 export interface RateLimitConfig {
@@ -49,6 +50,20 @@ export const RATE_LIMIT_PRESETS = {
     windowMs: 60 * 60 * 1000, // 1 hour
     maxRequests: 10, // 10 requests per hour
     blockDurationMs: 60 * 60 * 1000 // Block for 1 hour
+  },
+  // Per-user rate limit for authenticated routes (keyed by user ID)
+  authenticatedPerUser: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 120, // 120 requests per minute per user
+    blockDurationMs: 30 * 1000, // Block for 30 seconds
+    keyGenerator: userKeyGenerator
+  },
+  // Strict per-user limit for sensitive authenticated operations
+  sensitivePerUser: {
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 10, // 10 requests per hour per user
+    blockDurationMs: 60 * 60 * 1000, // Block for 1 hour
+    keyGenerator: userKeyGenerator
   }
 };
 
@@ -91,6 +106,32 @@ function getClientIP(req: Request): string {
   }
 
   return req.ip || req.socket.remoteAddress || 'unknown';
+}
+
+/**
+ * Key generator that uses authenticated user ID when available,
+ * falling back to client IP for unauthenticated requests.
+ * Keys are scoped to the request path.
+ */
+export function userKeyGenerator(req: Request): string {
+  const authReq = req as JWTAuthRequest;
+  const identifier = authReq.user?.id
+    ? `user:${authReq.user.id}`
+    : `ip:${getClientIP(req)}`;
+  return `${identifier}:${req.path}`;
+}
+
+/**
+ * Key generator that rate limits by user ID AND IP together.
+ * Useful when you want to prevent both account-level and IP-level abuse.
+ */
+export function combinedKeyGenerator(req: Request): string {
+  const authReq = req as JWTAuthRequest;
+  const ip = getClientIP(req);
+  const userId = authReq.user?.id;
+  return userId
+    ? `user:${userId}+ip:${ip}:${req.path}`
+    : `ip:${ip}:${req.path}`;
 }
 
 /**
@@ -243,7 +284,9 @@ export const rateLimiters = {
   publicForm: createRateLimiter(RATE_LIMIT_PRESETS.publicForm),
   standard: createRateLimiter(RATE_LIMIT_PRESETS.standard),
   authenticated: createRateLimiter(RATE_LIMIT_PRESETS.authenticated),
-  sensitive: createRateLimiter(RATE_LIMIT_PRESETS.sensitive)
+  sensitive: createRateLimiter(RATE_LIMIT_PRESETS.sensitive),
+  authenticatedPerUser: createRateLimiter(RATE_LIMIT_PRESETS.authenticatedPerUser),
+  sensitivePerUser: createRateLimiter(RATE_LIMIT_PRESETS.sensitivePerUser)
 };
 
 /**
@@ -329,5 +372,7 @@ export default {
   blockIP,
   unblockIP,
   getRateLimitStats,
-  RATE_LIMIT_PRESETS
+  RATE_LIMIT_PRESETS,
+  userKeyGenerator,
+  combinedKeyGenerator
 };
