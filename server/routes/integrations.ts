@@ -44,7 +44,9 @@ import {
   exportProjectToICal,
   exportUpcomingToICal,
   saveCalendarSyncConfig,
-  getCalendarSyncConfig
+  getCalendarSyncConfig,
+  // Health check
+  checkIntegrationHealth
 } from '../services/integrations';
 import { getDatabase } from '../database/init';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
@@ -107,6 +109,20 @@ function checkRuntimeConfiguration(type: string): boolean {
     return false;
   }
 }
+
+/**
+ * GET /api/integrations/health
+ * Run lightweight health checks on all integrations
+ */
+router.get(
+  '/health',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+    const report = await checkIntegrationHealth();
+    sendSuccess(res, report);
+  })
+);
 
 // ===================================
 // ZAPIER INTEGRATION

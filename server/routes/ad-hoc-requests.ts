@@ -21,6 +21,7 @@ import {
   type AdHocRequestUrgency
 } from '../services/ad-hoc-request-service.js';
 import { BUSINESS_INFO } from '../config/business.js';
+import { emailService } from '../services/email-service.js';
 import { projectService } from '../services/project-service.js';
 import { InvoiceService, type InvoiceLineItem } from '../services/invoice-service.js';
 import {
@@ -380,6 +381,43 @@ router.post(
       status: 'submitted',
       attachmentFileId: attachmentFileId ? Number(attachmentFileId) : null
     });
+
+    // Send admin notification (non-blocking)
+    try {
+      const clientInfo = await db.get(
+        'SELECT contact_name, company_name, email FROM clients WHERE id = ?',
+        [clientId]
+      ) as { contact_name?: string; company_name?: string; email?: string } | undefined;
+
+      const projectInfo = await db.get(
+        'SELECT project_name FROM projects WHERE id = ?',
+        [Number(projectId)]
+      ) as { project_name?: string } | undefined;
+
+      const clientDisplayName = clientInfo?.contact_name || clientInfo?.company_name || clientInfo?.email || 'Unknown client';
+      const projectDisplayName = projectInfo?.project_name || `Project #${projectId}`;
+
+      await emailService.sendAdminNotification('New Ad-Hoc Request Submitted', {
+        type: 'ad-hoc-request',
+        message: `New ad-hoc request from ${clientDisplayName}: ${title}`,
+        details: {
+          requestId: request.id,
+          clientId,
+          clientName: clientDisplayName,
+          projectId: Number(projectId),
+          projectName: projectDisplayName,
+          title,
+          requestType,
+          priority: priority || 'medium',
+          urgency: urgency || 'normal'
+        }
+      });
+    } catch (notificationError) {
+      await logger.error('[AdHocRequests] Admin notification failed:', {
+        error: notificationError instanceof Error ? notificationError : undefined,
+        category: 'AD_HOC'
+      });
+    }
 
     sendCreated(res, { request }, 'Request submitted');
   })
