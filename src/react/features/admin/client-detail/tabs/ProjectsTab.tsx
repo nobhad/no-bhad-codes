@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { FolderKanban, ExternalLink, Clock } from 'lucide-react';
+import { FolderKanban, Clock } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { EmptyState } from '@react/components/portal/EmptyState';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import type { ClientProject } from '../../types';
 import { PROJECT_STATUS_CONFIG } from '../../types';
 import { formatDate } from '@/utils/format-utils';
@@ -63,14 +63,7 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
             </div>
           </div>
 
-          <PortalButton
-            variant="ghost"
-            className="hover-reveal"
-            onClick={() => onViewProject?.(project.id)}
-            icon={<ExternalLink className="icon-md" />}
-          >
-            View
-          </PortalButton>
+          <IconButton action="view" className="hover-reveal" onClick={() => onViewProject?.(project.id)} title="View Project" />
         </div>
 
         {/* Progress bar */}

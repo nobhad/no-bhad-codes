@@ -325,14 +325,8 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
             onClick={() => setViewMode('grid')}
             className={viewMode === 'grid' ? 'active' : undefined}
           />
-          <PortalButton variant="secondary" size="sm">
-            <FolderPlus className="btn-icon" />
-            New Folder
-          </PortalButton>
-          <PortalButton variant="primary" size="sm">
-            <Upload className="btn-icon" />
-            Upload
-          </PortalButton>
+          <IconButton action="folder" title="New Folder" />
+          <IconButton action="upload" title="Upload" />
         </>
       }
       pagination={

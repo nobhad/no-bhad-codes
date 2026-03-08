@@ -347,10 +347,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
               className={viewMode === 'board' ? 'active' : undefined}
             />
           </div>
-          <PortalButton variant="primary" size="sm" onClick={() => onNavigate?.('task-create')}>
-            <CheckSquare className="btn-icon" />
-            Create Task
-          </PortalButton>
+          <IconButton action="add" onClick={() => onNavigate?.('task-create')} title="Create Task" />
         </>
       }
       pagination={

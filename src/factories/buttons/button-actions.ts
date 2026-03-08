@@ -138,7 +138,8 @@ export const BUTTON_ACTIONS: Record<string, ButtonActionDefinition> = {
   help: { icon: 'help-circle', title: 'Help', ariaLabel: 'Help' },
   test: { icon: 'send', title: 'Send Test', ariaLabel: 'Send test' },
   upload: { icon: 'upload', title: 'Upload', ariaLabel: 'Upload file' },
-  attach: { icon: 'paperclip', title: 'Attach', ariaLabel: 'Attach file' }
+  attach: { icon: 'paperclip', title: 'Attach', ariaLabel: 'Attach file' },
+  generate: { icon: 'file-text', title: 'Generate', ariaLabel: 'Generate document' }
 } as const;
 
 export type ButtonActionType = keyof typeof BUTTON_ACTIONS;

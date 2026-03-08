@@ -116,6 +116,7 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
   edit: Pencil,
   pencil: Pencil,
   trash: Trash2,
+  'trash-2': Trash2,
   delete: Trash2,
   plus: Plus,
   add: Plus,

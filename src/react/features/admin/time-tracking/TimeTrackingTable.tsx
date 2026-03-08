@@ -306,10 +306,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
             onChange={handleFilterChange}
           />
           {!activeTimer && (
-            <PortalButton variant="primary" size="sm" onClick={startTimer}>
-              <Play className="btn-icon" />
-              Start Timer
-            </PortalButton>
+            <IconButton action="start" onClick={startTimer} title="Start Timer" />
           )}
           <IconButton action="add" title="Add Entry" />
         </>
@@ -324,10 +321,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                 <div className="timer-project">{activeTimer.projectName || 'No project'}</div>
               </div>
             </div>
-            <PortalButton variant="danger" size="sm" onClick={stopTimer}>
-              <Square className="btn-icon" />
-              Stop
-            </PortalButton>
+            <IconButton action="stop" variant="danger" onClick={stopTimer} title="Stop Timer" />
           </div>
         ) : undefined
       }

@@ -3,7 +3,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   GitBranch,
   Inbox,
-  Zap,
   ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
@@ -40,7 +39,6 @@ import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { SUCCESS_RATE } from '@/constants/thresholds';
 
 const logger = createLogger('WorkflowsTable');
 
@@ -396,25 +394,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
             >
               Workflow
             </PortalTableHead>
-            <PortalTableHead className="type-col">Trigger</PortalTableHead>
-            <PortalTableHead className="count-col">Steps</PortalTableHead>
             <PortalTableHead className="status-col">Status</PortalTableHead>
-            <PortalTableHead
-              className="count-col"
-              sortable
-              sortDirection={sort?.column === 'runCount' ? sort.direction : null}
-              onClick={() => toggleSort('runCount')}
-            >
-              Runs
-            </PortalTableHead>
-            <PortalTableHead
-              className="count-col"
-              sortable
-              sortDirection={sort?.column === 'successRate' ? sort.direction : null}
-              onClick={() => toggleSort('successRate')}
-            >
-              Success
-            </PortalTableHead>
             <PortalTableHead
               className="date-col"
               sortable
@@ -429,12 +409,12 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={9} message={error} onRetry={loadWorkflows} />
+            <PortalTableError colSpan={5} message={error} onRetry={loadWorkflows} />
           ) : isLoading ? (
-            <PortalTableLoading colSpan={9} rows={5} />
+            <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedWorkflows.length === 0 ? (
             <PortalTableEmpty
-              colSpan={9}
+              colSpan={5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No workflows match your filters' : 'No workflows yet'}
             />
@@ -460,20 +440,15 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                     <GitBranch className="cell-icon" />
                     <div className="cell-content">
                       <span className="cell-title">{workflow.name}</span>
-                      {workflow.description && (
-                        <span className="cell-subtitle">{workflow.description}</span>
-                      )}
-                      <span className="trigger-stacked">{workflow.trigger}</span>
+                      <span className="cell-subtitle">{workflow.trigger} · {workflow.steps} steps</span>
+                      <span className="status-stacked">
+                        <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
+                          {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
+                        </StatusBadge>
+                      </span>
                     </div>
                   </div>
                 </PortalTableCell>
-                <PortalTableCell className="type-cell">
-                  <div className="cell-with-icon">
-                    <Zap className="cell-icon-sm status-pending" />
-                    <span>{workflow.trigger}</span>
-                  </div>
-                </PortalTableCell>
-                <PortalTableCell className="count-cell">{workflow.steps} steps</PortalTableCell>
                 <PortalTableCell
                   className="status-cell"
                   onClick={(e) => e.stopPropagation()}
@@ -503,20 +478,6 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                     </PortalDropdownContent>
                   </PortalDropdown>
                 </PortalTableCell>
-                <PortalTableCell className="count-cell">{workflow.runCount}</PortalTableCell>
-                <PortalTableCell className="count-cell">
-                  <span
-                    className={
-                      workflow.successRate >= SUCCESS_RATE.EXCELLENT
-                        ? 'text-success'
-                        : workflow.successRate >= SUCCESS_RATE.ACCEPTABLE
-                          ? 'text-warning'
-                          : 'text-danger'
-                    }
-                  >
-                    {workflow.successRate}%
-                  </span>
-                </PortalTableCell>
                 <PortalTableCell className="date-cell">
                   {formatDate(workflow.updatedAt)}
                 </PortalTableCell>
@@ -526,10 +487,6 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                       action="edit"
                       title="Configure"
                       onClick={() => onNavigate?.('workflow-editor', String(workflow.id))}
-                    />
-                    <IconButton
-                      action="duplicate"
-                      title="Duplicate"
                     />
                     <IconButton
                       action="delete"

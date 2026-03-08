@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
+  FileText,
   Inbox,
   ChevronDown
 } from 'lucide-react';
@@ -477,13 +478,16 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
                     aria-label={`Select ${proposal.title}`}
                   />
                 </PortalTableCell>
-                <PortalTableCell className="primary-cell contact-cell">
-                  <div className="cell-content">
-                    <span className="cell-title">{proposal.title}</span>
-                    <span className="cell-subtitle">{proposal.clientName}</span>
-                    {proposal.projectType && (
-                      <span className="identity-company">{proposal.projectType}</span>
-                    )}
+                <PortalTableCell className="primary-cell">
+                  <div className="cell-with-icon">
+                    <FileText className="cell-icon" />
+                    <div className="cell-content">
+                      <span className="cell-title">{proposal.title}</span>
+                      <span className="cell-subtitle">{proposal.clientName}</span>
+                      {proposal.projectType && (
+                        <span className="identity-company">{proposal.projectType}</span>
+                      )}
+                    </div>
                   </div>
                 </PortalTableCell>
                 <PortalTableCell className="text-right">
