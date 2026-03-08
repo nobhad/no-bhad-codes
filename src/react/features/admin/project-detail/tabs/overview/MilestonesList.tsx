@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useCallback, useState } from 'react';
 import {
-  Plus,
   Check,
   Trash2,
   Pencil,
@@ -9,6 +8,7 @@ import {
   ChevronRight,
   ListTodo
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { PortalInput } from '@react/components/portal/PortalInput';
@@ -140,9 +140,7 @@ export function MilestonesList({
       <div className="panel">
         <div className="panel-card-header">
           <h3 className="section-title">Milestones</h3>
-          <PortalButton variant="ghost" onClick={() => setShowAddMilestone(true)} icon={<Plus className="icon-md" />}>
-            Add
-          </PortalButton>
+          <IconButton action="add" onClick={() => setShowAddMilestone(true)} title="Add Milestone" />
         </div>
 
         {/* Progress Bar */}

@@ -8,13 +8,11 @@ import {
   StickyNote,
   MoreHorizontal,
   Pencil,
-  Mail,
   Archive,
   Trash2
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalDropdown,
   PortalDropdownTrigger,
@@ -273,14 +271,10 @@ export function ClientDetail({
           <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
 
           {!client.invitation_sent_at && (
-            <PortalButton variant="secondary" onClick={handleSendInvitation} icon={<Mail className="icon-md" />}>
-              Send Invite
-            </PortalButton>
+            <IconButton action="send" onClick={handleSendInvitation} title="Send Invite" />
           )}
 
-          <PortalButton variant="secondary" onClick={() => onEdit?.(clientId)} icon={<Pencil className="icon-md" />}>
-            Edit
-          </PortalButton>
+          <IconButton action="edit" onClick={() => onEdit?.(clientId)} title="Edit" />
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>

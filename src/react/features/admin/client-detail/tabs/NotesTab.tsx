@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import { StickyNote, Plus, Pin, Pencil, Trash2, X, Check } from 'lucide-react';
+import { StickyNote, Pin, Pencil, Trash2, X, Check } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { cn } from '@react/lib/utils';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import { PortalButton } from '@react/components/portal/PortalButton';
@@ -251,9 +252,7 @@ export function NotesTab({
           Notes ({notes.length})
         </h2>
         {!isFormOpen && (
-          <PortalButton variant="secondary" onClick={handleStartAdd} icon={<Plus className="icon-md" />}>
-            Add Note
-          </PortalButton>
+          <IconButton action="add" onClick={handleStartAdd} title="Add Note" />
         )}
       </div>
 

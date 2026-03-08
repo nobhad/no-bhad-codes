@@ -5,7 +5,6 @@ import {
   Mail,
   Phone,
   Briefcase,
-  Plus,
   Pencil,
   Trash2,
   Star,
@@ -13,6 +12,7 @@ import {
   ChevronDown,
   Inbox
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { cn } from '@react/lib/utils';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import { Checkbox } from '@react/components/ui/checkbox';
@@ -318,9 +318,7 @@ export function ContactsTab({
           Contacts ({contacts.length})
         </h2>
         {!isFormOpen && (
-          <PortalButton variant="secondary" onClick={handleStartAdd} icon={<Plus className="icon-md" />}>
-            Add Contact
-          </PortalButton>
+          <IconButton action="add" onClick={handleStartAdd} title="Add Contact" />
         )}
       </div>
 

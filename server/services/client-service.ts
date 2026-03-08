@@ -243,13 +243,12 @@ interface ClientRow {
 
 const CLIENT_COLUMNS = `
   id, email, password_hash, company_name, contact_name, phone, status, created_at, updated_at,
-  notification_messages, notification_status, notification_invoices, notification_weekly,
   billing_company, billing_address, billing_address2, billing_city, billing_state, billing_zip, billing_country,
-  invitation_token, invitation_expires_at, invitation_sent_at, last_login_at, magic_link_token,
-  magic_link_token_expires_at, avatar_url, notes, tags, industry, website, account_manager, client_type,
-  lead_source, referral_source, tax_id, currency_preference, payment_terms, discount_percentage,
-  credit_limit, is_archived, archived_at, health_score, health_status, lifetime_value,
-  acquisition_source, company_size, last_contact_date, next_follow_up_date, preferred_contact_method
+  billing_name, is_admin, invitation_token, invitation_expires_at, invitation_sent_at, last_login_at,
+  magic_link_token, magic_link_expires_at, client_type, notes, industry, website,
+  health_score, health_status, lifetime_value, acquisition_source, company_size,
+  last_contact_date, next_follow_up_date, preferred_contact_method,
+  deleted_at, deleted_by
 `.replace(/\s+/g, ' ').trim();
 
 const CLIENT_CONTACT_COLUMNS = `

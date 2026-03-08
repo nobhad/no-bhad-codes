@@ -8,11 +8,10 @@ import {
   FileText,
   Calendar,
   DollarSign,
-  ExternalLink,
   Inbox
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { EmptyState } from '@react/components/portal/EmptyState';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectFile } from '../../types';
 import { formatCurrency, formatDate } from '@/utils/format-utils';
@@ -130,19 +129,8 @@ export function ContractTab({
           <div className="pd-row-compact">
             {!isSigned && (
               <>
-                <PortalButton
-                  variant="secondary"
-                  onClick={handleGenerateContract}
-                  icon={<FileText className="icon-md" />}
-                >
-                  Generate
-                </PortalButton>
-                <PortalButton
-                  onClick={handleSendForSignature}
-                  icon={<ExternalLink className="icon-md" />}
-                >
-                  Send for Signature
-                </PortalButton>
+                <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
+                <IconButton action="send" onClick={handleSendForSignature} title="Send for Signature" />
               </>
             )}
           </div>

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { Plus, Inbox } from 'lucide-react';
+import { Inbox } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectMilestone } from '../../types';
 import { NOTIFICATIONS } from '@/constants/notifications';
@@ -97,9 +97,7 @@ export function TasksTab({
           </div>
         </div>
 
-        <PortalButton onClick={() => setShowAddForm(true)} icon={<Plus className="icon-md" />}>
-          Add Milestone
-        </PortalButton>
+        <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
       </div>
 
       {/* Progress Bar */}

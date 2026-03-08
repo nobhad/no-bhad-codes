@@ -6,11 +6,10 @@ import {
   ChevronDown,
   ChevronRight,
   Calendar,
-  GripVertical,
-  X
+  GripVertical
 } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { cn } from '@react/lib/utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import type { ProjectMilestone } from '../../../types';
 import { formatDate } from '@/utils/format-utils';
@@ -297,12 +296,8 @@ function MilestoneEditForm({ editState, dispatch, onSave, onCancel }: MilestoneE
       />
 
       <div className="pd-row-end pd-mt-2">
-        <PortalButton variant="ghost" onClick={onCancel} icon={<X className="icon-md" />}>
-          Cancel
-        </PortalButton>
-        <PortalButton onClick={onSave} loading={editState.isSaving}>
-          Save
-        </PortalButton>
+        <IconButton action="close" onClick={onCancel} title="Cancel" />
+        <IconButton action="save" onClick={onSave} loading={editState.isSaving} title="Save" />
       </div>
     </div>
   );

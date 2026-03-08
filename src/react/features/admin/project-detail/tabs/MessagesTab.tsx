@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useCallback, useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, User, Clock } from 'lucide-react';
+import { MessageSquare, User, Clock } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Message } from '../../types';
 import { NOTIFICATIONS } from '@/constants/notifications';
 import { KEYS } from '@/constants/keyboard';
@@ -170,15 +170,14 @@ export function MessagesTab({
             className="textarea msgtab-textarea"
             aria-label="Message"
           />
-          <PortalButton
+          <IconButton
+            action="send"
             className="msgtab-send-btn"
             onClick={handleSend}
             disabled={!newMessage.trim()}
             loading={isSending}
-            icon={<Send className="icon-md" />}
-          >
-            Send
-          </PortalButton>
+            title="Send"
+          />
         </div>
         <div className="text-muted pd-hint pd-mt-2">
           Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useCallback, useState, useEffect } from 'react';
-import { Save, StickyNote } from 'lucide-react';
-import { PortalButton } from '@react/components/portal/PortalButton';
+import { StickyNote } from 'lucide-react';
+import { IconButton } from '@react/factories';
 import type { Project } from '../../types';
 import { NOTIFICATIONS } from '@/constants/notifications';
 import { isKeyCombo } from '@/constants/keyboard';
@@ -83,14 +83,13 @@ export function NotesTab({
           {hasChanges && (
             <span className="text-muted pd-hint">Unsaved changes</span>
           )}
-          <PortalButton
+          <IconButton
+            action="save"
             onClick={handleSave}
             disabled={!hasChanges}
             loading={isSaving}
-            icon={<Save className="icon-md" />}
-          >
-            Save
-          </PortalButton>
+            title="Save"
+          />
         </div>
       </div>
 

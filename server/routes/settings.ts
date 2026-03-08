@@ -114,152 +114,9 @@ router.get(
   })
 );
 
-/**
- * @swagger
- * /api/settings/{key}:
- *   get:
- *     tags:
- *       - Settings
- *     summary: Get a single setting
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: key
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Setting retrieved successfully
- *       404:
- *         description: Setting not found
- */
-router.get(
-  '/:key',
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const setting = await settingsService.getSetting(req.params.key);
-
-    if (!setting) {
-      return errorResponse(res, 'Setting not found', 404);
-    }
-
-    sendSuccess(res, {
-      ...setting,
-      value: setting.isSensitive ? '********' : setting.value
-    });
-  })
-);
-
-/**
- * @swagger
- * /api/settings/{key}:
- *   put:
- *     tags:
- *       - Settings
- *     summary: Update a setting
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: key
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               value:
- *                 type: string
- *               type:
- *                 type: string
- *                 enum: [string, number, boolean, json]
- *               description:
- *                 type: string
- *     responses:
- *       200:
- *         description: Setting updated successfully
- */
-router.put(
-  '/:key',
-  settingsModifyRateLimit,
-  authenticateToken,
-  requireAdmin,
-  validateRequest(SettingsValidationSchemas.updateSetting, { allowUnknownFields: true }),
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { value, type, description } = req.body;
-
-    if (value === undefined) {
-      return errorResponse(res, 'Value is required', 400);
-    }
-
-    const setting = await settingsService.setSetting(req.params.key, value, {
-      type,
-      description
-    });
-
-    await auditLogger.log({
-      action: 'setting_updated',
-      entityType: 'system_settings',
-      entityId: String(setting.id),
-      userId: req.user?.id,
-      changes: { key: req.params.key, newValue: value }
-    });
-
-    sendSuccess(res, setting);
-  })
-);
-
-/**
- * @swagger
- * /api/settings/{key}:
- *   delete:
- *     tags:
- *       - Settings
- *     summary: Delete a setting
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: key
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Setting deleted successfully
- *       404:
- *         description: Setting not found
- */
-router.delete(
-  '/:key',
-  settingsModifyRateLimit,
-  authenticateToken,
-  requireAdmin,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const deleted = await settingsService.deleteSetting(req.params.key);
-
-    if (!deleted) {
-      return errorResponse(res, 'Setting not found', 404);
-    }
-
-    await auditLogger.log({
-      action: 'setting_deleted',
-      entityType: 'system_settings',
-      entityId: req.params.key,
-      userId: req.user?.id,
-      changes: { key: req.params.key }
-    });
-
-    sendSuccess(res, null, 'Setting deleted');
-  })
-);
+// =====================================================
+// SPECIFIC NAMED ROUTES (must be defined BEFORE /:key wildcard)
+// =====================================================
 
 /**
  * @swagger
@@ -474,6 +331,157 @@ router.put(
     });
 
     sendSuccess(res, invoiceSettings);
+  })
+);
+
+// =====================================================
+// WILDCARD ROUTES (must be AFTER specific named routes)
+// =====================================================
+
+/**
+ * @swagger
+ * /api/settings/{key}:
+ *   get:
+ *     tags:
+ *       - Settings
+ *     summary: Get a single setting
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: key
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Setting retrieved successfully
+ *       404:
+ *         description: Setting not found
+ */
+router.get(
+  '/:key',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const setting = await settingsService.getSetting(req.params.key);
+
+    if (!setting) {
+      return errorResponse(res, 'Setting not found', 404);
+    }
+
+    sendSuccess(res, {
+      ...setting,
+      value: setting.isSensitive ? '********' : setting.value
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/settings/{key}:
+ *   put:
+ *     tags:
+ *       - Settings
+ *     summary: Update a setting
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: key
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               value:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [string, number, boolean, json]
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Setting updated successfully
+ */
+router.put(
+  '/:key',
+  settingsModifyRateLimit,
+  authenticateToken,
+  requireAdmin,
+  validateRequest(SettingsValidationSchemas.updateSetting, { allowUnknownFields: true }),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { value, type, description } = req.body;
+
+    if (value === undefined) {
+      return errorResponse(res, 'Value is required', 400);
+    }
+
+    const setting = await settingsService.setSetting(req.params.key, value, {
+      type,
+      description
+    });
+
+    await auditLogger.log({
+      action: 'setting_updated',
+      entityType: 'system_settings',
+      entityId: String(setting.id),
+      userId: req.user?.id,
+      changes: { key: req.params.key, newValue: value }
+    });
+
+    sendSuccess(res, setting);
+  })
+);
+
+/**
+ * @swagger
+ * /api/settings/{key}:
+ *   delete:
+ *     tags:
+ *       - Settings
+ *     summary: Delete a setting
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: key
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Setting deleted successfully
+ *       404:
+ *         description: Setting not found
+ */
+router.delete(
+  '/:key',
+  settingsModifyRateLimit,
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const deleted = await settingsService.deleteSetting(req.params.key);
+
+    if (!deleted) {
+      return errorResponse(res, 'Setting not found', 404);
+    }
+
+    await auditLogger.log({
+      action: 'setting_deleted',
+      entityType: 'system_settings',
+      entityId: req.params.key,
+      userId: req.user?.id,
+      changes: { key: req.params.key }
+    });
+
+    sendSuccess(res, null, 'Setting deleted');
   })
 );
 

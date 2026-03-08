@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { getDatabase } from '../database/init.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
-import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { authenticateToken, requireAdmin, requireClient, AuthenticatedRequest } from '../middleware/auth.js';
 import { emailService } from '../services/email-service.js';
 import { cache, invalidateCache, QueryCache } from '../middleware/cache.js';
 import { auditLogger } from '../services/audit-logger.js';
@@ -2367,8 +2367,16 @@ router.get(
       return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
     }
 
-    const health = await clientService.calculateHealthScore(clientId);
-    sendSuccess(res, { health });
+    try {
+      const health = await clientService.calculateHealthScore(clientId);
+      sendSuccess(res, { health });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      if (message === 'Client not found') {
+        return errorResponse(res, 'Client not found', 404, 'NOT_FOUND');
+      }
+      throw err;
+    }
   })
 );
 
@@ -2680,19 +2688,21 @@ router.put(
 router.get(
   '/me/notifications/history',
   authenticateToken,
+  requireClient,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    if (req.user!.type !== 'client') {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
-    }
-
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     if (isNaN(limit) || limit < 0) {
       return errorResponse(res, 'Invalid limit parameter', 400, 'VALIDATION_ERROR');
     }
-    const notifications = await notificationPreferencesService.getNotificationHistory(
-      req.user!.id,
-      'client',
-      limit
+
+    const db = getDatabase();
+    const notifications = await db.all(
+      `SELECT id, type, title, message, is_read, created_at, data
+       FROM notification_history
+       WHERE user_id = ? AND user_type = 'client'
+       ORDER BY created_at DESC
+       LIMIT ?`,
+      [req.user!.id, limit]
     );
 
     sendSuccess(res, { notifications });
@@ -2721,11 +2731,8 @@ router.get(
 router.put(
   '/me/notifications/:id/read',
   authenticateToken,
+  requireClient,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    if (req.user!.type !== 'client') {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
-    }
-
     const notificationId = parseInt(req.params.id, 10);
     if (isNaN(notificationId) || notificationId <= 0) {
       return errorResponse(res, 'Invalid notification ID', 400, 'VALIDATION_ERROR');
@@ -2764,11 +2771,8 @@ router.put(
 router.put(
   '/me/notifications/mark-all-read',
   authenticateToken,
+  requireClient,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    if (req.user!.type !== 'client') {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
-    }
-
     const db = getDatabase();
 
     await db.run(
