@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
 
 // Common globals for both JS and TS
 const commonGlobals = {
@@ -202,7 +203,8 @@ export default [
   {
     files: ['src/**/*.{ts,tsx}', 'server/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts', '*.config.ts'],
     plugins: {
-      '@typescript-eslint': tsPlugin
+      '@typescript-eslint': tsPlugin,
+      'react-hooks': reactHooksPlugin
     },
     languageOptions: {
       parser: tsParser,
@@ -261,7 +263,11 @@ export default [
       'prefer-arrow-callback': 'error',
       'prefer-template': 'warn',
       'no-useless-concat': 'error',
-      'no-useless-return': 'error'
+      'no-useless-return': 'error',
+
+      // React Hooks rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn'
     }
   },
   {
