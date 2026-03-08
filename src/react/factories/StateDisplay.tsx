@@ -52,7 +52,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className={cn('empty-state', className)} role="status" aria-live="polite">
-      {icon && <div className="empty-state-icon" aria-hidden="true">{icon}</div>}
+      {icon && <div className="empty-icon" aria-hidden="true">{icon}</div>}
       <p>{message}</p>
       {children}
       {ctaLabel && onCtaClick && (

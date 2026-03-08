@@ -123,7 +123,7 @@ const handleBulkArchive = createBulkHandler(BULK_ACTION_PRESETS.archive(bulkArch
 Before:
 
 ```typescript
-<AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+<AdminTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
   <div className="table-actions">
     <IconButton
       action="view"
@@ -168,7 +168,7 @@ const { renderActions } = useConditionalActions({
 });
 
 // In render:
-<AdminTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+<AdminTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
   {renderActions(client)}
 </AdminTableCell>
 ```
