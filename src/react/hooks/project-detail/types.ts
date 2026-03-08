@@ -1,0 +1,81 @@
+/**
+ * Shared types for useProjectDetail sub-hooks
+ */
+
+import type {
+  Project,
+  ProjectMilestone,
+  ProjectFile,
+  Invoice,
+  Message
+} from '@react/features/admin/types';
+
+/** Auth token getter function signature */
+export type AuthTokenGetter = (() => string | null) | undefined;
+
+/** Options passed to all project-detail sub-hooks */
+export interface ProjectDetailHookOptions {
+  projectId: number;
+  getAuthToken?: () => string | null;
+}
+
+/** Options for the top-level useProjectDetail hook */
+export interface UseProjectDetailOptions extends ProjectDetailHookOptions {
+  /** Whether to fetch immediately on mount */
+  autoFetch?: boolean;
+}
+
+/** Aggregate data shape for the project detail */
+export interface ProjectDetailData {
+  project: Project | null;
+  milestones: ProjectMilestone[];
+  files: ProjectFile[];
+  invoices: Invoice[];
+  messages: Message[];
+}
+
+/** Full return type of useProjectDetail */
+export interface UseProjectDetailReturn {
+  /** Project data */
+  project: Project | null;
+  /** Project milestones */
+  milestones: ProjectMilestone[];
+  /** Project files */
+  files: ProjectFile[];
+  /** Project invoices */
+  invoices: Invoice[];
+  /** Project messages */
+  messages: Message[];
+  /** Loading state */
+  isLoading: boolean;
+  /** Error message if any */
+  error: string | null;
+  /** Computed progress percentage */
+  progress: number;
+  /** Outstanding balance */
+  outstandingBalance: number;
+  /** Total paid amount */
+  totalPaid: number;
+  /** Refetch all data */
+  refetch: () => Promise<void>;
+  /** Update project */
+  updateProject: (updates: Partial<Project>) => Promise<boolean>;
+  /** Add milestone */
+  addMilestone: (milestone: Omit<ProjectMilestone, 'id' | 'project_id'>) => Promise<boolean>;
+  /** Update milestone */
+  updateMilestone: (id: number, updates: Partial<ProjectMilestone>) => Promise<boolean>;
+  /** Delete milestone */
+  deleteMilestone: (id: number) => Promise<boolean>;
+  /** Toggle milestone completion */
+  toggleMilestoneComplete: (id: number) => Promise<boolean>;
+  /** Upload file */
+  uploadFile: (file: File, category?: string) => Promise<boolean>;
+  /** Delete file */
+  deleteFile: (id: number) => Promise<boolean>;
+  /** Toggle file sharing */
+  toggleFileSharing: (id: number) => Promise<boolean>;
+  /** Load messages */
+  loadMessages: () => Promise<void>;
+  /** Send message */
+  sendMessage: (content: string) => Promise<boolean>;
+}
