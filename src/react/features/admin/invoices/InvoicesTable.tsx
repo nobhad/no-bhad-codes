@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Inbox } from 'lucide-react';
+import { Inbox, Receipt } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { Checkbox } from '@react/components/ui/checkbox';
 import {
@@ -457,20 +457,20 @@ export function InvoicesTable({
                 />
               </PortalTableHead>
               <PortalTableHead
-                className="invoice-col"
+                className="name-col"
                 sortable
                 sortDirection={sort?.column === 'invoice_number' ? sort.direction : null}
                 onClick={() => toggleSort('invoice_number')}
               >
-                Invoice #
+                Invoice
               </PortalTableHead>
               <PortalTableHead
-                className="contact-col"
+                className="client-col"
                 sortable
                 sortDirection={sort?.column === 'client' ? sort.direction : null}
                 onClick={() => toggleSort('client')}
               >
-                Client / Project
+                Client
               </PortalTableHead>
               <PortalTableHead
                 className="amount-col"
@@ -536,23 +536,20 @@ export function InvoicesTable({
                       />
                     </PortalTableCell>
 
-                    {/* Invoice Number */}
-                    <PortalTableCell className="invoice-cell">
-                      <span className="mono-text">{invoice.invoice_number}</span>
+                    {/* Invoice */}
+                    <PortalTableCell className="primary-cell">
+                      <div className="cell-with-icon">
+                        <Receipt className="cell-icon" />
+                        <div className="cell-content">
+                          <span className="cell-title">{invoice.invoice_number}</span>
+                          {invoice.project_name && <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>}
+                        </div>
+                      </div>
                     </PortalTableCell>
 
-                    {/* Client / Project */}
-                    <PortalTableCell className="primary-cell contact-cell">
-                      <div className="cell-content">
-                        <span className="cell-title">{decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}</span>
-                        {invoice.project_name && <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>}
-                        {/* Stacked content for responsive - hidden on desktop */}
-                        <span className="invoice-stacked">{invoice.invoice_number}</span>
-                        <span className="amount-stacked">{formatCurrency(invoice.amount_total)}</span>
-                        {invoice.due_date && (
-                          <span className="date-stacked">Due: {formatDate(invoice.due_date)}</span>
-                        )}
-                      </div>
+                    {/* Client */}
+                    <PortalTableCell className="client-cell">
+                      {decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}
                     </PortalTableCell>
 
                     {/* Amount */}

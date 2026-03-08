@@ -245,13 +245,13 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
         <PortalTableHeader>
           <PortalTableRow>
             <PortalTableHead
+              className="name-col"
               sortable
               sortDirection={sort?.column === 'name' ? sort.direction : null}
               onClick={() => toggleSort('name')}
             >
               Template
             </PortalTableHead>
-            <PortalTableHead>Subject</PortalTableHead>
             <PortalTableHead className="category-col">Category</PortalTableHead>
             <PortalTableHead className="status-col">Status</PortalTableHead>
             <PortalTableHead
@@ -268,12 +268,12 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={6} message={error} onRetry={loadTemplates} />
+            <PortalTableError colSpan={5} message={error} onRetry={loadTemplates} />
           ) : isLoading ? (
-            <PortalTableLoading colSpan={6} rows={5} />
+            <PortalTableLoading colSpan={5} rows={5} />
           ) : paginatedTemplates.length === 0 ? (
             <PortalTableEmpty
-              colSpan={6}
+              colSpan={5}
               icon={<Inbox />}
               message={hasActiveFilters ? 'No templates match your filters' : 'No templates yet'}
             />
@@ -285,11 +285,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                     <Mail className="cell-icon" />
                     <div className="cell-content">
                       <span className="cell-title">{decodeHtmlEntities(template.name)}</span>
-                      {template.variables.length > 0 && (
-                        <span className="cell-subtitle">
-                          {template.variables.length} variables
-                        </span>
-                      )}
+                      <span className="cell-subtitle">{decodeHtmlEntities(template.subject)}</span>
                       <span className="category-stacked">{template.category}</span>
                       <span className="status-stacked">
                         <StatusBadge status={template.is_active ? 'completed' : 'pending'} size="sm">
@@ -298,9 +294,6 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                       </span>
                     </div>
                   </div>
-                </PortalTableCell>
-                <PortalTableCell>
-                  <span className="cell-truncate">{decodeHtmlEntities(template.subject)}</span>
                 </PortalTableCell>
                 <PortalTableCell className="category-cell">
                   <div className="cell-with-icon">
@@ -316,10 +309,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                 <PortalTableCell className="date-cell">{formatDate(template.updated_at)}</PortalTableCell>
                 <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
-                    <IconButton action="preview" title="Preview" />
                     <IconButton action="edit" title="Edit" />
-                    <IconButton action="test" title="Send Test" />
-                    <IconButton action="duplicate" title="Duplicate" />
                     <IconButton action="delete" title="Delete" />
                   </div>
                 </PortalTableCell>
