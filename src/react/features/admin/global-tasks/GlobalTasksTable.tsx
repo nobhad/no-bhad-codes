@@ -491,6 +491,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                       <span className="priority-stacked">
                         <span
                           className="priority-indicator"
+                          data-priority={task.priority}
                           style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
                         />
                         {PRIORITY_CONFIG[task.priority]?.label}
@@ -514,6 +515,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                     <div className="cell-with-icon">
                       <span
                         className="priority-indicator"
+                        data-priority={task.priority}
                         style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
                       />
                       <span>{PRIORITY_CONFIG[task.priority]?.label}</span>
@@ -625,6 +627,7 @@ function TasksKanbanView({
               <div className="kanban-column-title-wrapper">
                 <span
                   className="status-dot"
+                  data-status={column.id}
                   style={{ backgroundColor: column.color }}
                 />
                 <span className="kanban-column-title">
@@ -649,6 +652,7 @@ function TasksKanbanView({
                     <div className="kanban-card-header">
                       <span
                         className="priority-indicator"
+                        data-priority={task.priority}
                         style={{ backgroundColor: PRIORITY_CONFIG[task.priority]?.color }}
                       />
                       <span className="kanban-card-title">

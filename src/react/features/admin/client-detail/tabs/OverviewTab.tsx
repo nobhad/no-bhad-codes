@@ -192,6 +192,7 @@ export function OverviewTab({
                     <PortalDropdownItem key={tag.id} onClick={() => handleAddTag(tag.id)}>
                       <span
                         className="tag-color-dot"
+                        aria-hidden="true"
                         style={{ backgroundColor: tag.color }}
                       />
                       {tag.name}
@@ -211,7 +212,7 @@ export function OverviewTab({
               tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="badge"
+                  className="badge badge-tag"
                   style={{ backgroundColor: tag.color }}
                 >
                   {tag.name}

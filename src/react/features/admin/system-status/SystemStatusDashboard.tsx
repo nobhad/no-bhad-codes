@@ -79,25 +79,25 @@ const SERVICE_ICONS: Record<string, React.ReactNode> = {
   auth: <Shield className="icon-lg" />
 };
 
-function getStatusColor(status: string): string {
+function getStatusVariantName(status: string): string {
   switch (status) {
   case 'operational':
   case 'good':
   case 'resolved':
-    return 'var(--status-completed)';
+    return 'completed';
   case 'degraded':
   case 'warning':
   case 'monitoring':
   case 'identified':
-    return 'var(--status-pending)';
+    return 'pending';
   case 'outage':
   case 'critical':
   case 'investigating':
-    return 'var(--status-cancelled)';
+    return 'cancelled';
   case 'maintenance':
-    return 'var(--status-active)';
+    return 'active';
   default:
-    return 'var(--portal-text-muted)';
+    return 'muted';
   }
 }
 
@@ -279,25 +279,25 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
           {/* Services */}
           {data.services.length > 0 && (
             <div className="status-section">
-              <h4 className="status-section-title">Services</h4>
+              <h3 className="status-section-title">Services</h3>
               <div className="status-services-grid">
                 {data.services.map((service) => (
                   <div key={service.id} className="status-service-card">
                     <div className="status-service-header">
                       <div className="status-service-name-row">
-                        <span className="status-service-icon" style={{ color: getStatusColor(service.status) }}>
+                        <span className="status-service-icon" data-status-variant={getStatusVariantName(service.status)}>
                           {SERVICE_ICONS[service.icon] || <Server className="icon-lg" />}
                         </span>
                         <span className="status-service-name">{service.name}</span>
                       </div>
-                      <span style={{ color: getStatusColor(service.status) }}>
+                      <span className="status-color-indicator" data-status-variant={getStatusVariantName(service.status)}>
                         {getStatusIcon(service.status)}
                       </span>
                     </div>
                     <div className="status-service-details">
                       <div className="status-detail-row">
                         <span className="status-detail-label">Status</span>
-                        <span className="status-text-capitalize" style={{ color: getStatusColor(service.status) }}>
+                        <span className="status-text-capitalize status-color-indicator" data-status-variant={getStatusVariantName(service.status)}>
                           {service.status}
                         </span>
                       </div>
@@ -321,13 +321,13 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
           {/* Metrics */}
           {data.metrics.length > 0 && (
             <div className="status-section">
-              <h4 className="status-section-title">System Metrics</h4>
+              <h3 className="status-section-title">System Metrics</h3>
               <div className="status-metrics-grid">
                 {data.metrics.map((metric) => (
                   <div key={metric.id} className="status-metric-card">
                     <div className="status-metric-header">
                       <span className="status-metric-name">{metric.name}</span>
-                      <span style={{ color: getStatusColor(metric.status) }}>
+                      <span className="status-color-indicator" data-status-variant={getStatusVariantName(metric.status)}>
                         {getStatusIcon(metric.status)}
                       </span>
                     </div>
@@ -337,9 +337,9 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
                     <div className="status-progress-track">
                       <div
                         className="status-progress-bar"
+                        data-status-variant={getStatusVariantName(metric.status)}
                         style={{
-                          width: `${Math.min((metric.value / metric.threshold) * 100, 100)}%`,
-                          backgroundColor: getStatusColor(metric.status)
+                          width: `${Math.min((metric.value / metric.threshold) * 100, 100)}%`
                         }}
                       />
                     </div>
@@ -355,7 +355,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
           {/* Incidents */}
           {data.incidents.length > 0 && (
             <div className="status-section">
-              <h4 className="status-section-title">Recent Incidents</h4>
+              <h3 className="status-section-title">Recent Incidents</h3>
               <div className="status-incidents-list">
                 {data.incidents.map((incident) => (
                   <div key={incident.id} className="status-incident-card">
@@ -372,7 +372,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
                         <span>Affected: {incident.affectedServices.join(', ')}</span>
                       </div>
                     </div>
-                    <div className="status-incident-status" style={{ color: getStatusColor(incident.status) }}>
+                    <div className="status-incident-status status-color-indicator" data-status-variant={getStatusVariantName(incident.status)}>
                       {getStatusIcon(incident.status)}
                       <span className="status-text-capitalize">{incident.status}</span>
                     </div>

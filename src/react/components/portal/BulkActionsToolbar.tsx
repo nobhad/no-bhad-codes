@@ -113,6 +113,7 @@ export function BulkActionsToolbar({
                   {option.color && (
                     <span
                       className="status-dot"
+                      data-status={option.value}
                       style={{ backgroundColor: option.color }}
                     />
                   )}

@@ -83,6 +83,13 @@
 .text-status-pending { color: var(--status-pending); }
 .text-status-new { color: var(--status-new); }
 
+/* Data-attribute driven priority colors for badges (CSS fallback) */
+.badge[data-priority="urgent"] { color: var(--status-cancelled); }
+.badge[data-priority="high"] { color: var(--status-pending); }
+.badge[data-priority="normal"] { color: var(--status-active); }
+.badge[data-priority="medium"] { color: var(--status-active); }
+.badge[data-priority="low"] { color: var(--portal-text-muted); }
+
 /* Card drag-over highlight state */
 .card-drag-highlight {
   background: var(--portal-alpha-white-10);
