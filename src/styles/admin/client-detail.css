@@ -100,59 +100,6 @@
   }
 }
 
-.client-overview-main,
-.client-overview-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portal-section-gap);
-}
-
-/* Contact info vertical list */
-.contact-info-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.contact-info-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-/* Account detail row — label left, value right */
-.account-detail-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.account-detail-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Tags list */
-.tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-/* Health factors grid */
-.health-factors-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-}
-
-.health-factor-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .health-factor-header {
   display: flex;
   align-items: center;
@@ -648,15 +595,6 @@
 
 /* --- Shared Tab Layout --- */
 
-/* Section header: title + action (used across all tabs)
-   Follows .section-header-with-actions pattern */
-.tab-section-header,
-.section-header-with-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 /* Panel header row: heading + close button */
 .panel-header-row {
   display: flex;
@@ -685,20 +623,6 @@
   justify-content: flex-end;
   gap: var(--space-2);
   margin-top: var(--space-3);
-}
-
-/* Two-column card grid */
-.card-grid-2col,
-.card-grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-}
-
-.card-grid-2col--compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
 }
 
 /* Vertical list (flex column with gap) */

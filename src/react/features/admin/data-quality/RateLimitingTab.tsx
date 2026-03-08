@@ -101,7 +101,7 @@ export function RateLimitingTab({
     <>
       {stats && (
         <div className="portal-card">
-          <div className="section-header-with-actions">
+          <div className="layout-row-between">
             <h3 className="section-title">Rate Limit Overview</h3>
             <button className="btn btn-secondary" onClick={loadStats}>
               <RefreshCw size={14} />

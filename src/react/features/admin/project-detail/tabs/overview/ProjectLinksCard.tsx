@@ -17,8 +17,8 @@ export function ProjectLinksCard({ project, onSaveField }: ProjectLinksCardProps
   return (
     <div className="panel">
       <h3 className="section-title">Links</h3>
-      <div className="project-info-grid">
-        <div className="project-info-field">
+      <div className="grid-2col">
+        <div className="layout-form-field">
           <div className="field-label">
             <LinkIcon className="icon-sm" /> Preview URL
             {project.preview_url && (
@@ -35,7 +35,7 @@ export function ProjectLinksCard({ project, onSaveField }: ProjectLinksCardProps
           />
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <div className="field-label">
             <LinkIcon className="icon-sm" /> Repository
             {project.repo_url && (
@@ -52,7 +52,7 @@ export function ProjectLinksCard({ project, onSaveField }: ProjectLinksCardProps
           />
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <div className="field-label">
             <LinkIcon className="icon-sm" /> Production URL
             {project.production_url && (

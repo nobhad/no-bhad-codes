@@ -313,7 +313,7 @@ export function ContactsTab({
   return (
     <div className="section">
       {/* Header */}
-      <div className="tab-section-header">
+      <div className="layout-row-between">
         <h2 className="heading text-lg">
           Contacts ({contacts.length})
         </h2>
@@ -332,7 +332,7 @@ export function ContactsTab({
           message="No contacts yet. Add contacts to keep track of key people."
         />
       ) : (
-        <div className="card-grid-2col">
+        <div className="grid-2col">
           {sortedContacts.map((contact) => (
             <div
               key={contact.id}

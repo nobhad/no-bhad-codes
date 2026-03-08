@@ -13,78 +13,6 @@
  */
 
 /* ============================================
-   OVERVIEW TAB COMPONENT
-   ============================================ */
-
-/* Section title with margin */
-.overview-section-title {
-  margin-bottom: var(--space-4);
-}
-
-/* Text size variants */
-.overview-text-sm {
-  font-size: var(--font-size-xs);
-}
-
-.overview-text-base {
-  font-size: var(--font-size-sm);
-}
-
-/* Description text with pre-wrap */
-.overview-description {
-  font-size: var(--font-size-sm);
-  white-space: pre-wrap;
-}
-
-/* Label with block display */
-.overview-label-block {
-  display: block;
-  margin-bottom: var(--space-2);
-}
-
-/* Divider with top margin */
-.overview-divider-top {
-  margin-top: var(--space-4);
-}
-
-/* Link item without padding/border */
-.overview-link-item {
-  padding: var(--space-2) 0;
-  border-bottom: none;
-}
-
-/* Input height for inline forms */
-.overview-input-sm {
-  height: 32px;
-}
-
-/* Empty state with custom padding */
-.overview-empty-state {
-  padding: var(--space-8) 0;
-}
-
-/* Checkbox without border radius */
-.overview-checkbox {
-  border-radius: 0;
-}
-
-/* Expanded content with top border */
-.overview-expanded-content {
-  border-top: var(--border-width) solid var(--portal-border-subtle);
-}
-
-/* Inline stat card (no border, no padding) */
-.overview-stat-inline {
-  border: none;
-  padding: 0;
-}
-
-/* Grid 2 columns */
-.overview-grid-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-/* ============================================
    TASKS TAB COMPONENT
    ============================================ */
 
@@ -152,31 +80,6 @@
 }
 
 /* ============================================
-   CLIENT DETAIL COMPONENT
-   ============================================ */
-
-/* Panel with larger padding */
-.cdetail-panel-lg {
-  padding: var(--space-6);
-}
-
-/* Grid 3 columns */
-.cdetail-grid-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* Empty state italic */
-.cdetail-empty-italic {
-  font-size: var(--font-size-sm);
-  font-style: italic;
-}
-
-/* Tag color dot */
-.cdetail-tag-dot {
-  border-radius: 0;
-}
-
-/* ============================================
    CONTRACT TAB COMPONENT
    ============================================ */
 
@@ -237,13 +140,6 @@
 .portal-card-description {
   color: var(--portal-text-muted);
   font-size: var(--font-size-xs);
-}
-
-/* Footer -- date + actions */
-.portal-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 /* Progress section with bar */
@@ -338,37 +234,6 @@
 }
 
 /* ============================================
-   CLIENT PROJECTS TAB COMPONENT
-   ============================================ */
-
-/* Text size variants */
-.proj-text-xs {
-  font-size: var(--font-size-2xs);
-}
-
-.proj-text-sm {
-  font-size: var(--font-size-xs);
-}
-
-.proj-text-base {
-  font-size: var(--font-size-sm);
-}
-
-.proj-text-lg {
-  font-size: var(--font-size-lg);
-}
-
-/* Section title spacing */
-.proj-section-title {
-  margin-bottom: var(--space-1-5);
-}
-
-/* Empty state italic text */
-.proj-empty-italic {
-  font-style: italic;
-}
-
-/* ============================================
    ACTIVITY TAB COMPONENT
    ============================================ */
 
@@ -423,13 +288,6 @@
 /* Thread list no gap */
 .message-thread-list {
   gap: 0;
-}
-
-/* Header flex layout */
-.message-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 /* Timestamp no shrink */

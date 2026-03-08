@@ -193,7 +193,7 @@ export function FilesTab({
           onChange={(e) => handleFileSelect(e.target.files)}
         />
 
-        <div className="pd-col-center">
+        <div className="layout-stack-center">
           <Upload
             className={cn(
               'files-upload-icon',
@@ -210,7 +210,7 @@ export function FilesTab({
           </div>
 
           {/* Category Selector */}
-          <div className="pd-row-compact pd-mt-2" onClick={(e) => e.stopPropagation()}>
+          <div className="layout-row gap-2 pd-mt-2" onClick={(e) => e.stopPropagation()}>
             <span className="text-muted pd-hint">Category:</span>
             <PortalDropdown>
               <PortalDropdownTrigger asChild>
@@ -292,9 +292,9 @@ export function FilesTab({
                   className="files-table-row"
                 >
                   <td className="pd-table-cell">
-                    <div className="pd-row-tight">
+                    <div className="layout-row">
                       {getFileIcon(file.file_type)}
-                      <div className="pd-col-inline">
+                      <div className="layout-stack gap-1">
                         <span className="pd-highlight-value pd-truncate-filename">
                           {file.original_name}
                         </span>
@@ -328,7 +328,7 @@ export function FilesTab({
                     </button>
                   </td>
                   <td className="pd-table-cell pd-cell-right">
-                    <div className="pd-row-end">
+                    <div className="layout-row-end">
                       {file.download_url && (
                         <button
                           className="icon-btn"

@@ -178,7 +178,7 @@ export function MilestoneItem({
         </button>
 
         {/* Title and Progress */}
-        <div className="pd-flex-fill">
+        <div className="flex-fill">
           <div className="milestone-content">
             <span
               className={cn(
@@ -209,7 +209,7 @@ export function MilestoneItem({
 
         {/* Due Date */}
         {milestone.due_date && (
-          <span className="text-muted pd-row-inline pd-text-xs">
+          <span className="text-muted layout-row gap-1 pd-text-xs">
             <Calendar className="icon-sm" />
             {formatDate(milestone.due_date, 'label')}
           </span>
@@ -268,7 +268,7 @@ interface MilestoneEditFormProps {
  */
 function MilestoneEditForm({ editState, dispatch, onSave, onCancel }: MilestoneEditFormProps) {
   return (
-    <div className="pd-col">
+    <div className="layout-stack">
       <PortalInput
         placeholder="Milestone title..."
         value={editState.title}
@@ -295,7 +295,7 @@ function MilestoneEditForm({ editState, dispatch, onSave, onCancel }: MilestoneE
         className="tasks-date-input"
       />
 
-      <div className="pd-row-end pd-mt-2">
+      <div className="layout-row-end pd-mt-2">
         <IconButton action="close" onClick={onCancel} title="Cancel" />
         <IconButton action="save" onClick={onSave} loading={editState.isSaving} title="Save" />
       </div>

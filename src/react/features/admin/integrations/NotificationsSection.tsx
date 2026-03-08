@@ -33,7 +33,7 @@ export function NotificationsSection({
 }: NotificationsSectionProps) {
   return (
     <div className="status-section">
-      <div className="section-header-with-actions">
+      <div className="layout-row-between">
         <h4 className="section-title">Notification Configurations</h4>
         <button className="btn btn-primary" onClick={onAdd}>
           <Plus className="icon-sm" />

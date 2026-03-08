@@ -78,8 +78,8 @@ export function DeliverablesTab({
   return (
     <div className="section">
       {/* Header with stats */}
-      <div className="pd-tab-header">
-        <div className="pd-row">
+      <div className="layout-row-between">
+        <div className="layout-row gap-4">
           <div>
             <span className="text-muted">Overall Progress: </span>
             <span className="pd-highlight-value">
@@ -110,7 +110,7 @@ export function DeliverablesTab({
           message="No deliverables defined yet. Add deliverables to milestones in the Tasks tab."
         />
       ) : (
-        <div className="pd-col-wide">
+        <div className="layout-stack gap-4">
           {milestones
             .filter((m) => m.deliverables && m.deliverables.length > 0)
             .map((milestone) => {
@@ -122,8 +122,8 @@ export function DeliverablesTab({
                   className="panel"
                 >
                   {/* Milestone Header */}
-                  <div className="pd-tab-header deliv-milestone-header">
-                    <div className="pd-row-tight">
+                  <div className="layout-row-between deliv-milestone-header">
+                    <div className="layout-row">
                       {milestone.is_completed ? (
                         <Check className="icon-md" />
                       ) : (
@@ -150,7 +150,7 @@ export function DeliverablesTab({
 
                     {/* Due Date */}
                     {milestone.due_date && (
-                      <span className="text-muted pd-row-inline pd-text-xs">
+                      <span className="text-muted layout-row gap-1 pd-text-xs">
                         <Calendar className="icon-sm" />
                         {formatDate(milestone.due_date, 'label')}
                       </span>

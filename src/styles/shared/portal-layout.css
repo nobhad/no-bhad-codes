@@ -1113,12 +1113,6 @@ html[data-theme="light"] .portal .funnel-value {
   padding: var(--portal-card-padding);
 }
 
-/* Panel card header — heading + action button on same row */
-.panel-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 /* Clickable card variant — portal-card + card-clickable */
 .card-clickable,

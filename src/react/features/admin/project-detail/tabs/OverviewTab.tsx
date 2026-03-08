@@ -57,7 +57,7 @@ export function OverviewTab({
   return (
     <div className="project-overview-grid">
       {/* Left Column - Project Info */}
-      <div className="project-overview-main">
+      <div className="layout-stack">
         <ProjectDetailsCard project={project} onSaveField={handleSaveField} />
         <ProjectLinksCard project={project} onSaveField={handleSaveField} />
         <MilestonesList

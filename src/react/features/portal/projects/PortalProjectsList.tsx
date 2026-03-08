@@ -98,7 +98,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       </div>
 
       {/* Footer: Date and Preview */}
-      <div className="portal-card-footer">
+      <div className="layout-row-between">
         <span className="text-muted text-xs">
           {project.start_date ? `Started ${formatCardDate(project.start_date)}` : 'Not started'}
         </span>

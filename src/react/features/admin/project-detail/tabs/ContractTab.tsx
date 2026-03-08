@@ -91,7 +91,7 @@ export function ContractTab({
       {/* Contract Status Card */}
       <div className="panel">
         <div className="contract-status-layout">
-          <div className="pd-row-start-wide">
+          <div className="layout-row-top gap-4">
             {isSigned ? (
               <Check className="icon-xl" />
             ) : (
@@ -99,7 +99,7 @@ export function ContractTab({
             )}
 
             <div>
-              <div className="pd-row-tight">
+              <div className="layout-row">
                 <h3 className="heading pd-text-lg">
                   Contract Status
                 </h3>
@@ -109,7 +109,7 @@ export function ContractTab({
               </div>
 
               {isSigned && project.contract_signed_date && (
-                <div className="pd-row-compact text-muted pd-mt-2">
+                <div className="layout-row gap-2 text-muted pd-mt-2">
                   <Calendar className="icon-md" />
                   <span>Signed on {formatDate(project.contract_signed_date, 'label')}</span>
                 </div>
@@ -126,7 +126,7 @@ export function ContractTab({
           </div>
 
           {/* Actions */}
-          <div className="pd-row-compact">
+          <div className="layout-row gap-2">
             {!isSigned && (
               <>
                 <IconButton action="generate" onClick={handleGenerateContract} title="Generate Contract" />
@@ -138,7 +138,7 @@ export function ContractTab({
       </div>
 
       {/* Contract Terms */}
-      <StatsRow className="pd-grid-2">
+      <StatsRow className="grid-2col">
         <StatCard
           label="Contract Value"
           value={formatCurrency(project.price || project.budget)}
@@ -158,8 +158,8 @@ export function ContractTab({
 
       {/* Contract Files */}
       <div className="panel contract-panel-no-padding">
-        <div className="pd-tab-header contract-files-header">
-          <div className="pd-row-compact">
+        <div className="layout-row-between contract-files-header">
+          <div className="layout-row gap-2">
             <FileText className="icon-md" />
             <span className="heading">
               Contract Documents
@@ -183,7 +183,7 @@ export function ContractTab({
                 key={file.id}
                 className="list-item"
               >
-                <div className="pd-row-tight">
+                <div className="layout-row">
                   <FileText className="icon-lg" />
                   <div>
                     <span className="pd-highlight-value">

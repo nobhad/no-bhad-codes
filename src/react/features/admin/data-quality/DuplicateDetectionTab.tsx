@@ -102,7 +102,7 @@ export function DuplicateDetectionTab({
 
   return (
     <div className="portal-card">
-      <div className="section-header-with-actions">
+      <div className="layout-row-between">
         <h3 className="section-title">Duplicate Detection</h3>
         <button
           className="btn btn-primary"

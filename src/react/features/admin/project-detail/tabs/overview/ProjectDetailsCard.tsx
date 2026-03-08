@@ -29,8 +29,8 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
     <div className="panel">
       <h3 className="section-title">Project Details</h3>
 
-      <div className="project-info-grid">
-        <div className="project-info-field">
+      <div className="grid-2col">
+        <div className="layout-form-field">
           <span className="field-label">Type</span>
           <InlineSelect
             value={project.project_type || ''}
@@ -41,7 +41,7 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
           />
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <span className="field-label">Timeline</span>
           <InlineEdit
             value={project.timeline || ''}
@@ -51,7 +51,7 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
           />
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <span className="field-label">Start Date</span>
           <div className="project-info-field-value">
             <Calendar className="icon-sm" />
@@ -64,7 +64,7 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
           </div>
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <span className="field-label">Target End Date</span>
           <div className="project-info-field-value">
             <Calendar className="icon-sm" />
@@ -77,7 +77,7 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
           </div>
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <span className="field-label">Budget</span>
           <div className="project-info-field-value">
             <DollarSign className="icon-sm" />
@@ -92,7 +92,7 @@ export function ProjectDetailsCard({ project, onSaveField }: ProjectDetailsCardP
           </div>
         </div>
 
-        <div className="project-info-field">
+        <div className="layout-form-field">
           <span className="field-label">Quoted Price</span>
           <div className="project-info-field-value">
             <DollarSign className="icon-sm" />

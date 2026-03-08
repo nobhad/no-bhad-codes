@@ -68,8 +68,8 @@ export function NotesTab({
   return (
     <div className="section">
       {/* Header */}
-      <div className="pd-tab-header">
-        <div className="pd-row-compact">
+      <div className="layout-row-between">
+        <div className="layout-row gap-2">
           <StickyNote className="icon-lg" />
           <h3 className="heading">
             Internal Notes
@@ -79,7 +79,7 @@ export function NotesTab({
           </span>
         </div>
 
-        <div className="pd-row-compact">
+        <div className="layout-row gap-2">
           {hasChanges && (
             <span className="text-muted pd-hint">Unsaved changes</span>
           )}

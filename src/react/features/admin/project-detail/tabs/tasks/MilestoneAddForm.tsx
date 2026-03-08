@@ -71,7 +71,7 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
         New Milestone
       </h4>
 
-      <div className="pd-col">
+      <div className="layout-stack">
         <PortalInput
           placeholder="Milestone title..."
           value={formState.title}
@@ -95,7 +95,7 @@ export function MilestoneAddForm({ onAdd, onCancel, showNotification }: Mileston
           className="tasks-date-input"
         />
 
-        <div className="pd-row-end pd-mt-2">
+        <div className="layout-row-end pd-mt-2">
           <PortalButton variant="ghost" onClick={resetAndClose}>
             Cancel
           </PortalButton>

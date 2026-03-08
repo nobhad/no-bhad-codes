@@ -486,21 +486,21 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
               </div>
               <div className="analytics-card-grid">
                 <div className="analytics-chart-card">
-                  <div className="analytics-card-header">
+                  <div className="layout-row-between">
                     <h3>Revenue Over Time</h3>
                     <LineChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.revenueChart} type="line" />
                 </div>
                 <div className="analytics-chart-card">
-                  <div className="analytics-card-header">
+                  <div className="layout-row-between">
                     <h3>Projects by Status</h3>
                     <PieChart className="icon-md" />
                   </div>
                   <ChartWidget data={data?.projectsChart} type="pie" />
                 </div>
                 <div className="analytics-chart-card">
-                  <div className="analytics-card-header">
+                  <div className="layout-row-between">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
@@ -522,7 +522,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
               <div className="analytics-chart-card">
-                <div className="analytics-card-header">
+                <div className="layout-row-between">
                   <h3>Revenue Over Time</h3>
                   <LineChart className="icon-md" />
                 </div>
@@ -540,7 +540,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
               </div>
               <div className="analytics-card-grid">
                 <div className="analytics-chart-card">
-                  <div className="analytics-card-header">
+                  <div className="layout-row-between">
                     <h3>Lead Funnel</h3>
                     <BarChart3 className="icon-md" />
                   </div>
@@ -562,7 +562,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
                   .map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
               </div>
               <div className="analytics-chart-card">
-                <div className="analytics-card-header">
+                <div className="layout-row-between">
                   <h3>Projects by Status</h3>
                   <PieChart className="icon-md" />
                 </div>
