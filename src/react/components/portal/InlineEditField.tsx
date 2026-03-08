@@ -186,6 +186,7 @@ export function InlineEditField({
             placeholder={placeholder}
             disabled={isSaving}
             className={cn('inline-edit-input', error && 'has-error')}
+            aria-label={label}
             aria-invalid={!!error}
             aria-describedby={error ? `${label}-error` : undefined}
           />
@@ -360,6 +361,7 @@ export function InlineEditSelect({
             }}
             disabled={isSaving}
             className="inline-edit-select"
+            aria-label={label}
           >
             {options.map(opt => (
               <option key={opt.value} value={opt.value}>

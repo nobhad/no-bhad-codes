@@ -145,6 +145,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search articles"
               />
             </div>
           </div>

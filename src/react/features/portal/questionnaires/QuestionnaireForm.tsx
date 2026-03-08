@@ -138,6 +138,7 @@ function TextInput({ question, value, onChange, disabled }: QuestionInputProps) 
       placeholder={question.placeholder}
       disabled={disabled}
       className="input"
+      aria-label={question.text}
     />
   );
 }
@@ -154,6 +155,7 @@ function TextareaInput({ question, value, onChange, disabled }: QuestionInputPro
       disabled={disabled}
       rows={4}
       className="textarea form-textarea-resizable"
+      aria-label={question.text}
     />
   );
 }
@@ -270,6 +272,7 @@ function NumberInput({ question, value, onChange, disabled }: QuestionInputProps
       max={question.max}
       disabled={disabled}
       className="input"
+      aria-label={question.text}
     />
   );
 }
@@ -353,6 +356,7 @@ function FileInput({ question, value, onChange, disabled }: QuestionInputProps) 
               type="button"
               onClick={handleRemove}
               className="icon-btn"
+              aria-label="Remove file"
             >
               <X className="icon-xs" />
             </button>
@@ -604,6 +608,7 @@ export function QuestionnaireForm({
             className="icon-btn"
             onClick={onBack}
             title="Back to questionnaires"
+            aria-label="Back to questionnaires"
           >
             <ArrowLeft className="icon-xs" />
           </button>

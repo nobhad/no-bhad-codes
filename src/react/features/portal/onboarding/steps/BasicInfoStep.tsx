@@ -56,7 +56,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Contact Name */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">
+          <label className="field-label" htmlFor="basic-contact-name">
             Contact Name <span className="text-primary">*</span>
           </label>
           <div className="relative">
@@ -64,6 +64,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               <User className="icon-xs" />
             </div>
             <input
+              id="basic-contact-name"
               type="text"
               placeholder="Your full name"
               value={basicInfo.contactName}
@@ -78,7 +79,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Contact Email */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">
+          <label className="field-label" htmlFor="basic-contact-email">
             Email Address <span className="text-primary">*</span>
           </label>
           <div className="relative">
@@ -86,6 +87,7 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
               <Mail className="icon-xs" />
             </div>
             <input
+              id="basic-contact-email"
               type="email"
               placeholder="your@email.com"
               value={basicInfo.contactEmail}
@@ -100,12 +102,13 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Contact Phone */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">Phone Number</label>
+          <label className="field-label" htmlFor="basic-contact-phone">Phone Number</label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Phone className="icon-xs" />
             </div>
             <input
+              id="basic-contact-phone"
               type="tel"
               placeholder="(555) 123-4567"
               value={basicInfo.contactPhone}
@@ -120,12 +123,13 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Timezone */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">Timezone</label>
+          <label className="field-label" htmlFor="basic-timezone">Timezone</label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Clock className="icon-xs" />
             </div>
             <select
+              id="basic-timezone"
               value={basicInfo.timezone}
               onChange={(e) => handleChange('timezone', e.target.value)}
               className="select w-full pl-10"
@@ -155,12 +159,13 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Company Name */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">Company Name</label>
+          <label className="field-label" htmlFor="basic-company-name">Company Name</label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Building2 className="icon-xs" />
             </div>
             <input
+              id="basic-company-name"
               type="text"
               placeholder="Your company name"
               value={basicInfo.companyName}
@@ -172,12 +177,13 @@ export function BasicInfoStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Company Website */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">Current Website</label>
+          <label className="field-label" htmlFor="basic-company-website">Current Website</label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Globe className="icon-xs" />
             </div>
             <input
+              id="basic-company-website"
               type="url"
               placeholder="https://yoursite.com"
               value={basicInfo.companyWebsite}

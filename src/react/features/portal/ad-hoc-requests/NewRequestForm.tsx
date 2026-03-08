@@ -166,11 +166,12 @@ export function NewRequestForm({
     <form onSubmit={handleSubmit} className="section">
       {/* Title */}
       <div className="flex flex-col gap-1">
-        <label className="field-label">
+        <label className="field-label" htmlFor="request-title">
           Title
           <span className="form-required">*</span>
         </label>
         <input
+          id="request-title"
           type="text"
           placeholder="Brief description of your request"
           value={title}
@@ -190,11 +191,12 @@ export function NewRequestForm({
 
       {/* Description */}
       <div className="flex flex-col gap-1">
-        <label className="field-label">
+        <label className="field-label" htmlFor="request-description">
           Description
           <span className="form-required">*</span>
         </label>
         <textarea
+          id="request-description"
           placeholder="Provide details about what you need..."
           value={description}
           onChange={(e) => {
@@ -238,8 +240,9 @@ export function NewRequestForm({
       {/* Project (Optional) */}
       {projects.length > 0 && (
         <div className="flex flex-col gap-1">
-          <label className="field-label">Related Project (Optional)</label>
+          <label className="field-label" htmlFor="request-project">Related Project (Optional)</label>
           <select
+            id="request-project"
             value={projectId || ''}
             onChange={(e) => setProjectId(e.target.value ? Number(e.target.value) : undefined)}
             disabled={loading}
@@ -319,6 +322,7 @@ export function NewRequestForm({
                   onClick={() => handleRemoveFile(index)}
                   disabled={loading}
                   className="icon-btn"
+                  aria-label="Remove file"
                 >
                   <X className="icon-xs" />
                 </button>

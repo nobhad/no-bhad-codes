@@ -61,8 +61,8 @@ function SummarySection({ icon: Icon, title, items, onEdit, stepNumber }: Summar
         )}
       </div>
       <div className="space-y-2">
-        {items.map((item, index) => (
-          <div key={index} className="flex gap-2 text-sm font-mono">
+        {items.map((item) => (
+          <div key={item.label} className="flex gap-2 text-sm font-mono">
             <span className="text-muted min-w-[100px] flex-shrink-0">
               {item.label}:
             </span>
@@ -115,8 +115,8 @@ export function ConfirmationStep({ data, errors, isSubmitting: _isSubmitting, on
               Please fix the following issues:
             </p>
             <ul className="mt-1 space-y-1">
-              {errors.map((error, index) => (
-                <li key={index} className="text-sm font-mono">
+              {errors.map((error) => (
+                <li key={error.message} className="text-sm font-mono">
                   {error.message}
                 </li>
               ))}

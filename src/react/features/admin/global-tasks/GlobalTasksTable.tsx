@@ -522,7 +522,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                   <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="status-dropdown-trigger">
+                        <button className="status-dropdown-trigger" aria-label="Change task status">
                           <StatusBadge status={getStatusVariant(task.status)}>
                             {TASK_STATUS_CONFIG[task.status]?.label || task.status}
                           </StatusBadge>

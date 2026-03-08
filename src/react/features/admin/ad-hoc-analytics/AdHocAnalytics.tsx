@@ -248,6 +248,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                           deleteQuery(sq.id);
                         }}
                         className="icon-btn"
+                        aria-label="Delete saved query"
                       >
                         <Trash2 className="analytics-trash-icon" />
                       </button>
@@ -275,6 +276,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                   value={queryName}
                   onChange={(e) => setQueryName(e.target.value)}
                   className="input analytics-name-input"
+                  aria-label="Query name"
                 />
                 <button className="btn-secondary" onClick={saveQuery} disabled={!query || !queryName}>
                   <Save className="analytics-action-icon" />
@@ -288,6 +290,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
               placeholder="Enter your analytics query here..."
               rows={6}
               className="textarea"
+              aria-label="Analytics query"
             />
             <div className="analytics-editor-footer">
               <span className="text-muted analytics-hint">
@@ -323,12 +326,14 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                     <button
                       onClick={() => setViewMode('table')}
                       className={cn(viewMode === 'table' ? 'tab-active' : 'tab', 'analytics-view-toggle')}
+                      aria-label="Table view"
                     >
                       <Table className="analytics-action-icon" />
                     </button>
                     <button
                       onClick={() => setViewMode('chart')}
                       className={cn(viewMode === 'chart' ? 'tab-active' : 'tab', 'analytics-view-toggle')}
+                      aria-label="Chart view"
                     >
                       <BarChart3 className="analytics-action-icon" />
                     </button>
@@ -352,7 +357,7 @@ export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalytic
                     </thead>
                     <tbody>
                       {result.rows.slice(0, 100).map((row, i) => (
-                        <tr key={i} className="table-row">
+                        <tr key={`row-${i}-${String(row[result.columns[0]] ?? i)}`} className="table-row">
                           {result.columns.map((col) => (
                             <td key={col} className="table-cell">{row[col] != null ? String(row[col]) : ''}</td>
                           ))}

@@ -59,6 +59,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="search-bar-input"
+          aria-label={placeholder || 'Search'}
           onKeyDown={(e) => {
             if (e.key === KEYS.ESCAPE) setIsOpen(false);
           }}
@@ -185,6 +186,7 @@ export function ExportButton({ onClick, disabled, icon, title = 'Export' }: Expo
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={title}
     >
       {icon || <span>Export</span>}
     </button>

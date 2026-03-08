@@ -238,7 +238,7 @@ export function ProjectDetail({
               </h1>
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="btn-unstyled">
+                  <button className="btn-unstyled" aria-label="Change project status">
                     <span className="badge">
                       {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
                     </span>
@@ -289,7 +289,7 @@ export function ProjectDetail({
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="icon-btn">
+              <button className="icon-btn" aria-label="More actions">
                 <MoreHorizontal className="icon-lg" />
               </button>
             </PortalDropdownTrigger>

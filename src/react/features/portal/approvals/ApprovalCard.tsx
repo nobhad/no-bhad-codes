@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   FileText,
   Receipt,
@@ -20,6 +20,7 @@ import {
 import { cn } from '@react/lib/utils';
 import { formatCardDate, isOverdue, getDueDaysText } from '@react/utils/cardFormatters';
 import { ConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { KEYS } from '@/constants/keyboard';
 import type { PendingApproval, ApprovalEntityType } from './types';
 
 interface ApprovalCardProps {
@@ -92,11 +93,18 @@ export function ApprovalCard({
     }
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     if (onNavigate) {
       onNavigate(approval.entity_type, String(approval.entity_id));
     }
-  };
+  }, [onNavigate, approval.entity_type, approval.entity_id]);
+
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+      e.preventDefault();
+      handleCardClick();
+    }
+  }, [handleCardClick]);
 
   const disabled = isSubmitting || isProcessing;
 
@@ -105,6 +113,9 @@ export function ApprovalCard({
       <div
         className={cn('portal-card', onNavigate && 'card-clickable', overdue && 'text-status-cancelled')}
         onClick={onNavigate ? handleCardClick : undefined}
+        role={onNavigate ? 'button' : undefined}
+        tabIndex={onNavigate ? 0 : undefined}
+        onKeyDown={onNavigate ? handleCardKeyDown : undefined}
       >
         {/* Header */}
         <div className="portal-card-header">

@@ -145,6 +145,7 @@ export function NotesTab({
         <button
           onClick={handleCancel}
           className="icon-btn"
+          aria-label="Cancel editing"
         >
           <X className="icon-md" />
         </button>
@@ -211,6 +212,7 @@ export function NotesTab({
             onClick={() => handleStartEdit(note)}
             className="icon-btn"
             title="Edit"
+            aria-label="Edit note"
           >
             <Pencil className="icon-sm" />
           </button>
@@ -218,6 +220,7 @@ export function NotesTab({
             onClick={() => handleDeleteClick(note)}
             className="icon-btn"
             title="Delete"
+            aria-label="Delete note"
           >
             <Trash2 className="icon-sm" />
           </button>

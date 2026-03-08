@@ -207,6 +207,7 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
               size="icon"
               onClick={handleStartEdit}
               title="Edit"
+              aria-label="Edit message"
               className="message-action-btn"
             >
               <Pencil className="icon-xs" />
@@ -216,6 +217,7 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
               size="icon"
               onClick={confirmDialog.open}
               title="Delete"
+              aria-label="Delete message"
               className="message-action-btn danger"
             >
               <Trash2 className="icon-xs" />
@@ -419,6 +421,7 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
           onClick={handleSend}
           disabled={disabled || isSending || (!content.trim() && attachments.length === 0)}
           title="Send message"
+          aria-label="Send message"
         >
           <Send className="icon-sm" />
         </button>

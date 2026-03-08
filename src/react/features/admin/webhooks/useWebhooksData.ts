@@ -192,8 +192,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
     if (formData.events.length === 0) { setFormError('At least one event is required'); return; }
 
     let parsedHeaders: Record<string, string>;
-    try { parsedHeaders = JSON.parse(formData.headers); }
-    catch { setFormError('Headers must be valid JSON'); return; }
+    try { parsedHeaders = JSON.parse(formData.headers); } catch { setFormError('Headers must be valid JSON'); return; }
 
     setFormSaving(true);
     try {
@@ -249,8 +248,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
   const handleTestSubmit = useCallback(async (onClose: () => void) => {
     if (!testingWebhook || !testEventType) return;
     let parsedData: Record<string, unknown>;
-    try { parsedData = JSON.parse(testSampleData); }
-    catch { showNotification?.('Sample data must be valid JSON', 'error'); return; }
+    try { parsedData = JSON.parse(testSampleData); } catch { showNotification?.('Sample data must be valid JSON', 'error'); return; }
 
     setTestSending(true);
     try {

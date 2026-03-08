@@ -252,7 +252,19 @@ export function LeadDetailPanel({
   return createPortal(
     <>
       {/* Overlay backdrop */}
-      <div className="details-overlay" onClick={onClose} />
+      <div
+        className="details-overlay"
+        onClick={onClose}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+            e.preventDefault();
+            onClose();
+          }
+        }}
+        aria-label="Close panel"
+      />
 
       {/* Panel */}
       <div ref={panelRef} id="lead-details-panel" className="details-panel" role="dialog" aria-label="Lead details">
@@ -276,6 +288,7 @@ export function LeadDetailPanel({
               className="icon-btn icon-btn-outline"
               onClick={activateDialog.open}
               title="Activate as Project"
+              aria-label="Activate as Project"
             >
               <Rocket className="icon-sm" />
             </button>
@@ -294,7 +307,7 @@ export function LeadDetailPanel({
           <span className="field-label">Status</span>
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="status-dropdown-trigger">
+              <button className="status-dropdown-trigger" aria-label="Change lead status">
                 <StatusBadge status={getStatusVariant(lead.status)}>
                   {LEAD_STATUS_CONFIG[lead.status]?.label || lead.status}
                 </StatusBadge>
@@ -372,6 +385,7 @@ export function LeadDetailPanel({
                         className="copy-email-btn"
                         onClick={() => handleCopyEmail(lead.email)}
                         title="Copy email"
+                        aria-label="Copy email"
                       >
                         <Copy className="icon-xs" />
                       </button>
@@ -426,6 +440,7 @@ export function LeadDetailPanel({
                         className={cn('icon-btn', task.status === 'completed' && 'icon-btn-success')}
                         onClick={() => task.status !== 'completed' && handleCompleteTask(task.id)}
                         title={task.status === 'completed' ? 'Completed' : 'Mark complete'}
+                        aria-label={task.status === 'completed' ? 'Completed' : 'Mark complete'}
                         disabled={task.status === 'completed'}
                       >
                         <Check className="icon-sm" />
@@ -470,6 +485,7 @@ export function LeadDetailPanel({
                           className={cn('icon-btn', note.is_pinned && 'active')}
                           onClick={() => handleTogglePin(note.id)}
                           title={note.is_pinned ? 'Unpin' : 'Pin'}
+                          aria-label={note.is_pinned ? 'Unpin note' : 'Pin note'}
                         >
                           <Pin className="icon-xs" />
                         </button>
@@ -477,6 +493,7 @@ export function LeadDetailPanel({
                           className="icon-btn"
                           onClick={() => handleDeleteNote(note.id)}
                           title="Delete note"
+                          aria-label="Delete note"
                         >
                           <Trash2 className="icon-xs" />
                         </button>
