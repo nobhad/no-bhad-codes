@@ -32,6 +32,18 @@ vi.mock('../../server/services/email-service', () => ({
   emailService: mockEmailService
 }));
 
+// Mock environment config
+vi.mock('../../server/config/environment', () => ({
+  default: {
+    PORT: 4000,
+    NODE_ENV: 'test',
+    FRONTEND_URL: 'http://localhost:4000'
+  },
+  getBaseUrl: () => 'http://localhost:4000',
+  getPortalUrl: () => 'http://localhost:4000/client/portal',
+  getAdminUrl: () => 'http://localhost:4000/admin'
+}));
+
 // Mock logger
 vi.mock('../../server/services/logger', () => ({
   logger: {

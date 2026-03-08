@@ -40,7 +40,14 @@ vi.mock('../../../server/utils/api-response', () => ({
   sendUnauthorized: (...args: unknown[]) => mockSendUnauthorized(...args),
   sendNotFound: (...args: unknown[]) => mockSendNotFound(...args),
   sendForbidden: (...args: unknown[]) => mockSendForbidden(...args),
-  sendServerError: (...args: unknown[]) => mockSendServerError(...args)
+  sendServerError: (...args: unknown[]) => mockSendServerError(...args),
+  ErrorCodes: {
+    UNAUTHORIZED: 'UNAUTHORIZED',
+    INVALID_TOKEN: 'INVALID_TOKEN',
+    FORBIDDEN: 'FORBIDDEN',
+    NOT_FOUND: 'NOT_FOUND',
+    INTERNAL_ERROR: 'INTERNAL_ERROR'
+  }
 }));
 
 // Mock logger
@@ -213,7 +220,7 @@ describe('Portal Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Authentication required');
+      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Authentication required', 'UNAUTHORIZED');
     });
 
     it('should return 401 when JWT has no userId', async () => {
@@ -229,7 +236,7 @@ describe('Portal Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Invalid token: missing user ID');
+      expect(mockSendUnauthorized).toHaveBeenCalledWith(res, 'Invalid token: missing user ID', 'INVALID_TOKEN');
     });
 
     it('should return 404 when tab does not exist', async () => {
@@ -245,7 +252,7 @@ describe('Portal Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found');
+      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found', 'NOT_FOUND');
     });
 
     it('should return 404 when client tries to access admin tab (no enumeration)', async () => {
@@ -262,7 +269,7 @@ describe('Portal Routes', () => {
       await handler(req, res);
 
       // Should return 404, not 403 — prevents tab enumeration
-      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found');
+      expect(mockSendNotFound).toHaveBeenCalledWith(res, 'Tab not found', 'NOT_FOUND');
       expect(mockSendUnauthorized).not.toHaveBeenCalled();
     });
 
@@ -280,7 +287,7 @@ describe('Portal Routes', () => {
       const res = createMockRes();
       await handler(req, res);
 
-      expect(mockSendServerError).toHaveBeenCalledWith(res, 'Failed to fetch tab data');
+      expect(mockSendServerError).toHaveBeenCalledWith(res, 'Failed to fetch tab data', 'INTERNAL_ERROR');
     });
 
     it('should return 500 on unexpected errors', async () => {

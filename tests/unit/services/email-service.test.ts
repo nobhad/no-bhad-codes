@@ -30,6 +30,41 @@ vi.mock('nodemailer', () => ({
   createTransport: vi.fn(() => mockTransporter)
 }));
 
+// Mock database
+vi.mock('../../../server/database/init', () => ({
+  getDatabase: () => ({
+    run: vi.fn(),
+    get: vi.fn(),
+    all: vi.fn()
+  })
+}));
+
+// Mock logger
+vi.mock('../../../server/services/logger', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn()
+  }
+}));
+
+// Mock environment config
+vi.mock('../../../server/config/environment', () => ({
+  default: {
+    NODE_ENV: 'test',
+    JWT_SECRET: 'test-secret',
+    APP_URL: 'http://localhost:3000',
+    FRONTEND_URL: 'http://localhost:3000',
+    PORT: 3000
+  },
+  getBaseUrl: vi.fn(() => 'http://localhost:3000'),
+  getAdminUrl: vi.fn(() => 'http://localhost:3000/admin'),
+  getPortalUrl: vi.fn(() => 'http://localhost:3000/client/portal'),
+  validateConfig: vi.fn(),
+  getConfigSummary: vi.fn(() => ({}))
+}));
+
 describe('Email Service', () => {
   beforeAll(async () => {
     // Initialize email service once

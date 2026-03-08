@@ -503,7 +503,7 @@ describe('UpdateQueryBuilder', () => {
     it('should build increment operations', () => {
       const { sql } = updateBuilder.increment('login_count', 1).where('id', '=', 1).toSql();
 
-      expect(sql).toBe('UPDATE users SET login_count = ? WHERE id = ?');
+      expect(sql).toBe('UPDATE users SET login_count = login_count + 1 WHERE id = ?');
     });
 
     it('should throw error when no data provided', () => {
