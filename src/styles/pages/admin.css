@@ -166,12 +166,8 @@ body[data-page="admin"]:not(.admin-logged-in) {
    ADMIN SIDEBAR LAYOUT
    ================================================ */
 
-/* Dashboard container — scoping wrapper, NOT a layout container.
+/* .portal is a scoping wrapper, NOT a layout container.
    .portal-body handles the sidebar+content flex layout. */
-[data-page="admin"] .dashboard-container {
-  display: block;
-  width: 100%;
-}
 
 /* Sidebar — height: 100% inherited from .portal-body via portal-layout.css.
    Only admin-specific width/z-index overrides here. */
@@ -188,36 +184,6 @@ body[data-page="admin"]:not(.admin-logged-in) {
 [data-page="admin"] .sidebar.collapsed {
   width: var(--sidebar-width-collapsed);
   min-width: var(--sidebar-width-collapsed);
-}
-
-/* Sidebar content — base styles in portal-sidebar.css. No admin overrides needed. */
-
-[data-page="admin"] .sidebar-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--space-3);
-}
-
-[data-page="admin"] .sidebar-logo-img {
-  width: var(--logo-width-sidebar);
-  height: auto;
-  filter: invert(1);
-}
-
-[data-page="admin"] .sidebar-collapsed-logo {
-  display: flex;
-  align-items: center;
-}
-
-[data-page="admin"] .sidebar.collapsed .sidebar-collapsed-logo {
-  justify-content: center;
-  margin: var(--portal-header-top, 20px) auto var(--space-3) auto;
-  padding: 0;
-  width: 100%;
-}
-
-[data-page="admin"] .sidebar.collapsed .sidebar-logo {
-  display: none;
 }
 
 /* Sidebar buttons/footer — base styles in portal-sidebar.css.
@@ -1429,18 +1395,6 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .sidebar-section {
-  border: none;
-}
-
-[data-page="admin"] .sidebar-section + .sidebar-section {
-  border-top: none;
-}
-
-[data-page="admin"] .sidebar-section-label {
-  border: none;
-}
-
-[data-page="admin"] .sidebar-nav {
   border: none;
 }
 

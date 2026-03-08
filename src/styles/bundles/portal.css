@@ -88,11 +88,20 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
   background-color: #ffffff;
 }
 
-/* Ensure dashboard-container.hidden is truly hidden on login page */
-/* Must override sidebar.css [data-page] .sidebar rules */
-.portal .dashboard-container.hidden,
-.portal .dashboard-container.hidden .sidebar,
-.portal .dashboard-container.hidden .dashboard-content {
+/* Portal scoping wrapper — NOT a layout container.
+   display: block is default for a div; width/overflow prevent
+   horizontal overflow from content area. */
+.portal {
+  display: block;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+}
+
+/* Ensure portal is truly hidden when .hidden is applied (e.g. login page transition) */
+.portal.hidden,
+.portal.hidden .sidebar,
+.portal.hidden .dashboard-content {
   display: none !important;
   visibility: hidden !important;
 }

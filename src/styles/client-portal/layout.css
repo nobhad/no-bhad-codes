@@ -18,7 +18,7 @@ body[data-page="client-portal"] {
 /* Footer is hidden via footer.css [data-page="client-portal"] selector */
 
 /* LEGACY CLASSES — .client-portal-main, .client-dashboard, .dashboard-layout
-   are no longer in the DOM (portal.ejs uses .dashboard-container.portal > .portal-body).
+   are no longer in the DOM (portal.ejs uses .portal > .portal-body).
    Kept as minimal stubs in case any JS references them. */
 .client-portal-main,
 .client-dashboard,
@@ -27,15 +27,9 @@ body[data-page="client-portal"] {
   overflow-x: hidden;
 }
 
-/* Dashboard Container — scoping wrapper (.portal class) for CSS selectors.
+/* Portal wrapper — scoping element for CSS selectors.
    NOT a layout container. .portal-body handles the flex sidebar+content layout.
    Height is determined by .portal-body (single source of truth in portal-layout.css). */
-.dashboard-container {
-  display: block;
-  width: 100%;
-  max-width: 100vw;
-  overflow: hidden; /* Both axes — only .dashboard-content scrolls */
-}
 
 /* Dashboard Content Area (right side) — client portal base.
    Shared layout (flex, height, min-width) in portal-layout.css.

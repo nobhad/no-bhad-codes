@@ -232,7 +232,7 @@
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (--tablet) {
   .status-auto-refresh-text {
     display: inline;
   }

@@ -32,7 +32,7 @@
   gap: var(--portal-section-gap);
 }
 
-@media (min-width: 1024px) {
+@media (--laptop-up) {
   .project-overview-grid {
     grid-template-columns: 2fr 1fr;
   }
@@ -105,10 +105,11 @@
   gap: var(--space-2);
 }
 
-/* Wrapper: groups the milestone row + expanded content */
+/* Wrapper: groups the milestone row + expanded content with continuous border */
 .milestone-item-wrapper {
   display: flex;
   flex-direction: column;
+  border: var(--portal-border);
 }
 
 /* Button-based checkbox — completed state (used when no native input) */
@@ -127,11 +128,10 @@
   margin-bottom: var(--space-3);
 }
 
-/* Milestone expanded detail area */
+/* Milestone expanded detail area — inside wrapper border */
 .milestone-expanded-content {
-  padding: var(--space-3);
-  padding-top: 0;
-  margin-left: calc(var(--icon-size-lg) + var(--space-2));
+  padding: var(--space-2);
+  padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
 }
 
 /* Financial summary row: label left, value right */
@@ -538,11 +538,10 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .milestone-item,
 [data-page="admin"] .milestone-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-1-5);
   padding: var(--space-2);
   background: transparent;
-  border: var(--portal-border);
 }
 
 /* Custom checkbox - wrapper div */
@@ -551,7 +550,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   width: var(--icon-size-lg);
   height: var(--icon-size-lg);
   cursor: pointer;
-  background: var(--portal-bg-pitch);
+  background: transparent;
+  border: var(--border-width) solid var(--portal-border-color);
   position: relative;
   display: flex;
   align-items: center;
@@ -590,6 +590,9 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .milestone-content {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
 }
 
 /* .milestone-title styled by unified rule in portal-cards.css */
@@ -600,6 +603,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .milestone-actions {
   display: flex;
+  justify-content: flex-end;
   gap: var(--space-1);
 }
 
@@ -1721,7 +1725,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* 2-column grid, gap-4 */
-.pd-grid-2 {
+.pd-grid-2,
+.card-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4);
@@ -1822,8 +1827,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* --- Files Tab --- */
 
 /* File upload dropzone */
-.files-dropzone {
-  border: var(--border-width-thick) dashed var(--portal-border-color);
+.panel.files-dropzone {
+  border: var(--border-width) dashed var(--portal-border-color);
   cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }

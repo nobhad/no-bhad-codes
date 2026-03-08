@@ -296,8 +296,14 @@
 .mb-3 {
   margin-bottom: var(--space-3);
 }
+.mb-0 {
+  margin-bottom: 0;
+}
 .mb-4 {
   margin-bottom: var(--space-4);
+}
+.mt-lg {
+  margin-top: var(--spacing-lg);
 }
 
 /* ============================================
@@ -374,6 +380,26 @@
 }
 .text-light {
   color: var(--portal-text-light, var(--color-text-inverse));
+}
+.text-dark {
+  color: var(--portal-text-dark, var(--color-text-primary));
+}
+.text-accent {
+  color: var(--portal-accent, var(--color-brand-primary));
+}
+.text-brand {
+  color: var(--color-brand-primary);
+}
+
+/* Status colors (map to --status-* tokens) */
+.text-status-success {
+  color: var(--status-completed);
+}
+.text-status-danger {
+  color: var(--status-cancelled);
+}
+.text-status-warning {
+  color: var(--status-warning, var(--color-warning));
 }
 
 /* ============================================
@@ -514,6 +540,11 @@
 }
 .whitespace-normal {
   white-space: normal;
+}
+.pre-wrap-scroll {
+  white-space: pre-wrap;
+  max-height: var(--chart-height-md);
+  overflow: auto;
 }
 
 /* ============================================
