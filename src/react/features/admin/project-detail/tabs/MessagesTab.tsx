@@ -121,8 +121,7 @@ export function MessagesTab({
                     )}
                   >
                     <User
-                      className="icon-md"
-                      style={{ color: isAdmin ? 'var(--portal-text-dark)' : undefined }}
+                      className={cn('icon-md', isAdmin && 'text-dark')}
                     />
                   </div>
 

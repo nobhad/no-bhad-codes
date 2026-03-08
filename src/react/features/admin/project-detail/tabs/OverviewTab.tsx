@@ -8,6 +8,7 @@ import {
   Plus,
   Check,
   Trash2,
+  Pencil,
   ChevronDown,
   ChevronRight,
   Mail,
@@ -340,8 +341,7 @@ export function OverviewTab({
                   }
                 }}
                 autoFocus
-                className="form-input"
-                style={{ flex: 1 }}
+                className="form-input flex-1"
               />
               <PortalButton variant="primary" size="sm" onClick={handleAddMilestone}>
                 Add
@@ -445,15 +445,25 @@ export function OverviewTab({
 
                       <div className="milestone-actions">
                         <button
-                          className="btn-ghost"
+                          className="icon-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: wire up milestone edit
+                          }}
+                          aria-label="Edit milestone"
+                        >
+                          <Pencil className="icon-sm" />
+                        </button>
+                        <button
+                          className="icon-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeletingMilestoneId(milestone.id);
                             deleteDialog.open();
                           }}
+                          aria-label="Delete milestone"
                         >
                           <Trash2 className="icon-sm" />
-                          Delete
                         </button>
                       </div>
                     </div>

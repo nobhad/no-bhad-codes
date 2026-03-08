@@ -385,7 +385,7 @@ export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, s
           {/* Empty state when no services or metrics */}
           {data.services.length === 0 && data.metrics.length === 0 && data.incidents.length === 0 && (
             <div className="status-empty">
-              <CheckCircle className="icon-lg" style={{ color: 'var(--status-completed)' }} />
+              <CheckCircle className="icon-lg text-status-success" />
               <span>All systems operational. No services to display.</span>
             </div>
           )}

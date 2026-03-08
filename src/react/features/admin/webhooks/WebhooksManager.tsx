@@ -857,13 +857,13 @@ export function WebhooksManager({
               </div>
               <div className="detail-row">
                 <span className="detail-label">Payload</span>
-                <pre className="detail-value form-textarea" style={{ whiteSpace: 'pre-wrap', maxHeight: 'var(--chart-height-md)', overflow: 'auto' }}>
+                <pre className="detail-value form-textarea pre-wrap-scroll">
                   {selectedDelivery.payload || 'N/A'}
                 </pre>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Response Body</span>
-                <pre className="detail-value form-textarea" style={{ whiteSpace: 'pre-wrap', maxHeight: 'var(--chart-height-md)', overflow: 'auto' }}>
+                <pre className="detail-value form-textarea pre-wrap-scroll">
                   {selectedDelivery.responseBody || 'N/A'}
                 </pre>
               </div>

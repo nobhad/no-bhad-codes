@@ -32,6 +32,13 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { ChevronDown } from 'lucide-react';
+import {
+  PortalDropdown,
+  PortalDropdownTrigger,
+  PortalDropdownContent,
+  PortalDropdownItem
+} from '@react/components/portal/PortalDropdown';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '../../../../utils/format-utils';
@@ -409,17 +416,25 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="analytics-view">
       {/* Actions Bar */}
       <div className="analytics-actions-bar action-bar">
-        <div className="date-range-selector">
-          {dateRangeOptions.map((option) => (
-            <button
-              key={option.value}
-              className={cn('btn-secondary', dateRange === option.value && 'active')}
-              onClick={() => setDateRange(option.value as typeof dateRange)}
-            >
-              {option.label}
+        <PortalDropdown>
+          <PortalDropdownTrigger asChild>
+            <button className="btn-secondary dropdown-trigger date-range-trigger">
+              {dateRangeOptions.find((o) => o.value === dateRange)?.label}
+              <ChevronDown className="dropdown-caret" />
             </button>
-          ))}
-        </div>
+          </PortalDropdownTrigger>
+          <PortalDropdownContent align="start" sideOffset={0}>
+            {dateRangeOptions.map((option) => (
+              <PortalDropdownItem
+                key={option.value}
+                className={cn(dateRange === option.value && 'is-active')}
+                onSelect={() => setDateRange(option.value as typeof dateRange)}
+              >
+                {option.label}
+              </PortalDropdownItem>
+            ))}
+          </PortalDropdownContent>
+        </PortalDropdown>
         <button className="btn-secondary" onClick={() => loadAnalytics()} disabled={isLoading}>
           <RefreshCw className={cn('icon-sm', isLoading && 'animate-spin')} />
           Refresh

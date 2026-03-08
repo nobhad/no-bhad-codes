@@ -399,8 +399,7 @@ export function ContactsTab({
                   <Mail className="icon-sm text-muted" />
                   <a
                     href={`mailto:${contact.email}`}
-                    className="text-sm"
-                    style={{ color: 'var(--portal-accent)' }}
+                    className="text-sm text-accent"
                   >
                     {contact.email}
                   </a>

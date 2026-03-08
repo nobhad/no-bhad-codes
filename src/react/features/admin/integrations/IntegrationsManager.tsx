@@ -143,7 +143,7 @@ function IntegrationCard({ integration }: { integration: IntegrationStatus }) {
       <div className="stat-card">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span style={{ color: 'var(--portal-text-muted)' }}>{icon}</span>
+            <span className="text-muted">{icon}</span>
             <span className="font-semibold">{integration.name}</span>
           </div>
           <span className={healthClass} />
@@ -622,7 +622,7 @@ export function IntegrationsManager({
               </table>
             ) : (
               <div className="status-empty">
-                <AlertCircle className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
+                <AlertCircle className="icon-lg text-muted" />
                 <span>No notification configurations yet.</span>
               </div>
             )}
@@ -636,17 +636,17 @@ export function IntegrationsManager({
                 <div className="portal-card">
                   <div className="stat-card">
                     <div className="flex items-center gap-2 mb-3">
-                      <CreditCard className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
+                      <CreditCard className="icon-lg text-muted" />
                       <span className="font-semibold">Stripe Payment Gateway</span>
                     </div>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted">Connected</span>
-                        <span className={stripeStatus.connected ? 'text-[var(--status-completed)]' : ''}>
+                        <span>
                           {stripeStatus.connected ? (
-                            <CheckCircle className="icon-sm" style={{ color: 'var(--status-completed)' }} />
+                            <CheckCircle className="icon-sm text-status-success" />
                           ) : (
-                            <XCircle className="icon-sm" style={{ color: 'var(--status-cancelled)' }} />
+                            <XCircle className="icon-sm text-status-danger" />
                           )}
                         </span>
                       </div>
@@ -672,7 +672,7 @@ export function IntegrationsManager({
               </div>
             ) : (
               <div className="status-empty">
-                <CreditCard className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
+                <CreditCard className="icon-lg text-muted" />
                 <span>Stripe status unavailable.</span>
               </div>
             )}
@@ -686,7 +686,7 @@ export function IntegrationsManager({
                 <div className="portal-card">
                   <div className="stat-card">
                     <div className="flex items-center gap-2 mb-3">
-                      <Calendar className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
+                      <Calendar className="icon-lg text-muted" />
                       <span className="font-semibold">Calendar Sync</span>
                     </div>
                     <div className="space-y-1 text-sm">
@@ -694,9 +694,9 @@ export function IntegrationsManager({
                         <span className="text-muted">Connected</span>
                         <span>
                           {calendarStatus.connected ? (
-                            <CheckCircle className="icon-sm" style={{ color: 'var(--status-completed)' }} />
+                            <CheckCircle className="icon-sm text-status-success" />
                           ) : (
-                            <XCircle className="icon-sm" style={{ color: 'var(--status-cancelled)' }} />
+                            <XCircle className="icon-sm text-status-danger" />
                           )}
                         </span>
                       </div>
@@ -714,9 +714,9 @@ export function IntegrationsManager({
                           title={calendarStatus.syncEnabled ? 'Disable sync' : 'Enable sync'}
                         >
                           {calendarStatus.syncEnabled ? (
-                            <ToggleRight className="icon-md" style={{ color: 'var(--status-completed)' }} />
+                            <ToggleRight className="icon-md text-status-success" />
                           ) : (
-                            <ToggleLeft className="icon-md" style={{ color: 'var(--portal-text-muted)' }} />
+                            <ToggleLeft className="icon-md text-muted" />
                           )}
                         </button>
                       </div>
@@ -730,7 +730,7 @@ export function IntegrationsManager({
               </div>
             ) : (
               <div className="status-empty">
-                <Calendar className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />
+                <Calendar className="icon-lg text-muted" />
                 <span>Calendar status unavailable.</span>
               </div>
             )}

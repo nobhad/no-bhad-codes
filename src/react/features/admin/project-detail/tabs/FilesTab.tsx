@@ -53,15 +53,15 @@ function formatDate(date: string): string {
  */
 function getFileIcon(fileType: string): React.ReactNode {
   if (fileType.startsWith('image/')) {
-    return <Image className="icon-lg" style={{ color: 'var(--color-brand-primary)' }} />;
+    return <Image className="icon-lg text-brand" />;
   }
   if (fileType === 'application/pdf') {
-    return <FileText className="icon-lg" style={{ color: 'var(--status-cancelled)' }} />;
+    return <FileText className="icon-lg text-status-danger" />;
   }
   if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('archive')) {
-    return <FileArchive className="icon-lg" style={{ color: 'var(--status-warning)' }} />;
+    return <FileArchive className="icon-lg text-status-warning" />;
   }
-  return <File className="icon-lg" style={{ color: 'var(--portal-text-muted)' }} />;
+  return <File className="icon-lg text-muted" />;
 }
 
 /**
