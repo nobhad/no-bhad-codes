@@ -51,13 +51,13 @@
 
 /* Sidebar logo styles in shared/portal-layout.css */
 
-/* Sidebar Footer - no left padding, buttons handle their own alignment.
-   Bottom padding matches sidebar-buttons top padding for symmetry. */
+/* Sidebar Footer - pushed to bottom via margin-top: auto.
+   Bottom padding provides visual balance below Sign Out button. */
 .sidebar-footer {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: 0 0 var(--space-1);
+  padding: 0 0 var(--space-2);
   margin-top: auto;
   border-top: none;
 }
@@ -88,15 +88,14 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 /* Sidebar logo/branding styles in shared/portal-layout.css */
 
-/* Sidebar Buttons - consistent padding in both open and collapsed states.
-   Top padding accounts for button's own 8px internal padding so that
-   sidebar text baseline aligns with content area tab row baseline. */
+/* Sidebar Buttons - no top padding; button's own padding provides spacing.
+   flex: 1 pushes footer to bottom. */
 .sidebar-buttons {
   display: flex;
   flex-direction: column;
   gap: 0;
   overflow: visible;
-  padding: var(--space-1) 0 0;
+  padding: 0;
   flex: 1;
 }
 
@@ -114,7 +113,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: var(--space-2) 0;
+  padding: 0;
 }
 
 /* Focus indicators inherited from global :focus-visible rule in reset.css */
@@ -417,8 +416,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 @media (--laptop) {
   .portal .sidebar:not(.collapsed) .sidebar-content {
-    padding: 0.75rem 0.5rem;
-    padding-bottom: 0.5rem;
+    padding: 0 0.5rem;
     gap: 0.5rem;
     align-items: center;
     overflow: hidden;
@@ -498,9 +496,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
   .portal .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
-    padding: 0.5rem;
-    padding-top: 1rem;
-    gap: 1rem;
+    padding: 0 0.5rem;
+    gap: 0.5rem;
     align-items: center;
   }
 
