@@ -186,6 +186,32 @@
   background-color: var(--portal-text-secondary);
 }
 
+/* Data-attribute driven priority colors (CSS fallback for dynamic styles) */
+.priority-indicator[data-priority="urgent"],
+.priority-dot[data-priority="urgent"] {
+  background-color: var(--status-cancelled);
+}
+
+.priority-indicator[data-priority="high"],
+.priority-dot[data-priority="high"] {
+  background-color: var(--status-pending);
+}
+
+.priority-indicator[data-priority="medium"],
+.priority-dot[data-priority="medium"] {
+  background-color: var(--status-active);
+}
+
+.priority-indicator[data-priority="low"],
+.priority-dot[data-priority="low"] {
+  background-color: var(--portal-text-muted);
+}
+
+.priority-label[data-priority="urgent"] { color: var(--status-cancelled); }
+.priority-label[data-priority="high"] { color: var(--status-pending); }
+.priority-label[data-priority="medium"] { color: var(--status-active); }
+.priority-label[data-priority="low"] { color: var(--portal-text-muted); }
+
 /* Dropdown styling: uses createModalDropdown from shared/modal-dropdown.ts */
 
 .task-meta {

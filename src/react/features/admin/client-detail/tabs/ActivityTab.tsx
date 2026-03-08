@@ -176,7 +176,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                     <div key={activity.id} className="activity-event-row">
                       {/* Timeline dot */}
                       <div className="activity-dot activity-timeline-dot">
-                        <Icon className="icon-sm" style={{ color: iconColorVar }} />
+                        <Icon className="icon-sm" data-activity-type={activity.activityType} style={{ color: iconColorVar }} />
                       </div>
 
                       {/* Activity content */}

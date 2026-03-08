@@ -533,6 +533,27 @@
   background: var(--status-pending-bg);
 }
 
+/* Data-attribute driven priority colors for activity dots */
+.activity-dot[data-priority="urgent"] {
+  border-color: var(--status-cancelled);
+  background: var(--status-cancelled);
+}
+
+.activity-dot[data-priority="high"] {
+  border-color: var(--status-pending);
+  background: var(--status-pending);
+}
+
+.activity-dot[data-priority="medium"] {
+  border-color: var(--portal-text-light);
+  background: var(--portal-text-light);
+}
+
+.activity-dot[data-priority="low"] {
+  border-color: var(--portal-text-muted);
+  background: var(--portal-text-muted);
+}
+
 .activity-body {
   flex: 1;
   min-width: 0;

@@ -248,7 +248,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
                 <ul className="activity-feed">
                   {upcomingTasks.slice(0, 5).map((task) => (
                     <li key={task.id} className="activity-feed-item">
-                      <span className="activity-dot" style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                      <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
                       <div className="activity-body ovdash-flex-1">
                         <span className="activity-text">{task.title}</span>
                         <span className="activity-time">{task.projectName}</span>
@@ -350,7 +350,7 @@ const TasksKanban = React.memo(function TasksKanban({ tasks }: { tasks: TaskItem
             <div className="kanban-items">
               {columnTasks.map((task) => (
                 <div key={task.id} className="kanban-card">
-                  <span className="activity-dot" style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                  <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
                   <div>
                     <div className="activity-text">{task.title}</div>
                     <div className="activity-time">{task.projectName}</div>

@@ -252,6 +252,28 @@
 }
 
 /* ================================================
+   Status color indicator (data-attribute driven)
+   Provides CSS-class fallback for dynamic status colors.
+   ================================================ */
+.status-color-indicator[data-status-variant="completed"] { color: var(--status-completed); }
+.status-color-indicator[data-status-variant="pending"] { color: var(--status-pending); }
+.status-color-indicator[data-status-variant="cancelled"] { color: var(--status-cancelled); }
+.status-color-indicator[data-status-variant="active"] { color: var(--status-active); }
+.status-color-indicator[data-status-variant="muted"] { color: var(--portal-text-muted); }
+
+.status-progress-bar[data-status-variant="completed"] { background-color: var(--status-completed); }
+.status-progress-bar[data-status-variant="pending"] { background-color: var(--status-pending); }
+.status-progress-bar[data-status-variant="cancelled"] { background-color: var(--status-cancelled); }
+.status-progress-bar[data-status-variant="active"] { background-color: var(--status-active); }
+.status-progress-bar[data-status-variant="muted"] { background-color: var(--portal-text-muted); }
+
+.status-service-icon[data-status-variant="completed"] { color: var(--status-completed); }
+.status-service-icon[data-status-variant="pending"] { color: var(--status-pending); }
+.status-service-icon[data-status-variant="cancelled"] { color: var(--status-cancelled); }
+.status-service-icon[data-status-variant="active"] { color: var(--status-active); }
+.status-service-icon[data-status-variant="muted"] { color: var(--portal-text-muted); }
+
+/* ================================================
    Shared utility
    ================================================ */
 .status-text-capitalize {

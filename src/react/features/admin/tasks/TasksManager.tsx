@@ -271,6 +271,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                     <div className="kanban-card-type">
                       <div
                         className="priority-dot"
+                        data-priority={task.priority}
                         style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
                       />
                     </div>
@@ -428,6 +429,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                     <div className="cell-with-icon">
                       <div
                         className="priority-dot"
+                        data-priority={task.priority}
                         style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
                         title={getPriorityLabel(task.priority)}
                       />
@@ -454,6 +456,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                   <PortalTableCell className="priority-cell">
                     <span
                       className="priority-label"
+                      data-priority={task.priority}
                       style={{ color: PRIORITY_COLORS[task.priority] }}
                     >
                       {getPriorityLabel(task.priority)}

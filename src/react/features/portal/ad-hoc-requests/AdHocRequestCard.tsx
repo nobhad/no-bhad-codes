@@ -95,6 +95,7 @@ export function AdHocRequestCard({
               </span>
               <span
                 className="badge"
+                data-priority={request.priority}
                 style={{ color: AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.color }}
               >
                 {AD_HOC_REQUEST_PRIORITY_CONFIG[request.priority]?.label || request.priority}
