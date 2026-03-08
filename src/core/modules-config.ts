@@ -259,7 +259,7 @@ export function registerModules(debug: boolean = false): void {
               // mountPortalApp uses flushSync so React paints in the same
               // frame as clearing — no visual flash.
               const dashboardContainer =
-                document.querySelector('.dashboard-container.portal') as HTMLElement;
+                document.querySelector('.portal') as HTMLElement;
               if (dashboardContainer) {
                 dashboardContainer.innerHTML = '';
                 cleanup = mountPortalApp(dashboardContainer);

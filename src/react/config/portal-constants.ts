@@ -34,7 +34,7 @@ export const STORAGE_KEYS = {
 
 export const PORTAL_SELECTORS = {
   LAYOUT_CONTAINER: '.dashboard-layout',
-  PORTAL_CONTAINER: '.dashboard-container.portal'
+  PORTAL_CONTAINER: '.portal'
 } as const;
 
 // ============================================
@@ -61,9 +61,9 @@ export const UI_LIMITS = {
 // ============================================
 
 export const SIDEBAR = {
-  WIDTH_COLLAPSED: 'tw-w-16',
-  WIDTH_EXPANDED: 'tw-w-56',
-  TRANSITION: 'tw-transition-[width] tw-duration-200 tw-ease-out'
+  WIDTH_COLLAPSED: 'sidebar-collapsed-width',
+  WIDTH_EXPANDED: 'sidebar-expanded-width',
+  TRANSITION: 'sidebar-transition'
 } as const;
 
 // ============================================
