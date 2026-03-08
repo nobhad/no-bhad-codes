@@ -12,6 +12,7 @@ import { useListFetch } from '@react/factories/useDataFetch';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import DOMPurify from 'dompurify';
 
 // ============================================================================
 // CONSTANTS
@@ -173,7 +174,7 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
                   <div
                     id={`article-content-${article.id}`}
                     className="help-article-content"
-                    dangerouslySetInnerHTML={{ __html: article.content }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }}
                   />
                 )}
               </div>

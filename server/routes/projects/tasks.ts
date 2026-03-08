@@ -8,7 +8,7 @@ import {
   canAccessChecklistItem
 } from '../../middleware/access-control.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -23,17 +23,17 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const { status, assignedTo, milestoneId, includeSubtasks } = req.query;
@@ -68,13 +68,13 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const task = await projectService.createTask(projectId, req.body);
@@ -89,16 +89,16 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await projectService.getTask(taskId);
 
     if (!task) {
-      return errorResponse(res, 'Task not found', 404, 'TASK_NOT_FOUND');
+      return errorResponse(res, 'Task not found', 404, ErrorCodes.TASK_NOT_FOUND);
     }
 
     if (!(await canAccessTask(req, taskId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     sendSuccess(res, { task });
@@ -113,7 +113,7 @@ router.put(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await projectService.updateTask(taskId, req.body);
     sendSuccess(res, { task }, 'Task updated successfully');
@@ -128,7 +128,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await projectService.deleteTask(taskId);
     sendSuccess(res, undefined, 'Task deleted successfully');
@@ -143,7 +143,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const task = await projectService.completeTask(taskId);
     sendSuccess(res, { task }, 'Task completed successfully');
@@ -158,7 +158,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { position, milestoneId } = req.body;
 
@@ -179,12 +179,12 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { dependsOnTaskId, type } = req.body;
 
     if (!dependsOnTaskId) {
-      return errorResponse(res, 'dependsOnTaskId is required', 400, 'MISSING_DEPENDENCY');
+      return errorResponse(res, 'dependsOnTaskId is required', 400, ErrorCodes.MISSING_DEPENDENCY);
     }
 
     const dependency = await projectService.addDependency(taskId, dependsOnTaskId, type);
@@ -201,7 +201,7 @@ router.delete(
     const taskId = parseInt(req.params.taskId, 10);
     const dependsOnTaskId = parseInt(req.params.dependsOnTaskId, 10);
     if (isNaN(taskId) || taskId <= 0 || isNaN(dependsOnTaskId) || dependsOnTaskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await projectService.removeDependency(taskId, dependsOnTaskId);
@@ -216,11 +216,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const tasks = await projectService.getBlockedTasks(projectId);
@@ -239,11 +239,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId)) {
-      return errorResponse(res, 'Invalid task ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessTask(req, taskId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const comments = await projectService.getTaskComments(taskId);
@@ -260,15 +260,15 @@ router.post(
     const { content } = req.body;
 
     if (isNaN(taskId)) {
-      return errorResponse(res, 'Invalid task ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessTask(req, taskId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     if (!content) {
-      return errorResponse(res, 'Comment content is required', 400, 'MISSING_CONTENT');
+      return errorResponse(res, 'Comment content is required', 400, ErrorCodes.MISSING_CONTENT);
     }
 
     const comment = await projectService.addTaskComment(taskId, req.user!.email, content);
@@ -284,7 +284,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const commentId = parseInt(req.params.commentId, 10);
     if (isNaN(commentId) || commentId <= 0) {
-      return errorResponse(res, 'Invalid comment ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid comment ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await projectService.deleteTaskComment(commentId);
     sendSuccess(res, undefined, 'Comment deleted successfully');
@@ -303,12 +303,12 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
     if (isNaN(taskId) || taskId <= 0) {
-      return errorResponse(res, 'Invalid task ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { content } = req.body;
 
     if (!content) {
-      return errorResponse(res, 'Checklist item content is required', 400, 'MISSING_CONTENT');
+      return errorResponse(res, 'Checklist item content is required', 400, ErrorCodes.MISSING_CONTENT);
     }
 
     const item = await projectService.addChecklistItem(taskId, content);
@@ -323,11 +323,11 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
     if (isNaN(itemId)) {
-      return errorResponse(res, 'Invalid checklist item ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid checklist item ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessChecklistItem(req, itemId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const item = await projectService.toggleChecklistItem(itemId);
@@ -343,7 +343,7 @@ router.delete(
   asyncHandler(async (req: express.Request, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
     if (isNaN(itemId) || itemId <= 0) {
-      return errorResponse(res, 'Invalid checklist item ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid checklist item ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     await projectService.deleteChecklistItem(itemId);
     sendSuccess(res, undefined, 'Checklist item deleted successfully');

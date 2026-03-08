@@ -9,7 +9,7 @@ import { canAccessProject } from '../../middleware/access-control.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { errorResponse, ErrorCodes } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -56,7 +56,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
@@ -76,7 +76,7 @@ router.get(
     const p = project as Record<string, unknown>;
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     // Find the intake file for this project

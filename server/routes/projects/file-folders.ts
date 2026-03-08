@@ -7,7 +7,7 @@ import {
   canAccessFile
 } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -19,11 +19,11 @@ router.get(
     const projectId = parseInt(req.params.id, 10);
     const parentId = req.query.parent_id ? parseInt(req.query.parent_id as string) : undefined;
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const folders = await fileService.getFolders(projectId, parentId);
@@ -40,15 +40,15 @@ router.post(
     const { name, description, parent_folder_id, color, icon } = req.body;
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     if (!name || name.trim().length === 0) {
-      return errorResponse(res, 'Folder name is required', 400, 'MISSING_NAME');
+      return errorResponse(res, 'Folder name is required', 400, ErrorCodes.MISSING_NAME);
     }
 
     const folder = await fileService.createFolder(projectId, {
@@ -72,11 +72,11 @@ router.put(
     const folderId = parseInt(req.params.folderId, 10);
     const { name, description, color, icon, sort_order } = req.body;
     if (isNaN(folderId)) {
-      return errorResponse(res, 'Invalid folder ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid folder ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFolder(req, folderId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const folder = await fileService.updateFolder(folderId, {
@@ -98,7 +98,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const folderId = parseInt(req.params.folderId, 10);
     if (isNaN(folderId) || folderId <= 0) {
-      return errorResponse(res, 'Invalid folder ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid folder ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const moveFilesTo = req.query.move_files_to
       ? parseInt(req.query.move_files_to as string, 10)
@@ -116,11 +116,11 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { folder_id } = req.body;
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.moveFile(fileId, folder_id || null);
@@ -136,11 +136,11 @@ router.post(
     const folderId = parseInt(req.params.folderId, 10);
     const { parent_folder_id } = req.body;
     if (isNaN(folderId)) {
-      return errorResponse(res, 'Invalid folder ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid folder ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFolder(req, folderId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.moveFolder(folderId, parent_folder_id || null);

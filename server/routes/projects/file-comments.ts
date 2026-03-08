@@ -3,7 +3,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessFile, canAccessFileComment } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
-import { errorResponse, sendSuccess, sendCreated, messageResponse } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -14,11 +14,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const includeInternal = req.user!.type === 'admin';
@@ -36,15 +36,15 @@ router.post(
     const { content, is_internal, parent_comment_id, author_name } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     if (!content || content.trim().length === 0) {
-      return errorResponse(res, 'Comment content is required', 400, 'MISSING_CONTENT');
+      return errorResponse(res, 'Comment content is required', 400, ErrorCodes.MISSING_CONTENT);
     }
 
     const comment = await fileService.addComment(
@@ -68,11 +68,11 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const commentId = parseInt(req.params.commentId, 10);
     if (isNaN(commentId)) {
-      return errorResponse(res, 'Invalid comment ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid comment ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFileComment(req, commentId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.deleteComment(commentId);

@@ -6,7 +6,7 @@ import { backfillMilestones } from '../../services/milestone-generator.js';
 import { backfillMilestoneTasks } from '../../services/task-generator.js';
 import { logger } from '../../services/logger.js';
 import { getDatabase } from '../../database/init.js';
-import { sendSuccess } from '../../utils/api-response.js';
+import { sendSuccess, errorResponse, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -69,7 +69,7 @@ router.post(
     const { workflowIds } = req.body;
 
     if (!workflowIds || !Array.isArray(workflowIds) || workflowIds.length === 0) {
-      return res.status(400).json({ success: false, error: 'workflowIds array is required' });
+      return errorResponse(res, 'workflowIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const db = getDatabase();
@@ -100,11 +100,11 @@ router.post(
     const { workflowIds, status } = req.body;
 
     if (!workflowIds || !Array.isArray(workflowIds) || workflowIds.length === 0) {
-      return res.status(400).json({ success: false, error: 'workflowIds array is required' });
+      return errorResponse(res, 'workflowIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     if (!status || !['active', 'inactive'].includes(status)) {
-      return res.status(400).json({ success: false, error: 'status must be "active" or "inactive"' });
+      return errorResponse(res, 'status must be "active" or "inactive"', 400, ErrorCodes.INVALID_STATUS);
     }
 
     const db = getDatabase();

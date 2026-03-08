@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const tags = await projectService.getProjectTags(projectId);
     sendSuccess(res, { tags });
@@ -33,7 +33,7 @@ router.post(
     const projectId = parseInt(req.params.id, 10);
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(tagId) || tagId <= 0) {
-      return errorResponse(res, 'Invalid project or tag ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project or tag ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await projectService.addTagToProject(projectId, tagId);
@@ -50,7 +50,7 @@ router.delete(
     const projectId = parseInt(req.params.id, 10);
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(projectId) || projectId <= 0 || isNaN(tagId) || tagId <= 0) {
-      return errorResponse(res, 'Invalid project or tag ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project or tag ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await projectService.removeTagFromProject(projectId, tagId);

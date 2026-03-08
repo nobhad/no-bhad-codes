@@ -27,7 +27,8 @@ import {
   errorResponseWithPayload,
   sanitizeErrorMessage,
   sendSuccess,
-  sendCreated
+  sendCreated,
+  ErrorCodes
 } from '../utils/api-response.js';
 import { validateRequest } from '../middleware/validation.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
@@ -345,7 +346,7 @@ router.post(
   upload.single('file'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.file) {
-      return errorResponse(res, 'No file uploaded', 400, 'NO_FILE');
+      return errorResponse(res, 'No file uploaded', 400, ErrorCodes.NO_FILE);
     }
 
     const fileInfo = {
@@ -392,7 +393,7 @@ router.post(
   upload.array('files', 5),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
-      return errorResponse(res, 'No files uploaded', 400, 'NO_FILES');
+      return errorResponse(res, 'No files uploaded', 400, ErrorCodes.NO_FILES);
     }
 
     const db = getDatabase();
@@ -483,12 +484,12 @@ router.post(
   upload.single('avatar'),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.file) {
-      return errorResponse(res, 'No avatar file uploaded', 400, 'NO_AVATAR');
+      return errorResponse(res, 'No avatar file uploaded', 400, ErrorCodes.NO_AVATAR);
     }
 
     // Validate that it's an image
     if (!req.file.mimetype.startsWith('image/')) {
-      return errorResponse(res, 'Avatar must be an image file', 400, 'INVALID_AVATAR_TYPE');
+      return errorResponse(res, 'Avatar must be an image file', 400, ErrorCodes.INVALID_AVATAR_TYPE);
     }
 
     const avatarInfo = {
@@ -557,11 +558,11 @@ router.post(
     const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_PROJECT_ID);
     }
 
     if (!req.file) {
-      return errorResponse(res, 'No project file uploaded', 400, 'NO_PROJECT_FILE');
+      return errorResponse(res, 'No project file uploaded', 400, ErrorCodes.NO_PROJECT_FILE);
     }
 
     const projectFile = {
@@ -633,7 +634,7 @@ router.get(
     const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_PROJECT_ID);
     }
 
     try {
@@ -668,7 +669,7 @@ router.get(
         error: dbError instanceof Error ? dbError : undefined,
         category: 'UPLOAD'
       });
-      return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
+      return errorResponse(res, 'Failed to fetch files', 500, ErrorCodes.DB_ERROR);
     }
   })
 );
@@ -690,7 +691,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401, 'NOT_AUTHENTICATED');
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     // Filter query params
@@ -782,7 +783,7 @@ router.get(
         error: dbError instanceof Error ? dbError : undefined,
         category: 'UPLOAD'
       });
-      return errorResponse(res, 'Failed to fetch files', 500, 'DB_ERROR');
+      return errorResponse(res, 'Failed to fetch files', 500, ErrorCodes.DB_ERROR);
     }
   })
 );
@@ -810,7 +811,7 @@ router.get(
     const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     try {
@@ -824,7 +825,7 @@ router.get(
       );
 
       if (!file) {
-        return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+        return errorResponse(res, 'File not found', 404, ErrorCodes.FILE_NOT_FOUND);
       }
 
       // Check access: admin, uploader, or client with explicit share permission
@@ -837,7 +838,7 @@ router.get(
       const isSharedWithClient = file.client_id === userId && file.shared_with_client === 1;
 
       if (!isAdmin && !isUploader && !isSharedWithClient) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
       }
 
       // Validate path to prevent path traversal attacks
@@ -848,14 +849,14 @@ router.get(
           category: 'UPLOAD',
           metadata: { filePath: filePathStr }
         });
-        return errorResponse(res, 'Invalid file path', 403, 'PATH_TRAVERSAL_DETECTED');
+        return errorResponse(res, 'Invalid file path', 403, ErrorCodes.PATH_TRAVERSAL_DETECTED);
       }
 
       // Construct the full file path using centralized uploads directory
       const filePath = resolveFilePath(filePathStr);
 
       if (!existsSync(filePath)) {
-        return errorResponse(res, 'File not found on disk', 404, 'FILE_MISSING');
+        return errorResponse(res, 'File not found on disk', 404, ErrorCodes.FILE_MISSING);
       }
 
       // Set content disposition based on query param
@@ -874,7 +875,7 @@ router.get(
         error: dbError instanceof Error ? dbError : undefined,
         category: 'UPLOAD'
       });
-      return errorResponse(res, 'Failed to fetch file', 500, 'DB_ERROR');
+      return errorResponse(res, 'Failed to fetch file', 500, ErrorCodes.DB_ERROR);
     }
   })
 );
@@ -902,7 +903,7 @@ router.delete(
     const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     try {
@@ -916,7 +917,7 @@ router.delete(
       );
 
       if (!file) {
-        return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+        return errorResponse(res, 'File not found', 404, ErrorCodes.FILE_NOT_FOUND);
       }
 
       // Check access: admin or uploader can delete
@@ -932,7 +933,7 @@ router.delete(
           res,
           'Access denied - this file belongs to another client',
           403,
-          'ACCESS_DENIED'
+          ErrorCodes.ACCESS_DENIED
         );
       }
 
@@ -941,7 +942,7 @@ router.delete(
           res,
           'Access denied - only admin or the uploader can delete this file',
           403,
-          'ACCESS_DENIED'
+          ErrorCodes.ACCESS_DENIED
         );
       }
 
@@ -955,7 +956,7 @@ router.delete(
         error: dbError instanceof Error ? dbError : undefined,
         category: 'UPLOAD'
       });
-      return errorResponse(res, 'Failed to delete file', 500, 'DB_ERROR');
+      return errorResponse(res, 'Failed to delete file', 500, ErrorCodes.DB_ERROR);
     }
   })
 );
@@ -1016,11 +1017,11 @@ router.get(
     const status = req.query.status as string | undefined;
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_PROJECT_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_PROJECT_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const deliverables = await fileService.getProjectDeliverables(projectId, status);
@@ -1043,7 +1044,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Admin access required', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const deliverables = await fileService.getPendingReviewDeliverables();
@@ -1066,11 +1067,11 @@ router.get(
     const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const workflow = await fileService.getDeliverableWorkflow(fileId);
@@ -1098,11 +1099,11 @@ router.post(
     const { notes } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const submittedBy = req.user?.email || 'unknown';
@@ -1125,13 +1126,13 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Admin access required', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     const reviewerEmail = req.user?.email || 'admin';
@@ -1160,14 +1161,14 @@ router.post(
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Admin access required', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const fileId = parseInt(req.params.fileId, 10);
     const { feedback } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     // Note: 'feedback' required check now handled by validation middleware
@@ -1176,7 +1177,7 @@ router.post(
         res,
         'Feedback is required when requesting changes',
         400,
-        'VALIDATION_ERROR'
+        ErrorCodes.VALIDATION_ERROR
       );
     }
 
@@ -1201,14 +1202,14 @@ router.post(
   validateRequest({ comment: UploadValidationSchemas.deliverableAction.comment }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Admin access required', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const fileId = parseInt(req.params.fileId, 10);
     const { comment } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     const approverEmail = req.user?.email || 'admin';
@@ -1237,19 +1238,19 @@ router.post(
   }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     if (req.user?.type !== 'admin') {
-      return errorResponse(res, 'Admin access required', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Admin access required', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const fileId = parseInt(req.params.fileId, 10);
     const { reason } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     // Note: 'reason' required check now handled by validation middleware
     if (!reason) {
-      return errorResponse(res, 'Reason is required when rejecting', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Reason is required when rejecting', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const reviewerEmail = req.user?.email || 'admin';
@@ -1276,7 +1277,7 @@ router.post(
     const { notes } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     const submittedBy = req.user?.email || 'unknown';
@@ -1308,17 +1309,17 @@ router.post(
     const { comment } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     // Note: 'comment' required check now handled by validation middleware
     if (!comment) {
-      return errorResponse(res, 'Comment is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Comment is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const workflow = await fileService.getDeliverableWorkflow(fileId);
     if (!workflow) {
-      return errorResponse(res, 'Deliverable workflow not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable workflow not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const authorEmail = req.user?.email || 'unknown';
@@ -1357,7 +1358,7 @@ router.post(
     const fileId = parseInt(req.params.id, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     const db = getDatabase();
@@ -1365,7 +1366,7 @@ router.post(
     // Verify file exists
     const file = await db.get('SELECT id, project_id FROM files WHERE id = ? AND deleted_at IS NULL', [fileId]);
     if (!file) {
-      return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+      return errorResponse(res, 'File not found', 404, ErrorCodes.FILE_NOT_FOUND);
     }
 
     // Share the file with the client
@@ -1400,7 +1401,7 @@ router.post(
     const fileId = parseInt(req.params.id, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_FILE_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
     const db = getDatabase();
@@ -1408,7 +1409,7 @@ router.post(
     // Verify file exists
     const file = await db.get('SELECT id FROM files WHERE id = ? AND deleted_at IS NULL', [fileId]);
     if (!file) {
-      return errorResponse(res, 'File not found', 404, 'FILE_NOT_FOUND');
+      return errorResponse(res, 'File not found', 404, ErrorCodes.FILE_NOT_FOUND);
     }
 
     // Revoke client access
@@ -1431,25 +1432,25 @@ router.use(
     if (error instanceof multer.MulterError) {
       const multerError = error as multer.MulterError;
       if (multerError.code === 'LIMIT_FILE_SIZE') {
-        return errorResponseWithPayload(res, 'File too large', 400, 'FILE_TOO_LARGE', {
+        return errorResponseWithPayload(res, 'File too large', 400, ErrorCodes.FILE_TOO_LARGE, {
           message: 'File size cannot exceed 10MB'
         });
       }
 
       if (multerError.code === 'LIMIT_FILE_COUNT') {
-        return errorResponseWithPayload(res, 'Too many files', 400, 'TOO_MANY_FILES', {
+        return errorResponseWithPayload(res, 'Too many files', 400, ErrorCodes.TOO_MANY_FILES, {
           message: 'Cannot upload more than 5 files at once'
         });
       }
 
-      return errorResponseWithPayload(res, 'Upload error', 400, 'UPLOAD_ERROR', {
+      return errorResponseWithPayload(res, 'Upload error', 400, ErrorCodes.UPLOAD_ERROR, {
         message: multerError.message
       });
     }
 
     const rawMessage = error instanceof Error ? error.message : '';
     if (rawMessage.includes('File type not allowed')) {
-      return errorResponseWithPayload(res, 'File type not allowed', 400, 'INVALID_FILE_TYPE', {
+      return errorResponseWithPayload(res, 'File type not allowed', 400, ErrorCodes.INVALID_FILE_TYPE, {
         message: sanitizeErrorMessage(error, 'File type not allowed')
       });
     }

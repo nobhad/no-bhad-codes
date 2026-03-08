@@ -45,7 +45,7 @@ html[data-theme="light"] body[data-page="admin"] {
 }
 
 html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-pitch, #ffffff);
+  background-color: var(--portal-bg-pitch, var(--color-off-white));
 }
 
 /* ============================================

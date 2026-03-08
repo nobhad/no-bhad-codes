@@ -49,7 +49,7 @@ import {
   checkIntegrationHealth
 } from '../services/integrations/index.js';
 import { getDatabase } from '../database/init.js';
-import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const INTEGRATION_STATUS_COLUMNS = `
@@ -241,7 +241,7 @@ router.post(
     const { name, url, events } = req.body;
 
     if (!name || !url || !events?.length) {
-      errorResponse(res, 'Name, URL, and events are required', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Name, URL, and events are required', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -249,24 +249,24 @@ router.post(
     const URL_MAX_LENGTH = 2000;
 
     if (name.length > NAME_MAX_LENGTH) {
-      errorResponse(res, `Name must be ${NAME_MAX_LENGTH} characters or fewer`, 400, 'VALIDATION_ERROR');
+      errorResponse(res, `Name must be ${NAME_MAX_LENGTH} characters or fewer`, 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
     if (url.length > URL_MAX_LENGTH) {
-      errorResponse(res, `URL must be ${URL_MAX_LENGTH} characters or fewer`, 400, 'VALIDATION_ERROR');
+      errorResponse(res, `URL must be ${URL_MAX_LENGTH} characters or fewer`, 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
     try {
       new URL(url);
     } catch {
-      errorResponse(res, 'Invalid webhook URL', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Invalid webhook URL', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
     if (!events.every((e: unknown) => typeof e === 'string')) {
-      errorResponse(res, 'All events must be strings', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'All events must be strings', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -324,7 +324,7 @@ router.post(
     const { eventType, data, entityId } = req.body;
 
     if (!eventType || !data) {
-      errorResponse(res, 'Event type and data are required', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Event type and data are required', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -426,7 +426,7 @@ router.post(
     }
 
     if (!['slack', 'discord'].includes(platform)) {
-      errorResponse(res, 'Platform must be slack or discord', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Platform must be slack or discord', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -512,7 +512,7 @@ router.post(
     const config = configs.find((c) => c.id === parseInt(id, 10));
 
     if (!config) {
-      errorResponse(res, 'Notification configuration not found', 404, 'RESOURCE_NOT_FOUND');
+      errorResponse(res, 'Notification configuration not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       return;
     }
 
@@ -562,7 +562,7 @@ router.post(
     const { platform, eventType, data } = req.body;
 
     if (!platform || !eventType) {
-      errorResponse(res, 'Platform and event type are required', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Platform and event type are required', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -656,7 +656,7 @@ router.post(
         res,
         'Stripe is not configured. Set STRIPE_SECRET_KEY environment variable.',
         400,
-        'STRIPE_NOT_CONFIGURED'
+        ErrorCodes.STRIPE_NOT_CONFIGURED
       );
       return;
     }
@@ -664,7 +664,7 @@ router.post(
     const { invoiceId, successUrl, cancelUrl } = req.body;
 
     if (!invoiceId) {
-      errorResponse(res, 'Invoice ID is required', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Invoice ID is required', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -672,7 +672,7 @@ router.post(
     const invoice = await db.get(`SELECT ${INVOICE_COLUMNS} FROM invoices WHERE id = ?`, [invoiceId]);
 
     if (!invoice) {
-      errorResponse(res, 'Invoice not found', 404, 'RESOURCE_NOT_FOUND');
+      errorResponse(res, 'Invoice not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       return;
     }
 
@@ -720,7 +720,7 @@ router.get(
     const link = await getPaymentLink(parseInt(invoiceId, 10));
 
     if (!link) {
-      errorResponse(res, 'No active payment link found', 404, 'RESOURCE_NOT_FOUND');
+      errorResponse(res, 'No active payment link found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       return;
     }
 
@@ -788,7 +788,7 @@ router.post(
     const signature = req.headers['stripe-signature'] as string;
 
     if (!signature) {
-      errorResponse(res, 'Missing Stripe signature', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Missing Stripe signature', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -797,7 +797,7 @@ router.post(
       req.body instanceof Buffer ? req.body.toString('utf8') : JSON.stringify(req.body);
 
     if (!verifyWebhookSignature(rawBody, signature)) {
-      errorResponse(res, 'Invalid Stripe webhook signature', 401, 'UNAUTHORIZED');
+      errorResponse(res, 'Invalid Stripe webhook signature', 401, ErrorCodes.UNAUTHORIZED);
       return;
     }
 
@@ -881,7 +881,7 @@ router.get(
         res,
         'Google Calendar is not configured',
         400,
-        'GOOGLE_CALENDAR_NOT_CONFIGURED'
+        ErrorCodes.GOOGLE_CALENDAR_NOT_CONFIGURED
       );
       return;
     }
@@ -928,12 +928,12 @@ router.post(
     const userId = req.user?.id;
 
     if (!userId) {
-      errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
+      errorResponse(res, 'Authentication required', 401, ErrorCodes.AUTH_REQUIRED);
       return;
     }
 
     if (!code) {
-      errorResponse(res, 'Authorization code is required', 400, 'VALIDATION_ERROR');
+      errorResponse(res, 'Authorization code is required', 400, ErrorCodes.VALIDATION_ERROR);
       return;
     }
 
@@ -993,14 +993,14 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
-      errorResponse(res, 'Authentication required', 401, 'AUTH_REQUIRED');
+      errorResponse(res, 'Authentication required', 401, ErrorCodes.AUTH_REQUIRED);
       return;
     }
     const { syncMilestones, syncTasks, syncInvoiceDueDates, isActive } = req.body;
 
     const existing = await getCalendarSyncConfig(userId);
     if (!existing) {
-      errorResponse(res, 'Calendar not connected', 404, 'RESOURCE_NOT_FOUND');
+      errorResponse(res, 'Calendar not connected', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       return;
     }
 

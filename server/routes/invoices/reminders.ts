@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
 import { BUSINESS_INFO } from '../../config/business.js';
@@ -34,7 +34,7 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -45,7 +45,7 @@ router.get(
         count: reminders.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve reminders', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve reminders', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve invoice reminders')
       });
     }
@@ -68,7 +68,7 @@ router.post(
     const reminderId = parseInt(req.params.id, 10);
 
     if (isNaN(reminderId)) {
-      return errorResponse(res, 'Invalid reminder ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid reminder ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -76,7 +76,7 @@ router.post(
 
       sendSuccess(res, undefined, 'Reminder skipped');
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to skip reminder', 500, 'SKIP_FAILED', {
+      errorResponseWithPayload(res, 'Failed to skip reminder', 500, ErrorCodes.SKIP_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to skip invoice reminder')
       });
     }
@@ -113,14 +113,14 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
 
       if (invoice.status === 'paid') {
-        return errorResponse(res, 'Cannot send reminder for a paid invoice', 400, 'INVOICE_PAID');
+        return errorResponse(res, 'Cannot send reminder for a paid invoice', 400, ErrorCodes.INVOICE_PAID);
       }
 
       if (invoice.status === 'cancelled') {
@@ -128,7 +128,7 @@ router.post(
           res,
           'Cannot send reminder for a cancelled invoice',
           400,
-          'INVOICE_CANCELLED'
+          ErrorCodes.INVOICE_CANCELLED
         );
       }
 
@@ -139,7 +139,7 @@ router.post(
       ])) as { email?: string; contact_name?: string } | undefined;
 
       if (!clientRow || !clientRow.email) {
-        return errorResponse(res, 'Client email not found', 400, 'NO_CLIENT_EMAIL');
+        return errorResponse(res, 'Client email not found', 400, ErrorCodes.NO_CLIENT_EMAIL);
       }
 
       const clientEmail = clientRow.email;
@@ -235,9 +235,9 @@ ${BUSINESS_INFO.name}
       const rawMessage = error instanceof Error ? error.message : '';
 
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to send reminder', 500, 'SEND_REMINDER_FAILED', {
+      errorResponseWithPayload(res, 'Failed to send reminder', 500, ErrorCodes.SEND_REMINDER_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to send payment reminder')
       });
     }

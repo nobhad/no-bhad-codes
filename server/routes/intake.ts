@@ -22,7 +22,7 @@ import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -508,7 +508,7 @@ router.post(
         error: error instanceof Error ? error : undefined,
         category: 'INTAKE'
       });
-      errorResponseWithPayload(res, 'Failed to process intake form', 500, 'INTERNAL_ERROR', {
+      errorResponseWithPayload(res, 'Failed to process intake form', 500, ErrorCodes.INTERNAL_ERROR, {
         details: sanitizeErrorMessage(error, 'Failed to process intake submission')
       });
     }
@@ -539,7 +539,7 @@ router.get(
       );
 
       if (!project) {
-        return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Get latest update
@@ -579,7 +579,7 @@ router.get(
         error: error instanceof Error ? error : undefined,
         category: 'INTAKE'
       });
-      errorResponse(res, 'Failed to get project status', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to get project status', 500, ErrorCodes.INTERNAL_ERROR);
     }
   }
 );

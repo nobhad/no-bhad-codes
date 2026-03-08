@@ -24,6 +24,7 @@ import { generateInvoicePdf, InvoicePdfData } from './pdf.js';
 import { getPdfCacheKey, getCachedPdf, cachePdf } from '../../utils/pdf-utils.js';
 import { getInvoiceService, toSnakeCaseInvoice } from './helpers.js';
 import {
+  ErrorCodes,
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
@@ -150,7 +151,7 @@ router.get(
           (minAmount !== undefined && isNaN(minAmount)) ||
           (maxAmount !== undefined && isNaN(maxAmount))
         ) {
-          return errorResponse(res, 'Invalid filter parameters', 400, 'VALIDATION_ERROR');
+          return errorResponse(res, 'Invalid filter parameters', 400, ErrorCodes.VALIDATION_ERROR);
         }
 
         // Truncate search to prevent DoS
@@ -194,7 +195,7 @@ router.get(
       const invoices = await getInvoiceService().getAllInvoices(limit, offset);
       sendSuccess(res, { invoices: invoices.map(toSnakeCaseInvoice) });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve invoices', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve invoices')
       });
     }
@@ -246,7 +247,7 @@ if (process.env.NODE_ENV === 'development') {
           res,
           'Failed to create test invoice',
           500,
-          'TEST_CREATION_FAILED',
+          ErrorCodes.TEST_CREATION_FAILED,
           { message: sanitizeErrorMessage(error, 'Failed to create test invoice') }
         );
       }
@@ -273,7 +274,7 @@ if (process.env.NODE_ENV === 'development') {
       const invoiceId = parseInt(req.params.id, 10);
 
       if (isNaN(invoiceId)) {
-        return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+        return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
       }
 
       try {
@@ -282,9 +283,9 @@ if (process.env.NODE_ENV === 'development') {
       } catch (error: unknown) {
         const rawMessage = error instanceof Error ? error.message : '';
         if (rawMessage.includes('not found')) {
-          return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+          return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
         }
-        errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED', {
+        errorResponseWithPayload(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED, {
           message: sanitizeErrorMessage(error, 'Failed to retrieve test invoice')
         });
       }
@@ -365,12 +366,12 @@ router.post(
       [invoiceData.projectId]
     );
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // Authorization check: verify user can access the project
     if (!(await canAccessProject(req, invoiceData.projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     // For non-admins, verify clientId matches the project's actual client
@@ -381,7 +382,7 @@ router.post(
           res,
           'Client ID must match the project owner',
           400,
-          'VALIDATION_ERROR'
+          ErrorCodes.VALIDATION_ERROR
         );
       }
     }
@@ -396,7 +397,7 @@ router.post(
     );
 
     if (invalidLineItems.length > 0) {
-      return errorResponseWithPayload(res, 'Invalid line items', 400, 'INVALID_LINE_ITEMS', {
+      return errorResponseWithPayload(res, 'Invalid line items', 400, ErrorCodes.INVALID_LINE_ITEMS, {
         message: 'Each line item must have description, quantity, rate, and amount'
       });
     }
@@ -416,7 +417,7 @@ router.post(
 
       sendCreated(res, { invoice }, 'Invoice created successfully');
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
+      errorResponseWithPayload(res, 'Failed to create invoice', 500, ErrorCodes.CREATION_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to create invoice')
       });
     }
@@ -452,7 +453,7 @@ router.post(
     );
 
     if (!client) {
-      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
+      return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
     }
 
     // Get project info
@@ -508,7 +509,7 @@ router.post(
       logger.error('[Invoices] Preview PDF generation error:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
+      errorResponse(res, 'Failed to generate preview', 500, ErrorCodes.PDF_GENERATION_FAILED);
     }
   })
 );
@@ -620,7 +621,7 @@ router.get(
         total: result.total
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to search invoices', 500, 'SEARCH_FAILED', {
+      errorResponseWithPayload(res, 'Failed to search invoices', 500, ErrorCodes.SEARCH_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to search invoices')
       });
     }
@@ -643,7 +644,7 @@ router.get(
     const clientId = parseInt(req.params.clientId, 10);
 
     if (isNaN(clientId)) {
-      return errorResponse(res, 'Invalid client ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -654,7 +655,7 @@ router.get(
         count: invoices.length
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve client invoices', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve client invoices', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve client invoices')
       });
     }
@@ -677,7 +678,7 @@ router.get(
     const projectId = parseInt(req.params.projectId, 10);
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -692,7 +693,7 @@ router.get(
         res,
         'Failed to retrieve project invoices',
         500,
-        'RETRIEVAL_FAILED',
+        ErrorCodes.RETRIEVAL_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to retrieve project invoices')
         }
@@ -728,14 +729,14 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
 
       if (!(await canAccessInvoice(req, invoiceId))) {
-        return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
       }
 
       const cacheKey = getPdfCacheKey('invoice', invoiceId, invoice.updatedAt || invoice.createdAt);
@@ -813,9 +814,9 @@ router.get(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to generate invoice PDF', 500, 'PDF_FAILED', {
+      errorResponseWithPayload(res, 'Failed to generate invoice PDF', 500, ErrorCodes.PDF_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to generate invoice PDF')
       });
     }
@@ -841,7 +842,7 @@ router.put(
     const { status, paymentData } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -850,9 +851,9 @@ router.put(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to update invoice status', 500, 'UPDATE_FAILED', {
+      errorResponseWithPayload(res, 'Failed to update invoice status', 500, ErrorCodes.UPDATE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to update invoice status')
       });
     }
@@ -875,7 +876,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -987,9 +988,9 @@ router.post(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to send invoice', 500, 'SEND_FAILED', {
+      errorResponseWithPayload(res, 'Failed to send invoice', 500, ErrorCodes.SEND_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to send invoice')
       });
     }
@@ -1014,14 +1015,14 @@ router.post(
     const { amountPaid, paymentMethod, paymentReference } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       // Verify invoice exists and user has access
       await getInvoiceService().getInvoiceById(invoiceId);
       if (!(await canAccessInvoice(req, invoiceId))) {
-        return errorResponse(res, 'Invoice not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
       const invoice = await getInvoiceService().markInvoiceAsPaid(invoiceId, {
         amountPaid: parseFloat(amountPaid),
@@ -1078,9 +1079,9 @@ router.post(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to process payment', 500, 'PAYMENT_FAILED', {
+      errorResponseWithPayload(res, 'Failed to process payment', 500, ErrorCodes.PAYMENT_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to process invoice payment')
       });
     }
@@ -1105,7 +1106,7 @@ router.get(
       const stats = await getInvoiceService().getInvoiceStats(clientId);
       sendSuccess(res, { stats });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, 'STATS_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve invoice statistics', 500, ErrorCodes.STATS_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve invoice statistics')
       });
     }

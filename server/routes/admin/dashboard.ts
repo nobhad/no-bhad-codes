@@ -7,7 +7,7 @@ import { errorTracker } from '../../services/error-tracking.js';
 import { auditLogger } from '../../services/audit-logger.js';
 import { getDatabase } from '../../database/init.js';
 import { projectService } from '../../services/project-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -99,7 +99,7 @@ router.get(
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
       });
 
-      errorResponseWithPayload(res, 'Failed to retrieve system status', 500, 'INTERNAL_ERROR', {
+      errorResponseWithPayload(res, 'Failed to retrieve system status', 500, ErrorCodes.INTERNAL_ERROR, {
         status: 'error',
         timestamp
       });
@@ -192,7 +192,7 @@ router.get(
         tags: { component: 'admin-audit' },
         user: { id: req.user?.id?.toString() || '', email: req.user?.email || '' }
       });
-      errorResponse(res, 'Failed to retrieve audit log', 500, 'AUDIT_LOG_ERROR');
+      errorResponse(res, 'Failed to retrieve audit log', 500, ErrorCodes.AUDIT_LOG_ERROR);
     }
   })
 );
@@ -244,7 +244,7 @@ router.get(
       logger.error('Error fetching sidebar counts:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to fetch sidebar counts', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to fetch sidebar counts', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -318,7 +318,7 @@ router.get(
       logger.error('Error fetching global tasks:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to fetch tasks', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to fetch tasks', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );
@@ -465,7 +465,7 @@ router.get(
       logger.error('Error fetching dashboard data:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to fetch dashboard data', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to fetch dashboard data', 500, ErrorCodes.INTERNAL_ERROR);
     }
   })
 );

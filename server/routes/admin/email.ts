@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { emailService } from '../../services/email-service.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -29,7 +29,7 @@ router.post(
         res,
         'Admin email not configured. Set ADMIN_EMAIL in environment.',
         400,
-        'ADMIN_EMAIL_NOT_CONFIGURED'
+        ErrorCodes.ADMIN_EMAIL_NOT_CONFIGURED
       );
     }
 
@@ -45,7 +45,7 @@ router.post(
         res,
         result.message || 'Failed to send test email',
         500,
-        'TEST_EMAIL_FAILED'
+        ErrorCodes.TEST_EMAIL_FAILED
       );
     }
 

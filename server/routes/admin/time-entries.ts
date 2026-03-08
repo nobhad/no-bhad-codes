@@ -16,7 +16,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
 // Matches the actual time_entries schema after migration 070
@@ -127,7 +127,7 @@ router.post(
     // Verify project exists
     const project = await db.get('SELECT id, project_name FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     // Look up user_id from the admin's email
@@ -163,7 +163,7 @@ router.post(
     const entryId = parseInt(req.params.entryId, 10);
 
     if (isNaN(entryId)) {
-      return errorResponse(res, 'Invalid entry ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid entry ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -171,7 +171,7 @@ router.post(
     // Get the entry — use created_at as timer start reference
     const entry = await db.get('SELECT created_at FROM time_entries WHERE id = ? AND hours = 0', [entryId]);
     if (!entry) {
-      return errorResponse(res, 'Active timer not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Active timer not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Calculate hours from created_at to now
@@ -202,11 +202,11 @@ router.post(
     const { projectId, taskId, description, hours, date, billable, hourlyRate } = req.body;
 
     if (!projectId) {
-      return errorResponse(res, 'Project ID is required', 400, 'MISSING_PROJECT');
+      return errorResponse(res, 'Project ID is required', 400, ErrorCodes.MISSING_PROJECT);
     }
 
     if (!hours || hours <= 0) {
-      return errorResponse(res, 'Hours must be greater than 0', 400, 'INVALID_HOURS');
+      return errorResponse(res, 'Hours must be greater than 0', 400, ErrorCodes.INVALID_HOURS);
     }
 
     const db = getDatabase();
@@ -246,14 +246,14 @@ router.delete(
     const entryId = parseInt(req.params.entryId, 10);
 
     if (isNaN(entryId)) {
-      return errorResponse(res, 'Invalid entry ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid entry ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
 
     const existing = await db.get('SELECT id FROM time_entries WHERE id = ? AND deleted_at IS NULL', [entryId]);
     if (!existing) {
-      return errorResponse(res, 'Time entry not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Time entry not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const adminEmail = req.user?.email || 'admin';

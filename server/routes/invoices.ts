@@ -17,6 +17,7 @@ import {
 } from '../services/invoice-service.js';
 import { softDeleteService } from '../services/soft-delete-service.js';
 import {
+  ErrorCodes,
   errorResponse,
   errorResponseWithPayload,
   sanitizeErrorMessage,
@@ -107,13 +108,13 @@ router.post(
     const milestoneId = parseInt(req.params.milestoneId, 10);
 
     if (isNaN(milestoneId)) {
-      return errorResponse(res, 'Invalid milestone ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid milestone ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const invoiceData: InvoiceCreateData = req.body;
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['projectId', 'clientId', 'lineItems']
       });
     }
@@ -127,7 +128,7 @@ router.post(
         res,
         'Failed to create milestone invoice',
         500,
-        'CREATION_FAILED',
+        ErrorCodes.CREATION_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to create milestone invoice')
         }
@@ -151,7 +152,7 @@ router.get(
     const milestoneId = parseInt(req.params.milestoneId, 10);
 
     if (isNaN(milestoneId)) {
-      return errorResponse(res, 'Invalid milestone ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid milestone ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -166,7 +167,7 @@ router.get(
         res,
         'Failed to retrieve milestone invoices',
         500,
-        'RETRIEVAL_FAILED',
+        ErrorCodes.RETRIEVAL_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to retrieve milestone invoices')
         }
@@ -193,11 +194,11 @@ router.put(
     const { milestoneId } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!milestoneId) {
-      return errorResponseWithPayload(res, 'Missing milestone ID', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing milestone ID', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['milestoneId']
       });
     }
@@ -211,7 +212,7 @@ router.put(
         res,
         'Failed to link invoice to milestone',
         500,
-        'LINK_FAILED',
+        ErrorCodes.LINK_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to link invoice to milestone')
         }
@@ -242,14 +243,14 @@ router.put(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     // Handle status-only updates (backwards compatibility)
     if (req.body.status && Object.keys(req.body).length === 1) {
       const validStatuses = ['draft', 'sent', 'viewed', 'partial', 'paid', 'overdue', 'cancelled'];
       if (!validStatuses.includes(req.body.status)) {
-        return errorResponseWithPayload(res, 'Invalid status', 400, 'INVALID_STATUS', {
+        return errorResponseWithPayload(res, 'Invalid status', 400, ErrorCodes.INVALID_STATUS, {
           validStatuses
         });
       }
@@ -260,9 +261,9 @@ router.put(
       } catch (error: unknown) {
         const rawMessage = error instanceof Error ? error.message : '';
         if (rawMessage.includes('not found')) {
-          return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+          return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
         }
-        return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', {
+        return errorResponseWithPayload(res, 'Failed to update invoice', 500, ErrorCodes.UPDATE_FAILED, {
           message: sanitizeErrorMessage(error, 'Failed to update invoice')
         });
       }
@@ -275,12 +276,12 @@ router.put(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('Only draft invoices can be edited')) {
-        return errorResponse(res, 'Only draft invoices can be edited', 400, 'INVALID_STATUS');
+        return errorResponse(res, 'Only draft invoices can be edited', 400, ErrorCodes.INVALID_STATUS);
       }
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', {
+      return errorResponseWithPayload(res, 'Failed to update invoice', 500, ErrorCodes.UPDATE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to update invoice')
       });
     }
@@ -316,7 +317,7 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -325,9 +326,9 @@ router.get(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      return errorResponse(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED');
+      return errorResponse(res, 'Failed to retrieve invoice', 500, ErrorCodes.RETRIEVAL_FAILED);
     }
   })
 );
@@ -371,7 +372,7 @@ router.delete(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -381,14 +382,14 @@ router.delete(
       if (!result.success) {
         // Check if it's a "cannot delete paid" error
         if (result.message.includes('paid')) {
-          return errorResponse(res, result.message, 400, 'CANNOT_DELETE_PAID');
+          return errorResponse(res, result.message, 400, ErrorCodes.CANNOT_DELETE_PAID);
         }
-        return errorResponse(res, result.message, 404, 'NOT_FOUND');
+        return errorResponse(res, result.message, 404, ErrorCodes.NOT_FOUND);
       }
 
       sendSuccess(res, { action: 'soft_deleted' }, result.message);
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to delete invoice', 500, 'DELETE_FAILED', {
+      errorResponseWithPayload(res, 'Failed to delete invoice', 500, ErrorCodes.DELETE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to delete invoice')
       });
     }
@@ -429,7 +430,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -443,9 +444,9 @@ router.post(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, 'DUPLICATE_FAILED', {
+      errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, ErrorCodes.DUPLICATE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to duplicate invoice')
       });
     }
@@ -500,15 +501,15 @@ router.post(
     const { amount, paymentMethod, paymentReference } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return errorResponse(res, 'Invalid payment amount', 400, 'INVALID_AMOUNT');
+      return errorResponse(res, 'Invalid payment amount', 400, ErrorCodes.INVALID_AMOUNT);
     }
 
     if (!paymentMethod) {
-      return errorResponse(res, 'Payment method is required', 400, 'MISSING_PAYMENT_METHOD');
+      return errorResponse(res, 'Payment method is required', 400, ErrorCodes.MISSING_PAYMENT_METHOD);
     }
 
     try {
@@ -528,13 +529,13 @@ router.post(
       const rawMessage = error instanceof Error ? error.message : '';
 
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
 
       if (rawMessage.includes('already fully paid') || rawMessage.includes('cancelled')) {
-        return errorResponse(res, sanitizeErrorMessage(error, 'Payment not allowed'), 400, 'PAYMENT_NOT_ALLOWED');
+        return errorResponse(res, sanitizeErrorMessage(error, 'Payment not allowed'), 400, ErrorCodes.PAYMENT_NOT_ALLOWED);
       }
-      errorResponseWithPayload(res, 'Failed to record payment', 500, 'PAYMENT_FAILED', {
+      errorResponseWithPayload(res, 'Failed to record payment', 500, ErrorCodes.PAYMENT_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to record payment')
       });
     }
@@ -577,7 +578,7 @@ router.post(
         res,
         'Failed to check overdue invoices',
         500,
-        'CHECK_OVERDUE_FAILED',
+        ErrorCodes.CHECK_OVERDUE_FAILED,
         {
           message: sanitizeErrorMessage(error, 'Failed to check overdue invoices')
         }
@@ -641,7 +642,7 @@ router.get(
       const terms = await getInvoiceService().getPaymentTermsPresets();
       sendSuccess(res, { terms: terms.map(toSnakeCasePaymentTerms) });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve payment terms')
       });
     }
@@ -673,7 +674,7 @@ router.post(
     } = req.body;
 
     if (!name || daysUntilDue === undefined) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['name', 'daysUntilDue']
       });
     }
@@ -692,7 +693,7 @@ router.post(
 
       sendCreated(res, { terms: toSnakeCasePaymentTerms(terms) }, 'Payment terms preset created');
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to create payment terms', 500, 'CREATION_FAILED', {
+      errorResponseWithPayload(res, 'Failed to create payment terms', 500, ErrorCodes.CREATION_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to create payment terms')
       });
     }
@@ -716,11 +717,11 @@ router.post(
     const { termsId } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!termsId) {
-      return errorResponseWithPayload(res, 'Missing termsId', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing termsId', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['termsId']
       });
     }
@@ -731,9 +732,9 @@ router.post(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice or payment terms not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice or payment terms not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to apply payment terms', 500, 'UPDATE_FAILED', {
+      errorResponseWithPayload(res, 'Failed to apply payment terms', 500, ErrorCodes.UPDATE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to apply payment terms')
       });
     }
@@ -761,7 +762,7 @@ router.put(
     const { taxRate, discountType, discountValue } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -776,9 +777,9 @@ router.put(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('draft')) {
-        return errorResponse(res, 'Only draft invoices can be modified', 400, 'INVALID_STATUS');
+        return errorResponse(res, 'Only draft invoices can be modified', 400, ErrorCodes.INVALID_STATUS);
       }
-      errorResponseWithPayload(res, 'Failed to update tax/discount', 500, 'UPDATE_FAILED', {
+      errorResponseWithPayload(res, 'Failed to update tax/discount', 500, ErrorCodes.UPDATE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to update tax/discount')
       });
     }
@@ -804,7 +805,7 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -820,9 +821,9 @@ router.get(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to calculate late fee', 500, 'CALCULATION_FAILED', {
+      errorResponseWithPayload(res, 'Failed to calculate late fee', 500, ErrorCodes.CALCULATION_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to calculate late fee')
       });
     }
@@ -845,7 +846,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -854,12 +855,12 @@ router.post(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('already been applied')) {
-        return errorResponse(res, 'Late fee already applied', 400, 'ALREADY_APPLIED');
+        return errorResponse(res, 'Late fee already applied', 400, ErrorCodes.ALREADY_APPLIED);
       }
       if (rawMessage.includes('No late fee applicable')) {
-        return errorResponse(res, 'No late fee applicable', 400, 'NOT_APPLICABLE');
+        return errorResponse(res, 'No late fee applicable', 400, ErrorCodes.NOT_APPLICABLE);
       }
-      errorResponseWithPayload(res, 'Failed to apply late fee', 500, 'APPLY_FAILED', {
+      errorResponseWithPayload(res, 'Failed to apply late fee', 500, ErrorCodes.APPLY_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to apply late fee')
       });
     }
@@ -883,7 +884,7 @@ router.post(
       const count = await getInvoiceService().processLateFees();
       sendSuccess(res, { count }, `Late fees applied to ${count} invoices`);
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to process late fees', 500, 'PROCESS_FAILED', {
+      errorResponseWithPayload(res, 'Failed to process late fees', 500, ErrorCodes.PROCESS_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to process late fees')
       });
     }
@@ -909,14 +910,14 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
       const payments = await getInvoiceService().getPaymentHistory(invoiceId);
       sendSuccess(res, { payments: payments.map(toSnakeCasePayment) });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve payment history')
       });
     }
@@ -940,11 +941,11 @@ router.post(
     const { amount, paymentMethod, paymentReference, notes } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!amount || !paymentMethod) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['amount', 'paymentMethod']
       });
     }
@@ -967,7 +968,7 @@ router.post(
         'Payment recorded'
       );
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to record payment', 500, 'RECORD_FAILED', {
+      errorResponseWithPayload(res, 'Failed to record payment', 500, ErrorCodes.RECORD_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to record payment')
       });
     }
@@ -995,7 +996,7 @@ router.put(
     const { internalNotes } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -1004,9 +1005,9 @@ router.put(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('not found')) {
-        return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
+        return errorResponse(res, 'Invoice not found', 404, ErrorCodes.NOT_FOUND);
       }
-      errorResponseWithPayload(res, 'Failed to update internal notes', 500, 'UPDATE_FAILED', {
+      errorResponseWithPayload(res, 'Failed to update internal notes', 500, ErrorCodes.UPDATE_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to update internal notes')
       });
     }
@@ -1049,7 +1050,7 @@ router.get(
         }
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve statistics', 500, 'STATS_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve statistics', 500, ErrorCodes.STATS_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve statistics')
       });
     }
@@ -1076,7 +1077,7 @@ router.post(
     const { prefix, ...invoiceData } = req.body;
 
     if (!invoiceData.projectId || !invoiceData.clientId || !invoiceData.lineItems?.length) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['projectId', 'clientId', 'lineItems']
       });
     }
@@ -1093,7 +1094,7 @@ router.post(
         'Invoice created with custom number'
       );
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
+      errorResponseWithPayload(res, 'Failed to create invoice', 500, ErrorCodes.CREATION_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to create invoice')
       });
     }

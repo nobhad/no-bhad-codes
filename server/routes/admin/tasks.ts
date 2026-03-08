@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -34,12 +34,12 @@ router.post(
     const { taskIds } = req.body;
 
     if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
-      return errorResponse(res, 'taskIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'taskIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const MAX_BATCH_SIZE = 100;
     if (taskIds.length > MAX_BATCH_SIZE) {
-      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} tasks at once`, 400, 'VALIDATION_ERROR');
+      return errorResponse(res, `Cannot delete more than ${MAX_BATCH_SIZE} tasks at once`, 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const validIds = taskIds
@@ -70,7 +70,7 @@ router.put(
     const { title, description, status, priority, dueDate, assignedTo } = req.body;
 
     if (isNaN(taskId)) {
-      return errorResponse(res, 'Invalid task ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -104,7 +104,7 @@ router.put(
     }
 
     if (updates.length === 0) {
-      return errorResponse(res, 'No fields to update', 400, 'NO_FIELDS');
+      return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
     }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');

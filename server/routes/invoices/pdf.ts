@@ -15,7 +15,7 @@ import { InvoiceLineItem } from '../../services/invoice-service.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../../config/business.js';
-import { errorResponse } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import {
   PdfPageContext,
@@ -667,7 +667,7 @@ router.post(
       !Array.isArray(lineItems) ||
       lineItems.length === 0
     ) {
-      return errorResponse(res, 'Missing required fields', 400, 'MISSING_FIELDS');
+      return errorResponse(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS);
     }
 
     const db = getDatabase();
@@ -678,7 +678,7 @@ router.post(
     );
 
     if (!client) {
-      return errorResponse(res, 'Client not found', 404, 'CLIENT_NOT_FOUND');
+      return errorResponse(res, 'Client not found', 404, ErrorCodes.CLIENT_NOT_FOUND);
     }
 
     const project = await db.get('SELECT project_name FROM projects WHERE id = ?', [projectId]);
@@ -730,7 +730,7 @@ router.post(
       logger.error('[Invoices] Preview PDF generation error:', {
         error: error instanceof Error ? error : undefined
       });
-      errorResponse(res, 'Failed to generate preview', 500, 'PDF_GENERATION_FAILED');
+      errorResponse(res, 'Failed to generate preview', 500, ErrorCodes.PDF_GENERATION_FAILED);
     }
   })
 );

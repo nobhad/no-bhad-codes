@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -91,14 +91,14 @@ router.delete(
     const fileId = parseInt(req.params.fileId, 10);
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
 
     const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ? AND deleted_at IS NULL`, [fileId]);
     if (!file) {
-      return errorResponse(res, 'File not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'File not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const adminEmail = req.user?.email || 'admin';

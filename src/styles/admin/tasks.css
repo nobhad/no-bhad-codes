@@ -236,10 +236,10 @@
   height: 256px;
   background: transparent;
   border: var(--border-width) solid var(--portal-border-color);
-  animation: pulse 2s ease-in-out infinite;
+  animation: pulse-skeleton 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
+@keyframes pulse-skeleton {
   0%,
   100% {
     opacity: 1;

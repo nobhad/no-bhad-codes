@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessProject, canAccessFile } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
-import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -16,17 +16,17 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const files = await db.all(
@@ -70,23 +70,23 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const files = req.files as Express.Multer.File[];
 
     if (!files || files.length === 0) {
-      return errorResponse(res, 'No files uploaded', 400, 'NO_FILES');
+      return errorResponse(res, 'No files uploaded', 400, ErrorCodes.NO_FILES);
     }
 
     const db = getDatabase();
 
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const uploadedFiles = [];
@@ -132,11 +132,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const tags = await fileService.getFileTags(fileId);
@@ -152,11 +152,11 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(fileId) || isNaN(tagId)) {
-      return errorResponse(res, 'Invalid file or tag ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file or tag ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.addTag(fileId, tagId);
@@ -172,11 +172,11 @@ router.delete(
     const fileId = parseInt(req.params.fileId, 10);
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(fileId) || isNaN(tagId)) {
-      return errorResponse(res, 'Invalid file or tag ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file or tag ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.removeTag(fileId, tagId);
@@ -192,11 +192,11 @@ router.get(
     const projectId = parseInt(req.params.id, 10);
     const tagId = parseInt(req.params.tagId, 10);
     if (isNaN(projectId) || isNaN(tagId)) {
-      return errorResponse(res, 'Invalid project or tag ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project or tag ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const files = await fileService.getFilesByTag(projectId, tagId);
@@ -213,15 +213,15 @@ router.post(
     const { access_type } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     if (!access_type || !['view', 'download', 'preview'].includes(access_type)) {
-      return errorResponse(res, 'Invalid access type', 400, 'INVALID_ACCESS_TYPE');
+      return errorResponse(res, 'Invalid access type', 400, ErrorCodes.INVALID_ACCESS_TYPE);
     }
 
     await fileService.logAccess(
@@ -244,7 +244,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId) || fileId <= 0) {
-      return errorResponse(res, 'Invalid file ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const log = await fileService.getAccessLog(fileId, limit);
@@ -259,11 +259,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const stats = await fileService.getAccessStats(fileId);
@@ -278,11 +278,11 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.archiveFile(fileId, req.user!.email);
@@ -297,11 +297,11 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.restoreFile(fileId);
@@ -316,11 +316,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const files = await fileService.getArchivedFiles(projectId);
@@ -336,7 +336,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId) || fileId <= 0) {
-      return errorResponse(res, 'Invalid file ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { expires_at } = req.body;
     await fileService.setExpiration(fileId, expires_at || null);
@@ -374,11 +374,11 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.lockFile(fileId, req.user!.email);
@@ -394,11 +394,11 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const isAdmin = req.user!.type === 'admin';
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     await fileService.unlockFile(fileId, req.user!.email, isAdmin);
@@ -415,11 +415,11 @@ router.put(
     const { category } = req.body;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const validCategories = [
@@ -432,7 +432,7 @@ router.put(
       'invoice'
     ];
     if (!category || !validCategories.includes(category)) {
-      return errorResponse(res, 'Invalid category', 400, 'INVALID_CATEGORY');
+      return errorResponse(res, 'Invalid category', 400, ErrorCodes.INVALID_CATEGORY);
     }
 
     await fileService.setCategory(fileId, category);
@@ -455,11 +455,11 @@ router.get(
       | 'contract'
       | 'invoice';
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const files = await fileService.getFilesByCategory(projectId, category);
@@ -474,11 +474,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const stats = await fileService.getFileStats(projectId);
@@ -495,15 +495,15 @@ router.get(
     const query = req.query.q as string;
 
     if (isNaN(projectId)) {
-      return errorResponse(res, 'Invalid project ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     if (!query || query.trim().length === 0) {
-      return errorResponse(res, 'Search query is required', 400, 'MISSING_QUERY');
+      return errorResponse(res, 'Search query is required', 400, ErrorCodes.MISSING_QUERY);
     }
 
     const files = await fileService.searchFiles(projectId, query.trim(), {

@@ -12,7 +12,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 
 const router = express.Router();
@@ -107,13 +107,13 @@ router.post(
     const { query } = req.body;
 
     if (!query || query.trim().length === 0) {
-      return errorResponse(res, 'Query is required', 400, 'MISSING_QUERY');
+      return errorResponse(res, 'Query is required', 400, ErrorCodes.MISSING_QUERY);
     }
 
     // Validate query safety
     const validation = isQuerySafe(query);
     if (!validation.safe) {
-      return errorResponse(res, validation.reason || 'Invalid query', 400, 'INVALID_QUERY');
+      return errorResponse(res, validation.reason || 'Invalid query', 400, ErrorCodes.INVALID_QUERY);
     }
 
     const db = getDatabase();
@@ -161,7 +161,7 @@ router.post(
         res,
         err instanceof Error ? err.message : 'Query execution failed',
         400,
-        'QUERY_ERROR'
+        ErrorCodes.QUERY_ERROR
       );
     }
   })
@@ -178,17 +178,17 @@ router.post(
     const { name, description, query } = req.body;
 
     if (!name || name.trim().length === 0) {
-      return errorResponse(res, 'Query name is required', 400, 'MISSING_NAME');
+      return errorResponse(res, 'Query name is required', 400, ErrorCodes.MISSING_NAME);
     }
 
     if (!query || query.trim().length === 0) {
-      return errorResponse(res, 'Query is required', 400, 'MISSING_QUERY');
+      return errorResponse(res, 'Query is required', 400, ErrorCodes.MISSING_QUERY);
     }
 
     // Validate query safety
     const validation = isQuerySafe(query);
     if (!validation.safe) {
-      return errorResponse(res, validation.reason || 'Invalid query', 400, 'INVALID_QUERY');
+      return errorResponse(res, validation.reason || 'Invalid query', 400, ErrorCodes.INVALID_QUERY);
     }
 
     const db = getDatabase();
@@ -224,7 +224,7 @@ router.delete(
     const queryId = parseInt(req.params.queryId, 10);
 
     if (isNaN(queryId)) {
-      return errorResponse(res, 'Invalid query ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid query ID', 400, ErrorCodes.INVALID_ID);
     }
 
     const db = getDatabase();
@@ -235,7 +235,7 @@ router.delete(
     );
 
     if (!existing) {
-      return errorResponse(res, 'Query not found', 404, 'NOT_FOUND');
+      return errorResponse(res, 'Query not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     await db.run('DELETE FROM saved_analytics_queries WHERE id = ?', [queryId]);

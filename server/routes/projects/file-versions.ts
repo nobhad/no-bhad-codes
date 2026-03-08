@@ -4,7 +4,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessFile } from '../../middleware/access-control.js';
 import { fileService } from '../../services/file-service.js';
 import { upload } from './uploads.js';
-import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 const router = express.Router();
 
@@ -15,11 +15,11 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const fileId = parseInt(req.params.fileId, 10);
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     const versions = await fileService.getVersions(fileId);
@@ -37,15 +37,15 @@ router.post(
     const file = req.file;
 
     if (isNaN(fileId)) {
-      return errorResponse(res, 'Invalid file ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!(await canAccessFile(req, fileId))) {
-      return errorResponse(res, 'Access denied', 403, 'ACCESS_DENIED');
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.ACCESS_DENIED);
     }
 
     if (!file) {
-      return errorResponse(res, 'No file uploaded', 400, 'NO_FILE');
+      return errorResponse(res, 'No file uploaded', 400, ErrorCodes.NO_FILE);
     }
 
     const { comment } = req.body;
@@ -72,7 +72,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const versionId = parseInt(req.params.versionId, 10);
     if (isNaN(fileId) || fileId <= 0 || isNaN(versionId) || versionId <= 0) {
-      return errorResponse(res, 'Invalid file or version ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid file or version ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const version = await fileService.restoreVersion(fileId, versionId);
     sendSuccess(res, { version }, 'Version restored');

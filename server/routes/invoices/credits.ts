@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
+import { ErrorCodes, errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../../utils/api-response.js';
 import { getInvoiceService, toSnakeCaseCredit } from './helpers.js';
 
 const router = express.Router();
@@ -33,11 +33,11 @@ router.post(
     const { depositInvoiceId, amount } = req.body;
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     if (!depositInvoiceId || !amount) {
-      return errorResponseWithPayload(res, 'Missing required fields', 400, 'MISSING_FIELDS', {
+      return errorResponseWithPayload(res, 'Missing required fields', 400, ErrorCodes.MISSING_FIELDS, {
         required: ['depositInvoiceId', 'amount']
       });
     }
@@ -54,9 +54,9 @@ router.post(
     } catch (error: unknown) {
       const rawMessage = error instanceof Error ? error.message : '';
       if (rawMessage.includes('Insufficient') || rawMessage.includes('Invalid')) {
-        return errorResponse(res, rawMessage, 400, 'INVALID_CREDIT');
+        return errorResponse(res, rawMessage, 400, ErrorCodes.INVALID_CREDIT);
       }
-      errorResponseWithPayload(res, 'Failed to apply credit', 500, 'CREDIT_FAILED', {
+      errorResponseWithPayload(res, 'Failed to apply credit', 500, ErrorCodes.CREDIT_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to apply deposit credit')
       });
     }
@@ -78,7 +78,7 @@ router.get(
     const invoiceId = parseInt(req.params.id, 10);
 
     if (isNaN(invoiceId)) {
-      return errorResponse(res, 'Invalid invoice ID', 400, 'INVALID_ID');
+      return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
     try {
@@ -90,7 +90,7 @@ router.get(
         total_credits: totalCredits
       });
     } catch (error: unknown) {
-      errorResponseWithPayload(res, 'Failed to retrieve credits', 500, 'RETRIEVAL_FAILED', {
+      errorResponseWithPayload(res, 'Failed to retrieve credits', 500, ErrorCodes.RETRIEVAL_FAILED, {
         message: sanitizeErrorMessage(error, 'Failed to retrieve invoice credits')
       });
     }

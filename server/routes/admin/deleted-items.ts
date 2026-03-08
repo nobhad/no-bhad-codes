@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { softDeleteService, SoftDeleteEntityType } from '../../services/soft-delete-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
 
 const VALID_ENTITY_TYPES: SoftDeleteEntityType[] = ['client', 'project', 'invoice', 'lead', 'proposal'];
 
@@ -30,7 +30,7 @@ router.get(
     const entityType = typeParam as SoftDeleteEntityType | undefined;
 
     if (entityType && !VALID_ENTITY_TYPES.includes(entityType)) {
-      return errorResponseWithPayload(res, 'Invalid entity type', 400, 'INVALID_TYPE', {
+      return errorResponseWithPayload(res, 'Invalid entity type', 400, ErrorCodes.INVALID_TYPE, {
         validTypes: VALID_ENTITY_TYPES
       });
     }
@@ -135,7 +135,7 @@ router.post(
     const { itemIds } = req.body;
 
     if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
-      return errorResponse(res, 'itemIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'itemIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     let restored = 0;
@@ -175,7 +175,7 @@ router.post(
     const { itemIds } = req.body;
 
     if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
-      return errorResponse(res, 'itemIds array is required', 400, 'MISSING_REQUIRED_FIELDS');
+      return errorResponse(res, 'itemIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     let deleted = 0;
@@ -215,7 +215,7 @@ router.post(
     const parsed = parseCompositeId(req.params.itemId);
 
     if (!parsed) {
-      return errorResponseWithPayload(res, 'Invalid item ID format or entity type', 400, 'INVALID_ID', {
+      return errorResponseWithPayload(res, 'Invalid item ID format or entity type', 400, ErrorCodes.INVALID_ID, {
         validTypes: VALID_ENTITY_TYPES
       });
     }
@@ -225,7 +225,7 @@ router.post(
     if (result.success) {
       sendSuccess(res, undefined, result.message);
     } else {
-      errorResponse(res, result.message, 400, 'RESTORE_FAILED');
+      errorResponse(res, result.message, 400, ErrorCodes.RESTORE_FAILED);
     }
   })
 );
@@ -241,7 +241,7 @@ router.delete(
     const parsed = parseCompositeId(req.params.itemId);
 
     if (!parsed) {
-      return errorResponseWithPayload(res, 'Invalid item ID format or entity type', 400, 'INVALID_ID', {
+      return errorResponseWithPayload(res, 'Invalid item ID format or entity type', 400, ErrorCodes.INVALID_ID, {
         validTypes: VALID_ENTITY_TYPES
       });
     }
@@ -251,7 +251,7 @@ router.delete(
     if (result.success) {
       sendSuccess(res, undefined, result.message);
     } else {
-      errorResponse(res, result.message, 400, 'DELETE_FAILED');
+      errorResponse(res, result.message, 400, ErrorCodes.DELETE_FAILED);
     }
   })
 );

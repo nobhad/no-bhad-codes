@@ -17,7 +17,8 @@ import {
   errorResponse,
   errorResponseWithPayload,
   sendSuccess,
-  sendCreated
+  sendCreated,
+  ErrorCodes
 } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
@@ -164,7 +165,7 @@ router.get(
     }
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const response = await questionnaireService.getResponse(responseId);
@@ -230,7 +231,7 @@ router.post(
     }
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Verify ownership
@@ -294,7 +295,7 @@ router.post(
     }
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Verify ownership
@@ -424,7 +425,7 @@ router.get(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid questionnaire ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid questionnaire ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const questionnaire = await questionnaireService.getQuestionnaire(id);
@@ -542,7 +543,7 @@ router.put(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid questionnaire ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid questionnaire ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const questionnaire = await questionnaireService.updateQuestionnaire(id, req.body);
@@ -581,7 +582,7 @@ router.delete(
     const id = parseInt(req.params.id, 10);
 
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid questionnaire ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid questionnaire ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await questionnaireService.deleteQuestionnaire(id);
@@ -719,7 +720,7 @@ router.post(
     const { client_id, project_id, due_date } = req.body;
 
     if (isNaN(questionnaireId) || questionnaireId <= 0) {
-      return errorResponse(res, 'Invalid questionnaire ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid questionnaire ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!client_id) {
@@ -792,7 +793,7 @@ router.get(
     const status = req.query.status as ResponseStatus | undefined;
 
     if (isNaN(clientId) || clientId <= 0) {
-      return errorResponse(res, 'Invalid client ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const responses = await questionnaireService.getClientResponses(clientId, status);
@@ -829,7 +830,7 @@ router.post(
     const responseId = parseInt(req.params.id, 10);
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const response = await questionnaireService.sendReminder(responseId);
@@ -865,7 +866,7 @@ router.delete(
     const responseId = parseInt(req.params.id, 10);
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await questionnaireService.deleteResponse(responseId);
@@ -912,7 +913,7 @@ router.get(
     const responseId = parseInt(req.params.id, 10);
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const response = await questionnaireService.getResponse(responseId);
@@ -980,7 +981,7 @@ router.get(
     const responseId = parseInt(req.params.id, 10);
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const response = await questionnaireService.getResponse(responseId);
@@ -1044,7 +1045,7 @@ router.post(
     const responseId = parseInt(req.params.id, 10);
 
     if (isNaN(responseId) || responseId <= 0) {
-      return errorResponse(res, 'Invalid response ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid response ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const response = await questionnaireService.getResponse(responseId);

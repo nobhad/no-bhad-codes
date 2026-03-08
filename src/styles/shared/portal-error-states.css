@@ -70,19 +70,22 @@
   margin: 0;
 }
 
+:is(.error-boundary-retry, .mount-error-button) {
+  background: transparent;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
 .error-boundary-retry {
   display: inline-flex;
   align-items: center;
   gap: var(--icon-gap-sm);
   padding: var(--space-1-5) var(--space-3);
-  background: transparent;
   border: var(--border-width) solid var(--portal-text-light);
   color: var(--portal-text-light);
   font-family: var(--font-family-sans);
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .error-boundary-retry:hover {
@@ -125,14 +128,10 @@
 }
 
 .mount-error-button {
-  background: transparent;
   border: var(--border-width) solid currentColor;
   padding: var(--space-2) var(--space-4);
-  cursor: pointer;
   color: inherit;
   font-family: inherit;
-  font-size: var(--font-size-sm);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .mount-error-button:hover {

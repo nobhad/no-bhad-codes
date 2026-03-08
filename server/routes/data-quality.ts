@@ -32,7 +32,7 @@ import {
 } from '../services/validation-service.js';
 import { blockIP, unblockIP, getRateLimitStats } from '../middleware/rate-limiter.js';
 import { userService } from '../services/user-service.js';
-import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage } from '../utils/api-response.js';
+import { errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
@@ -126,7 +126,7 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to scan for duplicates', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to scan for duplicates', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to scan for duplicate records')
     });
   }
@@ -165,7 +165,7 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
     const { email, firstName, lastName, company, phone, website } = req.body;
 
     if (!email && !firstName && !lastName) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'At least email or name is required'
       });
       return;
@@ -194,7 +194,7 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to check for duplicates', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to check for duplicates', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to check for duplicate records')
     });
   }
@@ -242,7 +242,7 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
     const { keepId, keepType, mergeIds, fieldSelections } = req.body;
 
     if (!keepId || !keepType || !mergeIds || !Array.isArray(mergeIds)) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'keepId, keepType, and mergeIds array are required'
       });
       return;
@@ -263,7 +263,7 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to merge records', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to merge records', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to merge duplicate records')
     });
   }
@@ -327,7 +327,7 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to dismiss duplicate', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to dismiss duplicate', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to dismiss duplicate record')
     });
   }
@@ -365,7 +365,7 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to fetch history', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to fetch duplicate detection history')
     });
   }
@@ -407,7 +407,7 @@ router.post('/validate/email', (req: Request, res: Response) => {
     const { email } = req.body;
 
     if (!email) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'Email is required'
       });
       return;
@@ -416,7 +416,7 @@ router.post('/validate/email', (req: Request, res: Response) => {
     const result = validateEmail(email);
     sendSuccess(res, result);
   } catch (error) {
-    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Validation failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
@@ -450,7 +450,7 @@ router.post('/validate/phone', (req: Request, res: Response) => {
     const result = validatePhone(phone || '');
     sendSuccess(res, result);
   } catch (error) {
-    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Validation failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
@@ -484,7 +484,7 @@ router.post('/validate/url', (req: Request, res: Response) => {
     const result = validateUrl(url || '');
     sendSuccess(res, result);
   } catch (error) {
-    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Validation failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
@@ -532,7 +532,7 @@ router.post('/validate/file', (req: Request, res: Response) => {
     const { filename, mimeType, sizeBytes, allowedCategories } = req.body;
 
     if (!filename || !mimeType || sizeBytes === undefined) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'filename, mimeType, and sizeBytes are required'
       });
       return;
@@ -541,7 +541,7 @@ router.post('/validate/file', (req: Request, res: Response) => {
     const result = validateFile(filename, mimeType, sizeBytes, allowedCategories);
     sendSuccess(res, result);
   } catch (error) {
-    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Validation failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
@@ -582,7 +582,7 @@ router.post('/validate/object', (req: Request, res: Response) => {
     const { data, schema } = req.body;
 
     if (!data || !schema) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'data and schema are required'
       });
       return;
@@ -591,7 +591,7 @@ router.post('/validate/object', (req: Request, res: Response) => {
     const result = validateObject(data, schema);
     sendSuccess(res, result);
   } catch (error) {
-    errorResponseWithPayload(res, 'Validation failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Validation failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Data validation operation failed')
     });
   }
@@ -631,7 +631,7 @@ router.post('/sanitize', (req: Request, res: Response) => {
     const { input, options } = req.body;
 
     if (input === undefined) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'input is required'
       });
       return;
@@ -640,7 +640,7 @@ router.post('/sanitize', (req: Request, res: Response) => {
     const result = sanitizeInput(input, options || {});
     sendSuccess(res, result);
   } catch (error) {
-    errorResponseWithPayload(res, 'Sanitization failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Sanitization failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Input sanitization failed')
     });
   }
@@ -678,7 +678,7 @@ router.post('/security/check', async (req: Request, res: Response) => {
     const { input } = req.body;
 
     if (!input) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'input is required'
       });
       return;
@@ -709,7 +709,7 @@ router.post('/security/check', async (req: Request, res: Response) => {
       sqlInjection: sqlResult
     });
   } catch (error) {
-    errorResponseWithPayload(res, 'Security check failed', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Security check failed', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Security threat detection failed')
     });
   }
@@ -742,7 +742,7 @@ router.get('/metrics', async (_req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to fetch metrics', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to fetch metrics', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to fetch data quality metrics')
     });
   }
@@ -787,7 +787,7 @@ router.post('/metrics/calculate', async (_req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to calculate metrics', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to calculate metrics', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to calculate data quality metrics')
     });
   }
@@ -833,7 +833,7 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to fetch history', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to fetch history', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to fetch metrics history')
     });
   }
@@ -866,7 +866,7 @@ router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to fetch rate limit stats', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to fetch rate limit statistics')
     });
   }
@@ -910,7 +910,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
     const { ip, reason, expiresAt, adminEmail } = req.body;
 
     if (!ip || !reason) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'ip and reason are required'
       });
       return;
@@ -924,7 +924,7 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to block IP', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to block IP', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to block IP address')
     });
   }
@@ -962,7 +962,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
     const { ip } = req.body;
 
     if (!ip) {
-      errorResponseWithPayload(res, 'Validation error', 400, 'VALIDATION_ERROR', {
+      errorResponseWithPayload(res, 'Validation error', 400, ErrorCodes.VALIDATION_ERROR, {
         message: 'ip is required'
       });
       return;
@@ -976,7 +976,7 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to unblock IP', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to unblock IP', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to unblock IP address')
     });
   }
@@ -1031,7 +1031,7 @@ router.get('/validation-errors', async (req: Request, res: Response) => {
       error: error instanceof Error ? error : undefined,
       category: 'DATA_QUALITY'
     });
-    errorResponseWithPayload(res, 'Failed to fetch validation errors', 500, 'INTERNAL_ERROR', {
+    errorResponseWithPayload(res, 'Failed to fetch validation errors', 500, ErrorCodes.INTERNAL_ERROR, {
       message: sanitizeErrorMessage(error, 'Failed to fetch validation error logs')
     });
   }

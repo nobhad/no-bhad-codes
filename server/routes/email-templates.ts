@@ -17,7 +17,7 @@ import {
   type CreateTemplateData,
   type UpdateTemplateData
 } from '../services/email-template-service.js';
-import { sendSuccess, sendCreated, errorResponse } from '../utils/api-response.js';
+import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -106,7 +106,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await emailTemplateService.getTemplate(id);
@@ -218,7 +218,7 @@ router.put(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const {
@@ -295,7 +295,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     try {
@@ -344,7 +344,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const versions = await emailTemplateService.getVersions(id);
@@ -387,7 +387,7 @@ router.get(
     const version = parseInt(req.params.version, 10);
 
     if (isNaN(id) || id <= 0 || isNaN(version) || version <= 0) {
-      return errorResponse(res, 'Invalid template ID or version', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID or version', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const v = await emailTemplateService.getVersion(id, version);
@@ -434,7 +434,7 @@ router.post(
     const version = parseInt(req.params.version, 10);
 
     if (isNaN(id) || id <= 0 || isNaN(version) || version <= 0) {
-      return errorResponse(res, 'Invalid template ID or version', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID or version', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await emailTemplateService.restoreVersion(id, version, req.user?.email);
@@ -486,7 +486,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const template = await emailTemplateService.getTemplate(id);
@@ -604,7 +604,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     if (isNaN(id) || id <= 0) {
-      return errorResponse(res, 'Invalid template ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid template ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const { to_email, sample_data } = req.body;
@@ -692,7 +692,7 @@ router.get(
 
     // Validate numeric parameters
     if (templateId !== undefined && (isNaN(templateId) || templateId <= 0)) {
-      return errorResponse(res, 'Invalid templateId', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid templateId', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const limit = isNaN(limitParam) || limitParam < 1 ? 100 : Math.min(limitParam, 1000);
 

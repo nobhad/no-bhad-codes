@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../mid
 import { canAccessProject, isUserAdmin } from '../../middleware/access-control.js';
 import { getNumber } from '../../database/row-helpers.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponse, sendSuccess, sendCreated } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -30,12 +30,12 @@ router.post(
   asyncHandler(async (req: express.Request, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const { title, description, update_type = 'general', author = 'Admin' } = req.body;
 
     if (!title) {
-      return errorResponse(res, 'Update title is required', 400, 'MISSING_TITLE');
+      return errorResponse(res, 'Update title is required', 400, ErrorCodes.MISSING_TITLE);
     }
 
     const db = getDatabase();
@@ -43,12 +43,12 @@ router.post(
     // Verify project exists
     const project = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const validUpdateTypes = ['progress', 'milestone', 'issue', 'resolution', 'general'];
     if (!validUpdateTypes.includes(update_type)) {
-      return errorResponse(res, 'Invalid update type', 400, 'INVALID_UPDATE_TYPE');
+      return errorResponse(res, 'Invalid update type', 400, ErrorCodes.INVALID_UPDATE_TYPE);
     }
 
     // Look up user ID for author
@@ -83,17 +83,17 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
     if (isNaN(projectId) || projectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const db = getDatabase();
 
     const projectExists = await db.get('SELECT id FROM projects WHERE id = ?', [projectId]);
     if (!projectExists) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     if (!(await canAccessProject(req, projectId))) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const isAdmin = await isUserAdmin(req);
@@ -110,7 +110,7 @@ router.get(
       );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404, 'PROJECT_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     // Get project statistics

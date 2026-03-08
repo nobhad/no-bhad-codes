@@ -6,7 +6,7 @@
 import { Router, Response } from 'express';
 import { deliverableService } from '../services/deliverable-service.js';
 import { fileService } from '../services/file-service.js';
-import { errorResponse, sendSuccess, sendCreated, sendPaginated, parsePaginationQuery } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, sendPaginated, parsePaginationQuery, ErrorCodes } from '../utils/api-response.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { logger } from '../services/logger.js';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js';
@@ -192,12 +192,12 @@ async function canAccessDeliverable(
 router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (await isUserAdmin(req)) {
-      return errorResponse(res, 'Admin users should use /api/admin/deliverables', 403, 'FORBIDDEN');
+      return errorResponse(res, 'Admin users should use /api/admin/deliverables', 403, ErrorCodes.FORBIDDEN);
     }
 
     const clientId = req.user?.id;
     if (!clientId) {
-      return errorResponse(res, 'Authentication required', 401, 'UNAUTHORIZED');
+      return errorResponse(res, 'Authentication required', 401, ErrorCodes.UNAUTHORIZED);
     }
 
     const db = getDatabase();
@@ -272,12 +272,12 @@ router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnk
 
     const parsedProjectId = parseInt(projectId, 10);
     if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Verify user can access this project
     if (!(await canAccessProject(req, parsedProjectId))) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const deliverable = await deliverableService.createDeliverable(
@@ -304,7 +304,7 @@ router.post('/', validateRequest(DeliverableValidationSchemas.create, { allowUnk
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to create deliverable', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to create deliverable', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -334,18 +334,18 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const deliverable = await deliverableService.getDeliverableById(deliverableId);
 
     if (!deliverable) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     sendSuccess(res, { deliverable });
@@ -354,7 +354,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to retrieve deliverable', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to retrieve deliverable', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -400,12 +400,12 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
     const { projectId } = req.params;
     const parsedProjectId = parseInt(projectId, 10);
     if (isNaN(parsedProjectId) || parsedProjectId <= 0) {
-      return errorResponse(res, 'Invalid project ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Verify user can access this project
     if (!(await canAccessProject(req, parsedProjectId))) {
-      return errorResponse(res, 'Project not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { status, roundNumber } = req.query;
@@ -426,7 +426,7 @@ router.get('/projects/:projectId/list', async (req: AuthenticatedRequest, res: R
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to list deliverables', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list deliverables', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -456,25 +456,25 @@ router.put('/:id', validateRequest(DeliverableValidationSchemas.update, { allowU
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const deliverable = await deliverableService.updateDeliverable(deliverableId, req.body);
     sendSuccess(res, { deliverable });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to update deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to update deliverable', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to update deliverable', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -514,18 +514,18 @@ router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDelive
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { reviewedById } = req.body;
 
     if (!reviewedById) {
-      return errorResponse(res, 'reviewedById is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'reviewedById is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
     const deliverable = await deliverableService.lockDeliverable(deliverableId, reviewedById);
 
@@ -590,13 +590,13 @@ router.post('/:id/lock', validateRequest(DeliverableValidationSchemas.lockDelive
     );
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to lock deliverable', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to lock deliverable', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to lock deliverable', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -638,18 +638,18 @@ router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.reques
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { reason, reviewedById } = req.body;
 
     if (!reason || !reviewedById) {
-      return errorResponse(res, 'reason and reviewedById are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'reason and reviewedById are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const deliverable = await deliverableService.requestRevision(
@@ -668,13 +668,13 @@ router.post('/:id/revision', validateRequest(DeliverableValidationSchemas.reques
     sendSuccess(res, { deliverable }, 'Revision requested');
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to request revision', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to request revision', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to request revision', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -704,12 +704,12 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     await deliverableService.deleteDeliverable(deliverableId);
@@ -719,7 +719,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to delete deliverable', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to delete deliverable', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -771,18 +771,18 @@ router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.upload
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { filePath, fileName, fileSize, fileType, uploadedById, changeNotes } = req.body;
 
     if (!filePath || !fileName || !uploadedById) {
-      return errorResponse(res, 'Missing required fields', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Missing required fields', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const version = await deliverableService.uploadVersion(
@@ -798,13 +798,13 @@ router.post('/:id/versions', validateRequest(DeliverableValidationSchemas.upload
     sendCreated(res, { version });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to upload version', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to upload version', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to upload version', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -832,12 +832,12 @@ router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => 
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const versions = await deliverableService.getDeliverableVersions(deliverableId);
@@ -847,7 +847,7 @@ router.get('/:id/versions', async (req: AuthenticatedRequest, res: Response) => 
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to list versions', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list versions', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -877,18 +877,18 @@ router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Respon
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const version = await deliverableService.getLatestVersion(deliverableId);
 
     if (!version) {
-      return errorResponse(res, 'No versions found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'No versions found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     sendSuccess(res, { version });
@@ -897,7 +897,7 @@ router.get('/:id/versions/latest', async (req: AuthenticatedRequest, res: Respon
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to retrieve latest version', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to retrieve latest version', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -947,18 +947,18 @@ router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addCom
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { authorId, text, x, y, annotationType, elementId } = req.body;
 
     if (!authorId || !text) {
-      return errorResponse(res, 'authorId and text are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'authorId and text are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const comment = await deliverableService.addComment(deliverableId, authorId, text, {
@@ -971,13 +971,13 @@ router.post('/:id/comments', validateRequest(DeliverableValidationSchemas.addCom
     sendCreated(res, { comment });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to add comment', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to add comment', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to add comment', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -1013,12 +1013,12 @@ router.get('/:id/comments', async (req: AuthenticatedRequest, res: Response) => 
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { resolved, elementId } = req.query;
@@ -1034,7 +1034,7 @@ router.get('/:id/comments', async (req: AuthenticatedRequest, res: Response) => 
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to list comments', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list comments', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -1077,31 +1077,31 @@ router.patch(
         isNaN(parsedCommentId) ||
         parsedCommentId <= 0
       ) {
-        return errorResponse(res, 'Invalid ID parameters', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid ID parameters', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       // Check authorization
       if (!(await canAccessDeliverable(req, parsedDeliverableId))) {
-        return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Verify comment belongs to this deliverable
       const existingComment = await deliverableService.getCommentById(parsedCommentId);
       if (!existingComment || existingComment.deliverable_id !== parsedDeliverableId) {
-        return errorResponse(res, 'Comment not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Comment not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       const comment = await deliverableService.resolveComment(parsedCommentId);
       sendSuccess(res, { comment });
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('not found')) {
-        return errorResponse(res, 'Comment not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Comment not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
       logger.error('[Deliverables] Failed to resolve comment', {
         error: error instanceof Error ? error : new Error(String(error)),
         category: 'DELIVERABLE'
       });
-      errorResponse(res, 'Failed to resolve comment', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to resolve comment', 500, ErrorCodes.INTERNAL_ERROR);
     }
   }
 );
@@ -1145,18 +1145,18 @@ router.delete(
         isNaN(parsedCommentId) ||
         parsedCommentId <= 0
       ) {
-        return errorResponse(res, 'Invalid ID parameters', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid ID parameters', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       // Check authorization
       if (!(await canAccessDeliverable(req, parsedDeliverableId))) {
-        return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Verify comment belongs to this deliverable
       const existingComment = await deliverableService.getCommentById(parsedCommentId);
       if (!existingComment || existingComment.deliverable_id !== parsedDeliverableId) {
-        return errorResponse(res, 'Comment not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Comment not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       await deliverableService.deleteComment(parsedCommentId);
@@ -1166,7 +1166,7 @@ router.delete(
         error: error instanceof Error ? error : new Error(String(error)),
         category: 'DELIVERABLE'
       });
-      errorResponse(res, 'Failed to delete comment', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to delete comment', 500, ErrorCodes.INTERNAL_ERROR);
     }
   }
 );
@@ -1209,31 +1209,31 @@ router.post('/:id/elements', validateRequest(DeliverableValidationSchemas.create
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { name, description } = req.body;
 
     if (!name) {
-      return errorResponse(res, 'name is required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'name is required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const element = await deliverableService.createDesignElement(deliverableId, name, description);
     sendCreated(res, { element });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to create design element', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to create design element', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to create design element', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -1261,12 +1261,12 @@ router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => 
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const elements = await deliverableService.getDeliverableElements(deliverableId);
@@ -1276,7 +1276,7 @@ router.get('/:id/elements', async (req: AuthenticatedRequest, res: Response) => 
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to list design elements', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list design elements', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -1331,37 +1331,37 @@ router.patch(
         isNaN(parsedElementId) ||
         parsedElementId <= 0
       ) {
-        return errorResponse(res, 'Invalid ID parameters', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid ID parameters', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       // Check authorization
       if (!(await canAccessDeliverable(req, parsedDeliverableId))) {
-        return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       // Verify element belongs to this deliverable
       const existingElement = await deliverableService.getDesignElementById(parsedElementId);
       if (!existingElement || existingElement.deliverable_id !== parsedDeliverableId) {
-        return errorResponse(res, 'Design element not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Design element not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
 
       const { status } = req.body;
 
       if (!['pending', 'approved', 'revision_needed'].includes(status)) {
-        return errorResponse(res, 'Invalid approval status', 400, 'VALIDATION_ERROR');
+        return errorResponse(res, 'Invalid approval status', 400, ErrorCodes.VALIDATION_ERROR);
       }
 
       const element = await deliverableService.updateElementApprovalStatus(parsedElementId, status);
       sendSuccess(res, { element });
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('not found')) {
-        return errorResponse(res, 'Design element not found', 404, 'RESOURCE_NOT_FOUND');
+        return errorResponse(res, 'Design element not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
       }
       logger.error('[Deliverables] Failed to update element approval status', {
         error: error instanceof Error ? error : new Error(String(error)),
         category: 'DELIVERABLE'
       });
-      errorResponse(res, 'Failed to update element approval status', 500, 'INTERNAL_ERROR');
+      errorResponse(res, 'Failed to update element approval status', 500, ErrorCodes.INTERNAL_ERROR);
     }
   }
 );
@@ -1411,18 +1411,18 @@ router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createR
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const { reviewerId, decision, feedback, elementsReviewed } = req.body;
 
     if (!reviewerId || !decision) {
-      return errorResponse(res, 'reviewerId and decision are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'reviewerId and decision are required', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const review = await deliverableService.createReview(
@@ -1436,13 +1436,13 @@ router.post('/:id/reviews', validateRequest(DeliverableValidationSchemas.createR
     sendCreated(res, { review });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('not found')) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
     logger.error('[Deliverables] Failed to create review', {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to create review', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to create review', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
@@ -1470,12 +1470,12 @@ router.get('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const deliverableId = parseInt(id, 10);
     if (isNaN(deliverableId) || deliverableId <= 0) {
-      return errorResponse(res, 'Invalid deliverable ID', 400, 'VALIDATION_ERROR');
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Check authorization
     if (!(await canAccessDeliverable(req, deliverableId))) {
-      return errorResponse(res, 'Deliverable not found', 404, 'RESOURCE_NOT_FOUND');
+      return errorResponse(res, 'Deliverable not found', 404, ErrorCodes.RESOURCE_NOT_FOUND);
     }
 
     const reviews = await deliverableService.getDeliverableReviews(deliverableId);
@@ -1485,7 +1485,7 @@ router.get('/:id/reviews', async (req: AuthenticatedRequest, res: Response) => {
       error: error instanceof Error ? error : new Error(String(error)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to list reviews', 500, 'INTERNAL_ERROR');
+    errorResponse(res, 'Failed to list reviews', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 

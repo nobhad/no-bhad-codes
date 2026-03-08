@@ -227,11 +227,14 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border-radius: 0;
   text-decoration: none;
 }
-.portal .sidebar-btn:hover,
-.portal .sidebar-btn.active {
+.portal :is(.sidebar-btn:hover, .sidebar-btn.active) {
   background: transparent;
   box-shadow: none;
   border: none;
+  color: var(--color-primary);
+}
+.portal :is(.sidebar-btn:hover, .sidebar-btn.active) .btn-icon {
+  color: var(--color-primary);
 }
 .portal .sidebar-btn .btn-icon {
   flex-shrink: 0;
@@ -243,12 +246,6 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.portal .sidebar-btn:hover,
-.portal .sidebar-btn:hover .btn-icon,
-.portal .sidebar-btn.active,
-.portal .sidebar-btn.active .btn-icon {
-  color: var(--color-primary);
 }
 
 /* ============================================
