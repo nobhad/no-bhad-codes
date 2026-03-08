@@ -612,7 +612,6 @@
   background: var(--color-overlay-medium);
   z-index: var(--z-index-portal-overlay, 9500);
   pointer-events: auto;
-  /* Backdrop blur for depth */
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
@@ -622,7 +621,6 @@
 }
 
 /* Intake Modal */
-/* High z-index to ensure modal appears above all other content */
 .intake-modal.intake-modal {
   display: none;
   position: fixed;
@@ -678,13 +676,12 @@
 }
 
 /* Override terminal styles when in modal */
-/* High specificity with doubled class selector */
 .intake-modal.intake-modal .terminal-intake-container,
 .intake-modal.intake-modal .terminal-intake {
   height: 100%;
   max-height: 100%;
   width: 100%;
-  min-height: 0; /* Override base calc(100vh - ...) */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -696,7 +693,7 @@
   width: 100%;
   max-width: 100%;
   max-height: 100%;
-  min-height: 0; /* Critical for flex shrinking */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -705,7 +702,7 @@
 
 .intake-modal.intake-modal .terminal-chat {
   flex: 1;
-  min-height: 0; /* Allow flex to shrink - input area must stay visible */
+  min-height: 0;
   max-height: none;
   overflow-y: auto;
 }
@@ -722,8 +719,6 @@
   background-color: var(--color-terminal-bg);
 }
 
-/* Force terminal visibility in modal */
-/* High specificity with doubled class and open state */
 .intake-modal.intake-modal.open .intake-modal-container > * {
   opacity: 1;
   visibility: visible;
@@ -741,9 +736,6 @@
     transform: none;
   }
 
-  .intake-modal .terminal-window {
-  }
-
   .intake-modal-close {
     top: 15px;
     right: 15px;
@@ -751,3 +743,4 @@
     height: 44px;
   }
 }
+

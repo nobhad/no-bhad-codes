@@ -68,15 +68,6 @@
   gap: var(--space-3);
 }
 
-.link-list-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  text-decoration: none;
-  padding: var(--space-2);
-  border-bottom: var(--border-width) solid var(--portal-border-color);
-}
-
 /* Milestone list container */
 .milestone-list {
   display: flex;
@@ -163,21 +154,10 @@
   margin: 0;
 }
 
-/* Project Overview Card — uses .portal-card from portal-cards.css
-   Only page-specific spacing overrides here */
-.project-detail-overview {
-  margin-bottom: var(--space-3);
-}
-
 /* h3 styling centralized in admin.css */
 
 /* .field-label, .meta-label, .meta-value, .meta-item
    SINGLE SOURCE OF TRUTH: shared/field-label-spacing.css */
-
-/* Hint text within field labels - same styling but not uppercase */
-.field-label-hint {
-  text-transform: none;
-}
 
 /* URL link with external-link icon (opens in new tab) */
 .meta-value .url-link {
@@ -193,23 +173,6 @@
 
 .meta-value .url-link[href="#"] .url-link-icon {
   display: none;
-}
-
-.project-detail-client-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Invite icon button inline with client name in project detail */
-.project-detail-client-row #pd-client-link {
-  position: relative;
-}
-
-.project-detail-client-row #pd-client-link .icon-btn-invite {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .project-detail-meta {
@@ -403,14 +366,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Readonly form values — meta-value styling from shared */
 
-/* Client account actions buttons */
-#pd-tab-settings .client-account-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-}
-
 /* Project status dropdown - match input field styling */
 #pd-status-dropdown .custom-dropdown-trigger {
   padding: var(--space-1) var(--space-1-5);
@@ -458,40 +413,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Text color inherited from portal theme — no overrides needed */
 /* .empty-state, .loading-state, .error-state styling from components/loading.css */
 
-/* Card Header with Action - base in portal-cards.css, override margin */
-.card-header-with-action {
-  margin-bottom: var(--space-2);
-}
-
 /* h3 styling centralized in admin.css */
-
-/* Progress Display */
-.project-progress-display {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.progress-percentage {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  min-width: 60px;
-}
-
-.project-progress-display .progress-bar {
-  flex: 1;
-  height: var(--space-3);
-  background: var(--portal-bg-light);
-  overflow: hidden;
-  box-shadow: var(--shadow-inset);
-}
-
-.project-progress-display .progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  transition: width var(--transition-medium);
-}
 
 /* Milestones List - flex layout from shared/portal-components.css :has() rule */
 
@@ -594,33 +516,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   white-space: pre-wrap;
 }
 
-/* Features container appended to description row */
-.project-description-row .features-container {
-  flex-basis: 100%;
-  margin-top: var(--space-1-5);
-}
-
-/* Project Notes - inside overview card */
-.project-detail-overview .project-notes {
-  background: transparent;
-  padding: 0;
-  border: none;
-  margin: 0;
-  min-height: 0;
-  white-space: normal;
-  display: flex;
-  flex-direction: column;
-}
-
-.project-detail-overview .project-notes:empty {
-  display: none;
-}
-
-/* Project notes meta-value allows wrapping */
-.project-detail-overview .project-notes .meta-value {
-  white-space: pre-wrap;
-}
-
 /* Project Notes - standalone */
 .project-notes {
   background: var(--portal-bg-medium);
@@ -636,8 +531,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* .project-notes h4 styled by unified rule in portal-cards.css */
 
-.project-notes .features-list,
-.features-container .features-list {
+.project-notes .features-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
@@ -646,8 +540,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   list-style: none;
 }
 
-.project-notes .feature-tag,
-.features-container .feature-tag {
+.project-notes .feature-tag {
   background: var(--portal-bg-medium);
   padding: var(--space-0-5) var(--space-1-5);
   display: inline-block;
@@ -698,30 +591,9 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Invoices tab display handled by [id^="pd-tab-"].active rule */
 /* Invoices list section - flex layout from pd-invoices.css */
 
-/* Card header spacing in invoices tab - match files section h3 */
-[data-page="admin"] #pd-tab-invoices .card-header-with-action {
-  margin-bottom: 0;
-}
-
 /* Invoice styles consolidated in pd-invoices.css */
 
 /* Message styles now in client-portal/messages.css (unified for all portals) */
-
-/* Client Account Info */
-.client-account-info {
-  margin-bottom: var(--space-2);
-}
-
-.client-account-info p {
-  margin: var(--space-1) 0;
-}
-
-.client-account-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin-top: var(--space-1-5);
-}
 
 /* Client account buttons should use .btn-outline .btn-full classes */
 
@@ -733,11 +605,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   justify-content: space-between;
   align-items: center;
   gap: var(--space-1);
-}
-
-.milestone-due-date {
-  background: var(--portal-bg-dark);
-  padding: var(--space-0-5) var(--space-0-5);
 }
 
 .milestone-description {
@@ -757,102 +624,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex-shrink: 0;
 }
 
-/* Milestone task progress styles */
-.milestone-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.milestone-progress-text {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.milestone-progress-bar {
-  width: 100%;
-  height: var(--space-1-5);
-  background: var(--portal-bg-medium);
-  overflow: hidden;
-  margin-top: var(--space-2);
-}
-
-.milestone-progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  transition: width var(--transition-medium);
-}
-
-/* .btn-milestone-tasks uses .btn .btn-outline .btn-sm from portal-buttons.css */
-.btn-milestone-tasks {
-  margin-top: var(--space-2);
-}
-
-.btn-milestone-tasks .icon-chevron {
-  transition: transform var(--transition-fast);
-}
-
-.btn-milestone-tasks .icon-chevron-up {
-  transform: rotate(180deg);
-}
-
-.milestone-tasks-container {
-  margin-top: var(--space-3);
-  padding: var(--space-3);
-  background: var(--portal-bg-medium);
-}
-
-.milestone-task-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.milestone-task-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  border-bottom: var(--border-width) solid var(--portal-border);
-  transition: background var(--transition-fast);
-}
-
-.milestone-task-item:last-child {
-  border-bottom: none;
-}
-
-.milestone-task-item:hover {
-  background: var(--portal-bg-dark);
-}
-
-/* .milestone-task-item.completed styling consolidated in shared/portal-cards.css */
-
-.milestone-task-item input[type="checkbox"] {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-  cursor: pointer;
-}
-
-.milestone-task-title {
-  flex: 1;
-}
-
-.milestone-task-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.milestone-tasks-empty,
-.milestone-tasks-error {
-  padding: var(--space-3);
-  text-align: center;
-}
-
-.milestone-tasks-error {
-  color: var(--color-danger);
-}
-
 /* File upload dropzone styles in shared/portal-files.css */
 
 /* Invoice Summary and Payment Plans moved to pd-invoices.css */
@@ -860,29 +631,12 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* ================================================
    Overview Stats Grid
    ================================================ */
-/* .analytics-overview — card styling from portal-cards.css */
-.analytics-overview {
-  margin-top: var(--space-2);
-}
-
-/* h3 styling centralized in admin.css */
 
 /* Recent activity - Base styles in shared/portal-cards.css */
 /* Admin-specific margin overrides */
 [data-page="admin"] .recent-activity {
   margin-top: var(--space-2);
   margin-bottom: 0;
-}
-
-.overview-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
-  align-items: stretch;
-}
-
-.overview-stats-grid > * {
-  height: 100%;
 }
 
 /* .overview-stat — uses .summary-card from portal-cards.css */
@@ -1077,268 +831,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Table mobile responsive styles are in shared/portal-tables.css */
 
 /* =====================================================
-   PROJECT DETAIL HEADER CARD
-   Matches client detail header pattern
-   ===================================================== */
-
-.pd-header-card {
-  padding: var(--space-3) var(--space-4);
-}
-
-.pd-header-card .detail-title-row {
-  margin-bottom: 0;
-}
-
-.pd-header-card .detail-title {
-  margin: 0;
-  font-size: var(--font-size-xl);
-}
-
-/* Header Client Info */
-.pd-header-client {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-}
-
-.pd-client-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.pd-client-item svg {
-  flex-shrink: 0;
-}
-
-.pd-client-item.clickable-client {
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.pd-client-item.clickable-client:hover {
-  color: var(--color-primary);
-}
-
-.pd-client-item.clickable-client:hover svg {
-  color: var(--color-primary);
-}
-
-/* Header Project Meta */
-.pd-header-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-}
-
-.pd-meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
-
-/* .pd-meta-value font from portal theme */
-
-/* Header Description */
-.pd-header-description {
-  margin-top: var(--space-2);
-}
-
-.pd-header-description .pd-description {
-  margin: var(--space-1) 0 0;
-  line-height: var(--line-height-relaxed);
-}
-
-/* Header URLs */
-.pd-header-urls {
-  margin-top: var(--space-2);
-}
-
-.pd-header-urls .pd-urls-row {
-  margin-top: var(--space-1);
-}
-
-/* =====================================================
-   PROJECT DETAIL OVERVIEW GRID
-   Two-column layout matching client detail
-   ===================================================== */
-
-.pd-overview-grid {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: var(--space-3);
-  align-items: start;
-}
-
-/* Uses utility classes: flex flex-col gap-3 */
-/* Uses utility classes: flex flex-col gap-3 */
-
-/* Activity Card (Full Width, Last Section) */
-.pd-activity-card {
-  /* No margin needed - flexbox gap handles spacing */
-}
-
-/* Project Details Card (Full Width at Top) */
-.pd-details-card {
-  margin-bottom: var(--space-3);
-}
-
-.pd-detail-section {
-  margin-bottom: var(--space-3);
-}
-
-.pd-detail-section:last-child {
-  margin-bottom: 0;
-}
-
-/* Field labels inherit from shared field-label-spacing.css via --portal-label-color */
-
-.pd-description {
-  margin: var(--space-1) 0 0;
-  line-height: var(--line-height-relaxed);
-}
-
-.pd-detail-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-bottom: var(--space-3);
-}
-
-.pd-detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-}
-
-/* .pd-detail-value font from portal theme */
-
-/* URL Links */
-.pd-urls-section {
-  margin-top: var(--space-3);
-}
-
-.pd-urls-row {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: var(--space-2);
-}
-
-.pd-url-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  padding: var(--space-1) var(--space-2);
-  background: var(--portal-bg-medium);
-  text-decoration: none;
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.pd-url-link:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-}
-
-.pd-url-link svg {
-  flex-shrink: 0;
-}
-
-.pd-url-link[href="#"],
-.pd-url-link:not([href]) {
-  display: none;
-}
-
-/* Progress Card */
-.pd-progress-card {
-  text-align: center;
-}
-
-.pd-progress-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Horizontal progress layout (above milestones) */
-.pd-progress-display.pd-progress-horizontal {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.pd-progress-display.pd-progress-horizontal .pd-progress-ring {
-  flex-shrink: 0;
-  width: 80px;
-  height: 80px;
-}
-
-.pd-progress-display.pd-progress-horizontal .progress-bar {
-  flex: 1;
-}
-
-.pd-progress-ring {
-  width: 100px;
-  height: 100px;
-  border-radius: var(--portal-radius-full);
-  background: var(--portal-bg-medium);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: var(--border-width-heavy) solid var(--color-primary);
-}
-
-.pd-progress-percent {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
-.pd-progress-card .progress-bar {
-  width: 100%;
-}
-
-/* Financial Stats */
-.pd-financial-stats,
-.pd-quick-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
-}
-
-.pd-stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-5);
-  padding: var(--space-2);
-  background: transparent;
-}
-
-/* Label styling from unified rule in portal-forms.css */
-
-.pd-stat-value {
-  font-weight: var(--font-weight-semibold);
-}
-
-.pd-stat-success {
-  color: var(--color-success);
-}
-
-.pd-stat-warning {
-  color: var(--color-warning);
-}
-
-/* =====================================================
    RESPONSIVE - PROJECT DETAIL
    ===================================================== */
 
 /* Tablet landscape - stack to single column */
 @media (--tablet-landscape) {
-  .pd-overview-grid {
-    grid-template-columns: 1fr;
-  }
-
   .pd-overview-sidebar {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1347,78 +844,21 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Tablet portrait */
 @media (--tablet-down) {
-  .pd-header-card {
-    padding: var(--space-3) var(--space-4);
-  }
-
   .pd-overview-sidebar {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .pd-detail-row {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 /* Mobile */
 @media (--mobile) {
-  .pd-header-card {
-    padding: var(--space-3);
-  }
-
-  .pd-header-client {
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .pd-header-meta {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-2);
-  }
-
   .pd-overview-sidebar {
     grid-template-columns: 1fr;
-  }
-
-  .pd-detail-row {
-    grid-template-columns: 1fr;
-  }
-
-  .pd-financial-stats,
-  .pd-quick-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .pd-progress-ring {
-    width: 80px;
-    height: 80px;
-  }
-
-  .pd-progress-percent {
-    font-size: var(--font-size-lg);
-  }
-}
-
-/* Small mobile */
-@media (--small-mobile) {
-  .pd-header-meta {
-    grid-template-columns: 1fr;
-  }
-
-  .pd-urls-row {
-    flex-direction: column;
-  }
-
-  .pd-url-link {
-    justify-content: center;
   }
 }
 
 /* Legacy styles - keep for backward compat */
 /* Project Overview Card - Stack on mobile */
 @media (--mobile) {
-  .project-detail-client-row,
   .project-detail-meta {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1429,7 +869,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 @media (--small-mobile) {
-  .project-detail-client-row,
   .project-detail-meta {
     grid-template-columns: 1fr;
   }
@@ -1450,131 +889,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* Contract tab styles moved to pd-contract.css */
-
-/* =====================================================
-   PROJECT NOTES TAB
-   ===================================================== */
-
-/* Notes display container */
-.notes-display {
-  min-height: 100px;
-}
-
-.notes-display .notes-content {
-  line-height: var(--line-height-relaxed);
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-/* =====================================================
-   DOCUMENT GENERATION MODAL
-   ===================================================== */
-
-.document-generation-modal {
-  min-width: min(600px, 90vw);
-}
-
-/* Uses utility classes: flex flex-col gap-4 */
-
-.document-generation-content .modal-description {
-  margin: 0;
-  line-height: var(--line-height-normal);
-}
-
-.document-section {
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-}
-
-.document-header {
-  display: flex;
-  align-items: flex-start;
-}
-
-.document-icon {
-  flex-shrink: 0;
-  width: calc(var(--icon-size-xl) * 2);
-  height: calc(var(--icon-size-xl) * 2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--portal-bg-dark);
-  color: var(--color-primary);
-}
-
-.document-icon svg {
-  width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-}
-
-.document-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.document-info h4 {
-  margin: 0 0 var(--space-1) 0;
-  font-weight: var(--font-weight-semibold);
-}
-
-.document-info p {
-  margin: 0;
-  line-height: var(--line-height-snug);
-}
-
-.document-actions {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
-.document-actions .btn svg {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
-}
-
-.document-generation-content .modal-note {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: var(--portal-bg-darker);
-  margin: 0;
-  line-height: var(--line-height-snug);
-}
-
-.document-generation-content .modal-note svg {
-  flex-shrink: 0;
-  margin-top: var(--space-px);
-  opacity: 0.7;
-}
-
-/* Responsive adjustments */
-@media (--small-mobile) {
-  .document-generation-modal {
-    min-width: unset;
-  }
-
-  .document-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .document-actions {
-    width: 100%;
-  }
-
-  .document-actions .btn {
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-/* Contract tab styles: see pd-contract.css */
-/* Invoice tab styles: see pd-invoices.css */
 
 /* =====================================================
    PROJECT DETAIL TAB SHARED CLASSES
@@ -1654,18 +968,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .pd-mt-3 {
   margin-top: var(--space-3);
-}
-
-.pd-mt-4 {
-  margin-top: var(--space-4);
-}
-
-.pd-mb-2 {
-  margin-bottom: var(--space-2);
-}
-
-.pd-mb-3 {
-  margin-bottom: var(--space-3);
 }
 
 /* --- Files Tab --- */
@@ -1829,14 +1131,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-}
-
-/* Contract stat header (icon + label) */
-.contract-stat-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
 }
 
 /* Contract files header bar */

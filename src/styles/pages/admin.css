@@ -376,18 +376,6 @@ body[data-page="admin"] .project-detail-overview {
   padding-bottom: var(--space-1-5);
 }
 
-/* Base Admin Styles */
-.admin-body {
-  background: linear-gradient(
-    135deg,
-    var(--color-admin-bg-start) 0%,
-    var(--color-admin-bg-end) 100%
-  );
-  color: var(--portal-text-light);
-  min-height: 100vh;
-  font-family: "Inter", sans-serif;
-}
-
 [data-page="admin"] .page-header h2 {
   color: var(--color-primary);
 }
@@ -405,71 +393,7 @@ body[data-page="admin"] .project-detail-overview {
   color: var(--portal-text-light);
 }
 
-.admin-nav {
-  background: var(--portal-bg-darker);
-  border-bottom: var(--portal-border);
-  padding: var(--space-4) var(--space-6);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-index-nav);
-  box-shadow: var(--shadow-nav);
-}
-
-.nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-
-.nav-header h1 {
-  color: var(--color-primary);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
-.nav-tabs {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
-/* .tab-btn — pills-style tab (questionnaires, admin settings).
-   Uses same font/color variables as all other tabs. */
-.tab-btn {
-  padding: var(--space-1) var(--space-2);
-  background: var(--portal-bg-darkest);
-  border: var(--border-width) solid var(--portal-border-color);
-  border-radius: 0;
-  color: var(--portal-text-secondary);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-  font-family: var(--portal-subtab-family);
-  font-size: var(--portal-subtab-size);
-  font-weight: var(--portal-subtab-weight);
-  text-transform: var(--portal-subtab-transform);
-  letter-spacing: var(--portal-subtab-spacing);
-}
-
-.tab-btn:hover {
-  color: var(--portal-text-primary);
-}
-
-.tab-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-white);
-}
-
-/* Tab Content */
-.admin-content {
-  flex: 1;
-  padding: var(--space-6);
-  overflow-y: auto;
-}
-
 body.modal-open,
-body.modal-open .admin-content,
 body.modal-open .dashboard-content {
   overflow: hidden;
 }
@@ -519,55 +443,6 @@ body.modal-open .dashboard-content {
   color: var(--portal-text-secondary);
 }
 
-/* Visitors Tab */
-.visitors-dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.visitors-controls {
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.visitors-pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-/* Leads Tab */
-.leads-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.leads-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-}
-
-.leads-header h2 {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0;
-}
-
-.leads-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-4);
-}
-
 /* Base .stat-card styles are in shared/portal-cards.css */
 [data-page="admin"] .stat-card-clickable:hover {
   background: var(--portal-bg-readonly);
@@ -588,14 +463,6 @@ body.modal-open .dashboard-content {
 
 [data-page="admin"] #admin-page-title {
   font-family: var(--font-family-sans);
-}
-
-/* Status cell wrapper for inline status + action button */
-.status-cell-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
 }
 
 /* Invite icon button - matches .icon-btn pattern */
@@ -636,32 +503,6 @@ body.modal-open .dashboard-content {
 }
 
 /* ================================================
-   CLIENT TYPE BADGES
-   ================================================ */
-.client-type-badge {
-  display: inline-block;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: capitalize;
-  border: var(--portal-border);
-  white-space: nowrap;
-}
-
-.client-type-personal {
-  background: var(--color-status-review-border);
-  border-color: var(--portal-border-dark);
-  color: var(--color-white);
-}
-
-.client-type-business {
-  background: var(--color-info);
-  border-color: var(--portal-border-dark);
-  color: var(--color-black);
-}
-
-/* ================================================
    Data Table Card - Admin overrides
    ================================================ */
 /* Base .data-table-card styles in portal-tables.css */
@@ -692,13 +533,6 @@ body.modal-open .dashboard-content {
 
 .data-table-header .data-table-actions {
   order: 2;
-}
-
-.data-table-title-group {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  min-width: 0;
 }
 
 .data-table-header h3 {
@@ -891,35 +725,6 @@ body.modal-open .dashboard-content {
 /* ================================================
    System Tab
    ================================================ */
-.system-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.system-section {
-  background: var(--portal-bg-darkest);
-  border: var(--portal-border);
-  border-radius: var(--border-radius-card);
-  padding: var(--space-4);
-  box-shadow: var(--shadow-card-rest);
-}
-
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
-}
-
-.status-grid h3 {
-  white-space: nowrap;
-}
-
-.status-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .status-item {
   display: flex;
   justify-content: space-between;
@@ -946,28 +751,6 @@ body.modal-open .dashboard-content {
 
 /* .status-badge and .status-indicator styles in shared/portal-badges.css */
 
-.export-controls,
-.data-controls {
-  display: flex;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-/* Loading Indicator */
-.loading-indicator {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--color-shadow);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--z-index-overlay);
-}
-
 .loader {
   width: var(--icon-btn-size-lg);
   height: var(--icon-btn-size-lg);
@@ -976,11 +759,6 @@ body.modal-open .dashboard-content {
   border-radius: var(--portal-radius-full);
   animation: spin 1s linear infinite;
   margin-bottom: var(--space-4);
-}
-
-.loading-indicator p {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-base);
 }
 
 /* Utility Classes */

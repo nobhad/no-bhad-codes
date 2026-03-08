@@ -126,106 +126,6 @@
 }
 
 /* ==========================================
-   INTRO ANIMATION CONTAINER - POSITIONING HANDLED BY INTROMODULE
-   ========================================== */
-.business-card-section .intro-animation-container {
-  /* Positioning handled by IntroModule via GSAP */
-  /* z-index handled by IntroModule via GSAP */
-
-  /* Visible immediately - high specificity to override GSAP inline cleanup */
-  display: flex;
-  opacity: 1;
-  visibility: visible;
-
-  /* Business card aspect ratio: 1069.5:599.3 = 1.784582:1 (SVG viewBox) */
-  /* Fixed dimensions to prevent CLS - maintaining exact aspect ratio */
-  width: 525px;
-  height: 294.19px; /* 525 ÷ 1.784582 = 294.19 */
-  min-width: 525px;
-  min-height: 294.19px;
-  max-width: 525px;
-  max-height: 294.19px;
-
-  /* Flex layout */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  /* 3D perspective */
-  perspective: 1000px;
-
-  /* Transparent wrapper */
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-
-  /* Prevent selection */
-  -webkit-user-select: none;
-  user-select: none;
-
-  /* Cursor indicates interactivity */
-  cursor: pointer;
-
-  /* Remove focus outline */
-  outline: none;
-}
-
-/* Intro card element - the actual card inside the container */
-.intro-card-element {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  /* CRITICAL: No CSS transitions - GSAP controls all animations */
-  transition: none;
-  border-radius: 0; /* No rounding - SVG has black stroke border */
-  box-shadow: 0 8px 32px var(--color-shadow-2xl);
-
-  /* Prevent child elements from receiving pointer events during intro */
-  pointer-events: none;
-}
-
-/* Intro card flipper - handles the 3D rotation */
-.intro-card-flipper {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  /* CRITICAL: No CSS transitions - GSAP controls all flip animations */
-  transition: none;
-}
-
-/* Intro card faces - front and back */
-.intro-card-face-front,
-.intro-card-face-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  border-radius: 0; /* No rounding - let SVG show its black stroke */
-  overflow: visible; /* Show full SVG including stroke */
-}
-
-.intro-card-face-front {
-  transform: rotateY(0deg);
-}
-
-.intro-card-face-back {
-  transform: rotateY(180deg);
-}
-
-/* Intro card images */
-.intro-card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Contain entire SVG including stroke */
-  display: block;
-  border-radius: 0; /* No rounding - SVG has its own black stroke border */
-}
-
-/* ==========================================
    BUSINESS CARD CONTAINER - INVISIBLE WRAPPER
    ========================================== */
 .business-card-container {
@@ -407,30 +307,6 @@
 }
 
 /* ==========================================
-   CARD CONTENT STYLING
-   ========================================== */
-.card-logo {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-fluid-xs);
-  letter-spacing: var(--letter-spacing-widest);
-  color: var(--color-card-text); /* Always dark text for light card */
-}
-
-.card-tagline {
-  font-size: var(--font-size-sm);
-  opacity: 0.8;
-  margin-bottom: var(--space-fluid-sm);
-  color: var(--color-card-text); /* Always dark text for light card */
-}
-
-.card-contact {
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-snug);
-  color: var(--color-card-text); /* Always dark text for light card */
-}
-
-/* ==========================================
    SVG CONTENT STYLING
    ========================================== */
 .card-svg {
@@ -514,18 +390,6 @@
     padding: 0; /* No padding - SVG fills entire area */
   }
 
-  .card-logo {
-    font-size: var(--font-size-lg);
-  }
-
-  .card-tagline {
-    font-size: var(--font-size-xs);
-  }
-
-  .card-contact {
-    font-size: var(--font-size-xs);
-  }
-
   /* Mobile: Start card showing back (rotated 180deg), JS will flip to front */
   .intro-loading .business-card-inner {
     transform: rotateY(180deg);
@@ -553,18 +417,6 @@
   .business-card-front,
   .business-card-back {
     padding: 0; /* No padding - SVG fills entire area */
-  }
-
-  .card-logo {
-    font-size: var(--font-size-base);
-  }
-
-  .card-tagline {
-    font-size: var(--font-size-xs);
-  }
-
-  .card-contact {
-    font-size: var(--font-size-xs);
   }
 }
 
@@ -643,10 +495,6 @@
 /* Dark Mode Enhancements - deeper shadow on faces */
 html[data-theme="dark"] .business-card-front,
 html[data-theme="dark"] .business-card-back {
-  box-shadow: 0 8px 32px var(--color-shadow-xl);
-}
-
-html[data-theme="dark"] .intro-card-element {
   box-shadow: 0 8px 32px var(--color-shadow-xl);
 }
 

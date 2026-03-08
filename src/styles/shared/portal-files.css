@@ -493,12 +493,6 @@
   max-width: 300px;
 }
 
-/* Files View (alternate layout) - client portal specific */
-.files-view {
-  padding: var(--space-4);
-  overflow-y: auto;
-}
-
 .files-header {
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-2);
@@ -507,44 +501,6 @@
 
 .files-header h1 {
   margin-bottom: var(--space-1);
-}
-
-.files-container {
-  display: flex;
-  flex-direction: column;
-}
-
-/* File Section - client portal specific alternate layout */
-.file-section {
-  background: transparent;
-  border: none;
-  overflow: hidden;
-  box-shadow: none;
-}
-
-.file-section-header {
-  padding: var(--space-2) var(--space-3);
-  background: var(--portal-bg-darker);
-  border-bottom: var(--portal-border);
-}
-
-.file-section-header h2 {
-  margin: 0;
-}
-
-.file-list {
-  padding: 0;
-}
-
-.file-list .file-item {
-  padding: var(--space-2) var(--space-3);
-  border-bottom: var(--portal-border);
-  transition: background-color var(--transition-fast);
-  color: var(--portal-text-light);
-}
-
-.file-list .file-item:last-child {
-  border-bottom: none;
 }
 
 /* File items - shared portal styling */
@@ -671,16 +627,6 @@
   .files-mobile-select {
     display: none;
   }
-}
-
-/* Breadcrumb path */
-.files-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin-bottom: var(--space-3);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
 }
 
 /* File name cell — icon + truncated name */

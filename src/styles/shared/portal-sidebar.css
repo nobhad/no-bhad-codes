@@ -66,28 +66,6 @@
 
 /* Logout button uses .sidebar-btn class - inherits all sidebar button styles */
 
-/* Theme Toggle Button in Sidebar */
-.btn-theme-toggle {
-  width: 100%;
-}
-
-/* Theme icons - show/hide based on current theme */
-.btn-theme-toggle .sun-icon {
-  display: block;
-}
-
-.btn-theme-toggle .moon-icon {
-  display: none;
-}
-
-html[data-theme="dark"] .btn-theme-toggle .sun-icon {
-  display: none;
-}
-
-html[data-theme="dark"] .btn-theme-toggle .moon-icon {
-  display: block;
-}
-
 /* Sidebar logo/branding styles in shared/portal-layout.css */
 
 /* Sidebar Buttons - no top padding; button's own padding provides spacing.

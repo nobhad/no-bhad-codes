@@ -359,12 +359,6 @@ section.business-card-section.page-hidden .intro-nav {
   filter: blur(var(--page-blur-amount));
 }
 
-/* Leaving page state */
-.page-leaving {
-  opacity: 0;
-  filter: blur(var(--page-blur-amount));
-}
-
 /* ============================================
  * DEFENSIVE PAGE VISIBILITY RULES
  * Ensures no page overlap during transitions
@@ -394,8 +388,7 @@ section[data-page].page-hidden {
     --page-blur-amount: 0;
   }
 
-  .page-entering,
-  .page-leaving {
+  .page-entering {
     transition: none !important;
     animation: none !important;
   }

@@ -128,7 +128,6 @@ select::-ms-expand {
  * ============================================ */
 
 /* Form container styling - EXCLUDE .contact-form (has custom styling in pages/contact.css) */
-.form-container,
 .login-form {
   background: var(--color-neutral-300);
   padding: clamp(8px, 2.5vw, 20px);
@@ -167,35 +166,6 @@ label {
   font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   font-size: clamp(0.875rem, 2.5vw, 1rem);
-}
-
-/* Form intro text */
-.form-intro {
-  margin: 0;
-  color: var(--color-text-primary);
-  font-size: clamp(0.875rem, 2vw, 1rem);
-  line-height: var(--line-height-snug);
-  text-align: center;
-}
-
-/* ============================================
- * FORM FOOTER ELEMENTS
- * ============================================ */
-
-/* Form footer styling */
-.login-footer,
-.form-footer {
-  margin-top: clamp(8px, 2vw, 16px);
-  padding-top: clamp(8px, 2vw, 16px);
-  border-top: var(--border-width) solid var(--color-dark);
-  text-align: center;
-}
-
-.login-footer p,
-.form-footer p {
-  margin: clamp(4px, 1vw, 8px) 0;
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
 }
 
 /* ============================================

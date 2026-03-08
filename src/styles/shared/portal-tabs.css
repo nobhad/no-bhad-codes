@@ -23,11 +23,6 @@
   display: none;
 }
 
-.tab-content-panel {
-  display: block;
-  min-height: auto;
-}
-
 .tab-content.active,
 .portal-tab-panel.active {
   display: block;
@@ -54,10 +49,6 @@
   margin-bottom: var(--portal-section-gap);
 }
 
-.portal-subtabs--sm {
-  gap: var(--space-0-25);
-}
-
 .view-toggle {
   display: inline-flex;
   gap: var(--space-1);
@@ -68,12 +59,6 @@
   display: flex;
   gap: 0;
   border-bottom: var(--border-width) solid var(--portal-border);
-}
-
-/* Hide inline tabs for project/client detail - tabs are now in header */
-.project-detail-tabs.portal-tabs,
-.client-detail-tabs.portal-tabs {
-  display: none;
 }
 
 /* =====================================================
@@ -182,14 +167,6 @@
   cursor: not-allowed;
 }
 
-.portal-tab--disabled {
-  cursor: not-allowed;
-}
-
-.portal-subtab--disabled {
-  cursor: not-allowed;
-}
-
 /* =====================================================
    FOCUS-VISIBLE
    ===================================================== */
@@ -213,7 +190,7 @@
   flex-shrink: 0;
 }
 
-:is(.view-toggle button, .view-toggle-option, .view-toggle-icon) svg {
+:is(.view-toggle button, .view-toggle-option) svg {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
 }
@@ -258,45 +235,6 @@
 }
 
 /* =====================================================
-   TAB SECTION HEADINGS
-   ===================================================== */
-
-.tab-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0;
-  padding: var(--portal-section-heading-padding);
-}
-
-.tab-section-header .tab-section-heading {
-  margin: 0;
-  padding-left: 0;
-}
-
-.tab-section-heading {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-base);
-  font-weight: var(--portal-label-weight, 500);
-  text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing, 0.05em);
-  color: var(--portal-text-secondary);
-  margin: 0;
-  padding: var(--portal-section-heading-padding);
-  line-height: var(--line-height-tight);
-}
-
-/* Hide heading on first tab (overview) since it's the main content */
-.portal-tab-panel:first-of-type .tab-section-heading {
-  display: none;
-}
-
-/* Hide section headings in analytics subtabs */
-.analytics-subtab-content .tab-section-heading {
-  display: none;
-}
-
-/* =====================================================
    TAB BADGES
    ===================================================== */
 
@@ -336,136 +274,6 @@
 .portal-subtab.active .portal-subtab-badge {
   background: var(--color-primary);
   color: var(--color-white);
-}
-
-.portal-tab-label {
-  flex-shrink: 0;
-}
-
-.view-toggle-icon {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.view-toggle-label {
-  flex-shrink: 0;
-}
-
-/* =====================================================
-   TAB SIZE VARIANTS
-   ===================================================== */
-
-.portal-tabs--sm :is(.portal-tab, button) {
-  padding: var(--space-0-5) var(--space-1-5);
-  font-size: var(--font-size-xs);
-}
-
-.portal-tabs--sm .portal-tab-icon {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
-}
-
-.portal-tabs--lg :is(.portal-tab, button) {
-  padding: var(--space-1-5) var(--space-3);
-  font-size: var(--font-size-base);
-}
-
-.portal-tabs--lg .portal-tab-icon {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.view-toggle--sm .view-toggle-option {
-  padding: var(--space-0-5) var(--space-1);
-}
-
-.view-toggle--sm .view-toggle-icon {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
-}
-
-/* =====================================================
-   TAB STYLE VARIANTS
-   ===================================================== */
-
-/* Pills variant */
-.portal-tabs--pills {
-  gap: var(--space-0-5);
-  border-bottom: none;
-}
-
-.portal-tabs--pills :is(.portal-tab, button) {
-  border-radius: var(--portal-radius-full);
-  border-bottom: none;
-}
-
-.portal-tabs--pills :is(.portal-tab, button).active {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-bottom: none;
-}
-
-/* Underline variant (default, explicit) */
-.portal-tabs--underline {
-  border-bottom: var(--border-width) solid var(--portal-border);
-}
-
-/* Contained variant */
-.portal-tabs--contained {
-  background: var(--portal-bg-medium);
-  border-radius: var(--portal-radius-md);
-  padding: var(--space-0-5);
-  border-bottom: none;
-  gap: var(--space-0-5);
-}
-
-.portal-tabs--contained :is(.portal-tab, button) {
-  border-radius: var(--portal-radius-sm);
-  border-bottom: none;
-}
-
-.portal-tabs--contained :is(.portal-tab, button).active {
-  background: var(--portal-bg-light);
-  border-bottom: none;
-}
-
-/* =====================================================
-   SCROLL INDICATORS
-   ===================================================== */
-
-.portal-tabs-wrapper {
-  position: relative;
-}
-
-.portal-tabs-wrapper::before,
-.portal-tabs-wrapper::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 4px;
-  width: 32px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--transition-mouse) ease;
-  z-index: var(--z-index-content);
-}
-
-.portal-tabs-wrapper::before {
-  left: 0;
-  background: linear-gradient(to right, var(--portal-bg-medium) 0%, transparent 100%);
-}
-
-.portal-tabs-wrapper::after {
-  right: 0;
-  background: linear-gradient(to left, var(--portal-bg-medium) 0%, transparent 100%);
-}
-
-.portal-tabs-wrapper[data-scroll-start="false"]::before {
-  opacity: 1;
-}
-
-.portal-tabs-wrapper[data-scroll-end="false"]::after {
-  opacity: 1;
 }
 
 /* =====================================================
@@ -511,7 +319,6 @@
 
   .portal-tab-panel.active,
   .portal-subtab-content.active,
-  .analytics-subtab-content.active,
   .documents-subtab-content.active {
     gap: var(--space-2);
   }

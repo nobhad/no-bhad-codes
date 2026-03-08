@@ -367,18 +367,6 @@ details > summary:focus-visible {
 
 /* Table dropdowns - focus handled in portal-dropdown.css */
 
-/* Export dropdowns */
-.export-dropdown.open:focus-within {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
-}
-
-.export-dropdown.open button:focus,
-.export-dropdown.open button:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
 /* ============================================
  * REDUCED MOTION SUPPORT
  * ============================================ */

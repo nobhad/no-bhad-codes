@@ -293,20 +293,6 @@
   color: var(--portal-text-muted);
 }
 
-.back-link {
-  display: block;
-  text-align: center;
-  margin-top: 1.5rem;
-  color: var(--portal-text-secondary);
-  text-decoration: none;
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  transition: color var(--transition-fast);
-}
-
-.back-link:hover {
-  color: var(--color-primary);
-}
-
 /* =====================================================
    AUTOFILL OVERRIDE - Keep dark background
    ===================================================== */

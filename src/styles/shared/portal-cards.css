@@ -54,7 +54,6 @@
    Single source of truth for ALL section headings.
    Uses --portal-section-heading-padding from design tokens.
    ===================================================== */
-.portal-section-heading,
 .portal-section > h3:first-child,
 .portal .analytics-section > h3:first-child,
 .portal .chart-container > h3:first-child,
@@ -72,7 +71,6 @@
    PORTAL SECTION CONTENT - BASE STYLE
    Uniform padding for content area below headings.
    ===================================================== */
-.portal-section-content,
 .portal-section > *:not(h3:first-child),
 .portal .analytics-section > *:not(h3:first-child),
 .portal .chart-container > *:not(h3:first-child),

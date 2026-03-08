@@ -385,7 +385,6 @@
   min-width: 0;
 }
 
-.admin-table-container,
 .table-container,
 .data-table-container {
   background: transparent;
@@ -395,7 +394,6 @@
 }
 
 /* Scroll wrapper - horizontal scroll when columns don't fit */
-.admin-table-scroll-wrapper,
 .table-scroll-wrapper,
 .data-table-scroll-wrapper {
   width: 100%;
@@ -406,7 +404,6 @@
 }
 
 /* Standalone scroll wrapper (not in card) gets the border */
-.admin-table-scroll-wrapper:not(.data-table-card *),
 .table-scroll-wrapper:not(.data-table-card *),
 .data-table-scroll-wrapper:not(.data-table-card *) {
   border: var(--portal-border);
@@ -957,54 +954,6 @@
   overflow: visible;
   text-overflow: clip;
   line-height: var(--line-height-snug);
-}
-
-/* ==============================================
-   COLUMN WIDTH UTILITIES
-   ============================================== */
-
-.col-xs {
-  width: var(--table-col-xs);
-}
-.col-sm {
-  width: var(--table-col-sm);
-}
-.col-md {
-  width: var(--table-col-md);
-}
-.col-lg {
-  width: var(--table-col-lg);
-}
-.col-xl {
-  width: var(--table-col-xl);
-}
-.col-auto {
-  width: auto;
-}
-.col-fill {
-  width: 100%;
-}
-
-.col-10 {
-  width: 10%;
-}
-.col-15 {
-  width: 15%;
-}
-.col-20 {
-  width: 20%;
-}
-.col-25 {
-  width: 25%;
-}
-.col-30 {
-  width: 30%;
-}
-.col-40 {
-  width: 40%;
-}
-.col-50 {
-  width: 50%;
 }
 
 /* ==============================================
@@ -1993,12 +1942,6 @@
 
 .data-table-row-selected {
   background-color: var(--portal-alpha-primary-10, rgba(0, 175, 240, 0.1));
-}
-
-.data-table-sort-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-0-5);
 }
 
 .data-table-pagination {

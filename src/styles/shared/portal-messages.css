@@ -845,15 +845,6 @@
   height: 100%;
 }
 
-/* Message thread header - uses data-table-header pattern now */
-.message-thread-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  padding: var(--space-1) var(--space-1-5);
-  border-bottom: var(--border-width) solid var(--portal-border-color);
-}
-
 /* Message bubble container */
 .message-bubble-container {
   display: flex;

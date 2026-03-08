@@ -337,22 +337,11 @@ section,
     color 0.2s ease;
 }
 
-/* Font Utility Classes */
-
-.font-acme {
-  font-family: var(--font-family-acme);
-}
-
 /* Container Utilities */
 .container {
   width: 100%;
   max-width: var(--size-container);
   margin: 0 auto;
-  padding: 0 var(--container-padding);
-}
-
-.container-fluid {
-  width: 100%;
   padding: 0 var(--container-padding);
 }
 
@@ -422,14 +411,7 @@ section,
 
 /* Responsive Text Utilities - defined in base/typography.css */
 
-.text-uppercase {
-  text-transform: uppercase;
-}
-
 /* Responsive Spacing Utilities */
-.p-xs {
-  padding: var(--space-fluid-xs);
-}
 .p-sm {
   padding: var(--space-fluid-sm);
 }
@@ -443,21 +425,6 @@ section,
   padding: var(--space-fluid-xl);
 }
 
-.m-xs {
-  margin: var(--space-fluid-xs);
-}
-.m-sm {
-  margin: var(--space-fluid-sm);
-}
-.m-md {
-  margin: var(--space-fluid-md);
-}
-.m-lg {
-  margin: var(--space-fluid-lg);
-}
-.m-xl {
-  margin: var(--space-fluid-xl);
-}
 
 /* Responsive Visibility */
 /* NOTE: Base .hidden is defined in base/layout.css - do not duplicate here */
@@ -485,12 +452,6 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
-}
-
-.img-responsive {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
 }
 
 /* NOTE: .video-responsive styles moved to main.css to avoid duplication */

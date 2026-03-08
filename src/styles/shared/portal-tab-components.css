@@ -16,26 +16,6 @@
    TASKS TAB COMPONENT
    ============================================ */
 
-/* Text size variants */
-.tasks-text-xs {
-  font-size: var(--font-size-xs);
-}
-
-.tasks-text-base {
-  font-size: var(--font-size-sm);
-}
-
-/* Text with font weight */
-.tasks-text-semibold {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.tasks-text-medium {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
 /* Form heading */
 .tasks-form-heading {
   font-size: var(--font-size-sm);
@@ -82,16 +62,6 @@
 /* ============================================
    CONTRACT TAB COMPONENT
    ============================================ */
-
-/* Icon container without border radius */
-.contract-icon-box {
-  border-radius: 0;
-}
-
-/* Large heading */
-.contract-heading-lg {
-  font-size: var(--font-size-lg);
-}
 
 /* Panel without padding */
 .contract-panel-no-padding {
@@ -156,11 +126,6 @@
   border-bottom: var(--border-width) solid var(--portal-border-subtle);
 }
 
-/* Icon box no radius */
-.deliv-icon-box {
-  border-radius: 0;
-}
-
 /* Milestone description */
 .deliv-milestone-desc {
   font-size: var(--font-size-xs);
@@ -170,12 +135,6 @@
 /* ============================================
    FILES TAB COMPONENT
    ============================================ */
-
-/* Upload area */
-.files-upload-area {
-  border-radius: 0;
-  padding: var(--space-6);
-}
 
 /* Spinner */
 .files-spinner {
@@ -309,11 +268,6 @@
   border-radius: 0;
 }
 
-/* Spinner circle */
-.msgtab-spinner {
-  border-radius: var(--portal-radius-full);
-}
-
 /* Avatar no radius */
 .msgtab-avatar {
   border-radius: 0;
@@ -356,14 +310,6 @@
   border-radius: 0;
 }
 
-/* Checkbox - uses portal border color */
-.contacts-checkbox {
-  border: var(--border-width) solid var(--portal-border-color);
-  border-radius: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
 /* Notes with border top */
 .contacts-notes {
   font-size: var(--font-size-xs);
@@ -377,11 +323,6 @@
 /* Stats container */
 .invtab-stats {
   font-size: var(--font-size-sm);
-}
-
-/* Bold amount text */
-.invtab-amount-bold {
-  font-weight: var(--font-weight-semibold);
 }
 
 /* Filter select */
@@ -403,12 +344,6 @@
 /* Table row display */
 .invtab-row {
   display: table-row;
-}
-
-/* Cell bold text */
-.invtab-cell-bold {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
 }
 
 /* ============================================

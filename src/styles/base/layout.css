@@ -3,7 +3,7 @@
  * LAYOUT SYSTEM
  * ===============================================
  * @file src/styles/base/layout.css
- * 
+ *
  * Core layout primitives and responsive containers
  * for consistent page structure across the application.
  */
@@ -85,14 +85,10 @@ main {
  * - .contact-section: pages/contact.css (EXCLUDED - uses CSS Grid, not Flex)
  * - .tech-stack-section: pages/about.css (EXCLUDED - mobile only, hidden on desktop)
  * - .hero-section: pages/hero.css (if exists)
- * - .text-animation-section: layout.css (below)
  */
 .business-card-section,
-.text-animation-section,
 .about-section,
 .hero-section,
-.client-login,
-.page-section,
 main > section:not(.contact-section):not(.tech-stack-section) {
   display: flex;
   flex-direction: column;
@@ -113,32 +109,6 @@ main > section:not(.contact-section):not(.tech-stack-section) {
   flex: 1 0 100%;
   width: 100%;
   position: relative;
-}
-
-/* Text animation section - full viewport height */
-@media (--tablet) {
-  .text-animation-section {
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: auto;
-  }
-
-  /* Hero section - full viewport height */
-  .hero-section {
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: auto;
-  }
-
-  /* Client login - full viewport height */
-  .client-login {
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: auto;
-  }
-
-  /* Generic page section - full viewport height */
-  .page-section {
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
-    height: auto;
-  }
 }
 
 /* Section base styles - fill main content area */
@@ -191,9 +161,7 @@ section.about-section.page-active {
 /* Universal container - based on main page pattern */
 /* NOTE: .about-content has its own styles in pages/about.css */
 .container,
-.section-content,
-.login-wrapper,
-.page-content {
+.section-content {
   max-width: min(1000px, 90vw);
   width: 100%;
   margin: 0 auto;
@@ -204,12 +172,6 @@ section.about-section.page-active {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-}
-
-/* Container variants */
-.container-fluid {
-  width: 100%;
-  padding: 0 var(--container-padding);
 }
 
 /* Content scaling within sections */
@@ -241,9 +203,6 @@ section.about-section.page-active {
   display: grid;
   gap: var(--gap);
 }
-.inline-grid {
-  display: inline-grid;
-}
 .grid-cols-1 {
   grid-template-columns: 1fr;
 }
@@ -255,9 +214,6 @@ section.about-section.page-active {
 }
 .grid-cols-4 {
   grid-template-columns: repeat(4, 1fr);
-}
-.grid-cols-12 {
-  grid-template-columns: repeat(12, 1fr);
 }
 
 /* ============================================
@@ -475,8 +431,7 @@ main {
     font-size: clamp(0.8rem, 2.5vw, 1rem);
   }
 
-  .container,
-  .page-content {
+  .container {
     max-width: 95vw;
   }
 }
@@ -491,8 +446,7 @@ main {
     padding: 0.25rem;
   }
 
-  .container,
-  .page-content {
+  .container {
     max-width: 98vw;
   }
 }
@@ -500,10 +454,6 @@ main {
 /* ============================================
  * TEXT ANIMATION SECTION STYLES
  * ============================================ */
-
-.text-animation-section {
-  overflow: hidden;
-}
 
 .text-animation-svg {
   width: 100%;

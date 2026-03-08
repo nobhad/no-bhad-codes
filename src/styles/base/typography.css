@@ -133,10 +133,6 @@ section h2 + hr {
   font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
-.text-3xl {
-  font-size: clamp(2rem, 5vw, 3rem);
-}
-
 /* ============================================
  * TYPOGRAPHY UTILITIES
  * ============================================ */
@@ -151,14 +147,8 @@ section h2 + hr {
 .text-right {
   text-align: right;
 }
-.text-justify {
-  text-align: justify;
-}
 
 /* Font weights */
-.font-normal {
-  font-weight: 400;
-}
 .font-medium {
   font-weight: 500;
 }
@@ -173,9 +163,6 @@ section h2 + hr {
 .italic {
   font-style: italic;
 }
-.not-italic {
-  font-style: normal;
-}
 
 /* Text transformations */
 .uppercase {
@@ -187,18 +174,8 @@ section h2 + hr {
 .capitalize {
   text-transform: capitalize;
 }
-.normal-case {
-  text-transform: none;
-}
 
 /* Text overflow - .truncate is in base/utilities.css */
-
-.text-ellipsis {
-  text-overflow: ellipsis;
-}
-.text-clip {
-  text-overflow: clip;
-}
 
 /* ============================================
  * SPECIALIZED TYPOGRAPHY CLASSES
@@ -289,37 +266,6 @@ p a:focus::before {
   display: flex;
   align-items: center;
   position: relative;
-}
-
-/* Icon links - shrink on hover for tactile feedback */
-.icon-link,
-a.icon-link {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.5rem;
-  box-sizing: border-box;
-}
-
-/* Disable underline animation on icon links */
-.icon-link::before,
-a.icon-link::before {
-  display: none;
-}
-
-.icon-link svg,
-a.icon-link svg {
-  fill: var(--color-text-primary, currentColor);
-  transition:
-    fill var(--transition-theme, 0.4s),
-    transform var(--transition-mouse, 0.2s) cubic-bezier(0.3, 0.9, 0.3, 0.9);
-}
-
-.icon-link:hover svg,
-.icon-link:focus-visible svg,
-a.icon-link:hover svg,
-a.icon-link:focus-visible svg {
-  transform: scale(0.9);
 }
 
 @media (hover: hover) {

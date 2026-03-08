@@ -38,12 +38,6 @@
   gap: var(--space-2);
 }
 
-.layout-row-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 /* ============================================
  * VERTICAL LAYOUTS
  * ============================================ */
@@ -54,38 +48,11 @@
   gap: var(--space-3);
 }
 
-.layout-stack-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-}
-
 /* ============================================
  * GAP UTILITIES (override defaults)
  * ============================================ */
 
-.gap-0 { gap: 0; }
 .gap-1 { gap: var(--space-1); }
 .gap-2 { gap: var(--space-2); }
 .gap-3 { gap: var(--space-3); }
 .gap-4 { gap: var(--space-4); }
-
-/* ============================================
- * FLEX ITEM UTILITIES
- * ============================================ */
-
-.flex-fill {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ============================================
- * FORM FIELD
- * ============================================ */
-
-.layout-form-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}

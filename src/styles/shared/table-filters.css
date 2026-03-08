@@ -12,14 +12,6 @@
  * - Sortable table headers
  */
 
-/* Filter controls container */
-.table-filter-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 /* =====================================================
    COMPACT FILTER SELECTS - React tables
    Height matches buttons (28px), prevents full-width stretch
@@ -176,30 +168,6 @@
 /* Checkbox group */
 /* Uses utility classes: flex flex-col gap-1 */
 
-.filter-checkbox {
-  display: flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  padding: var(--space-1) var(--space-1);
-  margin: 0 calc(-1 * var(--space-1));
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.filter-checkbox:hover {
-  background: var(--portal-bg-medium);
-}
-
-/* .portal-checkbox base styles live in portal-forms.css */
-.filter-checkbox .portal-checkbox {
-  flex-shrink: 0;
-}
-
-.filter-checkbox span {
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-}
-
 /* Filter options - simple clickable list items */
 .filter-options {
   display: flex;
@@ -228,47 +196,6 @@
   color: var(--portal-text-light);
 }
 
-/* Date range inputs - stacked vertically */
-/* Uses utility classes: flex flex-col gap-1 */
-
-.filter-date-input {
-  width: 100%;
-  padding: var(--space-1) var(--space-1);
-  background: var(--portal-bg-medium);
-  border: var(--border-width) solid var(--portal-border);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  height: var(--space-4);
-}
-
-.filter-date-input:focus {
-  outline: none;
-  border-color: var(--portal-accent);
-}
-
-.filter-date-separator {
-  display: none;
-}
-
-/* Clear button */
-.filter-clear-btn {
-  width: 100%;
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  border: var(--border-width) solid var(--portal-border);
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.filter-clear-btn:hover {
-  color: var(--portal-accent);
-  border-color: var(--portal-accent);
-}
-
 /* Sortable table headers - styles moved to shared/portal-tables.css */
 
 /* ===============================================
@@ -276,12 +203,6 @@
    =============================================== */
 
 @media (--mobile) {
-  .table-filter-controls {
-    flex-wrap: wrap;
-    width: 100%;
-    margin-top: var(--space-1-5);
-  }
-
   .filter-search {
     flex: 1;
     min-width: var(--table-col-md);
@@ -301,15 +222,10 @@
     flex-direction: column;
     align-items: stretch;
   }
-
-  .filter-date-separator {
-    text-align: center;
-  }
 }
 
 @media (--small-mobile) {
   /* Wrapper containers must have consistent height */
-  .table-filter-controls,
   .filter-search-wrapper,
   .filter-dropdown-wrapper {
     display: flex;
@@ -318,11 +234,5 @@
     width: auto;
     margin: 0;
     padding: 0;
-  }
-
-  .table-filter-controls {
-    gap: var(--space-1);
-    flex-wrap: nowrap;
-    margin-top: 0;
   }
 }

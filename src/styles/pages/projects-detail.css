@@ -427,6 +427,19 @@
   gap: var(--space-6);
 }
 
+.worksub-info figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.worksub-info figure img {
+  width: 100%;
+  border-radius: var(--portal-radius-lg, 12px);
+  box-shadow: var(--shadow-elevated-sm);
+}
+
 /* Section heading with icon */
 .section-heading-wrapper {
   display: flex;
@@ -447,20 +460,6 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-dark);
   margin: 0;
-}
-
-/* Screenshot figures */
-.worksub-info figure {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.worksub-info figure img {
-  width: 100%;
-  border-radius: var(--portal-radius-lg, 12px);
-  box-shadow: var(--shadow-elevated-sm);
 }
 
 /* Double image wrapper - side by side */
@@ -543,16 +542,7 @@
 
 /* ===============================================
    PROJECT DETAIL RESPONSIVE — MOBILE
-   Consolidated into one block for clarity.
    =============================================== */
-
-/* -----------------------------------------------
-   MOBILE
-   Hierarchy: title > body > metadata > labels
-   Section gap: space-6 (24px)
-   Inner gap: space-3 (12px)
-   Tight group: space-1 (4px)
-   ----------------------------------------------- */
 
 @media (--mobile) {
   .project-detail-section {
@@ -574,15 +564,6 @@
     box-shadow: var(--shadow-elevated-sm);
   }
 
-  /* --- Intro block ---
-     title+badge  (tight)
-     tagline      (tight)
-     ---gap---
-     metadata
-     description
-     ---gap---
-     tools
-  */
   .worksub-intro {
     display: flex;
     flex-direction: column;
@@ -617,20 +598,6 @@
     margin: 0 0 var(--space-2);
     font-size: 15px;
     color: var(--color-text-muted);
-  }
-
-  /* Metadata row */
-  .intro-content {
-    gap: var(--space-3);
-  }
-
-  .intro-left {
-    flex-direction: row;
-    gap: var(--space-4);
-  }
-
-  .intro-left-row {
-    gap: var(--space-4);
   }
 
   .intro-left-group {
@@ -670,6 +637,20 @@
   .tools-list .tool-tag {
     font-size: var(--font-size-xs);
     padding: 2px var(--space-2);
+  }
+
+  /* Metadata row */
+  .intro-content {
+    gap: var(--space-3);
+  }
+
+  .intro-left {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+
+  .intro-left-row {
+    gap: var(--space-4);
   }
 
   /* --- Case study --- */
@@ -727,7 +708,6 @@
 
   /* Prev/Next nav */
   .project-nav {
-    border-top: none;
     margin-top: 0;
     padding: 0 0 var(--space-4);
     gap: var(--space-2);
@@ -772,6 +752,10 @@
   color: var(--color-dark);
 }
 
+[data-theme="dark"] .worksub-links {
+  border-top-color: var(--color-dark);
+}
+
 [data-theme="dark"] .section-heading-wrapper h2 {
   color: var(--color-dark);
 }
@@ -784,10 +768,6 @@
   background-color: var(--color-dark);
 }
 
-[data-theme="dark"] .worksub-links {
-  border-top-color: var(--color-dark);
-}
-
 [data-theme="dark"] .project-nav {
   border-top-color: var(--color-dark);
 }
@@ -796,6 +776,7 @@
    CASE STUDY SECTIONS
    =============================================== */
 
+/* Worksub case study - grouped case study blocks */
 .worksub-case-study {
   display: flex;
   flex-direction: column;
@@ -900,8 +881,6 @@
     font-size: var(--font-size-sm);
   }
 }
-
-
 
 /* ===============================================
    TAGLINE & STATUS BADGE
@@ -1058,8 +1037,18 @@
   color: var(--color-dark);
 }
 
-/* Responsive — nav + title row */
+/* ===============================================
+   RESPONSIVE - MOBILE
+   =============================================== */
+
 @media (--mobile) {
+  .title-row {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
   .project-nav {
     border-top: none;
   }
@@ -1125,12 +1114,5 @@
 
   .project-nav-label {
     font-size: var(--font-size-2xs);
-  }
-
-  .title-row {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-2);
-    flex-wrap: wrap;
   }
 }

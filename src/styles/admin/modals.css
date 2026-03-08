@@ -38,30 +38,6 @@
 }
 
 /* ==============================================
-   MODAL CONTENT
-   ============================================== */
-
-.modal-content {
-  position: relative;
-  z-index: var(--z-index-portal-modal);
-  width: 100%;
-  max-width: var(--modal-width-md, 560px);
-  max-height: min(90vh, calc(100vh - 2 * var(--space-4, 1rem)));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: var(--portal-bg-darker);
-  box-shadow: var(--shadow-modal);
-  animation: slideUp var(--transition-fast);
-}
-
-.modal-content > .modal-body {
-  overflow: auto;
-  flex: 1;
-  min-height: 0;
-}
-
-/* ==============================================
    MODAL HEADER
    ============================================== */
 

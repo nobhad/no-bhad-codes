@@ -23,16 +23,14 @@
  * ERROR MESSAGES
  * ============================================ */
 
-.error-message,
-.login-error {
+.error-message {
   margin: 0;
   color: var(--color-danger);
   font-size: var(--font-size-sm);
   display: none;
 }
 
-.error-message.show,
-.login-error.show {
+.error-message.show {
   display: block;
 }
 
@@ -42,10 +40,6 @@
   min-height: 1.2em;
   margin-top: var(--space-0-5);
   display: none; /* Hidden by default */
-}
-
-.field-error--visible {
-  display: block;
 }
 
 /* Invalid field state - applied by form-errors.ts */

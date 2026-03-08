@@ -24,174 +24,10 @@
   height: var(--table-pagination-btn-size);
 }
 
-/* Legacy native select (kept for any non-js fallback) */
-.pagination-select {
-  width: auto;
-  min-width: var(--table-col-xs);
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-  border: var(--border-width) solid var(--portal-border-color);
-  background-color: var(--portal-bg-darker);
-  color: var(--portal-text-light);
-}
-
-.pagination-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
 /* Pagination dropdown styling is in shared/portal-dropdown.css
    React TablePagination now uses same classes as vanilla:
    .pagination-page-size-dropdown .table-dropdown.custom-dropdown
    ================================================ */
-
-/* ===============================================
-   TABLE VIEW CONTAINER
-   Main wrapper for admin table views
-   =============================================== */
-
-.table-view {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-/* ===============================================
-   TABLE STATS BAR
-   Inline stats display above tables
-   =============================================== */
-
-.table-stats-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
-}
-
-.table-stats-bar strong {
-  font-weight: var(--font-weight-medium);
-}
-
-/* Status text colors - REMOVED: all table text should inherit from root */
-
-/* ===============================================
-   BULK ACTIONS
-   =============================================== */
-
-/* Flexbox layout for bulk action toolbar */
-.bulk-action-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-2) var(--space-4);
-  margin-bottom: var(--space-2);
-  min-height: var(--space-6);
-  box-sizing: border-box;
-  background: var(--portal-bg-medium);
-  border: var(--border-width) solid var(--portal-border-color);
-  animation: slideDown var(--duration-fast) ease-out;
-}
-
-/* Collapse when hidden - no reserved space */
-.bulk-action-toolbar.hidden {
-  display: none;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Uses utility classes: flex items-center */
-
-.bulk-selection-count {
-  font-size: inherit;
-  color: inherit;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.bulk-selection-count strong {
-  font-weight: inherit;
-  color: inherit;
-}
-
-.bulk-clear-selection {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--portal-text-muted);
-  font-size: var(--font-size-sm);
-  text-decoration: underline;
-  cursor: pointer;
-  transition: color var(--transition-faster);
-}
-
-.bulk-clear-selection:hover {
-  color: var(--portal-text-light);
-}
-
-.bulk-toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Hide empty actions container */
-.bulk-toolbar-actions:empty {
-  display: none;
-}
-
-/* Bulk action buttons use .icon-btn.icon-btn-sm.icon-btn-primary from portal-buttons.css */
-
-/* Bulk action dropdown */
-.bulk-dropdown {
-  position: relative;
-  display: inline-flex;
-}
-
-/* Override table-dropdown positioning for bulk toolbar dropdowns */
-.bulk-toolbar-actions .bulk-dropdown .custom-dropdown-menu,
-.bulk-toolbar-actions .bulk-dropdown.table-dropdown .custom-dropdown-menu {
-  left: auto;
-  right: 0;
-}
-
-/* .bulk-dropdown-trigger uses .icon-btn.icon-btn-sm from portal-buttons.css */
-
-.bulk-dropdown-menu,
-[data-page="admin"] .bulk-dropdown .bulk-dropdown-menu,
-[data-page="admin"] .bulk-dropdown.table-dropdown .custom-dropdown-menu.bulk-dropdown-menu {
-  position: absolute;
-  right: 0;
-  left: auto;
-  top: calc(100% + var(--space-0-5));
-  min-width: var(--table-col-md);
-  max-height: var(--space-32);
-  overflow-y: auto;
-  padding: var(--space-1) 0;
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-color);
-  box-shadow: var(--shadow-card);
-  z-index: var(--z-index-portal-dropdown, 100);
-}
-
-.bulk-dropdown.open .bulk-dropdown-menu,
-[data-page="admin"] .bulk-dropdown.open .bulk-dropdown-menu,
-[data-page="admin"] .bulk-dropdown.table-dropdown.open .custom-dropdown-menu.bulk-dropdown-menu {
-  display: block;
-}
-
-/* Bulk select cell checkbox alignment - MOVED to portal-tables.css */
 
 /* ===============================================
    REACT BULK ACTIONS TOOLBAR
@@ -254,91 +90,15 @@
   color: var(--portal-btn-danger-hover-color);
 }
 
-/* ===============================================
-   EXPORT BUTTON
-   =============================================== */
-
-/* Follows .section-header-with-actions pattern for table action bars */
-.table-header-actions,
-.section-header-with-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.btn-export {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap-sm);
-  padding: var(--space-1) var(--space-3);
-  border: var(--border-width) solid var(--portal-border-color);
-  background: var(--portal-bg-dark);
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-faster);
-}
-
-.btn-export:hover {
-  background: var(--portal-bg-hover);
-  border-color: var(--portal-border-color);
-}
-
-.btn-export svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.export-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.export-dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + var(--space-0-5));
-  min-width: var(--table-col-md);
-  padding: var(--space-1) 0;
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-color);
-  box-shadow: var(--shadow-card);
-  z-index: var(--z-index-portal-dropdown, 100);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(calc(-1 * var(--space-0-5)));
-  transition: all var(--transition-faster);
-}
-
-.export-dropdown.open .export-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.export-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  background: none;
-  color: var(--portal-text-light);
-  font-size: var(--font-size-sm);
-  text-align: left;
-  cursor: pointer;
-  transition: background var(--transition-faster);
-}
-
-.export-dropdown-item:hover {
-  background: var(--portal-bg-hover);
-}
-
-.export-dropdown-item svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-  color: var(--portal-text-muted);
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===============================================
@@ -381,18 +141,6 @@
   }
 
   /* Pagination button sizes controlled by --table-pagination-btn-size in portal-tables.css */
-
-  .bulk-action-toolbar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-  }
-
-  .bulk-toolbar-actions {
-    width: 100%;
-    flex-wrap: wrap;
-  }
 
   /* Hide checkbox column on small screens - matches both class names */
   .data-table :is(th, td):is(.bulk-select-cell, .checkbox-col) {
@@ -449,71 +197,4 @@
   border: var(--border-width) solid var(--portal-border-color);
   font-family: inherit;
   font-size: inherit;
-}
-
-/* =====================================================
-   CONTRACTS TAB
-   Consolidated from contracts.css
-   ===================================================== */
-
-/* REMOVED: #tab-contracts specific styles
-   Table actions styling is handled generically in portal-tables.css
-   Search input styling is handled in portal-forms.css */
-
-.contract-detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--space-2);
-}
-
-.contract-detail-grid .portal-card {
-  margin-bottom: 0;
-}
-
-.contract-detail-grid .portal-card-header {
-  margin-bottom: var(--space-1);
-}
-
-.contract-detail-grid .detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-1) 0;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
-}
-
-.contract-detail-grid .detail-row:last-child {
-  border-bottom: none;
-}
-
-.contract-activity {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  max-height: var(--space-32);
-  overflow-y: auto;
-}
-
-.contract-activity-item {
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-color);
-  padding: var(--space-1);
-}
-
-.contract-activity-item .activity-title {
-  font-weight: inherit;
-  color: inherit;
-  text-transform: capitalize;
-}
-
-.contract-activity-item .activity-meta {
-  font-size: inherit;
-  color: inherit;
-  margin-top: var(--space-0-5);
-}
-
-@media (--tablet-landscape) {
-  .contract-detail-grid {
-    grid-template-columns: 1fr;
-  }
 }

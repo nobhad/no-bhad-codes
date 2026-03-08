@@ -8,84 +8,6 @@
  * responsive styles for the client portal login page.
  */
 
-/* ===============================================
-   AUTH CONTAINER - UNIFIED LOGIN DESIGN
-   =============================================== */
-
-.auth-container {
-  width: 100%;
-  max-width: 479px;
-  min-height: 480px;
-  max-height: 90vh;
-  background: var(--color-neutral-100);
-  border: var(--border-width-heavy) solid var(--color-border);
-  padding: 2rem;
-  box-shadow:
-    6px 6px 12px var(--portal-alpha-black-20),
-    12px 12px 24px var(--portal-alpha-black-15);
-  display: flex;
-  flex-direction: column;
-}
-
-/* New Client CTA - Below auth container */
-.new-client-cta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.new-client-title {
-  margin: 0 0 0.5rem 0;
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-xl);
-  text-transform: uppercase;
-  color: var(--color-dark);
-  letter-spacing: var(--letter-spacing-label);
-}
-
-[data-theme="dark"] .auth-container {
-  box-shadow:
-    6px 6px 12px var(--portal-alpha-black-50),
-    12px 12px 24px var(--portal-alpha-black-40);
-}
-
-/* Auth Header - Logo and Title */
-.auth-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.auth-logo {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  filter: brightness(0);
-}
-
-[data-theme="dark"] .auth-logo {
-  filter: brightness(0) invert(1) brightness(0.9);
-}
-
-.auth-title {
-  margin: 0;
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-2xl);
-  text-transform: uppercase;
-  color: var(--color-dark);
-  text-align: center;
-  letter-spacing: var(--letter-spacing-label);
-}
-
-/* Auth Method Toggle - uses shared .toggle-group and .toggle-btn from portal-buttons.css */
-.auth-toggle {
-  margin-bottom: 1rem;
-}
-
 /* Auth Forms - Matches contact form styling */
 .auth-form {
   display: flex;
@@ -152,6 +74,7 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 .auth-form .btn.loading .btn-text {
   opacity: 0;
 }
@@ -196,23 +119,6 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 
 .auth-form .password-toggle.showing .password-icon-hide {
   display: block;
-}
-
-/* Auth Footer */
-.auth-footer {
-  text-align: center;
-  margin-top: 0.25rem;
-}
-
-.forgot-password-link {
-  color: var(--color-dark);
-  font-size: var(--font-size-sm);
-  text-decoration: underline;
-  transition: color var(--transition-mouse) ease;
-}
-
-.forgot-password-link:hover {
-  color: var(--color-primary);
 }
 
 /* Magic Link Info */
@@ -281,26 +187,6 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
     position: static;
   }
 
-  .auth-container {
-    max-width: 100%;
-    min-height: 400px;
-    padding: 1.5rem;
-    border-width: var(--border-width-thick);
-  }
-
-  .new-client-cta {
-    margin-top: 1rem;
-  }
-
-  .auth-logo {
-    width: 60px;
-    height: 60px;
-  }
-
-  .auth-title {
-    font-size: var(--font-size-xl);
-  }
-
   .auth-toggle-btn {
     padding: 0.625rem 0.75rem;
     font-size: var(--font-size-sm);
@@ -317,29 +203,6 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 }
 
 @media (--small-mobile) {
-  .auth-container {
-    min-height: 360px;
-    padding: 1.25rem;
-  }
-
-  .auth-header {
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .auth-logo {
-    width: 50px;
-    height: 50px;
-  }
-
-  .auth-title {
-    font-size: var(--font-size-lg);
-  }
-
-  .auth-toggle {
-    margin-bottom: 1rem;
-  }
-
   .auth-toggle-btn {
     padding: 0.5rem;
     font-size: var(--font-size-xs);
@@ -388,38 +251,6 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
   border-color: var(--color-primary);
 }
 
-.login-error {
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
-  min-height: 1.2em;
-}
-
-/* Login divider - "or" separator */
-.login-divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 0.75rem 0;
-}
-
-.login-divider::before,
-.login-divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: var(--border-width) solid var(--color-neutral-400);
-}
-
-.login-divider span {
-  padding: 0 0.75rem;
-  font-size: var(--font-size-sm);
-  color: var(--color-neutral-600);
-  text-transform: lowercase;
-}
-
-.login-error.show {
-  display: block;
-}
-
 .login-form .btn {
   margin-top: 0.5rem;
   position: relative;
@@ -439,34 +270,9 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
   transform: translate(-50%, -50%);
 }
 
-/* Desktop/Mobile visibility helpers */
-.mobile-only {
-  display: none;
-}
-
-.desktop-only {
-  display: block;
-}
-
-br.desktop-only {
-  display: inline;
-}
-
 /* Responsive - Mobile */
 @media (--mobile) {
   /* Show/hide for mobile */
-  .mobile-only {
-    display: flex;
-  }
-
-  /* br elements need block display, not flex */
-  br.mobile-only {
-    display: block;
-  }
-
-  .desktop-only {
-    display: none;
-  }
 
   /* Hide login description on mobile */
   .login-description {
@@ -604,11 +410,6 @@ br.desktop-only {
     align-items: center;
   }
 
-  .login-title {
-    font-size: var(--font-size-2xl);
-    margin-bottom: 0.25rem;
-  }
-
   .login-subtitle {
     font-size: var(--font-size-sm);
     margin-bottom: 0.5rem;
@@ -617,11 +418,19 @@ br.desktop-only {
 
 /* Responsive - Small Mobile */
 @media (--small-mobile) {
-  .login-title {
-    font-size: var(--font-size-xl);
-  }
-
   .login-subtitle {
     font-size: var(--font-size-xs);
   }
+}
+
+/* Forgot password link */
+.forgot-password-link {
+  color: var(--color-dark);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  transition: color var(--transition-mouse) ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--color-primary);
 }
