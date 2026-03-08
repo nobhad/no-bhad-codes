@@ -8,9 +8,9 @@
  * Renders sidebar + header + content area.
  * Replaces server/views/layouts/portal.ejs structure.
  *
- * Mounts directly into the existing .dashboard-container.portal
- * element (no wrapper div), so we sync container-level classes
- * via useEffect rather than rendering an outer <div>.
+ * Mounts directly into the existing .portal element (no wrapper div),
+ * so we sync container-level classes via useEffect rather than
+ * rendering an outer <div>.
  */
 
 import * as React from 'react';
@@ -26,7 +26,7 @@ export function PortalLayout() {
   const role = usePortalRole();
 
   // Sync sidebar-collapsed class on the mount container
-  // (the .dashboard-container.portal div is owned by EJS, not React)
+  // (the .portal div is owned by EJS, not React)
   React.useEffect(() => {
     const container = document.querySelector(PORTAL_SELECTORS.PORTAL_CONTAINER) as HTMLElement | null;
     if (container) {

@@ -47,7 +47,7 @@ test.describe('Client Portal Flow', () => {
     await page.waitForLoadState('networkidle');
 
     // 3. Dashboard should be visible
-    await expect(page.locator('.dashboard-container')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.portal')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('#dashboard-content')).toBeVisible();
     await expect(page.locator('#tab-dashboard')).toBeVisible();
 

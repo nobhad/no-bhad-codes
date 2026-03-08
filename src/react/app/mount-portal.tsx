@@ -22,7 +22,7 @@ let root: Root | null = null;
 /**
  * Mount the React Portal SPA into the given container.
  *
- * @param container - DOM element to mount into (typically .dashboard-container.portal)
+ * @param container - DOM element to mount into (typically .portal)
  * @returns Cleanup function to unmount
  */
 export function mountPortalApp(container: HTMLElement): () => void {
