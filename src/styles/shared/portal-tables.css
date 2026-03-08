@@ -1979,7 +1979,7 @@
 }
 
 .data-table-search-input {
-  padding-left: var(--space-5) !important;
+  padding-left: var(--space-5);
 }
 
 .data-table-checkbox {

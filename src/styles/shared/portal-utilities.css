@@ -1,0 +1,427 @@
+/**
+ * ===============================================
+ * PORTAL UTILITY CLASSES
+ * ===============================================
+ * @file src/styles/shared/portal-utilities.css
+ *
+ * Global SVG icon defaults, :has() automatic styling,
+ * list container auto-layouts, and general-purpose
+ * utility classes (text, spacing, width, background,
+ * border, icon sizing, transitions, interactive, disabled).
+ */
+
+/* ============================================
+   GLOBAL SVG ICON STROKE WIDTH
+   Match border thickness (2px) for visual consistency
+   ============================================ */
+
+/* Global SVG stroke-width and color - class-controlled via CSS variables.
+   Overrides Lucide's stroke-width="2" presentation attribute (specificity 0,0,0,0).
+   The type+class selector (0,0,1,1) wins without !important.
+   Color inherits from parent via currentColor (set by icon class or parent). */
+svg.lucide {
+  stroke-width: var(--svg-stroke-width, 2.5);
+  color: currentColor;
+}
+
+/* =====================================================
+   :HAS() AUTOMATIC STYLING
+   Apply styles automatically based on child elements
+   ===================================================== */
+
+/* Containers with .status-item children get automatic gap */
+.portal :has(> .status-item) {
+  gap: var(--space-2);
+}
+
+/* Containers with .meta-item children get automatic gap */
+.portal :has(> .meta-item) {
+  gap: var(--space-2);
+}
+
+/* Containers with .form-group children get automatic column layout */
+.portal :has(> .form-group):not(.form-row) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Containers with .badge children get automatic row wrap */
+.portal :has(> .badge):not([class*="flex"]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+}
+
+/* =====================================================
+   LIST CONTAINER AUTO-LAYOUT
+   Lists ending in -list with children ending in -item
+   ===================================================== */
+
+/* Universal list containers with -item children: flex-column gap-1-5 */
+.portal [class$="-list"]:has(> [class$="-item"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Specific list containers with tighter gap-1 */
+.portal
+  :is(
+    .help-accordion,
+    .help-featured-list,
+    .help-results-list,
+    .notes-list,
+    .tasks-list,
+    .activity-list
+  ) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Containers with -card children: flex-column gap-2 */
+.portal :is([class$="-cards"], [class$="-grid"]):has(> [class$="-card"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Section containers: flex-column gap-1-5 */
+.portal
+  :is(
+    .signature-details,
+    .signature-info,
+    .lead-tab-section,
+    .time-entry-form,
+    .contract-tab-content,
+    .checkbox-group
+  ) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+/* Modal/form containers: flex-column gap-2 */
+.portal :is(.modal-form, .deliverables-modal-content, .deliverables-container) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* =====================================================
+   TEXT ALIGNMENT
+   ===================================================== */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* =====================================================
+   LIST UTILITIES
+   ===================================================== */
+
+/* Universal list reset for portal contexts */
+.portal
+  :is(
+    [class$="-list"],
+    .activity-list,
+    .tasks-list,
+    .notes-list,
+    .files-list,
+    .invoices-list,
+    .milestones-list,
+    .messages-list,
+    .upcoming-tasks-list
+  ) {
+  list-style: none;
+}
+
+/* Universal list item styling for portal lists */
+.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li {
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  color: var(--portal-text-light);
+  margin-bottom: var(--space-0-5);
+}
+
+.portal :is(.activity-list, .notes-list, .files-list, .tasks-list) > li:last-child {
+  margin-bottom: 0;
+}
+
+/* Clickable list items */
+.portal
+  :is(.activity-list, .notes-list, .files-list, .tasks-list)
+  > li:is(.clickable, .clickable-activity) {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.portal
+  :is(.activity-list, .notes-list, .files-list, .tasks-list)
+  > li:is(.clickable, .clickable-activity):hover {
+  background: var(--portal-bg-hover);
+}
+
+/* =====================================================
+   LIST ITEM COMPONENT
+   Universal styling for clickable list items
+   ===================================================== */
+
+.portal .list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
+  background: var(--portal-bg-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.portal .list-item:hover {
+  background: var(--portal-bg-light);
+}
+
+/* Compact list item variant */
+.portal .list-item-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  padding: var(--space-1-5) var(--space-2);
+  background: var(--portal-bg-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.portal .list-item-compact:hover {
+  background: var(--portal-bg-light);
+}
+
+/* =====================================================
+   BORDER RADIUS UTILITIES
+   ===================================================== */
+
+.rounded-full {
+  border-radius: var(--portal-radius-pill);
+}
+
+/* =====================================================
+   BACKGROUND UTILITIES
+   ===================================================== */
+
+.bg-darker {
+  background: var(--portal-bg-darker);
+}
+.bg-dark {
+  background: var(--portal-bg-dark);
+}
+.bg-medium {
+  background: var(--portal-bg-medium);
+}
+.bg-light {
+  background: var(--portal-bg-light);
+}
+
+/* =====================================================
+   SPACING UTILITIES (Gap)
+   ===================================================== */
+
+/* Gap utilities - for use with flex/grid containers */
+.gap-0 {
+  gap: 0;
+}
+.gap-0-5 {
+  gap: var(--space-0-5);
+}
+.gap-1 {
+  gap: var(--space-1);
+}
+.gap-1-5 {
+  gap: var(--space-1-5);
+}
+.gap-2 {
+  gap: var(--space-2);
+}
+.gap-3 {
+  gap: var(--space-3);
+}
+.gap-4 {
+  gap: var(--space-4);
+}
+
+/* =====================================================
+   WIDTH UTILITIES
+   ===================================================== */
+.w-full {
+  width: 100%;
+}
+.w-auto {
+  width: auto;
+}
+.min-w-0 {
+  min-width: 0;
+}
+
+/* =====================================================
+   TEXT COLOR UTILITIES
+   ===================================================== */
+.text-danger,
+a.text-danger,
+a.text-danger:visited {
+  color: var(--color-danger);
+}
+
+a.text-danger:hover {
+  color: var(--color-danger);
+  opacity: 0.8;
+}
+
+.text-secondary {
+  color: var(--portal-text-secondary);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+/* =====================================================
+   FONT WEIGHT UTILITIES
+   ===================================================== */
+
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+.font-normal {
+  font-weight: var(--font-weight-regular);
+}
+
+/* =====================================================
+   TRANSITION UTILITIES
+   ===================================================== */
+
+.transition-colors {
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.transition-opacity {
+  transition: opacity var(--transition-fast);
+}
+
+.transition-transform {
+  transition: transform var(--transition-fast);
+}
+
+.transition-all {
+  transition: all var(--transition-fast);
+}
+
+/* =====================================================
+   BORDER UTILITIES
+   ===================================================== */
+
+.border-bottom {
+  border-bottom: var(--portal-border);
+}
+
+.border-top {
+  border-top: var(--portal-border);
+}
+
+.border-all {
+  border: var(--portal-border);
+}
+
+.border-none {
+  border: none;
+}
+
+/* =====================================================
+   ICON SIZING UTILITIES
+   Uses CSS variables from variables.css for consistency.
+   Stroke-width set globally; color inherits via currentColor.
+   ===================================================== */
+
+.icon-xs {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}
+.icon-sm {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+.icon-md {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+.icon-lg {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+.icon-xl {
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+}
+
+/* Shared properties for all icon sizes.
+   stroke-width overrides Lucide's presentation attribute (specificity 0,0,0,0).
+   Class selectors (0,0,1,0) win without !important. */
+.icon-xs,
+.icon-sm,
+.icon-md,
+.icon-lg,
+.icon-xl {
+  flex-shrink: 0;
+  stroke-width: var(--svg-stroke-width, 2.5);
+  color: currentColor;
+}
+
+/* =====================================================
+   INTERACTIVE UTILITIES
+   ===================================================== */
+
+/* Interactive element (combines common patterns) */
+.interactive {
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.interactive:hover {
+  color: var(--color-primary);
+}
+
+/* =====================================================
+   DISABLED STATE UTILITIES
+   ===================================================== */
+
+.disabled,
+[disabled],
+:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

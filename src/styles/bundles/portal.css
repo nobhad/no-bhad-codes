@@ -79,13 +79,13 @@ body[data-page="client-portal"] {
 
 html:has(body[data-page="admin"]),
 html:has(body[data-page="client-portal"]) {
-  background-color: #000000;
+  background-color: var(--portal-bg-pitch, #000000);
   height: 100%;
 }
 
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: #ffffff;
+  background-color: var(--portal-bg-pitch, #ffffff);
 }
 
 /* Portal scoping wrapper — NOT a layout container.

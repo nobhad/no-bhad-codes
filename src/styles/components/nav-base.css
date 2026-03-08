@@ -176,7 +176,7 @@ li {
 /* Focus-visible: red color for keyboard navigation */
 .nav-logo-row:focus-visible {
   color: var(--color-primary);
-  outline: none !important;
+  outline: none;
   box-shadow: none;
 }
 
@@ -575,7 +575,7 @@ html[data-theme="dark"] .coming-soon-banner {
 .menu-button:focus-visible {
   color: var(--color-primary);
   background-color: rgba(var(--color-primary-rgb), 0.1);
-  outline: none !important;
+  outline: none;
   box-shadow: none;
 }
 

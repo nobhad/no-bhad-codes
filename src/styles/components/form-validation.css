@@ -50,7 +50,7 @@
 
 /* Invalid field state - applied by form-errors.ts */
 .field--invalid {
-  border-color: var(--color-error-500) !important;
+  border-color: var(--color-error-500);
   background-color: rgba(var(--color-error-rgb, 239, 68, 68), 0.05);
 }
 

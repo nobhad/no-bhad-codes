@@ -526,7 +526,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   .data-table .icon-btn:hover,
   table .icon-btn:hover {
     color: var(--color-primary);
-    background: transparent !important;
+    background: transparent;
     box-shadow: none;
   }
 

@@ -352,8 +352,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 /* No pseudo-elements on badge */
 .portal .sidebar-badge::before,
 .portal .sidebar-badge::after {
-  display: none !important;
-  content: none !important;
+  display: none;
+  content: none;
 }
 
 /* Expanded sidebar: badge on right edge, vertically centered */

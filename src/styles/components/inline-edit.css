@@ -40,8 +40,8 @@
 /* Editing state */
 [data-page="admin"] .inline-editable.is-editing,
 [data-page="admin"] .inline-editable-cell.is-editing {
-  padding: 0 !important;
-  background: transparent !important;
+  padding: 0;
+  background: transparent;
 }
 
 /* Input field styling */

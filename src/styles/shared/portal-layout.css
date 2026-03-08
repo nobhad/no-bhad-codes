@@ -1002,7 +1002,7 @@ html[data-theme="light"] .portal .funnel-value {
    MOBILE MENU TOGGLE
    ===================================================== */
 .mobile-menu-toggle {
-  display: none !important;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -1022,7 +1022,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 @media (--compact-mobile) {
   .portal .sidebar.collapsed ~ .dashboard-content .mobile-menu-toggle {
-    display: flex !important;
+    display: flex;
   }
 }
 
@@ -1422,11 +1422,11 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* text-muted / text-primary — base/utilities.css is canonical */
 .text-muted {
-  color: var(--portal-text-muted) !important;
+  color: var(--portal-text-muted);
 }
 
 .text-primary {
-  color: var(--portal-text-light) !important;
+  color: var(--portal-text-light);
 }
 
 /* Font sizes */

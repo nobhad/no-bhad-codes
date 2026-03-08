@@ -120,12 +120,13 @@
   border-color: var(--portal-border-light);
 }
 
-/* Focus state (closed) - border color change, no box-shadow for consistency with other dropdowns */
+/* Focus state (closed) - border color change, no box-shadow for consistency with other dropdowns.
+   Selector specificity (0,4,1,0) already exceeds the global :focus-visible rule (0,0,1,0) in reset.css. */
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus,
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
-  outline: none !important;
+  outline: none;
   border-color: var(--color-primary);
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger svg {

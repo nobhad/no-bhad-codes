@@ -377,8 +377,8 @@ td[colspan] .empty-state {
 /* Override flex display - td elements should not be flex containers */
 td.loading-state,
 td.loading-row.loading-state {
-  display: table-cell !important;
-  text-align: center !important;
+  display: table-cell;
+  text-align: center;
   vertical-align: middle;
 }
 
