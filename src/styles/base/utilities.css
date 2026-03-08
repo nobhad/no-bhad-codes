@@ -635,7 +635,7 @@
    ============================================ */
 
 html[data-wireframe="true"] {
-  filter: grayscale(100%) !important;
+  filter: grayscale(100%);
 }
 
 html[data-wireframe="true"] *:focus-visible {

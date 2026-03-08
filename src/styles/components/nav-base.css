@@ -784,26 +784,10 @@ html[data-theme="dark"] .coming-soon-banner {
    21. UTILITY CLASSES
    ===================================================== */
 
-/* Animation utilities */
-.no-transition {
-  transition: none !important;
-}
-
-.force-transition {
-  transition: all var(--transition-normal) var(--cubic-default) !important;
-}
-
-/* =====================================================
-   22. GSAP COMPATIBILITY
-   ===================================================== */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-  }
-}
+/* Animation utilities (.no-transition, .force-transition) are defined
+   in states/interactive.css (@layer states) — no duplicate here.
+   The global prefers-reduced-motion override is in base/reset.css
+   (@layer reset) — no duplicate here. */
 /* Dark Mode Text Enhancements */
 html[data-theme="dark"] .nav-logo-row {
   text-shadow: 0 2px 4px var(--color-shadow);
