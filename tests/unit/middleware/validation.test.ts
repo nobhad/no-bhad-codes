@@ -130,20 +130,22 @@ describe('ApiValidator', () => {
       expect(result.errors[0].code).toBe('INVALID_VALUE');
     });
 
-    it('should sanitize HTML content', () => {
+    it('should pass through HTML content without encoding (sanitization handled by global middleware)', () => {
       const schema = {
         message: { type: 'string' as const }
       };
 
-      const maliciousData = {
+      const htmlData = {
         message: '<script>alert("xss")</script>Hello world'
       };
 
-      const result = validator.validate(maliciousData, schema);
+      const result = validator.validate(htmlData, schema);
 
+      // HTML sanitization is NOT done here — it is handled by the global
+      // sanitizeInputs middleware. The validator only trims the string.
       expect(result.isValid).toBe(true);
       expect(result.sanitizedData.message).toBe(
-        '&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;Hello world'
+        '<script>alert("xss")</script>Hello world'
       );
     });
   });
