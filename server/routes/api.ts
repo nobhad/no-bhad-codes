@@ -359,16 +359,18 @@ router.get(
 // All user management now goes through the 'clients' table exclusively.
 
 /**
- * Data query endpoint with pagination
+ * Data query endpoint with pagination (admin only)
  */
 router.get(
   '/data',
+  authenticateToken,
+
   validateRequest(ValidationSchemas.pagination, {
     validateQuery: true,
     stripUnknownFields: false
   }),
 
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', search } = req.query;
 
@@ -376,8 +378,9 @@ router.get(
 
       // Implement actual data querying from projects table
       const db = getDatabase();
-      const pageNum = Number(page);
-      const limitNum = Number(limit);
+      const MAX_PAGE_SIZE = 500;
+      const pageNum = Math.max(1, Number(page) || 1);
+      const limitNum = Math.min(MAX_PAGE_SIZE, Math.max(1, Number(limit) || 20));
       const offset = (pageNum - 1) * limitNum;
 
       // Build query with search
@@ -436,16 +439,18 @@ router.get(
 );
 
 /**
- * API status and metrics endpoint
+ * API status and metrics endpoint (admin only)
  */
 router.get(
   '/status',
+  authenticateToken,
+
   rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
     maxRequests: 10
   }),
 
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
       // Gather actual metrics from database
       const db = getDatabase();

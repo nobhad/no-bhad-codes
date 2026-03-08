@@ -245,6 +245,31 @@ router.post(
       return;
     }
 
+    const NAME_MAX_LENGTH = 200;
+    const URL_MAX_LENGTH = 2000;
+
+    if (name.length > NAME_MAX_LENGTH) {
+      errorResponse(res, `Name must be ${NAME_MAX_LENGTH} characters or fewer`, 400, 'VALIDATION_ERROR');
+      return;
+    }
+
+    if (url.length > URL_MAX_LENGTH) {
+      errorResponse(res, `URL must be ${URL_MAX_LENGTH} characters or fewer`, 400, 'VALIDATION_ERROR');
+      return;
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      errorResponse(res, 'Invalid webhook URL', 400, 'VALIDATION_ERROR');
+      return;
+    }
+
+    if (!events.every((e: unknown) => typeof e === 'string')) {
+      errorResponse(res, 'All events must be strings', 400, 'VALIDATION_ERROR');
+      return;
+    }
+
     const webhook = await createZapierWebhook(name, url, events);
     sendCreated(
       res,
