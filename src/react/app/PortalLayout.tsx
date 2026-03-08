@@ -50,12 +50,10 @@ export function PortalLayout() {
         <PortalSidebar />
 
         <div className="dashboard-content" id="dashboard-content">
-          <div className="content-wrapper">
-            <PortalSubtabs />
-            <React.Suspense fallback={<TabLoadingFallback />}>
-              <Outlet />
-            </React.Suspense>
-          </div>
+          <PortalSubtabs />
+          <React.Suspense fallback={<TabLoadingFallback />}>
+            <Outlet />
+          </React.Suspense>
         </div>
       </div>
     </>

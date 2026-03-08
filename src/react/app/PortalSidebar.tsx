@@ -5,18 +5,17 @@
  * @file src/react/app/PortalSidebar.tsx
  *
  * React replacement for server/views/partials/sidebar.ejs.
- * Renders navigation buttons from unified-navigation config,
+ * Renders navigation links from unified-navigation config,
  * filtered by the current user role.
  */
 
 import * as React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   useNavItems,
   useSidebarCollapsed,
   useCurrentGroup,
-  useSwitchTab,
-  usePortalStore
+  useSwitchTab
 } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
 import { SIDEBAR_ICONS } from './portal-icons';
@@ -28,53 +27,44 @@ import { SIDEBAR_ICONS } from './portal-icons';
 export function PortalSidebar() {
   const navItems = useNavItems();
   const collapsed = useSidebarCollapsed();
-  const navigate = useNavigate();
   const location = useLocation();
   const { logout } = usePortalAuth();
   const switchTab = useSwitchTab();
 
-  const handleNavClick = React.useCallback((tabId: string) => {
-    switchTab(tabId);
-    // Get resolved tab from store after switchTab
-    const { currentTab } = usePortalStore.getState();
-    navigate(`/${currentTab}`);
-  }, [navigate, switchTab]);
-
   const handleLogout = React.useCallback(async () => {
     await logout();
-    // Redirect handled by auth guard in PortalApp
   }, [logout]);
 
-  // Determine active tab from URL and store group
   const currentPath = location.pathname.replace(/^\//, '');
   const currentGroup = useCurrentGroup();
 
   return (
     <aside
-      className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}
+      className={`sidebar${collapsed ? ' collapsed' : ''}`}
       id="sidebar"
       role="navigation"
       aria-label="Portal navigation"
     >
       <div className="sidebar-content">
-        <div className="sidebar-buttons">
+        <nav className="sidebar-buttons">
           {navItems
-            .filter((item) => !item.group) // Only show top-level items
+            .filter((item) => !item.group)
             .map((item) => {
               const tabId = item.dataTab || item.id;
               const isActive = currentPath === tabId || currentPath === item.id || currentGroup === tabId;
               const IconSvg = SIDEBAR_ICONS[item.icon];
 
               return (
-                <button
+                <Link
                   key={item.id}
-                  className={`btn sidebar-btn${isActive ? ' active' : ''}`}
+                  to={`/${tabId}`}
+                  className={`sidebar-btn${isActive ? ' active' : ''}`}
                   id={`btn-${item.id}`}
                   data-tab={tabId}
                   data-shortcut={item.shortcut}
                   aria-label={item.ariaLabel || item.label}
                   aria-current={isActive ? 'page' : undefined}
-                  onClick={() => handleNavClick(tabId)}
+                  onClick={() => switchTab(tabId)}
                 >
                   {IconSvg && (
                     <IconSvg className="btn-icon" aria-hidden="true" />
@@ -87,10 +77,10 @@ export function PortalSidebar() {
                       aria-label={`${item.label.toLowerCase()} count`}
                     />
                   )}
-                </button>
+                </Link>
               );
             })}
-        </div>
+        </nav>
 
         <div className="sidebar-footer">
           <button
