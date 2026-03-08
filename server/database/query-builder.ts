@@ -15,6 +15,13 @@ import { queryStats } from '../services/query-stats.js';
 import type { DatabaseRow } from '../types/database.js';
 
 // ============================================
+// Performance Constants
+// ============================================
+
+/** Threshold in milliseconds above which a query is logged as slow */
+const SLOW_QUERY_THRESHOLD_MS = 500;
+
+// ============================================
 // Type Definitions
 // ============================================
 
@@ -105,6 +112,23 @@ export abstract class BaseQueryBuilder<T = DatabaseRow> {
   constructor(db: Database, tableName: string) {
     this.db = db;
     this.tableName = tableName;
+  }
+
+  /**
+   * Log a warning if a query exceeded the slow query threshold
+   */
+  protected async logSlowQuery(sql: string, durationMs: number, method: string): Promise<void> {
+    if (durationMs >= SLOW_QUERY_THRESHOLD_MS) {
+      await logger.warn(`Slow query detected: ${durationMs}ms`, {
+        category: 'DATABASE',
+        metadata: {
+          sql,
+          durationMs,
+          method,
+          table: this.tableName
+        }
+      });
+    }
   }
 
   /**
@@ -414,6 +438,7 @@ export abstract class BaseQueryBuilder<T = DatabaseRow> {
 
       // Track query performance
       queryStats.record('select', this.tableName, executionTime, sql);
+      await this.logSlowQuery(sql, executionTime, 'executeQuery');
 
       await logger.debug('Database query completed');
 
@@ -465,6 +490,7 @@ export abstract class BaseQueryBuilder<T = DatabaseRow> {
 
       // Track query performance
       queryStats.record('select', this.tableName, executionTime, sql);
+      await this.logSlowQuery(sql, executionTime, 'executeQuerySingle');
 
       await logger.debug('Single row query completed');
 
@@ -707,6 +733,7 @@ export class InsertQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
       // Track query performance
       queryStats.record('insert', this.tableName, executionTime, sql);
+      await this.logSlowQuery(sql, executionTime, 'insert');
 
       await logger.debug('Insert query completed');
 
@@ -733,6 +760,18 @@ export class InsertQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
  */
 export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
   private updateData: Record<string, SqlValue | string> = {};
+  private rawExpressions: Set<string> = new Set();
+  private optimisticLockVersion: number | null = null;
+
+  /**
+   * Clone the current query builder (override to deep copy new fields)
+   */
+  protected clone(): this {
+    const cloned = super.clone();
+    cloned.rawExpressions = new Set(this.rawExpressions);
+    cloned.optimisticLockVersion = this.optimisticLockVersion;
+    return cloned;
+  }
 
   /**
    * Set data to update
@@ -757,6 +796,7 @@ export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
   increment(column: string, amount: number = 1): this {
     const cloned = this.clone();
     cloned.updateData = { ...cloned.updateData, [column]: `${column} + ${amount}` };
+    cloned.rawExpressions.add(column);
     return cloned;
   }
 
@@ -766,6 +806,20 @@ export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
   decrement(column: string, amount: number = 1): this {
     const cloned = this.clone();
     cloned.updateData = { ...cloned.updateData, [column]: `${column} - ${amount}` };
+    cloned.rawExpressions.add(column);
+    return cloned;
+  }
+
+  /**
+   * Enable optimistic locking for this update.
+   * Adds `AND version = ?` to the WHERE clause and `version = version + 1` to SET.
+   * If the row's version has changed since it was read, the update affects 0 rows,
+   * signaling a concurrent modification conflict.
+   * @param expectedVersion The version number read when the row was fetched
+   */
+  whereVersion(expectedVersion: number): this {
+    const cloned = this.clone();
+    cloned.optimisticLockVersion = expectedVersion;
     return cloned;
   }
 
@@ -781,20 +835,43 @@ export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
       throw new Error('Update query must have WHERE conditions');
     }
 
-    const setClause = Object.keys(this.updateData)
-      .map((column) => `${column} = ?`)
-      .join(', ');
+    // Build SET clause, handling raw expressions (increment/decrement) separately
+    const setClauses: string[] = [];
+    const setParams: SqlValue[] = [];
 
-    let sql = `UPDATE ${this.tableName} SET ${setClause}`;
+    for (const column of Object.keys(this.updateData)) {
+      if (this.rawExpressions.has(column)) {
+        setClauses.push(`${column} = ${this.updateData[column]}`);
+      } else {
+        setClauses.push(`${column} = ?`);
+        setParams.push(this.updateData[column] as SqlValue);
+      }
+    }
 
-    const whereClause = this.buildWhereClause(this.whereConditions);
+    // Add version increment if optimistic locking is enabled
+    if (this.optimisticLockVersion !== null) {
+      setClauses.push('version = version + 1');
+    }
+
+    let sql = `UPDATE ${this.tableName} SET ${setClauses.join(', ')}`;
+
+    // Build WHERE clause, adding version check if optimistic locking is enabled
+    const allConditions = [...this.whereConditions];
+    if (this.optimisticLockVersion !== null) {
+      allConditions.push({
+        column: 'version',
+        operator: '=',
+        value: this.optimisticLockVersion,
+        logical: 'AND'
+      });
+    }
+
+    const whereClause = this.buildWhereClause(allConditions);
     sql += whereClause.sql;
-
-    const updateParams = Object.values(this.updateData) as SqlValue[];
 
     return {
       sql,
-      params: [...updateParams, ...whereClause.params]
+      params: [...setParams, ...whereClause.params]
     };
   }
 
@@ -822,6 +899,7 @@ export class UpdateQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
       // Track query performance
       queryStats.record('update', this.tableName, executionTime, sql);
+      await this.logSlowQuery(sql, executionTime, 'update');
 
       await logger.debug('Update query completed');
 
@@ -890,6 +968,7 @@ export class DeleteQueryBuilder<T = DatabaseRow> extends BaseQueryBuilder<T> {
 
       // Track query performance
       queryStats.record('delete', this.tableName, executionTime, sql);
+      await this.logSlowQuery(sql, executionTime, 'delete');
 
       await logger.debug('Delete query completed');
 
@@ -979,6 +1058,18 @@ export class QueryBuilder {
       const tableMatch = sql.match(/(?:FROM|INTO|UPDATE)\s+(\w+)/i);
       const tableName = tableMatch ? tableMatch[1] : 'raw';
       queryStats.record('raw', tableName, executionTime, sql);
+
+      if (executionTime >= SLOW_QUERY_THRESHOLD_MS) {
+        await logger.warn(`Slow query detected: ${executionTime}ms`, {
+          category: 'DATABASE',
+          metadata: {
+            sql,
+            durationMs: executionTime,
+            method: 'raw',
+            table: tableName
+          }
+        });
+      }
 
       await logger.debug('Raw SQL query completed');
 
