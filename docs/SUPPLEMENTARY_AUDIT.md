@@ -21,7 +21,7 @@
 | 27 | Bundle & Build Optimization | A | **A** | No issues found |
 | 28 | Dependency Health | A- | **A** | Unused `sqlite` package removed |
 | 29 | Test Coverage & Test Health | C+ | **B+** | All 15 failing tests fixed (23/23 + 33/33 passing) |
-| 30 | Logging & Monitoring | A- | **A** | Slow query logging added (500ms threshold) |
+| 30 | Logging & Monitoring | A- | **A+** | Slow query logging, P50/P95/P99 latency, error rate per route |
 | 31 | API Design Consistency | B+ | **A-** | Pagination standardized, per-user rate limiting added |
 | 32 | Data Integrity & Database Patterns | B+ | **A** | Optimistic locking via `whereVersion()` + migration 099 |
 | | **OVERALL** | **B+** | **A** | All layers A or above |
@@ -276,19 +276,18 @@
 - **Sentry integration** (`server/app.ts:94-101`): profiling in prod, 10% trace sample
 - **6 health check endpoints**: `/health`, `/health/live`, `/health/ready`, `/health/db`, project health, project burndown
 - **Slow query logging**: queries >500ms logged with SQL, duration, method, table (params excluded for security)
+- **API latency percentiles**: P50/P95/P99 computed from rolling 10-minute window, per-route breakdown
+- **Error rate tracking**: Client (4xx) and server (5xx) error counts per route with overall error rate percentage
+- **Metrics endpoint**: `GET /health/metrics` exposes system + API metrics in one call
+- **OpenTelemetry integration**: `recordHttpRequest()` wired into request logger feeding histogram + counters
 
-### Fixed
+### All Issues Fixed
 
 | # | Issue | Status | Fix |
 |---|-------|--------|-----|
-| 30.1 | No slow query logging | FIXED | Added `SLOW_QUERY_THRESHOLD_MS = 500` + `logSlowQuery()` across all 6 execution paths in query-builder.ts |
-
-### Remaining (Low Priority)
-
-| # | Issue | Severity | Details |
-|---|-------|----------|---------|
-| 30.2 | No API response time tracking | Low | P50/P95/P99 latency metrics not aggregated |
-| 30.3 | No error rate monitoring dashboard | Low | Error counts by endpoint not aggregated |
+| 30.1 | No slow query logging | FIXED | `SLOW_QUERY_THRESHOLD_MS = 500` + `logSlowQuery()` across all 6 execution paths |
+| 30.2 | No API response time tracking | FIXED | Rolling-window percentile calculator in `server/middleware/logger.ts`, exposed via `getApiMetrics()` |
+| 30.3 | No error rate monitoring | FIXED | Per-route error counts (client/server split) + global error rate in rolling window |
 
 ---
 
