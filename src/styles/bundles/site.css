@@ -47,7 +47,6 @@
 /* ============================================
  * OTHER COMPONENTS
  * ============================================ */
-@import "../components/portfolio-carousel.css" layer(components);
 @import "../components/footer.css" layer(components);
 
 /* ============================================
@@ -63,7 +62,6 @@
 @import "../pages/projects-detail.css";
 
 @import "../pages/terminal-intake.css" layer(pages);
-@import "../pages/proposal-builder.css" layer(pages);
 @import "../pages/client-portal-section.css" layer(pages);
 
 /* ============================================

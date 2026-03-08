@@ -48,11 +48,12 @@
 @import "../client-portal/index.css" layer(pages);
 
 /* ============================================
- * LIGHT MODE (shared + portal-specific overrides)
- * Must be imported here (with other @imports) —
- * CSS spec ignores @import after any rules.
+ * PORTAL THEME (unlayered — beats all @layer rules)
+ * NOT in @layer tokens — complete isolation from main site styles.
+ * Variables + data-page selectors handle both dark and light mode.
+ * Must be last @import — CSS spec ignores @import after any rules.
  * ============================================ */
-@import "./light-mode.css";
+@import "../../design-system/tokens/portal-theme.css";
 
 /* Wireframe mode merged into base/utilities.css */
 
@@ -77,15 +78,11 @@ body[data-page="client-portal"] {
   overflow: hidden;
 }
 
+/* html background - portal-theme.css sets --color-bg-primary on html via :has() */
 html:has(body[data-page="admin"]),
 html:has(body[data-page="client-portal"]) {
-  background-color: var(--color-bg-primary, var(--portal-neutral-0));
+  background-color: var(--color-bg-primary);
   height: 100%;
-}
-
-html[data-theme="light"]:has(body[data-page="admin"]),
-html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: var(--color-bg-primary, var(--color-off-white));
 }
 
 /* Portal scoping wrapper — NOT a layout container.
