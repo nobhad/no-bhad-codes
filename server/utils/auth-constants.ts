@@ -117,6 +117,12 @@ export const RATE_LIMIT_CONFIG = {
   FILE_UPLOAD: {
     MAX_ATTEMPTS: 10,
     WINDOW_MS: 10 * TIME_MS.MINUTE
+  },
+
+  /** Email verification resend requests */
+  RESEND_VERIFICATION: {
+    MAX_ATTEMPTS: 3,
+    WINDOW_MS: TIME_MS.FIFTEEN_MINUTES
   }
 } as const;
 
@@ -141,6 +147,20 @@ export const ACCOUNT_LOCKOUT_CONFIG = {
 
   /** Duration of account lockout in milliseconds (15 minutes) */
   LOCKOUT_DURATION_MS: TIME_MS.FIFTEEN_MINUTES
+} as const;
+
+/**
+ * Email verification configuration
+ */
+export const EMAIL_VERIFICATION_CONFIG = {
+  /** Token byte length (32 bytes = 64 hex characters) */
+  TOKEN_BYTE_LENGTH: 32,
+
+  /** Token expiry duration in milliseconds (24 hours) */
+  TOKEN_EXPIRY_MS: TIME_MS.DAY,
+
+  /** Minimum interval between resend requests in milliseconds (5 minutes) */
+  RESEND_COOLDOWN_MS: 5 * TIME_MS.MINUTE
 } as const;
 
 /**
@@ -169,6 +189,42 @@ export const COOKIE_CONFIG = {
     path: '/'
   }
 } as const;
+
+/**
+ * Token rotation configuration
+ * Silent rotation reissues a fresh JWT when the current token
+ * has passed a configurable fraction of its total lifetime.
+ */
+export const TOKEN_ROTATION = {
+  /**
+   * Fraction of token lifetime that must have elapsed before
+   * the middleware issues a replacement token (0.5 = 50%).
+   */
+  THRESHOLD: 0.5
+} as const;
+
+/**
+ * Parse a JWT-style duration string (e.g. '1d', '2h', '30m', '60s')
+ * into the equivalent number of seconds.
+ * Returns undefined for unrecognised formats so callers can fall back safely.
+ */
+export function parseExpiryToSeconds(expiry: string): number | undefined {
+  const match = expiry.match(/^(\d+)\s*([smhd])$/);
+  if (!match) return undefined;
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+
+  const SECONDS_PER_UNIT: Record<string, number> = {
+    s: 1,
+    m: 60,
+    h: 3600,
+    d: 86400
+  };
+
+  const multiplier = SECONDS_PER_UNIT[unit];
+  return multiplier !== undefined ? value * multiplier : undefined;
+}
 
 /**
  * Password validation regex

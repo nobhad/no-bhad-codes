@@ -276,12 +276,9 @@ app.use('/health', healthRouter);
 // Setup API documentation
 setupSwagger(app);
 
-// Portal routes (EJS server-rendered shells)
-// These render the admin and client portal HTML shells
-app.use(portalRoutes);
-
 // Rate limiting for API routes
 // IMPORTANT: More specific routes must come BEFORE general routes in Express
+// Rate limiters must be registered BEFORE route handlers to take effect
 
 // Higher rate limit for admin routes (authenticated dashboard users)
 // Authenticated rate limit: 120 requests per minute
@@ -289,6 +286,10 @@ app.use('/api/admin', rateLimiters.authenticated);
 
 // Standard rate limit for other API routes: 60 requests per minute
 app.use('/api', rateLimiters.standard);
+
+// Portal routes (EJS server-rendered shells)
+// These render the admin and client portal HTML shells
+app.use(portalRoutes);
 
 // CSRF protection for state-changing API requests
 // Validates that x-csrf-token header matches csrf-token cookie

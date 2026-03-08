@@ -6,9 +6,14 @@
  * Supports both HttpOnly cookies and Authorization header
  */
 
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { Response, NextFunction } from 'express';
-import { COOKIE_CONFIG } from '../utils/auth-constants.js';
+import {
+  COOKIE_CONFIG,
+  JWT_CONFIG,
+  TOKEN_ROTATION,
+  parseExpiryToSeconds
+} from '../utils/auth-constants.js';
 import { errorResponse } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import type { JWTAuthRequest } from '../types/request.js';
@@ -19,6 +24,7 @@ interface JWTPayload {
   clientId?: number;
   email: string;
   type: 'admin' | 'client';
+  isAdmin?: boolean;
   iat?: number;
   exp?: number;
 }
@@ -52,6 +58,44 @@ export const authenticateToken = (req: JWTAuthRequest, res: Response, next: Next
       email: decoded.email,
       type: decoded.type
     };
+
+    // Silent token rotation: if the token has passed the rotation threshold
+    // of its total lifetime, issue a fresh token with the same payload.
+    // Only rotate cookie-based tokens (not Authorization header tokens).
+    if (cookieToken && decoded.iat && decoded.exp) {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const totalLifetime = decoded.exp - decoded.iat;
+      const elapsed = nowSeconds - decoded.iat;
+
+      if (totalLifetime > 0 && elapsed / totalLifetime >= TOKEN_ROTATION.THRESHOLD) {
+        const isAdmin = decoded.type === 'admin';
+        const expiry = isAdmin ? JWT_CONFIG.ADMIN_TOKEN_EXPIRY : JWT_CONFIG.USER_TOKEN_EXPIRY;
+        const cookieOptions = isAdmin ? COOKIE_CONFIG.ADMIN_OPTIONS : COOKIE_CONFIG.USER_OPTIONS;
+
+        // Build the same payload shape used at login (omit iat/exp -- jwt.sign sets them)
+        const refreshedPayload: Record<string, unknown> = {
+          id: userId,
+          email: decoded.email,
+          type: decoded.type
+        };
+        if (decoded.isAdmin !== undefined) {
+          refreshedPayload.isAdmin = decoded.isAdmin;
+        }
+
+        // Convert the expiry string to seconds for a clean numeric value;
+        // fall back to the raw string with a cast (matching existing codebase pattern).
+        const expirySeconds = parseExpiryToSeconds(expiry);
+        const signOptions = (
+          expirySeconds !== undefined
+            ? { expiresIn: expirySeconds }
+            : { expiresIn: expiry }
+        ) as SignOptions;
+
+        const rotatedToken = jwt.sign(refreshedPayload, secret, signOptions);
+        res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, rotatedToken, cookieOptions);
+      }
+    }
+
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

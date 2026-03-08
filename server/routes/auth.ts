@@ -23,8 +23,11 @@ import {
   RATE_LIMIT_CONFIG,
   COOKIE_CONFIG,
   ACCOUNT_LOCKOUT_CONFIG,
+  EMAIL_VERIFICATION_CONFIG,
   validatePassword
 } from '../utils/auth-constants.js';
+import { generateSecureToken } from '../utils/token-utils.js';
+import { getBaseUrl } from '../config/environment.js';
 import { getString, getNumber, getBoolean, getDate } from '../database/row-helpers.js';
 import {
   sendSuccess,
@@ -35,8 +38,66 @@ import {
   ErrorCodes
 } from '../utils/api-response.js';
 import { validateRequest } from '../middleware/validation.js';
+import { errorResponseWithPayload } from '../utils/api-response.js';
+import {
+  TEMP_TOKEN_CONFIG,
+  TWO_FACTOR_SETTINGS_KEYS
+} from '../utils/two-factor-constants.js';
 
 const router = express.Router();
+
+// ============================================
+// 2FA LOGIN HELPERS
+// ============================================
+
+/**
+ * Check if admin 2FA is enabled and handle the login response accordingly.
+ * If 2FA is enabled, issues a short-lived temp token and signals the client
+ * to proceed with 2FA verification instead of completing login.
+ *
+ * @returns true if 2FA is required (response already sent), false otherwise
+ */
+async function handleAdmin2FACheck(
+  req: express.Request,
+  res: express.Response,
+  adminEmail: string
+): Promise<boolean> {
+  const db = getDatabase();
+  const enabledRow = await db.get(
+    'SELECT setting_value FROM system_settings WHERE setting_key = ?',
+    [TWO_FACTOR_SETTINGS_KEYS.ENABLED]
+  );
+
+  const twoFactorEnabled = enabledRow
+    && (enabledRow as { setting_value: string }).setting_value === 'true';
+
+  if (!twoFactorEnabled) {
+    return false;
+  }
+
+  // 2FA is enabled: issue a temp token instead of the full JWT
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
+    return true;
+  }
+
+  const tempToken = jwt.sign(
+    { email: adminEmail, sub: TEMP_TOKEN_CONFIG.SUBJECT },
+    jwtSecret,
+    { expiresIn: TEMP_TOKEN_CONFIG.EXPIRY_STRING } as SignOptions
+  );
+
+  errorResponseWithPayload(
+    res,
+    'Two-factor authentication required',
+    200,
+    ErrorCodes.TWO_FACTOR_REQUIRED,
+    { requires2FA: true, tempToken }
+  );
+
+  return true;
+}
 
 // Auth-specific validation schemas
 const AuthValidationSchemas = {
@@ -67,6 +128,9 @@ const AuthValidationSchemas = {
   },
   verifyToken: {
     token: [{ type: 'required' as const }, { type: 'string' as const, minLength: 32, maxLength: 256 }]
+  },
+  resendVerification: {
+    email: [{ type: 'required' as const }, { type: 'email' as const }]
   }
 };
 
@@ -935,6 +999,18 @@ router.post(
       'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
     );
 
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      await logger.error('ADMIN_EMAIL not configured', { category: 'AUTH' });
+      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
+    }
+
+    // Check if 2FA is enabled -- if so, issue temp token instead of full JWT
+    const requires2FA = await handleAdmin2FACheck(req, res, adminEmail);
+    if (requires2FA) {
+      return;
+    }
+
     // Generate JWT token for admin
     const secret = process.env.JWT_SECRET;
     if (!secret) {
@@ -942,11 +1018,6 @@ router.post(
       return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (!adminEmail) {
-      await logger.error('ADMIN_EMAIL not configured', { category: 'AUTH' });
-      return sendServerError(res, 'Server configuration error', ErrorCodes.CONFIG_ERROR);
-    }
     const token = jwt.sign(
       {
         id: 0, // Admin doesn't have a client ID
@@ -1449,7 +1520,33 @@ No Bhad Codes Team`
       // Continue - account was activated successfully
     }
 
-    // 3. Log the activation
+    // 3. Send email verification
+    try {
+      const verificationToken = generateSecureToken();
+      const verificationSentAt = new Date();
+      await db.run(
+        `UPDATE clients
+         SET email_verification_token = ?,
+             email_verification_sent_at = ?
+         WHERE id = ?`,
+        [verificationToken, verificationSentAt.toISOString(), clientId]
+      );
+      await emailService.sendEmailVerificationEmail(clientEmail, {
+        verificationToken,
+        name: clientName
+      });
+      logger.info(`[AUTH] Sent email verification for client ${clientId}`, {
+        category: 'AUTH'
+      });
+    } catch (verificationError) {
+      logger.error('[AUTH] Failed to send email verification on account activation', {
+        error: verificationError instanceof Error ? verificationError : undefined,
+        category: 'AUTH'
+      });
+      // Continue - account activation is more important than verification email
+    }
+
+    // 4. Log the activation
     await auditLogger.log({
       action: 'account_activated',
       entityType: 'client',
@@ -1463,7 +1560,7 @@ No Bhad Codes Team`
       userAgent: req.get('user-agent') || 'unknown'
     });
 
-    // 4. Generate JWT token for auto-login
+    // 5. Generate JWT token for auto-login
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       await logger.error('[AUTH] JWT_SECRET not configured for auto-login after set-password', {
@@ -1590,6 +1687,12 @@ router.post(
       await db.run(
         'DELETE FROM system_settings WHERE setting_key IN (\'admin.locked_until\', \'admin.failed_login_attempts\')'
       );
+
+      // Check if 2FA is enabled -- if so, issue temp token instead of full JWT
+      const requires2FA = await handleAdmin2FACheck(req, res, adminEmail);
+      if (requires2FA) {
+        return;
+      }
 
       const secret = process.env.JWT_SECRET;
       if (!secret) {
@@ -1744,6 +1847,200 @@ router.post(
     );
   })
 );
+
+// ============================================
+// EMAIL VERIFICATION ROUTES
+// ============================================
+
+/**
+ * GET /api/auth/verify-email/:token
+ * Verify a client's email address using the token from the verification email.
+ * Marks email_verified = true and clears the token.
+ * Tokens expire after EMAIL_VERIFICATION_CONFIG.TOKEN_EXPIRY_MS (24 hours).
+ */
+router.get(
+  '/verify-email/:token',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token } = req.params;
+
+    if (!token || token.length < 32) {
+      return sendBadRequest(res, 'Invalid verification token', ErrorCodes.INVALID_TOKEN);
+    }
+
+    const db = getDatabase();
+
+    const client = await db.get(
+      `SELECT id, email, email_verified, email_verification_sent_at
+       FROM clients
+       WHERE email_verification_token = ? AND deleted_at IS NULL`,
+      [token]
+    );
+
+    if (!client) {
+      return sendBadRequest(res, 'Invalid or expired verification token', ErrorCodes.INVALID_TOKEN);
+    }
+
+    const clientId = getNumber(client, 'id');
+    const clientEmail = getString(client, 'email');
+    const alreadyVerified = getBoolean(client, 'email_verified');
+
+    if (alreadyVerified) {
+      // Redirect to portal with message even if already verified
+      const portalUrl = getBaseUrl();
+      return res.redirect(`${portalUrl}/client/portal?email_verified=already`);
+    }
+
+    // Check if token has expired
+    const sentAtStr = getString(client, 'email_verification_sent_at');
+    if (sentAtStr) {
+      const sentAt = new Date(sentAtStr);
+      const now = new Date();
+      const elapsed = now.getTime() - sentAt.getTime();
+
+      if (elapsed > EMAIL_VERIFICATION_CONFIG.TOKEN_EXPIRY_MS) {
+        return sendBadRequest(
+          res,
+          'Verification link has expired. Please request a new one.',
+          ErrorCodes.TOKEN_EXPIRED
+        );
+      }
+    }
+
+    // Mark email as verified and clear the token
+    await db.run(
+      `UPDATE clients
+       SET email_verified = 1,
+           email_verification_token = NULL,
+           email_verification_sent_at = NULL
+       WHERE id = ?`,
+      [clientId]
+    );
+
+    await auditLogger.log({
+      action: 'email_verified',
+      entityType: 'client',
+      entityId: String(clientId),
+      entityName: clientEmail,
+      userId: clientId,
+      userEmail: clientEmail,
+      userType: 'client',
+      metadata: { verifiedVia: 'email_link' },
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.get('user-agent') || 'unknown'
+    });
+
+    logger.info(`[AUTH] Email verified for client ${clientId}`, { category: 'AUTH' });
+
+    // Redirect to portal with success indicator
+    const portalUrl = getBaseUrl();
+    return res.redirect(`${portalUrl}/client/portal?email_verified=success`);
+  })
+);
+
+/**
+ * POST /api/auth/resend-verification
+ * Resend the email verification email for a client.
+ * Rate limited to 1 request per EMAIL_VERIFICATION_CONFIG.RESEND_COOLDOWN_MS (5 minutes)
+ * per email address, enforced via the email_verification_sent_at timestamp.
+ */
+router.post(
+  '/resend-verification',
+  rateLimit({
+    windowMs: RATE_LIMIT_CONFIG.RESEND_VERIFICATION.WINDOW_MS,
+    maxRequests: RATE_LIMIT_CONFIG.RESEND_VERIFICATION.MAX_ATTEMPTS,
+    message: 'Too many verification email requests. Please try again later.',
+    keyGenerator: (req) => `resend-verification:${req.ip}`
+  }),
+  validateRequest(AuthValidationSchemas.resendVerification),
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { email } = req.body;
+
+    const db = getDatabase();
+
+    const client = await db.get(
+      `SELECT id, email, contact_name, email_verified, email_verification_sent_at
+       FROM clients
+       WHERE email = ? AND deleted_at IS NULL`,
+      [email.toLowerCase()]
+    );
+
+    // Always return success to avoid revealing account existence
+    if (!client) {
+      return sendSuccess(
+        res,
+        undefined,
+        'If an account with that email exists, a verification email has been sent.'
+      );
+    }
+
+    const clientId = getNumber(client, 'id');
+    const clientEmail = getString(client, 'email');
+    const clientName = getString(client, 'contact_name');
+    const alreadyVerified = getBoolean(client, 'email_verified');
+
+    if (alreadyVerified) {
+      return sendSuccess(res, undefined, 'Email is already verified.');
+    }
+
+    // Enforce cooldown based on last send timestamp
+    const lastSentStr = getString(client, 'email_verification_sent_at');
+    if (lastSentStr) {
+      const lastSent = new Date(lastSentStr);
+      const now = new Date();
+      const elapsed = now.getTime() - lastSent.getTime();
+
+      if (elapsed < EMAIL_VERIFICATION_CONFIG.RESEND_COOLDOWN_MS) {
+        const remainingSeconds = Math.ceil(
+          (EMAIL_VERIFICATION_CONFIG.RESEND_COOLDOWN_MS - elapsed) / 1000
+        );
+        return sendBadRequest(
+          res,
+          `Please wait ${remainingSeconds} seconds before requesting another verification email.`,
+          ErrorCodes.RATE_LIMIT_EXCEEDED
+        );
+      }
+    }
+
+    // Generate new token and update the database
+    const verificationToken = generateSecureToken();
+    const now = new Date();
+
+    await db.run(
+      `UPDATE clients
+       SET email_verification_token = ?,
+           email_verification_sent_at = ?
+       WHERE id = ?`,
+      [verificationToken, now.toISOString(), clientId]
+    );
+
+    // Send verification email
+    try {
+      await emailService.sendEmailVerificationEmail(clientEmail, {
+        verificationToken,
+        name: clientName || undefined
+      });
+    } catch (emailError) {
+      logger.error('[AUTH] Failed to send verification email on resend', {
+        error: emailError instanceof Error ? emailError : undefined,
+        category: 'AUTH'
+      });
+      // Still return success - token was saved, email delivery is best-effort
+    }
+
+    return sendSuccess(
+      res,
+      undefined,
+      'If an account with that email exists, a verification email has been sent.'
+    );
+  })
+);
+
+// ============================================
+// TWO-FACTOR AUTHENTICATION ROUTES
+// ============================================
+
+import { twoFactorRouter } from './two-factor.js';
+router.use('/2fa', twoFactorRouter);
 
 export { router as authRouter };
 export default router;
