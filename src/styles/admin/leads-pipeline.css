@@ -700,7 +700,7 @@
 #lead-details-panel .project-detail-meta {
   display: grid;
   grid-template-columns: 1fr;
-  row-gap: var(--portal-field-group-gap);
+  row-gap: var(--space-3);
   column-gap: var(--space-1-5);
 }
 

@@ -116,7 +116,7 @@ export function ContractTab({
               )}
 
               {!isSigned && (
-                <p className="text-muted pd-mt-2">
+                <p className="text-muted pd-mt-1">
                   {contractStatus.status === 'pending'
                     ? 'Contract has been sent and is awaiting client signature.'
                     : 'Contract has not been sent to the client yet.'}
