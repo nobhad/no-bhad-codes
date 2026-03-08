@@ -19,6 +19,7 @@ import * as React from 'react';
 import { PortalProviders } from './PortalProviders';
 import { PortalRoutes } from './PortalRoutes';
 import { ErrorBoundary } from '../components/portal/ErrorBoundary';
+import { CommandPalette, useCommandPalette } from '../components/portal/CommandPalette';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalAuth } from '../hooks/usePortalAuth';
 import type { UserRole } from '../../../server/config/unified-navigation';
@@ -90,14 +91,23 @@ function AdminKeyboardShortcuts() {
 // ROOT COMPONENT
 // ============================================
 
+function PortalAppInner() {
+  const { open, setOpen } = useCommandPalette();
+
+  return (
+    <AuthInitializer>
+      <AdminKeyboardShortcuts />
+      <CommandPalette open={open} onClose={() => setOpen(false)} />
+      <PortalRoutes />
+    </AuthInitializer>
+  );
+}
+
 export function PortalApp() {
   return (
     <ErrorBoundary componentName="Portal">
       <PortalProviders>
-        <AuthInitializer>
-          <AdminKeyboardShortcuts />
-          <PortalRoutes />
-        </AuthInitializer>
+        <PortalAppInner />
       </PortalProviders>
     </ErrorBoundary>
   );

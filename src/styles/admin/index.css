@@ -67,3 +67,6 @@
 /* Unified modal system */
 @import "../shared/modal-system.css";
 
+/* Command palette */
+@import "../shared/command-palette.css";
+
