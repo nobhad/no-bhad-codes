@@ -291,6 +291,7 @@ export function DataTable<T extends { id: number }>({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="form-input data-table-search-input"
+            aria-label="Search table"
           />
         </div>
 
@@ -301,6 +302,7 @@ export function DataTable<T extends { id: number }>({
             value={filterValues[filter.key] || 'all'}
             onChange={(e) => setFilter(filter.key, e.target.value)}
             className="form-select"
+            aria-label={`Filter by ${filter.key}`}
           >
             {filter.options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -327,13 +329,14 @@ export function DataTable<T extends { id: number }>({
             loading={isExporting}
             disabled={filteredData.length === 0}
             title="Export to CSV"
+            aria-label="Export to CSV"
           >
             <Download className="icon-md" />
           </PortalButton>
         )}
 
         {/* Refresh */}
-        <PortalButton variant="ghost" size="sm" onClick={onRefetch} loading={isLoading}>
+        <PortalButton variant="ghost" size="sm" onClick={onRefetch} loading={isLoading} aria-label="Refresh data">
           <RefreshCw className="icon-md" />
         </PortalButton>
       </div>
@@ -479,8 +482,9 @@ export function DataTable<T extends { id: number }>({
 
             <div className="data-table-pagination-controls">
               <div className="data-table-page-size">
-                <label className="field-label">Show</label>
+                <label className="field-label" htmlFor="data-table-page-size">Show</label>
                 <select
+                  id="data-table-page-size"
                   value={pagination.pageSize}
                   onChange={(e) => pagination.setPageSize(Number(e.target.value))}
                   className="form-select form-select-sm"
@@ -500,6 +504,7 @@ export function DataTable<T extends { id: number }>({
                   onClick={pagination.firstPage}
                   disabled={!pagination.canGoPrev}
                   title="First page"
+                  aria-label="First page"
                 >
                   <ChevronsLeft className="icon-md" />
                 </button>
@@ -509,6 +514,7 @@ export function DataTable<T extends { id: number }>({
                   onClick={pagination.prevPage}
                   disabled={!pagination.canGoPrev}
                   title="Previous page"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft className="icon-md" />
                 </button>
@@ -526,6 +532,7 @@ export function DataTable<T extends { id: number }>({
                   onClick={pagination.nextPage}
                   disabled={!pagination.canGoNext}
                   title="Next page"
+                  aria-label="Next page"
                 >
                   <ChevronRight className="icon-md" />
                 </button>
@@ -535,6 +542,7 @@ export function DataTable<T extends { id: number }>({
                   onClick={pagination.lastPage}
                   disabled={!pagination.canGoNext}
                   title="Last page"
+                  aria-label="Last page"
                 >
                   <ChevronsRight className="icon-md" />
                 </button>

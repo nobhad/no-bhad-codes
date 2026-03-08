@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -352,7 +352,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     loadAnalytics();
   }, [loadAnalytics]);
 
-  const kpis: KPI[] = data
+  const kpis: KPI[] = useMemo(() => data
     ? [
       {
         id: 'revenue',
@@ -403,7 +403,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
         icon: <BarChart3 className="icon-lg" />
       }
     ]
-    : [];
+    : [], [data]);
 
   const dateRangeOptions = [
     { value: '7d', label: 'Last 7 days' },
@@ -556,7 +556,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
 // KpiCard — extracted to avoid repetition
 // ============================================
 
-function KpiCard({ kpi }: { kpi: KPI }) {
+const KpiCard = React.memo(function KpiCard({ kpi }: { kpi: KPI }) {
   return (
     <div className="kpi-card">
       <div className="kpi-card-icon">{kpi.icon}</div>
@@ -574,7 +574,7 @@ function KpiCard({ kpi }: { kpi: KPI }) {
       )}
     </div>
   );
-}
+});
 
 // ============================================
 // SourceBreakdown — lead source progress bars

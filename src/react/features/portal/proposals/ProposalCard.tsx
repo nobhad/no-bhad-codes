@@ -16,7 +16,7 @@ interface ProposalCardProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-export function ProposalCard({ proposal, onNavigate }: ProposalCardProps) {
+export const ProposalCard = React.memo(function ProposalCard({ proposal, onNavigate }: ProposalCardProps) {
   const overdue = isOverdue(proposal.validUntil ?? undefined);
   const dueDaysText = getDueDaysText(proposal.validUntil ?? undefined);
 
@@ -87,4 +87,4 @@ export function ProposalCard({ proposal, onNavigate }: ProposalCardProps) {
       )}
     </div>
   );
-}
+});

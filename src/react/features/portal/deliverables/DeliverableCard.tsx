@@ -15,7 +15,7 @@ interface DeliverableCardProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-export function DeliverableCard({ deliverable, onNavigate }: DeliverableCardProps) {
+export const DeliverableCard = React.memo(function DeliverableCard({ deliverable, onNavigate }: DeliverableCardProps) {
   const overdue = isOverdue(deliverable.review_deadline ?? undefined);
   const dueDaysText = getDueDaysText(deliverable.review_deadline ?? undefined);
 
@@ -90,4 +90,4 @@ export function DeliverableCard({ deliverable, onNavigate }: DeliverableCardProp
       )}
     </div>
   );
-}
+});

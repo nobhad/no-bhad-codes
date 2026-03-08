@@ -76,7 +76,7 @@ interface PortalTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> 
   clickable?: boolean;
 }
 
-const PortalTableRow = React.forwardRef<HTMLTableRowElement, PortalTableRowProps>(
+const PortalTableRow = React.memo(React.forwardRef<HTMLTableRowElement, PortalTableRowProps>(
   ({ className, selected, clickable = false, ...props }, ref) => (
     <tr
       ref={ref}
@@ -85,7 +85,7 @@ const PortalTableRow = React.forwardRef<HTMLTableRowElement, PortalTableRowProps
       {...props}
     />
   )
-);
+));
 PortalTableRow.displayName = 'PortalTableRow';
 
 interface PortalTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
@@ -95,7 +95,7 @@ interface PortalTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellEleme
   sortDirection?: 'asc' | 'desc' | null;
 }
 
-const PortalTableHead = React.forwardRef<HTMLTableCellElement, PortalTableHeadProps>(
+const PortalTableHead = React.memo(React.forwardRef<HTMLTableCellElement, PortalTableHeadProps>(
   ({ className, sortable, sortDirection, children, ...props }, ref) => (
     <th
       ref={ref}
@@ -120,7 +120,7 @@ const PortalTableHead = React.forwardRef<HTMLTableCellElement, PortalTableHeadPr
       )}
     </th>
   )
-);
+));
 PortalTableHead.displayName = 'PortalTableHead';
 
 interface PortalTableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
@@ -128,11 +128,11 @@ interface PortalTableCellProps extends React.TdHTMLAttributes<HTMLTableCellEleme
   label?: string;
 }
 
-const PortalTableCell = React.forwardRef<HTMLTableCellElement, PortalTableCellProps>(
+const PortalTableCell = React.memo(React.forwardRef<HTMLTableCellElement, PortalTableCellProps>(
   ({ className, label, ...props }, ref) => (
     <td ref={ref} className={className} data-label={label || undefined} {...props} />
   )
-);
+));
 PortalTableCell.displayName = 'PortalTableCell';
 
 const PortalTableCaption = React.forwardRef<
@@ -155,7 +155,7 @@ interface PortalTableEmptyProps {
   message?: string;
 }
 
-function PortalTableEmpty({
+const PortalTableEmpty = React.memo(function PortalTableEmpty({
   colSpan,
   icon,
   message = 'No data available'
@@ -170,7 +170,7 @@ function PortalTableEmpty({
       </td>
     </tr>
   );
-}
+});
 
 /**
  * Loading state for tables — uses standardized .loading-state class
@@ -200,7 +200,7 @@ function PortalTableLoading({ colSpan, rows = 1, message = 'Loading...' }: Porta
   return (
     <>
       {Array.from({ length: rows }).map((_, i) => (
-        <tr key={i} className="skeleton-row">
+        <tr key={`skeleton-${i}`} className="skeleton-row">
           <td colSpan={colSpan}>
             <div className="skeleton-bar" />
           </td>
