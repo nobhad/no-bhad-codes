@@ -267,7 +267,7 @@ export function TasksTab({
                     )}
                   >
                     {milestone.is_completed && (
-                      <Check className="icon-sm" style={{ color: 'var(--portal-text-dark)' }} />
+                      <Check className="icon-sm text-dark" />
                     )}
                   </button>
 

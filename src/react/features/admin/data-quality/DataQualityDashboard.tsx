@@ -505,7 +505,7 @@ function ValidationErrorsTab({
     <div className="portal-card">
       <div className="section-header-with-actions">
         <h3 className="section-title">Validation Errors</h3>
-        <div className="form-group" style={{ marginBottom: 0 }}>
+        <div className="form-group mb-0">
           <div className="filter-inline">
             <Filter size={14} />
             <select
@@ -677,7 +677,7 @@ function RateLimitingTab({
 
           {stats.topOffenders.length > 0 && (
             <>
-              <h4 className="section-title" style={{ marginTop: 'var(--spacing-lg)' }}>Top Offenders</h4>
+              <h4 className="section-title mt-lg">Top Offenders</h4>
               <table className="data-table">
                 <thead>
                   <tr>
