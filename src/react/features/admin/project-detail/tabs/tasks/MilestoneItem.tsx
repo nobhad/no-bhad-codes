@@ -45,20 +45,20 @@ const INITIAL_EDIT_STATE: EditState = {
 
 function editReducer(state: EditState, action: EditAction): EditState {
   switch (action.type) {
-    case 'START_EDIT':
-      return {
-        isEditing: true,
-        title: action.milestone.title,
-        description: action.milestone.description || '',
-        dueDate: action.milestone.due_date || '',
-        isSaving: false
-      };
-    case 'CANCEL_EDIT':
-      return INITIAL_EDIT_STATE;
-    case 'SET_FIELD':
-      return { ...state, [action.field]: action.value };
-    case 'SET_SAVING':
-      return { ...state, isSaving: action.isSaving };
+  case 'START_EDIT':
+    return {
+      isEditing: true,
+      title: action.milestone.title,
+      description: action.milestone.description || '',
+      dueDate: action.milestone.due_date || '',
+      isSaving: false
+    };
+  case 'CANCEL_EDIT':
+    return INITIAL_EDIT_STATE;
+  case 'SET_FIELD':
+    return { ...state, [action.field]: action.value };
+  case 'SET_SAVING':
+    return { ...state, isSaving: action.isSaving };
   }
 }
 

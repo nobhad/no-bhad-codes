@@ -1127,8 +1127,8 @@ router.post(
     const baseUrl = getBaseUrl();
     const portalUrl = `${baseUrl}/client/portal`;
 
-    const { emailService } = await import('../services/email-service.js');
-    await emailService.sendEmail({
+    const { emailService: emailSvc } = await import('../services/email-service.js');
+    await emailSvc.sendEmail({
       to: request.clientEmail,
       subject: `Quote Ready - ${projectName}`,
       text: `Hi ${clientName},

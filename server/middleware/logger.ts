@@ -107,7 +107,7 @@ export function getApiMetrics(): {
     latency: { p50: number; p95: number; p99: number; avg: number; count: number };
     errors: { client: number; server: number; total: number };
   }>;
-} {
+  } {
   resetWindowIfStale();
 
   // Aggregate all latency samples

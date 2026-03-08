@@ -78,7 +78,7 @@ export function PortalDocumentRequests({
     url: API_ENDPOINTS.DOCUMENT_REQUESTS_MY,
     transform: (raw) => (raw as { requests?: DocumentRequest[] }).requests || []
   });
-  const items = requests ?? [];
+  const items = useMemo(() => requests ?? [], [requests]);
   const summary = useMemo(() => calculateSummary(items), [items]);
 
   // Table filters

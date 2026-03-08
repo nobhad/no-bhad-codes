@@ -286,6 +286,30 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
 }
 
 // ============================================
+// KpiCard — extracted to avoid repetition
+// ============================================
+
+const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
+  return (
+    <div className="kpi-card">
+      <div className="kpi-card-icon">{kpi.icon}</div>
+      <span className="kpi-card-label">{kpi.label}</span>
+      <div className="kpi-card-value">{kpi.value}</div>
+      {kpi.change !== undefined && (
+        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
+          {kpi.change >= 0 ? <TrendingUp className="icon-xs" /> : <TrendingDown className="icon-xs" />}
+          <span className="change-value">
+            {kpi.change >= 0 ? '+' : ''}
+            {kpi.change}%
+          </span>
+          <span className="change-label">{kpi.changeLabel}</span>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ============================================
 // AnalyticsDashboard
 // ============================================
 
@@ -551,30 +575,6 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     </div>
   );
 }
-
-// ============================================
-// KpiCard — extracted to avoid repetition
-// ============================================
-
-const KpiCard = React.memo(function KpiCard({ kpi }: { kpi: KPI }) {
-  return (
-    <div className="kpi-card">
-      <div className="kpi-card-icon">{kpi.icon}</div>
-      <span className="kpi-card-label">{kpi.label}</span>
-      <div className="kpi-card-value">{kpi.value}</div>
-      {kpi.change !== undefined && (
-        <div className={cn('kpi-card-change', kpi.change >= 0 ? 'positive' : 'negative')}>
-          {kpi.change >= 0 ? <TrendingUp className="icon-xs" /> : <TrendingDown className="icon-xs" />}
-          <span className="change-value">
-            {kpi.change >= 0 ? '+' : ''}
-            {kpi.change}%
-          </span>
-          <span className="change-label">{kpi.changeLabel}</span>
-        </div>
-      )}
-    </div>
-  );
-});
 
 // ============================================
 // SourceBreakdown — lead source progress bars

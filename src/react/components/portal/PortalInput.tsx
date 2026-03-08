@@ -17,7 +17,8 @@ export interface PortalInputProps
  */
 export const PortalInput = React.forwardRef<HTMLInputElement, PortalInputProps>(
   ({ className, label, error, helperText, id, required, ...props }, ref) => {
-    const inputId = id || `input-${React.useId()}`;
+    const generatedId = React.useId();
+    const inputId = id || `input-${generatedId}`;
 
     return (
       <div className="form-field">

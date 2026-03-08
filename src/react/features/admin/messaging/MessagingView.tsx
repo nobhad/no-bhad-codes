@@ -219,7 +219,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
       loadMessages(selectedConversation.id, controller.signal);
       return () => controller.abort();
     }
-  }, [selectedConversation?.id, loadMessages]);
+  }, [selectedConversation, loadMessages]);
 
   useEffect(() => {
     scrollToBottom();

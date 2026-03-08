@@ -39,7 +39,7 @@ export function PortalContracts({
     url: API_ENDPOINTS.CONTRACTS_MY,
     transform: (raw) => (raw as PortalContractsResponse).contracts || []
   });
-  const items = contracts ?? [];
+  const items = useMemo(() => contracts ?? [], [contracts]);
 
   const {
     filterValues,

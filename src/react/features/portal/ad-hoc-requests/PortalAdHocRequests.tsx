@@ -52,7 +52,7 @@ export function PortalAdHocRequests({
     url: API_ENDPOINTS.AD_HOC_REQUESTS_MY,
     transform: (raw) => (raw as Record<string, unknown>).requests as AdHocRequest[] || []
   });
-  const items = requests ?? [];
+  const items = useMemo(() => requests ?? [], [requests]);
 
   const [projects, setProjects] = useState<Array<{ id: number; name: string }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);

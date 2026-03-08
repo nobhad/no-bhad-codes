@@ -18,7 +18,7 @@ import zapierService from './zapier-service.js';
 import slackService from './slack-service.js';
 import stripeService from './stripe-service.js';
 import calendarService from './calendar-service.js';
-import { isStripeConfigured, getStripeStatus } from './stripe-service.js';
+import { getStripeStatus } from './stripe-service.js';
 import { isGoogleCalendarConfigured } from './calendar-service.js';
 import { getNotificationConfigs } from './slack-service.js';
 import { getDatabase } from '../../database/init.js';

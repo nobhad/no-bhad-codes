@@ -80,7 +80,7 @@ export function PortalQuestionnairesView({
     url: API_ENDPOINTS.QUESTIONNAIRES_MY_RESPONSES,
     transform: (raw) => (raw as Record<string, unknown>).responses as PortalQuestionnaireResponse[] || []
   });
-  const items = responses ?? [];
+  const items = useMemo(() => responses ?? [], [responses]);
   const [selectedResponse, setSelectedResponse] = useState<PortalQuestionnaireResponse | null>(null);
 
   // Table filters
@@ -123,6 +123,20 @@ export function PortalQuestionnairesView({
     showNotification?.('Questionnaire submitted successfully', 'success');
   };
 
+  // Calculate summary stats - single pass instead of 3 separate filters
+  // Must be called unconditionally (before any early returns) per Rules of Hooks
+  const { completedCount, pendingCount, needsRevisionCount } = useMemo(() => {
+    let completed = 0;
+    let pending = 0;
+    let revision = 0;
+    for (const r of items) {
+      if (r.status === 'submitted' || r.status === 'approved') completed++;
+      else if (r.status === 'pending' || r.status === 'in_progress') pending++;
+      else if (r.status === 'rejected') revision++;
+    }
+    return { completedCount: completed, pendingCount: pending, needsRevisionCount: revision };
+  }, [items]);
+
   // If a questionnaire is selected, show the form
   if (selectedResponse) {
     return (
@@ -135,19 +149,6 @@ export function PortalQuestionnairesView({
       />
     );
   }
-
-  // Calculate summary stats - single pass instead of 3 separate filters
-  const { completedCount, pendingCount, needsRevisionCount } = useMemo(() => {
-    let completed = 0;
-    let pending = 0;
-    let revision = 0;
-    for (const r of items) {
-      if (r.status === 'submitted' || r.status === 'approved') completed++;
-      else if (r.status === 'pending' || r.status === 'in_progress') pending++;
-      else if (r.status === 'rejected') revision++;
-    }
-    return { completedCount: completed, pendingCount: pending, needsRevisionCount: revision };
-  }, [items]);
 
   return (
     <TableLayout

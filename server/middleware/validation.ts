@@ -12,7 +12,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
-import { errorResponseWithPayload, ErrorCodes } from '../utils/api-response.js';
+import { errorResponseWithPayload } from '../utils/api-response.js';
 
 // Validation error interface
 export interface ValidationError {
@@ -215,7 +215,7 @@ export class ApiValidator {
       return String(value);
     }
 
-    let sanitized = value.trim();
+    const sanitized = value.trim();
 
     // Length validation
     if (rule.minLength !== undefined && sanitized.length < rule.minLength) {

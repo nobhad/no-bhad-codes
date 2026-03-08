@@ -39,7 +39,7 @@ export function NotesTab({
   showNotification
 }: NotesTabProps) {
   const {
-    isAdding,
+    isAdding: _isAdding,
     editingId,
     formData: noteContent,
     isSubmitting,
@@ -99,7 +99,7 @@ export function NotesTab({
     } finally {
       setIsSubmitting(false);
     }
-  }, [noteContent, editingId, onAddNote, onUpdateNote, showNotification, handleCancel]);
+  }, [noteContent, editingId, onAddNote, onUpdateNote, showNotification, handleCancel, setIsSubmitting]);
 
   // Delete
   const handleDeleteClick = useCallback(

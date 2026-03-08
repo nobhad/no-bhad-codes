@@ -79,7 +79,7 @@ export function ContactsTab({
   showNotification
 }: ContactsTabProps) {
   const {
-    isAdding,
+    isAdding: _isAdding,
     editingId,
     formData,
     isSubmitting,
@@ -168,7 +168,7 @@ export function ContactsTab({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, editingId, onAddContact, onUpdateContact, showNotification, handleCancel]);
+  }, [formData, editingId, onAddContact, onUpdateContact, showNotification, handleCancel, setIsSubmitting]);
 
   // Handle delete
   const handleDeleteClick = useCallback(

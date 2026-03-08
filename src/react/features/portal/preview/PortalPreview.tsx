@@ -131,7 +131,7 @@ export function PortalPreview({
   // Initial fetch
   useEffect(() => {
     fetchPreviewUrl();
-  }, []);
+  }, [fetchPreviewUrl]);
 
   /** Open the preview URL in a new browser tab */
   const handleOpenNewTab = useCallback(() => {

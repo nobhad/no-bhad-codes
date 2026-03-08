@@ -60,6 +60,64 @@ interface TaskItem {
   dueDate?: string;
 }
 
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function getPriorityColor(priority: string): string {
+  switch (priority) {
+  case 'urgent': return 'var(--status-cancelled)';
+  case 'high': return 'var(--status-pending)';
+  case 'medium': return 'var(--portal-text-light)';
+  default: return 'var(--portal-text-muted)';
+  }
+}
+
+const KANBAN_COLUMNS = [
+  { id: 'pending', label: 'TO DO' },
+  { id: 'in_progress', label: 'IN PROGRESS' },
+  { id: 'completed', label: 'DONE' }
+] as const;
+
+const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
+  // Group tasks by status in a single pass instead of filtering per column
+  const tasksByStatus = React.useMemo(() => {
+    const grouped: Record<string, TaskItem[]> = {};
+    for (const col of KANBAN_COLUMNS) grouped[col.id] = [];
+    for (const task of tasks) {
+      if (grouped[task.status]) grouped[task.status].push(task);
+    }
+    return grouped;
+  }, [tasks]);
+
+  return (
+    <div className="kanban-grid">
+      {KANBAN_COLUMNS.map((column) => {
+        const columnTasks = tasksByStatus[column.id] || [];
+        return (
+          <div key={column.id} className="kanban-column">
+            <h4 className="field-label">{column.label}</h4>
+            <div className="kanban-items">
+              {columnTasks.map((task) => (
+                <div key={task.id} className="kanban-card">
+                  <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
+                  <div>
+                    <div className="activity-text">{task.title}</div>
+                    <div className="activity-time">{task.projectName}</div>
+                  </div>
+                </div>
+              ))}
+              {columnTasks.length === 0 && (
+                <div className="empty-state-small">No tasks</div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+});
+
 export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
@@ -321,62 +379,4 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
       </div>
     </div>
   );
-}
-
-const KANBAN_COLUMNS = [
-  { id: 'pending', label: 'TO DO' },
-  { id: 'in_progress', label: 'IN PROGRESS' },
-  { id: 'completed', label: 'DONE' }
-] as const;
-
-const TasksKanban = React.memo(function TasksKanban({ tasks }: { tasks: TaskItem[] }) {
-  // Group tasks by status in a single pass instead of filtering per column
-  const tasksByStatus = React.useMemo(() => {
-    const grouped: Record<string, TaskItem[]> = {};
-    for (const col of KANBAN_COLUMNS) grouped[col.id] = [];
-    for (const task of tasks) {
-      if (grouped[task.status]) grouped[task.status].push(task);
-    }
-    return grouped;
-  }, [tasks]);
-
-  return (
-    <div className="kanban-grid">
-      {KANBAN_COLUMNS.map((column) => {
-        const columnTasks = tasksByStatus[column.id] || [];
-        return (
-          <div key={column.id} className="kanban-column">
-            <h4 className="field-label">{column.label}</h4>
-            <div className="kanban-items">
-              {columnTasks.map((task) => (
-                <div key={task.id} className="kanban-card">
-                  <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
-                  <div>
-                    <div className="activity-text">{task.title}</div>
-                    <div className="activity-time">{task.projectName}</div>
-                  </div>
-                </div>
-              ))}
-              {columnTasks.length === 0 && (
-                <div className="empty-state-small">No tasks</div>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-});
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function getPriorityColor(priority: string): string {
-  switch (priority) {
-  case 'urgent': return 'var(--status-cancelled)';
-  case 'high': return 'var(--status-pending)';
-  case 'medium': return 'var(--portal-text-light)';
-  default: return 'var(--portal-text-muted)';
-  }
 }

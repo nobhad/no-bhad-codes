@@ -22,7 +22,7 @@ const TEST_ITEMS: TestItem[] = [
   { id: 1, name: 'Alpha', status: 'active', amount: 100 },
   { id: 2, name: 'Beta', status: 'inactive', amount: 200 },
   { id: 3, name: 'Gamma', status: 'active', amount: 50 },
-  { id: 4, name: 'Delta', status: 'pending', amount: 300 },
+  { id: 4, name: 'Delta', status: 'pending', amount: 300 }
 ];
 
 // Replicate the filterFn pattern used across portals
