@@ -364,7 +364,20 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const setting = await settingsService.getSetting(req.params.key);
+    const key = req.params.key;
+
+    // Express 5 router may match /:key before static routes like /payment.
+    // Delegate to the correct service method for known named routes.
+    if (key === 'payment') {
+      const paymentSettings = await settingsService.getPaymentSettings();
+      return sendSuccess(res, paymentSettings);
+    }
+    if (key === 'invoice') {
+      const invoiceSettings = await settingsService.getInvoiceSettings();
+      return sendSuccess(res, invoiceSettings);
+    }
+
+    const setting = await settingsService.getSetting(key);
 
     if (!setting) {
       return errorResponse(res, 'Setting not found', 404);
