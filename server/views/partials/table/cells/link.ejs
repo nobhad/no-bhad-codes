@@ -1,3 +1,14 @@
 <%# Link Cell %>
 <%# Locals: value, col, row %>
-<% if (value) { %><a href="<%= value %>" class="cell-link" target="_blank" rel="noopener"><%= value %></a><% } else { %>—<% } %>
+<% if (value) {
+  const allowedSchemes = ['http:', 'https:', 'mailto:', 'tel:'];
+  let isSafe = false;
+  try {
+    const parsed = new URL(String(value));
+    isSafe = allowedSchemes.includes(parsed.protocol);
+  } catch (_e) {
+    // Relative URLs are safe (no protocol injection)
+    isSafe = !/^\s*javascript:/i.test(String(value));
+  }
+  if (isSafe) { %><a href="<%= value %>" class="cell-link" target="_blank" rel="noopener"><%= value %></a><% } else { %><span class="cell-link"><%= value %></span><% }
+} else { %>—<% } %>

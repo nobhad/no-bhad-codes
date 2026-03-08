@@ -11,6 +11,7 @@
  * The rateLimit function here is a wrapper for backward compatibility.
  */
 
+import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../services/logger.js';
 import { errorResponse } from '../utils/api-response.js';
@@ -87,7 +88,15 @@ export function csrfProtection(
       const token = req.get(headerName) || req.body._csrf;
       const cookieToken = req.cookies?.[cookieName];
 
-      if (!token || !cookieToken || token !== cookieToken) {
+      const tokenBuffer = token ? Buffer.from(String(token)) : null;
+      const cookieBuffer = cookieToken ? Buffer.from(String(cookieToken)) : null;
+      const tokensMatch =
+        tokenBuffer !== null &&
+        cookieBuffer !== null &&
+        tokenBuffer.length === cookieBuffer.length &&
+        crypto.timingSafeEqual(tokenBuffer, cookieBuffer);
+
+      if (!tokensMatch) {
         await logger.logSecurity(
           'csrf_token_mismatch',
           {
