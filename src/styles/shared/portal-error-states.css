@@ -20,8 +20,8 @@
   justify-content: center;
   min-height: 200px;
   padding: var(--space-4);
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-color);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .error-boundary-content {
@@ -43,7 +43,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0;
   text-transform: none;
   letter-spacing: normal;
@@ -51,15 +51,15 @@
 
 .error-boundary-message {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .error-boundary-details {
   width: 100%;
   padding: var(--space-2);
-  background: var(--portal-bg-darkest);
-  border: var(--border-width) solid var(--portal-border-color);
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-primary);
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-xs);
   color: var(--color-danger);
@@ -82,15 +82,15 @@
   align-items: center;
   gap: var(--icon-gap-sm);
   padding: var(--space-1-5) var(--space-3);
-  border: var(--border-width) solid var(--portal-text-light);
-  color: var(--portal-text-light);
+  border: var(--border-width) solid var(--color-text-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-family-sans);
   font-weight: var(--font-weight-medium);
 }
 
 .error-boundary-retry:hover {
-  background: var(--portal-text-light);
-  color: var(--portal-bg-pitch);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
 }
 
 .error-boundary-retry-icon {
@@ -112,7 +112,7 @@
 .mount-error-container {
   padding: var(--space-6);
   text-align: center;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   display: flex;
@@ -124,7 +124,7 @@
 
 .mount-error-message {
   margin-bottom: var(--space-4);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .mount-error-button {
@@ -135,7 +135,7 @@
 }
 
 .mount-error-button:hover {
-  background: var(--portal-text-muted);
+  background: var(--color-text-tertiary);
   color: var(--portal-bg);
 }
 

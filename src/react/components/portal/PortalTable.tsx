@@ -2,6 +2,11 @@ import * as React from 'react';
 import { cn } from '@react/lib/utils';
 import { useStaggerChildren } from '@react/hooks/useGsap';
 import { GSAP } from '@react/config/portal-constants';
+import {
+  EmptyState,
+  LoadingState,
+  ErrorState
+} from '@react/factories';
 
 /**
  * PortalTable
@@ -144,7 +149,7 @@ const PortalTableCaption = React.forwardRef<
 PortalTableCaption.displayName = 'PortalTableCaption';
 
 /**
- * Empty state for tables — uses standardized .empty-state class
+ * Empty state for tables — delegates to reusable EmptyState factory component
  */
 interface PortalTableEmptyProps {
   /** Number of columns to span */
@@ -153,27 +158,35 @@ interface PortalTableEmptyProps {
   icon?: React.ReactNode;
   /** Message to display */
   message?: string;
+  /** CTA button label */
+  ctaLabel?: string;
+  /** CTA button click handler */
+  onCtaClick?: () => void;
 }
 
 const PortalTableEmpty = React.memo(({
   colSpan,
   icon,
-  message = 'No data available'
+  message = 'No data available',
+  ctaLabel,
+  onCtaClick
 }: PortalTableEmptyProps) => {
   return (
     <tr>
       <td colSpan={colSpan}>
-        <div className="empty-state">
-          {icon}
-          <span>{message}</span>
-        </div>
+        <EmptyState
+          icon={icon}
+          message={message}
+          ctaLabel={ctaLabel}
+          onCtaClick={onCtaClick}
+        />
       </td>
     </tr>
   );
 });
 
 /**
- * Loading state for tables — uses standardized .loading-state class
+ * Loading state for tables — delegates to reusable LoadingState factory component
  */
 interface PortalTableLoadingProps {
   /** Number of columns to span */
@@ -189,9 +202,7 @@ function PortalTableLoading({ colSpan, rows = 1, message = 'Loading...' }: Porta
     return (
       <tr>
         <td colSpan={colSpan}>
-          <div className="loading-state">
-            <span>{message}</span>
-          </div>
+          <LoadingState message={message} />
         </td>
       </tr>
     );
@@ -211,7 +222,7 @@ function PortalTableLoading({ colSpan, rows = 1, message = 'Loading...' }: Porta
 }
 
 /**
- * Error state for tables — uses standardized .error-state class
+ * Error state for tables — delegates to reusable ErrorState factory component
  */
 interface PortalTableErrorProps {
   /** Number of columns to span */
@@ -230,14 +241,10 @@ function PortalTableError({
   return (
     <tr>
       <td colSpan={colSpan}>
-        <div className="error-state">
-          <span>{message}</span>
-          {onRetry && (
-            <button type="button" className="btn-primary" onClick={onRetry}>
-              Try Again
-            </button>
-          )}
-        </div>
+        <ErrorState
+          message={message}
+          onRetry={onRetry}
+        />
       </td>
     </tr>
   );

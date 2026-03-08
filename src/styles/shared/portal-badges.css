@@ -76,7 +76,7 @@
 
 /* Not Invited - muted text */
 .status-badge.status-not-invited {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* =====================================================
@@ -89,8 +89,8 @@
 }
 
 .status-badge--muted {
-  border-color: var(--portal-text-muted);
-  color: var(--portal-text-muted);
+  border-color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary);
 }
 
 /* =====================================================
@@ -113,8 +113,8 @@
 }
 
 .status-badge.status-unknown {
-  border-color: var(--portal-text-muted);
-  color: var(--portal-text-muted);
+  border-color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary);
 }
 
 /* =====================================================
@@ -170,13 +170,13 @@
 .status-indicator .status-dot {
   width: var(--icon-size-xs);
   height: var(--icon-size-xs);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   flex-shrink: 0;
-  background-color: var(--portal-text-muted);
+  background-color: var(--color-text-tertiary);
 }
 
 .status-indicator .status-text {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Status indicator dot colors - Cyan/New and Upcoming */
@@ -379,7 +379,7 @@
   height: var(--status-dot-size, 8px);
   min-width: var(--status-dot-size, 8px);
   min-height: var(--status-dot-size, 8px);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   flex-shrink: 0;
-  background-color: var(--portal-text-muted);
+  background-color: var(--color-text-tertiary);
 }

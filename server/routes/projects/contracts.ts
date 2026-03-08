@@ -790,14 +790,14 @@ ${BUSINESS_INFO.email}
       `.trim()
     });
 
-    logger.info(`[CONTRACT] Signature request sent for project ${projectId} to ${clientEmail}`);
+    logger.info(`[Contract] Signature request sent for project ${projectId} to ${clientEmail}`);
 
     // Schedule contract reminders
     try {
       const scheduler = getSchedulerService();
       await scheduler.scheduleContractReminders(projectId);
     } catch (reminderError) {
-      logger.error('[CONTRACT] Failed to schedule contract reminders:', {
+      logger.error('[Contract] Failed to schedule contract reminders:', {
         error: reminderError instanceof Error ? reminderError : undefined
       });
       // Continue - don't fail the request if reminder scheduling fails
@@ -1099,7 +1099,7 @@ ${BUSINESS_INFO.email}
       html: `<p>Contract signed for <strong>"${projectName}"</strong> by ${signerName} (${clientEmail}) from IP ${signerIp} at ${new Date(signedAt).toLocaleString()}.</p>`
     });
 
-    logger.info(`[CONTRACT] Contract signed for project ${projectId} by ${signerName}`);
+    logger.info(`[Contract] Contract signed for project ${projectId} by ${signerName}`);
 
     // Emit contract.signed event for workflow automations
     await workflowTriggerService.emit('contract.signed', {
@@ -1115,7 +1115,7 @@ ${BUSINESS_INFO.email}
       const scheduler = getSchedulerService();
       await scheduler.cancelContractReminders(projectId);
     } catch (reminderError) {
-      logger.error('[CONTRACT] Failed to cancel contract reminders:', {
+      logger.error('[Contract] Failed to cancel contract reminders:', {
         error: reminderError instanceof Error ? reminderError : undefined
       });
       // Continue - don't fail the signing if reminder cancellation fails

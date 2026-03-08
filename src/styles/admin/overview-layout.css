@@ -19,7 +19,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--portal-section-gap);
-  padding-bottom: var(--space-6);
   max-width: 100%;
 }
 
@@ -27,7 +26,7 @@
 [data-page="admin"] .overview-greeting {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   letter-spacing: var(--letter-spacing-normal);
   line-height: var(--portal-header-height-line, 32px);
   padding-top: var(--space-3);
@@ -68,7 +67,7 @@
 }
 
 .overview-stat-card:hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 .stat-card-top {
@@ -87,7 +86,7 @@
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* Value - LARGE and prominent */
@@ -95,7 +94,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-3xl, 30px);
   font-weight: var(--font-weight-bold);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   line-height: var(--line-height-none);
   letter-spacing: var(--letter-spacing-title);
 }
@@ -126,7 +125,7 @@
 .overview-panel {
   background: transparent;
   /* Explicit fallback: 2px border if variables fail */
-  border: var(--border-width, 2px) solid var(--portal-border-color, currentColor);
+  border: var(--border-width, 2px) solid var(--color-border-primary, currentColor);
   overflow: hidden;
 }
 
@@ -158,7 +157,7 @@
   align-items: center;
   gap: var(--icon-gap-xs);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   background: none;
   border: none;
   cursor: pointer;
@@ -246,7 +245,7 @@
 
 .project-name {
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -263,7 +262,7 @@
 .progress-bar {
   flex: 1;
   height: var(--border-width);
-  background: var(--portal-border-subtle, var(--portal-alpha-white-08));
+  background: var(--color-border-secondary, var(--portal-alpha-white-08));
   overflow: hidden;
 }
 
@@ -276,7 +275,7 @@
 .progress-pct {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   width: 24px;
   text-align: right;
   flex-shrink: 0;
@@ -286,7 +285,7 @@
 .due-cell {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Loading/Empty/Error states - uses centralized styles from loading.css */
@@ -316,7 +315,7 @@
 }
 
 .activity-feed-item:hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .activity-dot {
@@ -346,13 +345,13 @@
 }
 
 .activity-dot[data-priority="medium"] {
-  border-color: var(--portal-text-light);
-  background: var(--portal-text-light);
+  border-color: var(--color-text-primary);
+  background: var(--color-text-primary);
 }
 
 .activity-dot[data-priority="low"] {
-  border-color: var(--portal-text-muted);
-  background: var(--portal-text-muted);
+  border-color: var(--color-text-tertiary);
+  background: var(--color-text-tertiary);
 }
 
 .activity-body {
@@ -362,20 +361,20 @@
 
 .activity-text {
   font-size: inherit;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   line-height: var(--line-height-snug);
   display: block;
   font-weight: var(--font-weight-regular);
 }
 
 .activity-text strong {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
 }
 
 .activity-time {
   font-size: var(--font-size-2xs, 10px);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin-top: var(--space-0-5);
   display: block;
 }
@@ -405,12 +404,12 @@
 
 .kanban-grid .kanban-card {
   padding: var(--space-1);
-  border: var(--border-width) solid var(--portal-border-subtle);
+  border: var(--border-width) solid var(--color-border-secondary);
 }
 
 .empty-state-small {
   font-size: var(--font-size-base);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   text-align: center;
   padding: var(--space-3) 0;
 }
@@ -422,7 +421,7 @@
   width: 100%;
   padding: var(--space-6);
   text-align: center;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
 }
 

@@ -85,32 +85,26 @@ interface IntakeRecord {
 }
 
 export class InvoiceService {
-  private static instance: InvoiceService;
-  private db: Database;
   private paymentService: InvoicePaymentService;
   private recurringService: InvoiceRecurringService;
   private reportingService: InvoiceReportingService;
 
-  private constructor() {
-    this.db = getDatabase();
-    this.paymentService = new InvoicePaymentService(this.db, {
+  constructor() {
+    this.paymentService = new InvoicePaymentService({
       getInvoiceById: this.getInvoiceById.bind(this),
       updateInvoiceStatus: this.updateInvoiceStatus.bind(this)
     });
-    this.recurringService = new InvoiceRecurringService(this.db, {
+    this.recurringService = new InvoiceRecurringService({
       createInvoice: async (data) => this.createInvoice(data),
       getInvoiceById: async (id) => this.getInvoiceById(id)
     });
-    this.reportingService = new InvoiceReportingService(this.db, {
+    this.reportingService = new InvoiceReportingService({
       mapRowToInvoice: this.mapRowToInvoice.bind(this)
     });
   }
 
-  static getInstance(): InvoiceService {
-    if (!InvoiceService.instance) {
-      InvoiceService.instance = new InvoiceService();
-    }
-    return InvoiceService.instance;
+  private getDb(): Database {
+    return getDatabase();
   }
 
   /**
@@ -149,7 +143,7 @@ export class InvoiceService {
       ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       invoiceNumber,
       data.projectId,
       data.clientId,
@@ -183,7 +177,7 @@ export class InvoiceService {
       WHERE i.id = ?
     `;
 
-    const row = await this.db.get(sql, [id]);
+    const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
       throw new Error(`Invoice with ID ${id} not found`);
@@ -207,7 +201,7 @@ export class InvoiceService {
       WHERE i.invoice_number = ?
     `;
 
-    const row = await this.db.get(sql, [invoiceNumber]);
+    const row = await this.getDb().get(sql, [invoiceNumber]);
 
     if (!row) {
       throw new Error(`Invoice with number ${invoiceNumber} not found`);
@@ -232,7 +226,7 @@ export class InvoiceService {
       ORDER BY i.created_at DESC
     `;
 
-    const rows = await this.db.all(sql, [clientId]);
+    const rows = await this.getDb().all(sql, [clientId]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
     // Batch fetch line items (eliminates N+1 query)
@@ -255,7 +249,7 @@ export class InvoiceService {
       ORDER BY i.created_at DESC
     `;
 
-    const rows = await this.db.all(sql, [projectId]);
+    const rows = await this.getDb().all(sql, [projectId]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
     // Batch fetch line items (eliminates N+1 query)
@@ -302,7 +296,7 @@ export class InvoiceService {
     sql += ' WHERE id = ?';
     params.push(id);
 
-    await this.db.run(sql, params);
+    await this.getDb().run(sql, params);
 
     return this.getInvoiceById(id);
   }
@@ -358,7 +352,7 @@ export class InvoiceService {
     const sql = `UPDATE invoices SET ${updates.join(', ')} WHERE id = ?`;
     params.push(id);
 
-    await this.db.run(sql, params);
+    await this.getDb().run(sql, params);
 
     // Update line items in table if they were changed
     if (data.lineItems && data.lineItems.length > 0) {
@@ -408,7 +402,7 @@ export class InvoiceService {
       WHERE ci.id = ?
     `;
 
-    const intake = await this.db.get(intakeSql, [intakeId]);
+    const intake = await this.getDb().get(intakeSql, [intakeId]);
 
     if (!intake) {
       throw new Error(`Intake with ID ${intakeId} not found`);
@@ -657,7 +651,7 @@ export class InvoiceService {
    * Get line items from the invoice_line_items table
    */
   async getLineItems(invoiceId: number): Promise<InvoiceLineItem[]> {
-    const rows = await this.db.all(
+    const rows = await this.getDb().all(
       `SELECT ${INVOICE_LINE_ITEM_COLUMNS} FROM invoice_line_items WHERE invoice_id = ? ORDER BY sort_order ASC`,
       [invoiceId]
     );
@@ -685,7 +679,7 @@ export class InvoiceService {
     }
 
     const placeholders = invoiceIds.map(() => '?').join(',');
-    const rows = await this.db.all(
+    const rows = await this.getDb().all(
       `SELECT ${INVOICE_LINE_ITEM_COLUMNS} FROM invoice_line_items WHERE invoice_id IN (${placeholders}) ORDER BY invoice_id, sort_order ASC`,
       invoiceIds
     );
@@ -735,12 +729,12 @@ export class InvoiceService {
    */
   async saveLineItems(invoiceId: number, lineItems: InvoiceLineItem[]): Promise<void> {
     // Delete existing line items for this invoice
-    await this.db.run('DELETE FROM invoice_line_items WHERE invoice_id = ?', [invoiceId]);
+    await this.getDb().run('DELETE FROM invoice_line_items WHERE invoice_id = ?', [invoiceId]);
 
     // Insert new line items
     for (let i = 0; i < lineItems.length; i++) {
       const item = lineItems[i];
-      await this.db.run(
+      await this.getDb().run(
         `INSERT INTO invoice_line_items (
           invoice_id, description, quantity, unit_price, amount,
           tax_rate, tax_amount, discount_type, discount_value, discount_amount,
@@ -833,7 +827,7 @@ export class InvoiceService {
       ) VALUES (?, ?, ?, ?, 0, 'USD', 'draft', ?, ?, ?, ?, 'deposit', ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       invoiceNumber,
       projectId,
       clientId,
@@ -868,7 +862,7 @@ export class InvoiceService {
         AND i.status = 'paid'
     `;
 
-    const deposits = await this.db.all(depositsSql, [projectId]);
+    const deposits = await this.getDb().all(depositsSql, [projectId]);
 
     if (!deposits || deposits.length === 0) {
       return [];
@@ -883,7 +877,7 @@ export class InvoiceService {
         FROM invoice_credits
         WHERE deposit_invoice_id = ?
       `;
-      const appliedResult = await this.db.get(appliedSql, [deposit.id]);
+      const appliedResult = await this.getDb().get(appliedSql, [deposit.id]);
       const totalApplied = appliedResult?.total_applied || 0;
       const totalAmount =
         typeof deposit.amount_total === 'string'
@@ -927,7 +921,7 @@ export class InvoiceService {
       FROM invoice_credits
       WHERE deposit_invoice_id = ?
     `;
-    const appliedResult = await this.db.get(appliedSql, [depositInvoiceId]);
+    const appliedResult = await this.getDb().get(appliedSql, [depositInvoiceId]);
     const totalApplied = appliedResult?.total_applied || 0;
     const availableAmount = depositInvoice.amountTotal - totalApplied;
 
@@ -946,7 +940,7 @@ export class InvoiceService {
       INSERT INTO invoice_credits (invoice_id, deposit_invoice_id, amount, applied_by)
       VALUES (?, ?, ?, ?)
     `;
-    const result = await this.db.run(insertSql, [
+    const result = await this.getDb().run(insertSql, [
       invoiceId,
       depositInvoiceId,
       amount,
@@ -965,7 +959,7 @@ export class InvoiceService {
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
-    await this.db.run(updateSql, [amount, amount, amount, invoiceId]);
+    await this.getDb().run(updateSql, [amount, amount, amount, invoiceId]);
 
     return {
       id: result.lastID!,
@@ -990,7 +984,7 @@ export class InvoiceService {
       ORDER BY ic.applied_at ASC
     `;
 
-    const rows: InvoiceCreditRow[] = await this.db.all(sql, [invoiceId]);
+    const rows: InvoiceCreditRow[] = await this.getDb().all(sql, [invoiceId]);
 
     return rows.map((row) => ({
       id: row.id,
@@ -1012,7 +1006,7 @@ export class InvoiceService {
       FROM invoice_credits
       WHERE invoice_id = ?
     `;
-    const result = await this.db.get(sql, [invoiceId]);
+    const result = await this.getDb().get(sql, [invoiceId]);
     return result?.total_credits || 0;
   }
 
@@ -1034,7 +1028,7 @@ export class InvoiceService {
       VALUES (?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       data.name,
       data.description || null,
       JSON.stringify(data.payments),
@@ -1049,7 +1043,7 @@ export class InvoiceService {
    */
   async getPaymentPlanTemplates(): Promise<PaymentPlanTemplate[]> {
     const sql = `SELECT ${PAYMENT_PLAN_TEMPLATE_COLUMNS} FROM payment_plan_templates ORDER BY is_default DESC, name ASC`;
-    const rows = await this.db.all(sql);
+    const rows = await this.getDb().all(sql);
 
     return rows.map((row: PaymentPlanTemplateRow) => ({
       id: row.id,
@@ -1066,7 +1060,7 @@ export class InvoiceService {
    */
   async getPaymentPlanTemplate(id: number): Promise<PaymentPlanTemplate> {
     const sql = `SELECT ${PAYMENT_PLAN_TEMPLATE_COLUMNS} FROM payment_plan_templates WHERE id = ?`;
-    const row = await this.db.get(sql, [id]);
+    const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
       throw new Error(`Payment plan template with ID ${id} not found`);
@@ -1087,7 +1081,7 @@ export class InvoiceService {
    */
   async deletePaymentPlanTemplate(id: number): Promise<void> {
     const sql = 'DELETE FROM payment_plan_templates WHERE id = ?';
-    await this.db.run(sql, [id]);
+    await this.getDb().run(sql, [id]);
   }
 
   /**
@@ -1147,7 +1141,7 @@ export class InvoiceService {
       });
 
       // Link invoice to payment plan
-      await this.db.run('UPDATE invoices SET payment_plan_id = ? WHERE id = ?', [
+      await this.getDb().run('UPDATE invoices SET payment_plan_id = ? WHERE id = ?', [
         templateId,
         invoice.id
       ]);
@@ -1169,7 +1163,7 @@ export class InvoiceService {
     const invoice = await this.createInvoice(data);
 
     // Link invoice to milestone
-    await this.db.run('UPDATE invoices SET milestone_id = ? WHERE id = ?', [
+    await this.getDb().run('UPDATE invoices SET milestone_id = ? WHERE id = ?', [
       milestoneId,
       invoice.id
     ]);
@@ -1191,7 +1185,7 @@ export class InvoiceService {
       ORDER BY i.created_at DESC
     `;
 
-    const rows = await this.db.all(sql, [milestoneId]);
+    const rows = await this.getDb().all(sql, [milestoneId]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
     // Batch fetch line items (eliminates N+1 query)
@@ -1204,7 +1198,7 @@ export class InvoiceService {
    * Link an existing invoice to a milestone
    */
   async linkInvoiceToMilestone(invoiceId: number, milestoneId: number): Promise<Invoice> {
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE invoices SET milestone_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [milestoneId, invoiceId]
     );
@@ -1366,20 +1360,20 @@ export class InvoiceService {
     // Draft and cancelled invoices can be permanently deleted
     if (invoice.status === 'draft' || invoice.status === 'cancelled') {
       // Delete related records first
-      await this.db.run('DELETE FROM invoice_reminders WHERE invoice_id = ?', [id]);
-      await this.db.run('DELETE FROM invoice_credits WHERE invoice_id = ?', [id]);
-      await this.db.run('DELETE FROM invoices WHERE id = ?', [id]);
+      await this.getDb().run('DELETE FROM invoice_reminders WHERE invoice_id = ?', [id]);
+      await this.getDb().run('DELETE FROM invoice_credits WHERE invoice_id = ?', [id]);
+      await this.getDb().run('DELETE FROM invoices WHERE id = ?', [id]);
       return { action: 'deleted' };
     }
 
     // Sent/Viewed/Partial/Overdue invoices are voided (soft delete)
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE invoices SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       ['cancelled', id]
     );
 
     // Cancel pending reminders
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE invoice_reminders SET status = ? WHERE invoice_id = ? AND status = ?',
       ['skipped', id, 'pending']
     );
@@ -1422,7 +1416,7 @@ export class InvoiceService {
       ) VALUES (?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, 'standard', ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       invoiceNumber,
       original.projectId,
       original.clientId,
@@ -1472,7 +1466,7 @@ export class InvoiceService {
   async checkAndMarkOverdue(): Promise<number> {
     const today = new Date().toISOString().split('T')[0];
 
-    const result = await this.db.run(
+    const result = await this.getDb().run(
       `UPDATE invoices
        SET status = 'overdue', updated_at = CURRENT_TIMESTAMP
        WHERE status IN ('sent', 'viewed', 'partial')
@@ -1574,7 +1568,7 @@ export class InvoiceService {
 
     // Get total count
     const countSql = `SELECT COUNT(*) as total FROM active_invoices i WHERE ${whereClause}`;
-    const countResult = await this.db.get(countSql, params);
+    const countResult = await this.getDb().get(countSql, params);
     const total = countResult?.total || 0;
 
     // Get paginated results
@@ -1592,7 +1586,7 @@ export class InvoiceService {
       LIMIT ? OFFSET ?
     `;
 
-    const rows = await this.db.all(sql, [...params, limit, offset]);
+    const rows = await this.getDb().all(sql, [...params, limit, offset]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
     // Batch fetch line items (eliminates N+1 query)
@@ -1619,7 +1613,7 @@ export class InvoiceService {
       LIMIT ? OFFSET ?
     `;
 
-    const rows = await this.db.all(sql, [limit, offset]);
+    const rows = await this.getDb().all(sql, [limit, offset]);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
     // Batch fetch line items (eliminates N+1 query)
@@ -1637,7 +1631,7 @@ export class InvoiceService {
    */
   async getPaymentTermsPresets(): Promise<PaymentTermsPreset[]> {
     const sql = `SELECT ${PAYMENT_TERMS_PRESET_COLUMNS} FROM payment_terms_presets ORDER BY days_until_due ASC`;
-    const rows = await this.db.all(sql);
+    const rows = await this.getDb().all(sql);
 
     return rows.map((row: PaymentTermsPresetRow) => ({
       id: row.id,
@@ -1658,7 +1652,7 @@ export class InvoiceService {
    */
   async getPaymentTermsPreset(id: number): Promise<PaymentTermsPreset> {
     const sql = `SELECT ${PAYMENT_TERMS_PRESET_COLUMNS} FROM payment_terms_presets WHERE id = ?`;
-    const row = await this.db.get(sql, [id]);
+    const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
       throw new Error(`Payment terms preset with ID ${id} not found`);
@@ -1698,7 +1692,7 @@ export class InvoiceService {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       data.name,
       data.daysUntilDue,
       data.description || null,
@@ -1724,7 +1718,7 @@ export class InvoiceService {
     const dueDate = new Date(issuedDate);
     dueDate.setDate(dueDate.getDate() + terms.daysUntilDue);
 
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE invoices SET
         payment_terms_id = ?,
         due_date = ?,
@@ -1827,7 +1821,7 @@ export class InvoiceService {
       discountValue ?? invoice.discountValue ?? 0
     );
 
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE invoices SET
         subtotal = ?,
         tax_rate = ?,
@@ -1907,7 +1901,7 @@ export class InvoiceService {
 
     const newTotal = invoice.amountTotal + lateFee;
 
-    await this.db.run(
+    await this.getDb().run(
       `UPDATE invoices SET
         late_fee_amount = ?,
         late_fee_applied_at = CURRENT_TIMESTAMP,
@@ -1941,7 +1935,7 @@ export class InvoiceService {
         AND i.due_date < ?
     `;
 
-    const rows = await this.db.all(sql, [today]);
+    const rows = await this.getDb().all(sql, [today]);
     let appliedCount = 0;
 
     for (const row of rows) {
@@ -2030,7 +2024,7 @@ export class InvoiceService {
       WHERE invoice_prefix = ?
     `;
 
-    const result = await this.db.get(sql, [usePrefix]);
+    const result = await this.getDb().get(sql, [usePrefix]);
     const nextSeq = (result?.max_seq || 0) + 1;
 
     // Format: PREFIX-YYYYMM-####
@@ -2064,7 +2058,7 @@ export class InvoiceService {
       ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'draft', ?, ?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       number,
       data.prefix || 'INV',
       sequence,
@@ -2095,7 +2089,7 @@ export class InvoiceService {
    * Update internal notes on an invoice (not visible to client)
    */
   async updateInternalNotes(invoiceId: number, internalNotes: string): Promise<Invoice> {
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE invoices SET internal_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [internalNotes, invoiceId]
     );
@@ -2126,3 +2120,6 @@ export class InvoiceService {
     return this.reportingService.getComprehensiveStats(dateFrom, dateTo);
   }
 }
+
+// Export singleton instance
+export const invoiceService = new InvoiceService();

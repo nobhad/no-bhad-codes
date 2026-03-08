@@ -28,7 +28,7 @@
   min-width: 32px;
   background: transparent;
   border: none;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .activity-icon svg {
@@ -47,7 +47,7 @@
 .portal .activity-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -55,12 +55,12 @@
 
 .portal .activity-client {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal :is(.activity-time, .activity-date) {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   white-space: nowrap;
 }
 
@@ -142,7 +142,7 @@
 .portal .dashboard-tasks-kanban .task-card-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -150,7 +150,7 @@
 
 .portal .dashboard-tasks-kanban .task-card-project {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .dashboard-tasks-kanban .task-meta {
@@ -166,7 +166,7 @@
   align-items: center;
   gap: var(--icon-gap-xs);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .dashboard-tasks-kanban .task-due-date.overdue {
@@ -191,7 +191,7 @@
 }
 
 .portal .upcoming-tasks-list .task-item:hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 .portal .upcoming-tasks-list .task-item:last-child {
@@ -200,13 +200,13 @@
 
 .portal .upcoming-tasks-list .task-item.empty {
   justify-content: center;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-style: italic;
   cursor: default;
 }
 
 .portal .upcoming-tasks-list .task-item.empty:hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 .portal .task-item-content {
@@ -218,7 +218,7 @@
 }
 
 .portal .task-item .task-title {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
@@ -227,7 +227,7 @@
 }
 
 .portal .task-item .task-project {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
 }
 
@@ -240,7 +240,7 @@
 
 .portal .task-item .task-due {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   white-space: nowrap;
 }
 
@@ -263,7 +263,7 @@
   padding: var(--space-0-5) var(--space-1);
   background: transparent;
   border: var(--portal-border);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal :is(.task-priority, .task-priority-badge).task-priority-urgent {
@@ -286,8 +286,8 @@
 
 .portal :is(.task-priority, .task-priority-badge).task-priority-low {
   background: transparent;
-  border-color: var(--portal-text-secondary);
-  color: var(--portal-text-secondary);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .upcoming-tasks-list .loading-row {
@@ -321,7 +321,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);  /* 16px - matches h3 */
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   margin: 0 0 var(--space-1-5) 0;
@@ -341,7 +341,7 @@
   min-height: 88px;
   background: transparent;
   border: var(--portal-border);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-family: inherit;
   cursor: pointer;
   transition: border-color var(--transition-fast);
@@ -350,7 +350,7 @@
 }
 
 .portal .attention-card:hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 /* Attention icon container - no background, just colored icon */
@@ -365,7 +365,7 @@
 }
 
 .portal :is(.attention-icon-warning, .attention-icon-info, .attention-icon-danger) {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* Attention content */

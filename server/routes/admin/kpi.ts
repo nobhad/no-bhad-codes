@@ -8,8 +8,18 @@ import { logger } from '../../services/logger.js';
 const router = express.Router();
 
 /**
- * GET /api/admin/bundle-stats
- * Get bundle size statistics from dist folder
+ * @swagger
+ * /api/admin/bundle-stats:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/bundle-stats
+ *     description: Get bundle size statistics from dist folder.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/bundle-stats',

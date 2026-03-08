@@ -52,13 +52,13 @@ export const PORTAL_INVOICE_STATUS_CONFIG: Record<
   PortalInvoiceStatus,
   { label: string; color: string }
 > = {
-  draft: { label: 'Draft', color: 'var(--portal-text-muted)' },
+  draft: { label: 'Draft', color: 'var(--color-text-tertiary)' },
   sent: { label: 'Sent', color: 'var(--status-pending)' },
   viewed: { label: 'Viewed', color: 'var(--color-brand-primary)' },
   partial: { label: 'Partial', color: 'var(--color-warning-500)' },
   paid: { label: 'Paid', color: 'var(--status-active)' },
   overdue: { label: 'Overdue', color: 'var(--status-cancelled)' },
-  cancelled: { label: 'Cancelled', color: 'var(--portal-text-muted)' }
+  cancelled: { label: 'Cancelled', color: 'var(--color-text-tertiary)' }
 };
 
 // ============================================================================

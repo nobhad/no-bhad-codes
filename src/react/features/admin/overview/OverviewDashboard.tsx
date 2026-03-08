@@ -68,8 +68,8 @@ function getPriorityColor(priority: string): string {
   switch (priority) {
   case 'urgent': return 'var(--status-cancelled)';
   case 'high': return 'var(--status-pending)';
-  case 'medium': return 'var(--portal-text-light)';
-  default: return 'var(--portal-text-muted)';
+  case 'medium': return 'var(--color-text-primary)';
+  default: return 'var(--color-text-tertiary)';
   }
 }
 

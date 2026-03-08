@@ -109,6 +109,8 @@ export class FileTransport implements LogTransport {
       }
     } catch (_error) {
       // File doesn't exist or other error - ignore
+      // Use console.debug to avoid recursion in the logging service
+      console.debug('[FileTransport] Log rotation check failed', _error);
     }
   }
 

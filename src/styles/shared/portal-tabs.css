@@ -82,7 +82,7 @@
   padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-family: var(--portal-subtab-family);
   font-size: var(--portal-subtab-size);
   font-weight: var(--portal-subtab-weight);
@@ -113,7 +113,7 @@
   .view-toggle button,
   .view-toggle-option
 ):hover:not(.active):not(:disabled) {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 /* =====================================================
@@ -245,11 +245,11 @@
   min-width: 18px;
   height: 18px;
   padding: 0 var(--space-0-5);
-  background: var(--portal-bg-light);
-  color: var(--portal-text-secondary);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
 }
 
 .portal-tab.active .portal-tab-badge {
@@ -264,11 +264,11 @@
   min-width: 16px;
   height: 16px;
   padding: 0 var(--space-0-25);
-  background: var(--portal-bg-light);
-  color: var(--portal-text-secondary);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
 }
 
 .portal-subtab.active .portal-subtab-badge {
@@ -286,7 +286,7 @@
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     scrollbar-width: thin;
-    scrollbar-color: var(--portal-bg-light) transparent;
+    scrollbar-color: var(--color-bg-elevated) transparent;
     overscroll-behavior-x: contain;
   }
 
@@ -296,12 +296,12 @@
 
   .portal-tabs::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: var(--portal-radius-xs);
+    border-radius: var(--border-radius-xs);
   }
 
   .portal-tabs::-webkit-scrollbar-thumb {
-    background: var(--portal-bg-light);
-    border-radius: var(--portal-radius-xs);
+    background: var(--color-bg-elevated);
+    border-radius: var(--border-radius-xs);
   }
 
   .portal-tabs::-webkit-scrollbar-thumb:hover {

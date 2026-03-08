@@ -24,7 +24,7 @@ export interface PortalContractsResponse {
 
 /** Contract status display config */
 export const CONTRACT_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  draft: { label: 'Draft', color: 'var(--portal-text-muted)' },
+  draft: { label: 'Draft', color: 'var(--color-text-tertiary)' },
   sent: { label: 'Sent', color: 'var(--status-pending)' },
   signed: { label: 'Signed', color: 'var(--status-completed)' },
   active: { label: 'Active', color: 'var(--status-completed)' },

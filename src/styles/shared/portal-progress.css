@@ -10,7 +10,7 @@
 
 .progress-bar {
   height: 12px;
-  background: var(--portal-bg-light);
+  background: var(--color-bg-elevated);
   overflow: hidden;
   box-shadow: var(--shadow-inset-light);
   margin: var(--space-2) 0;

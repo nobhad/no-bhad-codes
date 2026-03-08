@@ -77,7 +77,7 @@ router.post(
 
     for (const workflowId of workflowIds) {
       const id = typeof workflowId === 'string' ? parseInt(workflowId, 10) : workflowId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run('DELETE FROM workflow_triggers WHERE id = ?', [id]);
       if (result.changes && result.changes > 0) {
@@ -113,7 +113,7 @@ router.post(
 
     for (const workflowId of workflowIds) {
       const id = typeof workflowId === 'string' ? parseInt(workflowId, 10) : workflowId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run(
         'UPDATE workflow_triggers SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',

@@ -46,8 +46,8 @@
 }
 
 .confirm-dialog {
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-color);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-primary);
   box-shadow: none;
   width: 100%;
   max-width: var(--modal-width-sm, 400px);
@@ -98,7 +98,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .confirm-dialog-icon svg {
@@ -108,7 +108,7 @@
 
 .confirm-dialog-title {
   margin: 0;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -118,7 +118,7 @@
 
 .confirm-dialog-message {
   margin: 0 0 var(--space-5);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
 }
@@ -150,12 +150,12 @@
 /* Cancel button - transparent bg, white text */
 .confirm-dialog-cancel {
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .confirm-dialog-cancel:hover {
   background: var(--color-primary);
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
   box-shadow: none;
 }
 
@@ -167,7 +167,7 @@
 
 .confirm-dialog-confirm:hover {
   background: var(--color-primary);
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
   box-shadow: none;
 }
 
@@ -197,7 +197,7 @@
 /* Active state for selection buttons (e.g., who cancelled) */
 .confirm-dialog-btn.active {
   background: var(--color-primary);
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
 }
 
 /* Disabled state */
@@ -232,9 +232,9 @@
 .prompt-dialog-input {
   width: 100%;
   padding: var(--space-3);
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
   border: var(--portal-border);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-base);
   transition:
     border-color var(--transition-mouse) ease,
@@ -248,7 +248,7 @@
 }
 
 .prompt-dialog-input::placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Multi-prompt dialog */

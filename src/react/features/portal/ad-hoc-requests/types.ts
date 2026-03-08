@@ -92,14 +92,14 @@ export const AD_HOC_REQUEST_STATUS_CONFIG: Record<
   in_progress: { label: 'In Progress', color: 'var(--status-active)' },
   completed: { label: 'Completed', color: 'var(--status-completed)' },
   declined: { label: 'Declined', color: 'var(--status-cancelled)' },
-  cancelled: { label: 'Cancelled', color: 'var(--portal-text-muted)' }
+  cancelled: { label: 'Cancelled', color: 'var(--color-text-tertiary)' }
 };
 
 export const AD_HOC_REQUEST_PRIORITY_CONFIG: Record<
   AdHocRequestPriority,
   { label: string; color: string }
 > = {
-  low: { label: 'Low', color: 'var(--portal-text-muted)' },
+  low: { label: 'Low', color: 'var(--color-text-tertiary)' },
   normal: { label: 'Normal', color: 'var(--status-active)' },
   high: { label: 'High', color: 'var(--status-pending)' },
   urgent: { label: 'Urgent', color: 'var(--status-cancelled)' }

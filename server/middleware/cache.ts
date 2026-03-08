@@ -363,5 +363,3 @@ export class QueryCache {
     return `${table}:${conditionsStr}${suffix ? `:${suffix}` : ''}`;
   }
 }
-
-export default cache;

@@ -45,8 +45,16 @@ import {
 const router = Router();
 
 /**
- * POST /api/analytics/track
- * Receive tracking events from client
+ * @swagger
+ * /api/analytics/track:
+ *   post:
+ *     tags:
+ *       - Analytics
+ *     summary: POST /api/analytics/track
+ *     description: Receive tracking events from client.
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post('/track', trackingRateLimit, async (req: Request, res: Response) => {
   try {

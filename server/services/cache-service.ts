@@ -40,7 +40,6 @@ export interface CacheStats {
 }
 
 export class CacheService {
-  private static instance: CacheService;
   private client: Redis | null = null;
   private isConnected = false;
   private stats: CacheStats = {
@@ -52,15 +51,6 @@ export class CacheService {
     errors: 0
   };
   private config: CacheConfig | null = null;
-
-  private constructor() {}
-
-  static getInstance(): CacheService {
-    if (!CacheService.instance) {
-      CacheService.instance = new CacheService();
-    }
-    return CacheService.instance;
-  }
 
   /**
    * Initialize Redis connection
@@ -542,4 +532,4 @@ export class CacheService {
 }
 
 // Export singleton instance
-export const cacheService = CacheService.getInstance();
+export const cacheService = new CacheService();

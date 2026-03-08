@@ -465,8 +465,8 @@ function QueryChart({ result }: { result: QueryResult }) {
     const pieDatasets = chartType === 'pie' ? [datasets[0]] : datasets;
 
     const computedStyle = getComputedStyle(document.documentElement);
-    const textColor = computedStyle.getPropertyValue('--portal-text-secondary').trim() || computedStyle.getPropertyValue('--color-text-secondary').trim();
-    const gridColor = computedStyle.getPropertyValue('--portal-border-color').trim() || computedStyle.getPropertyValue('--color-border').trim();
+    const textColor = computedStyle.getPropertyValue('--color-text-secondary').trim() || computedStyle.getPropertyValue('--color-text-secondary').trim();
+    const gridColor = computedStyle.getPropertyValue('--color-border-primary').trim() || computedStyle.getPropertyValue('--color-border').trim();
 
     chartRef.current = new ChartJS(canvasRef.current, {
       type: chartType,

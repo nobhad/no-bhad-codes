@@ -313,8 +313,8 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
     case 'urgent': return 'var(--status-cancelled)';
     case 'high': return 'var(--status-pending)';
     case 'medium': return 'var(--status-active)';
-    case 'low': return 'var(--portal-text-muted)';
-    default: return 'var(--portal-text-muted)';
+    case 'low': return 'var(--color-text-tertiary)';
+    default: return 'var(--color-text-tertiary)';
     }
   }
 

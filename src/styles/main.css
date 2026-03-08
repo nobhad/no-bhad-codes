@@ -195,7 +195,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-400);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--border-radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -239,7 +239,7 @@ body {
 .tech-stack {
   background-color: var(--color-neutral-100);
   padding: 2rem;
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--border-radius-md);
   border: var(--border-width) solid var(--color-neutral-600);
   display: flex;
   flex-direction: column;

@@ -719,7 +719,18 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/admin/leads/scoring-rules - Get all scoring rules
+ * @swagger
+ * /api/admin/leads/scoring-rules:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/scoring-rules
+ *     description: Get all lead scoring rules.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/scoring-rules',
@@ -733,7 +744,18 @@ router.get(
 );
 
 /**
- * POST /api/admin/leads/scoring-rules - Create scoring rule
+ * @swagger
+ * /api/admin/leads/scoring-rules:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/scoring-rules
+ *     description: Create a new lead scoring rule.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created
  */
 router.post(
   '/leads/scoring-rules',
@@ -766,7 +788,24 @@ router.post(
 );
 
 /**
- * PUT /api/admin/leads/scoring-rules/:id - Update scoring rule
+ * @swagger
+ * /api/admin/leads/scoring-rules/{id}:
+ *   put:
+ *     tags:
+ *       - Admin
+ *     summary: PUT /api/admin/leads/scoring-rules/:id
+ *     description: Update a lead scoring rule.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/leads/scoring-rules/:id',
@@ -783,7 +822,24 @@ router.put(
 );
 
 /**
- * DELETE /api/admin/leads/scoring-rules/:id - Delete scoring rule
+ * @swagger
+ * /api/admin/leads/scoring-rules/{id}:
+ *   delete:
+ *     tags:
+ *       - Admin
+ *     summary: DELETE /api/admin/leads/scoring-rules/:id
+ *     description: Delete a lead scoring rule.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.delete(
   '/leads/scoring-rules/:id',
@@ -800,7 +856,24 @@ router.delete(
 );
 
 /**
- * POST /api/admin/leads/:id/calculate-score - Calculate score for a lead
+ * @swagger
+ * /api/admin/leads/{id}/calculate-score:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/:id/calculate-score
+ *     description: Calculate score for a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/:id/calculate-score',
@@ -817,7 +890,18 @@ router.post(
 );
 
 /**
- * POST /api/admin/leads/recalculate-all - Recalculate all lead scores
+ * @swagger
+ * /api/admin/leads/recalculate-all:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/recalculate-all
+ *     description: Recalculate scores for all leads.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/recalculate-all',
@@ -834,7 +918,18 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/admin/leads/pipeline/stages - Get pipeline stages
+ * @swagger
+ * /api/admin/leads/pipeline/stages:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/pipeline/stages
+ *     description: Get all pipeline stages.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/pipeline/stages',
@@ -847,7 +942,18 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/pipeline - Get pipeline view (kanban)
+ * @swagger
+ * /api/admin/leads/pipeline:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/pipeline
+ *     description: Get pipeline view for kanban display.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/pipeline',
@@ -860,7 +966,18 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/pipeline/stats - Get pipeline statistics
+ * @swagger
+ * /api/admin/leads/pipeline/stats:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/pipeline/stats
+ *     description: Get pipeline statistics.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/pipeline/stats',
@@ -873,7 +990,24 @@ router.get(
 );
 
 /**
- * POST /api/admin/leads/:id/move-stage - Move lead to stage
+ * @swagger
+ * /api/admin/leads/{id}/move-stage:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/:id/move-stage
+ *     description: Move a lead to a different pipeline stage.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/:id/move-stage',
@@ -900,7 +1034,24 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/admin/leads/:id/tasks - Get tasks for a lead
+ * @swagger
+ * /api/admin/leads/{id}/tasks:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/:id/tasks
+ *     description: Get tasks for a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/:id/tasks',
@@ -917,7 +1068,24 @@ router.get(
 );
 
 /**
- * POST /api/admin/leads/:id/tasks - Create task for a lead
+ * @swagger
+ * /api/admin/leads/{id}/tasks:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/:id/tasks
+ *     description: Create a task for a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created
  */
 router.post(
   '/leads/:id/tasks',
@@ -951,7 +1119,24 @@ router.post(
 );
 
 /**
- * PUT /api/admin/leads/tasks/:taskId - Update a task
+ * @swagger
+ * /api/admin/leads/tasks/{taskId}:
+ *   put:
+ *     tags:
+ *       - Admin
+ *     summary: PUT /api/admin/leads/tasks/:taskId
+ *     description: Update a lead task.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/leads/tasks/:taskId',
@@ -968,7 +1153,24 @@ router.put(
 );
 
 /**
- * POST /api/admin/leads/tasks/:taskId/complete - Complete a task
+ * @swagger
+ * /api/admin/leads/tasks/{taskId}/complete:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/tasks/:taskId/complete
+ *     description: Mark a lead task as complete.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/tasks/:taskId/complete',
@@ -985,7 +1187,18 @@ router.post(
 );
 
 /**
- * GET /api/admin/leads/tasks/overdue - Get overdue tasks
+ * @swagger
+ * /api/admin/leads/tasks/overdue:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/tasks/overdue
+ *     description: Get all overdue lead tasks.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/tasks/overdue',
@@ -998,7 +1211,18 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/tasks/upcoming - Get upcoming tasks
+ * @swagger
+ * /api/admin/leads/tasks/upcoming:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/tasks/upcoming
+ *     description: Get upcoming lead tasks.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/tasks/upcoming',
@@ -1017,7 +1241,24 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/admin/leads/:id/notes - Get notes for a lead
+ * @swagger
+ * /api/admin/leads/{id}/notes:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/:id/notes
+ *     description: Get notes for a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/:id/notes',
@@ -1034,7 +1275,24 @@ router.get(
 );
 
 /**
- * POST /api/admin/leads/:id/notes - Add note to a lead
+ * @swagger
+ * /api/admin/leads/{id}/notes:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/:id/notes
+ *     description: Add a note to a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created
  */
 router.post(
   '/leads/:id/notes',
@@ -1057,7 +1315,24 @@ router.post(
 );
 
 /**
- * POST /api/admin/leads/notes/:noteId/toggle-pin - Pin/unpin a note
+ * @swagger
+ * /api/admin/leads/notes/{noteId}/toggle-pin:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/notes/:noteId/toggle-pin
+ *     description: Pin or unpin a lead note.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/notes/:noteId/toggle-pin',
@@ -1074,7 +1349,24 @@ router.post(
 );
 
 /**
- * DELETE /api/admin/leads/notes/:noteId - Delete a note
+ * @swagger
+ * /api/admin/leads/notes/{noteId}:
+ *   delete:
+ *     tags:
+ *       - Admin
+ *     summary: DELETE /api/admin/leads/notes/:noteId
+ *     description: Delete a lead note.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.delete(
   '/leads/notes/:noteId',
@@ -1095,7 +1387,18 @@ router.delete(
 // =====================================================
 
 /**
- * GET /api/admin/leads/sources - Get lead sources
+ * @swagger
+ * /api/admin/leads/sources:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/sources
+ *     description: Get all lead sources.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/sources',
@@ -1109,7 +1412,24 @@ router.get(
 );
 
 /**
- * POST /api/admin/leads/:id/source - Set lead source
+ * @swagger
+ * /api/admin/leads/{id}/source:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/:id/source
+ *     description: Set the source for a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/:id/source',
@@ -1136,7 +1456,24 @@ router.post(
 // =====================================================
 
 /**
- * POST /api/admin/leads/:id/assign - Assign a lead
+ * @swagger
+ * /api/admin/leads/{id}/assign:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/:id/assign
+ *     description: Assign a lead to a team member.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/:id/assign',
@@ -1159,7 +1496,18 @@ router.post(
 );
 
 /**
- * GET /api/admin/leads/my-leads - Get leads assigned to current user
+ * @swagger
+ * /api/admin/leads/my-leads:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/my-leads
+ *     description: Get leads assigned to the current user.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/my-leads',
@@ -1172,7 +1520,18 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/unassigned - Get unassigned leads
+ * @swagger
+ * /api/admin/leads/unassigned:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/unassigned
+ *     description: Get all unassigned leads.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/unassigned',
@@ -1189,8 +1548,18 @@ router.get(
 // =====================================================
 
 /**
- * GET /api/admin/leads/duplicates - Get all pending duplicates
- * NOTE: This route MUST come before /leads/:id/duplicates to avoid matching 'duplicates' as :id
+ * @swagger
+ * /api/admin/leads/duplicates:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/duplicates
+ *     description: Get all pending duplicate leads.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/duplicates',
@@ -1203,7 +1572,24 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/:id/duplicates - Find duplicates for a lead
+ * @swagger
+ * /api/admin/leads/{id}/duplicates:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/:id/duplicates
+ *     description: Find duplicate leads for a specific lead.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/:id/duplicates',
@@ -1220,7 +1606,24 @@ router.get(
 );
 
 /**
- * POST /api/admin/leads/duplicates/:id/resolve - Resolve duplicate
+ * @swagger
+ * /api/admin/leads/duplicates/{id}/resolve:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/duplicates/:id/resolve
+ *     description: Resolve a duplicate lead entry.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/duplicates/:id/resolve',
@@ -1252,7 +1655,18 @@ router.post(
 // =====================================================
 
 /**
- * POST /api/admin/leads/bulk/status - Bulk update status
+ * @swagger
+ * /api/admin/leads/bulk/status:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/bulk/status
+ *     description: Bulk update lead statuses.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/bulk/status',
@@ -1276,7 +1690,18 @@ router.post(
 );
 
 /**
- * POST /api/admin/leads/bulk/assign - Bulk assign
+ * @swagger
+ * /api/admin/leads/bulk/assign:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/bulk/assign
+ *     description: Bulk assign leads to a team member.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/bulk/assign',
@@ -1300,7 +1725,18 @@ router.post(
 );
 
 /**
- * POST /api/admin/leads/bulk/move-stage - Bulk move to stage
+ * @swagger
+ * /api/admin/leads/bulk/move-stage:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/bulk/move-stage
+ *     description: Bulk move leads to a pipeline stage.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/bulk/move-stage',
@@ -1324,7 +1760,18 @@ router.post(
 );
 
 /**
- * POST /api/admin/leads/bulk/delete - Bulk soft delete leads
+ * @swagger
+ * /api/admin/leads/bulk/delete:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/leads/bulk/delete
+ *     description: Bulk soft delete leads.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/leads/bulk/delete',
@@ -1350,7 +1797,7 @@ router.post(
     // Soft delete each lead (leads are stored in projects table)
     for (const leadId of leadIds) {
       const id = typeof leadId === 'string' ? parseInt(leadId, 10) : leadId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run(
         'UPDATE projects SET deleted_at = ?, deleted_by = ? WHERE id = ? AND deleted_at IS NULL',
@@ -1370,7 +1817,18 @@ router.post(
 // =====================================================
 
 /**
- * GET /api/admin/leads/analytics - Get lead analytics
+ * @swagger
+ * /api/admin/leads/analytics:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/analytics
+ *     description: Get lead analytics data.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/analytics',
@@ -1383,7 +1841,18 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/conversion-funnel - Get conversion funnel
+ * @swagger
+ * /api/admin/leads/conversion-funnel:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/conversion-funnel
+ *     description: Get lead conversion funnel data.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/conversion-funnel',
@@ -1396,7 +1865,18 @@ router.get(
 );
 
 /**
- * GET /api/admin/leads/source-performance - Get source performance
+ * @swagger
+ * /api/admin/leads/source-performance:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: GET /api/admin/leads/source-performance
+ *     description: Get lead source performance data.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/leads/source-performance',

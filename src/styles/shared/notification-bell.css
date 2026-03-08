@@ -34,7 +34,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   transition: color var(--transition-mouse) ease;
   font-family: inherit;
 }
@@ -88,8 +88,8 @@
   right: 0;
   width: 320px;
   max-height: 420px;
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-color);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-border-primary);
   z-index: var(--z-index-portal-dropdown, 9700);
   overflow: hidden;
   display: flex;
@@ -106,13 +106,13 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 .notification-dropdown-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider, 0.05em);
   margin: 0;
@@ -120,7 +120,7 @@
 
 .notification-header .btn-link {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   background: none;
   border: none;
   cursor: pointer;
@@ -131,7 +131,7 @@
 }
 
 .notification-header .btn-link:hover {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* ============================================================================
@@ -147,7 +147,7 @@
 .notification-empty {
   padding: var(--space-8) var(--space-4);
   text-align: center;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
 }
 
@@ -162,7 +162,7 @@
   width: 100%;
   padding: var(--space-3) var(--space-4);
   border: none;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
   background: transparent;
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -176,12 +176,12 @@
 }
 
 .notification-item:hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .notification-item:focus {
   outline: none;
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .notification-item.unread {
@@ -189,7 +189,7 @@
 }
 
 .notification-item.unread:hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .notification-item-content {
@@ -200,14 +200,14 @@
 .notification-item-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0 0 var(--space-1) 0;
   line-height: var(--line-height-snug);
 }
 
 .notification-item-message {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin: 0 0 var(--space-1) 0;
   line-height: var(--line-height-snug);
   display: -webkit-box;
@@ -218,14 +218,14 @@
 
 .notification-item-time {
   font-size: var(--font-size-2xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Unread dot indicator */
 .notification-unread-dot {
   width: 8px;
   height: 8px;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   background: var(--color-primary);
   flex-shrink: 0;
   margin-top: var(--space-1);

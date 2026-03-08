@@ -4,6 +4,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { canAccessProject } from '../../middleware/access-control.js';
 import { getString } from '../../database/row-helpers.js';
+import { logger } from '../../services/logger.js';
 import { errorResponse, sendSuccess, sendCreated, messageResponse, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
@@ -84,6 +85,9 @@ router.get(
         try {
           milestone.deliverables = JSON.parse(deliverablesStr);
         } catch (_e) {
+          logger.debug('[Milestones] Failed to parse milestone deliverables JSON', {
+            error: _e instanceof Error ? _e : undefined
+          });
           milestone.deliverables = [];
         }
       } else {
@@ -157,6 +161,9 @@ router.post(
       try {
         newMilestone.deliverables = JSON.parse(newMilestoneDeliverablesStr);
       } catch (_e) {
+        logger.debug('[Milestones] Failed to parse new milestone deliverables JSON', {
+          error: _e instanceof Error ? _e : undefined
+        });
         newMilestone.deliverables = [];
       }
     } else {
@@ -273,6 +280,9 @@ router.put(
       try {
         updatedMilestone.deliverables = JSON.parse(updatedMilestoneDeliverablesStr);
       } catch (_e) {
+        logger.debug('[Milestones] Failed to parse updated milestone deliverables JSON', {
+          error: _e instanceof Error ? _e : undefined
+        });
         updatedMilestone.deliverables = [];
       }
     } else {

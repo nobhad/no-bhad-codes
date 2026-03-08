@@ -13,6 +13,7 @@ import type {
   InvoiceAgingReport,
   InvoiceRow
 } from '../../types/invoice-types.js';
+import { getDatabase } from '../../database/init.js';
 import type { Database } from '../../database/init.js';
 
 type SqlValue = string | number | boolean | null;
@@ -20,12 +21,14 @@ type SqlValue = string | number | boolean | null;
 type MapRowToInvoice = (row: InvoiceRow) => Invoice;
 
 export class InvoiceReportingService {
-  private db: Database;
   private mapRowToInvoice: MapRowToInvoice;
 
-  constructor(db: Database, deps: { mapRowToInvoice: MapRowToInvoice }) {
-    this.db = db;
+  constructor(deps: { mapRowToInvoice: MapRowToInvoice }) {
     this.mapRowToInvoice = deps.mapRowToInvoice;
+  }
+
+  private getDb(): Database {
+    return getDatabase();
   }
 
   /**
@@ -55,7 +58,7 @@ export class InvoiceReportingService {
       params.push(clientId);
     }
 
-    const row = await this.db.get(sql, params);
+    const row = await this.getDb().get(sql, params);
 
     return {
       totalInvoices: row?.total_invoices || 0,
@@ -92,7 +95,7 @@ export class InvoiceReportingService {
 
     sql += ' ORDER BY i.due_date ASC';
 
-    const rows = await this.db.all(sql, params);
+    const rows = await this.getDb().all(sql, params);
     const invoices = rows.map((row: InvoiceRow) => this.mapRowToInvoice(row));
 
     const buckets: Map<InvoiceAgingBucket['bucket'], InvoiceAgingBucket> = new Map([
@@ -187,7 +190,7 @@ export class InvoiceReportingService {
       ${whereClause}
     `;
 
-    const basicStats = await this.db.get(basicSql, params);
+    const basicStats = await this.getDb().get(basicSql, params);
 
     const statusSql = `
       SELECT status, COUNT(*) as count
@@ -196,7 +199,7 @@ export class InvoiceReportingService {
       GROUP BY status
     `;
 
-    const statusRows = await this.db.all(statusSql, params);
+    const statusRows = await this.getDb().all(statusSql, params);
     const statusBreakdown: Record<Invoice['status'], number> = {
       draft: 0,
       sent: 0,
@@ -224,7 +227,7 @@ export class InvoiceReportingService {
       LIMIT 12
     `;
 
-    const monthlyRows = await this.db.all(monthlySql, params);
+    const monthlyRows = await this.getDb().all(monthlySql, params);
     const monthlyRevenue = monthlyRows.map(
       (row: { month: string; revenue: number; count: number }) => ({
         month: row.month,

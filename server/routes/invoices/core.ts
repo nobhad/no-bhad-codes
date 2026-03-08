@@ -103,9 +103,20 @@ const InvoiceValidationSchemas = {
   }
 };
 
-// GET /api/invoices
-// Admin invoice listing. Returns an array of invoices (snake_case fields).
-// Supports optional filters via query params (status, clientId, projectId, search, dateFrom, dateTo, minAmount, maxAmount, invoiceType, limit, offset)
+/**
+ * @swagger
+ * /api/invoices:
+ *   get:
+ *     tags:
+ *       - Invoices
+ *     summary: GET /api/invoices
+ *     description: Admin invoice listing with optional filters.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/',
   authenticateToken,
@@ -273,7 +284,7 @@ if (process.env.NODE_ENV === 'development') {
     asyncHandler(async (req: express.Request, res: express.Response) => {
       const invoiceId = parseInt(req.params.id, 10);
 
-      if (isNaN(invoiceId)) {
+      if (isNaN(invoiceId) || invoiceId <= 0) {
         return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
       }
 
@@ -643,7 +654,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
+    if (isNaN(clientId) || clientId <= 0) {
       return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -677,7 +688,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId, 10);
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -728,7 +739,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -841,7 +852,7 @@ router.put(
     const invoiceId = parseInt(req.params.id, 10);
     const { status, paymentData } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -875,7 +886,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.id, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -1014,7 +1025,7 @@ router.post(
     const invoiceId = parseInt(req.params.id, 10);
     const { amountPaid, paymentMethod, paymentReference } = req.body;
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 

@@ -92,7 +92,7 @@
 
 .form-help {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -119,7 +119,7 @@
 .portal .settings-form-section .section-icon {
   width: var(--icon-size-sm, 16px);
   height: var(--icon-size-sm, 16px);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
 
@@ -130,13 +130,13 @@
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .settings-form-section .section-description {
   margin: 0 0 var(--space-3) 0;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Notification options list */
@@ -154,12 +154,12 @@
   gap: var(--space-4);
   padding: var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   transition: border-color var(--transition-fast);
 }
 
 .portal .notification-option.is-active {
-  border-color: var(--portal-text-light);
+  border-color: var(--color-text-primary);
 }
 
 .portal .notification-option-content {
@@ -174,9 +174,9 @@
   justify-content: center;
   width: var(--space-4, 32px);
   height: var(--space-4, 32px);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   flex-shrink: 0;
   transition: all var(--transition-fast);
 }
@@ -188,8 +188,8 @@
 }
 
 .portal .notification-option-icon.is-active {
-  background: var(--portal-text-light);
-  color: var(--portal-bg-dark);
+  background: var(--color-text-primary);
+  color: var(--color-bg-tertiary);
 }
 
 .portal .notification-option-text {
@@ -201,18 +201,18 @@
 .portal .notification-option-label {
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-base);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .portal .notification-option-description {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Notification note */
 .portal .notification-note {
   padding: var(--space-3);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   background: transparent;
 }
 
@@ -220,11 +220,11 @@
   margin: 0;
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .notification-note strong {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* =====================================================
@@ -237,7 +237,7 @@
   width: var(--space-4-5, 36px);
   flex-shrink: 0;
   cursor: pointer;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   background: transparent;
   transition: background-color var(--transition-fast);
 }
@@ -248,7 +248,7 @@
 }
 
 .portal .notification-toggle.is-checked {
-  background: var(--portal-text-light);
+  background: var(--color-text-primary);
 }
 
 /* Toggle thumb */
@@ -257,14 +257,14 @@
   display: inline-block;
   height: var(--icon-size-sm, 16px);
   width: var(--icon-size-sm, 16px);
-  background: var(--portal-text-light);
+  background: var(--color-text-primary);
   transform: translateX(0);
   transition: transform var(--transition-fast);
   margin: 1px;
 }
 
 .portal .notification-toggle.is-checked .toggle-thumb {
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
   transform: translateX(var(--icon-size-sm, 16px));
 }
 
@@ -280,12 +280,12 @@
 .portal .notification-toggle .toggle-loading svg {
   width: var(--icon-size-xs, 12px);
   height: var(--icon-size-xs, 12px);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   animation: spin 1s linear infinite;
 }
 
 .portal .notification-toggle.is-checked .toggle-loading svg {
-  color: var(--portal-bg-dark);
+  color: var(--color-bg-tertiary);
 }
 
 /* Responsive adjustments */

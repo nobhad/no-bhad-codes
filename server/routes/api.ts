@@ -19,7 +19,7 @@ import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
-import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess, ErrorCodes } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -302,11 +302,7 @@ router.post(
         `File uploaded successfully - filename: ${fileInfo.filename}, fileId: ${fileId}`
       );
 
-      res.status(201).json({
-        success: true,
-        message: 'File uploaded successfully',
-        file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id }
-      });
+      sendCreated(res, { file: { ...fileInfo, id: fileId > 0 ? fileId : fileInfo.id } }, 'File uploaded successfully');
     } catch (_error) {
       await logger.error('File upload error');
       errorResponse(res, 'File upload failed', 500, ErrorCodes.UPLOAD_ERROR);

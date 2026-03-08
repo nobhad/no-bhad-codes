@@ -19,7 +19,7 @@
 
 .progress-bar-sm .progress-fill {
   height: 100%;
-  background: var(--portal-text-light);
+  background: var(--color-text-primary);
   transition: width var(--transition-normal);
 }
 
@@ -30,7 +30,7 @@
 
 /* Dropdown menus */
 .dropdown {
-  background: var(--portal-bg-pitch);
+  background: var(--color-bg-primary);
   border: var(--border-width) solid var(--portal-alpha-white-30);
   padding: var(--space-1) 0;
 }
@@ -39,14 +39,14 @@
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm, 14px);
   font-family: var(--font-family-mono, monospace);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .dropdown-item:hover {
   background: var(--portal-alpha-white-10);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Badges/Status */
@@ -81,10 +81,10 @@
 .badge[data-priority="high"] { color: var(--status-pending); }
 .badge[data-priority="normal"] { color: var(--status-active); }
 .badge[data-priority="medium"] { color: var(--status-active); }
-.badge[data-priority="low"] { color: var(--portal-text-muted); }
+.badge[data-priority="low"] { color: var(--color-text-tertiary); }
 
 /* Card drag-over highlight state */
 .card-drag-highlight {
   background: var(--portal-alpha-white-10);
-  border-color: var(--portal-text-light);
+  border-color: var(--color-text-primary);
 }

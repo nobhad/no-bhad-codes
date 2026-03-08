@@ -69,12 +69,12 @@ interface ProposalStats {
 }
 
 const PROPOSAL_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  draft: { label: 'Draft', color: 'var(--portal-text-muted)' },
+  draft: { label: 'Draft', color: 'var(--color-text-tertiary)' },
   sent: { label: 'Sent', color: 'var(--status-active)' },
   viewed: { label: 'Viewed', color: 'var(--status-pending)' },
   accepted: { label: 'Accepted', color: 'var(--status-completed)' },
   declined: { label: 'Declined', color: 'var(--status-cancelled)' },
-  expired: { label: 'Expired', color: 'var(--portal-text-muted)' }
+  expired: { label: 'Expired', color: 'var(--color-text-tertiary)' }
 };
 
 const DEFAULT_PROPOSAL_STATS: ProposalStats = {

@@ -14,7 +14,7 @@
   height: 20px;
   border: var(--border-width) solid var(--color-border);
   border-top-color: var(--color-primary);
-  border-radius: var(--portal-radius-full, 50%);
+  border-radius: var(--border-radius-full, 50%);
   animation: spin 0.8s linear infinite;
 }
 
@@ -98,7 +98,7 @@ button[aria-busy="true"] .loading-spinner {
 .skeleton-card {
   padding: 1rem;
   background: var(--color-bg-secondary);
-  border-radius: var(--portal-radius-md, 8px);
+  border-radius: var(--border-radius-md, 8px);
   margin-bottom: 0.5rem;
 }
 
@@ -111,7 +111,7 @@ button[aria-busy="true"] .loading-spinner {
     var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
@@ -170,7 +170,7 @@ button[aria-busy="true"] .loading-spinner {
     var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--portal-radius-sm, 4px) var(--portal-radius-sm, 4px) 0 0;
+  border-radius: var(--border-radius-sm, 4px) var(--border-radius-sm, 4px) 0 0;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
@@ -269,7 +269,7 @@ td.empty-row {
   box-sizing: border-box;
   text-align: center;
   margin: 0 auto;
-  color: var(--portal-text-primary, inherit);
+  color: var(--color-text-primary, inherit);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
 }
@@ -337,7 +337,7 @@ td[colspan] .empty-state {
   font-style: normal;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary, inherit);
+  color: var(--color-text-primary, inherit);
 }
 
 /* Handle loading-state directly on td (initial HTML pattern) */
@@ -386,7 +386,7 @@ p.empty-state {
   height: 24px;
   border: var(--border-width-thick) solid var(--color-border);
   border-top-color: var(--color-primary);
-  border-radius: var(--portal-radius-full, 50%);
+  border-radius: var(--border-radius-full, 50%);
   animation: spin 0.8s linear infinite;
   flex-shrink: 0;
 }
@@ -502,7 +502,7 @@ p.empty-state {
 .error-state-message,
 .empty-state-message,
 .loading-message {
-  color: var(--portal-text-primary, inherit);
+  color: var(--color-text-primary, inherit);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-style: normal;
@@ -563,7 +563,7 @@ p.empty-state {
   padding: 0.75rem 1rem;
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-danger);
-  border-radius: var(--portal-radius-md, 8px);
+  border-radius: var(--border-radius-md, 8px);
   box-shadow: var(--shadow-elevated-sm);
   z-index: var(--z-index-loading);
   animation: slide-in-right 0.3s ease;
@@ -628,16 +628,16 @@ p.empty-state {
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
   background: transparent;
-  color: var(--portal-text-primary, var(--color-text));
+  color: var(--color-text-primary, var(--color-text));
   border: var(--border-width) solid var(--portal-border, var(--color-border));
   cursor: pointer;
   transition: all var(--transition-fast, 0.2s ease);
 }
 
 .error-state-secondary:hover {
-  background: var(--portal-bg-hover, var(--color-state-hover));
-  border-color: var(--portal-text-light, var(--color-text-inverse));
-  color: var(--portal-text-light, var(--color-text-inverse));
+  background: var(--color-bg-hover, var(--color-state-hover));
+  border-color: var(--color-text-primary, var(--color-text-inverse));
+  color: var(--color-text-primary, var(--color-text-inverse));
 }
 
 /* Skeleton container wrapper */
@@ -665,7 +665,7 @@ p.empty-state {
     var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 

@@ -55,7 +55,7 @@
   width: var(--space-1);
   height: var(--space-1);
   background: var(--color-primary);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   z-index: var(--z-index-content);
 }
 
@@ -132,7 +132,7 @@
   z-index: var(--z-index-portal-dropdown, 9700);
   min-width: var(--table-col-lg);
   padding: var(--space-3) var(--space-1-5) var(--space-1-5) var(--space-1-5);
-  background: var(--portal-bg-dark);
+  background: var(--color-bg-tertiary);
   border: var(--border-width) solid var(--portal-border);
   box-shadow: var(--shadow-dropdown-xl);
   opacity: 0;
@@ -181,19 +181,19 @@
   background: transparent;
   border: none;
   text-align: left;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
 .filter-option:hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .filter-option.active {
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-light);
+  background: var(--color-bg-raised);
+  color: var(--color-text-primary);
 }
 
 /* Sortable table headers - styles moved to shared/portal-tables.css */

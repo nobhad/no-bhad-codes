@@ -64,7 +64,7 @@ const PRIORITY_ORDER: Record<Task['priority'], number> = {
 };
 
 const PRIORITY_COLORS: Record<Task['priority'], string> = {
-  low: 'var(--portal-text-muted)',
+  low: 'var(--color-text-tertiary)',
   medium: 'var(--status-info)',
   high: 'var(--status-warning)',
   urgent: 'var(--status-danger)'

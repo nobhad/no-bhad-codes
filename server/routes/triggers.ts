@@ -15,7 +15,7 @@ import {
   EventType,
   ActionType
 } from '../services/workflow-trigger-service.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
 
 const router = express.Router();
 
@@ -235,7 +235,7 @@ router.post(
       priority
     });
 
-    sendSuccess(res, { trigger }, 'Trigger created', 201);
+    sendCreated(res, { trigger }, 'Trigger created');
   })
 );
 

@@ -601,7 +601,7 @@ section.contact-section .contact-form textarea.error {
 .form-message {
   padding: clamp(12px, 3vw, 20px);
   margin-bottom: clamp(12px, 2vw, 16px);
-  border-radius: var(--portal-radius-md, 8px);
+  border-radius: var(--border-radius-md, 8px);
   font-weight: var(--font-weight-semibold);
   font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   text-align: center;

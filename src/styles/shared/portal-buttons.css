@@ -110,10 +110,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .btn-ghost {
   background: transparent;
   border-color: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 .btn-ghost:hover {
-  background: var(--portal-bg-lighter);
+  background: var(--color-bg-prominent);
   color: var(--color-primary);
   border-color: transparent;
 }
@@ -156,8 +156,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border-bottom-color: var(--portal-btn-border-color, var(--color-white));
 }
 .btn-filled:disabled {
-  background: var(--portal-bg-lighter);
-  color: var(--portal-text-muted);
+  background: var(--color-bg-prominent);
+  color: var(--color-text-tertiary);
   cursor: not-allowed;
 }
 
@@ -189,8 +189,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 .btn-auth:disabled {
-  color: var(--portal-text-muted);
-  border-color: var(--portal-border-color);
+  color: var(--color-text-tertiary);
+  border-color: var(--color-border-primary);
   cursor: not-allowed;
 }
 .btn-sm .btn-icon {
@@ -206,7 +206,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .portal .sidebar-btn {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-sm, 8px);
+  gap: var(--icon-gap-md, 0.5rem);
   width: 100%;
   min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
   padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent, 18px);
@@ -221,7 +221,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   overflow: hidden;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: color var(--transition-fast);
   border-radius: 0;
@@ -266,7 +266,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   background: transparent;
   border: none;
   box-shadow: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   flex-shrink: 0;
   transition: color var(--transition-mouse) ease;
@@ -453,7 +453,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     justify-content: center;
     flex-shrink: 0;
     /* ALL table action buttons are neutral - no colors */
-    color: var(--portal-text-light);
+    color: var(--color-text-primary);
     background: transparent;
   }
 
@@ -465,7 +465,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   .table-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
   .data-table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
   table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
-    color: var(--portal-text-light);
+    color: var(--color-text-primary);
     background: transparent;
   }
 
@@ -666,7 +666,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   font-weight: var(--font-weight-regular);
   font-family: var(--font-family-mono, monospace);
   background: transparent;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   border: none;
   border-radius: 0;
   cursor: pointer;
@@ -678,7 +678,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 .btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn):disabled {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   cursor: not-allowed;
 }
 

@@ -13,7 +13,7 @@
 
 import { getDatabase } from '../database/init.js';
 import { workflowTriggerService } from './workflow-trigger-service.js';
-import { InvoiceService } from './invoice-service.js';
+import { invoiceService } from './invoice-service.js';
 import { generateDefaultMilestones } from './milestone-generator.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { logger } from './logger.js';
@@ -348,6 +348,9 @@ async function handleMilestoneCompleted(data: {
       try {
         deliverables = JSON.parse(deliverablesStr);
       } catch (_e) {
+        logger.debug('[WorkflowAutomations] Failed to parse deliverables JSON', {
+          error: _e instanceof Error ? _e : undefined
+        });
         deliverables = [];
       }
     }
@@ -410,7 +413,6 @@ async function handleMilestoneCompleted(data: {
     }
 
     // Create draft invoice
-    const invoiceService = InvoiceService.getInstance();
     const description = milestone.description as string | undefined;
     const invoice = await invoiceService.createMilestoneInvoice(milestoneId, {
       projectId,

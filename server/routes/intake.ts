@@ -22,7 +22,7 @@ import { sendNewIntakeNotification } from '../services/email-service.js';
 import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../config/uploads.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { userService } from '../services/user-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../utils/api-response.js';
 import { rateLimiters } from '../middleware/rate-limiter.js';
 import { validateRequest, ValidationSchemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -471,38 +471,34 @@ router.post(
       }, 100);
 
       // Return success response
-      res.status(201).json({
-        success: true,
-        message: 'Intake form processed successfully',
-        data: {
-          clientId,
-          projectId,
-          proposalRequestId,
-          projectName: generateProjectName(
-            intakeData.projectType,
-            clientType,
-            companyName,
-            intakeData.name
-          ),
-          accessToken,
-          isNewClient,
-          projectPlan: projectPlan.summary,
-          estimatedDelivery: projectPlan.estimatedDelivery,
-          nextSteps: proposalRequestId
-            ? [
-              'Review your proposal in the client portal',
-              'We\'ll finalize your quote within 24-48 hours',
-              'Schedule a call to discuss the details',
-              'Begin project development upon agreement'
-            ]
-            : [
-              'Review your project details in the client portal',
-              'We\'ll send a detailed proposal within 24-48 hours',
-              'Schedule a discovery call to discuss requirements',
-              'Begin project development upon agreement'
-            ]
-        }
-      });
+      sendCreated(res, {
+        clientId,
+        projectId,
+        proposalRequestId,
+        projectName: generateProjectName(
+          intakeData.projectType,
+          clientType,
+          companyName,
+          intakeData.name
+        ),
+        accessToken,
+        isNewClient,
+        projectPlan: projectPlan.summary,
+        estimatedDelivery: projectPlan.estimatedDelivery,
+        nextSteps: proposalRequestId
+          ? [
+            'Review your proposal in the client portal',
+            'We\'ll finalize your quote within 24-48 hours',
+            'Schedule a call to discuss the details',
+            'Begin project development upon agreement'
+          ]
+          : [
+            'Review your project details in the client portal',
+            'We\'ll send a detailed proposal within 24-48 hours',
+            'Schedule a discovery call to discuss requirements',
+            'Begin project development upon agreement'
+          ]
+      }, 'Intake form processed successfully');
     } catch (error: unknown) {
       await logger.error('Intake processing error:', {
         error: error instanceof Error ? error : undefined,

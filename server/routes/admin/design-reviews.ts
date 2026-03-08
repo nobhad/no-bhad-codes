@@ -94,7 +94,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const reviewId = parseInt(req.params.reviewId, 10);
 
-    if (isNaN(reviewId)) {
+    if (isNaN(reviewId) || reviewId <= 0) {
       return errorResponse(res, 'Invalid review ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -146,7 +146,7 @@ router.patch(
     const reviewId = parseInt(req.params.reviewId, 10);
     const { status } = req.body;
 
-    if (isNaN(reviewId)) {
+    if (isNaN(reviewId) || reviewId <= 0) {
       return errorResponse(res, 'Invalid review ID', 400, ErrorCodes.INVALID_ID);
     }
 

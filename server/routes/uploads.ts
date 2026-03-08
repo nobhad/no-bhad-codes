@@ -557,7 +557,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId, 10);
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_PROJECT_ID);
     }
 
@@ -633,7 +633,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const projectId = parseInt(req.params.projectId, 10);
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_PROJECT_ID);
     }
 
@@ -810,7 +810,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -902,7 +902,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1016,7 +1016,7 @@ router.get(
     const projectId = parseInt(req.params.projectId, 10);
     const status = req.query.status as string | undefined;
 
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_PROJECT_ID);
     }
 
@@ -1066,7 +1066,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.fileId, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1098,7 +1098,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { notes } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1131,7 +1131,7 @@ router.post(
 
     const fileId = parseInt(req.params.fileId, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1167,7 +1167,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { feedback } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1208,7 +1208,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { comment } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1244,7 +1244,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { reason } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1276,7 +1276,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { notes } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1308,7 +1308,7 @@ router.post(
     const fileId = parseInt(req.params.fileId, 10);
     const { comment } = req.body;
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1332,7 +1332,7 @@ router.post(
       'feedback'
     );
 
-    sendSuccess(res, { comment: newComment }, 'Comment added');
+    sendCreated(res, { comment: newComment }, 'Comment added');
   })
 );
 
@@ -1357,7 +1357,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.id, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 
@@ -1400,7 +1400,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const fileId = parseInt(req.params.id, 10);
 
-    if (isNaN(fileId)) {
+    if (isNaN(fileId) || fileId <= 0) {
       return errorResponse(res, 'Invalid file ID', 400, ErrorCodes.INVALID_FILE_ID);
     }
 

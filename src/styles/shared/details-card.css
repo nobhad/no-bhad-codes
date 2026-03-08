@@ -35,7 +35,7 @@
   flex-shrink: 0;
   width: 0;
   height: 0;
-  border-left: 5px solid var(--portal-text-secondary);
+  border-left: 5px solid var(--color-text-secondary);
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
   transition: transform var(--transition-mouse) ease;
@@ -82,11 +82,11 @@
 }
 
 .portal :is(.details-card-row, .system-info-row) span:first-child {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal :is(.details-card-row, .system-info-row) span:last-child {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
 }
 

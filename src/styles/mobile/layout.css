@@ -281,7 +281,7 @@
   .tech-stack-desktop .tech-stack {
     background-color: var(--color-neutral-100);
     padding: 2rem;
-    border-radius: var(--portal-radius-md, 8px);
+    border-radius: var(--border-radius-md, 8px);
     border: var(--border-width) solid var(--color-neutral-600);
     display: flex;
     flex-direction: column;

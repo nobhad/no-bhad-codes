@@ -8,22 +8,23 @@
  */
 
 import {
-  InvoiceService,
-  Invoice,
-  InvoiceCredit,
-  DepositSummary,
-  PaymentPlanTemplate,
-  ScheduledInvoice,
-  RecurringInvoice,
-  InvoiceReminder,
-  InvoicePayment
+  invoiceService,
+  type InvoiceService,
+  type Invoice,
+  type InvoiceCredit,
+  type DepositSummary,
+  type PaymentPlanTemplate,
+  type ScheduledInvoice,
+  type RecurringInvoice,
+  type InvoiceReminder,
+  type InvoicePayment
 } from '../../services/invoice-service.js';
 
 /**
  * Get singleton InvoiceService instance
  */
 export function getInvoiceService(): InvoiceService {
-  return InvoiceService.getInstance();
+  return invoiceService;
 }
 
 /**

@@ -34,7 +34,7 @@ body:has(.portal) {
   right: 0;
   width: 100%;
   height: var(--portal-header-height, 56px);
-  background: var(--portal-bg-pitch);
+  background: var(--color-bg-primary);
   border-bottom: none;
   display: flex;
   align-items: center;
@@ -45,7 +45,7 @@ body:has(.portal) {
   box-shadow: none;
 }
 
-/* NOTE: Header background uses --portal-bg-pitch for consistency
+/* NOTE: Header background uses --color-bg-primary for consistency
    with sidebar and content areas across all portals */
 
 .portal-global-header-left {
@@ -68,11 +68,11 @@ body:has(.portal) {
 .portal-global-header .header-branding {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--icon-gap-md, 0.5rem);
   text-decoration: none;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   transition: color var(--transition-mouse) ease;
-  padding-left: var(--sidebar-icon-indent, 18px);
+  padding-left: calc((var(--space-7) - var(--icon-size-2xl)) / 2);
   margin-left: calc(-1 * var(--space-6, 1.5rem));
 }
 
@@ -107,7 +107,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-family-sans);
   font-weight: var(--font-weight-regular);
   font-size: var(--font-size-lg);
@@ -132,14 +132,14 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: color var(--transition-fast);
   flex-shrink: 0;
 }
 
 .portal-global-header .header-sidebar-toggle:hover {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .portal-global-header .header-sidebar-toggle svg {
@@ -152,7 +152,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   margin: 0;
@@ -171,7 +171,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   gap: 0.375rem;
   flex-wrap: wrap;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   list-style: none;
   padding: 0;
   margin: 0;
@@ -185,7 +185,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 .portal-global-header .breadcrumb-link {
   background: none;
   border: none;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: inherit;
   padding: 0;
@@ -194,16 +194,16 @@ html[data-theme="light"] .portal-global-header .header-avatar {
 }
 
 .portal-global-header .breadcrumb-link:hover {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .portal-global-header .breadcrumb-current {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
 }
 
 .portal-global-header .breadcrumb-separator {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-xs);
 }
 
@@ -221,7 +221,7 @@ html[data-theme="light"] .portal-global-header .header-avatar {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   transition: color var(--transition-mouse) ease;
 }
 
@@ -281,7 +281,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   height: calc(100vh - var(--portal-header-height, 56px));
   height: calc(100dvh - var(--portal-header-height, 56px));
   margin-top: var(--portal-header-height, 56px);
-  background: var(--portal-bg-pitch);
+  background: var(--color-bg-primary);
   overflow: hidden; /* Only .dashboard-content scrolls — sidebar stays fixed */
 }
 
@@ -295,6 +295,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   --portal-header-height-line: 32px;
   --portal-nav-gap: var(--space-6);
   --sidebar-icon-indent: 18px;
+  --portal-page-bottom: var(--space-6);
 }
 
 /* Dashboard content - scroll container next to sidebar.
@@ -305,7 +306,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: block;
   flex: 1;
   min-width: 0;
-  padding: var(--portal-header-top, 20px) 24px var(--space-3) 24px;
+  padding: var(--portal-header-top, 20px) 24px var(--portal-page-bottom) 24px;
   overflow-y: auto;
   background: inherit;
 }
@@ -426,7 +427,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 /* Tab content - shown when active, hidden otherwise. */
 .portal .tab-content.active {
   display: block;
-  padding-bottom: var(--space-8);
 }
 
 /* Sidebar and dashboard-content inherit height from .portal-body (100%).
@@ -512,7 +512,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
   margin: 0 0 var(--space-2) 0;
@@ -568,14 +568,14 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   font-weight: var(--portal-font-weight-muted);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .portal :is(.breadcrumb, .page-breadcrumb) a {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
@@ -585,29 +585,29 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal .breadcrumb-separator {
-  color: var(--portal-bg-light);
+  color: var(--color-bg-elevated);
   font-size: var(--font-size-2xs);
 }
 
 .portal :is(.breadcrumb-current, .breadcrumb li:last-child) {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* Breadcrumb list pattern (client portal style) */
 .portal .breadcrumb-list {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .breadcrumb-link {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .breadcrumb-link:hover {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .portal .breadcrumb-current {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -634,14 +634,14 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   font-weight: var(--portal-subtab-weight);
   text-transform: var(--portal-subtab-transform);
   letter-spacing: var(--portal-subtab-spacing);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
   transition: color var(--transition-fast);
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn:hover {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn.active {
@@ -719,11 +719,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   padding: 0 var(--space-0-5);
   background: transparent;
   border: var(--portal-border);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--border-radius-sm);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   letter-spacing: 0;
   text-transform: none;
   line-height: 1;
@@ -736,7 +736,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 .portal .sidebar-buttons .sidebar-btn:hover .sidebar-shortcut {
   opacity: 0.9;
-  border-color: var(--portal-bg-light);
+  border-color: var(--color-bg-elevated);
 }
 
 .portal .sidebar-buttons .sidebar-btn.active .sidebar-shortcut {
@@ -774,10 +774,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   left: calc(100% + var(--space-1-5));
   top: 50%;
   transform: translateY(-50%);
-  background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--border-radius-sm);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
@@ -875,7 +875,7 @@ td {
   overflow: hidden; /* Both axes — prevents implicit overflow-y: auto */
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 
   /* Override base font size for all portal elements */
   --font-size-base: 15px;
@@ -912,7 +912,7 @@ td {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
   letter-spacing: var(--letter-spacing-tightest, -0.09em);
   text-shadow: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .portal .page-header h2,
@@ -927,7 +927,7 @@ td {
 
 /* Base text color in light mode - uses CSS variables */
 html[data-theme="light"] .portal {
-  color: var(--portal-text-primary, var(--color-light-text));
+  color: var(--color-text-primary, var(--color-light-text));
 }
 
 /* Headings in light mode */
@@ -937,11 +937,11 @@ html[data-theme="light"] .portal h3,
 html[data-theme="light"] .portal h4,
 html[data-theme="light"] .portal h5,
 html[data-theme="light"] .portal h6 {
-  color: var(--portal-text-primary, var(--color-light-text));
+  color: var(--color-text-primary, var(--color-light-text));
 }
 
 html[data-theme="light"] .portal hr {
-  background-color: var(--portal-border-color, var(--color-light-border));
+  background-color: var(--color-border-primary, var(--color-light-border));
 }
 
 /* Secondary text elements - use muted color for hierarchy */
@@ -956,7 +956,7 @@ html[data-theme="light"] .portal .summary-label,
 html[data-theme="light"] .portal .funnel-stage-label,
 html[data-theme="light"] .portal .funnel-stage,
 html[data-theme="light"] .portal .funnel-value {
-  color: var(--portal-text-secondary, var(--color-light-text-secondary));
+  color: var(--color-text-secondary, var(--color-light-text-secondary));
 }
 
 /* =====================================================
@@ -971,7 +971,7 @@ html[data-theme="light"] .portal .funnel-value {
 .portal hr {
   height: 2px;
   border-radius: 0;
-  background-color: var(--portal-text-light);
+  background-color: var(--color-text-primary);
 }
 
 /* =====================================================
@@ -1010,7 +1010,7 @@ html[data-theme="light"] .portal .funnel-value {
   padding: 0;
   background: transparent;
   border: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -1040,7 +1040,7 @@ html[data-theme="light"] .portal .funnel-value {
   gap: var(--space-0-5);
   flex-wrap: wrap;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   list-style: none;
   padding: 0;
   margin: 0;
@@ -1088,7 +1088,7 @@ html[data-theme="light"] .portal .funnel-value {
   flex-direction: column;
   gap: var(--space-2);
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--portal-card-padding);
 }
 
@@ -1097,7 +1097,7 @@ html[data-theme="light"] .portal .funnel-value {
 .card-clickable,
 .card-hover {
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-4);
   transition: border-color var(--transition-fast);
   cursor: pointer;
@@ -1105,7 +1105,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 .card-clickable:hover,
 .card-hover:hover {
-  border-color: var(--portal-text-light);
+  border-color: var(--color-text-primary);
 }
 
 /* Dividers */
@@ -1281,7 +1281,7 @@ html[data-theme="light"] .portal .funnel-value {
    ===================================================== */
 .heading {
   font-family: var(--font-family-mono, monospace);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-weight: var(--font-weight-regular);
   letter-spacing: var(--letter-spacing-wide);
 }
@@ -1292,7 +1292,7 @@ html[data-theme="light"] .portal .funnel-value {
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
@@ -1302,24 +1302,24 @@ html[data-theme="light"] .portal .funnel-value {
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Inline form field label — field-label-spacing.css is canonical; this aligns */
 .field-label {
   font-size: var(--font-size-sm, 14px);
   font-weight: var(--font-weight-bold);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: 0.25rem;
 }
 
 /* text-muted / text-primary — base/utilities.css is canonical */
 .text-muted {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .text-primary {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Font sizes */
@@ -1351,11 +1351,11 @@ html[data-theme="light"] .portal .funnel-value {
 .italic,
 .text-italic { font-style: italic; }
 
-.text-secondary { color: var(--portal-text-secondary); }
+.text-secondary { color: var(--color-text-secondary); }
 
 /* Background colors */
-.bg-white { background-color: var(--portal-text-light); }
-.bg-black { background-color: var(--portal-bg-pitch); }
+.bg-white { background-color: var(--color-text-primary); }
+.bg-black { background-color: var(--color-bg-primary); }
 .bg-transparent { background: transparent; }
 
 /* =====================================================
@@ -1367,14 +1367,14 @@ html[data-theme="light"] .portal .funnel-value {
 .border-t { border-top: var(--border-width) solid var(--portal-alpha-white-30); }
 .border-r { border-right: var(--border-width) solid var(--portal-alpha-white-30); }
 .border-dashed { border-style: dashed; }
-.border-black { border-color: var(--portal-bg-pitch); }
+.border-black { border-color: var(--color-bg-primary); }
 
 /* Border radius - brutalist style is 0 */
 .rounded { border-radius: 0; }
 
 /* Ring (focus outline) */
 .ring-2 { box-shadow: 0 0 0 2px var(--ring); }
-.ring-white { --ring: var(--portal-border-color); }
+.ring-white { --ring: var(--color-border-primary); }
 
 /* =====================================================
    MISC UTILITY CLASSES
@@ -1426,7 +1426,7 @@ html[data-theme="light"] .portal .funnel-value {
 .section-icon {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* .section-title definition consolidated to PORTAL TYPOGRAPHY section above */
@@ -1537,7 +1537,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 .page-breadcrumbs {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .page-header-content {
@@ -1562,14 +1562,14 @@ html[data-theme="light"] .portal .funnel-value {
 .page-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   margin: 0;
   line-height: var(--line-height-tight);
 }
 
 .page-subtitle {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
   margin-top: var(--space-0-5);
 }

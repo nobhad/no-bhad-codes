@@ -228,7 +228,7 @@ router.post(
     let deleted = 0;
     for (const contractId of contractIds) {
       const id = typeof contractId === 'string' ? parseInt(contractId, 10) : contractId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       try {
         await contractService.updateContract(id, { status: 'cancelled' });

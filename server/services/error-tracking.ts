@@ -27,17 +27,7 @@ export interface ErrorContext {
 }
 
 export class ErrorTrackingService {
-  private static instance: ErrorTrackingService;
   private isInitialized = false;
-
-  private constructor() {}
-
-  static getInstance(): ErrorTrackingService {
-    if (!ErrorTrackingService.instance) {
-      ErrorTrackingService.instance = new ErrorTrackingService();
-    }
-    return ErrorTrackingService.instance;
-  }
 
   /**
    * Initialize Sentry with configuration
@@ -329,4 +319,4 @@ export class ErrorTrackingService {
 }
 
 // Export singleton instance
-export const errorTracker = ErrorTrackingService.getInstance();
+export const errorTracker = new ErrorTrackingService();

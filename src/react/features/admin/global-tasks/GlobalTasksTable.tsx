@@ -86,7 +86,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgent', color: 'var(--status-cancelled)' },
   high: { label: 'High', color: 'var(--status-pending)' },
   medium: { label: 'Medium', color: 'var(--status-active)' },
-  low: { label: 'Low', color: 'var(--portal-text-muted)' }
+  low: { label: 'Low', color: 'var(--color-text-tertiary)' }
 };
 
 interface GlobalTasksTableProps {
@@ -593,7 +593,7 @@ function TasksKanbanView({
   isLoading: boolean;
 }) {
   const columns = [
-    { id: 'pending', label: 'To Do', color: 'var(--portal-text-secondary)' },
+    { id: 'pending', label: 'To Do', color: 'var(--color-text-secondary)' },
     { id: 'in_progress', label: 'In Progress', color: 'var(--status-active)' },
     { id: 'blocked', label: 'Blocked', color: 'var(--status-pending)' },
     { id: 'completed', label: 'Done', color: 'var(--status-completed)' }

@@ -55,7 +55,7 @@ function getActivityColorVar(type: string): string {
     alert: 'var(--status-cancelled)'
   };
 
-  return colorMap[type] || 'var(--portal-text-muted)';
+  return colorMap[type] || 'var(--color-text-tertiary)';
 }
 
 /**

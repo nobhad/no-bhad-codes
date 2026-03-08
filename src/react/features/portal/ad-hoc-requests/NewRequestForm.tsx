@@ -226,7 +226,7 @@ export function NewRequestForm({
               disabled={loading}
               className={cn('flex-1 text-xs', priority === p ? 'btn-primary' : 'btn-secondary')}
               style={{
-                color: priority === p ? 'var(--portal-text-light)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
+                color: priority === p ? 'var(--color-text-primary)' : AD_HOC_REQUEST_PRIORITY_CONFIG[p].color,
                 backgroundColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : 'transparent',
                 borderColor: priority === p ? AD_HOC_REQUEST_PRIORITY_CONFIG[p].color : undefined
               }}

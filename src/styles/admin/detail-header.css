@@ -35,7 +35,7 @@
   margin: 0;
   font-family: var(--font-family-sans);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -78,7 +78,7 @@
   align-items: center;
   gap: var(--space-4);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .detail-meta .field-label {
@@ -110,14 +110,14 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:hover {
-  background: var(--portal-bg-lighter);
-  border-color: var(--portal-border-light);
+  background: var(--color-bg-prominent);
+  border-color: var(--color-border-secondary);
 }
 
 /* Focus state (closed) - border color change, no box-shadow for consistency with other dropdowns.
@@ -144,8 +144,8 @@
   width: auto;
   min-width: 200px;
   max-height: none;
-  background: var(--portal-bg-dark);
-  border: var(--border-width) solid var(--portal-border-dark);
+  background: var(--color-bg-tertiary);
+  border: var(--border-width) solid var(--color-border-primary);
   list-style: none;
   margin: 0;
   padding: var(--space-0-5) 0;
@@ -164,7 +164,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: background var(--transition-fast);
@@ -177,7 +177,7 @@
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-item:hover {
-  background: var(--portal-bg-lighter);
+  background: var(--color-bg-prominent);
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-item svg {
@@ -199,7 +199,7 @@
 /* Divider between menu sections */
 [data-page="admin"] .detail-more-menu.table-dropdown .dropdown-divider {
   height: 1px;
-  background: var(--portal-border-dark);
+  background: var(--color-border-primary);
   margin: var(--space-0-5) 0;
   padding: 0;
 }
@@ -225,7 +225,7 @@
   min-width: auto;
   background: transparent;
   border: none;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
@@ -234,15 +234,15 @@
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:hover {
-  background: var(--portal-bg-lighter);
-  border-color: var(--portal-border-light);
+  background: var(--color-bg-prominent);
+  border-color: var(--color-border-secondary);
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus,
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
   outline: none;
-  border-color: var(--portal-border-light);
-  box-shadow: 0 0 0 1px var(--portal-border-light);
+  border-color: var(--color-border-secondary);
+  box-shadow: 0 0 0 1px var(--color-border-secondary);
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-trigger svg {
@@ -274,8 +274,8 @@
   padding: var(--space-1) 0;
   margin: 0;
   list-style: none;
-  background: var(--portal-bg-dark);
-  border: var(--border-width) solid var(--portal-border-medium);
+  background: var(--color-bg-tertiary);
+  border: var(--border-width) solid var(--color-border-primary);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-dropdown);
   z-index: var(--z-index-max);
@@ -291,7 +291,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   background: transparent;
@@ -304,7 +304,7 @@
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-item:hover {
-  background: var(--portal-bg-lighter);
+  background: var(--color-bg-prominent);
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-item svg {

@@ -174,4 +174,3 @@ export function stripDangerousPatterns(input: string): string {
   return sanitizeString(stripped);
 }
 
-export default sanitizeInputs;

@@ -338,7 +338,7 @@ router.post(
     }
 
     await clientService.addTagToClient(clientId, tagId);
-    sendSuccess(res, undefined, 'Tag added to client');
+    sendCreated(res, undefined, 'Tag added to client');
   })
 );
 

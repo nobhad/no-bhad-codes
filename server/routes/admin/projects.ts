@@ -8,7 +8,7 @@ import { getUploadsSubdir, getRelativePath, UPLOAD_DIRS } from '../../config/upl
 import { errorTracker } from '../../services/error-tracking.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
 import { userService } from '../../services/user-service.js';
-import { errorResponse, sendSuccess, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, sanitizeErrorMessage, ErrorCodes } from '../../utils/api-response.js';
 import { logger } from '../../services/logger.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 
@@ -176,13 +176,7 @@ router.post(
         extra: { projectId, projectName, clientId: finalClientId }
       });
 
-      res.status(201).json({
-        success: true,
-        message: 'Project created successfully',
-        projectId,
-        projectName,
-        clientId: finalClientId
-      });
+      sendCreated(res, { projectId, projectName, clientId: finalClientId }, 'Project created successfully');
     } catch (error) {
       logger.error('[AdminProjects] Error creating project:', {
         error: error instanceof Error ? error : undefined
@@ -301,7 +295,18 @@ async function saveAdminProjectAsFile(
 // =====================================================
 
 /**
- * POST /api/admin/projects/bulk/delete - Bulk soft delete projects
+ * @swagger
+ * /api/admin/projects/bulk/delete:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: POST /api/admin/projects/bulk/delete
+ *     description: Bulk soft delete projects.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.post(
   '/projects/bulk/delete',
@@ -326,7 +331,7 @@ router.post(
     // Soft delete each project using the soft delete service
     for (const projectId of projectIds) {
       const id = typeof projectId === 'string' ? parseInt(projectId, 10) : projectId;
-      if (isNaN(id)) {
+      if (isNaN(id) || id <= 0) {
         errors.push(`Invalid project ID: ${projectId}`);
         continue;
       }

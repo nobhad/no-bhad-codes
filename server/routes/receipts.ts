@@ -202,7 +202,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const receiptId = parseInt(req.params.id, 10);
 
-    if (isNaN(receiptId)) {
+    if (isNaN(receiptId) || receiptId <= 0) {
       return errorResponse(res, 'Invalid receipt ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -250,7 +250,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceId = parseInt(req.params.invoiceId, 10);
 
-    if (isNaN(invoiceId)) {
+    if (isNaN(invoiceId) || invoiceId <= 0) {
       return errorResponse(res, 'Invalid invoice ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -309,7 +309,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const receiptId = parseInt(req.params.id, 10);
 
-    if (isNaN(receiptId)) {
+    if (isNaN(receiptId) || receiptId <= 0) {
       return errorResponse(res, 'Invalid receipt ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -360,7 +360,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = parseInt(req.params.clientId, 10);
 
-    if (isNaN(clientId)) {
+    if (isNaN(clientId) || clientId <= 0) {
       return errorResponse(res, 'Invalid client ID', 400, ErrorCodes.INVALID_ID);
     }
 

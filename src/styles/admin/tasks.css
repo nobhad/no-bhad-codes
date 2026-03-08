@@ -58,7 +58,7 @@
   align-items: center;
   gap: var(--icon-gap);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-2);
 }
 
@@ -75,7 +75,7 @@
 .priority-indicator {
   width: var(--space-1);
   height: var(--space-1);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   flex-shrink: 0;
 }
 
@@ -92,7 +92,7 @@
 }
 
 .priority-indicator.priority-low {
-  background-color: var(--portal-text-secondary);
+  background-color: var(--color-text-secondary);
 }
 
 /* Data-attribute driven priority colors (CSS fallback for dynamic styles) */
@@ -113,13 +113,13 @@
 
 .priority-indicator[data-priority="low"],
 .priority-dot[data-priority="low"] {
-  background-color: var(--portal-text-muted);
+  background-color: var(--color-text-tertiary);
 }
 
 .priority-label[data-priority="urgent"] { color: var(--status-cancelled); }
 .priority-label[data-priority="high"] { color: var(--status-pending); }
 .priority-label[data-priority="medium"] { color: var(--status-active); }
-.priority-label[data-priority="low"] { color: var(--portal-text-muted); }
+.priority-label[data-priority="low"] { color: var(--color-text-tertiary); }
 
 /* Dropdown styling: uses createModalDropdown from shared/modal-dropdown.ts */
 
@@ -129,7 +129,7 @@
   flex-wrap: wrap;
   gap: var(--space-1-5);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .task-meta svg {
@@ -169,7 +169,7 @@
    Only page-specific overrides here */
 #time-entries-list .data-table {
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 #time-entries-list .data-table th {
@@ -218,7 +218,7 @@
 
 /* Text muted utility */
 .text-muted {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* Date value styling - inherits from table */
@@ -235,7 +235,7 @@
 .kanban-loading .kanban-column-skeleton {
   height: 256px;
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   animation: pulse-skeleton 2s ease-in-out infinite;
 }
 
@@ -254,7 +254,7 @@
   padding: var(--space-4);
   text-align: center;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0.5;
 }
 
@@ -274,7 +274,7 @@
 .kanban-card-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 /* Kanban column title wrapper */

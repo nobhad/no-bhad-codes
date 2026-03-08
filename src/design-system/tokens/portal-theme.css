@@ -4,15 +4,23 @@
  * ===============================================
  * @file src/design-system/tokens/portal-theme.css
  *
- * ALL portal-specific CSS variables consolidated here.
- * This file is the ONLY place portal theme values should be defined.
+ * Portal-specific CSS variable overrides.
+ * All portal theme values are defined here — this is the ONLY place.
+ *
+ * Strategy: portal overrides the same semantic variables the main site uses
+ * (--color-text-*, --color-bg-*, --color-border-*) within portal scope.
+ * Components use one consistent variable name everywhere.
+ *
+ * Portal-specific extensions (no main-site equivalent):
+ * - --color-bg-raised/elevated/prominent/hover/readonly (extra bg ramp levels)
+ * - --color-hover-bg/text/icon/border (hover state colors)
+ * - --portal-alpha-* (alpha utility colors)
+ * - --portal-border (border shorthand)
+ * - --portal-radius-pill (brutalist pill = 0, differs from --border-radius-full)
  *
  * Includes:
- * - Portal text colors
- * - Portal background colors
- * - Portal border system
- * - Dark mode (default)
- * - Light mode overrides
+ * - Dark mode (default): black background, white text
+ * - Light mode overrides: off-white background, off-black text
  */
 
 /* ============================================
@@ -24,37 +32,34 @@
   /* ----------------------------------------
    * TEXT COLORS
    * ---------------------------------------- */
-  --portal-text-light: #ffffff;
-  --portal-text-primary: #ffffff;
-  --portal-text-secondary: #ffffff;
-  --portal-text-muted: #999999;
-  --portal-text-dark: #000000;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #ffffff;
+  --color-text-tertiary: #999999;
+  --color-text-inverse: #000000;
 
   /* ----------------------------------------
    * BACKGROUND COLORS
    * ---------------------------------------- */
-  --portal-bg-pitch: #000000;
-  --portal-bg-darkest: #000000;
-  --portal-bg-darker: #0a0a0a;
-  --portal-bg-dark: #1a1a1a;
-  --portal-bg-medium: #2a2a2a;
-  --portal-bg-light: #3a3a3a;
-  --portal-bg-lighter: #4a4a4a;
-  --portal-bg-hover: #1a1a1a;
-  --portal-bg-readonly: #0a0a0a;
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-raised: #2a2a2a;
+  --color-bg-elevated: #3a3a3a;
+  --color-bg-prominent: #4a4a4a;
+  --color-bg-hover: #1a1a1a;
+  --color-bg-readonly: #0a0a0a;
 
   /* ----------------------------------------
    * BORDER SYSTEM
    * ---------------------------------------- */
-  --portal-border-color: #ffffff;
-  --portal-border: var(--border-width) solid var(--portal-border-color);
-  --portal-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-primary: #ffffff;
+  --color-border-secondary: rgba(255, 255, 255, 0.08);
 
-  /* Border aliases for backwards compatibility */
-  --portal-border-dark: var(--portal-border-color);
-  --portal-border-medium: var(--portal-border-color);
-  --portal-border-light: var(--portal-border-color);
-  --table-border-color: var(--portal-border-color);
+  /* Portal border shorthand — convenience alias */
+  --portal-border: var(--border-width) solid var(--color-border-primary);
+
+  /* Table border alias */
+  --table-border-color: var(--color-border-primary);
 
   /* ----------------------------------------
    * ALPHA COLORS
@@ -94,25 +99,19 @@
 
   /* ----------------------------------------
    * BORDER RADIUS - BRUTALIST (sharp corners)
+   * --border-radius-* (xs through xl) are all 0 in borders.css — use those.
+   * Only portal-radius-pill differs: brutalist pill = 0, not a rounded pill.
    * ---------------------------------------- */
-  --border-radius-card: 0;
-  --portal-radius-xs: 0;
-  --portal-radius-sm: 0;
-  --portal-radius-md: 0;
-  --portal-radius-lg: 0;
-  --portal-radius-xl: 0;
   --portal-radius-pill: 0;
-  --portal-radius-full: 50%; /* Exception for circular avatars/indicators */
 
   /* ----------------------------------------
    * HOVER STATE COLORS - SEMANTIC CONTRAST
    * Dark bg = light text/icons
-   * Light bg = dark text/icons
    * ---------------------------------------- */
-  --hover-bg-color: var(--portal-text-light);        /* White bg on hover */
-  --hover-text-color: var(--portal-bg-pitch);        /* Black text on hover */
-  --hover-icon-color: var(--portal-bg-pitch);        /* Black icons on hover */
-  --hover-border-color: var(--portal-text-light);    /* White border on hover */
+  --color-hover-bg: var(--color-text-primary);     /* White bg on hover */
+  --color-hover-text: var(--color-bg-primary);     /* Black text on hover */
+  --color-hover-icon: var(--color-bg-primary);     /* Black icons on hover */
+  --color-hover-border: var(--color-text-primary); /* White border on hover */
 
   /* ----------------------------------------
    * FOCUS STATE COLORS
@@ -123,11 +122,6 @@
   --focus-ring: 0 0 0 var(--focus-ring-width) var(--portal-alpha-primary-25);
 
   /* ----------------------------------------
-   * BUTTON COLORS
-   * See: src/design-system/tokens/buttons.css
-   * ---------------------------------------- */
-
-  /* ----------------------------------------
    * CARD & PANEL TOKENS
    * ---------------------------------------- */
   --portal-card-padding: 13px 14px;
@@ -136,9 +130,8 @@
 
   /* ----------------------------------------
    * LAYOUT TOKENS
-   * See: src/design-system/tokens/spacing.css
    * ---------------------------------------- */
-  --portal-section-gap: 24px;  /* Gap between sections (tables, cards, panels) */
+  --portal-section-gap: 24px;
 
   /* ----------------------------------------
    * FIELD/LABEL SPACING
@@ -150,29 +143,22 @@
    * LABEL STYLING
    * ---------------------------------------- */
   --label-font-size: 0.75rem;
-  --label-color: var(--portal-text-secondary);
+  --label-color: var(--color-text-secondary);
   --label-font-weight: 500;
   --label-text-transform: uppercase;
   --label-letter-spacing: 0.05em;
 
-  /* Portal label aliases — used in 30+ files across cards, components, tabs */
-  --portal-label-size: var(--label-font-size);       /* 0.75rem / 12px */
-  --portal-label-spacing: var(--label-letter-spacing); /* 0.05em */
-
   /* ----------------------------------------
-   * SUBTAB FONT STYLING - ROOT LEVEL
-   * Single source for all subtab buttons
-   * MUST match h3 heading size for consistency
+   * SUBTAB FONT STYLING
    * ---------------------------------------- */
   --subtab-font-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
-  --subtab-font-size: var(--font-size-base);  /* 16px - matches h3 */
+  --subtab-font-size: var(--font-size-base);
   --subtab-font-weight: 500;
   --subtab-text-transform: uppercase;
   --subtab-letter-spacing: 0.05em;
 
   /* ----------------------------------------
    * DASHBOARD LAYOUT TOKENS
-   * See: src/design-system/tokens/spacing.css
    * ---------------------------------------- */
   --dashboard-panel-padding: var(--space-4);
   --dashboard-title-margin: var(--space-3);
@@ -192,11 +178,6 @@
   --color-neutral-900: #ffffff;
   --color-dark: #ffffff;
   --color-light: #000000;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #ffffff;
-  --color-text-tertiary: #ffffff;
-  --color-border: #ffffff;
-  --color-border-light: #787878;
   --color-nav-text: #ffffff;
   --color-white: #ffffff;
   --color-black: #000000;
@@ -215,48 +196,43 @@
 
 /* ============================================
  * PORTAL LIGHT MODE - INVERTED DISCOTHÈQUE
- * White background, black text
- * ============================================
- * IMPORTANT: Use consistent selector pattern
- */
+ * Off-white background, off-black text
+ * ============================================ */
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"] {
   /* ----------------------------------------
    * TEXT COLORS - ALL OFF-BLACK (#333333, matches main site --color-dark)
    * ---------------------------------------- */
-  --portal-text-light: #333333;
-  --portal-text-primary: #333333;
-  --portal-text-secondary: #333333;
-  --portal-text-muted: #333333;
-  --portal-text-dark: #ffffff;
+  --color-text-primary: #333333;
+  --color-text-secondary: #333333;
+  --color-text-tertiary: #333333;
+  --color-text-inverse: #ffffff;
 
   /* ----------------------------------------
    * BACKGROUND COLORS - OFF-WHITE BASE (#fffefd, matches main site --color-off-white)
    * ---------------------------------------- */
-  --portal-bg-pitch: var(--color-off-white);
-  --portal-bg-darkest: var(--color-off-white);
-  --portal-bg-darker: #f5f5f5;
-  --portal-bg-dark: #e5e5e5;
-  --portal-bg-medium: #d5d5d5;
-  --portal-bg-light: #c5c5c5;
-  --portal-bg-lighter: #b5b5b5;
-  --portal-bg-hover: #e5e5e5;
-  --portal-bg-readonly: #f5f5f5;
+  --color-bg-primary: var(--color-off-white);
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #e5e5e5;
+  --color-bg-raised: #d5d5d5;
+  --color-bg-elevated: #c5c5c5;
+  --color-bg-prominent: #b5b5b5;
+  --color-bg-hover: #e5e5e5;
+  --color-bg-readonly: #f5f5f5;
 
   /* ----------------------------------------
    * BORDER SYSTEM - OFF-BLACK BORDERS
    * ---------------------------------------- */
-  --portal-border-color: #333333;
-  --portal-border-subtle: rgba(0, 0, 0, 0.08);
+  --color-border-primary: #333333;
+  --color-border-secondary: rgba(0, 0, 0, 0.08);
 
   /* ----------------------------------------
    * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)
-   * Light bg = dark text/icons
    * ---------------------------------------- */
-  --hover-bg-color: var(--portal-text-light);        /* Off-black bg on hover */
-  --hover-text-color: var(--portal-bg-pitch);        /* Off-white text on hover */
-  --hover-icon-color: var(--portal-bg-pitch);        /* Off-white icons on hover */
-  --hover-border-color: var(--portal-text-light);    /* Off-black border on hover */
+  --color-hover-bg: var(--color-text-primary);     /* Off-black bg on hover */
+  --color-hover-text: var(--color-bg-primary);     /* Off-white text on hover */
+  --color-hover-icon: var(--color-bg-primary);     /* Off-white icons on hover */
+  --color-hover-border: var(--color-text-primary); /* Off-black border on hover */
 
   /* ----------------------------------------
    * FOCUS STATE COLORS (Light Mode)
@@ -264,6 +240,16 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --focus-ring-color: var(--color-primary);
   --focus-ring-width: 2px;
   --focus-ring-offset: 0px;
+
+  /* ----------------------------------------
+   * ALPHA OVERRIDES (Light Mode)
+   * White alpha values invert to black for light mode
+   * ---------------------------------------- */
+  --portal-alpha-white-08: rgba(0, 0, 0, 0.08);
+  --portal-alpha-white-10: rgba(0, 0, 0, 0.1);
+  --portal-alpha-white-15: rgba(0, 0, 0, 0.15);
+  --portal-alpha-white-20: rgba(0, 0, 0, 0.2);
+  --portal-alpha-white-30: rgba(0, 0, 0, 0.3);
 
   /* ----------------------------------------
    * BUTTON COLORS (Light Mode)
@@ -302,13 +288,8 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --color-neutral-900: #333333;
   --color-dark: #333333;
   --color-light: var(--color-off-white);
-  --color-text-primary: #333333;
-  --color-text-secondary: #333333;
-  --color-text-tertiary: #333333;
-  --color-border: #333333;
-  --color-border-light: #787878;
   --color-nav-text: #333333;
-  --color-white: #333333; /* Inverted for text that uses var(--color-white) */
+  --color-white: #333333;
   --color-black: var(--color-off-white);
 
   /* Gray scale - ALL OFF-BLACK for text in light mode */
@@ -317,7 +298,7 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --color-gray-300: #333333;
   --color-gray-400: #333333;
   --color-gray-500: #333333;
-  --color-gray-600: #cccccc; /* Chart grid lines - light gray on white */
+  --color-gray-600: #cccccc;
 
   /* App-level aliases for portal light mode */
   --app-color-primary: #333333;
@@ -334,5 +315,5 @@ html[data-theme="light"] body[data-page="client-portal"] {
 /* Apply to html element as well for full coverage */
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: var(--portal-bg-pitch, var(--color-off-white));
+  background-color: var(--color-bg-primary, var(--color-off-white));
 }

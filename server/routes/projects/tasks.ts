@@ -215,7 +215,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const projectId = parseInt(req.params.id, 10);
-    if (isNaN(projectId)) {
+    if (isNaN(projectId) || projectId <= 0) {
       return errorResponse(res, 'Invalid project ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -238,7 +238,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const taskId = parseInt(req.params.taskId, 10);
-    if (isNaN(taskId)) {
+    if (isNaN(taskId) || taskId <= 0) {
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -259,7 +259,7 @@ router.post(
     const taskId = parseInt(req.params.taskId, 10);
     const { content } = req.body;
 
-    if (isNaN(taskId)) {
+    if (isNaN(taskId) || taskId <= 0) {
       return errorResponse(res, 'Invalid task ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -322,7 +322,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const itemId = parseInt(req.params.itemId, 10);
-    if (isNaN(itemId)) {
+    if (isNaN(itemId) || itemId <= 0) {
       return errorResponse(res, 'Invalid checklist item ID', 400, ErrorCodes.INVALID_ID);
     }
 

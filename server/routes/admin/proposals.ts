@@ -11,7 +11,7 @@ import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { getDatabase } from '../../database/init.js';
-import { errorResponse, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROPOSAL_REQUEST_COLUMNS = `
@@ -83,7 +83,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const proposalId = parseInt(req.params.proposalId, 10);
 
-    if (isNaN(proposalId)) {
+    if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -112,7 +112,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const proposalId = parseInt(req.params.proposalId, 10);
 
-    if (isNaN(proposalId)) {
+    if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -140,7 +140,7 @@ router.post(
 
     const newProposal = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [result.lastID]);
 
-    sendSuccess(res, { proposal: newProposal });
+    sendCreated(res, { proposal: newProposal });
   })
 );
 
@@ -154,7 +154,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const proposalId = parseInt(req.params.proposalId, 10);
 
-    if (isNaN(proposalId)) {
+    if (isNaN(proposalId) || proposalId <= 0) {
       return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -190,7 +190,7 @@ router.post(
 
     for (const proposalId of proposalIds) {
       const id = typeof proposalId === 'string' ? parseInt(proposalId, 10) : proposalId;
-      if (isNaN(id)) continue;
+      if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run(
         'UPDATE proposals SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',

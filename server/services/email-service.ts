@@ -44,7 +44,7 @@ export async function isClientActivated(clientIdentifier: number | string): Prom
 
   if (!client) {
     logger.info(
-      `[EMAIL] Client not found for activation check: ${typeof clientIdentifier === 'number' ? clientIdentifier : sanitizeEmailForLog(clientIdentifier)}`
+      `[Email] Client not found for activation check: ${typeof clientIdentifier === 'number' ? clientIdentifier : sanitizeEmailForLog(clientIdentifier)}`
     );
     return false;
   }
@@ -201,7 +201,7 @@ let emailConfig: EmailConfig | null = null;
 async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
   // If transporter is not initialized, log and return
   if (!transporter || !emailConfig) {
-    logger.info('[EMAIL] Transporter not initialized. Email logged to console:');
+    logger.info('[Email] Transporter not initialized. Email logged to console:');
     logger.info(`To: ${sanitizeEmailForLog(emailContent.to)}`);
     logger.info(`Subject: ${emailContent.subject}`);
     return { success: true, message: 'Email logged to console (transporter not configured)' };
@@ -217,10 +217,10 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
       replyTo: emailConfig.replyTo
     });
 
-    logger.info(`[EMAIL] Message sent successfully: ${info.messageId}`);
+    logger.info(`[Email] Message sent successfully: ${info.messageId}`);
     return { success: true, message: `Email sent: ${info.messageId}` };
   } catch (error) {
-    logger.error('[EMAIL] Failed to send email:', {
+    logger.error('[Email] Failed to send email:', {
       error: error instanceof Error ? error : undefined
     });
 
@@ -256,7 +256,7 @@ function enqueueForRetry(emailContent: EmailContent): void {
     const discarded = retryQueue.shift();
     if (discarded) {
       logger.warn(
-        `[EMAIL RETRY] Queue full (${MAX_QUEUE_SIZE}), discarded oldest item: ${sanitizeEmailForLog(discarded.emailContent.to)} - ${discarded.emailContent.subject}`
+        `[Email Retry] Queue full (${MAX_QUEUE_SIZE}), discarded oldest item: ${sanitizeEmailForLog(discarded.emailContent.to)} - ${discarded.emailContent.subject}`
       );
     }
   }
@@ -269,7 +269,7 @@ function enqueueForRetry(emailContent: EmailContent): void {
   });
 
   logger.info(
-    `[EMAIL RETRY] Enqueued email for retry: ${sanitizeEmailForLog(emailContent.to)} - ${emailContent.subject} (queue size: ${retryQueue.length})`
+    `[Email Retry] Enqueued email for retry: ${sanitizeEmailForLog(emailContent.to)} - ${emailContent.subject} (queue size: ${retryQueue.length})`
   );
 }
 
@@ -283,7 +283,7 @@ function enqueueForRetry(emailContent: EmailContent): void {
  */
 export async function processEmailRetryQueue(): Promise<{ retried: number; failed: number; remaining: number }> {
   if (isProcessingRetryQueue) {
-    logger.info('[EMAIL RETRY] Queue processing already in progress, skipping');
+    logger.info('[Email Retry] Queue processing already in progress, skipping');
     return { retried: 0, failed: 0, remaining: retryQueue.length };
   }
 
@@ -309,13 +309,13 @@ export async function processEmailRetryQueue(): Promise<{ retried: number; faile
       }
 
       logger.info(
-        `[EMAIL RETRY] Retrying email (attempt ${item.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${sanitizeEmailForLog(item.emailContent.to)} - ${item.emailContent.subject}`
+        `[Email Retry] Retrying email (attempt ${item.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${sanitizeEmailForLog(item.emailContent.to)} - ${item.emailContent.subject}`
       );
 
       try {
         if (!transporter || !emailConfig) {
           // Transporter still not available - skip processing entirely
-          logger.info('[EMAIL RETRY] Transporter not initialized, deferring queue processing');
+          logger.info('[Email Retry] Transporter not initialized, deferring queue processing');
           break;
         }
 
@@ -329,19 +329,19 @@ export async function processEmailRetryQueue(): Promise<{ retried: number; faile
         });
 
         logger.info(
-          `[EMAIL RETRY] Successfully sent on retry (attempt ${item.attemptCount}): ${sanitizeEmailForLog(item.emailContent.to)}`
+          `[Email Retry] Successfully sent on retry (attempt ${item.attemptCount}): ${sanitizeEmailForLog(item.emailContent.to)}`
         );
         indicesToRemove.push(i);
         retriedCount++;
       } catch (error) {
-        logger.error(`[EMAIL RETRY] Retry attempt ${item.attemptCount} failed:`, {
+        logger.error(`[Email Retry] Retry attempt ${item.attemptCount} failed:`, {
           error: error instanceof Error ? error : undefined
         });
 
         if (item.attemptCount >= MAX_RETRY_ATTEMPTS) {
           // Max retries exceeded - discard
           logger.error(
-            `[EMAIL RETRY] Max retries (${MAX_RETRY_ATTEMPTS}) exceeded, discarding email: ${sanitizeEmailForLog(item.emailContent.to)} - ${item.emailContent.subject}`
+            `[Email Retry] Max retries (${MAX_RETRY_ATTEMPTS}) exceeded, discarding email: ${sanitizeEmailForLog(item.emailContent.to)} - ${item.emailContent.subject}`
           );
           indicesToRemove.push(i);
           failedCount++;
@@ -363,7 +363,7 @@ export async function processEmailRetryQueue(): Promise<{ retried: number; faile
 
   if (retriedCount > 0 || failedCount > 0) {
     logger.info(
-      `[EMAIL RETRY] Queue processed: ${retriedCount} sent, ${failedCount} discarded, ${retryQueue.length} remaining`
+      `[Email Retry] Queue processed: ${retriedCount} sent, ${failedCount} discarded, ${retryQueue.length} remaining`
     );
   }
 
@@ -388,7 +388,7 @@ export async function sendWelcomeEmail(
   name: string,
   accessToken: string
 ): Promise<EmailResult> {
-  logger.info(`[EMAIL] Preparing welcome email for: ${sanitizeEmailForLog(email)}`);
+  logger.info(`[Email] Preparing welcome email for: ${sanitizeEmailForLog(email)}`);
 
   const portalUrl = `${getPortalUrl()}?token=${accessToken}`;
 
@@ -432,11 +432,11 @@ export async function sendNewIntakeNotification(
   intakeData: IntakeData,
   projectId: number
 ): Promise<EmailResult> {
-  logger.info(`[EMAIL] Preparing intake notification for project: ${projectId}`);
+  logger.info(`[Email] Preparing intake notification for project: ${projectId}`);
 
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) {
-    logger.warn('[EMAIL] ADMIN_EMAIL not configured - skipping intake notification');
+    logger.warn('[Email] ADMIN_EMAIL not configured - skipping intake notification');
     return { success: false, message: 'Admin email not configured' };
   }
 
@@ -684,7 +684,7 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
 // Email service object for backwards compatibility
 export const emailService = {
   async init(config: EmailConfig): Promise<void> {
-    logger.info('[EMAIL] Initializing email service...');
+    logger.info('[Email] Initializing email service...');
 
     // Store config
     emailConfig = config;
@@ -700,23 +700,23 @@ export const emailService = {
       }
     });
 
-    logger.info('[EMAIL] Email service initialized successfully');
+    logger.info('[Email] Email service initialized successfully');
   },
 
   async testConnection(): Promise<boolean> {
-    logger.info('[EMAIL] Testing email connection...');
+    logger.info('[Email] Testing email connection...');
 
     if (!transporter) {
-      logger.warn('[EMAIL] Transporter not initialized. Skipping connection test.');
+      logger.warn('[Email] Transporter not initialized. Skipping connection test.');
       return false;
     }
 
     try {
       await transporter.verify();
-      logger.info('[EMAIL] Email connection test successful');
+      logger.info('[Email] Email connection test successful');
       return true;
     } catch (error) {
-      logger.error('[EMAIL] Email connection test failed:', {
+      logger.error('[Email] Email connection test failed:', {
         error: error instanceof Error ? error : undefined
       });
       return false;
@@ -752,7 +752,7 @@ export const emailService = {
     email: string,
     data: { resetToken: string; name?: string }
   ): Promise<EmailResult> {
-    logger.info(`[EMAIL] Preparing password reset email for: ${sanitizeEmailForLog(email)}`);
+    logger.info(`[Email] Preparing password reset email for: ${sanitizeEmailForLog(email)}`);
 
     const resetUrl = `${getBaseUrl()}/reset-password?token=${data.resetToken}`;
     const name = data.name || 'User';
@@ -818,12 +818,12 @@ export const emailService = {
   },
 
   async sendMessageNotification(email: string, data?: Record<string, unknown>): Promise<EmailResult> {
-    logger.info(`[EMAIL] Sending message notification to: ${sanitizeEmailForLog(email)}`, { metadata: data });
+    logger.info(`[Email] Sending message notification to: ${sanitizeEmailForLog(email)}`, { metadata: data });
     return { success: true, message: 'Message notification logged for development' };
   },
 
   async sendProjectUpdateEmail(email: string, data?: Record<string, unknown>): Promise<EmailResult> {
-    logger.info(`[EMAIL] Sending project update email to: ${sanitizeEmailForLog(email)}`, { metadata: data });
+    logger.info(`[Email] Sending project update email to: ${sanitizeEmailForLog(email)}`, { metadata: data });
     return { success: true, message: 'Project update email logged for development' };
   },
 
@@ -851,7 +851,7 @@ export const emailService = {
     data: { name?: string; portalUrl?: string }
   ): Promise<EmailResult> {
     logger.info(
-      `[EMAIL] Preparing account activation welcome email for: ${sanitizeEmailForLog(email)}`
+      `[Email] Preparing account activation welcome email for: ${sanitizeEmailForLog(email)}`
     );
 
     const portalUrl =
@@ -982,7 +982,7 @@ export const emailService = {
     email: string,
     data: { magicLinkToken: string; name?: string }
   ): Promise<EmailResult> {
-    logger.info(`[EMAIL] Preparing magic link email for: ${sanitizeEmailForLog(email)}`);
+    logger.info(`[Email] Preparing magic link email for: ${sanitizeEmailForLog(email)}`);
 
     const loginUrl = `${getBaseUrl()}/auth/magic-link?token=${data.magicLinkToken}`;
     const name = data.name || 'there';
@@ -1058,11 +1058,11 @@ export const emailService = {
    * Includes tier selection, price, and signature details
    */
   async sendProposalSignedNotification(data: ProposalSignedData): Promise<EmailResult> {
-    logger.info(`[EMAIL] Preparing proposal signed notification for project: ${data.projectId}`);
+    logger.info(`[Email] Preparing proposal signed notification for project: ${data.projectId}`);
 
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
-      logger.warn('[EMAIL] ADMIN_EMAIL not configured - skipping proposal signed notification');
+      logger.warn('[Email] ADMIN_EMAIL not configured - skipping proposal signed notification');
       return { success: false, message: 'Admin email not configured' };
     }
 
@@ -1176,7 +1176,7 @@ View project: ${adminUrl}/projects/${data.projectId}
 
       return sendEmail(emailContent);
     } catch (error) {
-      logger.error('[EMAIL] Failed to load proposal signed templates:', {
+      logger.error('[Email] Failed to load proposal signed templates:', {
         error: error instanceof Error ? error : undefined
       });
       return {
@@ -1192,7 +1192,7 @@ View project: ${adminUrl}/projects/${data.projectId}
    */
   async sendProposalSignedClientConfirmation(data: ProposalSignedClientData): Promise<EmailResult> {
     logger.info(
-      `[EMAIL] Preparing proposal signed confirmation for client: ${sanitizeEmailForLog(data.signerEmail)}`
+      `[Email] Preparing proposal signed confirmation for client: ${sanitizeEmailForLog(data.signerEmail)}`
     );
 
     try {
@@ -1299,7 +1299,7 @@ This email confirms your legally binding agreement. Please keep it for your reco
 
       return sendEmail(emailContent);
     } catch (error) {
-      logger.error('[EMAIL] Failed to load proposal signed client templates:', {
+      logger.error('[Email] Failed to load proposal signed client templates:', {
         error: error instanceof Error ? error : undefined
       });
       return {
@@ -1318,7 +1318,7 @@ This email confirms your legally binding agreement. Please keep it for your reco
     email: string,
     data: { verificationToken: string; name?: string }
   ): Promise<EmailResult> {
-    logger.info(`[EMAIL] Preparing email verification email for: ${sanitizeEmailForLog(email)}`);
+    logger.info(`[Email] Preparing email verification email for: ${sanitizeEmailForLog(email)}`);
 
     const verifyUrl = `${getBaseUrl()}/auth/verify-email/${data.verificationToken}`;
     const name = data.name || 'there';

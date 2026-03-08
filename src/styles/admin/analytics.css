@@ -84,7 +84,7 @@
 
 .analytics-chart-card {
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
@@ -96,13 +96,13 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
 }
 
 .analytics-view .layout-row-between svg {
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 /* ============================================
@@ -111,7 +111,7 @@
 
 .analytics-section {
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   overflow: hidden;
 }
 
@@ -146,7 +146,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   font-style: italic;
   padding: 1rem;
   box-sizing: border-box;
@@ -154,7 +154,7 @@
 
 .chart-container {
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   overflow: hidden;
 }
 
@@ -167,7 +167,7 @@
   gap: var(--space-2);
   min-height: 200px;
   padding: var(--space-4);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .chart-placeholder svg {
@@ -218,11 +218,11 @@
   justify-content: space-between;
   align-items: center;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .source-value {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .source-progress-track {
@@ -249,21 +249,21 @@
   gap: var(--space-1);
   padding: var(--space-3);
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   text-align: center;
   min-height: 120px;
   transition: border-color var(--transition-faster);
 }
 
 .kpi-card:hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 .kpi-card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .kpi-card-icon svg {
@@ -275,7 +275,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
 }
@@ -284,7 +284,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .kpi-card-change {
@@ -298,11 +298,11 @@
 
 .kpi-card-change .change-value {
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .kpi-card-change .change-label {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .kpi-card-change.positive .change-value {
@@ -321,13 +321,13 @@
 
 .data-label {
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .data-value {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Uses utility classes: flex flex-col gap-0-5 */

@@ -162,9 +162,9 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
     if (!data || !data.labels?.length) return;
 
     // Resolve CSS variable colors
-    const textMuted = resolveCssVar('var(--portal-text-muted)');
-    const borderColor = resolveCssVar('var(--portal-border-color)');
-    const textSecondary = resolveCssVar('var(--portal-text-secondary)');
+    const textMuted = resolveCssVar('var(--color-text-tertiary)');
+    const borderColor = resolveCssVar('var(--color-border-primary)');
+    const textSecondary = resolveCssVar('var(--color-text-secondary)');
 
     const resolvedDatasets = data.datasets.map((ds) => {
       const color = resolveCssVar(ds.color);
@@ -222,8 +222,8 @@ function ChartWidget({ data, type }: ChartWidgetProps) {
           }
         },
         tooltip: {
-          backgroundColor: resolveCssVar('var(--portal-bg-dark)'),
-          titleColor: resolveCssVar('var(--portal-text-light)'),
+          backgroundColor: resolveCssVar('var(--color-bg-tertiary)'),
+          titleColor: resolveCssVar('var(--color-text-primary)'),
           bodyColor: textSecondary,
           borderColor: borderColor,
           borderWidth: 1

@@ -21,7 +21,7 @@
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   line-height: var(--line-height-tight);
@@ -45,7 +45,7 @@
    ===================================================== */
 .portal-section {
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   overflow: hidden;
 }
 
@@ -64,7 +64,7 @@
 .portal .content-section > h3:first-child {
   padding: var(--portal-section-heading-padding);
   margin: 0;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* =====================================================
@@ -95,19 +95,19 @@
    ===================================================== */
 
 /* Label variables defined in portal-theme.css (single source of truth)
-   --portal-label-size: 0.75rem (12px)
-   --portal-label-weight: 500
-   --portal-label-spacing: 0.05em
+   --label-font-size: 0.75rem (12px)
+   --label-font-weight: 500
+   --label-letter-spacing: 0.05em
 */
 
 /* Primary semantic label classes */
 .portal :is(.field-label, .section-label, .stat-label) {
   font-family: var(--font-family-sans);
-  font-size: var(--portal-label-size);
-  font-weight: var(--portal-label-weight);
-  color: var(--portal-text-secondary);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing);
+  letter-spacing: var(--label-letter-spacing);
 }
 
 /* LIGHT MODE - ALL labels black */
@@ -154,11 +154,11 @@ html[data-theme="light"] .portal :is(.field-label, .section-label, .stat-label) 
   .project-notes h4
 ) {
   font-family: var(--font-family-sans);
-  font-size: var(--portal-label-size);
-  font-weight: var(--portal-label-weight);
-  color: var(--portal-text-secondary);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing);
+  letter-spacing: var(--label-letter-spacing);
 }
 
 /* LIGHT MODE - ALL legacy labels black */
@@ -203,11 +203,11 @@ html[data-theme="light"] .portal :is(
   display: block;
   margin-bottom: var(--space-1);
   font-family: var(--font-family-sans);
-  font-size: var(--portal-label-size);
-  font-weight: var(--portal-label-weight);
-  color: var(--portal-text-secondary);
-  text-transform: var(--portal-label-transform);
-  letter-spacing: var(--portal-label-spacing);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  color: var(--color-text-secondary);
+  text-transform: var(--label-text-transform);
+  letter-spacing: var(--label-letter-spacing);
 }
 
 /* =====================================================
@@ -320,7 +320,7 @@ html[data-theme="light"] .portal :is(
   font-family: var(--font-family-sans);
   font-size: var(--font-size-lg);  /* 18px - card titles */
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   margin: 0 0 var(--space-2) 0;
@@ -344,7 +344,7 @@ html[data-theme="light"] .portal :is(
 
 /* Card body - standard content area */
 .portal .portal-card-body {
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* Mobile responsive for base cards */
@@ -462,7 +462,7 @@ html[data-theme="light"] .portal :is(
   background: transparent;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
 }
@@ -485,7 +485,7 @@ html[data-theme="light"] .portal :is(
   background: transparent;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
 }
@@ -512,7 +512,7 @@ html[data-theme="light"] .portal :is(
   background: transparent;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
 }
@@ -556,12 +556,12 @@ html[data-theme="light"] .portal :is(
 .portal .health-indicator {
   width: var(--indicator-dot-md);
   height: var(--indicator-dot-md);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   flex-shrink: 0;
 }
 
 .portal .health-indicator.health-loading {
-  background: var(--portal-text-muted);
+  background: var(--color-text-tertiary);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -589,11 +589,11 @@ html[data-theme="light"] .portal :is(
 
 .portal .health-label {
   flex: 1;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .portal .health-status {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }
 
@@ -648,7 +648,7 @@ html[data-theme="light"] .portal :is(
   background: transparent;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   transition: border-color var(--transition-fast);
 }
 
@@ -661,7 +661,7 @@ html[data-theme="light"] .portal :is(
   display: block;
   font-family: var(--font-family-sans);
   font-size: var(--font-size-2xl);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 
@@ -673,7 +673,7 @@ html[data-theme="light"] .portal :is(
   :is(.milestone-item, .milestone-task-item).completed
   :is(.milestone-title, .milestone-task-title) {
   text-decoration: line-through;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   opacity: 0.7;
 }
 
@@ -689,7 +689,7 @@ html[data-theme="light"] .portal :is(
   padding: var(--space-1) var(--portal-panel-padding-x);
   background: transparent;
   border: var(--portal-border);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: inherit;
   transition: border-color var(--transition-fast);
 }
@@ -703,7 +703,7 @@ html[data-theme="light"] .portal :is(
     .bundle-item,
     .history-request-item
   ):hover {
-  border-color: var(--portal-border-color);
+  border-color: var(--color-border-primary);
 }
 
 /* =====================================================
@@ -714,7 +714,7 @@ html[data-theme="light"] .portal :is(
   background: transparent;
   border: var(--portal-border);
   padding: var(--portal-card-padding);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   overflow: hidden;
   transition: border-color var(--transition-fast);
 }
@@ -743,7 +743,7 @@ html[data-theme="light"] .portal :is(
 
 .portal .progress-card .progress-text {
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 /* =====================================================
@@ -764,7 +764,7 @@ html[data-theme="light"] .portal :is(
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label, 0.05em);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   margin: 0 0 var(--space-3);
 }
 
@@ -837,7 +837,7 @@ html[data-theme="light"] .portal :is(
 
 /* No Invoices Message */
 .no-invoices-message {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-style: italic;
   text-align: left;
   padding: var(--space-2) 0;

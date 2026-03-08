@@ -21,6 +21,7 @@ import type {
   InvoiceReminderRow
 } from '../../types/invoice-types.js';
 import { logger } from '../logger.js';
+import { getDatabase } from '../../database/init.js';
 import type { Database } from '../../database/init.js';
 import { safeJsonParseArray } from '../../utils/safe-json.js';
 
@@ -47,17 +48,16 @@ const INVOICE_REMINDER_COLUMNS = `
 `.replace(/\s+/g, ' ').trim();
 
 export class InvoiceRecurringService {
-  private db: Database;
   private createInvoice: CreateInvoice;
   private getInvoiceById: GetInvoiceById;
 
-  constructor(
-    db: Database,
-    deps: { createInvoice: CreateInvoice; getInvoiceById: GetInvoiceById }
-  ) {
-    this.db = db;
+  constructor(deps: { createInvoice: CreateInvoice; getInvoiceById: GetInvoiceById }) {
     this.createInvoice = deps.createInvoice;
     this.getInvoiceById = deps.getInvoiceById;
+  }
+
+  private getDb(): Database {
+    return getDatabase();
   }
 
   /**
@@ -71,7 +71,7 @@ export class InvoiceRecurringService {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       data.projectId,
       data.clientId,
       data.scheduledDate,
@@ -99,7 +99,7 @@ export class InvoiceRecurringService {
 
     sql += ' ORDER BY scheduled_date ASC';
 
-    const rows = await this.db.all(sql, params);
+    const rows = await this.getDb().all(sql, params);
     return rows.map((row: ScheduledInvoiceRow) => this.mapScheduledInvoiceRow(row));
   }
 
@@ -107,7 +107,7 @@ export class InvoiceRecurringService {
    * Cancel a scheduled invoice
    */
   async cancelScheduledInvoice(id: number): Promise<void> {
-    await this.db.run('UPDATE scheduled_invoices SET status = ? WHERE id = ?', ['cancelled', id]);
+    await this.getDb().run('UPDATE scheduled_invoices SET status = ? WHERE id = ?', ['cancelled', id]);
   }
 
   /**
@@ -123,7 +123,7 @@ export class InvoiceRecurringService {
         AND scheduled_date <= ?
     `;
 
-    const dueInvoices = await this.db.all(sql, [today]);
+    const dueInvoices = await this.getDb().all(sql, [today]);
     let generatedCount = 0;
 
     for (const scheduled of dueInvoices) {
@@ -136,7 +136,7 @@ export class InvoiceRecurringService {
           terms: scheduled.terms
         });
 
-        await this.db.run(
+        await this.getDb().run(
           'UPDATE scheduled_invoices SET status = ?, generated_invoice_id = ? WHERE id = ?',
           ['generated', invoice.id, scheduled.id]
         );
@@ -171,7 +171,7 @@ export class InvoiceRecurringService {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await this.db.run(sql, [
+    const result = await this.getDb().run(sql, [
       data.projectId,
       data.clientId,
       data.frequency,
@@ -202,7 +202,7 @@ export class InvoiceRecurringService {
 
     sql += ' ORDER BY next_generation_date ASC';
 
-    const rows = await this.db.all(sql, params);
+    const rows = await this.getDb().all(sql, params);
     return rows.map((row: RecurringInvoiceRow) => this.mapRecurringInvoiceRow(row));
   }
 
@@ -251,7 +251,7 @@ export class InvoiceRecurringService {
 
     params.push(id);
     const sql = `UPDATE recurring_invoices SET ${updates.join(', ')} WHERE id = ?`;
-    await this.db.run(sql, params);
+    await this.getDb().run(sql, params);
 
     return this.getRecurringInvoiceById(id);
   }
@@ -260,7 +260,7 @@ export class InvoiceRecurringService {
    * Pause a recurring invoice
    */
   async pauseRecurringInvoice(id: number): Promise<void> {
-    await this.db.run('UPDATE recurring_invoices SET is_active = 0 WHERE id = ?', [id]);
+    await this.getDb().run('UPDATE recurring_invoices SET is_active = 0 WHERE id = ?', [id]);
   }
 
   /**
@@ -276,7 +276,7 @@ export class InvoiceRecurringService {
       recurring.dayOfWeek
     );
 
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE recurring_invoices SET is_active = 1, next_generation_date = ? WHERE id = ?',
       [nextDate, id]
     );
@@ -286,7 +286,7 @@ export class InvoiceRecurringService {
    * Delete a recurring invoice pattern
    */
   async deleteRecurringInvoice(id: number): Promise<void> {
-    await this.db.run('DELETE FROM recurring_invoices WHERE id = ?', [id]);
+    await this.getDb().run('DELETE FROM recurring_invoices WHERE id = ?', [id]);
   }
 
   /**
@@ -303,7 +303,7 @@ export class InvoiceRecurringService {
         AND (end_date IS NULL OR end_date >= ?)
     `;
 
-    const dueRecurring = await this.db.all(sql, [today, today]);
+    const dueRecurring = await this.getDb().all(sql, [today, today]);
 
     if (dueRecurring.length === 0) {
       return 0;
@@ -342,7 +342,7 @@ export class InvoiceRecurringService {
 
     // Batch update all successful recurring invoices in a single transaction
     if (successfulRecurring.length > 0) {
-      await this.db.transaction(async (ctx) => {
+      await this.getDb().transaction(async (ctx) => {
         // Update each recurring invoice individually with parameterized queries
         for (const r of successfulRecurring) {
           await ctx.run(
@@ -408,7 +408,7 @@ export class InvoiceRecurringService {
         params.push(invoiceId, reminder.type, reminder.scheduledDate);
       }
 
-      await this.db.run(
+      await this.getDb().run(
         `INSERT INTO invoice_reminders (invoice_id, reminder_type, scheduled_date) VALUES ${valuePlaceholders}`,
         params
       );
@@ -420,7 +420,7 @@ export class InvoiceRecurringService {
    */
   async getInvoiceReminders(invoiceId: number): Promise<InvoiceReminder[]> {
     const sql = `SELECT ${INVOICE_REMINDER_COLUMNS} FROM invoice_reminders WHERE invoice_id = ? ORDER BY scheduled_date ASC`;
-    const rows = await this.db.all(sql, [invoiceId]);
+    const rows = await this.getDb().all(sql, [invoiceId]);
 
     return rows.map((row: InvoiceReminderRow) => ({
       id: row.id,
@@ -437,7 +437,7 @@ export class InvoiceRecurringService {
    * Mark a reminder as sent
    */
   async markReminderSent(reminderId: number): Promise<void> {
-    await this.db.run(
+    await this.getDb().run(
       'UPDATE invoice_reminders SET status = ?, sent_at = CURRENT_TIMESTAMP WHERE id = ?',
       ['sent', reminderId]
     );
@@ -447,7 +447,7 @@ export class InvoiceRecurringService {
    * Skip a reminder (won't be sent)
    */
   async skipReminder(reminderId: number): Promise<void> {
-    await this.db.run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
+    await this.getDb().run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
       'skipped',
       reminderId
     ]);
@@ -468,7 +468,7 @@ export class InvoiceRecurringService {
         AND i.status NOT IN ('paid', 'cancelled')
     `;
 
-    const dueReminders = await this.db.all(sql, [today]);
+    const dueReminders = await this.getDb().all(sql, [today]);
 
     return dueReminders.map((row: InvoiceReminderRow) => ({
       id: row.id,
@@ -485,7 +485,7 @@ export class InvoiceRecurringService {
    * Mark a reminder as failed
    */
   async markReminderFailed(reminderId: number): Promise<void> {
-    await this.db.run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
+    await this.getDb().run('UPDATE invoice_reminders SET status = ? WHERE id = ?', [
       'failed',
       reminderId
     ]);
@@ -493,7 +493,7 @@ export class InvoiceRecurringService {
 
   private async getScheduledInvoiceById(id: number): Promise<ScheduledInvoice> {
     const sql = `SELECT ${SCHEDULED_INVOICE_COLUMNS} FROM scheduled_invoices WHERE id = ?`;
-    const row = await this.db.get(sql, [id]);
+    const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
       logger.error(`Scheduled invoice not found: ${id}`);
@@ -522,7 +522,7 @@ export class InvoiceRecurringService {
 
   private async getRecurringInvoiceById(id: number): Promise<RecurringInvoice> {
     const sql = `SELECT ${RECURRING_INVOICE_COLUMNS} FROM recurring_invoices WHERE id = ?`;
-    const row = await this.db.get(sql, [id]);
+    const row = await this.getDb().get(sql, [id]);
 
     if (!row) {
       logger.error(`Recurring invoice not found: ${id}`);

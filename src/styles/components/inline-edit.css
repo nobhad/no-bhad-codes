@@ -18,7 +18,7 @@
 /* Hover state - subtle edit hint */
 [data-page="admin"] .inline-editable:hover:not(.is-editing),
 [data-page="admin"] .inline-editable-cell:hover:not(.is-editing) {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 /* Edit icon on hover (optional - uses ::after) */
@@ -49,9 +49,9 @@
   width: 100%;
   padding: var(--space-0-5) var(--space-1);
   border: var(--border-width) solid var(--color-primary);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   font-size: inherit;
   font-family: inherit;
   font-weight: inherit;
@@ -66,14 +66,14 @@
 }
 
 [data-page="admin"] .inline-edit-input::placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0.6;
 }
 
 /* Placeholder text for empty values */
 [data-page="admin"] .inline-editable.placeholder,
 [data-page="admin"] .inline-editable-cell.placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-style: italic;
 }
 
@@ -112,7 +112,7 @@
   justify-content: center;
   padding: var(--space-px);
   border: none;
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
   background: transparent;
   cursor: pointer;
   transition: background-color var(--transition-faster, 0.1s) ease;
@@ -148,12 +148,12 @@
   min-height: 24px;
   padding: 0 4px;
   margin: 0 -4px;
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
   transition: background-color var(--transition-faster, 0.1s) ease;
 }
 
 .portal .inline-edit-display:hover {
-  background-color: var(--portal-bg-hover);
+  background-color: var(--color-bg-hover);
 }
 
 .portal .inline-edit-display.is-disabled {
@@ -170,7 +170,7 @@
 }
 
 .portal .inline-edit-value.is-placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-style: italic;
 }
 
@@ -178,7 +178,7 @@
 .portal .inline-edit-icon {
   width: 10px;
   height: 10px;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0;
   transition: opacity var(--transition-faster, 0.1s) ease;
 }
@@ -193,10 +193,10 @@
   min-width: 80px;
   width: 100%;
   padding: 0 6px;
-  background: var(--portal-bg-darkest);
-  color: var(--portal-text-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
   border: var(--border-width) solid var(--color-brand-primary, var(--color-primary));
-  border-radius: var(--portal-radius-sm, 4px);
+  border-radius: var(--border-radius-sm, 4px);
   font-size: var(--font-size-xs);
   outline: none;
 }
@@ -215,9 +215,9 @@
   min-width: 100px;
   width: 100%;
   padding: 0 var(--dropdown-padding-x);
-  background: var(--portal-bg-darkest);
-  color: var(--portal-text-primary);
-  border: var(--border-width) solid var(--portal-border-color);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width) solid var(--color-border-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: border-color var(--transition-fast);
@@ -267,7 +267,7 @@
   display: inline-flex;
   align-items: center;
   margin-left: var(--icon-gap-xs, 4px);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   transition: color var(--transition-faster, 0.1s) ease;
 }
 
@@ -312,7 +312,7 @@
 .portal .inline-edit-label .inline-edit-icon {
   width: var(--icon-size-sm, 16px);
   height: var(--icon-size-sm, 16px);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 1;
 }
 
@@ -334,7 +334,7 @@
   justify-content: flex-end;
   gap: var(--icon-gap-xs, 4px);
   text-align: right;
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   font-size: var(--font-size-base, 14px);
   min-height: 24px;
   padding: var(--space-0-5) var(--space-1);
@@ -347,7 +347,7 @@
 }
 
 .portal .inline-edit-row .inline-edit-value.editable:hover {
-  background: var(--portal-bg-hover);
+  background: var(--color-bg-hover);
 }
 
 .portal .inline-edit-row .inline-edit-value.editable:focus {
@@ -356,7 +356,7 @@
 }
 
 .portal .inline-edit-row .inline-edit-value.placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   font-style: italic;
 }
 
@@ -364,7 +364,7 @@
 .portal .inline-edit-row .inline-edit-pencil {
   width: var(--icon-size-xs, 12px);
   height: var(--icon-size-xs, 12px);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0;
   transition: opacity var(--transition-fast);
   flex-shrink: 0;
@@ -387,8 +387,8 @@
   width: 100%;
   padding: var(--space-1) var(--space-2);
   border: var(--border-width) solid var(--color-primary);
-  background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-base, 14px);
   font-family: inherit;
   text-align: right;
@@ -400,7 +400,7 @@
 }
 
 .portal .inline-edit-row .inline-edit-input::placeholder {
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   opacity: 0.6;
 }
 
@@ -417,8 +417,8 @@
   width: 100%;
   padding: var(--space-1) var(--space-2);
   border: var(--border-width) solid var(--color-primary);
-  background: var(--portal-bg-darker);
-  color: var(--portal-text-light);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-base, 14px);
   font-family: inherit;
   text-align: right;
@@ -471,7 +471,7 @@
 .portal .inline-edit-row .inline-edit-spinner {
   width: 16px;
   height: 16px;
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
   animation: spin 1s linear infinite;
 }
 

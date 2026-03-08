@@ -162,7 +162,7 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const entryId = parseInt(req.params.entryId, 10);
 
-    if (isNaN(entryId)) {
+    if (isNaN(entryId) || entryId <= 0) {
       return errorResponse(res, 'Invalid entry ID', 400, ErrorCodes.INVALID_ID);
     }
 
@@ -245,7 +245,7 @@ router.delete(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const entryId = parseInt(req.params.entryId, 10);
 
-    if (isNaN(entryId)) {
+    if (isNaN(entryId) || entryId <= 0) {
       return errorResponse(res, 'Invalid entry ID', 400, ErrorCodes.INVALID_ID);
     }
 

@@ -43,7 +43,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: var(--portal-bg-dark, var(--color-bg-tertiary));
+    background: var(--color-bg-tertiary, var(--color-bg-tertiary));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,14 +53,14 @@
   .is-skeleton {
     background: linear-gradient(
       90deg,
-      var(--portal-bg-dark, var(--color-bg-tertiary)) 25%,
-      var(--portal-bg-medium, var(--color-surface-tertiary)) 50%,
-      var(--portal-bg-dark, var(--color-bg-tertiary)) 75%
+      var(--color-bg-tertiary, var(--color-bg-tertiary)) 25%,
+      var(--color-bg-raised, var(--color-surface-tertiary)) 50%,
+      var(--color-bg-tertiary, var(--color-bg-tertiary)) 75%
     );
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s ease-in-out infinite;
     color: transparent;
-    border-radius: var(--portal-radius-sm, 4px);
+    border-radius: var(--border-radius-sm, 4px);
   }
 
   @keyframes skeleton-loading {
@@ -78,7 +78,7 @@
 
   /* Active - currently selected/active item */
   .is-active {
-    background-color: var(--portal-bg-hover, var(--color-state-hover));
+    background-color: var(--color-bg-hover, var(--color-state-hover));
   }
 
   /* Selected - checkbox/radio style selection */

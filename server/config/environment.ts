@@ -128,6 +128,12 @@ export interface AppConfig {
   HELMET_ENABLED: boolean;
   CLUSTER_WORKERS: string;
 
+  // Swagger / API Docs
+  SUPPORT_EMAIL?: string;
+  PRODUCTION_API_URL?: string;
+  BRAND_COLOR: string;
+  DARK_BG_COLOR: string;
+
   // OpenTelemetry
   OTEL_ENABLED: boolean;
   OTEL_SERVICE_NAME: string;
@@ -237,6 +243,12 @@ const configSchema: ConfigSchema = {
   TRUST_PROXY: { required: false, default: false, type: 'boolean' },
   HELMET_ENABLED: { required: false, default: true, type: 'boolean' },
   CLUSTER_WORKERS: { required: false, default: 'auto' },
+
+  // Swagger / API Docs
+  SUPPORT_EMAIL: { required: false, type: 'email' },
+  PRODUCTION_API_URL: { required: false, type: 'url' },
+  BRAND_COLOR: { required: false, default: '#00ff41' },
+  DARK_BG_COLOR: { required: false, default: '#1a1a1a' },
 
   // OpenTelemetry
   OTEL_ENABLED: { required: false, default: true, type: 'boolean' },

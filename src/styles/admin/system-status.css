@@ -27,7 +27,7 @@
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin: 0 0 var(--space-2) 0;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .status-service-card {
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 
@@ -65,7 +65,7 @@
 .status-service-name {
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .status-service-details {
@@ -82,7 +82,7 @@
 }
 
 .status-detail-label {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* ================================================
@@ -95,7 +95,7 @@
 }
 
 .status-metric-card {
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 
@@ -109,7 +109,7 @@
 .status-metric-name {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
 }
@@ -117,13 +117,13 @@
 .status-metric-value {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
   margin-bottom: var(--space-1-5);
 }
 
 .status-progress-track {
   height: 4px;
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
   overflow: hidden;
   margin-bottom: var(--space-1);
 }
@@ -135,7 +135,7 @@
 
 .status-metric-threshold {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 /* ================================================
@@ -152,7 +152,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 
@@ -174,7 +174,7 @@
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   padding: var(--space-0-5) var(--space-1-5);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .status-incident-severity.severity-critical {
@@ -188,13 +188,13 @@
 }
 
 .status-incident-severity.severity-minor {
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .status-incident-title {
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
-  color: var(--portal-text-primary);
+  color: var(--color-text-primary);
 }
 
 .status-incident-meta {
@@ -202,7 +202,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .status-incident-status {
@@ -224,7 +224,7 @@
   gap: var(--space-1);
   cursor: pointer;
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -247,7 +247,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-6) var(--space-3);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -259,19 +259,19 @@
 .status-color-indicator[data-status-variant="pending"] { color: var(--status-pending); }
 .status-color-indicator[data-status-variant="cancelled"] { color: var(--status-cancelled); }
 .status-color-indicator[data-status-variant="active"] { color: var(--status-active); }
-.status-color-indicator[data-status-variant="muted"] { color: var(--portal-text-muted); }
+.status-color-indicator[data-status-variant="muted"] { color: var(--color-text-tertiary); }
 
 .status-progress-bar[data-status-variant="completed"] { background-color: var(--status-completed); }
 .status-progress-bar[data-status-variant="pending"] { background-color: var(--status-pending); }
 .status-progress-bar[data-status-variant="cancelled"] { background-color: var(--status-cancelled); }
 .status-progress-bar[data-status-variant="active"] { background-color: var(--status-active); }
-.status-progress-bar[data-status-variant="muted"] { background-color: var(--portal-text-muted); }
+.status-progress-bar[data-status-variant="muted"] { background-color: var(--color-text-tertiary); }
 
 .status-service-icon[data-status-variant="completed"] { color: var(--status-completed); }
 .status-service-icon[data-status-variant="pending"] { color: var(--status-pending); }
 .status-service-icon[data-status-variant="cancelled"] { color: var(--status-cancelled); }
 .status-service-icon[data-status-variant="active"] { color: var(--status-active); }
-.status-service-icon[data-status-variant="muted"] { color: var(--portal-text-muted); }
+.status-service-icon[data-status-variant="muted"] { color: var(--color-text-tertiary); }
 
 /* ================================================
    Shared utility

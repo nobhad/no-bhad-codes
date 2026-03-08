@@ -56,7 +56,7 @@
 
 /* Description divider within a panel card */
 .panel-description {
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
   margin-top: var(--space-4);
   padding-top: var(--space-4);
 }
@@ -89,7 +89,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   margin-bottom: var(--space-3);
 }
 
@@ -284,7 +284,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-color: var(--portal-bg-pitch);
+  background-color: var(--color-bg-primary);
   background-image: var(--select-caret);
   background-repeat: no-repeat;
   background-position: right var(--space-4) center;
@@ -302,25 +302,25 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] #pd-setting-status.status-on-hold,
 [data-page="admin"] #pd-setting-status.status-on_hold {
   background-color: var(--color-warning);
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
   background-image: var(--select-caret-light);
 }
 
 [data-page="admin"] #pd-setting-status.status-active {
   background-color: var(--color-info);
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
   background-image: var(--select-caret-light);
 }
 
 [data-page="admin"] #pd-setting-status.status-completed {
   background-color: var(--color-success);
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
   background-image: var(--select-caret-light);
 }
 
 [data-page="admin"] #pd-setting-status.status-cancelled {
   background-color: var(--color-danger);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
   background-image: var(--select-caret);
 }
 
@@ -434,7 +434,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   height: var(--icon-size-lg);
   cursor: pointer;
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   position: relative;
   display: flex;
   align-items: center;
@@ -466,7 +466,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   top: 2px;
   width: 6px;
   height: 10px;
-  border: solid var(--portal-text-light);
+  border: solid var(--color-text-primary);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -513,9 +513,9 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Project Notes - standalone */
 .project-notes {
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
   padding: var(--space-2);
-  border: var(--border-width) solid var(--portal-border-medium);
+  border: var(--border-width) solid var(--color-border-primary);
   min-height: 100px;
   white-space: pre-wrap;
 }
@@ -536,7 +536,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 .project-notes .feature-tag {
-  background: var(--portal-bg-medium);
+  background: var(--color-bg-raised);
   padding: var(--space-0-5) var(--space-1-5);
   display: inline-block;
   text-transform: capitalize;
@@ -678,8 +678,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   box-sizing: border-box;
   padding: var(--space-2) var(--space-3);
   padding-right: var(--space-1-5);
-  border: var(--border-width-heavy) solid var(--portal-border-dark);
-  background-color: var(--portal-bg-pitch);
+  border: var(--border-width-heavy) solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
   cursor: pointer;
   text-align: left;
 }
@@ -729,8 +729,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   margin-top: calc(-1 * var(--space-1));
   padding: 0;
   list-style: none;
-  background-color: var(--portal-bg-pitch);
-  border: var(--border-width-heavy) solid var(--portal-border-dark);
+  background-color: var(--color-bg-primary);
+  border: var(--border-width-heavy) solid var(--color-border-primary);
   border-top: none;
   max-height: 300px;
   overflow-y: auto;
@@ -783,7 +783,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Dropdown item hover - subtle highlight (status dropdowns in detail panels) */
 [data-page="admin"] .details-panel .custom-dropdown-item:hover {
-  background-color: var(--portal-bg-hover);
+  background-color: var(--color-bg-hover);
 }
 
 /* Hide currently selected item from dropdown menu - prevents double representation */
@@ -969,7 +969,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* File upload dropzone */
 .panel.files-dropzone {
-  border: var(--border-width) dashed var(--portal-border-color);
+  border: var(--border-width) dashed var(--color-border-primary);
   cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
@@ -980,7 +980,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .files-dropzone.is-dragging {
   border-color: var(--color-primary);
-  background-color: var(--portal-bg-hover);
+  background-color: var(--color-bg-hover);
 }
 
 /* Upload icon sizing */
@@ -1029,7 +1029,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Table header row styling */
 .files-table-header {
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Table row — ensure table-row display (override any .list-item flex) */
@@ -1047,8 +1047,8 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   height: 32px;
   padding: var(--space-1) var(--space-2);
   background: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-light);
+  border: var(--border-width) solid var(--color-border-primary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: inherit;
   cursor: pointer;
@@ -1056,7 +1056,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 .files-category-trigger:hover {
-  border-color: var(--portal-text-muted);
+  border-color: var(--color-text-tertiary);
 }
 
 .files-category-trigger[data-state="open"] {
@@ -1069,7 +1069,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .tasks-checkbox {
   width: 20px;
   height: 20px;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1131,7 +1131,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Contract files header bar */
 .contract-files-header {
   padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Contract empty state padding */
@@ -1178,7 +1178,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Invoice table header row */
 .invtab-header-row {
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Invoice table row - clickable, ensure table-row display */
@@ -1202,7 +1202,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Deliverables milestone header */
 .deliv-milestone-header {
   padding: var(--space-4);
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Deliverables milestone description */
@@ -1295,7 +1295,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .msgtab-avatar.is-client {
   background-color: transparent;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Message content wrapper */
@@ -1325,11 +1325,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 .msgtab-bubble.is-admin {
   background-color: var(--color-white);
-  color: var(--portal-text-dark);
+  color: var(--color-text-inverse);
 }
 
 .msgtab-bubble.is-client {
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   color: var(--color-text-primary);
 }
 
@@ -1342,7 +1342,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Message input area */
 .msgtab-input-panel {
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
   padding-top: var(--space-4);
 }
 

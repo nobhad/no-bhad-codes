@@ -79,8 +79,8 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'text-sm text-center font-mono',
                 'focus:outline-none focus:ring-2 focus:ring-white',
                 requirements.designStyle === style
-                  ? 'border-primary bg-white text-[var(--portal-text-dark)]'
-                  : 'border-[var(--portal-border-color)] text-[var(--portal-text-light)] hover:border-primary'
+                  ? 'border-primary bg-white text-[var(--color-text-inverse)]'
+                  : 'border-[var(--color-border-primary)] text-[var(--color-text-primary)] hover:border-primary'
               )}
             >
               <Palette className="icon-sm flex-shrink-0" />
@@ -109,7 +109,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
       {/* Checkboxes */}
       <div className="flex flex-wrap gap-4 mt-4">
         {/* Brand Guidelines */}
-        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--portal-border-color)]">
+        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--color-border-primary)]">
           <Checkbox
             checked={requirements.brandGuidelines}
             onCheckedChange={(checked) => handleChange('brandGuidelines', checked === true)}
@@ -120,7 +120,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
         </label>
 
         {/* Content Ready */}
-        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--portal-border-color)]">
+        <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-[var(--color-border-primary)]">
           <Checkbox
             checked={requirements.contentReady}
             onCheckedChange={(checked) => handleChange('contentReady', checked === true)}
@@ -159,8 +159,8 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                 'text-sm font-mono',
                 'focus:outline-none focus:ring-2 focus:ring-white',
                 isSelected
-                  ? 'border-primary bg-white text-[var(--portal-text-dark)]'
-                  : 'border-[var(--portal-border-color)] text-[var(--portal-text-light)] hover:border-primary'
+                  ? 'border-primary bg-white text-[var(--color-text-inverse)]'
+                  : 'border-[var(--color-border-primary)] text-[var(--color-text-primary)] hover:border-primary'
               )}
             >
               <div
@@ -172,7 +172,7 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
                     : 'border-primary'
                 )}
               >
-                {isSelected && <Check className="icon-xs text-[var(--portal-text-light)]" strokeWidth={3} />}
+                {isSelected && <Check className="icon-xs text-[var(--color-text-primary)]" strokeWidth={3} />}
               </div>
               <span>{feature}</span>
             </button>

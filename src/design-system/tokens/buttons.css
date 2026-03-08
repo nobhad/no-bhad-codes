@@ -34,17 +34,17 @@
   --portal-btn-border-width: 2px;
   --portal-btn-border-bottom-width: 6px;
   --portal-btn-border-radius: 0;
-  --portal-btn-border-color: var(--portal-text-light);
+  --portal-btn-border-color: var(--color-text-primary);
 
   /* Button colors - base (inherit bg, white text/border) */
   --portal-btn-bg: inherit;
-  --portal-btn-color: var(--portal-text-light);
-  --portal-btn-border: var(--portal-text-light);
+  --portal-btn-color: var(--color-text-primary);
+  --portal-btn-border: var(--color-text-primary);
 
   /* Button colors - hover (inverted: dark bg = light text, light bg = dark text) */
-  --portal-btn-hover-bg: var(--portal-text-light);
-  --portal-btn-hover-color: var(--portal-bg-pitch);
-  --portal-btn-hover-border: var(--portal-text-light);
+  --portal-btn-hover-bg: var(--color-text-primary);
+  --portal-btn-hover-color: var(--color-bg-primary);
+  --portal-btn-hover-border: var(--color-text-primary);
 
   /* Button colors - danger (transparent bg, red text/border) */
   --portal-btn-danger-bg: transparent;
@@ -53,7 +53,7 @@
 
   /* Button colors - danger hover */
   --portal-btn-danger-hover-bg: var(--color-error-500);
-  --portal-btn-danger-hover-color: var(--portal-text-light);
+  --portal-btn-danger-hover-color: var(--color-text-primary);
   --portal-btn-danger-hover-border: var(--color-error-500);
 
   /* Button effects - BRUTALIST: no shadows */

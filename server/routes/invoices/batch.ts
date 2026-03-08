@@ -52,9 +52,18 @@ router.get(
 );
 
 /**
- * POST /api/invoices/export-batch
- * Export multiple invoices as a ZIP file
- * Body: { invoiceIds: number[] }
+ * @swagger
+ * /api/invoices/export-batch:
+ *   post:
+ *     tags:
+ *       - Invoices
+ *     summary: POST /api/invoices/export-batch
+ *     description: Export multiple invoices as a ZIP file.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: ZIP file download
  */
 router.post(
   '/export-batch',

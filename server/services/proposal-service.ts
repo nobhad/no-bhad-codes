@@ -692,7 +692,7 @@ class ProposalService {
       );
 
       if (!proposal) {
-        logger.error(`[PROPOSAL] Cannot send notification - proposal not found: ${proposalId}`);
+        logger.error(`[Proposal] Cannot send notification - proposal not found: ${proposalId}`);
         return;
       }
 
@@ -761,9 +761,9 @@ class ProposalService {
       const adminResult = await emailService.sendProposalSignedNotification(notificationData);
 
       if (adminResult.success) {
-        logger.info(`[PROPOSAL] Admin notification sent for proposal: ${proposalId}`);
+        logger.info(`[Proposal] Admin notification sent for proposal: ${proposalId}`);
       } else {
-        logger.error(`[PROPOSAL] Failed to send admin notification: ${adminResult.message}`);
+        logger.error(`[Proposal] Failed to send admin notification: ${adminResult.message}`);
       }
 
       // Send client confirmation email only if client account is activated
@@ -782,17 +782,17 @@ class ProposalService {
         const clientResult = await emailService.sendProposalSignedClientConfirmation(clientData);
 
         if (clientResult.success) {
-          logger.info(`[PROPOSAL] Client confirmation sent for proposal: ${proposalId}`);
+          logger.info(`[Proposal] Client confirmation sent for proposal: ${proposalId}`);
         } else {
-          logger.error(`[PROPOSAL] Failed to send client confirmation: ${clientResult.message}`);
+          logger.error(`[Proposal] Failed to send client confirmation: ${clientResult.message}`);
         }
       } else {
         logger.info(
-          `[PROPOSAL] Skipping client confirmation email for proposal ${proposalId} - client account not activated`
+          `[Proposal] Skipping client confirmation email for proposal ${proposalId} - client account not activated`
         );
       }
     } catch (error) {
-      logger.error('[PROPOSAL] Error sending proposal signed notifications:', {
+      logger.error('[Proposal] Error sending proposal signed notifications:', {
         error: error instanceof Error ? error : undefined
       });
     }

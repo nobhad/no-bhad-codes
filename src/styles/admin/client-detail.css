@@ -80,7 +80,7 @@
 .tag-color-dot {
   width: 12px;
   height: 12px;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--border-radius-full);
   display: inline-block;
   margin-right: var(--space-2);
 }
@@ -215,7 +215,7 @@
 .contact-avatar {
   width: 40px;
   height: 40px;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -307,7 +307,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: var(--border-width) solid var(--portal-border-color);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Activity event content panel */
@@ -378,7 +378,7 @@
 .note-footer {
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: var(--border-width) solid var(--portal-border-color);
+  border-top: var(--border-width) solid var(--color-border-primary);
 }
 
 /* Section label with bottom margin */

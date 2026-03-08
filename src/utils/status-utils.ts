@@ -232,5 +232,5 @@ export function getPriorityColor(priority: string): string {
     high: 'var(--color-danger)',
     urgent: 'var(--color-danger)'
   };
-  return colors[priority] || 'var(--portal-text-secondary)';
+  return colors[priority] || 'var(--color-text-secondary)';
 }

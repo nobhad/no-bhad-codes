@@ -10,7 +10,7 @@ import { getString, getNumber } from '../../database/row-helpers.js';
 import { notDeleted } from '../../database/query-helpers.js';
 import { softDeleteService } from '../../services/soft-delete-service.js';
 import { generateDefaultMilestones } from '../../services/milestone-generator.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess, ErrorCodes } from '../../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
 
@@ -275,7 +275,7 @@ router.post(
       name
     });
 
-    sendSuccess(res, { project: newProject }, 'Project request submitted successfully. We will review and get back to you soon!', 201);
+    sendCreated(res, { project: newProject }, 'Project request submitted successfully. We will review and get back to you soon!');
   })
 );
 
@@ -344,7 +344,7 @@ router.post(
       name
     });
 
-    sendSuccess(res, { project: newProject }, 'Project created successfully', 201);
+    sendCreated(res, { project: newProject }, 'Project created successfully');
   })
 );
 

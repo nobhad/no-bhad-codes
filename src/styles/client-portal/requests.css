@@ -23,7 +23,7 @@
 
 .portal .requests-intro {
   margin: 0 0 var(--space-2) 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -34,7 +34,7 @@
 .portal .requests-attachment-note {
   margin: var(--space-0-5) 0 0 0;
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .requests-list-header {
@@ -69,7 +69,7 @@
 
 .portal .requests-card-title {
   font-weight: var(--font-weight-semibold);
-  color: var(--portal-text-light);
+  color: var(--color-text-primary);
 }
 
 .portal .requests-card-status {
@@ -81,13 +81,13 @@
   flex-wrap: wrap;
   gap: var(--space-1);
   font-size: var(--font-size-xs);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-0-5);
 }
 
 .portal .requests-card-description {
   margin: 0 0 var(--space-1) 0;
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -96,8 +96,8 @@
   gap: var(--space-0-5);
   margin: 0 0 var(--space-1) 0;
   padding: var(--space-1);
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-secondary);
+  border: var(--border-width) solid var(--color-border-primary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }
 
@@ -112,7 +112,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
@@ -120,27 +120,27 @@
   display: grid;
   gap: var(--space-0-5);
   padding: var(--space-1);
-  border: var(--border-width) solid var(--portal-border-color);
-  color: var(--portal-text-secondary);
+  border: var(--border-width) solid var(--color-border-primary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }
 
 .portal .requests-quote-modal-note {
   margin: 0;
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .requests-card-footer {
   font-size: var(--font-size-xs);
-  color: var(--portal-text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .portal .requests-empty,
 .portal .requests-error {
   margin: 0;
   font-size: var(--font-size-sm);
-  color: var(--portal-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .portal .requests-error {
