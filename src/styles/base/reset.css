@@ -258,14 +258,9 @@ summary::-webkit-details-marker {
  * with icons across admin and client portals
  * ============================================ */
 
-/* Navigation items, dropdown items, logout buttons - all icon+text patterns */
+/* Navigation items, toggle buttons - all icon+text patterns */
 .portal :is(
-    .sidebar-nav-item,
-    .sidebar-signout,
-    .dropdown-item,
-    .logout-btn,
     .nav-item,
-    .sidebar-collapsed-logo,
     .sidebar-toggle-btn
   ) {
   display: flex;

@@ -106,7 +106,7 @@
   right: 20px;
   width: 320px;
   background: var(--color-neutral-300);
-  border: var(--border-width-thick) solid var(--color-gray-50);
+  border: var(--border-width-thick) solid var(--color-dark);
   padding: 1.5rem;
   z-index: var(--z-index-portal-dropdown);
   opacity: 0;
@@ -136,7 +136,7 @@
   left: var(--caret-left, 20px);
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid var(--color-gray-50);
+  border-bottom: 10px solid var(--color-dark);
 }
 
 .portal-dropdown::after {
@@ -163,8 +163,8 @@
   display: flex;
   width: 100%;
   height: 44px;
-  border: var(--border-width-thick) solid var(--color-gray-50);
-  border-radius: var(--portal-radius-pill, 9999px);
+  border: var(--border-width-thick) solid var(--color-dark);
+  border-radius: 0;
   margin-bottom: 1rem;
   box-sizing: border-box;
   overflow: hidden;
@@ -189,11 +189,11 @@
 }
 
 .portal-dropdown .portal-toggle-btn:first-child {
-  border-right: var(--border-width-thick) solid var(--color-gray-50);
+  border-right: var(--border-width-thick) solid var(--color-dark);
 }
 
 .portal-dropdown .portal-toggle-btn:last-child {
-  border-left: var(--border-width-thick) solid var(--color-gray-50);
+  border-left: var(--border-width-thick) solid var(--color-dark);
 }
 
 .portal-dropdown .portal-toggle-btn:hover:not(.active) {
@@ -220,7 +220,7 @@
   height: 48px;
   background: inherit;
   border: var(--border-width) solid var(--color-dark);
-  border-radius: var(--portal-radius-pill, 9999px);
+  border-radius: 0;
   padding: 0 1rem;
   font-size: var(--font-size-sm);
   color: var(--color-dark);

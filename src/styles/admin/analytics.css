@@ -10,6 +10,7 @@
 
 /* ============================================
    Analytics View Container
+   Follows .portal-view pattern (flex column + section gap)
    ============================================ */
 
 .analytics-view {
@@ -31,29 +32,14 @@
   margin-bottom: var(--space-3);
 }
 
-/* Date range selector - button group */
-.date-range-selector {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin-right: auto;
+/* Date range selector - inline dropdown trigger */
+.date-range-trigger {
+  padding-right: var(--dropdown-padding-x);
 }
 
-.date-range-selector .btn-secondary {
-  border-radius: 0;
-  margin-left: calc(-1 * var(--border-width, 2px));
-}
-
-.date-range-selector .btn-secondary:first-child {
-  margin-left: 0;
-}
-
-.date-range-selector .btn-secondary.active {
-  background: var(--portal-btn-hover-bg);
-  color: var(--portal-btn-hover-color);
-  border-color: var(--portal-btn-hover-border);
-  position: relative;
-  z-index: var(--z-index-content);
+/* Remove bottom border when dropdown is open - seamless connection */
+.date-range-trigger[data-state="open"] {
+  border-bottom-color: transparent;
 }
 
 /* ============================================

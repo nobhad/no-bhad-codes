@@ -94,7 +94,7 @@
   gap: var(--portal-section-gap);
 }
 
-@media (min-width: 1024px) {
+@media (--laptop-up) {
   .client-overview-grid {
     grid-template-columns: 2fr 1fr;
   }
@@ -576,6 +576,7 @@
   gap: var(--space-4);
 }
 
+/* Follows .section-header-with-actions pattern */
 .overview-header {
   display: flex;
   justify-content: space-between;
@@ -647,8 +648,10 @@
 
 /* --- Shared Tab Layout --- */
 
-/* Section header: title + action (used across all tabs) */
-.tab-section-header {
+/* Section header: title + action (used across all tabs)
+   Follows .section-header-with-actions pattern */
+.tab-section-header,
+.section-header-with-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -685,7 +688,8 @@
 }
 
 /* Two-column card grid */
-.card-grid-2col {
+.card-grid-2col,
+.card-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4);

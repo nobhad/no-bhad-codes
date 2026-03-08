@@ -258,7 +258,9 @@
    EXPORT BUTTON
    =============================================== */
 
-.table-header-actions {
+/* Follows .section-header-with-actions pattern for table action bars */
+.table-header-actions,
+.section-header-with-actions {
   display: flex;
   align-items: center;
   gap: var(--space-2);

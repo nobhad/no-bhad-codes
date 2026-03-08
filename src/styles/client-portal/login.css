@@ -16,34 +16,8 @@
    (Same as admin - see admin/auth.css)
    ===================================================== */
 
-body[data-page="client-portal"] .header,
-body[data-page="client-portal"] .client-header {
+body[data-page="client-portal"] .header {
   z-index: calc(var(--z-index-portal-overlay, 9500) + 200);
-}
-
-/* =====================================================
-   LOGIN PAGE - HEADER & FOOTER
-   Must be visible and functional on login page
-   (Same pattern as admin - see pages/admin.css)
-   ===================================================== */
-
-[data-page="client-portal"] .client-header {
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-index-portal-modal);
-  background: transparent;
-  height: var(--header-height, 60px);
-}
-
-body[data-page="client-portal"]:not(.portal-logged-in) .client-header,
-body[data-page="client-portal"]:not(.portal-logged-in) .client-header * {
-  color: var(--color-nav-text);
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
 }
 
 body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row {
@@ -59,11 +33,6 @@ body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row:hover,
 body[data-page="client-portal"]:not(.portal-logged-in) .theme-button:hover,
 body[data-page="client-portal"]:not(.portal-logged-in) .menu-button:hover {
   color: var(--color-primary);
-}
-
-/* Hide header after login (dashboard has its own header) */
-body.portal-logged-in[data-page="client-portal"] .client-header {
-  display: none;
 }
 
 /* Footer visible on login page */
