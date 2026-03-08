@@ -61,7 +61,7 @@
 /* Portfolio Item Card */
 .portfolio-item {
   background: var(--color-neutral-100);
-  border-radius: var(--portal-radius-lg);
+  border-radius: var(--portal-radius-lg, 12px);
   padding: 2.5rem;
   position: relative;
   box-shadow: var(--shadow-elevated-md);
@@ -84,7 +84,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-primary);
   font-weight: var(--font-weight-bold);
-  text-shadow: 0 2px 8px var(--portal-alpha-black-80);
+  text-shadow: 0 2px 8px var(--portal-alpha-black-80, rgba(0, 0, 0, 0.8));
 }
 
 .portfolio-item h3 {
@@ -115,7 +115,7 @@
   background: var(--color-primary);
   color: var(--color-neutral-100);
   padding: 0.25rem 0.75rem;
-  border-radius: var(--portal-radius-xl);
+  border-radius: var(--portal-radius-xl, 16px);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -139,7 +139,7 @@
   width: 44px;
   height: 44px;
   border: none;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   background: var(--color-neutral-200);
   color: var(--color-dark);
   cursor: pointer;
@@ -176,7 +176,7 @@
 .indicator {
   width: 12px;
   height: 12px;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   background: var(--color-neutral-200);
   cursor: pointer;
   transition: all var(--transition-normal) ease;

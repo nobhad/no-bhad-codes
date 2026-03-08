@@ -67,26 +67,7 @@
  * UTILITIES (highest priority)
  * ============================================ */
 @layer utilities {
-  .skip-link {
-    position: absolute;
-    top: -100%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: var(--z-index-portal-confirm, 9900);
-    padding: var(--space-3) var(--space-6);
-    background-color: var(--portal-bg-darker);
-    color: var(--portal-text-primary);
-    text-decoration: none;
-    font-weight: var(--font-weight-semibold);
-    border-radius: 0; /* Portal: sharp corners */
-    transition: top var(--transition-mouse) ease;
-  }
-
-  .skip-link:focus {
-    top: 10px;
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
+  /* Utility classes */
 }
 
 /* ============================================
@@ -105,11 +86,14 @@ body.admin-logged-in[data-page="admin"] {
   overflow: hidden;
 }
 
-/* html background needs fallback since portal variables are scoped to body */
+/* html background - hardcoded since portal variables are scoped to body, not html */
 html:has(body.admin-logged-in[data-page="admin"]) {
-  background-color: var(--portal-bg-pitch);
-  /* Fixed height to constrain body */
+  background-color: #000000;
   height: 100%;
+}
+
+html[data-theme="light"]:has(body.admin-logged-in[data-page="admin"]) {
+  background-color: #ffffff;
 }
 
 /* Scrollbar styling */

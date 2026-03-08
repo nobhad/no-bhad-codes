@@ -26,7 +26,7 @@
    ===================================================== */
 
 [data-page="admin"] select[class*="tw-py-"],
-[data-page="admin"] .tw-flex select {
+[data-page="admin"] .flex select {
   height: var(--table-pagination-btn-size);
   min-height: var(--table-pagination-btn-size);
   max-height: var(--table-pagination-btn-size);

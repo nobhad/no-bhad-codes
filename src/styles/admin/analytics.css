@@ -34,6 +34,7 @@
 /* Date range selector - button group */
 .date-range-selector {
   display: flex;
+  flex-wrap: wrap;
   gap: 0;
   margin-right: auto;
 }

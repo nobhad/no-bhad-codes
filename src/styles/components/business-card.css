@@ -651,5 +651,5 @@ html[data-theme="dark"] .intro-card-element {
 }
 
 html[data-theme="dark"] .business-card-container {
-  background: radial-gradient(circle at center, var(--portal-alpha-white-02), transparent);
+  background: radial-gradient(circle at center, var(--portal-alpha-white-02, rgba(255, 255, 255, 0.02)), transparent);
 }

@@ -893,7 +893,7 @@
   transition: opacity var(--transition-fast);
 }
 
-.tw-group:hover .note-actions,
+.group:hover .note-actions,
 .portal-card:hover .note-actions {
   opacity: 1;
 }
@@ -952,7 +952,7 @@
   transition: opacity var(--transition-fast);
 }
 
-.tw-group:hover .hover-reveal,
+.group:hover .hover-reveal,
 .portal-card:hover .hover-reveal {
   opacity: 1;
 }

@@ -166,21 +166,21 @@ body[data-page="admin"]:not(.admin-logged-in) {
    ADMIN SIDEBAR LAYOUT
    ================================================ */
 
+/* Dashboard container — scoping wrapper, NOT a layout container.
+   .portal-body handles the sidebar+content flex layout. */
 [data-page="admin"] .dashboard-container {
-  display: flex;
+  display: block;
   width: 100%;
-  min-height: 100vh;
-  height: 100vh;
 }
 
+/* Sidebar — height: 100% inherited from .portal-body via portal-layout.css.
+   Only admin-specific width/z-index overrides here. */
 [data-page="admin"] .sidebar {
   width: var(--sidebar-width-open);
   min-width: var(--sidebar-width-open);
   background: var(--portal-bg-pitch);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  min-height: 100vh;
   z-index: var(--z-index-50);
   position: relative;
 }
@@ -190,14 +190,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
   min-width: var(--sidebar-width-collapsed);
 }
 
-[data-page="admin"] .sidebar-content {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
+/* Sidebar content — base styles in portal-sidebar.css. No admin overrides needed. */
 
 [data-page="admin"] .sidebar-logo {
   display: flex;
@@ -227,15 +220,10 @@ body[data-page="admin"]:not(.admin-logged-in) {
   display: none;
 }
 
+/* Sidebar buttons/footer — base styles in portal-sidebar.css.
+   Only admin-specific overrides here. */
 [data-page="admin"] .sidebar-buttons {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-1);
-}
-
-[data-page="admin"] .sidebar-footer {
-  margin-top: auto;
-  padding-top: var(--space-1);
 }
 
 /* Dashboard Content Area — admin-specific overrides only.
@@ -1084,7 +1072,7 @@ body.modal-open .dashboard-content {
 
 @media (--compact-mobile) {
   body[data-page="admin"] .tab-content > *,
-  body[data-page="admin"] .content-wrapper > * {
+  body[data-page="admin"] .dashboard-content > * {
     margin-bottom: 0;
   }
 
@@ -1468,7 +1456,7 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .data-table-card,
 [data-page="admin"] .data-table-card,
 [data-page="admin"] .stat-card,
-[data-page="admin"] .tw-stat-card,
+[data-page="admin"] .stat-card,
 [data-page="admin"] .panel {
   border: var(--portal-border);
 }
@@ -1558,10 +1546,10 @@ body.modal-open .dashboard-content {
 [data-page="admin"] .subtab-content-wrapper > .loading-state,
 [data-page="admin"] .analytics-view > .loading-state,
 [data-page="admin"] .overview-linear > .loading-state,
-[data-page="admin"] .tw-section > .loading-state,
+[data-page="admin"] .section > .loading-state,
 [data-page="admin"] .stats-grid > .loading-state,
-[data-page="admin"] .tw-scroll-container > .loading-state,
-[data-page="admin"] .tw-scroll-container > .empty-state {
+[data-page="admin"] .scroll-container > .loading-state,
+[data-page="admin"] .scroll-container > .empty-state {
   height: auto;
   min-height: var(--card-min-height-sm);
   display: flex;

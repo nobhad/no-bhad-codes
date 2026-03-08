@@ -77,6 +77,9 @@
 .flex-none {
   flex: none;
 }
+.grow {
+  flex-grow: 1;
+}
 .grow-0 {
   flex-grow: 0;
 }
@@ -134,6 +137,12 @@
    ALIGN SELF
    ============================================ */
 
+.self-start {
+  align-self: flex-start;
+}
+.self-center {
+  align-self: center;
+}
 .self-end {
   align-self: flex-end;
 }
@@ -167,7 +176,7 @@
   gap: var(--space-4);
 }
 .gap-section {
-  gap: var(--portal-section-gap);
+  gap: var(--portal-section-gap, 24px);
 }
 
 /* Row/Column gap */
@@ -349,27 +358,31 @@
 }
 
 /* ============================================
-   TEXT COLOR (uses portal variables)
+   TEXT COLOR
+   Portal pages define --portal-text-*; main site
+   falls back to the design-system --color-text-* tokens.
    ============================================ */
 
 .text-primary {
-  color: var(--portal-text-primary);
+  color: var(--portal-text-primary, var(--color-text-primary));
 }
 .text-secondary {
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary, var(--color-text-secondary));
 }
 .text-muted {
-  color: var(--portal-text-muted);
-  font-weight: var(--portal-font-weight-muted, 400);
+  color: var(--portal-text-muted, var(--color-text-tertiary));
 }
 .text-light {
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-inverse));
 }
 
 /* ============================================
    FONT WEIGHT
    ============================================ */
 
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
 .font-medium {
   font-weight: var(--font-weight-medium);
 }
@@ -381,49 +394,53 @@
 }
 
 /* ============================================
-   BACKGROUND (uses portal variables)
+   BACKGROUND
+   Portal pages define --portal-bg-*; main site
+   falls back to the design-system --color-bg-* tokens.
    ============================================ */
 
 .bg-transparent {
   background: transparent;
 }
 .bg-darkest {
-  background: var(--portal-bg-darkest);
+  background: var(--portal-bg-darkest, var(--color-bg-primary));
 }
 .bg-darker {
-  background: var(--portal-bg-darker);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
 }
 .bg-dark {
-  background: var(--portal-bg-dark);
+  background: var(--portal-bg-dark, var(--color-bg-tertiary));
 }
 .bg-medium {
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-medium, var(--color-surface-tertiary));
 }
 .bg-light {
-  background: var(--portal-bg-light);
+  background: var(--portal-bg-light, var(--color-surface-secondary));
 }
 .bg-hover {
-  background: var(--portal-bg-hover);
+  background: var(--portal-bg-hover, var(--color-state-hover));
 }
 
 /* ============================================
-   BORDER RADIUS (uses portal variables)
+   BORDER RADIUS
+   Portal pages set --portal-radius-* to 0 (brutalist);
+   main site falls back to standard border-radius values.
    ============================================ */
 
 .rounded-none {
   border-radius: 0;
 }
 .rounded-sm {
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
 }
 .rounded-md {
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
 }
 .rounded-lg {
-  border-radius: var(--portal-radius-lg);
+  border-radius: var(--portal-radius-lg, 12px);
 }
 .rounded-full {
-  border-radius: var(--border-radius-full);
+  border-radius: var(--border-radius-full, 9999px);
 }
 
 /* ============================================
@@ -431,19 +448,19 @@
    ============================================ */
 
 .border {
-  border: var(--border-width) solid var(--portal-border);
+  border: var(--border-width) solid var(--portal-border, var(--color-border-primary));
 }
 .border-dark {
-  border: var(--border-width) solid var(--portal-border-dark);
+  border: var(--border-width) solid var(--portal-border-dark, var(--color-border-primary));
 }
 .border-none {
   border: none;
 }
 .border-t {
-  border-top: var(--border-width) solid var(--portal-border);
+  border-top: var(--border-width) solid var(--portal-border, var(--color-border-primary));
 }
 .border-b {
-  border-bottom: var(--border-width) solid var(--portal-border);
+  border-bottom: var(--border-width) solid var(--portal-border, var(--color-border-primary));
 }
 
 /* ============================================
@@ -537,6 +554,9 @@
 .pointer-events-none {
   pointer-events: none;
 }
+.pointer-events-auto {
+  pointer-events: auto;
+}
 
 /* ============================================
    OPACITY
@@ -556,29 +576,15 @@
 }
 
 /* ============================================
-   FOCUS RING
-   Reusable focus ring pattern using --portal-focus-ring token
-   from portal-theme.css (0 0 0 2px with primary alpha).
-   Apply via class or reference the --portal-focus-ring variable directly.
-   ============================================ */
-
-.focus-ring:focus,
-.focus-ring:focus-visible {
-  outline: none;
-  box-shadow: var(--portal-focus-ring);
-}
-
-/* Danger variant - red ring for destructive actions */
-.focus-ring-danger:focus,
-.focus-ring-danger:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--portal-focus-width, 2px) var(--color-danger);
-}
-
-/* ============================================
    TRANSITIONS
    ============================================ */
 
+.transition-fast {
+  transition: all var(--transition-fast) ease;
+}
+.transition-base {
+  transition: all var(--transition-base) ease;
+}
 .transition-none {
   transition: none;
 }
@@ -602,84 +608,11 @@ html[data-wireframe="true"] {
 }
 
 html[data-wireframe="true"] *:focus-visible {
-  outline-color: var(--color-text-secondary);
+  outline-color: var(--color-gray-700);
 }
 
 /* ============================================
-   SKIP LINK (Accessibility)
-   (Merged from base/site-utilities.css)
+   PORTAL LIGHT MODE
+   All variable definitions live in portal-theme.css
+   (single source of truth). Do NOT duplicate here.
    ============================================ */
-
-.skip-link {
-  position: absolute;
-  top: -100%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: var(--z-index-portal-confirm, 9900);
-  padding: var(--space-3) var(--space-6);
-  background-color: var(--color-dark);
-  color: var(--color-light);
-  text-decoration: none;
-  font-weight: var(--font-weight-semibold);
-  border-radius: var(--portal-radius-sm);
-  transition: top var(--transition-mouse) ease;
-}
-
-.skip-link:focus {
-  top: 10px;
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* ============================================
-   PORTAL LIGHT MODE - HIGHEST PRIORITY
-   Unlayered CSS overrides all layered content.
-   References :root primitives from colors.css
-   (which are never remapped by portal-theme.css).
-   ============================================ */
-
-html[data-theme="light"] body[data-page="admin"],
-html[data-theme="light"] body[data-page="client-portal"] {
-  /* Portal text colors — use gray-900 for primary text on light bg */
-  --portal-text-light: var(--color-gray-900);
-  --portal-text-primary: var(--color-gray-900);
-  --portal-text-secondary: var(--color-gray-700);
-  --portal-text-muted: var(--color-gray-500);
-
-  /* Generic text colors — match main site light theme */
-  --color-dark: var(--color-gray-900);
-  --color-text-primary: var(--color-gray-900);
-  --color-text-secondary: var(--color-gray-700);
-  --color-text-tertiary: var(--color-gray-500);
-
-  /* Semantic neutral ramp — match main site gray scale */
-  --color-neutral-100: var(--color-gray-100);
-  --color-neutral-200: var(--color-gray-200);
-  --color-neutral-300: var(--color-gray-300);
-  --color-neutral-400: var(--color-gray-400);
-  --color-neutral-500: var(--color-gray-500);
-  --color-neutral-600: var(--color-gray-600);
-  --color-neutral-700: var(--color-gray-700);
-  --color-neutral-800: var(--color-gray-800);
-  --color-neutral-900: var(--color-gray-900);
-
-  /* Portal backgrounds — matches main site gray base (#d4d4d4) */
-  --portal-bg-pitch: var(--color-gray-300);
-  --portal-bg-darkest: var(--color-gray-300);
-  --portal-bg-darker: var(--color-gray-200);
-  --portal-bg-dark: var(--color-gray-100);
-  --portal-bg-medium: var(--color-gray-50);
-  --portal-bg-light: var(--color-off-white);
-  --portal-bg-hover: var(--color-gray-200);
-  --portal-bg-readonly: var(--color-gray-200);
-
-  /* Portal borders — same color as text */
-  --portal-border-color: var(--color-gray-900);
-
-  /* Button tokens — inverted for light mode */
-  --portal-btn-color: var(--color-gray-900);
-  --portal-btn-border-color: var(--color-gray-900);
-  --portal-btn-hover-bg: var(--color-gray-900);
-  --portal-btn-hover-color: var(--color-white);
-  --portal-btn-hover-border: var(--color-gray-900);
-}

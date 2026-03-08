@@ -54,7 +54,6 @@ This CSS file defines global variables and font-face rules for consistent stylin
  * @media (--desktop) { }      - min-width: 992px
  * @media (--desktop-down) { } - max-width: 1023px
  * @media (--tablet-to-desktop) { } - 600px to 1100px (medium viewport range)
- * @media (--desktop-l) { }    - min-width: 1100px
  * @media (--wide) { }         - min-width: 1200px
  * @media (--ultra-wide) { }   - min-width: 1400px
  * @media (--ultra-wide-down) { } - max-width: 1399px
@@ -84,7 +83,6 @@ This CSS file defines global variables and font-face rules for consistent stylin
 @custom-media --laptop-up (min-width: 1025px); /* Above laptop threshold */
 @custom-media --laptop-wide (max-width: 1100px); /* Wider laptop threshold */
 @custom-media --tablet-to-desktop (min-width: 600px) and (max-width: 1100px); /* Medium viewport range */
-@custom-media --desktop-l (min-width: 1100px); /* Large desktop / above laptop-wide */
 @custom-media --laptop-to-wide (min-width: 1100px) and (max-width: 1300px); /* Laptop to wide range */
 @custom-media --desktop-wide (max-width: 1200px); /* Desktop to wide threshold */
 @custom-media --wide (min-width: 1200px);
@@ -107,9 +105,17 @@ This CSS file defines global variables and font-face rules for consistent stylin
 
   /* Container and Layout - defined in base/layout.css */
 
-  /* Font sizes defined in design-system/tokens/typography.css (fluid clamp values) */
+  /* Responsive Typography */
+  --font-size-2xs: 0.625rem; /* 10px - smallest, badges/tags */
+  --font-size-xs: 0.75rem; /* 12px - table cells, secondary text */
+  --font-size-sm: 0.875rem; /* 14px - body text, buttons */
+  --font-size-base: 1rem; /* 16px - default body */
+  --font-size-lg: 1.125rem; /* 18px - headings */
+  --font-size-xl: 1.25rem; /* 20px - large headings */
+  --font-size-2xl: 1.5rem; /* 24px - page titles */
+  --font-size-3xl: 2rem; /* 32px - hero text */
 
-  /* Border Width - Portal uses 2px borders consistently */
+  /* Border Width - DISCOTHÈQUE uses 2px borders consistently */
   --border-width: 2px;
   --border-width-thick: 3px;   /* For focus states, emphasized borders */
   --border-width-heavy: 4px;   /* For strong visual emphasis */
@@ -128,55 +134,22 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Icon-Text Size Matching - icons in same row as text MUST match text size */
   --icon-text-size: var(--font-size-sm); /* 14px - matches body text */
 
+  /* Navigation Font Size - shared by header logo text + sidebar buttons */
+  --portal-nav-font-size: 1.25rem;
+
   /* Sidebar Icon Size - SINGLE VALUE for both open & collapsed states */
   --sidebar-icon-size: 20px;
 
   /* Button Icon Sizes - portal icon button dimensions */
-  --portal-btn-icon-size: 32px;
-  --portal-btn-icon-size-sm: 28px;
-  --portal-btn-icon-size-xs: 24px;
+  --btn-portal-icon-size: 32px;
+  --btn-portal-icon-size-sm: 28px;
+  --btn-portal-icon-size-xs: 24px;
   --btn-table-icon-size: 24px;
-  --portal-btn-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
-
-  /* Button Tokens - brutalist design system */
-  --portal-btn-bg: transparent;
-  --portal-btn-color: var(--color-white);
-  --portal-btn-border-width: var(--border-width);
-  --portal-btn-border-color: var(--color-white);
-  --portal-btn-border-bottom-width: 6px;
-  --portal-btn-border-radius: 0;
-  --portal-btn-padding: 8px 18px;
-  --portal-btn-font-size: var(--font-size-sm, 14px);
-  --portal-btn-font-weight: var(--font-weight-semibold, 600);
-  --portal-btn-font-family: var(--font-family-mono, monospace);
-  --portal-btn-letter-spacing: var(--letter-spacing-wider, 0.05em);
-  --portal-btn-text-transform: uppercase;
-  --portal-btn-shadow: none;
-  --portal-btn-transition: all var(--transition-fast);
-  --portal-btn-hover-bg: var(--color-white);
-  --portal-btn-hover-color: var(--color-black);
-  --portal-btn-hover-border: var(--color-white);
-  --portal-btn-shadow-hover: none;
-  --portal-btn-sm-padding-y: 4px;
-  --portal-btn-sm-padding-x: 12px;
-  --portal-btn-sm-font-size: var(--font-size-xs, 12px);
-  --portal-btn-sm-min-height: 28px;
-
-  /* Danger button tokens */
-  --portal-btn-danger-bg: transparent;
-  --portal-btn-danger-color: var(--color-error-500, #ef4444);
-  --portal-btn-danger-border: var(--color-error-500, #ef4444);
-  --portal-btn-danger-hover-bg: var(--color-error-500, #ef4444);
-  --portal-btn-danger-hover-color: var(--color-white);
-  --portal-btn-danger-hover-border: var(--color-error-500, #ef4444);
+  --btn-portal-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
 
   /* Dropdown caret sizing and spacing - consistent across all dropdowns */
   --dropdown-caret-size: var(--icon-size-xs);
   --dropdown-caret-gap: var(--space-2); /* Gap between text and caret */
-
-  /* Native <select> caret — matches Lucide ChevronDown used in custom dropdowns */
-  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 
   /* Dropdown text styling - single source of truth for all dropdowns */
   --dropdown-font-size: inherit;
@@ -189,7 +162,14 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --status-dot-size: 8px;
   --status-dot-gap: var(--space-2); /* Gap between dot and text */
 
-  /* Letter spacing defined in design-system/tokens/typography.css */
+  /* Font Weight aliases not in design-system tokens */
+  --font-weight-normal: 400;
+  --font-weight-base: 400;
+
+  /* Letter Spacing overrides - main site uses wider tracking than design-system defaults */
+  --letter-spacing-label: 0.05em;
+  --letter-spacing-title: 0.02em;
+  --letter-spacing-wide: 0.08em;
 
   /* Responsive (fluid) spacing - use for layout that should scale with viewport.
      Fixed scale (--space-0, --space-1, ...) is in design-system/tokens/spacing.css */
@@ -207,7 +187,6 @@ This CSS file defines global variables and font-face rules for consistent stylin
   /* Transition tokens - use for consistent animations */
   --transition-faster: 0.15s ease;
   --transition-fast: 0.2s ease;
-  --transition-mouse: 0.2s; /* Hover/interaction transitions (no easing — callers supply their own) */
   --transition-medium: 0.3s ease;
   --transition-slow: 0.4s ease;
   --transition-slower: 0.5s ease;
@@ -219,7 +198,10 @@ This CSS file defines global variables and font-face rules for consistent stylin
   --duration-slow: 0.4s;
   --duration-slower: 0.5s;
 
-  /* Z-index defined in design-system/tokens/z-index.css */
+  /* Z-index */
+  --z-header: 10;
+  --z-nav: 100;
+  --z-modal: 1000;
 
   /* Modal sizes */
   --modal-width-sm: 400px;
@@ -299,7 +281,7 @@ This CSS file defines global variables and font-face rules for consistent stylin
  * Portal-specific design tokens are defined in:
  * src/design-system/tokens/portal-theme.css
  *
- * This includes dark mode and light mode (default) overrides.
+ * This includes dark mode (DISCOTHÈQUE) and light mode overrides.
  */
 
 /* ============================================
@@ -329,7 +311,7 @@ html {
 body {
   font-family: var(--font-family-body, Arial, Helvetica, sans-serif);
   font-size: var(--font-size-base);
-  line-height: var(--line-height-relaxed);
+  line-height: 1.6;
   margin: 0;
   padding: 0;
   background-color: var(--color-bg-primary);
@@ -341,7 +323,7 @@ body {
 
 /* Portal pages use Inconsolata monospace font */
 body:is([data-page="admin"], [data-page="client-portal"]) {
-  font-family: var(--font-family-mono);
+  font-family: var(--font-family-mono, "Inconsolata", monospace);
 }
 
 /* Theme transition for main structural elements */
@@ -544,7 +526,7 @@ img {
 
   body {
     font-size: 12pt;
-    line-height: var(--line-height-normal);
+    line-height: 1.5;
   }
 
   .no-print {

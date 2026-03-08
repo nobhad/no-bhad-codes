@@ -16,7 +16,7 @@
    ===================================================== */
 
 .portal
-  :is(.stat-card, .tw-stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
+  :is(.stat-card, .stat-card, .kpi-card, .tasks-stat-card, .overview-stat-card, .vital-card) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -33,7 +33,7 @@
 .portal
   :is(
     .stat-card,
-    .tw-stat-card,
+    .stat-card,
     .kpi-card,
     .tasks-stat-card,
     .overview-stat-card,
@@ -46,7 +46,7 @@
 .portal
   :is(
     .stat-card,
-    .tw-stat-card,
+    .stat-card,
     .kpi-card,
     .tasks-stat-card,
     .overview-stat-card,
@@ -59,7 +59,7 @@
 .portal
   :is(
     .stat-card,
-    .tw-stat-card,
+    .stat-card,
     .kpi-card,
     .tasks-stat-card,
     .overview-stat-card,
@@ -106,7 +106,7 @@
 }
 
 /* Layout-only styling for stat labels (typography from unified label system) */
-.portal :is(.stat-label, .stat-card .field-label, .tw-stat-card .field-label) {
+.portal :is(.stat-label, .stat-card .field-label, .stat-card .field-label) {
   display: block;
   line-height: var(--line-height-snug);
   margin: 0;
@@ -117,8 +117,8 @@
    ===================================================== */
 
 .portal .stat-card-icon,
-.portal :is(.stat-card, .tw-stat-card, .overview-stat-card) .stat-icon,
-.portal :is(.stat-card, .tw-stat-card, .overview-stat-card) svg:not(.btn-icon) {
+.portal :is(.stat-card, .stat-card, .overview-stat-card) .stat-icon,
+.portal :is(.stat-card, .stat-card, .overview-stat-card) svg:not(.btn-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -133,7 +133,7 @@
    ===================================================== */
 
 .portal .stat-card-clickable,
-.portal a:is(.stat-card, .tw-stat-card) {
+.portal a:is(.stat-card, .stat-card) {
   cursor: pointer;
   text-decoration: none;
 }
@@ -146,7 +146,7 @@
 }
 
 .portal .stat-card-clickable:hover,
-.portal a:is(.stat-card, .tw-stat-card):hover {
+.portal a:is(.stat-card, .stat-card):hover {
   border-color: var(--portal-border-color);
 }
 
@@ -156,12 +156,12 @@
 
 /* Active/selected state - subtle primary accent */
 .portal .stat-card-clickable.active,
-.portal :is(.stat-card, .tw-stat-card).active {
+.portal :is(.stat-card, .stat-card).active {
   border-color: var(--color-primary);
 }
 
 .portal .stat-card-clickable.active :is(.stat-number, .stat-value),
-.portal :is(.stat-card, .tw-stat-card).active :is(.stat-number, .stat-value) {
+.portal :is(.stat-card, .stat-card).active :is(.stat-number, .stat-value) {
   color: var(--color-primary);
 }
 
@@ -169,7 +169,7 @@
    STAT SECONDARY TEXT
    ===================================================== */
 
-.portal :is(.stat-card, .tw-stat-card) :is(.stat-secondary, .stat-change, .stat-meta) {
+.portal :is(.stat-card, .stat-card) :is(.stat-secondary, .stat-change, .stat-meta) {
   font-size: var(--font-size-2xs);  /* 10px */
   color: var(--portal-text-muted);
   letter-spacing: var(--letter-spacing-normal);
@@ -177,11 +177,11 @@
   line-height: var(--line-height-snug);
 }
 
-.portal :is(.stat-card, .tw-stat-card) .stat-change.positive {
+.portal :is(.stat-card, .stat-card) .stat-change.positive {
   color: var(--color-success);
 }
 
-.portal :is(.stat-card, .tw-stat-card) .stat-change.negative {
+.portal :is(.stat-card, .stat-card) .stat-change.negative {
   color: var(--color-danger);
 }
 
@@ -226,7 +226,7 @@
    ===================================================== */
 
 @media (--small-mobile) {
-  .portal :is(.stat-card, .tw-stat-card) {
+  .portal :is(.stat-card, .stat-card) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -234,12 +234,12 @@
     gap: 0.5rem;
   }
 
-  .portal :is(.stat-card, .tw-stat-card) :is(.stat-number, .stat-value, .stat-card-value) {
+  .portal :is(.stat-card, .stat-card) :is(.stat-number, .stat-value, .stat-card-value) {
     font-size: var(--font-size-lg);
     margin: 0;
   }
 
-  .portal :is(.stat-card, .tw-stat-card) .stat-label {
+  .portal :is(.stat-card, .stat-card) .stat-label {
     font-size: var(--font-size-xs);
     text-align: right;
     margin-top: 0;

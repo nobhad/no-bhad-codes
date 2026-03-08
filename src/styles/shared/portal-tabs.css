@@ -11,7 +11,7 @@
  * 1. Main tabs: .portal-tabs + .portal-tab-panel
  * 2. Sub-tabs: .portal-subtabs + .portal-subtab + .portal-subtab-content
  * 3. View toggle: .view-toggle + button / .view-toggle-option
- * 4. React tabs: .tw-tab-list + .tw-tab / .tw-tab-active
+ * 4. React tabs: .tab-list + .tab / .tab-active
  * 5. Factory tabs: .portal-tab
  */
 
@@ -64,7 +64,7 @@
   border-bottom: var(--border-width) solid var(--portal-border);
 }
 
-.tw-tab-list {
+.tab-list {
   display: flex;
   gap: 0;
   border-bottom: var(--border-width) solid var(--portal-border);
@@ -86,8 +86,8 @@
   .portal-tabs button,
   .portal-tab,
   .portal-subtab,
-  .tw-tab,
-  .tw-tab-active,
+  .tab,
+  .tab-active,
   .view-toggle button,
   .view-toggle-option
 ) {
@@ -124,7 +124,7 @@
   .portal-tabs button,
   .portal-tab,
   .portal-subtab,
-  .tw-tab,
+  .tab,
   .view-toggle button,
   .view-toggle-option
 ):hover:not(.active):not(:disabled) {
@@ -142,7 +142,7 @@
   .view-toggle button,
   .view-toggle-option
 ).active,
-.tw-tab-active {
+.tab-active {
   color: var(--color-primary);
   border-bottom: var(--border-width) solid var(--color-primary);
   background: transparent;

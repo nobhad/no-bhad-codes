@@ -25,20 +25,20 @@
   align-items: center;
   justify-content: center;
   gap: var(--icon-gap-md, 0.5rem);
-  padding: var(--portal-btn-padding);
-  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
-  border-bottom-width: var(--portal-btn-border-bottom-width);
-  border-radius: var(--portal-btn-border-radius);
-  font-size: var(--portal-btn-font-size);
-  font-weight: var(--portal-btn-font-weight);
-  font-family: var(--portal-btn-font-family);
-  letter-spacing: var(--portal-btn-letter-spacing);
-  text-transform: var(--portal-btn-text-transform);
+  padding: var(--portal-btn-padding, 8px 18px);
+  border: var(--portal-btn-border-width, 2px) solid var(--portal-btn-border-color, var(--color-dark));
+  border-bottom-width: var(--portal-btn-border-bottom-width, 2px);
+  border-radius: var(--portal-btn-border-radius, 0);
+  font-size: var(--portal-btn-font-size, var(--font-size-sm));
+  font-weight: var(--portal-btn-font-weight, 600);
+  font-family: var(--portal-btn-font-family, inherit);
+  letter-spacing: var(--portal-btn-letter-spacing, normal);
+  text-transform: var(--portal-btn-text-transform, uppercase);
   cursor: pointer;
-  background: var(--portal-btn-bg);
-  color: var(--portal-btn-color);
-  box-shadow: var(--portal-btn-shadow);
-  transition: var(--portal-btn-transition);
+  background: var(--portal-btn-bg, transparent);
+  color: var(--portal-btn-color, var(--color-dark));
+  box-shadow: var(--portal-btn-shadow, none);
+  transition: var(--portal-btn-transition, all 0.2s ease);
   text-decoration: none;
   white-space: nowrap;
   text-shadow: none;
@@ -68,10 +68,10 @@ button.btn-secondary svg {
 .btn-primary:not(.icon-btn):not(.sidebar-btn):hover,
 .btn-secondary:not(.icon-btn):not(.sidebar-btn):hover,
 .btn-outline:not(.icon-btn):not(.sidebar-btn):hover {
-  background: var(--portal-btn-hover-bg);
-  color: var(--portal-btn-hover-color);
-  border-color: var(--portal-btn-hover-border);
-  box-shadow: var(--portal-btn-shadow-hover);
+  background: var(--portal-btn-hover-bg, var(--color-dark));
+  color: var(--portal-btn-hover-color, var(--color-light));
+  border-color: var(--portal-btn-hover-border, var(--color-dark));
+  box-shadow: var(--portal-btn-shadow-hover, none);
 }
 
 /* Focus state */
@@ -90,9 +90,9 @@ button.btn-secondary svg {
 .btn-primary.form-valid,
 .form-button.form-valid,
 .login-btn.form-valid {
-  background: var(--portal-btn-hover-bg);
-  color: var(--portal-btn-hover-color);
-  border-color: var(--portal-btn-hover-border);
+  background: var(--portal-btn-hover-bg, var(--color-dark));
+  color: var(--portal-btn-hover-color, var(--color-light));
+  border-color: var(--portal-btn-hover-border, var(--color-dark));
 }
 
 /* Submit button focus */
@@ -106,9 +106,9 @@ input[type="submit"]:active {
 /* Submit button valid state */
 input[type="submit"].form-valid,
 input.form-button.form-valid {
-  background: var(--portal-btn-hover-bg);
-  color: var(--portal-btn-hover-color);
-  border-color: var(--portal-btn-hover-border);
+  background: var(--portal-btn-hover-bg, var(--color-dark));
+  color: var(--portal-btn-hover-color, var(--color-light));
+  border-color: var(--portal-btn-hover-border, var(--color-dark));
 }
 
 /* ============================================
