@@ -83,6 +83,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+
+// Trust proxy when behind reverse proxy (Railway, Nginx, CloudFlare, etc.)
+// Required for accurate req.ip in rate limiting, CSRF, audit logging
+if (process.env.TRUST_PROXY === 'true') {
+  app.set('trust proxy', 1);
+}
+
 app.use(i18nMiddleware);
 const PORT = process.env.PORT || 4001;
 
@@ -141,7 +148,12 @@ app.use(
     // XSS filter (legacy browsers)
     xssFilter: true,
     // Referrer policy - don't leak referrer to external sites
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    // HTTP Strict Transport Security - prevent SSL downgrade attacks
+    // Only enabled in production where HTTPS is enforced
+    hsts: process.env.NODE_ENV === 'production'
+      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+      : false
   })
 );
 
@@ -525,6 +537,12 @@ async function startServer() {
         extra: { port: PORT, environment: process.env.NODE_ENV }
       });
     });
+
+    // Set server timeouts to prevent hanging connections
+    const SERVER_TIMEOUT_MS = 30_000;
+    const HEADERS_TIMEOUT_MS = 60_000;
+    server.setTimeout(SERVER_TIMEOUT_MS);
+    server.headersTimeout = HEADERS_TIMEOUT_MS;
 
     // Graceful shutdown
     const shutdown = async (signal: string) => {

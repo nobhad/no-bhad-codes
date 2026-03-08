@@ -205,36 +205,16 @@ router.get(
 // DEVELOPMENT-ONLY TEST ENDPOINTS
 // ============================================
 // These endpoints are only available in development mode
+// NOTE: Auth is still required even in dev to prevent accidental exposure
 if (process.env.NODE_ENV === 'development') {
-  /**
-   * @swagger
-   * /api/invoices/test:
-   *   get:
-   *     tags:
-   *       - Invoices
-   *     summary: Test invoice endpoint (development only)
-   *     responses:
-   *       200:
-   *         description: Invoice system is working
-   */
-  router.get('/test', (req: express.Request, res: express.Response) => {
+  router.get('/test', authenticateToken, (req: express.Request, res: express.Response) => {
     sendSuccess(res, { timestamp: new Date().toISOString() }, 'Invoice system is operational');
   });
 
-  /**
-   * @swagger
-   * /api/invoices/test-create:
-   *   post:
-   *     tags:
-   *       - Invoices
-   *     summary: Test invoice creation (development only)
-   *     description: Creates a test invoice without authentication for development testing
-   *     responses:
-   *       201:
-   *         description: Test invoice created successfully
-   */
   router.post(
     '/test-create',
+    authenticateToken,
+    requireAdmin,
     asyncHandler(async (req: express.Request, res: express.Response) => {
       const testInvoiceData: InvoiceCreateData = {
         projectId: 1,
