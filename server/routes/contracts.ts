@@ -19,6 +19,7 @@ import { sendSuccess, sendCreated, errorResponse, ErrorCodes } from '../utils/ap
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { getBaseUrl } from '../config/environment.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
+import { EMAIL_COLORS, EMAIL_TYPOGRAPHY } from '../config/email-styles.js';
 
 const router = express.Router();
 
@@ -649,10 +650,10 @@ router.post(
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .content { background: #f9f9f9; padding: 24px; border-radius: 8px; }
-    .btn { display: inline-block; padding: 12px 24px; background: #00aff0; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .content { background: ${EMAIL_COLORS.contentBg}; padding: 24px; border-radius: 8px; }
+    .btn { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.buttonContractBg}; color: ${EMAIL_COLORS.buttonContractText}; text-decoration: none; border-radius: 6px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -771,10 +772,10 @@ router.post(
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .content { background: #f9f9f9; padding: 24px; border-radius: 8px; }
-    .btn { display: inline-block; padding: 12px 24px; background: #00aff0; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .content { background: ${EMAIL_COLORS.contentBg}; padding: 24px; border-radius: 8px; }
+    .btn { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.buttonContractBg}; color: ${EMAIL_COLORS.buttonContractText}; text-decoration: none; border-radius: 6px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -1001,9 +1002,9 @@ router.post(
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .content { background: #f9f9f9; padding: 24px; border-radius: 8px; }
+    .content { background: ${EMAIL_COLORS.contentBg}; padding: 24px; border-radius: 8px; }
   </style>
 </head>
 <body>

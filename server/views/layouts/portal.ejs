@@ -73,7 +73,7 @@
 
   <!-- Footer (login page only — not shown on dashboard) -->
   <% if (portalType === 'login') { %>
-    <%- include('../partials/footer', { portalType }) %>
+    <%- include('../partials/footer', { portalType, businessName }) %>
   <% } %>
 
   <% if (isDev) { %>

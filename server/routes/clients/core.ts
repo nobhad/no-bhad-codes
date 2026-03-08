@@ -35,6 +35,7 @@ import {
   clientService,
   ClientValidationSchemas
 } from './helpers.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 const router = express.Router();
 
@@ -760,11 +761,11 @@ router.post(
     try {
       await emailService.sendEmail({
         to: clientEmail,
-        subject: 'Welcome to No Bhad Codes - Set Up Your Client Portal',
+        subject: `Welcome to ${BUSINESS_INFO.name} - Set Up Your Client Portal`,
         text: `
 Hello ${clientName || 'there'},
 
-You've been invited to access the No Bhad Codes client portal.
+You've been invited to access the ${BUSINESS_INFO.name} client portal.
 
 Click the link below to set your password and access your dashboard:
 ${invitationLink}
@@ -774,7 +775,7 @@ This link will expire in 7 days.
 If you didn't expect this invitation, you can safely ignore this email.
 
 Best regards,
-No Bhad Codes Team
+${BUSINESS_INFO.name} Team
         `,
         html: `
 <!DOCTYPE html>
@@ -791,10 +792,10 @@ No Bhad Codes Team
 <body>
   <div class="container">
     <div class="header">
-      <h1>Welcome to No Bhad Codes</h1>
+      <h1>Welcome to ${BUSINESS_INFO.name}</h1>
     </div>
     <p>Hello ${clientName || 'there'},</p>
-    <p>You've been invited to access the No Bhad Codes client portal.</p>
+    <p>You've been invited to access the ${BUSINESS_INFO.name} client portal.</p>
     <p>Click the button below to set your password and access your dashboard:</p>
     <p style="text-align: center;">
       <a href="${invitationLink}" class="button">Set Up Your Account</a>
@@ -804,7 +805,7 @@ No Bhad Codes Team
     <p><strong>This link will expire in 7 days.</strong></p>
     <div class="footer">
       <p>If you didn't expect this invitation, you can safely ignore this email.</p>
-      <p>Best regards,<br>No Bhad Codes Team</p>
+      <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
     </div>
   </div>
 </body>

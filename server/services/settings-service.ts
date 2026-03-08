@@ -18,6 +18,7 @@ import {
   type SettingRow,
   toSystemSetting
 } from '../database/entities/index.js';
+import { BUSINESS_INFO } from '../config/business.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -222,12 +223,12 @@ class SettingsService {
    */
   async getBusinessInfo(): Promise<BusinessInfo> {
     const [name, owner, contact, tagline, email, website] = await Promise.all([
-      this.getValue('business.name', 'No Bhad Codes'),
+      this.getValue('business.name', BUSINESS_INFO.name),
       this.getValue('business.owner', 'Noelle Bhaduri'),
       this.getValue('business.contact', 'Noelle Bhaduri'),
       this.getValue('business.tagline', 'Web Development & Design'),
-      this.getValue('business.email', 'nobhaduri@gmail.com'),
-      this.getValue('business.website', 'nobhad.codes')
+      this.getValue('business.email', BUSINESS_INFO.email),
+      this.getValue('business.website', BUSINESS_INFO.website)
     ]);
 
     return { name, owner, contact, tagline, email, website };
@@ -268,7 +269,7 @@ class SettingsService {
   async getPaymentSettings(): Promise<PaymentSettings> {
     const [venmoHandle, zelleEmail, paypalEmail] = await Promise.all([
       this.getValue('payment.venmo_handle', '@nobhaduri'),
-      this.getValue('payment.zelle_email', 'nobhaduri@gmail.com'),
+      this.getValue('payment.zelle_email', BUSINESS_INFO.zelleEmail),
       this.getValue('payment.paypal_email', '')
     ]);
 

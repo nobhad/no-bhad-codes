@@ -5,9 +5,10 @@
 
 import * as bcrypt from 'bcryptjs';
 import * as sqlite3 from 'sqlite3';
+import { BUSINESS_INFO } from '../config/business.js';
 
 async function createTestUser() {
-  const email = 'test@nobhad.codes';
+  const email = `test@${BUSINESS_INFO.website}`;
   const password = 'Test!1234';
   const hash = await bcrypt.hash(password, 10);
 

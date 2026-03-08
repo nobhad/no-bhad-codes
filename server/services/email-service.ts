@@ -16,6 +16,8 @@ import { fileURLToPath } from 'url';
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
 import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
+import { EMAIL_COLORS, EMAIL_TYPOGRAPHY } from '../config/email-styles.js';
+import { BUSINESS_INFO } from '../config/business.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -394,11 +396,11 @@ export async function sendWelcomeEmail(
 
   const emailContent: EmailContent = {
     to: email,
-    subject: 'Welcome to No Bhad Codes - Your Project Portal is Ready!',
+    subject: `Welcome to ${BUSINESS_INFO.name} - Your Project Portal is Ready!`,
     text: `
       Hi ${name},
 
-      Thank you for choosing No Bhad Codes for your project! We're excited to work with you.
+      Thank you for choosing ${BUSINESS_INFO.name} for your project! We're excited to work with you.
 
       Your project details have been received and we're already reviewing your requirements.
       You'll receive a detailed proposal within 24-48 hours.
@@ -415,7 +417,7 @@ export async function sendWelcomeEmail(
       If you have any questions, feel free to reply to this email.
 
       Best regards,
-      No Bhad Codes Team
+      ${BUSINESS_INFO.name} Team
     `,
     html: generateWelcomeEmailHTML(name, portalUrl)
   };
@@ -484,34 +486,34 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to No Bhad Codes</title>
+      <title>Welcome to ${BUSINESS_INFO.name}</title>
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-        .content { padding: 20px; background: #f9f9f9; }
+        .header { background: ${EMAIL_COLORS.brandAccentAlt}; color: ${EMAIL_COLORS.buttonPrimaryText}; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
         .button {
           display: inline-block;
-          background: #00ff41;
-          color: #000;
+          background: ${EMAIL_COLORS.buttonPrimaryBg};
+          color: ${EMAIL_COLORS.buttonPrimaryText};
           padding: 12px 24px;
           text-decoration: none;
           border-radius: 5px;
           font-weight: bold;
         }
-        .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+        .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to No Bhad Codes!</h1>
+          <h1>Welcome to ${BUSINESS_INFO.name}!</h1>
         </div>
 
         <div class="content">
           <h2>Hi ${safeName},</h2>
 
-          <p>Thank you for choosing <strong>No Bhad Codes</strong> for your project! We're excited to work with you.</p>
+          <p>Thank you for choosing <strong>${BUSINESS_INFO.name}</strong> for your project! We're excited to work with you.</p>
 
           <p>Your project details have been received and we're already reviewing your requirements. You'll receive a detailed proposal within <strong>24-48 hours</strong>.</p>
 
@@ -532,11 +534,11 @@ function generateWelcomeEmailHTML(name: string, portalUrl: string): string {
           <p>If you have any questions, feel free to reply to this email.</p>
 
           <p>Best regards,<br>
-          <strong>No Bhad Codes Team</strong></p>
+          <strong>${BUSINESS_INFO.name} Team</strong></p>
         </div>
 
         <div class="footer">
-          <p>&copy; 2025 No Bhad Codes. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} ${BUSINESS_INFO.name}. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -564,8 +566,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
 
   const infoRow = (label: string, value: string | undefined) => `
     <tr>
-      <td style="padding: 8px 12px; font-weight: 600; color: #555; width: 140px; vertical-align: top;">${escapeHtml(label)}</td>
-      <td style="padding: 8px 12px; color: #222;">${value || 'Not specified'}</td>
+      <td style="padding: 8px 12px; font-weight: 600; color: ${EMAIL_COLORS.bodyTextLight}; width: 140px; vertical-align: top;">${escapeHtml(label)}</td>
+      <td style="padding: 8px 12px; color: ${EMAIL_COLORS.bodyTextDark};">${value || 'Not specified'}</td>
     </tr>
   `;
 
@@ -577,27 +579,27 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>New Project Intake</title>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333; background-color: #f5f5f5;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+    <body style="margin: 0; padding: 0; font-family: ${EMAIL_TYPOGRAPHY.fontFamilyFull}; font-size: 15px; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; background-color: ${EMAIL_COLORS.outerBg};">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.outerBg}; padding: 20px 0;">
         <tr>
           <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: ${EMAIL_COLORS.cardBg}; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
               <!-- Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px 20px; text-align: center;">
-                  <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">New Project Intake</h1>
-                  <p style="margin: 10px 0 0; color: #7ff709; font-size: 16px;">Project #${projectId}</p>
+                <td style="background: linear-gradient(135deg, ${EMAIL_COLORS.headerBg} 0%, ${EMAIL_COLORS.headerBgGradientEnd} 100%); padding: ${EMAIL_COLORS.headerBg ? '30px 20px' : '30px 20px'}; text-align: center;">
+                  <h1 style="margin: 0; color: ${EMAIL_COLORS.headerText}; font-size: 24px; font-weight: 600;">New Project Intake</h1>
+                  <p style="margin: 10px 0 0; color: ${EMAIL_COLORS.brandAccent}; font-size: 16px;">Project #${projectId}</p>
                 </td>
               </tr>
 
               <!-- Client Info -->
               <tr>
                 <td style="padding: 25px 20px 15px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Client</h2>
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: ${EMAIL_COLORS.headerBg}; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${EMAIL_COLORS.sectionBorder}; padding-bottom: 8px;">Client</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Name', safeName)}
-                    ${infoRow('Email', `<a href="mailto:${safeEmail}" style="color: #0066cc;">${safeEmail}</a>`)}
+                    ${infoRow('Email', `<a href="mailto:${safeEmail}" style="color: ${EMAIL_COLORS.link};">${safeEmail}</a>`)}
                   </table>
                 </td>
               </tr>
@@ -605,15 +607,15 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               <!-- Project Details -->
               <tr>
                 <td style="padding: 15px 20px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Project</h2>
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: ${EMAIL_COLORS.headerBg}; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${EMAIL_COLORS.sectionBorder}; padding-bottom: 8px;">Project</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Type', safeProjectType)}
                     ${infoRow('Budget', safeBudget)}
                     ${infoRow('Timeline', safeTimeline)}
                   </table>
-                  <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
-                    <strong style="display: block; margin-bottom: 8px; color: #555;">Description:</strong>
-                    <span style="color: #222;">${safeProjectDescription}</span>
+                  <div style="margin-top: 15px; padding: 15px; background: ${EMAIL_COLORS.contentBgAlt}; border-radius: 6px; border-left: 4px solid ${EMAIL_COLORS.sectionBorder};">
+                    <strong style="display: block; margin-bottom: 8px; color: ${EMAIL_COLORS.bodyTextLight};">Description:</strong>
+                    <span style="color: ${EMAIL_COLORS.bodyTextDark};">${safeProjectDescription}</span>
                   </div>
                 </td>
               </tr>
@@ -621,7 +623,7 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               <!-- Technical -->
               <tr>
                 <td style="padding: 15px 20px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Technical</h2>
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: ${EMAIL_COLORS.headerBg}; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${EMAIL_COLORS.sectionBorder}; padding-bottom: 8px;">Technical</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Tech Comfort', safeTechComfort)}
                     ${infoRow('Domain/Hosting', safeDomainHosting)}
@@ -635,9 +637,9 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               <!-- Features -->
               <tr>
                 <td style="padding: 15px 20px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Features</h2>
-                  <div style="padding: 15px; background: #f8f9fa; border-radius: 6px;">
-                    ${safeFeatures.map((f) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 14px;">${f}</span>`).join('')}
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: ${EMAIL_COLORS.headerBg}; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${EMAIL_COLORS.sectionBorder}; padding-bottom: 8px;">Features</h2>
+                  <div style="padding: 15px; background: ${EMAIL_COLORS.contentBgAlt}; border-radius: 6px;">
+                    ${safeFeatures.map((f) => `<span style="display: inline-block; margin: 4px; padding: 6px 12px; background: ${EMAIL_COLORS.featureBadgeBg}; color: ${EMAIL_COLORS.featureBadgeText}; border-radius: 20px; font-size: ${EMAIL_TYPOGRAPHY.badgeFontSize};">${f}</span>`).join('')}
                   </div>
                 </td>
               </tr>
@@ -648,16 +650,16 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
               <!-- Design & Notes -->
               <tr>
                 <td style="padding: 15px 20px;">
-                  <h2 style="margin: 0 0 15px; font-size: 16px; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7ff709; padding-bottom: 8px;">Design & Notes</h2>
+                  <h2 style="margin: 0 0 15px; font-size: 16px; color: ${EMAIL_COLORS.headerBg}; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid ${EMAIL_COLORS.sectionBorder}; padding-bottom: 8px;">Design & Notes</h2>
                   <table width="100%" cellpadding="0" cellspacing="0">
                     ${infoRow('Design Level', safeDesignLevel)}
                   </table>
                   ${
   safeAdditionalInfo
     ? `
-                  <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #7ff709;">
-                    <strong style="display: block; margin-bottom: 8px; color: #555;">Additional Info:</strong>
-                    <span style="color: #222;">${safeAdditionalInfo}</span>
+                  <div style="margin-top: 15px; padding: 15px; background: ${EMAIL_COLORS.contentBgAlt}; border-radius: 6px; border-left: 4px solid ${EMAIL_COLORS.sectionBorder};">
+                    <strong style="display: block; margin-bottom: 8px; color: ${EMAIL_COLORS.bodyTextLight};">Additional Info:</strong>
+                    <span style="color: ${EMAIL_COLORS.bodyTextDark};">${safeAdditionalInfo}</span>
                   </div>
                   `
     : ''
@@ -667,8 +669,8 @@ function generateIntakeNotificationHTML(intakeData: IntakeData, projectId: numbe
 
               <!-- Footer -->
               <tr>
-                <td style="padding: 20px; background: #f8f9fa; text-align: center; border-top: 1px solid #eee;">
-                  <p style="margin: 0; color: #666; font-size: 14px;">Review and prepare proposal within 24-48 hours</p>
+                <td style="padding: 20px; background: ${EMAIL_COLORS.contentBgAlt}; text-align: center; border-top: 1px solid ${EMAIL_COLORS.border};">
+                  <p style="margin: 0; color: ${EMAIL_COLORS.bodyTextMuted}; font-size: ${EMAIL_TYPOGRAPHY.smallFontSize};">Review and prepare proposal within 24-48 hours</p>
                 </td>
               </tr>
 
@@ -759,11 +761,11 @@ export const emailService = {
 
     const emailContent: EmailContent = {
       to: email,
-      subject: 'Password Reset Request - No Bhad Codes',
+      subject: `Password Reset Request - ${BUSINESS_INFO.name}`,
       text: `
         Hi ${name},
 
-        We received a request to reset your password for your No Bhad Codes account.
+        We received a request to reset your password for your ${BUSINESS_INFO.name} account.
 
         Click the link below to reset your password:
         ${resetUrl}
@@ -773,7 +775,7 @@ export const emailService = {
         If you didn't request this password reset, please ignore this email or contact support if you have concerns.
 
         Best regards,
-        No Bhad Codes Team
+        ${BUSINESS_INFO.name} Team
       `,
       html: `
         <!DOCTYPE html>
@@ -781,24 +783,24 @@ export const emailService = {
         <head>
           <meta charset="utf-8">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
+            .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.buttonPrimaryBg}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; }
           </style>
         </head>
         <body>
           <div class="container">
             <h2>Password Reset Request</h2>
             <p>Hi ${name},</p>
-            <p>We received a request to reset your password for your No Bhad Codes account.</p>
+            <p>We received a request to reset your password for your ${BUSINESS_INFO.name} account.</p>
             <p style="text-align: center; margin: 30px 0;">
               <a href="${resetUrl}" class="button">Reset Password</a>
             </p>
             <p>Or copy and paste this link into your browser:</p>
-            <p style="word-break: break-all; background: #f5f5f5; padding: 10px;">${resetUrl}</p>
+            <p style="word-break: break-all; background: ${EMAIL_COLORS.outerBg}; padding: 10px;">${resetUrl}</p>
             <p><small>This link will expire in 1 hour.</small></p>
             <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
-            <p>Best regards,<br>No Bhad Codes Team</p>
+            <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
           </div>
         </body>
         </html>
@@ -861,11 +863,11 @@ export const emailService = {
 
     const emailContent: EmailContent = {
       to: email,
-      subject: 'Welcome to Your Client Portal - No Bhad Codes',
+      subject: `Welcome to Your Client Portal - ${BUSINESS_INFO.name}`,
       text: `
         Hi ${name},
 
-        Your account is now active! Welcome to your No Bhad Codes client portal.
+        Your account is now active! Welcome to your ${BUSINESS_INFO.name} client portal.
 
         Here's what you can do in your portal:
         - View your project status and milestones
@@ -883,7 +885,7 @@ export const emailService = {
         If you have any questions, feel free to reach out through the portal messaging system.
 
         Best regards,
-        No Bhad Codes Team
+        ${BUSINESS_INFO.name} Team
       `,
       html: `
         <!DOCTYPE html>
@@ -892,34 +894,34 @@ export const emailService = {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; margin: 0; padding: 0; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a2e; color: #fff; padding: 30px 20px; text-align: center; }
-            .header h1 { margin: 0; color: #7ff709; }
-            .content { padding: 30px 20px; background: #f9f9f9; }
+            .header { background: ${EMAIL_COLORS.headerBg}; color: ${EMAIL_COLORS.headerText}; padding: 30px 20px; text-align: center; }
+            .header h1 { margin: 0; color: ${EMAIL_COLORS.brandAccent}; }
+            .content { padding: 30px 20px; background: ${EMAIL_COLORS.contentBg}; }
             .button {
               display: inline-block;
               padding: 14px 28px;
-              background: #7ff709;
-              color: #000;
+              background: ${EMAIL_COLORS.brandAccent};
+              color: ${EMAIL_COLORS.buttonPrimaryText};
               text-decoration: none;
               border-radius: 4px;
               font-weight: bold;
               margin: 10px 5px;
             }
             .button-secondary {
-              background: #1a1a2e;
-              color: #fff;
+              background: ${EMAIL_COLORS.buttonSecondaryBg};
+              color: ${EMAIL_COLORS.buttonSecondaryText};
             }
             .highlight-box {
-              background: #fff3cd;
-              border-left: 4px solid #ffc107;
+              background: ${EMAIL_COLORS.highlightBg};
+              border-left: 4px solid ${EMAIL_COLORS.highlightBorder};
               padding: 15px 20px;
               margin: 20px 0;
               border-radius: 0 4px 4px 0;
             }
             .feature-list {
-              background: #fff;
+              background: ${EMAIL_COLORS.cardBg};
               padding: 20px;
               border-radius: 8px;
               margin: 20px 0;
@@ -928,13 +930,13 @@ export const emailService = {
               margin: 10px 0;
               padding-left: 10px;
             }
-            .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; background: #f0f0f0; }
+            .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; background: ${EMAIL_COLORS.footerBg}; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Welcome to No Bhad Codes!</h1>
+              <h1>Welcome to ${BUSINESS_INFO.name}!</h1>
               <p style="margin: 10px 0 0; opacity: 0.9;">Your account is now active</p>
             </div>
 
@@ -967,7 +969,7 @@ export const emailService = {
             </div>
 
             <div class="footer">
-              <p>Best regards,<br><strong>No Bhad Codes Team</strong></p>
+              <p>Best regards,<br><strong>${BUSINESS_INFO.name} Team</strong></p>
             </div>
           </div>
         </body>
@@ -989,11 +991,11 @@ export const emailService = {
 
     const emailContent: EmailContent = {
       to: email,
-      subject: 'Your Login Link - No Bhad Codes',
+      subject: `Your Login Link - ${BUSINESS_INFO.name}`,
       text: `
         Hi ${name},
 
-        Click the link below to sign in to your No Bhad Codes account:
+        Click the link below to sign in to your ${BUSINESS_INFO.name} account:
         ${loginUrl}
 
         This link will expire in 15 minutes for security.
@@ -1001,7 +1003,7 @@ export const emailService = {
         If you didn't request this login link, please ignore this email.
 
         Best regards,
-        No Bhad Codes Team
+        ${BUSINESS_INFO.name} Team
       `,
       html: `
         <!DOCTYPE html>
@@ -1009,26 +1011,26 @@ export const emailService = {
         <head>
           <meta charset="utf-8">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-            .content { padding: 20px; background: #f9f9f9; }
+            .header { background: ${EMAIL_COLORS.brandAccentAlt}; color: ${EMAIL_COLORS.buttonPrimaryText}; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
             .button {
               display: inline-block;
               padding: 28px;
-              background: #00ff41;
-              color: #000;
+              background: ${EMAIL_COLORS.buttonPrimaryBg};
+              color: ${EMAIL_COLORS.buttonPrimaryText};
               text-decoration: none;
               border-radius: 4px;
               font-weight: bold;
             }
-            .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+            .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Sign In to No Bhad Codes</h1>
+              <h1>Sign In to ${BUSINESS_INFO.name}</h1>
             </div>
             <div class="content">
               <p>Hi ${name},</p>
@@ -1037,12 +1039,12 @@ export const emailService = {
                 <a href="${loginUrl}" class="button">Sign In</a>
               </p>
               <p>Or copy and paste this link into your browser:</p>
-              <p style="word-break: break-all; background: #fff; padding: 10px; border: 1px solid #ddd;">${loginUrl}</p>
+              <p style="word-break: break-all; background: ${EMAIL_COLORS.cardBg}; padding: 10px; border: 1px solid ${EMAIL_COLORS.borderMedium};">${loginUrl}</p>
               <p><small>This link will expire in 15 minutes for security.</small></p>
               <p>If you didn't request this login link, you can safely ignore this email.</p>
             </div>
             <div class="footer">
-              <p>Best regards,<br>No Bhad Codes Team</p>
+              <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
             </div>
           </div>
         </body>
@@ -1325,7 +1327,7 @@ This email confirms your legally binding agreement. Please keep it for your reco
 
     const emailContent: EmailContent = {
       to: email,
-      subject: 'Verify Your Email - No Bhad Codes',
+      subject: `Verify Your Email - ${BUSINESS_INFO.name}`,
       text: `
         Hi ${name},
 
@@ -1337,7 +1339,7 @@ This email confirms your legally binding agreement. Please keep it for your reco
         If you did not create an account, please ignore this email.
 
         Best regards,
-        No Bhad Codes Team
+        ${BUSINESS_INFO.name} Team
       `,
       html: `
         <!DOCTYPE html>
@@ -1346,20 +1348,20 @@ This email confirms your legally binding agreement. Please keep it for your reco
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-            .content { padding: 20px; background: #f9f9f9; }
+            .header { background: ${EMAIL_COLORS.brandAccentAlt}; color: ${EMAIL_COLORS.buttonPrimaryText}; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
             .button {
               display: inline-block;
               padding: 12px 24px;
-              background: #00ff41;
-              color: #000;
+              background: ${EMAIL_COLORS.buttonPrimaryBg};
+              color: ${EMAIL_COLORS.buttonPrimaryText};
               text-decoration: none;
               border-radius: 4px;
               font-weight: bold;
             }
-            .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+            .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
           </style>
         </head>
         <body>
@@ -1374,12 +1376,12 @@ This email confirms your legally binding agreement. Please keep it for your reco
                 <a href="${escapeHtml(verifyUrl)}" class="button">Verify Email</a>
               </p>
               <p>Or copy and paste this link into your browser:</p>
-              <p style="word-break: break-all; background: #fff; padding: 10px; border: 1px solid #ddd;">${escapeHtml(verifyUrl)}</p>
+              <p style="word-break: break-all; background: ${EMAIL_COLORS.cardBg}; padding: 10px; border: 1px solid ${EMAIL_COLORS.borderMedium};">${escapeHtml(verifyUrl)}</p>
               <p><small>This link will expire in 24 hours.</small></p>
               <p>If you did not create an account, you can safely ignore this email.</p>
             </div>
             <div class="footer">
-              <p>Best regards,<br>No Bhad Codes Team</p>
+              <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
             </div>
           </div>
         </body>

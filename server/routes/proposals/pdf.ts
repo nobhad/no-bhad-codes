@@ -40,6 +40,7 @@ import type {
   ProposalRow,
   FeatureRow
 } from './helpers.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../../config/pdf-styles.js';
 
 const router = express.Router();
 
@@ -215,9 +216,9 @@ router.get(
       context.currentPage.drawText('Proposal (continued)', {
         x: ctx.leftMargin,
         y: context.y,
-        size: 10,
+        size: PDF_TYPOGRAPHY.bodySize,
         font: helvetica,
-        color: rgb(0.4, 0.4, 0.4)
+        color: PDF_COLORS.continuationHeader
       });
       context.y -= 20;
     };
@@ -227,16 +228,16 @@ router.get(
     const rightMargin = ctx.rightMargin;
 
     // === HEADER - Title on left, logo and business info on right ===
-    const logoHeight = 100; // ~1.4 inch for prominent branding
+    const logoHeight = PDF_SPACING.logoHeight;
 
-    // PROPOSAL title on left: 28pt
+    // PROPOSAL title on left
     const titleText = 'PROPOSAL';
     page().drawText(titleText, {
       x: leftMargin,
       y: ctx.y - 20,
-      size: 28,
+      size: PDF_TYPOGRAPHY.titleSize,
       font: helveticaBold,
-      color: rgb(0.15, 0.15, 0.15)
+      color: PDF_COLORS.title
     });
 
     // Logo and business info on right (logo left of text, text left-aligned)
@@ -259,37 +260,37 @@ router.get(
     page().drawText(BUSINESS_INFO.name, {
       x: textStartX,
       y: ctx.y - 11,
-      size: 15,
+      size: PDF_TYPOGRAPHY.businessNameSize,
       font: helveticaBold,
-      color: rgb(0.1, 0.1, 0.1)
+      color: PDF_COLORS.title
     });
     page().drawText(BUSINESS_INFO.owner, {
       x: textStartX,
       y: ctx.y - 34,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.subtitle
     });
     page().drawText(BUSINESS_INFO.tagline, {
       x: textStartX,
       y: ctx.y - 54,
-      size: 9,
+      size: PDF_TYPOGRAPHY.smallSize,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
     page().drawText(BUSINESS_INFO.email, {
       x: textStartX,
       y: ctx.y - 70,
-      size: 9,
+      size: PDF_TYPOGRAPHY.smallSize,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
     page().drawText(BUSINESS_INFO.website, {
       x: textStartX,
       y: ctx.y - 86,
-      size: 9,
+      size: PDF_TYPOGRAPHY.smallSize,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
 
     ctx.y -= 120; // Account for 100pt logo height
@@ -298,8 +299,8 @@ router.get(
     page().drawLine({
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
-      thickness: 1,
-      color: rgb(0.7, 0.7, 0.7)
+      thickness: PDF_SPACING.dividerThickness,
+      color: PDF_COLORS.divider
     });
     ctx.y -= 21;
 
@@ -312,14 +313,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.subtitle
     });
     page().drawText(getString(p, 'client_name') || 'Client', {
       x: leftMargin,
       y: ctx.y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     let clientLineY = ctx.y - 30;
     if (proposal.company_name) {
@@ -328,7 +329,7 @@ router.get(
         y: clientLineY,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       clientLineY -= 15;
     }
@@ -337,7 +338,7 @@ router.get(
       y: clientLineY,
       size: 10,
       font: helvetica,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
 
     // Right side - Prepared By & Date
@@ -346,28 +347,28 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.subtitle
     });
     page().drawText(BUSINESS_INFO.name, {
       x: rightCol,
       y: ctx.y - 15,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     page().drawText('Date:', {
       x: rightCol,
       y: ctx.y - 45,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.2, 0.2, 0.2)
+      color: PDF_COLORS.subtitle
     });
     page().drawText(formatDate(getString(p, 'created_at')), {
       x: rightCol,
       y: ctx.y - 60,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
 
     ctx.y -= 90;
@@ -378,7 +379,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8)
+      color: PDF_COLORS.sectionHeading
     });
     ctx.y -= 18;
 
@@ -387,14 +388,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     page().drawText(getString(p, 'project_name'), {
       x: leftMargin + 55,
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 15;
 
@@ -403,13 +404,13 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     page().drawText(
       getString(p, 'project_type')
         .replace(/-/g, ' ')
         .replace(/\b\w/g, (l) => l.toUpperCase()),
-      { x: leftMargin + 80, y: ctx.y, size: 10, font: helvetica, color: rgb(0, 0, 0) }
+      { x: leftMargin + 80, y: ctx.y, size: 10, font: helvetica, color: PDF_COLORS.black }
     );
     ctx.y -= 25;
 
@@ -419,7 +420,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8)
+      color: PDF_COLORS.sectionHeading
     });
     ctx.y -= 18;
 
@@ -429,7 +430,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 15;
     page().drawText(`Base Price: $${getNumber(p, 'base_price').toLocaleString()}`, {
@@ -437,7 +438,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 20;
 
@@ -449,7 +450,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       ctx.y -= 15;
       for (const f of includedFeatures) {
@@ -461,7 +462,7 @@ router.get(
           y: ctx.y,
           size: 10,
           font: helvetica,
-          color: rgb(0, 0, 0)
+          color: PDF_COLORS.black
         });
         ctx.y -= 12;
       }
@@ -478,7 +479,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       ctx.y -= 15;
       for (const f of addons) {
@@ -491,7 +492,7 @@ router.get(
           y: ctx.y,
           size: 10,
           font: helvetica,
-          color: rgb(0, 0, 0)
+          color: PDF_COLORS.black
         });
         ctx.y -= 12;
       }
@@ -506,7 +507,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       ctx.y -= 15;
       page().drawText(formatMaintenance(proposal.maintenance_option), {
@@ -514,7 +515,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       ctx.y -= 20;
     }
@@ -528,7 +529,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8)
+      color: PDF_COLORS.sectionHeading
     });
     ctx.y -= 18;
 
@@ -537,7 +538,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     const basePriceText = `$${getNumber(p, 'base_price').toLocaleString()}`;
     page().drawText(basePriceText, {
@@ -545,7 +546,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 15;
 
@@ -556,7 +557,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       const addonsTotalText = `$${addonsTotal.toLocaleString()}`;
       page().drawText(addonsTotalText, {
@@ -564,7 +565,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       ctx.y -= 15;
     }
@@ -574,8 +575,8 @@ router.get(
     page().drawLine({
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
-      thickness: 1,
-      color: rgb(0.2, 0.2, 0.2)
+      thickness: PDF_SPACING.dividerThickness,
+      color: PDF_COLORS.subtitle
     });
     ctx.y -= 15;
 
@@ -585,7 +586,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     const totalText = `$${getNumber(p, 'final_price').toLocaleString()}`;
     page().drawText(totalText, {
@@ -593,7 +594,7 @@ router.get(
       y: ctx.y,
       size: 12,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
 
     // === PAYMENT SCHEDULE ===
@@ -604,7 +605,7 @@ router.get(
       y: ctx.y,
       size: 14,
       font: helveticaBold,
-      color: rgb(0, 0.4, 0.8)
+      color: PDF_COLORS.sectionHeading
     });
     ctx.y -= 20;
 
@@ -624,21 +625,21 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     page().drawText('When Due', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     page().drawText('Amount', {
       x: rightMargin - 70,
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     ctx.y -= 5;
 
@@ -646,8 +647,8 @@ router.get(
     page().drawLine({
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
-      thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7)
+      thickness: PDF_SPACING.dividerThin,
+      color: PDF_COLORS.divider
     });
     ctx.y -= paymentRowHeight;
 
@@ -657,14 +658,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     page().drawText('Upon contract signing', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
     const depositText = `$${depositAmount.toLocaleString()}`;
     page().drawText(depositText, {
@@ -672,7 +673,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 5;
 
@@ -680,8 +681,8 @@ router.get(
     page().drawLine({
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
-      thickness: 0.25,
-      color: rgb(0.85, 0.85, 0.85)
+      thickness: PDF_SPACING.dividerVeryThin,
+      color: PDF_COLORS.dividerVeryLight
     });
     ctx.y -= paymentRowHeight;
 
@@ -691,14 +692,14 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     page().drawText('Upon project completion', {
       x: leftMargin + colWidth,
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
     const finalPaymentText = `$${finalPayment.toLocaleString()}`;
     page().drawText(finalPaymentText, {
@@ -706,7 +707,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 5;
 
@@ -714,8 +715,8 @@ router.get(
     page().drawLine({
       start: { x: leftMargin, y: ctx.y },
       end: { x: rightMargin, y: ctx.y },
-      thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7)
+      thickness: PDF_SPACING.dividerThin,
+      color: PDF_COLORS.divider
     });
     ctx.y -= paymentRowHeight;
 
@@ -725,7 +726,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     const totalInvestmentText = `$${finalPrice.toLocaleString()}`;
     page().drawText(totalInvestmentText, {
@@ -733,7 +734,7 @@ router.get(
       y: ctx.y,
       size: 10,
       font: helveticaBold,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     ctx.y -= 15;
 
@@ -745,7 +746,7 @@ router.get(
         y: ctx.y,
         size: 8,
         font: helvetica,
-        color: rgb(0.5, 0.5, 0.5)
+        color: PDF_COLORS.faint
       }
     );
 
@@ -758,7 +759,7 @@ router.get(
         y: ctx.y,
         size: 12,
         font: helveticaBold,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       ctx.y -= 15;
       page().drawText(proposal.client_notes, {
@@ -766,7 +767,7 @@ router.get(
         y: ctx.y,
         size: 10,
         font: helvetica,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
     }
 
@@ -780,7 +781,7 @@ router.get(
         y: ctx.y,
         size: 14,
         font: helveticaBold,
-        color: rgb(0, 0.4, 0.8)
+        color: PDF_COLORS.sectionHeading
       });
       ctx.y -= 18;
 
@@ -801,7 +802,7 @@ router.get(
               y: ctx.y,
               size: 9,
               font: helvetica,
-              color: rgb(0.3, 0.3, 0.3)
+              color: PDF_COLORS.bodyLight
             });
             ctx.y -= 12;
             ensureSpace(ctx, 12, drawContinuationHeader);
@@ -816,7 +817,7 @@ router.get(
             y: ctx.y,
             size: 9,
             font: helvetica,
-            color: rgb(0.3, 0.3, 0.3)
+            color: PDF_COLORS.bodyLight
           });
           ctx.y -= 12;
         }
@@ -835,7 +836,7 @@ router.get(
         y: ctx.y,
         size: 14,
         font: helveticaBold,
-        color: rgb(0, 0.4, 0.8)
+        color: PDF_COLORS.sectionHeading
       });
       ctx.y -= 20;
 
@@ -847,9 +848,9 @@ router.get(
         y: sigBoxY - sigBoxHeight,
         width: ctx.contentWidth,
         height: sigBoxHeight,
-        borderColor: rgb(0.7, 0.7, 0.7),
+        borderColor: PDF_COLORS.signatureBoxBorder,
         borderWidth: 1,
-        color: rgb(0.98, 0.98, 0.98)
+        color: PDF_COLORS.signatureBoxBg
       });
 
       // Embed signature image if available (drawn signature)
@@ -890,7 +891,7 @@ router.get(
           y: sigBoxY - 45,
           size: 24,
           font: helvetica,
-          color: rgb(0, 0, 0.6)
+          color: PDF_COLORS.signatureBlue
         });
       }
 
@@ -903,7 +904,7 @@ router.get(
         y: detailsY,
         size: 11,
         font: helveticaBold,
-        color: rgb(0, 0, 0)
+        color: PDF_COLORS.black
       });
       detailsY -= 14;
 
@@ -913,7 +914,7 @@ router.get(
           y: detailsY,
           size: 9,
           font: helvetica,
-          color: rgb(0.3, 0.3, 0.3)
+          color: PDF_COLORS.bodyLight
         });
         detailsY -= 12;
       }
@@ -924,7 +925,7 @@ router.get(
           y: detailsY,
           size: 9,
           font: helvetica,
-          color: rgb(0.3, 0.3, 0.3)
+          color: PDF_COLORS.bodyLight
         });
         detailsY -= 12;
       }
@@ -938,7 +939,7 @@ router.get(
         y: detailsY,
         size: 9,
         font: helvetica,
-        color: rgb(0.4, 0.4, 0.4)
+        color: PDF_COLORS.muted
       });
 
       ctx.y = sigBoxY - sigBoxHeight - 15;
@@ -951,7 +952,7 @@ router.get(
           y: ctx.y,
           size: 8,
           font: helvetica,
-          color: rgb(0.5, 0.5, 0.5)
+          color: PDF_COLORS.faint
         }
       );
       ctx.y -= 12;
@@ -962,7 +963,7 @@ router.get(
           y: ctx.y,
           size: 7,
           font: helvetica,
-          color: rgb(0.6, 0.6, 0.6)
+          color: PDF_COLORS.whisper
         });
       }
     }
@@ -978,14 +979,14 @@ router.get(
       y: footerY,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
     page().drawText(footerText2, {
       x: (width - helvetica.widthOfTextAtSize(footerText2, 9)) / 2,
       y: footerY - 12,
       size: 9,
       font: helvetica,
-      color: rgb(0.4, 0.4, 0.4)
+      color: PDF_COLORS.muted
     });
 
     // Add page numbers if multiple pages
@@ -1009,7 +1010,7 @@ router.get(
           y: pgHeight / 2 - 30,
           size: 72,
           font: helveticaBold,
-          color: rgb(0, 0.6, 0.2),
+          color: PDF_COLORS.watermarkGreen,
           opacity: 0.08,
           rotate: degrees(-35)
         });

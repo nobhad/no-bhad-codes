@@ -19,6 +19,8 @@ import { getString, getNumber } from '../database/row-helpers.js';
 import { logger } from './logger.js';
 import { emailService } from './email-service.js';
 import { getPortalUrl } from '../config/environment.js';
+import { EMAIL_COLORS, EMAIL_TYPOGRAPHY } from '../config/email-styles.js';
+import { BUSINESS_INFO } from '../config/business.js';
 
 // ============================================
 // Types
@@ -491,31 +493,31 @@ async function sendClientNotification(
     await emailService.sendEmail({
       to: client.email,
       subject,
-      text: `Hi ${client.name},\n\n${message}\n\n${ctaText ? `${ctaText}: ${finalCtaUrl}` : ''}\n\nBest regards,\nNo Bhad Codes Team`,
+      text: `Hi ${client.name},\n\n${message}\n\n${ctaText ? `${ctaText}: ${finalCtaUrl}` : ''}\n\nBest regards,\n${BUSINESS_INFO.name} Team`,
       html: `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a2e; color: #fff; padding: 20px; text-align: center; }
-            .header h1 { margin: 0; color: #7ff709; font-size: 20px; }
-            .content { padding: 30px 20px; background: #f9f9f9; }
-            .button { display: inline-block; padding: 12px 24px; background: #7ff709; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; }
-            .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
+            .header { background: ${EMAIL_COLORS.headerBg}; color: ${EMAIL_COLORS.headerText}; padding: 20px; text-align: center; }
+            .header h1 { margin: 0; color: ${EMAIL_COLORS.brandAccent}; font-size: 20px; }
+            .content { padding: 30px 20px; background: ${EMAIL_COLORS.contentBg}; }
+            .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.brandAccent}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; font-weight: bold; }
+            .footer { padding: 20px; text-align: center; color: ${EMAIL_COLORS.bodyTextMuted}; font-size: 12px; }
           </style>
         </head>
         <body>
           <div class="container">
-            <div class="header"><h1>No Bhad Codes</h1></div>
+            <div class="header"><h1>${BUSINESS_INFO.name}</h1></div>
             <div class="content">
               <p>Hi ${client.name},</p>
               <p>${message}</p>
               ${ctaText ? `<p style="text-align: center; margin-top: 30px;"><a href="${finalCtaUrl}" class="button">${ctaText}</a></p>` : ''}
             </div>
-            <div class="footer">No Bhad Codes - Professional Web Solutions</div>
+            <div class="footer">${BUSINESS_INFO.name} - Professional Web Solutions</div>
           </div>
         </body>
         </html>

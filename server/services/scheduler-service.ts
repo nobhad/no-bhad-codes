@@ -15,6 +15,8 @@ import { softDeleteService } from './soft-delete-service.js';
 import { escalateAllProjects, EscalationResult } from './priority-escalation-service.js';
 import { logger } from './logger.js';
 import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
+import { BUSINESS_INFO } from '../config/business.js';
+import { EMAIL_COLORS, EMAIL_TYPOGRAPHY } from '../config/email-styles.js';
 
 /**
  * Lightweight cron scheduler using setTimeout instead of node-cron.
@@ -746,21 +748,21 @@ Sign your contract here: ${signingUrl}
 If you have any questions about the contract, please don't hesitate to reach out.
 
 Best regards,
-No Bhad Codes Team
+${BUSINESS_INFO.name} Team
       `,
       html: `
 <!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
-    .content { padding: 20px; background: #f9f9f9; }
-    .project-name { font-size: 20px; font-weight: bold; color: #333; margin: 15px 0; }
-    .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; }
-    .urgency { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
-    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+    .header { background: ${EMAIL_COLORS.brandAccentAlt}; color: ${EMAIL_COLORS.buttonPrimaryText}; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
+    .project-name { font-size: 20px; font-weight: bold; color: ${EMAIL_COLORS.bodyText}; margin: 15px 0; }
+    .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.buttonPrimaryBg}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .urgency { background: ${EMAIL_COLORS.highlightBg}; border-left: 4px solid ${EMAIL_COLORS.highlightBorder}; padding: 15px; margin: 15px 0; }
+    .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
   </style>
 </head>
 <body>
@@ -779,7 +781,7 @@ No Bhad Codes Team
       <p><small>If you have any questions about the contract, please don't hesitate to reach out.</small></p>
     </div>
     <div class="footer">
-      <p>Best regards,<br>No Bhad Codes Team</p>
+      <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
     </div>
   </div>
 </body>
@@ -875,21 +877,21 @@ View and pay your invoice here: ${portalUrl}
 If you have already submitted payment, please disregard this message.
 
 Best regards,
-No Bhad Codes Team
+${BUSINESS_INFO.name} Team
       `,
       html: `
 <!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: ${reminderType.includes('overdue') ? '#dc3545' : '#00ff41'}; color: ${reminderType.includes('overdue') ? '#fff' : '#000'}; padding: 20px; text-align: center; }
-    .content { padding: 20px; background: #f9f9f9; }
-    .amount { font-size: 24px; font-weight: bold; color: #333; margin: 15px 0; }
-    .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; }
-    .urgency { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
-    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+    .header { background: ${reminderType.includes('overdue') ? EMAIL_COLORS.danger : EMAIL_COLORS.brandAccentAlt}; color: ${reminderType.includes('overdue') ? EMAIL_COLORS.headerText : EMAIL_COLORS.buttonPrimaryText}; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
+    .amount { font-size: 24px; font-weight: bold; color: ${EMAIL_COLORS.bodyText}; margin: 15px 0; }
+    .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.buttonPrimaryBg}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; }
+    .urgency { background: ${EMAIL_COLORS.highlightBg}; border-left: 4px solid ${EMAIL_COLORS.highlightBorder}; padding: 15px; margin: 15px 0; }
+    .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
   </style>
 </head>
 <body>
@@ -909,7 +911,7 @@ No Bhad Codes Team
       <p><small>If you have already submitted payment, please disregard this message.</small></p>
     </div>
     <div class="footer">
-      <p>Best regards,<br>No Bhad Codes Team</p>
+      <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
     </div>
   </div>
 </body>
@@ -1083,21 +1085,21 @@ ${urgency ? `\n${urgency}\n` : ''}
 Please log in to the portal to review and approve or reject this item.
 
 Best regards,
-No Bhad Codes Team
+${BUSINESS_INFO.name} Team
       `,
       html: `
 <!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: ${reminderCount >= 3 ? '#dc3545' : '#00ff41'}; color: ${reminderCount >= 3 ? '#fff' : '#000'}; padding: 20px; text-align: center; }
-    .content { padding: 20px; background: #f9f9f9; }
-    .info-box { background: #fff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00ff41; }
-    .button { display: inline-block; padding: 12px 24px; background: #00ff41; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; }
-    .urgency { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
-    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+    .header { background: ${reminderCount >= 3 ? EMAIL_COLORS.danger : EMAIL_COLORS.brandAccentAlt}; color: ${reminderCount >= 3 ? EMAIL_COLORS.headerText : EMAIL_COLORS.buttonPrimaryText}; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
+    .info-box { background: ${EMAIL_COLORS.cardBg}; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid ${EMAIL_COLORS.brandAccentAlt}; }
+    .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.buttonPrimaryBg}; color: ${EMAIL_COLORS.buttonPrimaryText}; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .urgency { background: ${EMAIL_COLORS.highlightBg}; border-left: 4px solid ${EMAIL_COLORS.highlightBorder}; padding: 15px; margin: 15px 0; }
+    .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
   </style>
 </head>
 <body>
@@ -1119,7 +1121,7 @@ No Bhad Codes Team
       </p>
     </div>
     <div class="footer">
-      <p>Best regards,<br>No Bhad Codes Team</p>
+      <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
     </div>
   </div>
 </body>
@@ -1178,14 +1180,14 @@ This is an automated alert from the approval system.
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    body { font-family: ${EMAIL_TYPOGRAPHY.fontFamily}; line-height: ${EMAIL_TYPOGRAPHY.lineHeight}; color: ${EMAIL_COLORS.bodyText}; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #dc3545; color: #fff; padding: 20px; text-align: center; }
-    .content { padding: 20px; background: #f9f9f9; }
-    .alert-box { background: #fff; padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid #dc3545; }
-    .action-box { background: #e7f5ff; border-left: 4px solid #0066cc; padding: 15px; margin: 15px 0; }
-    .button { display: inline-block; padding: 12px 24px; background: #0066cc; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; }
-    .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+    .header { background: ${EMAIL_COLORS.danger}; color: ${EMAIL_COLORS.headerText}; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: ${EMAIL_COLORS.contentBg}; }
+    .alert-box { background: ${EMAIL_COLORS.cardBg}; padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid ${EMAIL_COLORS.danger}; }
+    .action-box { background: ${EMAIL_COLORS.infoBg}; border-left: 4px solid ${EMAIL_COLORS.infoBorder}; padding: 15px; margin: 15px 0; }
+    .button { display: inline-block; padding: 12px 24px; background: ${EMAIL_COLORS.link}; color: ${EMAIL_COLORS.headerText}; text-decoration: none; border-radius: 4px; font-weight: bold; }
+    .footer { padding: 20px; text-align: center; font-size: ${EMAIL_TYPOGRAPHY.footerFontSize}; color: ${EMAIL_COLORS.bodyTextMuted}; }
   </style>
 </head>
 <body>

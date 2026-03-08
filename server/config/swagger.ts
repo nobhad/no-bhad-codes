@@ -11,16 +11,17 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
 import { logger } from '../services/logger.js';
+import { BUSINESS_INFO } from './business.js';
 
 // Basic API information
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'No Bhad Codes API',
+      title: `${BUSINESS_INFO.name} API`,
       version: process.env.npm_package_version || '1.0.0',
       description: `
-        # No Bhad Codes Client Management API
+        # ${BUSINESS_INFO.name} Client Management API
         
         A comprehensive API for managing clients, projects, and portfolio data.
         
@@ -52,9 +53,9 @@ const options = {
         \`\`\`
       `,
       contact: {
-        name: 'No Bhad Codes Support',
-        email: process.env.SUPPORT_EMAIL || 'nobhaduri@gmail.com',
-        url: process.env.FRONTEND_URL || 'https://nobhad.codes'
+        name: `${BUSINESS_INFO.name} Support`,
+        email: process.env.SUPPORT_EMAIL || BUSINESS_INFO.email,
+        url: process.env.FRONTEND_URL || `https://${BUSINESS_INFO.website}`
       },
       license: {
         name: 'MIT',
@@ -67,7 +68,7 @@ const options = {
         description: 'Development server'
       },
       {
-        url: process.env.PRODUCTION_API_URL || 'https://api.nobhad.codes',
+        url: process.env.PRODUCTION_API_URL || `https://api.${BUSINESS_INFO.website}`,
         description: 'Production server'
       }
     ],
@@ -451,7 +452,7 @@ export function setupSwagger(app: Express): void {
       .swagger-ui .info .title { color: ${brandColor}; }
       .swagger-ui .scheme-container { background: ${darkBgColor}; }
     `,
-    customSiteTitle: 'No Bhad Codes API Documentation',
+    customSiteTitle: `${BUSINESS_INFO.name} API Documentation`,
     customfavIcon: '/favicon.png',
     swaggerOptions: {
       persistAuthorization: true,

@@ -66,6 +66,7 @@ import healthRouter from './routes/health.js';
 import { portalRoutes } from './routes/portal.js';
 import { errorResponseWithPayload } from './utils/api-response.js';
 import { setupSwagger } from './config/swagger.js';
+import { BUSINESS_INFO } from './config/business.js';
 import { logger as requestLoggerMiddleware } from './middleware/logger.js';
 import { logger } from './services/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -225,7 +226,7 @@ app.use('/uploads', express.static(resolve(__dirname, '../uploads')));
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'No Bhad Codes API Server',
+    message: `${BUSINESS_INFO.name} API Server`,
     version: '1.0.0',
     apiVersion: 'v1',
     status: 'running',
@@ -458,7 +459,7 @@ async function startServer() {
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || ''
       },
-      from: process.env.SMTP_FROM || 'nobhaduri@gmail.com',
+      from: process.env.SMTP_FROM || BUSINESS_INFO.email,
       replyTo: process.env.SMTP_REPLY_TO
     };
 

@@ -4,6 +4,7 @@
 
 <script type="module">
     import { mountOnboardingWizard } from '/src/react/features/portal/onboarding/mount.tsx';
+    import { BRANDING } from '/src/config/branding.ts';
 
     document.addEventListener('DOMContentLoaded', () => {
         const container = document.querySelector('.terminal-intake-container');
@@ -15,7 +16,7 @@
                 container.innerHTML = `
                     <div class="module-error-state">
                         <h2>Unable to load intake form</h2>
-                        <p>Please try refreshing the page or contact nobhaduri@gmail.com</p>
+                        <p>Please try refreshing the page or contact <a href="mailto:${BRANDING.CONTACT_EMAIL}">${BRANDING.CONTACT_EMAIL}</a></p>
                     </div>
                 `;
             }

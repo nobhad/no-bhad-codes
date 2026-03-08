@@ -39,6 +39,7 @@ import { receiptService } from '../../services/receipt-service.js';
 import { logger } from '../../services/logger.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { getPortalUrl } from '../../config/environment.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 const router = express.Router();
 
@@ -926,7 +927,7 @@ router.post(
         // Send invoice email
         await emailService.sendEmail({
           to: clientEmail,
-          subject: `Invoice #${invoice.invoiceNumber} from No Bhad Codes`,
+          subject: `Invoice #${invoice.invoiceNumber} from ${BUSINESS_INFO.name}`,
           text: `
             Hi ${client.name},
 
@@ -941,7 +942,7 @@ router.post(
             If you have any questions, please don't hesitate to contact us.
 
             Best regards,
-            No Bhad Codes Team
+            ${BUSINESS_INFO.name} Team
           `,
           html: `
             <!DOCTYPE html>
@@ -971,7 +972,7 @@ router.post(
                   <a href="${invoiceUrl}" class="button">View Invoice</a>
                 </p>
                 <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
-                <p>Best regards,<br>No Bhad Codes Team</p>
+                <p>Best regards,<br>${BUSINESS_INFO.name} Team</p>
               </div>
             </body>
             </html>

@@ -20,6 +20,7 @@ import {
   type UnifiedNavItem,
   type UnifiedSubtabGroup
 } from './unified-navigation.js';
+import { BUSINESS_INFO } from './business.js';
 
 // ============================================
 // TYPES (for EJS template compatibility)
@@ -57,6 +58,8 @@ export interface PortalConfig {
   authDescription: string;
   dashboardId: string;
   pageTitleId: string;
+  /** Meta theme-color value for the browser chrome */
+  themeColor: string;
   navigation: NavItem[];
   subtabGroups?: SubtabGroup[];
   features: {
@@ -124,6 +127,13 @@ export const ICONS: Record<string, string> = {
 // PORTAL CONFIG METADATA
 // ============================================
 
+/**
+ * Meta theme-color for browser chrome.
+ * Sourced from BRAND_COLOR env or falls back to neutral gray.
+ * This is the single source of truth for all EJS-rendered pages.
+ */
+const META_THEME_COLOR = process.env.META_THEME_COLOR || '#e0e0e0';
+
 const PORTAL_METADATA: Record<
   UserRole,
   {
@@ -133,23 +143,26 @@ const PORTAL_METADATA: Record<
     authDescription: string;
     dashboardId: string;
     pageTitleId: string;
+    themeColor: string;
   }
 > = {
   admin: {
-    title: 'Admin Dashboard - No Bhad Codes',
+    title: `Admin Dashboard - ${BUSINESS_INFO.name}`,
     pageTitle: 'Dashboard',
     authTitle: 'Admin Access',
     authDescription: 'Enter your admin password to continue',
     dashboardId: 'admin-dashboard',
-    pageTitleId: 'admin-page-title'
+    pageTitleId: 'admin-page-title',
+    themeColor: META_THEME_COLOR
   },
   client: {
-    title: 'Client Portal - No Bhad Codes',
+    title: `Client Portal - ${BUSINESS_INFO.name}`,
     pageTitle: 'Welcome Back',
     authTitle: 'Client Portal',
     authDescription: 'Sign in to access your projects and documents',
     dashboardId: 'client-dashboard',
-    pageTitleId: 'portal-page-title'
+    pageTitleId: 'portal-page-title',
+    themeColor: META_THEME_COLOR
   }
 };
 

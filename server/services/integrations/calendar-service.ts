@@ -16,6 +16,7 @@
 
 import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 // ============================================
 // Rate Limit & Retry Constants
@@ -118,7 +119,7 @@ export interface CalendarSyncConfig {
 }
 
 // iCal format constants
-const ICAL_PRODID = '-//No Bhad Codes//Calendar Export//EN';
+const ICAL_PRODID = `-//${BUSINESS_INFO.name}//Calendar Export//EN`;
 const ICAL_VERSION = '2.0';
 
 /**

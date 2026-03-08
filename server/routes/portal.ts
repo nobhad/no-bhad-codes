@@ -20,6 +20,7 @@ import { COOKIE_CONFIG } from '../utils/auth-constants.js';
 import { sendUnauthorized, sendNotFound, sendServerError, ErrorCodes } from '../utils/api-response.js';
 import { logger } from '../services/logger.js';
 import { createRateLimiter } from '../middleware/rate-limiter.js';
+import { BUSINESS_INFO } from '../config/business.js';
 
 // Rate limiter for tab data endpoint: 30 req/min per authenticated user
 const TAB_DATA_MAX_REQUESTS = 30;
@@ -98,7 +99,8 @@ router.get('/dashboard', (req: Request, res: Response) => {
       cssBundle: '/src/styles/bundles/admin.css',
       bodyClass: 'admin',
       bodyPage: 'admin',
-      isDev
+      isDev,
+      businessName: BUSINESS_INFO.name
     });
   }
 
@@ -113,7 +115,8 @@ router.get('/dashboard', (req: Request, res: Response) => {
     cssBundle: '/src/styles/bundles/portal.css',
     bodyClass: 'client-portal',
     bodyPage: 'client-portal',
-    isDev
+    isDev,
+    businessName: BUSINESS_INFO.name
   });
 });
 

@@ -8,12 +8,13 @@
  * Generates PDF receipts for payments using pdf-lib.
  */
 
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { getDatabase } from '../database/init.js';
 import { getFloat } from '../database/row-helpers.js';
 import { BUSINESS_INFO, getPdfLogoBytes } from '../config/business.js';
+import { PDF_COLORS, PDF_TYPOGRAPHY, PDF_SPACING } from '../config/pdf-styles.js';
 import { getUploadsSubdir, getRelativePath, sanitizeFilename } from '../config/uploads.js';
 import { PAGE_MARGINS } from '../utils/pdf-utils.js';
 import { logger } from './logger.js';
@@ -93,14 +94,14 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   let y = height - 43;
 
   // === HEADER ===
-  const logoHeight = 100;
+  const logoHeight = PDF_SPACING.logoHeight;
   const titleText = 'RECEIPT';
   page.drawText(titleText, {
     x: leftMargin,
     y: y - 20,
-    size: 28,
+    size: PDF_TYPOGRAPHY.titleSize,
     font: helveticaBold,
-    color: rgb(0.15, 0.15, 0.15)
+    color: PDF_COLORS.title
   });
 
   let textStartX = rightMargin - 180;
@@ -121,37 +122,37 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   page.drawText(BUSINESS_INFO.name, {
     x: textStartX,
     y: y - 11,
-    size: 15,
+    size: PDF_TYPOGRAPHY.businessNameSize,
     font: helveticaBold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.title
   });
   page.drawText(BUSINESS_INFO.owner, {
     x: textStartX,
     y: y - 34,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
-    color: rgb(0.2, 0.2, 0.2)
+    color: PDF_COLORS.subtitle
   });
   page.drawText(BUSINESS_INFO.tagline, {
     x: textStartX,
     y: y - 54,
-    size: 9,
+    size: PDF_TYPOGRAPHY.smallSize,
     font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
+    color: PDF_COLORS.muted
   });
   page.drawText(BUSINESS_INFO.email, {
     x: textStartX,
     y: y - 70,
-    size: 9,
+    size: PDF_TYPOGRAPHY.smallSize,
     font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
+    color: PDF_COLORS.muted
   });
   page.drawText(BUSINESS_INFO.website, {
     x: textStartX,
     y: y - 86,
-    size: 9,
+    size: PDF_TYPOGRAPHY.smallSize,
     font: helvetica,
-    color: rgb(0.4, 0.4, 0.4)
+    color: PDF_COLORS.muted
   });
 
   y -= 120;
@@ -160,8 +161,8 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   page.drawLine({
     start: { x: leftMargin, y },
     end: { x: rightMargin, y },
-    thickness: 1,
-    color: rgb(0.7, 0.7, 0.7)
+    thickness: PDF_SPACING.dividerThickness,
+    color: PDF_COLORS.divider
   });
   y -= 30;
 
@@ -169,9 +170,9 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   page.drawText('PAYMENT RECEIVED', {
     x: leftMargin,
     y,
-    size: 16,
+    size: PDF_TYPOGRAPHY.paymentHeaderSize,
     font: helveticaBold,
-    color: rgb(0.13, 0.55, 0.13)
+    color: PDF_COLORS.paymentGreen
   });
   y -= 30;
 
@@ -179,64 +180,64 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   page.drawText('RECEIVED FROM:', {
     x: leftMargin,
     y,
-    size: 11,
+    size: PDF_TYPOGRAPHY.labelSize,
     font: helveticaBold,
-    color: rgb(0.2, 0.2, 0.2)
+    color: PDF_COLORS.subtitle
   });
   y -= 16;
   page.drawText(data.clientName, {
     x: leftMargin,
     y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helveticaBold,
-    color: rgb(0, 0, 0)
+    color: PDF_COLORS.black
   });
   y -= 12;
   if (data.clientCompany) {
     page.drawText(data.clientCompany, {
       x: leftMargin,
       y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
     y -= 12;
   }
   page.drawText(data.clientEmail, {
     x: leftMargin,
     y,
-    size: 10,
+    size: PDF_TYPOGRAPHY.bodySize,
     font: helvetica,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
   y -= 30;
 
   // === RECEIPT DETAILS BOX ===
   const boxTop = y;
-  const boxHeight = 140;
+  const boxHeight = PDF_SPACING.receiptBoxHeight;
   page.drawRectangle({
     x: leftMargin,
     y: y - boxHeight,
     width: rightMargin - leftMargin,
     height: boxHeight,
-    borderColor: rgb(0.8, 0.8, 0.8),
+    borderColor: PDF_COLORS.boxBorder,
     borderWidth: 1
   });
 
   // Box header
   page.drawRectangle({
     x: leftMargin,
-    y: y - 25,
+    y: y - PDF_SPACING.receiptBoxHeaderHeight,
     width: rightMargin - leftMargin,
-    height: 25,
-    color: rgb(0.95, 0.95, 0.95)
+    height: PDF_SPACING.receiptBoxHeaderHeight,
+    color: PDF_COLORS.boxHeaderBg
   });
   page.drawText('PAYMENT DETAILS', {
-    x: leftMargin + 10,
+    x: leftMargin + PDF_SPACING.indent,
     y: y - 17,
-    size: 11,
+    size: PDF_TYPOGRAPHY.labelSize,
     font: helveticaBold,
-    color: rgb(0.2, 0.2, 0.2)
+    color: PDF_COLORS.subtitle
   });
 
   y -= 45;
@@ -244,20 +245,20 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   // Detail rows
   const drawDetailRow = (label: string, value: string) => {
     page.drawText(label, {
-      x: leftMargin + 10,
+      x: leftMargin + PDF_SPACING.indent,
       y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helveticaBold,
-      color: rgb(0.3, 0.3, 0.3)
+      color: PDF_COLORS.bodyLight
     });
     page.drawText(value, {
-      x: leftMargin + 150,
+      x: leftMargin + PDF_SPACING.receiptDetailOffset,
       y,
-      size: 10,
+      size: PDF_TYPOGRAPHY.bodySize,
       font: helvetica,
-      color: rgb(0, 0, 0)
+      color: PDF_COLORS.black
     });
-    y -= 18;
+    y -= PDF_SPACING.paymentRowHeight;
   };
 
   drawDetailRow('Receipt Number:', data.receiptNumber);
@@ -277,66 +278,66 @@ export async function generateReceiptPdf(data: ReceiptPdfData): Promise<Uint8Arr
   page.drawLine({
     start: { x: leftMargin, y: y + 15 },
     end: { x: rightMargin, y: y + 15 },
-    thickness: 2,
-    color: rgb(0.13, 0.55, 0.13)
+    thickness: PDF_SPACING.underlineThickness,
+    color: PDF_COLORS.paymentGreen
   });
 
   page.drawText('AMOUNT PAID:', {
     x: leftMargin,
     y,
-    size: 14,
+    size: PDF_TYPOGRAPHY.sectionHeadingSize,
     font: helveticaBold,
-    color: rgb(0.1, 0.1, 0.1)
+    color: PDF_COLORS.title
   });
   const amountText = `$${data.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  const amountWidth = helveticaBold.widthOfTextAtSize(amountText, 18);
+  const amountWidth = helveticaBold.widthOfTextAtSize(amountText, PDF_TYPOGRAPHY.amountSize);
   page.drawText(amountText, {
     x: rightMargin - amountWidth,
     y,
-    size: 18,
+    size: PDF_TYPOGRAPHY.amountSize,
     font: helveticaBold,
-    color: rgb(0.13, 0.55, 0.13)
+    color: PDF_COLORS.paymentGreen
   });
 
   y -= 50;
 
   // === THANK YOU ===
   const thankYouText = 'Thank you for your payment!';
-  const thankYouWidth = helvetica.widthOfTextAtSize(thankYouText, 12);
+  const thankYouWidth = helvetica.widthOfTextAtSize(thankYouText, PDF_TYPOGRAPHY.subHeadingSize);
   page.drawText(thankYouText, {
     x: (width - thankYouWidth) / 2,
     y,
-    size: 12,
+    size: PDF_TYPOGRAPHY.subHeadingSize,
     font: helvetica,
-    color: rgb(0.3, 0.3, 0.3)
+    color: PDF_COLORS.bodyLight
   });
 
   // === FOOTER ===
   page.drawLine({
-    start: { x: leftMargin, y: 72 },
-    end: { x: rightMargin, y: 72 },
-    thickness: 0.5,
-    color: rgb(0.8, 0.8, 0.8)
+    start: { x: leftMargin, y: PDF_SPACING.footerY },
+    end: { x: rightMargin, y: PDF_SPACING.footerY },
+    thickness: PDF_SPACING.dividerThin,
+    color: PDF_COLORS.dividerLight
   });
 
   const footerText = `${BUSINESS_INFO.name} • ${BUSINESS_INFO.owner} • ${BUSINESS_INFO.email} • ${BUSINESS_INFO.website}`;
-  const footerWidth = helvetica.widthOfTextAtSize(footerText, 7);
+  const footerWidth = helvetica.widthOfTextAtSize(footerText, PDF_TYPOGRAPHY.footerSize);
   page.drawText(footerText, {
     x: (width - footerWidth) / 2,
-    y: 54,
-    size: 7,
+    y: PDF_SPACING.footerTextY,
+    size: PDF_TYPOGRAPHY.footerSize,
     font: helvetica,
-    color: rgb(0.5, 0.5, 0.5)
+    color: PDF_COLORS.faint
   });
 
   const legalText = 'This receipt confirms payment received. Please retain for your records.';
-  const legalWidth = helvetica.widthOfTextAtSize(legalText, 7);
+  const legalWidth = helvetica.widthOfTextAtSize(legalText, PDF_TYPOGRAPHY.footerSize);
   page.drawText(legalText, {
     x: (width - legalWidth) / 2,
-    y: 40,
-    size: 7,
+    y: PDF_SPACING.legalTextY,
+    size: PDF_TYPOGRAPHY.footerSize,
     font: helvetica,
-    color: rgb(0.5, 0.5, 0.5)
+    color: PDF_COLORS.faint
   });
 
   return await pdfDoc.save();

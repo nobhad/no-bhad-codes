@@ -5,6 +5,7 @@
  */
 
 import { emailService } from '../services/email-service.js';
+import { BUSINESS_INFO } from '../config/business.js';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
@@ -42,7 +43,7 @@ async function testEmailService(): Promise<void> {
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || ''
       },
-      from: process.env.SMTP_FROM || 'nobhaduri@gmail.com',
+      from: process.env.SMTP_FROM || BUSINESS_INFO.email,
       replyTo: process.env.SMTP_REPLY_TO
     };
 

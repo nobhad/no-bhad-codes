@@ -13,6 +13,7 @@ import { generateDefaultMilestones } from '../../services/milestone-generator.js
 import { errorResponse, errorResponseWithPayload, sendSuccess, sendCreated, ErrorCodes } from '../../utils/api-response.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
 import { validateRequest, ValidationSchemas } from '../../middleware/validation.js';
+import { BUSINESS_INFO } from '../../config/business.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -549,7 +550,7 @@ router.put(
             description:
               statusDescriptions[req.body.status] || 'Your project status has been updated.',
             clientName: clientContactName || 'Client',
-            portalUrl: `${process.env.CLIENT_PORTAL_URL || 'https://nobhad.codes/client/portal.html'}?project=${projectId}`,
+            portalUrl: `${process.env.CLIENT_PORTAL_URL || `https://${BUSINESS_INFO.website}/client/portal.html`}?project=${projectId}`,
             nextSteps:
               req.body.status === 'completed'
                 ? [
