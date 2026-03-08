@@ -9,18 +9,6 @@
  */
 
 /* ============================================================================
-   CSS CUSTOM PROPERTIES - TERMINAL SPECIFIC
-   ============================================================================ */
-
-:root {
-  /* Terminal font stack */
-  --terminal-font-family:
-    "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --terminal-font-size: var(--terminal-font-size);
-  --terminal-line-height: 1.7;
-}
-
-/* ============================================================================
    BASE TERMINAL CONTAINER
    ============================================================================ */
 

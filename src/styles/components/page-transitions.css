@@ -10,15 +10,6 @@
  */
 
 /* ============================================
- * CSS VARIABLES FOR TRANSITIONS
- * ============================================ */
-
-:root {
-  --page-transition-duration: var(--transition-length);
-  --page-blur-amount: 12px;
-}
-
-/* ============================================
  * PAGE TRANSITION OVERLAY (DISABLED)
  * Overlay no longer used - direct blur crossfade instead
  * ============================================ */

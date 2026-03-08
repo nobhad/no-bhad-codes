@@ -8,22 +8,6 @@
  * for consistent page structure across the application.
  */
 
-/* ============================================
- * LAYOUT CONSTANTS
- * ============================================ */
-
-:root {
-  /* Layout dimensions - Fixed values to prevent CLS */
-  --header-height: 60px;
-  --footer-height: 40px;
-
-  /* Responsive layout dimensions */
-  --size-container: min(1200px, 100vw - 2rem);
-  --container-padding: clamp(1rem, 4vw, 2rem);
-  --gap: clamp(0.75rem, 3vw, 1.5rem);
-  --section-padding: clamp(1rem, 5vw, 2rem);
-}
-
 /* Responsive header height adjustments */
 @media (--desktop-down) {
   :root {

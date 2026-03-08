@@ -15,25 +15,6 @@
  **/
 
 /* ==========================================
-   CONTACT FORM LAYOUT VARIABLES
-   ========================================== */
-
-:root {
-  /* Contact form field dimensions — responsive, read by GSAP via sentinel */
-  --contact-input-height: clamp(52px, 14vw, 60px);
-  --contact-input-width: min(520px, 100%);
-  --contact-textarea-height: 175px;
-  --contact-textarea-width: min(520px, 100%);
-  --contact-field-gap: 0;
-  --contact-row-gap: 0;
-  /* Layout height kept for animation compat */
-  --contact-layout-height: 480px;
-  /* Contact form border - thicker, same color as text, themes with dark/light toggle */
-  --contact-field-border-width: var(--border-width);
-  --contact-field-border-color: var(--color-text-primary);
-}
-
-/* ==========================================
    CONTACT HERO - DISABLED
    ========================================== */
 
@@ -333,7 +314,7 @@ p.contact-options {
 /* Transparent so inputs always match the page background regardless of theme */
 .input-item input,
 .input-item textarea {
-  background: transparent;
+  background: inherit;
   border: none;
   border-radius: 0;
   color: var(--color-text-primary);
@@ -591,7 +572,7 @@ html[data-theme="dark"] .input-item textarea {
 section.contact-section .contact-form input.error,
 section.contact-section .contact-form textarea.error {
   border-color: var(--color-danger);
-  background-color: transparent;
+  background-color: inherit;
 }
 
 /* ==========================================

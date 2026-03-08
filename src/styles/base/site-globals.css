@@ -7,15 +7,6 @@
  * Global variables and unlayered overrides for the main site.
  */
 
-/* Section transition variables */
-:root {
-  --blur-amount: 4px;
-  --drop-distance: 20px;
-  --transition-enter: 0.3s;
-  --transition-exit: 0.2s;
-  --stagger-delay: 0.05s;
-}
-
 /* Theme integration */
 body {
   background-color: var(--color-neutral-300);
