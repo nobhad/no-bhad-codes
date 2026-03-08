@@ -128,7 +128,7 @@ export function DuplicateDetectionTab({
               <th>Confidence</th>
               <th>Match Fields</th>
               <th>Detected</th>
-              <th className="actions-cell">Actions</th>
+              <th className="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -146,7 +146,7 @@ export function DuplicateDetectionTab({
                 </td>
                 <td>{dup.matchFields.join(', ')}</td>
                 <td>{formatDate(dup.detectedAt)}</td>
-                <td className="actions-cell">
+                <td className="col-actions">
                   <button
                     className="btn btn-primary btn-sm"
                     onClick={() => handleMerge(dup.id)}

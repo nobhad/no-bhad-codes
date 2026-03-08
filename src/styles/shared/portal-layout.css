@@ -453,7 +453,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 /* Disable focus outline on ALL sidebar elements */
 .sidebar :is(:focus, :focus-visible),
-.sidebar :is(.sidebar-btn, .icon-btn, a, button, .sidebar-toggle-btn):is(:focus, :focus-visible) {
+.sidebar :is(.nav-btn, .icon-btn, a, button, .sidebar-toggle-btn):is(:focus, :focus-visible) {
   outline: none;
   box-shadow: none;
 }
@@ -738,12 +738,12 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   opacity: 0.5;
 }
 
-.portal .sidebar-buttons .sidebar-btn:hover .sidebar-shortcut {
+.portal .sidebar-buttons .nav-btn:hover .sidebar-shortcut {
   opacity: 0.9;
   border-color: var(--color-bg-elevated);
 }
 
-.portal .sidebar-buttons .sidebar-btn.active .sidebar-shortcut {
+.portal .sidebar-buttons .nav-btn.active .sidebar-shortcut {
   border-color: var(--color-primary);
   color: var(--color-primary);
   opacity: 0.8;
@@ -754,25 +754,25 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Collapsed state - center icons, hide text */
-.portal .sidebar.collapsed .sidebar-buttons .sidebar-btn {
+.portal .sidebar.collapsed .sidebar-buttons .nav-btn {
   justify-content: center;
   padding-left: 0;
   padding-right: 0;
   position: relative;
 }
 
-.portal .sidebar.collapsed .sidebar-btn .btn-text {
+.portal .sidebar.collapsed .nav-btn .nav-label {
   display: none;
 }
 
-.portal .sidebar.collapsed .sidebar-footer .sidebar-btn {
+.portal .sidebar.collapsed .sidebar-footer .nav-btn {
   justify-content: center;
   padding-left: 0;
   padding-right: 0;
 }
 
 /* Tooltips on collapsed nav items */
-.portal .sidebar.collapsed .sidebar-btn::after {
+.portal .sidebar.collapsed .nav-btn::after {
   content: attr(aria-label);
   position: absolute;
   left: calc(100% + var(--space-1-5));
@@ -798,7 +798,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
     visibility var(--transition-faster);
 }
 
-.portal .sidebar.collapsed .sidebar-btn:hover::after {
+.portal .sidebar.collapsed .nav-btn:hover::after {
   opacity: 1;
   visibility: visible;
 }
@@ -808,11 +808,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 /* Nav item active state - left accent bar */
-.portal .sidebar-buttons .sidebar-btn.active {
+.portal .sidebar-buttons .nav-btn.active {
   position: relative;
 }
 
-.portal .sidebar-buttons .sidebar-btn.active::before {
+.portal .sidebar-buttons .nav-btn.active::before {
   content: "";
   position: absolute;
   left: 0;
@@ -823,7 +823,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   border-radius: 0 2px 2px 0;
 }
 
-.portal .sidebar.collapsed .sidebar-buttons .sidebar-btn.active::before {
+.portal .sidebar.collapsed .sidebar-buttons .nav-btn.active::before {
   display: none;
 }
 
@@ -835,16 +835,16 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
 @media (--tablet-to-laptop) {
   .portal .portal-body .sidebar {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
+    width: var(--sidebar-collapsed-width);
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
   }
 
-  .portal .portal-body .sidebar .sidebar-buttons .sidebar-btn {
+  .portal .portal-body .sidebar .sidebar-buttons .nav-btn {
     justify-content: center;
   }
 
-  .portal .portal-body .sidebar .sidebar-buttons .sidebar-btn .btn-text {
+  .portal .portal-body .sidebar .sidebar-buttons .nav-btn .nav-label {
     display: none;
   }
 
@@ -865,7 +865,7 @@ td {
   word-break: break-word;
   overflow-wrap: anywhere;
   white-space: normal;
-  padding: clamp(0.25rem, 2vw, 1rem) clamp(0.5rem, 3vw, 2rem);
+  /* No padding here — .data-table uses variable-based padding from portal-tables.css */
 }
 
 /* =====================================================

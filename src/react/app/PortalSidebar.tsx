@@ -58,7 +58,7 @@ export function PortalSidebar() {
                 <Link
                   key={item.id}
                   to={`/${tabId}`}
-                  className={`sidebar-btn${isActive ? ' active' : ''}`}
+                  className={`nav-btn${isActive ? ' active' : ''}`}
                   id={`btn-${item.id}`}
                   data-tab={tabId}
                   data-shortcut={item.shortcut}
@@ -67,9 +67,9 @@ export function PortalSidebar() {
                   onClick={() => switchTab(tabId)}
                 >
                   {IconSvg && (
-                    <IconSvg className="btn-icon" aria-hidden="true" />
+                    <IconSvg className="nav-icon" aria-hidden="true" />
                   )}
-                  <span className="btn-text">{item.label}</span>
+                  <span className="nav-label">{item.label}</span>
                   {item.badge && (
                     <span
                       className="sidebar-badge"
@@ -85,15 +85,15 @@ export function PortalSidebar() {
         <div className="sidebar-footer">
           <button
             type="button"
-            className="btn sidebar-btn btn-logout"
+            className="nav-btn btn-logout"
             id="btn-logout"
             aria-label="Sign out"
             onClick={handleLogout}
           >
             {SIDEBAR_ICONS.logOut && (
-              <SIDEBAR_ICONS.logOut className="btn-icon" aria-hidden="true" />
+              <SIDEBAR_ICONS.logOut className="nav-icon" aria-hidden="true" />
             )}
-            <span className="btn-text">Sign Out</span>
+            <span className="nav-label">Sign Out</span>
           </button>
         </div>
       </div>

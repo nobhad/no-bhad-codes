@@ -90,9 +90,8 @@
 }
 
 /* Ensure actions cell inherits row hover - no exceptions */
-.data-table tbody tr:hover td.actions-cell,
+.data-table tbody tr:hover td.col-actions,
 .data-table tbody tr:hover td:last-child,
-.data-table tbody tr:hover td[class*="actions"],
 .portal .data-table tbody tr:hover td {
   background: var(--color-bg-hover);
 }
@@ -167,7 +166,7 @@
   .table-actions,
   .data-table .table-actions,
   td .table-actions,
-  .actions-cell .table-actions,
+  .col-actions .table-actions,
   .portal .table-actions {
     display: inline-flex;
     align-items: center;
@@ -177,12 +176,12 @@
   }
 
   /* Actions cell - DO NOT use display:flex on td, it breaks table-cell behavior */
-  .actions-cell,
-  td.actions-cell,
-  .data-table .actions-cell,
-  .data-table td.actions-cell,
-  .portal .actions-cell,
-  .portal td.actions-cell {
+  .col-actions,
+  td.col-actions,
+  .data-table .col-actions,
+  .data-table td.col-actions,
+  .portal .col-actions,
+  .portal td.col-actions {
     /* Keep table-cell display for proper row background inheritance */
     display: table-cell;
     vertical-align: middle;
@@ -195,7 +194,7 @@
   }
 }
 
-.data-table :is(th, td).actions-col,
+.data-table :is(th, td).col-actions,
 .data-table :is(th, td):last-child:has(.table-actions) {
   width: auto;
   min-width: fit-content;
@@ -203,36 +202,36 @@
   text-align: right;
 }
 
-.data-table th.actions-col {
+.data-table th.col-actions {
   text-align: right;
 }
 
-.data-table .actions-cell {
+.data-table .col-actions {
   width: 1%;
   white-space: nowrap;
   text-align: right;
 }
 
-.actions-cell:not(:has(.table-actions)) {
+.col-actions:not(:has(.table-actions)) {
   gap: var(--table-actions-gap);
 }
 
 /* Table action icon buttons - match text size (14px) */
 .data-table .table-actions .icon-btn,
-.data-table .actions-cell .icon-btn,
+.data-table .col-actions .icon-btn,
 .table-actions .icon-btn {
-  width: var(--space-3, 24px);
-  height: var(--space-3, 24px);
-  min-width: var(--space-3, 24px);
-  min-height: var(--space-3, 24px);
-  max-width: var(--space-3, 24px);
-  max-height: var(--space-3, 24px);
+  width: var(--space-3);
+  height: var(--space-3);
+  min-width: var(--space-3);
+  min-height: var(--space-3);
+  max-width: var(--space-3);
+  max-height: var(--space-3);
   padding: 0;
 }
 
 /* Action button SVGs - use SAME size as cell icons for uniformity */
 .data-table .table-actions .icon-btn svg,
-.data-table .actions-cell .icon-btn svg,
+.data-table .col-actions .icon-btn svg,
 .table-actions .icon-btn svg {
   width: var(--table-action-icon-size);
   height: var(--table-action-icon-size);
@@ -714,9 +713,9 @@
 
 /* Checkbox column - use utilities layer for padding override */
 @layer utilities {
-  .data-table .bulk-select-cell,
-  .data-table .checkbox-col,
-  .data-table th.checkbox-col {
+  .data-table .col-checkbox,
+  .data-table .col-checkbox,
+  .data-table th.col-checkbox {
     width: var(--table-checkbox-width);
     min-width: var(--table-checkbox-width);
     max-width: var(--table-checkbox-width);
@@ -865,7 +864,7 @@
   text-align: right;
 }
 
-.data-table :is(.actions-col, .actions-cell) {
+.data-table .col-actions {
   max-width: none;
   overflow: visible;
   text-align: right;
@@ -1018,8 +1017,8 @@
     width: auto;
   }
 
-  .data-table .bulk-select-cell,
-  .data-table th.checkbox-col {
+  .data-table .col-checkbox,
+  .data-table th.col-checkbox {
     display: none;
   }
 
@@ -1248,8 +1247,8 @@
   .data-table td.status-col,
   .data-table td.amount-cell,
   .data-table td.amount-col,
-  .data-table td.actions-cell,
-  .data-table td.actions-col,
+  .data-table td.col-actions,
+  .data-table td.col-actions,
   .data-table td.priority-cell,
   .data-table td.priority-col,
   .data-table td.date-cell,
@@ -1357,17 +1356,17 @@
   }
 
   /* Hide actions column label and style as footer */
-  .data-table td.actions-cell {
+  .data-table td.col-actions {
     justify-content: flex-end;
     align-items: center;
   }
 
-  .data-table td.actions-cell:before {
+  .data-table td.col-actions:before {
     display: none;
   }
 
   /* Compact actions */
-  .data-table .actions-cell .table-actions {
+  .data-table .col-actions .table-actions {
     gap: var(--space-0-5);
   }
 
@@ -1418,8 +1417,8 @@
   .data-table td.title-col:not([data-label]):before { content: "Title"; }
 
   /* Hide bulk-select cells on mobile card layout */
-  .data-table td.bulk-select-cell,
-  .data-table th.checkbox-col {
+  .data-table td.col-checkbox,
+  .data-table th.col-checkbox {
     display: none;
   }
 
@@ -1466,7 +1465,7 @@
    The data-initialized attribute is set to "true" by TableManager.init().
    ===================================================== */
 
-[data-table-id]:not([data-initialized="true"]) .bulk-select-cell {
+[data-table-id]:not([data-initialized="true"]) .col-checkbox {
   display: none;
 }
 
@@ -1513,8 +1512,8 @@
 /* Small mobile layout overrides - utilities layer for override */
 @layer utilities {
   @media (--small-mobile) {
-    .data-table .bulk-select-cell,
-    .data-table th.checkbox-col {
+    .data-table .col-checkbox,
+    .data-table th.col-checkbox {
       display: none;
     }
 
@@ -1525,7 +1524,7 @@
       margin-bottom: var(--space-1);
     }
 
-    .data-table tbody td.actions-cell {
+    .data-table tbody td.col-actions {
       order: 10;
       display: flex;
       justify-content: flex-end;
@@ -1561,7 +1560,7 @@
 }
 
 /* Stats badge in EJS header */
-.table-stats-badge {
+.table-stat {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
   white-space: nowrap;
@@ -1653,7 +1652,7 @@
   color: var(--color-text-primary, inherit);
 }
 
-.empty-state-text {
+.empty-message {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary, inherit);
@@ -1713,9 +1712,9 @@
    Used by server/views/partials/table/table-row.ejs
    ============================================== */
 
-/* Select column (alias for checkbox-col) */
+/* Select column (alias for col-checkbox) */
 @layer utilities {
-  .data-table .select-col {
+  .data-table .col-checkbox {
     width: var(--table-checkbox-width);
     min-width: var(--table-checkbox-width);
     max-width: var(--table-checkbox-width);
@@ -1773,8 +1772,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--space-3, 24px);
-  height: var(--space-3, 24px);
+  width: var(--space-3);
+  height: var(--space-3);
   padding: 0;
   background: transparent;
   border: none;

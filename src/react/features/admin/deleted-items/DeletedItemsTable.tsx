@@ -454,7 +454,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
                 onCheckedChange={selection.toggleSelectAll}
@@ -494,7 +494,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
             >
                 Expires In
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -516,7 +516,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
                 selected={selection.isSelected(item)}
               >
                 <PortalTableCell
-                  className="bulk-select-cell"
+                  className="col-checkbox"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Checkbox
@@ -549,7 +549,7 @@ export function DeletedItemsTable({ getAuthToken, showNotification, onNavigate: 
                     </span>
                   </span>
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell">
+                <PortalTableCell className="col-actions">
                   <div className="table-actions">
                     <IconButton
                       action="restore"

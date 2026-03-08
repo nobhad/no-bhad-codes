@@ -201,9 +201,9 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* ============================================
  * SIDEBAR BUTTONS - Navigation link style
  * These have completely different styling from action buttons
- * Uses .sidebar-btn class to exclude from form-buttons.css styling
+ * Uses .nav-btn class to exclude from form-buttons.css styling
  * ============================================ */
-.portal .sidebar-btn {
+.portal .nav-btn {
   display: flex;
   align-items: center;
   gap: var(--icon-gap-md);
@@ -227,21 +227,21 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border-radius: 0;
   text-decoration: none;
 }
-.portal :is(.sidebar-btn:hover, .sidebar-btn.active) {
+.portal :is(.nav-btn:hover, .nav-btn.active) {
   background: transparent;
   box-shadow: none;
   border: none;
   color: var(--color-primary);
 }
-.portal :is(.sidebar-btn:hover, .sidebar-btn.active) .btn-icon {
+.portal :is(.nav-btn:hover, .nav-btn.active) .nav-icon {
   color: var(--color-primary);
 }
-.portal .sidebar-btn .btn-icon {
+.portal .nav-btn .nav-icon {
   flex-shrink: 0;
   width: var(--sidebar-icon-size);
   height: var(--sidebar-icon-size);
 }
-.portal .sidebar-btn .btn-text {
+.portal .nav-btn .nav-label {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -377,10 +377,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   @media (pointer: coarse) {
     .data-table .icon-btn,
     .data-table .table-actions .icon-btn,
-    .data-table .actions-cell .icon-btn,
+    .data-table .col-actions .icon-btn,
     .data-table td .icon-btn,
     .table-actions .icon-btn,
-    .actions-cell .icon-btn {
+    .col-actions .icon-btn {
       width: var(--portal-btn-icon-size-xs);
       height: var(--portal-btn-icon-size-xs);
       min-width: var(--portal-btn-icon-size-xs);
@@ -389,10 +389,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
     .data-table .icon-btn svg,
     .data-table .table-actions .icon-btn svg,
-    .data-table .actions-cell .icon-btn svg,
+    .data-table .col-actions .icon-btn svg,
     .data-table td .icon-btn svg,
     .table-actions .icon-btn svg,
-    .actions-cell .icon-btn svg {
+    .col-actions .icon-btn svg {
       /* Use unified table icon size from portal-tables.css */
       width: var(--table-action-icon-size, var(--icon-size-md));
       height: var(--table-action-icon-size, var(--icon-size-md));
@@ -426,20 +426,20 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   td .icon-btn,
   td > .icon-btn,
   td button.icon-btn,
-  .actions-cell .icon-btn,
-  .actions-cell > .icon-btn,
-  .actions-cell button.icon-btn,
+  .col-actions .icon-btn,
+  .col-actions > .icon-btn,
+  .col-actions button.icon-btn,
   .table-actions .icon-btn,
   .table-actions > .icon-btn,
   .table-actions button.icon-btn,
   .data-table .icon-btn,
   .data-table td .icon-btn,
-  .data-table .actions-cell .icon-btn,
+  .data-table .col-actions .icon-btn,
   .data-table .table-actions .icon-btn,
   table .icon-btn,
   table td .icon-btn,
 .portal td .icon-btn,
-  .portal .actions-cell .icon-btn,
+  .portal .col-actions .icon-btn,
   .portal .table-actions .icon-btn {
     width: var(--portal-btn-icon-size);
     height: var(--portal-btn-icon-size);
@@ -461,7 +461,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
    * Override all colored variants (danger, success, warning, primary)
    * to use neutral color in table contexts */
   td .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
-  .actions-cell .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
+  .col-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
   .table-actions .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
   .data-table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary),
   table .icon-btn:is(.icon-btn-danger, .icon-btn-success, .icon-btn-warning, .icon-btn-primary) {
@@ -471,7 +471,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
   /* Hover state - ALL table buttons hover to primary, no backgrounds */
   td .icon-btn:hover,
-  .actions-cell .icon-btn:hover,
+  .col-actions .icon-btn:hover,
   .table-actions .icon-btn:hover,
   .data-table .icon-btn:hover,
   table .icon-btn:hover {
@@ -486,20 +486,20 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   td .icon-btn svg,
   td > .icon-btn svg,
   td button.icon-btn svg,
-  .actions-cell .icon-btn svg,
-  .actions-cell > .icon-btn svg,
-  .actions-cell button.icon-btn svg,
+  .col-actions .icon-btn svg,
+  .col-actions > .icon-btn svg,
+  .col-actions button.icon-btn svg,
   .table-actions .icon-btn svg,
   .table-actions > .icon-btn svg,
   .table-actions button.icon-btn svg,
   .data-table .icon-btn svg,
   .data-table td .icon-btn svg,
-  .data-table .actions-cell .icon-btn svg,
+  .data-table .col-actions .icon-btn svg,
   .data-table .table-actions .icon-btn svg,
   table .icon-btn svg,
   table td .icon-btn svg,
   .portal td .icon-btn svg,
-  .portal .actions-cell .icon-btn svg,
+  .portal .col-actions .icon-btn svg,
   .portal .table-actions .icon-btn svg {
     /* Use unified table icon size - NO !important, cascade handles specificity */
     width: var(--table-action-icon-size, var(--icon-size-md));
@@ -517,7 +517,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
  * ============================================ */
 
 /* Base icon-only button styles - applies to all collapsed states */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn {
   width: var(--space-5);
   height: var(--space-5);
   padding: 0;
@@ -531,7 +531,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 /* Active/hover states */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn.active {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn.active {
   background: transparent;
   border: none;
   outline: none;
@@ -540,13 +540,13 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 .portal
   :is(.sidebar.collapsed, .sidebar.icon-only)
-  .sidebar-btn:is(.active, :hover, :focus)
+  .nav-btn:is(.active, :hover, :focus)
   .btn-icon {
   color: var(--color-primary);
 }
 
 /* Hidden text */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-text {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn .nav-label {
   display: none;
   width: 0;
   height: 0;
@@ -557,13 +557,13 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 /* Icon sizing - SAME SIZE as open state, use --sidebar-icon-size */
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn .nav-icon {
   margin: 0;
   width: var(--sidebar-icon-size);
   height: var(--sidebar-icon-size);
 }
 
-.portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover) .btn-icon svg {
+.portal :is(.sidebar.collapsed, .sidebar.icon-only) .nav-btn:is(.active, :hover) .nav-icon svg {
   filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
 }
 
@@ -573,11 +573,11 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 @media (--laptop) {
   .portal .sidebar .sidebar-buttons {
-    gap: 0.5rem;
+    gap: var(--space-1);
   }
 
   /* Force icon-only appearance at this breakpoint */
-  .portal .sidebar .sidebar-btn {
+  .portal .sidebar .nav-btn {
     width: var(--space-5);
     height: var(--space-5);
     padding: 0;
@@ -589,18 +589,18 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     overflow: visible;
   }
 
-  .portal .sidebar .sidebar-btn.active,
-  .portal .sidebar .sidebar-btn:is(:hover, :focus) {
+  .portal .sidebar .nav-btn.active,
+  .portal .sidebar .nav-btn:is(:hover, :focus) {
     background: transparent;
     border: none;
     box-shadow: none;
   }
 
-  .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon {
+  .portal .sidebar .nav-btn:is(.active, :hover) .nav-icon {
     color: var(--color-primary);
   }
 
-  .portal .sidebar .sidebar-btn .btn-text {
+  .portal .sidebar .nav-btn .nav-label {
     display: none;
     visibility: hidden;
     position: absolute;
@@ -608,13 +608,13 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   }
 
   /* Icon sizing - SAME SIZE regardless of sidebar state, use --sidebar-icon-size */
-  .portal .sidebar .sidebar-btn .btn-icon {
+  .portal .sidebar .nav-btn .nav-icon {
     margin: 0;
     width: var(--sidebar-icon-size);
     height: var(--sidebar-icon-size);
   }
 
-  .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon svg {
+  .portal .sidebar .nav-btn:is(.active, :hover) .nav-icon svg {
     filter: drop-shadow(0 1px 1px var(--portal-alpha-black-30));
   }
 }
@@ -656,12 +656,12 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
    .btn-primary, .btn-secondary, .btn-outline, .btn-danger get full styling
    from form-buttons.css (components layer). We exclude them here so the
    pages-layer ghost override doesn't strip their borders/backgrounds. */
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn) {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
   font-size: var(--portal-btn-font-size);
   font-weight: var(--font-weight-regular);
   font-family: var(--font-family-mono, monospace);
@@ -673,11 +673,11 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   transition: color var(--transition-fast);
 }
 
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn):hover {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):hover {
   color: var(--color-primary);
 }
 
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn):disabled {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):disabled {
   color: var(--color-text-tertiary);
   cursor: not-allowed;
 }

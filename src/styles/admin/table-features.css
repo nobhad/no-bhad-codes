@@ -142,8 +142,8 @@
 
   /* Pagination button sizes controlled by --table-pagination-btn-size in portal-tables.css */
 
-  /* Hide checkbox column on small screens - matches both class names */
-  .data-table :is(th, td):is(.bulk-select-cell, .checkbox-col) {
+  /* Hide checkbox column on small screens */
+  .data-table :is(th, td).col-checkbox {
     display: none;
   }
 }

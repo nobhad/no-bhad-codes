@@ -380,7 +380,7 @@ export function LeadsTable({
         <PortalTable>
           <PortalTableHeader>
             <PortalTableRow>
-              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
@@ -420,7 +420,7 @@ export function LeadsTable({
               >
                 Created
               </PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
 
@@ -444,7 +444,7 @@ export function LeadsTable({
                   onClick={() => handleRowClick(lead)}
                 >
                   {/* Checkbox */}
-                  <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(lead)}
                       onCheckedChange={() => selection.toggleSelection(lead)}
@@ -523,7 +523,7 @@ export function LeadsTable({
                   </PortalTableCell>
 
                   {/* Actions */}
-                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <IconButton
                         action="view"

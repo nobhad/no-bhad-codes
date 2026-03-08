@@ -370,7 +370,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
@@ -404,7 +404,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
             >
               Due
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -426,7 +426,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 clickable
                 selected={selection.isSelected(deliverable)}
               >
-                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(deliverable)}
                     onCheckedChange={() => selection.toggleSelection(deliverable)}
@@ -496,7 +496,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                     </span>
                   )}
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />

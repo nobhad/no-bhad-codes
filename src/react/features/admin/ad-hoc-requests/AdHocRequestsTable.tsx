@@ -386,7 +386,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
@@ -420,7 +420,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
             >
               Due
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -442,7 +442,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 clickable
                 selected={selection.isSelected(request)}
               >
-                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(request)}
                     onCheckedChange={() => selection.toggleSelection(request)}
@@ -526,7 +526,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 <PortalTableCell className="date-cell">
                   {request.dueDate && formatDate(request.dueDate)}
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />

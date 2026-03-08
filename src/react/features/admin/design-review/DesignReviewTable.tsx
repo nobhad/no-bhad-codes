@@ -230,7 +230,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
             >
               Submitted
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -285,7 +285,7 @@ export function DesignReviewTable({ projectId, onNavigate, getAuthToken, showNot
                   )}
                 </PortalTableCell>
                 <PortalTableCell className="date-cell">{formatDate(review.submittedAt)}</PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {review.status === 'in-review' && (

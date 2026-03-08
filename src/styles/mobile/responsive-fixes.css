@@ -33,8 +33,8 @@
   /* .icon-btn hover: portal-buttons.css */
 
   /* Sidebar button hover */
-  .portal .sidebar-buttons .sidebar-btn:hover,
-  .portal .sidebar-buttons .sidebar-btn:hover .btn-icon {
+  .portal .sidebar-buttons .nav-btn:hover,
+  .portal .sidebar-buttons .nav-btn:hover .nav-icon {
     color: var(--color-primary);
   }
 
@@ -186,14 +186,14 @@
   }
 
   /* Sidebar collapsed buttons */
-  .portal .sidebar.collapsed .sidebar-buttons .sidebar-btn {
+  .portal .sidebar.collapsed .sidebar-buttons .nav-btn {
     width: 44px;
     height: 44px;
     min-width: 44px;
     min-height: 44px;
   }
 
-  .portal .sidebar.collapsed .sidebar-footer .sidebar-btn {
+  .portal .sidebar.collapsed .sidebar-footer .nav-btn {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -474,7 +474,7 @@
 /* Prevent text selection on interactive elements for better touch UX */
 @media (pointer: coarse) {
   .btn,
-  .sidebar-buttons .sidebar-btn,
+  .sidebar-buttons .nav-btn,
   .custom-dropdown-trigger,
   .portal-tab,
   .admin-tab {

@@ -410,7 +410,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
         <PortalTable>
           <PortalTableHeader>
             <PortalTableRow>
-              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
@@ -450,7 +450,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
               >
                 Due Date
               </PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
 
@@ -472,7 +472,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                   clickable
                   selected={selection.isSelected(task)}
                 >
-                  <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selection.isSelected(task)}
                       onCheckedChange={() => selection.toggleSelection(task)}
@@ -561,7 +561,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
                       </span>
                     )}
                   </PortalTableCell>
-                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <IconButton action="view" title="View" />
                       <IconButton action="edit" title="Edit" />

@@ -449,7 +449,7 @@ export function InvoicesTable({
         <PortalTable>
           <PortalTableHeader>
             <PortalTableRow>
-              <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+              <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selection.allSelected}
                   onCheckedChange={selection.toggleSelectAll}
@@ -496,7 +496,7 @@ export function InvoicesTable({
               >
                 Due Date
               </PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
 
@@ -528,7 +528,7 @@ export function InvoicesTable({
                     onClick={() => handleRowClick(invoice)}
                   >
                     {/* Checkbox */}
-                    <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selection.isSelected(invoice)}
                         onCheckedChange={() => selection.toggleSelection(invoice)}
@@ -570,7 +570,7 @@ export function InvoicesTable({
                     </PortalTableCell>
 
                     {/* Actions */}
-                    <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                    <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                       <div className="table-actions">
                         <IconButton
                           action="view"

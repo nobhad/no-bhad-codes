@@ -503,7 +503,7 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
       { id: 'type', label: 'Type', options: [{ value: 'all', label: 'All Types' }, { value: 'business', label: 'Business' }, { value: 'personal', label: 'Personal' }] }
     ],
     columns: [
-      { id: '_select', label: '', type: 'text', className: 'select-col' },
+      { id: '_select', label: '', type: 'text', className: 'col-checkbox' },
       { id: 'name', label: 'Name', type: 'name', sortable: true, primary: true, className: 'name-col', secondaryKey: 'email' },
       { id: 'email', label: 'Email', type: 'email', sortable: true, className: 'email-col', hideMobile: true },
       { id: 'phone', label: 'Phone', type: 'phone', className: 'phone-col', hideMobile: true },
@@ -511,7 +511,7 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
       { id: 'client_type', label: 'Type', type: 'text', sortable: true, className: 'type-col', hideTablet: true },
       { id: 'projectCount', label: 'Projects', type: 'count', sortable: true, align: 'right', className: 'count-col', hideTablet: true },
       { id: 'created_at', label: 'Created', type: 'date', sortable: true, className: 'date-col', hideTablet: true },
-      { id: '_actions', label: '', type: 'text', className: 'actions-col' }
+      { id: '_actions', label: '', type: 'text', className: 'col-actions' }
     ]
   },
 
@@ -525,14 +525,14 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
     defaultSort: { column: 'created_at', direction: 'desc' },
     features: { search: true, sort: true, paginate: true, select: true, export: true, refresh: true },
     columns: [
-      { id: '_select', label: '', type: 'text', className: 'select-col' },
+      { id: '_select', label: '', type: 'text', className: 'col-checkbox' },
       { id: 'name', label: 'Name', type: 'name', sortable: true, primary: true, className: 'name-col', secondaryKey: 'role' },
       { id: 'email', label: 'Email', type: 'email', sortable: true, className: 'email-col' },
       { id: 'phone', label: 'Phone', type: 'phone', className: 'phone-col', hideMobile: true },
       { id: 'company', label: 'Company', type: 'text', sortable: true, className: 'name-col', hideMobile: true },
       { id: 'isPrimary', label: 'Primary', type: 'boolean', className: 'type-col', hideTablet: true },
       { id: 'created_at', label: 'Created', type: 'date', sortable: true, className: 'date-col', hideTablet: true },
-      { id: '_actions', label: '', type: 'text', className: 'actions-col' }
+      { id: '_actions', label: '', type: 'text', className: 'col-actions' }
     ]
   },
 
@@ -552,7 +552,7 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
       { id: 'amount', label: 'Amount', type: 'currency', sortable: true, align: 'right', className: 'amount-col' },
       { id: 'due_date', label: 'Due Date', type: 'date', sortable: true, className: 'date-col', hideMobile: true },
       { id: 'created_at', label: 'Issued', type: 'date', sortable: true, className: 'date-col', hideTablet: true },
-      { id: '_actions', label: '', type: 'text', className: 'actions-col' }
+      { id: '_actions', label: '', type: 'text', className: 'col-actions' }
     ]
   },
 
@@ -569,14 +569,14 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
       { id: 'status', label: 'Status', options: [{ value: 'all', label: 'All Statuses' }, ...INVOICE_STATUSES.options.map((o) => ({ value: o.value, label: o.label }))] }
     ],
     columns: [
-      { id: '_select', label: '', type: 'text', className: 'select-col' },
+      { id: '_select', label: '', type: 'text', className: 'col-checkbox' },
       { id: 'invoice_number', label: 'Invoice #', type: 'text', sortable: true, primary: true, className: 'name-col', secondaryKey: 'client_name' },
       { id: 'client_name', label: 'Client', type: 'text', sortable: true, className: 'name-col', hideMobile: true },
       { id: 'status', label: 'Status', type: 'status', sortable: true, statusConfig: INVOICE_STATUSES, className: 'status-col' },
       { id: 'amount', label: 'Amount', type: 'currency', sortable: true, align: 'right', className: 'amount-col' },
       { id: 'due_date', label: 'Due Date', type: 'date', sortable: true, className: 'date-col', hideMobile: true },
       { id: 'created_at', label: 'Created', type: 'date', sortable: true, className: 'date-col', hideTablet: true },
-      { id: '_actions', label: '', type: 'text', className: 'actions-col' }
+      { id: '_actions', label: '', type: 'text', className: 'col-actions' }
     ]
   },
 
@@ -594,13 +594,13 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
       { id: 'status', label: 'Status', options: [{ value: 'all', label: 'All Statuses' }, ...PROJECT_STATUSES.options.map((o) => ({ value: o.value, label: o.label }))] }
     ],
     columns: [
-      { id: '_select', label: '', type: 'text', className: 'select-col' },
+      { id: '_select', label: '', type: 'text', className: 'col-checkbox' },
       { id: 'name', label: 'Project', type: 'text', sortable: true, primary: true, className: 'name-col', secondaryKey: 'client_name' },
       { id: 'client_name', label: 'Client', type: 'text', sortable: true, className: 'name-col', hideMobile: true },
       { id: 'status', label: 'Status', type: 'status', sortable: true, statusConfig: PROJECT_STATUSES, className: 'status-col' },
       { id: 'budget', label: 'Budget', type: 'currency', sortable: true, align: 'right', className: 'amount-col', hideTablet: true },
       { id: 'created_at', label: 'Created', type: 'date', sortable: true, className: 'date-col', hideTablet: true },
-      { id: '_actions', label: '', type: 'text', className: 'actions-col' }
+      { id: '_actions', label: '', type: 'text', className: 'col-actions' }
     ]
   },
 
@@ -617,13 +617,13 @@ const SERVER_TABLE_DEFS: Record<string, ServerTableDef> = {
       { id: 'status', label: 'Status', options: [{ value: 'all', label: 'All Statuses' }, ...LEAD_STATUSES.options.map((o) => ({ value: o.value, label: o.label }))] }
     ],
     columns: [
-      { id: '_select', label: '', type: 'text', className: 'select-col' },
+      { id: '_select', label: '', type: 'text', className: 'col-checkbox' },
       { id: 'name', label: 'Name', type: 'name', sortable: true, primary: true, className: 'name-col', secondaryKey: 'company' },
       { id: 'email', label: 'Email', type: 'email', sortable: true, className: 'email-col', hideMobile: true },
       { id: 'status', label: 'Status', type: 'status', sortable: true, statusConfig: LEAD_STATUSES, className: 'status-col' },
       { id: 'source', label: 'Source', type: 'text', sortable: true, className: 'type-col', hideTablet: true },
       { id: 'created_at', label: 'Created', type: 'date', sortable: true, className: 'date-col', hideTablet: true },
-      { id: '_actions', label: '', type: 'text', className: 'actions-col' }
+      { id: '_actions', label: '', type: 'text', className: 'col-actions' }
     ]
   }
 };

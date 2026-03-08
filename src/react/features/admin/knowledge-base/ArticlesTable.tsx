@@ -305,7 +305,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
             >
               Updated
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -352,7 +352,7 @@ export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotif
                 </PortalTableCell>
                 <PortalTableCell className="text-center">{article.view_count}</PortalTableCell>
                 <PortalTableCell className="date-cell">{formatDate(article.updated_at)}</PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     <IconButton action="edit" title="Edit" />
