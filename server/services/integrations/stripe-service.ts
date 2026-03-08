@@ -15,6 +15,11 @@
 
 import { getDatabase } from '../../database/init';
 import { logger } from '../logger.js';
+import { getBaseUrl } from '../../config/environment.js';
+import {
+  STRIPE_IDEMPOTENCY_TTL_MS,
+  STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS
+} from '../../config/constants.js';
 
 // =====================================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -29,6 +34,49 @@ const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const STRIPE_API_VERSION = '2023-10-16';
 const STRIPE_API_BASE = 'https://api.stripe.com/v1';
+
+// =====================================================
+// Webhook Idempotency - Prevents duplicate event processing
+// =====================================================
+
+/** Map of processed Stripe event IDs to their processing timestamps */
+const processedWebhookEvents = new Map<string, number>();
+
+/**
+ * Check if a webhook event has already been processed
+ */
+function isEventAlreadyProcessed(eventId: string): boolean {
+  return processedWebhookEvents.has(eventId);
+}
+
+/**
+ * Mark a webhook event as processed with the current timestamp
+ */
+function markEventProcessed(eventId: string): void {
+  processedWebhookEvents.set(eventId, Date.now());
+}
+
+/**
+ * Remove expired event IDs older than the TTL threshold
+ */
+function cleanupExpiredEvents(): void {
+  const expirationThreshold = Date.now() - STRIPE_IDEMPOTENCY_TTL_MS;
+  let removedCount = 0;
+
+  for (const [eventId, timestamp] of processedWebhookEvents) {
+    if (timestamp < expirationThreshold) {
+      processedWebhookEvents.delete(eventId);
+      removedCount++;
+    }
+  }
+
+  if (removedCount > 0) {
+    logger.info(`Cleaned up ${removedCount} expired Stripe webhook event IDs`);
+  }
+}
+
+// Schedule periodic cleanup of expired event IDs
+setInterval(cleanupExpiredEvents, STRIPE_IDEMPOTENCY_CLEANUP_INTERVAL_MS);
 
 /**
  * Validate Stripe configuration before any operation
@@ -148,7 +196,7 @@ export async function createPaymentLink(config: PaymentLinkConfig): Promise<Paym
     throw new Error(`Invoice ${config.invoiceId} not found`);
   }
 
-  const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+  const baseUrl = getBaseUrl();
 
   try {
     // Create Checkout Session via Stripe API
@@ -293,7 +341,13 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
 /**
  * Handle Stripe webhook event
  */
-export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<void> {
+export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<{ alreadyProcessed: boolean }> {
+  // Idempotency check: skip events that have already been processed
+  if (isEventAlreadyProcessed(event.id)) {
+    logger.info(`Stripe webhook event ${event.id} already processed, skipping`);
+    return { alreadyProcessed: true };
+  }
+
   const db = getDatabase();
 
   switch (event.type) {
@@ -406,6 +460,10 @@ export async function handleWebhookEvent(event: StripeWebhookEvent): Promise<voi
   default:
     logger.info(`Unhandled Stripe event type: ${event.type}`);
   }
+
+  // Mark event as processed after successful handling
+  markEventProcessed(event.id);
+  return { alreadyProcessed: false };
 }
 
 /**

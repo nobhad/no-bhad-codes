@@ -20,8 +20,72 @@ import {
   sendCreated
 } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const QUESTIONNAIRE_NAME_MAX_LENGTH = 200;
+const QUESTIONNAIRE_DESCRIPTION_MAX_LENGTH = 5000;
+const QUESTIONS_MAX_COUNT = 100;
+const PROJECT_TYPE_MAX_LENGTH = 50;
+const DISPLAY_ORDER_MAX = 9999;
+const BULK_DELETE_MAX_IDS = 100;
+
+const QuestionnaireValidationSchemas = {
+  create: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: QUESTIONNAIRE_NAME_MAX_LENGTH }
+    ],
+    questions: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: QUESTIONS_MAX_COUNT }
+    ],
+    description: { type: 'string' as const, maxLength: QUESTIONNAIRE_DESCRIPTION_MAX_LENGTH },
+    project_type: { type: 'string' as const, maxLength: PROJECT_TYPE_MAX_LENGTH },
+    is_active: { type: 'boolean' as const },
+    auto_send_on_project_create: { type: 'boolean' as const },
+    display_order: { type: 'number' as const, min: 0, max: DISPLAY_ORDER_MAX }
+  } as ValidationSchema,
+
+  update: {
+    name: { type: 'string' as const, minLength: 1, maxLength: QUESTIONNAIRE_NAME_MAX_LENGTH },
+    description: { type: 'string' as const, maxLength: QUESTIONNAIRE_DESCRIPTION_MAX_LENGTH },
+    questions: { type: 'array' as const, maxLength: QUESTIONS_MAX_COUNT },
+    project_type: { type: 'string' as const, maxLength: PROJECT_TYPE_MAX_LENGTH },
+    is_active: { type: 'boolean' as const },
+    auto_send_on_project_create: { type: 'boolean' as const },
+    display_order: { type: 'number' as const, min: 0, max: DISPLAY_ORDER_MAX }
+  } as ValidationSchema,
+
+  bulkDelete: {
+    questionnaireIds: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: BULK_DELETE_MAX_IDS }
+    ]
+  } as ValidationSchema,
+
+  send: {
+    client_id: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    project_id: { type: 'number' as const, min: 1 },
+    due_date: { type: 'string' as const, maxLength: 30 }
+  } as ValidationSchema,
+
+  saveProgress: {
+    answers: { type: 'object' as const }
+  } as ValidationSchema,
+
+  submitResponse: {
+    answers: { type: 'object' as const }
+  } as ValidationSchema
+};
 
 // =====================================================
 // CLIENT ENDPOINTS
@@ -90,6 +154,7 @@ router.get(
 router.post(
   '/responses/:id/save',
   authenticateToken,
+  validateRequest(QuestionnaireValidationSchemas.saveProgress, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = req.user?.id;
     const responseId = parseInt(req.params.id, 10);
@@ -126,6 +191,7 @@ router.post(
 router.post(
   '/responses/:id/submit',
   authenticateToken,
+  validateRequest(QuestionnaireValidationSchemas.submitResponse, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const clientId = req.user?.id;
     const responseId = parseInt(req.params.id, 10);
@@ -248,6 +314,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(QuestionnaireValidationSchemas.create, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       name,
@@ -287,6 +354,7 @@ router.put(
   '/:id',
   authenticateToken,
   requireAdmin,
+  validateRequest(QuestionnaireValidationSchemas.update, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
 
@@ -330,6 +398,7 @@ router.post(
   '/bulk-delete',
   authenticateToken,
   requireAdmin,
+  validateRequest(QuestionnaireValidationSchemas.bulkDelete),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { questionnaireIds } = req.body;
 
@@ -379,6 +448,7 @@ router.post(
   '/:id/send',
   authenticateToken,
   requireAdmin,
+  validateRequest(QuestionnaireValidationSchemas.send, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const questionnaireId = parseInt(req.params.id, 10);
     const { client_id, project_id, due_date } = req.body;

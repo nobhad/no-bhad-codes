@@ -10,11 +10,12 @@
 
 import cron, { ScheduledTask } from 'node-cron';
 import { InvoiceService } from './invoice-service.js';
-import { emailService } from './email-service.js';
+import { emailService, processEmailRetryQueue } from './email-service.js';
 import { getDatabase, Database } from '../database/init.js';
 import { softDeleteService } from './soft-delete-service.js';
 import { escalateAllProjects, EscalationResult } from './priority-escalation-service.js';
 import { logger } from './logger.js';
+import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
 
 interface SchedulerConfig {
   enableReminders: boolean;
@@ -195,6 +196,20 @@ export class SchedulerService {
         await this.processReminders();
       } catch (error) {
         logger.error('[Scheduler] Error processing reminders:', {
+          error: error instanceof Error ? error : undefined
+        });
+      }
+
+      // Process email retry queue on each hourly tick
+      try {
+        const retryResult = await processEmailRetryQueue();
+        if (retryResult.retried > 0 || retryResult.failed > 0) {
+          logger.info(
+            `[Scheduler] Email retry queue: ${retryResult.retried} retried, ${retryResult.failed} failed, ${retryResult.remaining} remaining`
+          );
+        }
+      } catch (error) {
+        logger.error('[Scheduler] Error processing email retry queue:', {
           error: error instanceof Error ? error : undefined
         });
       }
@@ -392,7 +407,7 @@ export class SchedulerService {
         }
 
         // Send reminder email
-        const portalUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000/client/portal'}?invoice=${invoice.id}`;
+        const portalUrl = `${getPortalUrl()}?invoice=${invoice.id}`;
 
         await this.sendReminderEmail({
           email: client.email,
@@ -472,7 +487,7 @@ export class SchedulerService {
         }
 
         // Build the signing URL (signature_token comes from contracts table)
-        const signingUrl = `${process.env.CLIENT_PORTAL_URL || 'http://localhost:3000'}/contract/sign/${reminder.signature_token}`;
+        const signingUrl = `${getBaseUrl()}/contract/sign/${reminder.signature_token}`;
 
         await this.sendContractReminderEmail({
           email: reminder.email,
@@ -944,7 +959,7 @@ No Bhad Codes Team
     const { email, entityType, entityId, workflowName, reminderCount, daysWaiting } = data;
 
     const entityLabel = entityType.charAt(0).toUpperCase() + entityType.slice(1);
-    const portalUrl = process.env.CLIENT_PORTAL_URL || 'http://localhost:3000';
+    const portalUrl = getPortalUrl();
 
     let subject: string;
     let urgency = '';
@@ -1034,7 +1049,7 @@ No Bhad Codes Team
 
     const entityLabel = entityType.charAt(0).toUpperCase() + entityType.slice(1);
     const adminEmail = process.env.ADMIN_EMAIL || process.env.SUPPORT_EMAIL;
-    const adminUrl = process.env.ADMIN_URL || 'http://localhost:3000/admin';
+    const adminUrl = getAdminUrl();
 
     if (!adminEmail) {
       logger.warn('[Scheduler] No admin email configured for stalled approval notification');

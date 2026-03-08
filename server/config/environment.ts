@@ -103,6 +103,7 @@ export interface AppConfig {
 
   // Logging
   LOG_LEVEL: 'error' | 'warn' | 'info' | 'debug';
+  LOG_FORMAT: 'json' | 'text';
   LOG_FILE: string;
   LOG_MAX_SIZE: string;
   LOG_MAX_FILES: string;
@@ -209,6 +210,7 @@ const configSchema: ConfigSchema = {
 
   // Logging
   LOG_LEVEL: { required: false, default: 'info', values: ['error', 'warn', 'info', 'debug'] },
+  LOG_FORMAT: { required: false, default: 'text', values: ['json', 'text'] },
   LOG_FILE: { required: false, default: './logs/app.log' },
   LOG_MAX_SIZE: { required: false, default: '10m' },
   LOG_MAX_FILES: { required: false, default: '14d' },
@@ -478,3 +480,32 @@ export default finalConfig as AppConfig;
 
 // Export validation function for testing
 export { validateConfig, getConfigSummary };
+
+/**
+ * Get the base URL for the website (client-facing).
+ * Checks WEBSITE_URL, BASE_URL, and FRONTEND_URL in order of precedence.
+ * Throws in production if none are set; falls back to FRONTEND_URL default in dev.
+ */
+export function getBaseUrl(): string {
+  const url = process.env.WEBSITE_URL || process.env.BASE_URL || finalConfig.FRONTEND_URL;
+  if (!url && finalConfig.NODE_ENV === 'production') {
+    throw new Error('No base URL configured. Set WEBSITE_URL or BASE_URL in environment.');
+  }
+  return url || `http://localhost:${finalConfig.PORT}`;
+}
+
+/**
+ * Get the admin panel URL.
+ * Checks ADMIN_URL first, then derives from base URL.
+ */
+export function getAdminUrl(): string {
+  return process.env.ADMIN_URL || `${getBaseUrl()}/admin`;
+}
+
+/**
+ * Get the client portal URL.
+ * Checks CLIENT_PORTAL_URL first, then derives from base URL.
+ */
+export function getPortalUrl(): string {
+  return process.env.CLIENT_PORTAL_URL || `${getBaseUrl()}/client/portal`;
+}

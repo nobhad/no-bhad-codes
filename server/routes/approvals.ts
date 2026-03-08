@@ -13,8 +13,89 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
 import { getDatabase } from '../database/init.js';
 import { errorResponse, sendSuccess } from '../utils/api-response.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const WORKFLOW_NAME_MAX_LENGTH = 200;
+const WORKFLOW_DESCRIPTION_MAX_LENGTH = 2000;
+const ENTITY_TYPE_VALUES = ['proposal', 'invoice', 'contract', 'deliverable', 'project'];
+const WORKFLOW_TYPE_VALUES = ['sequential', 'parallel', 'any_one'];
+const APPROVER_TYPE_MAX_LENGTH = 50;
+const APPROVER_VALUE_MAX_LENGTH = 200;
+const AUTO_APPROVE_MAX_HOURS = 720;
+const STEP_ORDER_MAX = 100;
+const COMMENT_MAX_LENGTH = 5000;
+const REASON_MAX_LENGTH = 2000;
+const NOTES_MAX_LENGTH = 5000;
+
+const ApprovalValidationSchemas = {
+  createWorkflow: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: WORKFLOW_NAME_MAX_LENGTH }
+    ],
+    entity_type: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: ENTITY_TYPE_VALUES }
+    ],
+    workflow_type: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: WORKFLOW_TYPE_VALUES }
+    ],
+    description: { type: 'string' as const, maxLength: WORKFLOW_DESCRIPTION_MAX_LENGTH },
+    is_default: { type: 'boolean' as const }
+  } as ValidationSchema,
+
+  addStep: {
+    step_order: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1, max: STEP_ORDER_MAX }
+    ],
+    approver_type: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: APPROVER_TYPE_MAX_LENGTH }
+    ],
+    approver_value: [
+      { type: 'required' as const },
+      { type: 'string' as const, maxLength: APPROVER_VALUE_MAX_LENGTH }
+    ],
+    is_optional: { type: 'boolean' as const },
+    auto_approve_after_hours: { type: 'number' as const, min: 1, max: AUTO_APPROVE_MAX_HOURS }
+  } as ValidationSchema,
+
+  startWorkflow: {
+    entity_type: [
+      { type: 'required' as const },
+      { type: 'string' as const, allowedValues: ENTITY_TYPE_VALUES }
+    ],
+    entity_id: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    workflow_definition_id: { type: 'number' as const, min: 1 },
+    notes: { type: 'string' as const, maxLength: NOTES_MAX_LENGTH }
+  } as ValidationSchema,
+
+  approveRequest: {
+    comment: { type: 'string' as const, maxLength: COMMENT_MAX_LENGTH }
+  } as ValidationSchema,
+
+  rejectRequest: {
+    reason: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: REASON_MAX_LENGTH }
+    ]
+  } as ValidationSchema,
+
+  cancelWorkflow: {
+    reason: { type: 'string' as const, maxLength: REASON_MAX_LENGTH }
+  } as ValidationSchema
+};
 
 // =====================================================
 // WORKFLOW DEFINITIONS
@@ -64,12 +145,9 @@ router.post(
   '/workflows',
   authenticateToken,
   requireAdmin,
+  validateRequest(ApprovalValidationSchemas.createWorkflow, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, description, entity_type, workflow_type, is_default } = req.body;
-
-    if (!name || !entity_type || !workflow_type) {
-      return errorResponse(res, 'Name, entity_type, and workflow_type are required', 400);
-    }
 
     const validEntityTypes: EntityType[] = [
       'proposal',
@@ -115,6 +193,7 @@ router.post(
   '/workflows/:id/steps',
   authenticateToken,
   requireAdmin,
+  validateRequest(ApprovalValidationSchemas.addStep, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const workflowId = parseInt(req.params.id, 10);
     if (isNaN(workflowId) || workflowId <= 0) {
@@ -151,12 +230,9 @@ router.post(
 router.post(
   '/start',
   authenticateToken,
+  validateRequest(ApprovalValidationSchemas.startWorkflow),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { entity_type, entity_id, workflow_definition_id, notes } = req.body;
-
-    if (!entity_type || !entity_id) {
-      return errorResponse(res, 'entity_type and entity_id are required', 400);
-    }
 
     const initiatedBy = req.user?.email || 'unknown';
 
@@ -269,6 +345,7 @@ router.get(
 router.post(
   '/requests/:id/approve',
   authenticateToken,
+  validateRequest(ApprovalValidationSchemas.approveRequest, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requestId = parseInt(req.params.id, 10);
     if (isNaN(requestId) || requestId <= 0) {
@@ -306,6 +383,7 @@ router.post(
 router.post(
   '/requests/:id/reject',
   authenticateToken,
+  validateRequest(ApprovalValidationSchemas.rejectRequest),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const requestId = parseInt(req.params.id, 10);
     if (isNaN(requestId) || requestId <= 0) {
@@ -348,6 +426,7 @@ router.post(
   '/instance/:id/cancel',
   authenticateToken,
   requireAdmin,
+  validateRequest(ApprovalValidationSchemas.cancelWorkflow, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const instanceId = parseInt(req.params.id, 10);
     if (isNaN(instanceId) || instanceId <= 0) {

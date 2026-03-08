@@ -15,6 +15,7 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { getDatabase } from '../database/init.js';
 import { logger } from './logger.js';
+import { getBaseUrl, getAdminUrl, getPortalUrl } from '../config/environment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -150,6 +151,36 @@ interface EmailConfig {
   replyTo?: string;
 }
 
+// ============================================
+// Retry Queue Constants
+// ============================================
+
+/** Maximum number of retry attempts per failed email */
+const MAX_RETRY_ATTEMPTS = 3;
+
+/** Delay in milliseconds between retries (exponential backoff: attempt * base delay) */
+const RETRY_BASE_DELAY_MS = 5000;
+
+/** Maximum number of items the retry queue can hold before discarding oldest */
+const MAX_QUEUE_SIZE = 100;
+
+// ============================================
+// Retry Queue Types & State
+// ============================================
+
+interface RetryQueueItem {
+  emailContent: EmailContent;
+  attemptCount: number;
+  nextRetryAt: number; // timestamp in ms
+  addedAt: number; // timestamp in ms
+}
+
+/** In-memory retry queue for failed email sends */
+const retryQueue: RetryQueueItem[] = [];
+
+/** Flag to prevent concurrent queue processing */
+let isProcessingRetryQueue = false;
+
 // Nodemailer transporter instance
 let transporter: Transporter | null = null;
 let emailConfig: EmailConfig | null = null;
@@ -184,15 +215,158 @@ async function sendEmail(emailContent: EmailContent): Promise<EmailResult> {
     logger.error('[EMAIL] Failed to send email:', {
       error: error instanceof Error ? error : undefined
     });
-    // Fall back to logging if send fails
-    logger.info('[EMAIL] Email content (send failed):');
-    logger.info(`To: ${sanitizeEmailForLog(emailContent.to)}`);
-    logger.info(`Subject: ${emailContent.subject}`);
+
+    // Enqueue for retry
+    enqueueForRetry(emailContent);
+
     return {
       success: false,
       message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
+}
+
+/**
+ * Calculate exponential backoff delay for a given attempt number
+ * @param attemptCount - Current attempt (1-based)
+ * @returns Delay in milliseconds
+ */
+function getRetryDelay(attemptCount: number): number {
+  return RETRY_BASE_DELAY_MS * Math.pow(2, attemptCount - 1);
+}
+
+/**
+ * Add a failed email to the retry queue
+ * If the queue is full, the oldest item is discarded.
+ */
+function enqueueForRetry(emailContent: EmailContent): void {
+  const now = Date.now();
+  const firstRetryDelay = getRetryDelay(1);
+
+  // Enforce queue size limit by removing the oldest entry
+  if (retryQueue.length >= MAX_QUEUE_SIZE) {
+    const discarded = retryQueue.shift();
+    if (discarded) {
+      logger.warn(
+        `[EMAIL RETRY] Queue full (${MAX_QUEUE_SIZE}), discarded oldest item: ${sanitizeEmailForLog(discarded.emailContent.to)} - ${discarded.emailContent.subject}`
+      );
+    }
+  }
+
+  retryQueue.push({
+    emailContent,
+    attemptCount: 1,
+    nextRetryAt: now + firstRetryDelay,
+    addedAt: now
+  });
+
+  logger.info(
+    `[EMAIL RETRY] Enqueued email for retry: ${sanitizeEmailForLog(emailContent.to)} - ${emailContent.subject} (queue size: ${retryQueue.length})`
+  );
+}
+
+/**
+ * Process the email retry queue.
+ * Retries emails whose backoff period has elapsed.
+ * After MAX_RETRY_ATTEMPTS, the email is discarded with a log entry.
+ *
+ * This function is safe to call from the scheduler/cron on any interval.
+ * It prevents concurrent processing with an internal lock.
+ */
+export async function processEmailRetryQueue(): Promise<{ retried: number; failed: number; remaining: number }> {
+  if (isProcessingRetryQueue) {
+    logger.info('[EMAIL RETRY] Queue processing already in progress, skipping');
+    return { retried: 0, failed: 0, remaining: retryQueue.length };
+  }
+
+  if (retryQueue.length === 0) {
+    return { retried: 0, failed: 0, remaining: 0 };
+  }
+
+  isProcessingRetryQueue = true;
+  const now = Date.now();
+  let retriedCount = 0;
+  let failedCount = 0;
+
+  // Process items from front to back; collect indices to remove after iteration
+  const indicesToRemove: number[] = [];
+
+  try {
+    for (let i = 0; i < retryQueue.length; i++) {
+      const item = retryQueue[i];
+
+      // Skip items whose backoff period has not elapsed
+      if (item.nextRetryAt > now) {
+        continue;
+      }
+
+      logger.info(
+        `[EMAIL RETRY] Retrying email (attempt ${item.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${sanitizeEmailForLog(item.emailContent.to)} - ${item.emailContent.subject}`
+      );
+
+      try {
+        if (!transporter || !emailConfig) {
+          // Transporter still not available - skip processing entirely
+          logger.info('[EMAIL RETRY] Transporter not initialized, deferring queue processing');
+          break;
+        }
+
+        await transporter.sendMail({
+          from: emailConfig.from,
+          to: item.emailContent.to,
+          subject: item.emailContent.subject,
+          text: item.emailContent.text,
+          html: item.emailContent.html,
+          replyTo: emailConfig.replyTo
+        });
+
+        logger.info(
+          `[EMAIL RETRY] Successfully sent on retry (attempt ${item.attemptCount}): ${sanitizeEmailForLog(item.emailContent.to)}`
+        );
+        indicesToRemove.push(i);
+        retriedCount++;
+      } catch (error) {
+        logger.error(`[EMAIL RETRY] Retry attempt ${item.attemptCount} failed:`, {
+          error: error instanceof Error ? error : undefined
+        });
+
+        if (item.attemptCount >= MAX_RETRY_ATTEMPTS) {
+          // Max retries exceeded - discard
+          logger.error(
+            `[EMAIL RETRY] Max retries (${MAX_RETRY_ATTEMPTS}) exceeded, discarding email: ${sanitizeEmailForLog(item.emailContent.to)} - ${item.emailContent.subject}`
+          );
+          indicesToRemove.push(i);
+          failedCount++;
+        } else {
+          // Schedule next retry with exponential backoff
+          item.attemptCount++;
+          item.nextRetryAt = now + getRetryDelay(item.attemptCount);
+        }
+      }
+    }
+
+    // Remove processed items in reverse order to preserve indices
+    for (let i = indicesToRemove.length - 1; i >= 0; i--) {
+      retryQueue.splice(indicesToRemove[i], 1);
+    }
+  } finally {
+    isProcessingRetryQueue = false;
+  }
+
+  if (retriedCount > 0 || failedCount > 0) {
+    logger.info(
+      `[EMAIL RETRY] Queue processed: ${retriedCount} sent, ${failedCount} discarded, ${retryQueue.length} remaining`
+    );
+  }
+
+  return { retried: retriedCount, failed: failedCount, remaining: retryQueue.length };
+}
+
+/**
+ * Get the current size of the email retry queue (for status reporting)
+ */
+export function getEmailRetryQueueSize(): number {
+  return retryQueue.length;
 }
 
 /**
@@ -208,7 +382,7 @@ export async function sendWelcomeEmail(
 ): Promise<EmailResult> {
   logger.info(`[EMAIL] Preparing welcome email for: ${sanitizeEmailForLog(email)}`);
 
-  const portalUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/client/portal?token=${accessToken}`;
+  const portalUrl = `${getPortalUrl()}?token=${accessToken}`;
 
   const emailContent: EmailContent = {
     to: email,
@@ -544,9 +718,9 @@ export const emailService = {
   getStatus(): EmailServiceStatus {
     return {
       initialized: transporter !== null,
-      queueSize: 0,
+      queueSize: retryQueue.length,
       templatesLoaded: 4,
-      isProcessingQueue: false
+      isProcessingQueue: isProcessingRetryQueue
     };
   },
 
@@ -574,7 +748,7 @@ export const emailService = {
   ): Promise<EmailResult> {
     logger.info(`[EMAIL] Preparing password reset email for: ${sanitizeEmailForLog(email)}`);
 
-    const resetUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/reset-password?token=${data.resetToken}`;
+    const resetUrl = `${getBaseUrl()}/reset-password?token=${data.resetToken}`;
     const name = data.name || 'User';
 
     const emailContent: EmailContent = {
@@ -675,7 +849,7 @@ export const emailService = {
     );
 
     const portalUrl =
-      data.portalUrl || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/client/portal`;
+      data.portalUrl || getPortalUrl();
     const settingsUrl = `${portalUrl}#settings`;
     const name = data.name || 'there';
 
@@ -804,7 +978,7 @@ export const emailService = {
   ): Promise<EmailResult> {
     logger.info(`[EMAIL] Preparing magic link email for: ${sanitizeEmailForLog(email)}`);
 
-    const loginUrl = `${process.env.WEBSITE_URL || 'http://localhost:3000'}/auth/magic-link?token=${data.magicLinkToken}`;
+    const loginUrl = `${getBaseUrl()}/auth/magic-link?token=${data.magicLinkToken}`;
     const name = data.name || 'there';
 
     const emailContent: EmailContent = {
@@ -887,7 +1061,7 @@ export const emailService = {
     }
 
     const adminUrl =
-      process.env.ADMIN_URL || `${process.env.WEBSITE_URL || 'http://localhost:3000'}/admin`;
+      getAdminUrl();
     const timestamp = new Date().toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -1127,5 +1301,86 @@ This email confirms your legally binding agreement. Please keep it for your reco
         message: `Failed to load email templates: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
+  },
+
+  /**
+   * Send email verification email to client
+   * @param email - Recipient email address
+   * @param data - Verification data including token and optional name
+   */
+  async sendEmailVerificationEmail(
+    email: string,
+    data: { verificationToken: string; name?: string }
+  ): Promise<EmailResult> {
+    logger.info(`[EMAIL] Preparing email verification email for: ${sanitizeEmailForLog(email)}`);
+
+    const verifyUrl = `${getBaseUrl()}/auth/verify-email/${data.verificationToken}`;
+    const name = data.name || 'there';
+
+    const emailContent: EmailContent = {
+      to: email,
+      subject: 'Verify Your Email - No Bhad Codes',
+      text: `
+        Hi ${name},
+
+        Please verify your email address by clicking the link below:
+        ${verifyUrl}
+
+        This link will expire in 24 hours.
+
+        If you did not create an account, please ignore this email.
+
+        Best regards,
+        No Bhad Codes Team
+      `,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #00ff41; color: #000; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .button {
+              display: inline-block;
+              padding: 12px 24px;
+              background: #00ff41;
+              color: #000;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+            }
+            .footer { padding: 20px; text-align: center; font-size: 0.9em; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Verify Your Email</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${escapeHtml(name)},</p>
+              <p>Please verify your email address to complete your account setup.</p>
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="${escapeHtml(verifyUrl)}" class="button">Verify Email</a>
+              </p>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; background: #fff; padding: 10px; border: 1px solid #ddd;">${escapeHtml(verifyUrl)}</p>
+              <p><small>This link will expire in 24 hours.</small></p>
+              <p>If you did not create an account, you can safely ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>Best regards,<br>No Bhad Codes Team</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    return sendEmail(emailContent);
   }
 };

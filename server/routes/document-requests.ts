@@ -13,8 +13,104 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { documentRequestService, RequestStatus } from '../services/document-request-service.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const DOC_REQUEST_TITLE_MAX_LENGTH = 200;
+const DOC_REQUEST_DESCRIPTION_MAX_LENGTH = 5000;
+const DOC_TYPE_MAX_LENGTH = 100;
+const DOC_PRIORITY_VALUES = ['low', 'normal', 'high', 'urgent'];
+const BULK_DELETE_MAX_IDS = 100;
+const TEMPLATE_NAME_MAX_LENGTH = 200;
+const MAX_TEMPLATE_IDS = 50;
+const REJECTION_REASON_MAX_LENGTH = 2000;
+const REVIEW_NOTES_MAX_LENGTH = 2000;
+const DAYS_UNTIL_DUE_MAX = 365;
+
+const DocRequestValidationSchemas = {
+  create: {
+    client_id: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    title: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: DOC_REQUEST_TITLE_MAX_LENGTH }
+    ],
+    project_id: { type: 'number' as const, min: 1 },
+    description: { type: 'string' as const, maxLength: DOC_REQUEST_DESCRIPTION_MAX_LENGTH },
+    document_type: { type: 'string' as const, maxLength: DOC_TYPE_MAX_LENGTH },
+    priority: { type: 'string' as const, allowedValues: DOC_PRIORITY_VALUES },
+    due_date: { type: 'string' as const, maxLength: 30 },
+    is_required: { type: 'boolean' as const }
+  } as ValidationSchema,
+
+  fromTemplates: {
+    client_id: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ],
+    template_ids: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: MAX_TEMPLATE_IDS }
+    ],
+    project_id: { type: 'number' as const, min: 1 }
+  } as ValidationSchema,
+
+  upload: {
+    fileId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ]
+  } as ValidationSchema,
+
+  approve: {
+    notes: { type: 'string' as const, maxLength: REVIEW_NOTES_MAX_LENGTH }
+  } as ValidationSchema,
+
+  reject: {
+    reason: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: REJECTION_REASON_MAX_LENGTH }
+    ]
+  } as ValidationSchema,
+
+  bulkDelete: {
+    requestIds: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: BULK_DELETE_MAX_IDS }
+    ]
+  } as ValidationSchema,
+
+  createTemplate: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: TEMPLATE_NAME_MAX_LENGTH }
+    ],
+    title: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: DOC_REQUEST_TITLE_MAX_LENGTH }
+    ],
+    description: { type: 'string' as const, maxLength: DOC_REQUEST_DESCRIPTION_MAX_LENGTH },
+    document_type: { type: 'string' as const, maxLength: DOC_TYPE_MAX_LENGTH },
+    is_required: { type: 'boolean' as const },
+    days_until_due: { type: 'number' as const, min: 1, max: DAYS_UNTIL_DUE_MAX }
+  } as ValidationSchema,
+
+  updateTemplate: {
+    name: { type: 'string' as const, minLength: 1, maxLength: TEMPLATE_NAME_MAX_LENGTH },
+    title: { type: 'string' as const, minLength: 1, maxLength: DOC_REQUEST_TITLE_MAX_LENGTH },
+    description: { type: 'string' as const, maxLength: DOC_REQUEST_DESCRIPTION_MAX_LENGTH },
+    document_type: { type: 'string' as const, maxLength: DOC_TYPE_MAX_LENGTH },
+    is_required: { type: 'boolean' as const },
+    days_until_due: { type: 'number' as const, min: 1, max: DAYS_UNTIL_DUE_MAX }
+  } as ValidationSchema
+};
 
 // =====================================================
 // CLIENT ENDPOINTS
@@ -70,6 +166,7 @@ router.post(
 router.post(
   '/:id/upload',
   authenticateToken,
+  validateRequest(DocRequestValidationSchemas.upload),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     const { fileId } = req.body;
@@ -243,6 +340,7 @@ router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.create, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const {
       client_id,
@@ -284,6 +382,7 @@ router.post(
   '/from-templates',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.fromTemplates),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { client_id, template_ids, project_id } = req.body;
 
@@ -334,6 +433,7 @@ router.post(
   '/:id/approve',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.approve, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     const { notes } = req.body;
@@ -376,6 +476,7 @@ router.post(
   '/:id/reject',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.reject),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
     const { reason } = req.body;
@@ -453,6 +554,7 @@ router.post(
   '/bulk-delete',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.bulkDelete),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { requestIds } = req.body;
 
@@ -525,6 +627,7 @@ router.post(
   '/templates',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.createTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { name, title, description, document_type, is_required, days_until_due } = req.body;
 
@@ -555,6 +658,7 @@ router.put(
   '/templates/:id',
   authenticateToken,
   requireAdmin,
+  validateRequest(DocRequestValidationSchemas.updateTemplate, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const id = parseInt(req.params.id, 10);
 

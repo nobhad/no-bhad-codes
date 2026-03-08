@@ -9,8 +9,86 @@ import { errorResponse, sendSuccess, sendCreated } from '../utils/api-response.j
 import { logger } from '../services/logger.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const WEBHOOK_NAME_MAX_LENGTH = 200;
+const WEBHOOK_URL_MAX_LENGTH = 2000;
+const WEBHOOK_EVENTS_MAX = 50;
+const PAYLOAD_TEMPLATE_MAX_LENGTH = 50000;
+const EVENT_TYPE_MAX_LENGTH = 100;
+const RETRY_MAX_ATTEMPTS = 10;
+const RETRY_BACKOFF_MAX_SECONDS = 3600;
+const HTTP_METHOD_VALUES = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+const WebhookValidationSchemas = {
+  create: {
+    name: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: WEBHOOK_NAME_MAX_LENGTH }
+    ],
+    url: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: WEBHOOK_URL_MAX_LENGTH }
+    ],
+    events: [
+      { type: 'required' as const },
+      { type: 'array' as const, minLength: 1, maxLength: WEBHOOK_EVENTS_MAX }
+    ],
+    payloadTemplate: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: PAYLOAD_TEMPLATE_MAX_LENGTH }
+    ],
+    method: { type: 'string' as const, allowedValues: HTTP_METHOD_VALUES },
+    headers: { type: 'object' as const },
+    retryMaxAttempts: { type: 'number' as const, min: 0, max: RETRY_MAX_ATTEMPTS },
+    retryBackoffSeconds: { type: 'number' as const, min: 1, max: RETRY_BACKOFF_MAX_SECONDS }
+  } as ValidationSchema,
+
+  update: {
+    name: { type: 'string' as const, minLength: 1, maxLength: WEBHOOK_NAME_MAX_LENGTH },
+    url: { type: 'string' as const, minLength: 1, maxLength: WEBHOOK_URL_MAX_LENGTH },
+    events: { type: 'array' as const, maxLength: WEBHOOK_EVENTS_MAX },
+    payload_template: { type: 'string' as const, maxLength: PAYLOAD_TEMPLATE_MAX_LENGTH },
+    method: { type: 'string' as const, allowedValues: HTTP_METHOD_VALUES },
+    headers: { type: 'object' as const }
+  } as ValidationSchema,
+
+  toggle: {
+    active: [
+      { type: 'required' as const },
+      { type: 'boolean' as const }
+    ]
+  } as ValidationSchema,
+
+  test: {
+    eventType: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: EVENT_TYPE_MAX_LENGTH }
+    ],
+    sampleData: { type: 'object' as const }
+  } as ValidationSchema,
+
+  retry: {
+    deliveryId: [
+      { type: 'required' as const },
+      { type: 'number' as const, min: 1 }
+    ]
+  } as ValidationSchema,
+
+  triggerEvent: {
+    eventType: [
+      { type: 'required' as const },
+      { type: 'string' as const, minLength: 1, maxLength: EVENT_TYPE_MAX_LENGTH }
+    ],
+    data: { type: 'object' as const }
+  } as ValidationSchema
+};
 
 // All webhook routes require admin authentication
 router.use(authenticateToken);
@@ -67,7 +145,7 @@ router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: 
  * Create new webhook
  * Body: { name, url, events[], payloadTemplate, method?, headers? }
  */
-router.post('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const {
       name,
@@ -125,7 +203,7 @@ router.post('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Res
  * PUT /api/v1/webhooks/:id
  * Update webhook configuration
  */
-router.put('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -185,7 +263,7 @@ router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, re
  * Toggle webhook active/inactive
  * Body: { active: boolean }
  */
-router.patch('/webhooks/:id/toggle', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.toggle), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -219,7 +297,7 @@ router.patch('/webhooks/:id/toggle', asyncHandler(async (req: AuthenticatedReque
  * Test webhook by sending sample payload
  * Body: { eventType, sampleData? }
  */
-router.post('/webhooks/:id/test', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -359,7 +437,7 @@ router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest,
  * Manually retry failed delivery
  * Body: { deliveryId }
  */
-router.post('/webhooks/:id/retry', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retry), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -431,7 +509,7 @@ router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: Authenti
  * Manually trigger webhook event (for testing/validation)
  * Body: { eventType, data? }
  */
-router.post('/events/trigger', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/events/trigger', validateRequest(WebhookValidationSchemas.triggerEvent, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { eventType, data } = req.body;
 

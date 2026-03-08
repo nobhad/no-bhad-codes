@@ -18,8 +18,56 @@ import { rateLimit } from '../middleware/security.js';
 import { settingsService } from '../services/settings-service.js';
 import { auditLogger } from '../services/audit-logger.js';
 import { errorResponse, sendSuccess } from '../utils/api-response.js';
+import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
+
+// =====================================================
+// VALIDATION SCHEMAS
+// =====================================================
+
+const SETTING_VALUE_MAX_LENGTH = 10000;
+const SETTING_KEY_MAX_LENGTH = 200;
+const BUSINESS_FIELD_MAX_LENGTH = 200;
+const PAYMENT_HANDLE_MAX_LENGTH = 100;
+const INVOICE_PREFIX_MAX_LENGTH = 20;
+const INVOICE_SEQUENCE_MAX = 999999;
+const CURRENCY_CODE_LENGTH = 3;
+
+const SettingsValidationSchemas = {
+  updateSetting: {
+    value: [
+      { type: 'required' as const }
+    ],
+    type: {
+      type: 'string' as const,
+      allowedValues: ['string', 'number', 'boolean', 'json']
+    },
+    description: { type: 'string' as const, maxLength: SETTING_KEY_MAX_LENGTH }
+  } as ValidationSchema,
+
+  updateBusinessInfo: {
+    name: { type: 'string' as const, maxLength: BUSINESS_FIELD_MAX_LENGTH },
+    owner: { type: 'string' as const, maxLength: BUSINESS_FIELD_MAX_LENGTH },
+    contact: { type: 'string' as const, maxLength: BUSINESS_FIELD_MAX_LENGTH },
+    tagline: { type: 'string' as const, maxLength: BUSINESS_FIELD_MAX_LENGTH },
+    email: { type: 'email' as const },
+    website: { type: 'string' as const, maxLength: BUSINESS_FIELD_MAX_LENGTH }
+  } as ValidationSchema,
+
+  updatePaymentSettings: {
+    venmoHandle: { type: 'string' as const, maxLength: PAYMENT_HANDLE_MAX_LENGTH },
+    zelleEmail: { type: 'email' as const },
+    paypalEmail: { type: 'email' as const }
+  } as ValidationSchema,
+
+  updateInvoiceSettings: {
+    defaultCurrency: { type: 'string' as const, minLength: CURRENCY_CODE_LENGTH, maxLength: CURRENCY_CODE_LENGTH },
+    defaultTerms: { type: 'string' as const, maxLength: SETTING_VALUE_MAX_LENGTH },
+    prefix: { type: 'string' as const, maxLength: INVOICE_PREFIX_MAX_LENGTH },
+    nextSequence: { type: 'number' as const, min: 1, max: INVOICE_SEQUENCE_MAX }
+  } as ValidationSchema
+};
 
 // Strict rate limiting for settings modifications (10 requests per 5 minutes)
 const settingsModifyRateLimit = rateLimit({
@@ -143,6 +191,7 @@ router.put(
   settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
+  validateRequest(SettingsValidationSchemas.updateSetting, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { value, type, description } = req.body;
 
@@ -272,6 +321,7 @@ router.put(
   settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
+  validateRequest(SettingsValidationSchemas.updateBusinessInfo, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const businessInfo = await settingsService.updateBusinessInfo(req.body);
 
@@ -340,6 +390,7 @@ router.put(
   settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
+  validateRequest(SettingsValidationSchemas.updatePaymentSettings, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const paymentSettings = await settingsService.updatePaymentSettings(req.body);
 
@@ -410,6 +461,7 @@ router.put(
   settingsModifyRateLimit,
   authenticateToken,
   requireAdmin,
+  validateRequest(SettingsValidationSchemas.updateInvoiceSettings, { allowUnknownFields: true }),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const invoiceSettings = await settingsService.updateInvoiceSettings(req.body);
 
