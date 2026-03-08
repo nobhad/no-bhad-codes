@@ -1564,4 +1564,1196 @@ describe('Invoice Service', () => {
       );
     });
   });
+
+  // ============================================
+  // CREATE INVOICE
+  // ============================================
+
+  describe('createInvoice', () => {
+    it('creates an invoice with line items and returns mapped invoice', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      const lineItems = [{ description: 'Web Development', quantity: 1, rate: 2000, amount: 2000 }];
+
+      mockDb.run
+        .mockResolvedValueOnce({ lastID: 100 }) // INSERT invoice
+        .mockResolvedValueOnce({ changes: 1 }) // DELETE old line items
+        .mockResolvedValueOnce({ lastID: 1 }); // INSERT line item
+
+      mockDb.get.mockResolvedValueOnce({
+        id: 100,
+        invoice_number: 'INV-202603-000001',
+        project_id: 1,
+        client_id: 2,
+        amount_total: 2000,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        due_date: '2026-03-31',
+        issued_date: '2026-03-01',
+        invoice_type: 'standard',
+        company_name: 'Acme Corp',
+        contact_name: 'John Doe',
+        client_email: 'john@acme.com',
+        project_name: 'Website Redesign',
+        project_description: 'Full redesign'
+      });
+      mockDb.all.mockResolvedValueOnce([
+        { description: 'Web Development', quantity: 1, unit_price: 2000, amount: 2000 }
+      ]);
+
+      const result = await service.createInvoice({
+        projectId: 1,
+        clientId: 2,
+        lineItems
+      });
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO invoices'),
+        expect.arrayContaining([1, 2, 2000, 'USD'])
+      );
+      expect(result.amountTotal).toBe(2000);
+      expect(result.status).toBe('draft');
+    });
+
+    it('uses provided due date instead of default 30-day', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      const lineItems = [{ description: 'Consulting', quantity: 1, rate: 500, amount: 500 }];
+
+      mockDb.run
+        .mockResolvedValueOnce({ lastID: 101 })
+        .mockResolvedValueOnce({ changes: 1 })
+        .mockResolvedValueOnce({ lastID: 2 });
+
+      mockDb.get.mockResolvedValueOnce({
+        id: 101,
+        invoice_number: 'INV-202603-000002',
+        project_id: 3,
+        client_id: 4,
+        amount_total: 500,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        due_date: '2026-04-15',
+        issued_date: '2026-03-01',
+        invoice_type: 'standard',
+        company_name: 'Beta LLC',
+        contact_name: 'Jane Smith',
+        client_email: 'jane@beta.com',
+        project_name: 'Consulting',
+        project_description: 'Hourly consulting'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      await service.createInvoice({
+        projectId: 3,
+        clientId: 4,
+        lineItems,
+        dueDate: '2026-04-15'
+      });
+
+      const [, params] = mockDb.run.mock.calls[0];
+      expect(params).toContain('2026-04-15');
+    });
+  });
+
+  // ============================================
+  // GET INVOICE BY ID / NUMBER
+  // ============================================
+
+  describe('getInvoiceById', () => {
+    it('returns invoice when found', async () => {
+      mockDb.get.mockResolvedValueOnce({
+        id: 1,
+        invoice_number: 'INV-001',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 500,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'sent',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.getInvoiceById(1);
+
+      expect(result.invoiceNumber).toBe('INV-001');
+      expect(result.status).toBe('sent');
+    });
+
+    it('throws when invoice not found', async () => {
+      mockDb.get.mockResolvedValueOnce(undefined);
+
+      await expect(service.getInvoiceById(9999)).rejects.toThrow('Invoice with ID 9999 not found');
+    });
+  });
+
+  describe('getInvoiceByNumber', () => {
+    it('returns invoice when found by number', async () => {
+      mockDb.get.mockResolvedValueOnce({
+        id: 2,
+        invoice_number: 'INV-202601-123456',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 800,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.getInvoiceByNumber('INV-202601-123456');
+
+      expect(result.id).toBe(2);
+    });
+
+    it('throws when invoice number not found', async () => {
+      mockDb.get.mockResolvedValueOnce(undefined);
+
+      await expect(service.getInvoiceByNumber('INV-FAKE')).rejects.toThrow(
+        'Invoice with number INV-FAKE not found'
+      );
+    });
+  });
+
+  // ============================================
+  // GET CLIENT / PROJECT INVOICES
+  // ============================================
+
+  describe('getClientInvoices', () => {
+    it('returns all invoices for a client', async () => {
+      mockDb.all
+        .mockResolvedValueOnce([
+          {
+            id: 1,
+            invoice_number: 'INV-001',
+            project_id: 1,
+            client_id: 5,
+            amount_total: 1000,
+            amount_paid: 0,
+            currency: 'USD',
+            status: 'sent',
+            invoice_type: 'standard',
+            company_name: 'Client Co',
+            contact_name: 'Client',
+            client_email: 'client@co.com',
+            project_name: 'Project A',
+            project_description: 'Desc'
+          }
+        ])
+        .mockResolvedValueOnce([]); // line items batch
+
+      const result = await service.getClientInvoices(5);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].clientId).toBe(5);
+    });
+
+    it('returns empty array when client has no invoices', async () => {
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.getClientInvoices(999);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getProjectInvoices', () => {
+    it('returns all invoices for a project', async () => {
+      mockDb.all
+        .mockResolvedValueOnce([
+          {
+            id: 10,
+            invoice_number: 'INV-010',
+            project_id: 7,
+            client_id: 1,
+            amount_total: 3000,
+            amount_paid: 0,
+            currency: 'USD',
+            status: 'draft',
+            invoice_type: 'standard',
+            company_name: 'Test Co',
+            contact_name: 'Test',
+            client_email: 'test@test.com',
+            project_name: 'Big Project',
+            project_description: 'Desc'
+          }
+        ])
+        .mockResolvedValueOnce([]); // line items batch
+
+      const result = await service.getProjectInvoices(7);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].projectId).toBe(7);
+    });
+  });
+
+  // ============================================
+  // UPDATE INVOICE STATUS / SEND INVOICE
+  // ============================================
+
+  describe('updateInvoiceStatus', () => {
+    it('updates status without payment data', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+      mockDb.get.mockResolvedValueOnce({
+        id: 1,
+        invoice_number: 'INV-001',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 500,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'sent',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.updateInvoiceStatus(1, 'sent');
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE invoices SET status = ?'),
+        expect.arrayContaining(['sent', 1])
+      );
+      expect(result.status).toBe('sent');
+    });
+
+    it('updates status with full payment data', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+      mockDb.get.mockResolvedValueOnce({
+        id: 2,
+        invoice_number: 'INV-002',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 1000,
+        amount_paid: 1000,
+        currency: 'USD',
+        status: 'paid',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.updateInvoiceStatus(2, 'paid', {
+        amountPaid: 1000,
+        paymentMethod: 'stripe',
+        paymentReference: 'ch_abc123',
+        paidDate: '2026-03-01'
+      });
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('amount_paid = ?'),
+        expect.arrayContaining(['paid', 1000, 'stripe', 'ch_abc123', '2026-03-01', 2])
+      );
+      expect(result.status).toBe('paid');
+    });
+  });
+
+  describe('sendInvoice', () => {
+    it('sends invoice by updating status to sent', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+      mockDb.get.mockResolvedValueOnce({
+        id: 5,
+        invoice_number: 'INV-005',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 750,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'sent',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.sendInvoice(5);
+
+      expect(result.status).toBe('sent');
+    });
+  });
+
+  // ============================================
+  // GET ALL INVOICES
+  // ============================================
+
+  describe('getAllInvoices', () => {
+    it('returns paginated list of all invoices', async () => {
+      mockDb.all
+        .mockResolvedValueOnce([
+          {
+            id: 1,
+            invoice_number: 'INV-001',
+            project_id: 1,
+            client_id: 1,
+            amount_total: 500,
+            amount_paid: 0,
+            currency: 'USD',
+            status: 'sent',
+            invoice_type: 'standard',
+            company_name: 'Test Co',
+            contact_name: 'Test',
+            client_email: 'test@test.com',
+            project_name: 'Test Project',
+            project_description: 'Desc'
+          }
+        ])
+        .mockResolvedValueOnce([]); // line items
+
+      const result = await service.getAllInvoices(10, 0);
+
+      expect(result).toHaveLength(1);
+      expect(mockDb.all).toHaveBeenCalledWith(
+        expect.stringContaining('LIMIT ? OFFSET ?'),
+        [10, 0]
+      );
+    });
+
+    it('uses default pagination values of 100 and 0', async () => {
+      mockDb.all.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      await service.getAllInvoices();
+
+      expect(mockDb.all).toHaveBeenCalledWith(
+        expect.stringContaining('LIMIT ? OFFSET ?'),
+        [100, 0]
+      );
+    });
+  });
+
+  // ============================================
+  // PAYMENT TERMS PRESETS
+  // ============================================
+
+  describe('getPaymentTermsPresets', () => {
+    it('returns list of payment terms presets', async () => {
+      mockDb.all.mockResolvedValueOnce([
+        {
+          id: 1,
+          name: 'Net 14',
+          days_until_due: 14,
+          description: 'Due in 14 days',
+          late_fee_rate: 5,
+          late_fee_type: 'percentage',
+          late_fee_flat_amount: null,
+          grace_period_days: 3,
+          is_default: 1,
+          created_at: '2026-01-01'
+        }
+      ]);
+
+      const result = await service.getPaymentTermsPresets();
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 1,
+        name: 'Net 14',
+        daysUntilDue: 14,
+        gracePeriodDays: 3,
+        isDefault: true
+      });
+    });
+
+    it('returns empty array when no presets', async () => {
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.getPaymentTermsPresets();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getPaymentTermsPreset', () => {
+    it('returns a single preset by ID', async () => {
+      mockDb.get.mockResolvedValueOnce({
+        id: 2,
+        name: 'Net 30',
+        days_until_due: 30,
+        description: 'Standard terms',
+        late_fee_rate: null,
+        late_fee_type: 'none',
+        late_fee_flat_amount: null,
+        grace_period_days: 0,
+        is_default: 0,
+        created_at: '2026-01-01'
+      });
+
+      const result = await service.getPaymentTermsPreset(2);
+
+      expect(result.name).toBe('Net 30');
+      expect(result.lateFeeType).toBe('none');
+    });
+
+    it('throws when preset not found', async () => {
+      mockDb.get.mockResolvedValueOnce(undefined);
+
+      await expect(service.getPaymentTermsPreset(999)).rejects.toThrow(
+        'Payment terms preset with ID 999 not found'
+      );
+    });
+  });
+
+  describe('createPaymentTermsPreset', () => {
+    it('creates a new payment terms preset', async () => {
+      mockDb.run.mockResolvedValueOnce({ lastID: 5 });
+      mockDb.get.mockResolvedValueOnce({
+        id: 5,
+        name: 'Net 60',
+        days_until_due: 60,
+        description: null,
+        late_fee_rate: 2,
+        late_fee_type: 'percentage',
+        late_fee_flat_amount: null,
+        grace_period_days: 0,
+        is_default: 0,
+        created_at: '2026-03-01'
+      });
+
+      const result = await service.createPaymentTermsPreset({
+        name: 'Net 60',
+        daysUntilDue: 60,
+        lateFeeRate: 2,
+        lateFeeType: 'percentage'
+      });
+
+      expect(result.name).toBe('Net 60');
+      expect(result.daysUntilDue).toBe(60);
+    });
+  });
+
+  describe('applyPaymentTerms', () => {
+    it('applies payment terms to an invoice and updates due date', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      // getPaymentTermsPreset
+      mockDb.get.mockResolvedValueOnce({
+        id: 1,
+        name: 'Net 30',
+        days_until_due: 30,
+        description: 'Net 30',
+        late_fee_rate: 5,
+        late_fee_type: 'percentage',
+        late_fee_flat_amount: null,
+        grace_period_days: 0,
+        is_default: 1,
+        created_at: '2026-01-01'
+      });
+
+      // getInvoiceById for target invoice
+      mockDb.get.mockResolvedValueOnce({
+        id: 10,
+        invoice_number: 'INV-010',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 800,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        issued_date: '2026-03-01',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      // Update
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      // Final getInvoiceById
+      mockDb.get.mockResolvedValueOnce({
+        id: 10,
+        invoice_number: 'INV-010',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 800,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        due_date: '2026-03-31',
+        issued_date: '2026-03-01',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.applyPaymentTerms(10, 1);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('payment_terms_id = ?'),
+        expect.arrayContaining([1, 5, 'percentage', 10])
+      );
+      expect(result.dueDate).toBeDefined();
+    });
+  });
+
+  // ============================================
+  // PAYMENT PLAN TEMPLATES
+  // ============================================
+
+  describe('createPaymentPlanTemplate', () => {
+    it('creates a payment plan template', async () => {
+      const payments = [
+        { label: 'Upfront', percentage: 50, trigger: 'upfront' as const },
+        { label: 'Final', percentage: 50, trigger: 'completion' as const }
+      ];
+
+      mockDb.run.mockResolvedValueOnce({ lastID: 3 });
+      mockDb.get.mockResolvedValueOnce({
+        id: 3,
+        name: '50/50 Split',
+        description: 'Half upfront, half on completion',
+        payments: JSON.stringify(payments),
+        is_default: 0,
+        created_at: '2026-01-01'
+      });
+
+      const result = await service.createPaymentPlanTemplate({
+        name: '50/50 Split',
+        description: 'Half upfront, half on completion',
+        payments,
+        isDefault: false
+      });
+
+      expect(result.name).toBe('50/50 Split');
+      expect(result.payments).toHaveLength(2);
+    });
+  });
+
+  describe('getPaymentPlanTemplates', () => {
+    it('returns all payment plan templates', async () => {
+      mockDb.all.mockResolvedValueOnce([
+        {
+          id: 1,
+          name: 'Standard',
+          description: null,
+          payments: JSON.stringify([{ label: 'Full', percentage: 100, trigger: 'upfront' }]),
+          is_default: 1,
+          created_at: '2026-01-01'
+        }
+      ]);
+
+      const result = await service.getPaymentPlanTemplates();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].isDefault).toBe(true);
+    });
+  });
+
+  describe('getPaymentPlanTemplate', () => {
+    it('throws when template not found', async () => {
+      mockDb.get.mockResolvedValueOnce(undefined);
+
+      await expect(service.getPaymentPlanTemplate(999)).rejects.toThrow(
+        'Payment plan template with ID 999 not found'
+      );
+    });
+  });
+
+  describe('deletePaymentPlanTemplate', () => {
+    it('deletes a payment plan template', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      await service.deletePaymentPlanTemplate(1);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        'DELETE FROM payment_plan_templates WHERE id = ?',
+        [1]
+      );
+    });
+  });
+
+  // ============================================
+  // LINE ITEMS TABLE METHODS
+  // ============================================
+
+  describe('getLineItems', () => {
+    it('returns line items for an invoice', async () => {
+      mockDb.all.mockResolvedValueOnce([
+        {
+          description: 'Design',
+          quantity: 1,
+          unit_price: 500,
+          amount: 500,
+          tax_rate: null,
+          tax_amount: null,
+          discount_type: null,
+          discount_value: null,
+          discount_amount: null
+        }
+      ]);
+
+      const result = await service.getLineItems(1);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].description).toBe('Design');
+      expect(result[0].rate).toBe(500);
+    });
+
+    it('returns empty array when no line items', async () => {
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.getLineItems(999);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getLineItemsForInvoices', () => {
+    it('returns empty map when no invoice IDs provided', async () => {
+      const result = await service.getLineItemsForInvoices([]);
+
+      expect(result.size).toBe(0);
+      expect(mockDb.all).not.toHaveBeenCalled();
+    });
+
+    it('groups line items by invoice ID', async () => {
+      mockDb.all.mockResolvedValueOnce([
+        {
+          invoice_id: 1,
+          description: 'Design',
+          quantity: 1,
+          unit_price: 500,
+          amount: 500,
+          tax_rate: null,
+          tax_amount: null,
+          discount_type: null,
+          discount_value: null,
+          discount_amount: null
+        },
+        {
+          invoice_id: 1,
+          description: 'Development',
+          quantity: 1,
+          unit_price: 1000,
+          amount: 1000,
+          tax_rate: null,
+          tax_amount: null,
+          discount_type: null,
+          discount_value: null,
+          discount_amount: null
+        },
+        {
+          invoice_id: 2,
+          description: 'Hosting',
+          quantity: 12,
+          unit_price: 10,
+          amount: 120,
+          tax_rate: null,
+          tax_amount: null,
+          discount_type: null,
+          discount_value: null,
+          discount_amount: null
+        }
+      ]);
+
+      const result = await service.getLineItemsForInvoices([1, 2]);
+
+      expect(result.get(1)).toHaveLength(2);
+      expect(result.get(2)).toHaveLength(1);
+    });
+  });
+
+  describe('saveLineItems', () => {
+    it('deletes old and inserts new line items', async () => {
+      mockDb.run
+        .mockResolvedValueOnce({ changes: 2 }) // DELETE
+        .mockResolvedValueOnce({ lastID: 1 }) // INSERT item 1
+        .mockResolvedValueOnce({ lastID: 2 }); // INSERT item 2
+
+      const lineItems = [
+        { description: 'A', quantity: 1, rate: 100, amount: 100 },
+        { description: 'B', quantity: 2, rate: 50, amount: 100, taxRate: 10 }
+      ];
+
+      await service.saveLineItems(5, lineItems);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        'DELETE FROM invoice_line_items WHERE invoice_id = ?',
+        [5]
+      );
+      expect(mockDb.run).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  // ============================================
+  // BUSINESS INFO FROM SETTINGS
+  // ============================================
+
+  describe('getBusinessInfoFromSettings', () => {
+    it('returns merged business info from settings service', async () => {
+      const result = await service.getBusinessInfoFromSettings();
+
+      expect(result.name).toBe('Test Business');
+      expect(result.email).toBe('test@example.com');
+    });
+
+    it('falls back to BUSINESS_INFO constants on error', async () => {
+      const { settingsService } = await import('../../../server/services/settings-service');
+      vi.mocked(settingsService.getBusinessInfo).mockRejectedValueOnce(new Error('DB error'));
+
+      const result = await service.getBusinessInfoFromSettings();
+
+      expect(result).toBeDefined();
+      expect(typeof result.name).toBe('string');
+    });
+  });
+
+  // ============================================
+  // CREATE DEPOSIT INVOICE
+  // ============================================
+
+  describe('createDepositInvoice', () => {
+    it('creates a deposit invoice with correct type', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      mockDb.run
+        .mockResolvedValueOnce({ lastID: 200 }) // INSERT invoice
+        .mockResolvedValueOnce({ changes: 1 }) // DELETE line items
+        .mockResolvedValueOnce({ lastID: 1 }); // INSERT line item
+
+      mockDb.get.mockResolvedValueOnce({
+        id: 200,
+        invoice_number: 'INV-202603-000200',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 500,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        invoice_type: 'deposit',
+        deposit_for_project_id: 1,
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.createDepositInvoice(1, 1, 500, 50, 'Project Deposit 50%');
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining("'deposit'"),
+        expect.arrayContaining([1, 1, 500])
+      );
+      expect(result.invoiceType).toBe('deposit');
+    });
+
+    it('creates deposit invoice without percentage', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      mockDb.run
+        .mockResolvedValueOnce({ lastID: 201 })
+        .mockResolvedValueOnce({ changes: 0 })
+        .mockResolvedValueOnce({ lastID: 1 });
+
+      mockDb.get.mockResolvedValueOnce({
+        id: 201,
+        invoice_number: 'INV-202603-000201',
+        project_id: 2,
+        client_id: 3,
+        amount_total: 1000,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        invoice_type: 'deposit',
+        deposit_for_project_id: 2,
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      await service.createDepositInvoice(2, 3, 1000);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining("'deposit'"),
+        expect.arrayContaining([2, 3, 1000])
+      );
+    });
+  });
+
+  // ============================================
+  // MILESTONE INVOICE METHODS
+  // ============================================
+
+  describe('createMilestoneInvoice', () => {
+    it('creates invoice linked to a milestone', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      const lineItems = [{ description: 'Milestone 1', quantity: 1, rate: 600, amount: 600 }];
+
+      // createInvoice calls
+      mockDb.run
+        .mockResolvedValueOnce({ lastID: 300 }) // INSERT invoice
+        .mockResolvedValueOnce({ changes: 0 }) // DELETE line items
+        .mockResolvedValueOnce({ lastID: 1 }) // INSERT line item
+        .mockResolvedValueOnce({ changes: 1 }) // UPDATE milestone_id
+        .mockResolvedValueOnce({ changes: 0 }); // DELETE line items again (getInvoiceById -> no effect)
+
+      mockDb.get
+        .mockResolvedValueOnce({
+          id: 300,
+          invoice_number: 'INV-300',
+          project_id: 1,
+          client_id: 1,
+          amount_total: 600,
+          amount_paid: 0,
+          currency: 'USD',
+          status: 'draft',
+          invoice_type: 'standard',
+          company_name: 'Test Co',
+          contact_name: 'Test',
+          client_email: 'test@test.com',
+          project_name: 'Test Project',
+          project_description: 'Desc'
+        })
+        .mockResolvedValueOnce({
+          id: 300,
+          invoice_number: 'INV-300',
+          project_id: 1,
+          client_id: 1,
+          amount_total: 600,
+          amount_paid: 0,
+          currency: 'USD',
+          status: 'draft',
+          invoice_type: 'standard',
+          company_name: 'Test Co',
+          contact_name: 'Test',
+          client_email: 'test@test.com',
+          project_name: 'Test Project',
+          project_description: 'Desc'
+        });
+
+      mockDb.all.mockResolvedValue([]);
+
+      await service.createMilestoneInvoice(42, {
+        projectId: 1,
+        clientId: 1,
+        lineItems
+      });
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        'UPDATE invoices SET milestone_id = ? WHERE id = ?',
+        [42, 300]
+      );
+    });
+  });
+
+  describe('linkInvoiceToMilestone', () => {
+    it('links existing invoice to a milestone', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+      mockDb.get.mockResolvedValueOnce({
+        id: 5,
+        invoice_number: 'INV-005',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 900,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      await service.linkInvoiceToMilestone(5, 10);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        'UPDATE invoices SET milestone_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [10, 5]
+      );
+    });
+  });
+
+  describe('getInvoicesByMilestone', () => {
+    it('returns invoices linked to a milestone', async () => {
+      mockDb.all
+        .mockResolvedValueOnce([
+          {
+            id: 5,
+            invoice_number: 'INV-005',
+            project_id: 1,
+            client_id: 1,
+            amount_total: 900,
+            amount_paid: 0,
+            currency: 'USD',
+            status: 'draft',
+            invoice_type: 'standard',
+            company_name: 'Test Co',
+            contact_name: 'Test',
+            client_email: 'test@test.com',
+            project_name: 'Test Project',
+            project_description: 'Desc'
+          }
+        ])
+        .mockResolvedValueOnce([]); // line items batch
+
+      const result = await service.getInvoicesByMilestone(10);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(5);
+    });
+  });
+
+  // ============================================
+  // GENERATE INVOICE FROM INTAKE
+  // ============================================
+
+  describe('generateInvoiceFromIntake', () => {
+    it('throws when intake not found', async () => {
+      mockDb.get.mockResolvedValueOnce(undefined);
+
+      await expect(service.generateInvoiceFromIntake(999)).rejects.toThrow(
+        'Intake with ID 999 not found'
+      );
+    });
+
+    it('throws when intake has no project or client', async () => {
+      mockDb.get.mockResolvedValueOnce({
+        id: 1,
+        project_type: 'website',
+        budget_range: '5k-10k',
+        project_description: 'Test',
+        project_id: null,
+        client_id: null
+      });
+
+      await expect(service.generateInvoiceFromIntake(1)).rejects.toThrow(
+        'Intake must be converted to project and client first'
+      );
+    });
+
+    it('generates invoice for website project type', async () => {
+      vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
+
+      // getIntake
+      mockDb.get.mockResolvedValueOnce({
+        id: 1,
+        project_type: 'website',
+        budget_range: '5k-10k',
+        project_description: 'New website',
+        project_id: 5,
+        client_id: 3
+      });
+
+      // createInvoice
+      mockDb.run
+        .mockResolvedValueOnce({ lastID: 400 })
+        .mockResolvedValueOnce({ changes: 0 })
+        .mockResolvedValueOnce({ lastID: 1 })
+        .mockResolvedValueOnce({ lastID: 2 })
+        .mockResolvedValueOnce({ lastID: 3 });
+
+      mockDb.get.mockResolvedValueOnce({
+        id: 400,
+        invoice_number: 'INV-400',
+        project_id: 5,
+        client_id: 3,
+        amount_total: 7500,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'draft',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'New Website',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+
+      const result = await service.generateInvoiceFromIntake(1);
+
+      expect(result.projectId).toBe(5);
+      expect(result.clientId).toBe(3);
+    });
+  });
+
+  // ============================================
+  // REMINDER METHODS
+  // ============================================
+
+  describe('scheduleReminders', () => {
+    it('calls recurringService.scheduleReminders', async () => {
+      mockDb.get.mockResolvedValueOnce({
+        id: 1,
+        invoice_number: 'INV-001',
+        project_id: 1,
+        client_id: 1,
+        amount_total: 500,
+        amount_paid: 0,
+        currency: 'USD',
+        status: 'sent',
+        due_date: '2026-04-01',
+        issued_date: '2026-03-01',
+        invoice_type: 'standard',
+        company_name: 'Test Co',
+        contact_name: 'Test',
+        client_email: 'test@test.com',
+        project_name: 'Test Project',
+        project_description: 'Desc'
+      });
+      mockDb.all.mockResolvedValueOnce([]);
+      mockDb.run.mockResolvedValue({ lastID: 1 });
+
+      await service.scheduleReminders(1);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO invoice_reminders'),
+        expect.any(Array)
+      );
+    });
+  });
+
+  describe('getInvoiceReminders', () => {
+    it('returns reminders for an invoice', async () => {
+      mockDb.all.mockResolvedValueOnce([
+        {
+          id: 1,
+          invoice_id: 5,
+          type: 'before_due',
+          days_before_due: 3,
+          scheduled_date: '2026-03-28',
+          status: 'pending',
+          sent_at: null,
+          created_at: '2026-03-01'
+        }
+      ]);
+
+      const result = await service.getInvoiceReminders(5);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].status).toBe('pending');
+    });
+  });
+
+  describe('markReminderSent', () => {
+    it('marks a reminder as sent', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      await service.markReminderSent(1);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('invoice_reminders'),
+        expect.arrayContaining(['sent', 1])
+      );
+    });
+  });
+
+  describe('skipReminder', () => {
+    it('marks a reminder as skipped', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      await service.skipReminder(2);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('invoice_reminders'),
+        expect.arrayContaining(['skipped', 2])
+      );
+    });
+  });
+
+  describe('markReminderFailed', () => {
+    it('marks a reminder as failed', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      await service.markReminderFailed(3);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining('invoice_reminders'),
+        expect.arrayContaining(['failed', 3])
+      );
+    });
+  });
+
+  describe('processReminders', () => {
+    it('returns due reminders', async () => {
+      vi.setSystemTime(new Date('2026-03-28T12:00:00Z'));
+
+      mockDb.all.mockResolvedValueOnce([
+        {
+          id: 1,
+          invoice_id: 5,
+          type: 'before_due',
+          days_before_due: 3,
+          scheduled_date: '2026-03-28',
+          status: 'pending',
+          sent_at: null,
+          created_at: '2026-03-01'
+        }
+      ]);
+
+      const result = await service.processReminders();
+
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  // ============================================
+  // PAUSE / DELETE RECURRING INVOICE
+  // ============================================
+
+  describe('pauseRecurringInvoice', () => {
+    it('pauses a recurring invoice', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      await service.pauseRecurringInvoice(5);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        'UPDATE recurring_invoices SET is_active = 0 WHERE id = ?',
+        [5]
+      );
+    });
+  });
+
+  describe('deleteRecurringInvoice', () => {
+    it('deletes a recurring invoice', async () => {
+      mockDb.run.mockResolvedValueOnce({ changes: 1 });
+
+      await service.deleteRecurringInvoice(7);
+
+      expect(mockDb.run).toHaveBeenCalledWith(
+        'DELETE FROM recurring_invoices WHERE id = ?',
+        [7]
+      );
+    });
+  });
 });
