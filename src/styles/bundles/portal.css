@@ -98,12 +98,13 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
   overflow: hidden;
 }
 
-/* Ensure portal is truly hidden when .hidden is applied (e.g. login page transition) */
+/* Ensure portal is truly hidden when .hidden is applied (e.g. login page transition).
+   Unlayered CSS with compound selectors — high enough specificity to override all layers. */
 .portal.hidden,
 .portal.hidden .sidebar,
 .portal.hidden .dashboard-content {
-  display: none !important;
-  visibility: hidden !important;
+  display: none;
+  visibility: hidden;
 }
 
 /* Scrollbar styling */
