@@ -192,17 +192,13 @@
   border-right: var(--border-width-thick) solid var(--color-dark);
 }
 
-.portal-dropdown .portal-toggle-btn:last-child {
-  border-left: var(--border-width-thick) solid var(--color-dark);
-}
-
 .portal-dropdown .portal-toggle-btn:hover:not(.active) {
   background: var(--color-neutral-400);
 }
 
 .portal-dropdown .portal-toggle-btn.active {
-  background: var(--color-bg-inverse);
-  color: var(--color-neutral-300);
+  background: var(--color-dark);
+  color: var(--color-light);
 }
 
 /* Dropdown form visibility */
@@ -670,7 +666,7 @@
 }
 
 .intake-modal-close:hover {
-  color: var(--color-text-inverse);
+  color: var(--color-light);
   background: rgba(var(--color-mac-close-rgb, 255, 95, 86), 0.8);
 }
 

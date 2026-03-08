@@ -152,7 +152,7 @@ section.client-portal-section button[type="submit"] {
   border: none;
   cursor: pointer;
   padding: 0.25rem;
-  color: var(--color-text-inverse);
+  color: var(--color-dark);
   display: flex;
   align-items: center;
   justify-content: center;

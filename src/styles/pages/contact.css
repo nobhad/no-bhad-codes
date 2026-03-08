@@ -161,15 +161,25 @@ p.contact-options {
   display: block;
 }
 
-/* Eye */
-.avatar-blurb-svg #EYE {
-  fill: var(--color-gray-100);
+/* Body parts - subtle watermark */
+.avatar-blurb-svg #MAIN,
+.avatar-blurb-svg #NOSE,
+.avatar-blurb-svg #EAR {
+  fill: var(--color-dark);
+  opacity: 0.12;
 }
 
-/* Star glow */
+/* Eye - always light glow, never dark */
+.avatar-blurb-svg #EYE {
+  fill: var(--color-off-white);
+  filter: url(#eye-glow);
+  opacity: 0.5;
+}
+
+/* Star glow - always light, matches eye */
 .avatar-blurb-svg .star-glow,
 .avatar-blurb-svg #STAR_GLOW {
-  fill: var(--color-text-primary);
+  fill: var(--color-off-white);
   stroke: none;
   filter: url(#star-glow);
   transform-origin: center center;
@@ -479,7 +489,7 @@ html[data-theme="dark"] .input-item textarea {
   bottom: 6%;
   right: 5%;
   width: min(55vw, 520px);
-  opacity: 0.09;
+  /* opacity applied per-element so eye glow can be independent */
   pointer-events: none;
   z-index: var(--z-index-base);
 }

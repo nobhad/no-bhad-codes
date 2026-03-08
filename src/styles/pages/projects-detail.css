@@ -55,7 +55,7 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: var(--color-bg-inverse);
+  background-color: var(--color-dark);
   box-shadow: var(--shadow-elevated-sm);
   cursor: pointer;
   border: none;
@@ -72,7 +72,7 @@
 .back-button svg {
   width: 40px;
   height: 40px;
-  stroke: var(--color-text-inverse);
+  stroke: var(--color-light);
   transform: rotate(9deg);
   transition:
     transform var(--transition-mouse, 0.2s) cubic-bezier(0.25, 0.1, 0.25, 3.5),
@@ -350,8 +350,8 @@
 }
 
 .tools-list .tool-tag {
-  background: var(--color-bg-inverse);
-  color: var(--color-text-inverse);
+  background: var(--color-dark);
+  color: var(--color-light);
   padding: var(--space-1) var(--space-2-5);
   border-radius: var(--portal-radius-sm, 4px);
   font-size: var(--font-size-sm);
