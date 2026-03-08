@@ -113,25 +113,6 @@
   padding-left: calc(var(--icon-size-lg) + var(--space-1-5) + var(--space-2));
 }
 
-/* Financial summary row: label left, value right */
-.financial-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) 0;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
-}
-
-.financial-row:last-child {
-  border-bottom: none;
-}
-
-/* .financial-row-label inherits portal label styling */
-
-.financial-row-value {
-  font-weight: var(--font-weight-semibold);
-}
-
 /* Quick stats 2-col grid inside sidebar panel */
 .quick-stats-grid {
   display: grid;
@@ -1069,13 +1050,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* System info grid/rows: see shared/details-card.css */
-
-.truncate-text {
-  max-width: 400px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* Details panel styles moved to details-panel.css */
 /* System status styles moved to system-status.css */
