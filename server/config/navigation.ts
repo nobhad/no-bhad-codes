@@ -60,7 +60,6 @@ export interface PortalConfig {
   navigation: NavItem[];
   subtabGroups?: SubtabGroup[];
   features: {
-    secondarySidebar: boolean;
     subtabs: boolean;
     notificationBell: boolean;
     mobileMenuToggle: boolean;
@@ -225,7 +224,6 @@ export function getPortalConfig(portalType: 'admin' | 'client'): PortalConfig {
     navigation: topLevelNavItems.map(toNavItem),
     subtabGroups: subtabGroups.map(toSubtabGroup),
     features: {
-      secondarySidebar: features.secondarySidebar,
       subtabs: features.subtabs,
       notificationBell: features.notificationBell,
       mobileMenuToggle: features.mobileMenuToggle,
