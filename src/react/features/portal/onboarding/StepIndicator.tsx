@@ -38,7 +38,7 @@ export function StepIndicator({
   };
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-gap-1">
+    <div className="flex items-center justify-center gap-1">
       {steps.map((step, index) => {
         const isCompleted = isStepCompleted(step.id);
         const isCurrent = step.id === currentStep;
@@ -53,29 +53,29 @@ export function StepIndicator({
               onClick={() => handleStepClick(step.id)}
               disabled={!isAccessible}
               className={cn(
-                'tw-flex tw-items-center tw-justify-center',
-                'tw-w-7 tw-h-7',
-                'tw-text-sm tw-font-mono',
-                'tw-transition-all tw-duration-200',
-                'tw-border tw-border-primary',
-                'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary focus:tw-ring-offset-2 focus:tw-ring-offset-black',
+                'flex items-center justify-center',
+                'w-7 h-7',
+                'text-sm font-mono',
+                'transition-all duration-200',
+                'border border-primary',
+                'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black',
                 isCompleted && [
-                  'tw-bg-white',
-                  'tw-text-[var(--portal-text-dark)]',
-                  isAccessible && 'tw-cursor-pointer hover:tw-opacity-80'
+                  'bg-white',
+                  'text-dark',
+                  isAccessible && 'cursor-pointer hover:opacity-80'
                 ],
                 isCurrent &&
                   !isCompleted && [
-                  'tw-bg-white',
-                  'tw-text-[var(--portal-text-dark)]'
+                  'bg-white',
+                  'text-dark'
                 ],
                 !isCompleted &&
                   !isCurrent && [
-                  'tw-bg-transparent',
+                  'bg-transparent',
                   'text-muted',
-                  'tw-border-[var(--portal-border-color)]'
+                  'border border-default'
                 ],
-                !isAccessible && 'tw-cursor-not-allowed tw-opacity-50'
+                !isAccessible && 'cursor-not-allowed opacity-50'
               )}
               title={step.title}
               aria-label={`Step ${step.number}: ${step.title}${isCompleted ? ' (completed)' : isCurrent ? ' (current)' : ''}`}
@@ -92,10 +92,10 @@ export function StepIndicator({
             {!isLast && (
               <div
                 className={cn(
-                  'tw-w-8 tw-h-[1px] tw-transition-colors tw-duration-200',
+                  'w-8 h-[1px] transition-colors duration-200',
                   index < currentIndex || isStepCompleted(steps[index + 1]?.id)
-                    ? 'tw-bg-primary'
-                    : 'tw-bg-[var(--portal-border-subtle)]'
+                    ? 'bg-primary'
+                    : 'bg-subtle'
                 )}
               />
             )}
@@ -135,8 +135,8 @@ export function StepIndicatorDetailed({
   };
 
   return (
-    <nav aria-label="Onboarding progress" className="tw-w-full">
-      <ol className="tw-flex tw-items-start tw-justify-between tw-gap-2">
+    <nav aria-label="Onboarding progress" className="w-full">
+      <ol className="flex items-start justify-between gap-2">
         {steps.map((step, index) => {
           const isCompleted = isStepCompleted(step.id);
           const isCurrent = step.id === currentStep;
@@ -146,38 +146,38 @@ export function StepIndicatorDetailed({
           return (
             <li
               key={step.id}
-              className={cn('tw-flex tw-flex-col tw-items-center tw-flex-1', !isLast && 'tw-relative')}
+              className={cn('flex flex-col items-center flex-1', !isLast && 'relative')}
             >
-              <div className="tw-flex tw-items-center tw-w-full">
+              <div className="flex items-center w-full">
                 {/* Step Square - Brutalist */}
                 <button
                   type="button"
                   onClick={() => handleStepClick(step.id)}
                   disabled={!isAccessible}
                   className={cn(
-                    'tw-flex tw-items-center tw-justify-center tw-flex-shrink-0',
-                    'tw-w-8 tw-h-8',
-                    'tw-text-sm tw-font-mono',
-                    'tw-transition-all tw-duration-200',
-                    'tw-border tw-border-primary',
-                    'focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary focus:tw-ring-offset-2 focus:tw-ring-offset-black',
+                    'flex items-center justify-center flex-shrink-0',
+                    'w-8 h-8',
+                    'text-sm font-mono',
+                    'transition-all duration-200',
+                    'border border-primary',
+                    'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black',
                     isCompleted && [
-                      'tw-bg-white',
-                      'tw-text-[var(--portal-text-dark)]',
-                      isAccessible && 'tw-cursor-pointer hover:tw-opacity-80'
+                      'bg-white',
+                      'text-dark',
+                      isAccessible && 'cursor-pointer hover:opacity-80'
                     ],
                     isCurrent &&
                       !isCompleted && [
-                      'tw-bg-white',
-                      'tw-text-[var(--portal-text-dark)]'
+                      'bg-white',
+                      'text-dark'
                     ],
                     !isCompleted &&
                       !isCurrent && [
-                      'tw-bg-transparent',
+                      'bg-transparent',
                       'text-muted',
-                      'tw-border-[var(--portal-border-color)]'
+                      'border border-default'
                     ],
-                    !isAccessible && 'tw-cursor-not-allowed tw-opacity-50'
+                    !isAccessible && 'cursor-not-allowed opacity-50'
                   )}
                   aria-label={`Step ${step.number}: ${step.title}`}
                   aria-current={isCurrent ? 'step' : undefined}
@@ -193,10 +193,10 @@ export function StepIndicatorDetailed({
                 {!isLast && (
                   <div
                     className={cn(
-                      'tw-flex-1 tw-h-[1px] tw-mx-2 tw-transition-colors tw-duration-200',
+                      'flex-1 h-[1px] mx-2 transition-colors duration-200',
                       index < currentIndex
-                        ? 'tw-bg-primary'
-                        : 'tw-bg-[var(--portal-border-subtle)]'
+                        ? 'bg-primary'
+                        : 'bg-subtle'
                     )}
                   />
                 )}
@@ -205,9 +205,9 @@ export function StepIndicatorDetailed({
               {/* Step Title */}
               <span
                 className={cn(
-                  'tw-mt-2 tw-text-2xs tw-text-center tw-max-w-[80px] tw-leading-tight tw-font-mono',
+                  'mt-2 text-2xs text-center max-w-[80px] leading-tight font-mono',
                   isCurrent
-                    ? 'tw-text-primary tw-font-bold'
+                    ? 'text-primary font-bold'
                     : 'text-muted'
                 )}
               >

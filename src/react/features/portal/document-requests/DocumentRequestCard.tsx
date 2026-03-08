@@ -249,10 +249,10 @@ export function DocumentRequestCard({
       {/* Header */}
       <div className="portal-card-header">
         <div className="portal-card-title-group">
-          <span className="tw-text-primary tw-text-sm">{request.title}</span>
+          <span className="text-primary text-sm">{request.title}</span>
         </div>
         <div className="portal-card-status-group">
-          <span className="tw-badge">{statusInfo.text}</span>
+          <span className="badge">{statusInfo.text}</span>
         </div>
       </div>
 
@@ -263,9 +263,9 @@ export function DocumentRequestCard({
 
       {/* Due Date */}
       {request.due_date && (
-        <div className="tw-flex tw-items-center tw-gap-1 tw-mb-2">
+        <div className="flex items-center gap-1 mb-2">
           <Clock className="icon-xs" />
-          <span className={cn('tw-text-sm', overdue ? 'tw-text-primary' : 'text-muted')}>
+          <span className={cn('text-sm', overdue ? 'text-primary' : 'text-muted')}>
             Due {formatCardDate(request.due_date)}
             {daysUntilDue !== null && daysUntilDue > 0 && ` (${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'})`}
             {overdue && ' - Overdue'}
@@ -275,12 +275,12 @@ export function DocumentRequestCard({
 
       {/* Uploaded File Info (for submitted/approved) */}
       {(isSubmitted || isApproved) && request.uploaded_file && (
-        <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2 tw-mb-2">
+        <div className="panel flex items-center gap-2 p-2 mb-2">
           <FileText className="icon-xs" />
-          <span className="tw-text-primary tw-flex-1 tw-text-sm">
+          <span className="text-primary flex-1 text-sm">
             {request.uploaded_file.filename}
           </span>
-          <span className="text-muted tw-text-xs">
+          <span className="text-muted text-xs">
             {formatFileSize(request.uploaded_file.file_size)}
           </span>
         </div>
@@ -288,24 +288,24 @@ export function DocumentRequestCard({
 
       {/* Upload Area (for pending/rejected) */}
       {canUpload && (
-        <div className="tw-mt-2">
+        <div className="mt-2">
           {selectedFile ? (
-            <div className="tw-panel tw-flex tw-items-center tw-gap-2 tw-p-2">
+            <div className="panel flex items-center gap-2 p-2">
               <FileText className="icon-xs" />
-              <span className="tw-text-primary tw-flex-1 tw-text-sm">{selectedFile.name}</span>
-              <span className="text-muted tw-text-xs">{formatFileSize(selectedFile.size)}</span>
+              <span className="text-primary flex-1 text-sm">{selectedFile.name}</span>
+              <span className="text-muted text-xs">{formatFileSize(selectedFile.size)}</span>
               <IconButton action="close" onClick={clearSelectedFile} disabled={isUploading} />
             </div>
           ) : (
             <div
-              className="tw-dropzone"
+              className="dropzone"
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="icon-sm" />
-              <p className="text-muted tw-text-sm">
-                Drop file here or <span className="tw-text-primary">browse</span>
+              <p className="text-muted text-sm">
+                Drop file here or <span className="text-primary">browse</span>
               </p>
-              <p className="text-muted tw-text-xs tw-mt-1">
+              <p className="text-muted text-xs mt-1">
                 PDF, DOC, DOCX, TXT, JPG, PNG (max 10MB)
               </p>
             </div>
@@ -316,12 +316,12 @@ export function DocumentRequestCard({
             type="file"
             accept={ALLOWED_MIME_TYPES.join(',')}
             onChange={handleInputChange}
-            className="tw-hidden"
+            className="hidden"
           />
 
           {selectedFile && (
-            <div className="tw-mt-2">
-              <button className="btn-primary tw-w-full" onClick={handleUpload} disabled={isUploading}>
+            <div className="mt-2">
+              <button className="btn-primary w-full" onClick={handleUpload} disabled={isUploading}>
                 {isUploading ? 'Uploading...' : 'Upload Document'}
               </button>
             </div>
@@ -331,8 +331,8 @@ export function DocumentRequestCard({
 
       {/* Rejection Message */}
       {isRejected && (
-        <div className="tw-panel tw-mt-2 text-status-cancelled">
-          <p className="tw-text-sm">Please resubmit with the requested changes.</p>
+        <div className="panel mt-2 text-status-cancelled">
+          <p className="text-sm">Please resubmit with the requested changes.</p>
         </div>
       )}
     </div>

@@ -245,13 +245,13 @@ export function FileUploadDropzone({
   if (state === 'error' && error) {
     return (
       <div
-        className={cn('tw-dropzone is-error', className)}
+        className={cn('dropzone is-error', className)}
         role="alert"
       >
-        <div className="tw-dropzone-content">
+        <div className="dropzone-content">
           <AlertCircle className="icon-lg" />
-          <p className="tw-dropzone-text">{error.message}</p>
-          <div className="tw-dropzone-actions">
+          <p className="dropzone-text">{error.message}</p>
+          <div className="dropzone-actions">
             {error.files && error.files.length > 0 && (
               <button className="btn-secondary" onClick={handleRetry}>Try Again</button>
             )}
@@ -265,12 +265,12 @@ export function FileUploadDropzone({
   // Render uploading state
   if (state === 'uploading') {
     return (
-      <div className={cn('tw-dropzone', className)}>
-        <div className="tw-dropzone-content">
+      <div className={cn('dropzone', className)}>
+        <div className="dropzone-content">
           <RefreshCw className="icon-lg loading-spin" />
-          <p className="tw-dropzone-text text-muted">Uploading files...</p>
-          <div className="tw-progress-track">
-            <div className="tw-progress-bar" style={{ width: `${uploadProgress}%` }} />
+          <p className="dropzone-text text-muted">Uploading files...</p>
+          <div className="progress-track">
+            <div className="progress-bar" style={{ width: `${uploadProgress}%` }} />
           </div>
         </div>
       </div>
@@ -280,10 +280,10 @@ export function FileUploadDropzone({
   // Render success state
   if (state === 'success') {
     return (
-      <div className={cn('tw-dropzone is-success', className)}>
-        <div className="tw-dropzone-content">
+      <div className={cn('dropzone is-success', className)}>
+        <div className="dropzone-content">
           <CheckCircle className="icon-lg" />
-          <p className="tw-dropzone-text">{successCount} file(s) uploaded successfully</p>
+          <p className="dropzone-text">{successCount} file(s) uploaded successfully</p>
         </div>
       </div>
     );
@@ -293,9 +293,9 @@ export function FileUploadDropzone({
   return (
     <div
       className={cn(
-        'tw-dropzone',
+        'dropzone',
         state === 'drag-active' && 'is-drag-active',
-        disabled && 'tw-cursor-not-allowed',
+        disabled && 'cursor-not-allowed',
         className
       )}
       style={disabled ? { opacity: UI_LIMITS.DISABLED_OPACITY } : undefined}
@@ -309,9 +309,9 @@ export function FileUploadDropzone({
       aria-label="File upload dropzone - press Enter or Space to browse files, or drag and drop files here"
       aria-disabled={disabled}
     >
-      <div className="tw-dropzone-content">
-        <Upload className={cn('icon-lg', state === 'drag-active' && 'tw-text-primary')} />
-        <p className="tw-dropzone-text tw-text-primary">
+      <div className="dropzone-content">
+        <Upload className={cn('icon-lg', state === 'drag-active' && 'text-primary')} />
+        <p className="dropzone-text text-primary">
           Drag and drop files here or
         </p>
         <button
@@ -324,7 +324,7 @@ export function FileUploadDropzone({
         >
           Browse Files
         </button>
-        <p className="tw-dropzone-hint">
+        <p className="dropzone-hint">
           Max 5 files, 10MB each. Images, PDF, Word, ZIP accepted.
         </p>
       </div>

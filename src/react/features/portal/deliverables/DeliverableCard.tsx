@@ -32,11 +32,11 @@ export function DeliverableCard({ deliverable, onNavigate }: DeliverableCardProp
       <div className="portal-card-header">
         <div className="portal-card-title-group">
           <div className="text-muted"><Package className="icon-xs" /></div>
-          <div className="tw-flex tw-flex-col tw-gap-0.5">
-            <span className="tw-text-primary tw-text-sm">{deliverable.title}</span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-primary text-sm">{deliverable.title}</span>
             {deliverable.project_name && (
-              <span className="label tw-text-xs">
-                <FolderOpen className="icon-xs tw-inline tw-mr-0.5" />
+              <span className="label text-xs">
+                <FolderOpen className="icon-xs inline mr-0.5" />
                 {deliverable.project_name}
               </span>
             )}
@@ -51,38 +51,38 @@ export function DeliverableCard({ deliverable, onNavigate }: DeliverableCardProp
       </div>
 
       {/* Meta row */}
-      <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap tw-mb-3">
+      <div className="flex items-center gap-3 flex-wrap mb-3">
         {deliverable.type && (
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+          <div className="flex items-center gap-1 text-muted">
             <Layers className="icon-xs" />
-            <span className="tw-text-xs">{deliverable.type}</span>
+            <span className="text-xs">{deliverable.type}</span>
           </div>
         )}
 
         {deliverable.round_number > 1 && (
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
-            <span className="tw-text-xs">Round {deliverable.round_number}</span>
+          <div className="flex items-center gap-1 text-muted">
+            <span className="text-xs">Round {deliverable.round_number}</span>
           </div>
         )}
 
         {deliverable.review_deadline && (
-          <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+          <div className="flex items-center gap-1 text-muted">
             <Calendar className="icon-xs" />
-            <span className="tw-text-xs">Due {formatCardDate(deliverable.review_deadline)}</span>
+            <span className="text-xs">Due {formatCardDate(deliverable.review_deadline)}</span>
           </div>
         )}
 
         {dueDaysText && (
-          <div className={cn('tw-flex tw-items-center tw-gap-1', overdue ? 'tw-text-primary' : 'text-muted')}>
-            <span className="tw-text-xs">{dueDaysText}</span>
+          <div className={cn('flex items-center gap-1', overdue ? 'text-primary' : 'text-muted')}>
+            <span className="text-xs">{dueDaysText}</span>
           </div>
         )}
       </div>
 
       {/* Actions */}
       {onNavigate && (
-        <div className="tw-flex tw-justify-end">
-          <button className="btn-ghost tw-text-sm" onClick={handleClick}>
+        <div className="flex justify-end">
+          <button className="btn-ghost text-sm" onClick={handleClick}>
             View Deliverable
             <ChevronRight className="icon-xs" />
           </button>

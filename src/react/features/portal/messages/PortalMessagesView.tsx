@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   MessageSquare,
   ChevronRight,
@@ -69,33 +69,33 @@ const ThreadListItem = React.memo(({ thread, isSelected, onClick }: ThreadListIt
     <button
       type="button"
       onClick={onClick}
-      className={cn('tw-list-item message-thread-item', isSelected && 'tw-table-row-selected')}
+      className={cn('list-item message-thread-item', isSelected && 'table-row-selected')}
     >
       {/* Icon */}
-      <div className={hasUnread ? 'tw-text-primary' : ''}>
+      <div className={hasUnread ? 'text-primary' : ''}>
         <MessageSquare className="icon-xs" />
       </div>
 
       {/* Content */}
       <div className="message-thread-content">
         <div className="message-thread-row">
-          <span className="tw-text-primary ">{decodeHtmlEntities(thread.subject)}</span>
-          <span className="text-muted tw-text-xs message-timestamp">
+          <span className="text-primary ">{decodeHtmlEntities(thread.subject)}</span>
+          <span className="text-muted text-xs message-timestamp">
             {formatThreadTime(thread.last_message_at)}
           </span>
         </div>
 
         {thread.project_name && (
-          <span className="text-muted tw-text-xs">{decodeHtmlEntities(thread.project_name)}</span>
+          <span className="text-muted text-xs">{decodeHtmlEntities(thread.project_name)}</span>
         )}
 
         <div className="message-thread-preview-row">
-          <span className={cn(hasUnread ? 'tw-text-primary' : 'text-muted', 'tw-text-sm')}>
+          <span className={cn(hasUnread ? 'text-primary' : 'text-muted', 'text-sm')}>
             {truncatePreview(decodeHtmlEntities(thread.last_message_preview))}
           </span>
 
           {hasUnread && (
-            <span className="tw-badge tw-text-xs">
+            <span className="badge text-xs">
               {thread.unread_count > UNREAD_BADGE_MAX ? `${UNREAD_BADGE_MAX}+` : thread.unread_count}
             </span>
           )}
@@ -217,10 +217,17 @@ export function PortalMessagesView({
     setViewingThread(false);
   }, []);
 
+  // Auto-select when there's exactly one thread (client portal has one thread per project)
+  useEffect(() => {
+    if (!threadsLoading && threads.length === 1 && !selectedThread) {
+      handleSelectThread(threads[0]);
+    }
+  }, [threadsLoading, threads, selectedThread, handleSelectThread]);
+
   // Thread detail view
   if (viewingThread && selectedThread) {
     return (
-      <div ref={containerRef} className="tw-section">
+      <div ref={containerRef} className="section">
         <MessageThread
           thread={selectedThread}
           messages={messages}

@@ -204,7 +204,7 @@ function MessageBubble({ message, isOwn, onEdit, onDelete, showNotification }: M
         </span>
       )}
 
-      <div className="message-row tw-group">
+      <div className="message-row group">
         {/* Actions for own messages */}
         {isOwn && showActions && !isEditing && (
           <div className="message-bubble-actions">
@@ -416,12 +416,12 @@ function MessageComposer({ onSend, disabled, showNotification }: MessageComposer
             placeholder="Type a message..."
             disabled={disabled || isSending}
             rows={1}
-            className="tw-textarea composer-textarea"
+            className="textarea composer-textarea"
           />
         </div>
 
         <button
-          className="btn-primary tw-p-2"
+          className="btn-primary p-2"
           onClick={handleSend}
           disabled={disabled || isSending || (!content.trim() && attachments.length === 0)}
           title="Send message"
@@ -478,7 +478,7 @@ export function MessageThread({
   }, [messages]);
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       <div className="table-layout">
         <div className="data-table-card">
           <div className="message-thread-container">
@@ -486,10 +486,10 @@ export function MessageThread({
             <div className="data-table-header">
               <IconButton action="back" onClick={onBack} title="Back to threads" />
 
-              <div className="tw-flex-1 card-content-truncate">
-                <h3 className="tw-text-primary tw-text-sm">{decodeHtmlEntities(thread.subject)}</h3>
+              <div className="flex-1 card-content-truncate">
+                <h3 className="text-primary text-sm">{decodeHtmlEntities(thread.subject)}</h3>
                 {thread.project_name && (
-                  <span className="text-muted tw-text-sm">{decodeHtmlEntities(thread.project_name)}</span>
+                  <span className="text-muted text-sm">{decodeHtmlEntities(thread.project_name)}</span>
                 )}
               </div>
 
@@ -497,7 +497,7 @@ export function MessageThread({
             </div>
 
             {/* Messages area */}
-            <div className="messages-area tw-scroll-container">
+            <div className="messages-area scroll-container">
               {loading && messages.length === 0 ? (
                 <LoadingState message="Loading messages..." />
               ) : error ? (
@@ -508,7 +508,7 @@ export function MessageThread({
                   message="No messages yet. Start the conversation!"
                 />
               ) : (
-                <div ref={messagesRef} className="tw-section">
+                <div ref={messagesRef} className="section">
                   {messages.map((message) => (
                     <MessageBubble
                       key={message.id}

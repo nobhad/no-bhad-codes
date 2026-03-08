@@ -208,12 +208,12 @@ export function PortalDocumentRequests({
         <div className="portal-cards-list">
           {/* Action Needed Section */}
           {actionNeeded.length > 0 && (
-            <div className="tw-section">
+            <div className="section">
               <div className="portal-card-header">
                 <h3 className="section-title">Action Needed</h3>
-                <span className="tw-badge">{actionNeeded.length}</span>
+                <span className="badge">{actionNeeded.length}</span>
               </div>
-              <div className="tw-section">
+              <div className="section">
                 {actionNeeded.map(request => (
                   <DocumentRequestCard
                     key={request.id}
@@ -229,9 +229,9 @@ export function PortalDocumentRequests({
 
           {/* In Review Section */}
           {inReview.length > 0 && (
-            <div className="tw-section">
+            <div className="section">
               <h3 className="section-title">In Review</h3>
-              <div className="tw-section">
+              <div className="section">
                 {inReview.map(request => (
                   <DocumentRequestCard
                     key={request.id}
@@ -247,9 +247,9 @@ export function PortalDocumentRequests({
 
           {/* Completed Section */}
           {completed.length > 0 && (
-            <div className="tw-section">
+            <div className="section">
               <h3 className="section-title">Completed</h3>
-              <div className="tw-section">
+              <div className="section">
                 {completed.map(request => (
                   <DocumentRequestCard
                     key={request.id}

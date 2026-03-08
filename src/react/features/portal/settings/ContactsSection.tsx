@@ -170,13 +170,13 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4">
+    <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <h3 className="heading tw-text-base tw-m-0">Contacts</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="heading text-base m-0">Contacts</h3>
         {!showAddForm && (
           <button
-            className="btn-secondary tw-text-sm"
+            className="btn-secondary text-sm"
             onClick={() => { setShowAddForm(true); setEditingId(null); setFormData(EMPTY_FORM); }}
           >
             <Plus className="icon-xs" />
@@ -202,7 +202,7 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
           message="No contacts added yet"
         />
       ) : (
-        <div className="tw-flex tw-flex-col tw-gap-2">
+        <div className="flex flex-col gap-2">
           {contacts.map((contact) => (
             editingId === contact.id ? (
               <ContactForm
@@ -214,30 +214,30 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
               />
             ) : (
               <div key={contact.id} className="portal-card">
-                <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-                  <div className="tw-flex tw-flex-col tw-gap-0.5">
-                    <span className="tw-text-primary tw-text-sm tw-font-medium">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-primary text-sm font-medium">
                       {contact.first_name} {contact.last_name}
                       {contact.is_primary && (
-                        <span className="tw-badge tw-ml-2">Primary</span>
+                        <span className="badge ml-2">Primary</span>
                       )}
                     </span>
-                    <div className="tw-flex tw-items-center tw-gap-3 text-muted tw-text-xs tw-flex-wrap">
+                    <div className="flex items-center gap-3 text-muted text-xs flex-wrap">
                       {contact.email && <span>{contact.email}</span>}
                       {contact.phone && <span>{contact.phone}</span>}
                       {contact.title && <span>{contact.title}</span>}
                     </div>
                   </div>
-                  <div className="tw-flex tw-items-center tw-gap-1">
+                  <div className="flex items-center gap-1">
                     <button
-                      className="btn-ghost tw-p-1"
+                      className="btn-ghost p-1"
                       onClick={() => startEdit(contact)}
                       title="Edit"
                     >
                       <Edit2 className="icon-xs" />
                     </button>
                     <button
-                      className="btn-ghost tw-p-1"
+                      className="btn-ghost p-1"
                       onClick={() => handleDelete(contact.id)}
                       title="Delete"
                     >
@@ -273,32 +273,32 @@ function ContactForm({
   };
 
   return (
-    <div className="portal-card tw-flex tw-flex-col tw-gap-3">
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+    <div className="portal-card flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label tw-text-xs tw-mb-1 tw-block">First Name *</label>
+          <label className="label text-xs mb-1 block">First Name *</label>
           <input
-            className="form-input tw-w-full"
+            className="form-input w-full"
             value={formData.first_name}
             onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
             placeholder="First name"
           />
         </div>
         <div>
-          <label className="label tw-text-xs tw-mb-1 tw-block">Last Name *</label>
+          <label className="label text-xs mb-1 block">Last Name *</label>
           <input
-            className="form-input tw-w-full"
+            className="form-input w-full"
             value={formData.last_name}
             onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
             placeholder="Last name"
           />
         </div>
       </div>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label tw-text-xs tw-mb-1 tw-block">Email</label>
+          <label className="label text-xs mb-1 block">Email</label>
           <input
-            className="form-input tw-w-full"
+            className="form-input w-full"
             type="email"
             value={formData.email || ''}
             onChange={(e) => updateField('email', e.target.value)}
@@ -306,29 +306,29 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label tw-text-xs tw-mb-1 tw-block">Phone</label>
+          <label className="label text-xs mb-1 block">Phone</label>
           <input
-            className="form-input tw-w-full"
+            className="form-input w-full"
             value={formData.phone || ''}
             onChange={(e) => updateField('phone', e.target.value)}
             placeholder="Phone number"
           />
         </div>
       </div>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label tw-text-xs tw-mb-1 tw-block">Title</label>
+          <label className="label text-xs mb-1 block">Title</label>
           <input
-            className="form-input tw-w-full"
+            className="form-input w-full"
             value={formData.title || ''}
             onChange={(e) => updateField('title', e.target.value)}
             placeholder="Job title"
           />
         </div>
         <div>
-          <label className="label tw-text-xs tw-mb-1 tw-block">Role</label>
+          <label className="label text-xs mb-1 block">Role</label>
           <select
-            className="form-input tw-w-full"
+            className="form-input w-full"
             value={formData.role}
             onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
           >
@@ -340,12 +340,12 @@ function ContactForm({
           </select>
         </div>
       </div>
-      <div className="tw-flex tw-justify-end tw-gap-2">
-        <button className="btn-ghost tw-text-sm" onClick={onCancel}>
+      <div className="flex justify-end gap-2">
+        <button className="btn-ghost text-sm" onClick={onCancel}>
           <X className="icon-xs" />
           Cancel
         </button>
-        <button className="btn-primary tw-text-sm" onClick={onSave}>
+        <button className="btn-primary text-sm" onClick={onSave}>
           <Check className="icon-xs" />
           Save
         </button>

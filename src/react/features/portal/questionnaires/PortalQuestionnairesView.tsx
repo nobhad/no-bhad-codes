@@ -242,21 +242,21 @@ export function PortalQuestionnairesView({
                 <div className="portal-card-header">
                   <div className="portal-card-title-group">
                     {getStatusIcon(response.status)}
-                    <div className="tw-flex tw-flex-col tw-gap-0.5">
-                      <span className="tw-text-primary">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-primary">
                         {response.questionnaire.title}
                       </span>
                       {response.questionnaire.description && (
-                        <span className="text-muted tw-text-xs">
+                        <span className="text-muted text-xs">
                           {response.questionnaire.description}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="portal-card-status-group">
-                    <div className="tw-flex tw-flex-col tw-items-end tw-gap-0.5">
-                      <span className="tw-badge">{config.label}</span>
-                      <span className="text-muted tw-text-xs">
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="badge">{config.label}</span>
+                      <span className="text-muted text-xs">
                         {response.submitted_at
                           ? `Submitted ${formatDate(response.submitted_at)}`
                           : `Updated ${formatDate(response.updated_at || response.created_at)}`
@@ -272,13 +272,13 @@ export function PortalQuestionnairesView({
                 {/* Progress bar (if in progress) */}
                 {response.status === 'in_progress' && response.progress > 0 && (
                   <div className="portal-card-progress">
-                    <div className="tw-progress-track">
+                    <div className="progress-track">
                       <div
-                        className="tw-progress-bar"
+                        className="progress-bar"
                         style={{ width: `${response.progress}%` }}
                       />
                     </div>
-                    <span className="text-muted tw-text-xs">
+                    <span className="text-muted text-xs">
                       {response.progress}%
                     </span>
                   </div>

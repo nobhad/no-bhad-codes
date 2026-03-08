@@ -203,7 +203,7 @@ function ActivityList({ activities, onNavigate }: ActivityListProps) {
       {activities.map((item, index) => (
         <li
           key={`${item.type}-${item.entityId ?? index}`}
-          className="tw-list-item activity-item"
+          className="list-item activity-item"
           onClick={
             item.entityId && onNavigate
               ? () => onNavigate(item.type, item.entityId)
@@ -268,7 +268,7 @@ export function PortalDashboard({
   );
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {isLoading ? (
         <LoadingState message="Loading dashboard..." />
       ) : error ? (

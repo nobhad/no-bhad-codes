@@ -329,7 +329,7 @@ export function PortalProjectDetail({
     : (project?.progress ?? 0);
 
   return (
-    <div ref={containerRef} className="tw-section">
+    <div ref={containerRef} className="section">
       {isLoading ? (
         <LoadingState message="Loading project..." />
       ) : error || !project ? (
@@ -340,21 +340,21 @@ export function PortalProjectDetail({
       ) : (
         <>
           {/* Header */}
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-            <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
               {/* Back Button */}
               {onBack && (
                 <IconButton action="back" onClick={onBack} title="Back to projects" />
               )}
 
               {/* Project Info */}
-              <div className="tw-flex tw-flex-col tw-gap-0.5">
-                <div className="tw-flex tw-items-center tw-gap-2">
-                  <h2 className="heading tw-text-lg tw-m-0">{project.name}</h2>
-                  <span className="tw-badge">{statusLabel}</span>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <h2 className="heading text-lg m-0">{project.name}</h2>
+                  <span className="badge">{statusLabel}</span>
                 </div>
                 {project.description && (
-                  <p className="text-muted tw-text-sm tw-m-0">
+                  <p className="text-muted text-sm m-0">
                     {project.description}
                   </p>
                 )}
@@ -371,23 +371,23 @@ export function PortalProjectDetail({
           </div>
 
           {/* Progress Section */}
-          <div className="tw-panel">
-            <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
+          <div className="panel">
+            <div className="flex items-center justify-between mb-2">
               <span className="field-label">Overall Progress</span>
-              <span className="tw-text-primary">{progress}%</span>
+              <span className="text-primary">{progress}%</span>
             </div>
-            <div className="tw-progress-track">
+            <div className="progress-track">
               <div
-                className="tw-progress-bar"
+                className="progress-bar"
                 style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
               />
             </div>
-            <div className="tw-flex tw-items-center tw-justify-between tw-mt-2">
-              <span className="text-muted tw-text-xs">
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-muted text-xs">
                 {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
               </span>
               {milestones.length > 0 && (
-                <span className="text-muted tw-text-xs">
+                <span className="text-muted text-xs">
                   {completedMilestones}/{milestones.length} milestones
                 </span>
               )}
@@ -457,12 +457,12 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
   }
 
   return (
-    <div ref={containerRef} className="tw-flex tw-flex-col tw-gap-3">
+    <div ref={containerRef} className="flex flex-col gap-3">
       {milestones.map((milestone) => (
         <div key={milestone.id} className="portal-card">
-          <div className="tw-flex tw-gap-3">
+          <div className="flex gap-3">
             {/* Status Icon */}
-            <div className="tw-flex-shrink-0">
+            <div className="flex-shrink-0">
               {milestone.is_completed ? (
                 <CheckCircle2 className="icon-sm text-status-completed" />
               ) : (
@@ -471,29 +471,29 @@ function MilestonesList({ milestones, containerRef }: MilestonesListProps) {
             </div>
 
             {/* Content */}
-            <div className="tw-flex-1">
-              <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+            <div className="flex-1">
+              <div className="flex items-center justify-between gap-2">
                 <span
                   className={cn(
-                    milestone.is_completed ? 'text-muted tw-line-through' : 'tw-text-primary'
+                    milestone.is_completed ? 'text-muted line-through' : 'text-primary'
                   )}
                 >
                   {milestone.title}
                 </span>
                 {milestone.due_date && (
-                  <div className="tw-flex tw-items-center tw-gap-1 text-muted">
+                  <div className="flex items-center gap-1 text-muted">
                     <Clock className="icon-xs" />
-                    <span className="tw-text-xs">{formatDate(milestone.due_date)}</span>
+                    <span className="text-xs">{formatDate(milestone.due_date)}</span>
                   </div>
                 )}
               </div>
               {milestone.description && (
-                <p className="text-muted tw-text-sm tw-m-0 tw-mt-1">
+                <p className="text-muted text-sm m-0 mt-1">
                   {milestone.description}
                 </p>
               )}
               {milestone.is_completed && milestone.completed_date && (
-                <span className="tw-text-xs text-muted">
+                <span className="text-xs text-muted">
                   Completed {formatDate(milestone.completed_date)}
                 </span>
               )}
@@ -524,28 +524,28 @@ function UpdatesTimeline({ updates, containerRef }: UpdatesTimelineProps) {
   }
 
   return (
-    <div ref={containerRef} className="tw-relative">
+    <div ref={containerRef} className="relative">
       {/* Timeline line */}
-      <div className="tw-absolute tw-left-2 tw-top-0 tw-bottom-0 tw-w-px tw-bg-[var(--portal-border)]" />
+      <div className="absolute left-2 top-0 bottom-0 w-px bg-[var(--portal-border)]" />
 
       {/* Updates */}
-      <div className="tw-flex tw-flex-col tw-gap-3">
+      <div className="flex flex-col gap-3">
         {updates.map((update) => (
-          <div key={update.id} className="tw-flex tw-gap-3 tw-relative">
+          <div key={update.id} className="flex gap-3 relative">
             {/* Timeline dot */}
-            <div className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-flex tw-items-center tw-justify-center tw-bg-[var(--portal-bg)] tw-z-10">
+            <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center bg-[var(--portal-bg)] z-10">
               <span className="text-muted">{getUpdateIcon(update.update_type)}</span>
             </div>
 
             {/* Content */}
-            <div className="portal-card tw-flex-1">
-              <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-                <span className="tw-text-primary">{update.title}</span>
-                <span className="text-muted tw-text-xs">{formatRelativeTime(update.created_at)}</span>
+            <div className="portal-card flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-primary">{update.title}</span>
+                <span className="text-muted text-xs">{formatRelativeTime(update.created_at)}</span>
               </div>
-              <p className="text-muted tw-text-sm tw-m-0 tw-mt-1">{update.content}</p>
+              <p className="text-muted text-sm m-0 mt-1">{update.content}</p>
               {update.created_by && (
-                <span className="tw-text-xs text-muted">
+                <span className="text-xs text-muted">
                   by {update.created_by}
                 </span>
               )}
@@ -578,27 +578,27 @@ function FilesList({ files }: { files: ProjectFile[] }) {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
+    <div className="flex flex-col gap-2">
       {files.map((file) => (
         <div key={file.id} className="portal-card">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0">
-              <FileText className="icon-xs tw-flex-shrink-0 text-muted" />
-              <div className="tw-flex tw-flex-col tw-min-w-0">
-                <span className="tw-text-primary tw-text-sm tw-truncate">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <FileText className="icon-xs flex-shrink-0 text-muted" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-primary text-sm truncate">
                   {file.original_name}
                 </span>
-                <div className="tw-flex tw-items-center tw-gap-2 text-muted">
+                <div className="flex items-center gap-2 text-muted">
                   {file.file_size != null && (
-                    <span className="tw-text-xs">{formatFileSize(file.file_size)}</span>
+                    <span className="text-xs">{formatFileSize(file.file_size)}</span>
                   )}
-                  <span className="tw-text-xs">{formatDate(file.created_at)}</span>
+                  <span className="text-xs">{formatDate(file.created_at)}</span>
                 </div>
               </div>
             </div>
             <a
               href={buildEndpoint.fileDownload(file.id)}
-              className="btn-ghost tw-text-sm tw-flex-shrink-0"
+              className="btn-ghost text-sm flex-shrink-0"
               download
             >
               <Download className="icon-xs" />
@@ -625,22 +625,22 @@ function ThreadsList({ threads }: { threads: ProjectThread[] }) {
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
+    <div className="flex flex-col gap-2">
       {threads.map((thread) => (
         <div key={thread.id} className="portal-card">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0">
-              <MessageSquare className={cn('icon-xs tw-flex-shrink-0', thread.is_read === false ? 'tw-text-primary' : 'text-muted')} />
-              <div className="tw-flex tw-flex-col tw-min-w-0">
-                <span className={cn('tw-text-sm tw-truncate', thread.is_read === false ? 'tw-text-primary tw-font-medium' : 'tw-text-primary')}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <MessageSquare className={cn('icon-xs flex-shrink-0', thread.is_read === false ? 'text-primary' : 'text-muted')} />
+              <div className="flex flex-col min-w-0">
+                <span className={cn('text-sm truncate', thread.is_read === false ? 'text-primary font-medium' : 'text-primary')}>
                   {thread.subject}
                 </span>
-                <div className="tw-flex tw-items-center tw-gap-2 text-muted">
+                <div className="flex items-center gap-2 text-muted">
                   {thread.message_count != null && (
-                    <span className="tw-text-xs">{thread.message_count} messages</span>
+                    <span className="text-xs">{thread.message_count} messages</span>
                   )}
                   {thread.last_message_at && (
-                    <span className="tw-text-xs">{formatRelativeTime(thread.last_message_at)}</span>
+                    <span className="text-xs">{formatRelativeTime(thread.last_message_at)}</span>
                   )}
                 </div>
               </div>
@@ -666,31 +666,31 @@ function InvoicesList({ invoices }: { invoices: ProjectInvoice[] }) {
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
+    <div className="flex flex-col gap-2">
       {invoices.map((invoice) => (
         <div key={invoice.id} className="portal-card">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-            <div className="tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0">
-              <DollarSign className="icon-xs tw-flex-shrink-0 text-muted" />
-              <div className="tw-flex tw-flex-col tw-min-w-0">
-                <span className="tw-text-primary tw-text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <DollarSign className="icon-xs flex-shrink-0 text-muted" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-primary text-sm">
                   {invoice.invoice_number || `Invoice #${invoice.id}`}
                 </span>
-                <div className="tw-flex tw-items-center tw-gap-2 text-muted">
-                  <span className="tw-text-xs">{formatCurrency(invoice.amount)}</span>
+                <div className="flex items-center gap-2 text-muted">
+                  <span className="text-xs">{formatCurrency(invoice.amount)}</span>
                   {invoice.due_date && (
-                    <span className="tw-text-xs">Due {formatDate(invoice.due_date)}</span>
+                    <span className="text-xs">Due {formatDate(invoice.due_date)}</span>
                   )}
                 </div>
               </div>
             </div>
-            <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="flex items-center gap-2">
               <StatusBadge status={getStatusVariant(invoice.status)}>
                 {invoice.status}
               </StatusBadge>
               <a
                 href={buildEndpoint.invoicePdf(invoice.id)}
-                className="btn-ghost tw-text-sm tw-flex-shrink-0"
+                className="btn-ghost text-sm flex-shrink-0"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -726,11 +726,11 @@ function TimeSummaryTab({ summary }: { summary: TimeSummary | null }) {
   ];
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+    <div className="grid grid-cols-2 gap-3">
       {stats.map((stat) => (
-        <div key={stat.label} className="portal-card tw-text-center">
-          <span className="tw-text-2xl tw-font-semibold tw-text-primary">{stat.value}</span>
-          <span className="label tw-text-xs tw-block tw-mt-1">{stat.label}</span>
+        <div key={stat.label} className="portal-card text-center">
+          <span className="text-2xl font-semibold text-primary">{stat.value}</span>
+          <span className="label text-xs block mt-1">{stat.label}</span>
         </div>
       ))}
     </div>

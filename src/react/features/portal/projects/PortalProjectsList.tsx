@@ -66,12 +66,12 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       <div className="portal-card-header">
         <div className="portal-card-title-group">
           <FolderOpen className="icon-xs" />
-          <span className="tw-text-primary">
+          <span className="text-primary">
             {decodeHtmlEntities(project.name)}
           </span>
         </div>
         <div className="portal-card-status-group">
-          <span className="tw-badge">{statusLabel}</span>
+          <span className="badge">{statusLabel}</span>
           <ChevronRight className="icon-xs" />
         </div>
       </div>
@@ -87,11 +87,11 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       <div className="portal-card-progress">
         <div className="portal-card-header">
           <span className="field-label">Progress</span>
-          <span className="tw-text-primary tw-text-sm">{project.progress}%</span>
+          <span className="text-primary text-sm">{project.progress}%</span>
         </div>
-        <div className="tw-progress-track">
+        <div className="progress-track">
           <div
-            className="tw-progress-bar"
+            className="progress-bar"
             style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
           />
         </div>
@@ -99,7 +99,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
 
       {/* Footer: Date and Preview */}
       <div className="portal-card-footer">
-        <span className="text-muted tw-text-xs">
+        <span className="text-muted text-xs">
           {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
         </span>
         {project.preview_url && (
