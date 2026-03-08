@@ -8,6 +8,12 @@ import * as React from 'react';
 import { useCallback } from 'react';
 import { User, Mail, Building2, Phone, Hash, Calendar } from 'lucide-react';
 import { InlineEditField } from '@react/components/portal/InlineEditField';
+import { formatCardDate } from '@react/utils/cardFormatters';
+import {
+  validateEmail as sharedValidateEmail,
+  validatePhone as sharedValidatePhone,
+  validateName as sharedValidateName
+} from '../../../../../shared/validation/validators';
 import type { ClientProfile } from './PortalSettings';
 
 interface ProfileFormProps {
@@ -15,26 +21,23 @@ interface ProfileFormProps {
   onUpdate: (updates: Partial<ClientProfile>) => Promise<boolean>;
 }
 
-// Validation helpers
+// Validation adapters — wraps shared ValidationResult into (string | null) for InlineEditField
 function validateEmail(email: string): string | null {
   if (!email) return 'Email is required';
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) return 'Please enter a valid email address';
-  return null;
+  const result = sharedValidateEmail(email, { allowDisposable: true });
+  return result.isValid ? null : (result.error || 'Invalid email');
 }
 
 function validatePhone(phone: string): string | null {
   if (!phone) return null; // Phone is optional
-  const phoneRegex = /^[\d\s\-+()]+$/;
-  if (!phoneRegex.test(phone)) return 'Please enter a valid phone number';
-  if (phone.replace(/\D/g, '').length < 10) return 'Phone number must have at least 10 digits';
-  return null;
+  const result = sharedValidatePhone(phone);
+  return result.isValid ? null : (result.error || 'Invalid phone number');
 }
 
 function validateName(name: string): string | null {
   if (!name || !name.trim()) return 'Name is required';
-  if (name.trim().length < 2) return 'Name must be at least 2 characters';
-  return null;
+  const result = sharedValidateName(name, { type: 'person' });
+  return result.isValid ? null : (result.error || 'Invalid name');
 }
 
 /**
@@ -58,16 +61,6 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
   const handleSavePhone = useCallback(async (value: string) => {
     return await onUpdate({ phone: value || undefined });
   }, [onUpdate]);
-
-  // Format date for display
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
 
   return (
     <div className="settings-form-section">
@@ -145,7 +138,7 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
               label="Member Since"
               value={profile.created_at}
               onSave={async () => false}
-              formatDisplay={formatDate}
+              formatDisplay={(v) => v ? formatCardDate(v) : '-'}
               readOnly
               icon={<Calendar  />}
             />

@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { FileText, ChevronRight, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
@@ -20,20 +20,9 @@ import type {
   PortalQuestionnaireResponse,
   QuestionnaireStatus
 } from './types';
-import { unwrapApiData } from '../../../../utils/api-client';
+import { formatCardDate } from '@react/utils/cardFormatters';
+import { usePortalData } from '@react/hooks/usePortalFetch';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}
 
 /**
  * Get status icon based on questionnaire status
@@ -85,52 +74,13 @@ export function PortalQuestionnairesView({
   const containerRef = useFadeIn<HTMLDivElement>();
   const cardsRef = useStaggerChildren<HTMLDivElement>(0.08, 0.1);
 
-  const [responses, setResponses] = useState<PortalQuestionnaireResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: responses, isLoading, error, refetch } = usePortalData<PortalQuestionnaireResponse[]>({
+    getAuthToken,
+    url: API_ENDPOINTS.QUESTIONNAIRES_MY_RESPONSES,
+    transform: (raw) => (raw as Record<string, unknown>).responses as PortalQuestionnaireResponse[] || []
+  });
+  const items = responses ?? [];
   const [selectedResponse, setSelectedResponse] = useState<PortalQuestionnaireResponse | null>(null);
-
-  /**
-   * Fetch questionnaire responses from API
-   */
-  const fetchResponses = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-      };
-
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(API_ENDPOINTS.QUESTIONNAIRES_MY_RESPONSES, {
-        credentials: 'include',
-        headers
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch questionnaires');
-      }
-
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setResponses((data.responses as PortalQuestionnaireResponse[]) || []);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load questionnaires';
-      setError(errorMessage);
-      showNotification?.(errorMessage, 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getAuthToken, showNotification]);
-
-  // Fetch on mount
-  useEffect(() => {
-    fetchResponses();
-  }, [fetchResponses]);
 
   // Table filters
   const {
@@ -145,7 +95,7 @@ export function PortalQuestionnairesView({
     filterFn: filterQuestionnaire
   });
 
-  const filteredResponses = useMemo(() => applyFilters(responses), [applyFilters, responses]);
+  const filteredResponses = useMemo(() => applyFilters(items), [applyFilters, items]);
 
   /**
    * Handle card click to open questionnaire
@@ -160,7 +110,7 @@ export function PortalQuestionnairesView({
   const handleBack = () => {
     setSelectedResponse(null);
     // Refresh the list to get updated status
-    fetchResponses();
+    refetch();
   };
 
   /**
@@ -168,7 +118,7 @@ export function PortalQuestionnairesView({
    */
   const handleSubmitSuccess = () => {
     setSelectedResponse(null);
-    fetchResponses();
+    refetch();
     showNotification?.('Questionnaire submitted successfully', 'success');
   };
 
@@ -186,9 +136,9 @@ export function PortalQuestionnairesView({
   }
 
   // Calculate summary stats
-  const completedCount = responses.filter(r => r.status === 'submitted' || r.status === 'approved').length;
-  const pendingCount = responses.filter(r => r.status === 'pending' || r.status === 'in_progress').length;
-  const needsRevisionCount = responses.filter(r => r.status === 'rejected').length;
+  const completedCount = items.filter(r => r.status === 'submitted' || r.status === 'approved').length;
+  const pendingCount = items.filter(r => r.status === 'pending' || r.status === 'in_progress').length;
+  const needsRevisionCount = items.filter(r => r.status === 'rejected').length;
 
   return (
     <TableLayout
@@ -196,7 +146,7 @@ export function PortalQuestionnairesView({
       title="QUESTIONNAIRES"
       stats={
         <TableStats items={[
-          { value: responses.length, label: 'total' },
+          { value: items.length, label: 'total' },
           { value: completedCount, label: 'completed', variant: 'completed' },
           { value: pendingCount, label: 'pending', variant: 'pending' },
           { value: needsRevisionCount, label: 'needs revision', variant: 'overdue' }
@@ -210,18 +160,18 @@ export function PortalQuestionnairesView({
             values={filterValues}
             onChange={(key, value) => setFilter(key, value)}
           />
-          <IconButton action="refresh" onClick={fetchResponses} title="Refresh" loading={isLoading} />
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
         </>
       }
     >
       {isLoading ? (
         <LoadingState message="Loading questionnaires..." />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchResponses} />
+        <ErrorState message={error} onRetry={refetch} />
       ) : filteredResponses.length === 0 ? (
         <EmptyState
           icon={<FileText className="icon-lg" />}
-          message={responses.length === 0
+          message={items.length === 0
             ? 'No questionnaires assigned yet. Questionnaires will appear here when your project team sends them.'
             : 'No questionnaires match the current filters.'
           }
@@ -258,8 +208,8 @@ export function PortalQuestionnairesView({
                       <span className="badge">{config.label}</span>
                       <span className="text-muted text-xs">
                         {response.submitted_at
-                          ? `Submitted ${formatDate(response.submitted_at)}`
-                          : `Updated ${formatDate(response.updated_at || response.created_at)}`
+                          ? `Submitted ${formatCardDate(response.submitted_at)}`
+                          : `Updated ${formatCardDate(response.updated_at || response.created_at)}`
                         }
                       </span>
                     </div>

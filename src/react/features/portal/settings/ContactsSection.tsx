@@ -27,7 +27,7 @@ interface ClientContact {
 }
 
 interface ContactsSectionProps {
-  buildHeaders: () => Record<string, string>;
+  portalFetch: <T>(url: string, options?: { method?: string; body?: unknown; headers?: Record<string, string>; unwrap?: boolean }) => Promise<T>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -42,7 +42,7 @@ const EMPTY_FORM: Omit<ClientContact, 'id' | 'is_primary'> = {
   notes: null
 };
 
-export function ContactsSection({ buildHeaders, showNotification }: ContactsSectionProps) {
+export function ContactsSection({ portalFetch, showNotification }: ContactsSectionProps) {
   const [contacts, setContacts] = useState<ClientContact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -52,21 +52,14 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
   const fetchContacts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS_ME_CONTACTS, {
-        headers: buildHeaders(),
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const json = await response.json();
-        const data = json.data || json;
-        setContacts(data.contacts || []);
-      }
+      const result = await portalFetch<{ contacts?: ClientContact[] }>(API_ENDPOINTS.CLIENTS_ME_CONTACTS);
+      setContacts(result.contacts || []);
     } catch (err) {
       logger.error('Error fetching contacts:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [buildHeaders]);
+  }, [portalFetch]);
 
   useEffect(() => {
     fetchContacts();
@@ -79,19 +72,12 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
     }
 
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS_ME_CONTACTS, {
-        method: 'POST',
-        headers: buildHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) throw new Error('Failed to add contact');
-
-      const json = await response.json();
-      const newContact = json.data?.contact || json.contact;
-      if (newContact) {
-        setContacts(prev => [...prev, newContact]);
+      const result = await portalFetch<{ contact?: ClientContact }>(
+        API_ENDPOINTS.CLIENTS_ME_CONTACTS,
+        { method: 'POST', body: formData }
+      );
+      if (result.contact) {
+        setContacts(prev => [...prev, result.contact!]);
       }
       setShowAddForm(false);
       setFormData(EMPTY_FORM);
@@ -100,23 +86,16 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
       logger.error('Error adding contact:', err);
       showNotification?.('Failed to add contact', 'error');
     }
-  }, [formData, buildHeaders, showNotification]);
+  }, [formData, portalFetch, showNotification]);
 
   const handleUpdate = useCallback(async (contactId: number) => {
     try {
-      const response = await fetch(buildEndpoint.clientMeContact(contactId), {
-        method: 'PUT',
-        headers: buildHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) throw new Error('Failed to update contact');
-
-      const json = await response.json();
-      const updated = json.data?.contact || json.contact;
-      if (updated) {
-        setContacts(prev => prev.map(c => c.id === contactId ? updated : c));
+      const result = await portalFetch<{ contact?: ClientContact }>(
+        buildEndpoint.clientMeContact(contactId),
+        { method: 'PUT', body: formData }
+      );
+      if (result.contact) {
+        setContacts(prev => prev.map(c => c.id === contactId ? result.contact! : c));
       }
       setEditingId(null);
       setFormData(EMPTY_FORM);
@@ -125,25 +104,18 @@ export function ContactsSection({ buildHeaders, showNotification }: ContactsSect
       logger.error('Error updating contact:', err);
       showNotification?.('Failed to update contact', 'error');
     }
-  }, [formData, buildHeaders, showNotification]);
+  }, [formData, portalFetch, showNotification]);
 
   const handleDelete = useCallback(async (contactId: number) => {
     try {
-      const response = await fetch(buildEndpoint.clientMeContact(contactId), {
-        method: 'DELETE',
-        headers: buildHeaders(),
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Failed to delete contact');
-
+      await portalFetch(buildEndpoint.clientMeContact(contactId), { method: 'DELETE' });
       setContacts(prev => prev.filter(c => c.id !== contactId));
       showNotification?.('Contact deleted', 'success');
     } catch (err) {
       logger.error('Error deleting contact:', err);
       showNotification?.('Failed to delete contact', 'error');
     }
-  }, [buildHeaders, showNotification]);
+  }, [portalFetch, showNotification]);
 
   const startEdit = (contact: ClientContact) => {
     setEditingId(contact.id);

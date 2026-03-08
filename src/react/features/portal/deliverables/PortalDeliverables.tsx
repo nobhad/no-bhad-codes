@@ -4,47 +4,27 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Package } from 'lucide-react';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { useTableFilters } from '@react/hooks/useTableFilters';
-import { PORTAL_DELIVERABLES_FILTER_CONFIG } from '../shared/filterConfigs';
+import { PORTAL_DELIVERABLES_FILTER_CONFIG, createFilterFn } from '../shared/filterConfigs';
 import { IconButton } from '@react/factories';
 import { useStaggerChildren, useFadeIn } from '@react/hooks/useGsap';
+import { usePortalData } from '@react/hooks/usePortalFetch';
+import { countByField } from '@react/utils/cardFormatters';
 import { DeliverableCard } from './DeliverableCard';
 import type { PortalDeliverable, PortalDeliverablesResponse } from './types';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-
-const logger = createLogger('PortalDeliverables');
 
 export interface PortalDeliverablesProps extends PortalViewProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-function filterDeliverable(
-  deliverable: PortalDeliverable,
-  filters: Record<string, string>,
-  search: string
-): boolean {
-  if (search) {
-    const s = search.toLowerCase();
-    const matchesSearch =
-      deliverable.title?.toLowerCase().includes(s) ||
-      deliverable.type?.toLowerCase().includes(s) ||
-      deliverable.project_name?.toLowerCase().includes(s);
-    if (!matchesSearch) return false;
-  }
-
-  if (filters.status && filters.status !== 'all') {
-    if (deliverable.status !== filters.status) return false;
-  }
-
-  return true;
-}
+const filterDeliverable = createFilterFn<PortalDeliverable>(['title', 'type', 'project_name']);
 
 export function PortalDeliverables({
   getAuthToken,
@@ -53,9 +33,12 @@ export function PortalDeliverables({
   const containerRef = useFadeIn<HTMLDivElement>();
   const listRef = useStaggerChildren<HTMLDivElement>(0.05);
 
-  const [deliverables, setDeliverables] = useState<PortalDeliverable[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: deliverables, isLoading, error, refetch } = usePortalData<PortalDeliverable[]>({
+    getAuthToken,
+    url: API_ENDPOINTS.DELIVERABLES_MY,
+    transform: (raw) => (raw as PortalDeliverablesResponse).deliverables || []
+  });
+  const items = deliverables ?? [];
 
   const {
     filterValues,
@@ -69,47 +52,9 @@ export function PortalDeliverables({
     filterFn: filterDeliverable
   });
 
-  const fetchDeliverables = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const filteredDeliverables = useMemo(() => applyFilters(items), [applyFilters, items]);
 
-    try {
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      const token = getAuthToken?.();
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const response = await fetch(API_ENDPOINTS.DELIVERABLES_MY, {
-        method: 'GET',
-        headers,
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch deliverables');
-
-      const json = await response.json();
-      const data: PortalDeliverablesResponse = json.data || json;
-      setDeliverables(data.deliverables || []);
-    } catch (err) {
-      logger.error('Error fetching deliverables:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load deliverables');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getAuthToken]);
-
-  useEffect(() => {
-    fetchDeliverables();
-  }, [fetchDeliverables]);
-
-  const filteredDeliverables = useMemo(() => applyFilters(deliverables), [applyFilters, deliverables]);
-
-  const countByStatus = deliverables.reduce(
-    (acc, d) => {
-      acc[d.status] = (acc[d.status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const countByStatus = countByField(items);
 
   return (
     <TableLayout
@@ -118,7 +63,7 @@ export function PortalDeliverables({
       stats={
         <TableStats
           items={[
-            { value: deliverables.length, label: 'total' },
+            { value: items.length, label: 'total' },
             { value: countByStatus.in_review || 0, label: 'in review', variant: 'pending' },
             { value: countByStatus.approved || 0, label: 'approved', variant: 'completed' },
             { value: countByStatus.revision_requested || 0, label: 'revisions', variant: 'overdue' }
@@ -133,19 +78,19 @@ export function PortalDeliverables({
             values={filterValues}
             onChange={(key, value) => setFilter(key, value)}
           />
-          <IconButton action="refresh" onClick={fetchDeliverables} title="Refresh" loading={isLoading} />
+          <IconButton action="refresh" onClick={refetch} title="Refresh" loading={isLoading} />
         </>
       }
     >
       {isLoading ? (
         <LoadingState message="Loading deliverables..." />
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchDeliverables} />
+        <ErrorState message={error} onRetry={refetch} />
       ) : filteredDeliverables.length === 0 ? (
         <EmptyState
           icon={<Package className="icon-lg" />}
           message={
-            deliverables.length === 0
+            items.length === 0
               ? 'No deliverables yet. Deliverables will appear here as your project progresses.'
               : 'No deliverables match the current filters.'
           }

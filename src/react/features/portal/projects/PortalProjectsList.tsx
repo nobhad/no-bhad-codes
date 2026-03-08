@@ -15,6 +15,7 @@ import { PORTAL_PROJECT_STATUS_CONFIG } from '../types';
 import { PORTAL_PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalProject, PortalProjectStatus, PortalViewProps } from '../types';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+import { formatCardDate } from '@react/utils/cardFormatters';
 import { createLogger } from '../../../../utils/logger';
 import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
@@ -100,7 +101,7 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
       {/* Footer: Date and Preview */}
       <div className="portal-card-footer">
         <span className="text-muted text-xs">
-          {project.start_date ? `Started ${formatDate(project.start_date)}` : 'Not started'}
+          {project.start_date ? `Started ${formatCardDate(project.start_date)}` : 'Not started'}
         </span>
         {project.preview_url && (
           <IconButton action="external-link" onClick={onPreviewClick} title="View Preview" />
@@ -113,18 +114,6 @@ const ProjectCard = React.memo(({ project, onClick, onPreviewClick }: ProjectCar
 interface PortalProjectsListProps extends PortalViewProps {
   /** Callback when a project is selected */
   onSelectProject?: (projectId: string) => void;
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
 }
 
 /**

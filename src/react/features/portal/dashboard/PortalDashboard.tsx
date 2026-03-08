@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import {
   FolderKanban,
   Receipt,
@@ -21,12 +21,9 @@ import { StatCard } from '@react/components/portal';
 import { formatRelativeTime, IconButton } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { usePortalData } from '@react/hooks/usePortalFetch';
 import type { PortalViewProps } from '../types';
-import { createLogger } from '../../../../utils/logger';
-import { unwrapApiData } from '../../../../utils/api-client';
 import { API_ENDPOINTS } from '../../../../constants/api-endpoints';
-
-const logger = createLogger('PortalDashboard');
 
 // ============================================================================
 // CONSTANTS
@@ -82,93 +79,6 @@ interface DashboardData {
 export interface PortalDashboardProps extends PortalViewProps {
   /** Callback for navigation events */
   onNavigate?: (tab: string, entityId?: string) => void;
-}
-
-// ============================================================================
-// HOOK: usePortalDashboard
-// ============================================================================
-
-interface UsePortalDashboardOptions {
-  getAuthToken?: () => string | null;
-}
-
-interface UsePortalDashboardReturn {
-  stats: DashboardStats | null;
-  recentActivity: ActivityItem[];
-  isLoading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-function usePortalDashboard({
-  getAuthToken
-}: UsePortalDashboardOptions): UsePortalDashboardReturn {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Ref to avoid stale closure over getAuthToken
-  const getAuthTokenRef = useRef(getAuthToken);
-  useEffect(() => {
-    getAuthTokenRef.current = getAuthToken;
-  }, [getAuthToken]);
-
-  const fetchDashboard = useCallback(async (signal?: AbortSignal) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      const token = getAuthTokenRef.current?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(DASHBOARD_ENDPOINT, {
-        headers,
-        credentials: 'include',
-        signal
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load dashboard data');
-      }
-
-      const data = unwrapApiData<DashboardData>(await response.json());
-
-      if (!data?.stats) {
-        logger.warn('Dashboard response missing stats:', data);
-        setStats(null);
-        setRecentActivity([]);
-        return;
-      }
-
-      setStats(data.stats);
-      setRecentActivity(data.recentActivity ?? []);
-    } catch (err) {
-      if ((err as Error).name === 'AbortError') return;
-      logger.error('Error fetching dashboard:', err);
-      setError('Failed to load dashboard. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Initial fetch with AbortController cleanup
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchDashboard(controller.signal);
-    return () => controller.abort();
-  }, [fetchDashboard]);
-
-  const refetch = useCallback(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
-
-  return { stats, recentActivity, isLoading, error, refetch };
 }
 
 // ============================================================================
@@ -252,9 +162,14 @@ export function PortalDashboard({
   onNavigate
 }: PortalDashboardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const { stats, recentActivity, isLoading, error, refetch } = usePortalDashboard({
-    getAuthToken
+  const { data, isLoading, error, refetch } = usePortalData<DashboardData>({
+    getAuthToken,
+    url: DASHBOARD_ENDPOINT,
+    transform: (raw) => raw as DashboardData
   });
+
+  const stats = data?.stats ?? null;
+  const recentActivity = data?.recentActivity ?? [];
 
   // Suppress unused variable warning — showNotification is passed via BaseMountOptions
   // and may be used by child components in future iterations
@@ -277,98 +192,38 @@ export function PortalDashboard({
         <>
           {/* Stats Overview - clickable navigation shortcuts */}
           <div className="dashboard-stats-grid">
-            <div
-              className="stat-card-clickable"
+            <StatCard
+              label="Active Projects"
+              value={stats?.activeProjects ?? 0}
               onClick={() => handleStatClick(NAV_TAB_PROJECTS)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleStatClick(NAV_TAB_PROJECTS);
-                }
-              }}
-            >
-              <StatCard
-                label="Active Projects"
-                value={stats?.activeProjects ?? 0}
-              />
-            </div>
-            <div
-              className="stat-card-clickable"
+            />
+            <StatCard
+              label="Pending Invoices"
+              value={stats?.pendingInvoices ?? 0}
+              variant={stats?.pendingInvoices ? 'warning' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_INVOICES)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleStatClick(NAV_TAB_INVOICES);
-                }
-              }}
-            >
-              <StatCard
-                label="Pending Invoices"
-                value={stats?.pendingInvoices ?? 0}
-                variant={stats?.pendingInvoices ? 'warning' : 'default'}
-              />
-            </div>
-            <div
-              className="stat-card-clickable"
+            />
+            <StatCard
+              label="Unread Messages"
+              value={stats?.unreadMessages ?? 0}
+              variant={stats?.unreadMessages ? 'alert' : 'default'}
               onClick={() => handleStatClick(NAV_TAB_MESSAGES)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleStatClick(NAV_TAB_MESSAGES);
-                }
-              }}
-            >
-              <StatCard
-                label="Unread Messages"
-                value={stats?.unreadMessages ?? 0}
-                variant={stats?.unreadMessages ? 'alert' : 'default'}
-              />
-            </div>
+            />
             {(stats?.pendingContracts ?? 0) > 0 && (
-              <div
-                className="stat-card-clickable"
+              <StatCard
+                label="Pending Contracts"
+                value={stats?.pendingContracts ?? 0}
+                variant="warning"
                 onClick={() => handleStatClick(NAV_TAB_CONTRACTS)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleStatClick(NAV_TAB_CONTRACTS);
-                  }
-                }}
-              >
-                <StatCard
-                  label="Pending Contracts"
-                  value={stats?.pendingContracts ?? 0}
-                  variant="warning"
-                />
-              </div>
+              />
             )}
             {(stats?.pendingDocRequests ?? 0) > 0 && (
-              <div
-                className="stat-card-clickable"
+              <StatCard
+                label="Document Requests"
+                value={stats?.pendingDocRequests ?? 0}
+                variant="warning"
                 onClick={() => handleStatClick(NAV_TAB_DOC_REQUESTS)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleStatClick(NAV_TAB_DOC_REQUESTS);
-                  }
-                }}
-              >
-                <StatCard
-                  label="Document Requests"
-                  value={stats?.pendingDocRequests ?? 0}
-                  variant="warning"
-                />
-              </div>
+              />
             )}
           </div>
 

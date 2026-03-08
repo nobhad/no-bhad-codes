@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useState, useRef } from 'react';
 import { Upload, X, Paperclip, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@react/lib/utils';
+import { formatFileSize } from '@react/utils/cardFormatters';
 import type { AdHocRequestPriority, NewAdHocRequestPayload } from './types';
 import { AD_HOC_REQUEST_PRIORITY_CONFIG } from './types';
 
@@ -28,15 +29,6 @@ export interface NewRequestFormProps {
 const PRIORITY_OPTIONS: AdHocRequestPriority[] = ['low', 'normal', 'high', 'urgent'];
 const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const DEFAULT_MAX_FILES = 5;
-
-/**
- * Format file size for display
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 /**
  * NewRequestForm Component

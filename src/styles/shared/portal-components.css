@@ -1460,26 +1460,12 @@ a.text-danger:hover {
   padding: var(--space-6);
 }
 
-/* Category select */
-.files-category-select {
-  height: 32px;
-  width: auto;
-}
-
 /* Spinner */
 .files-spinner {
   border-radius: var(--portal-radius-full);
 }
 
-/* Table header row */
-.files-table-header {
-  border-bottom: var(--border-width) solid var(--portal-border-color);
-}
-
-/* Table row display */
-.files-table-row {
-  display: table-row;
-}
+/* Files table styles moved to project-detail.css */
 
 /* ============================================
    REACT MOUNT ERROR STATE
