@@ -279,7 +279,30 @@ async function getAdHocTimeSummary(
 // CLIENT ENDPOINTS
 // =====================================================
 
-// Get ad hoc requests for the authenticated client
+/**
+ * @swagger
+ * /api/ad-hoc-requests/my-requests:
+ *   get:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Get client ad hoc requests
+ *     description: Returns all ad hoc requests for the authenticated client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: requestType
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of client requests
+ *       401:
+ *         description: Not authenticated
+ */
 router.get(
   '/my-requests',
   authenticateToken,
@@ -310,7 +333,45 @@ router.get(
   })
 );
 
-// Submit ad hoc request (client)
+/**
+ * @swagger
+ * /api/ad-hoc-requests/my-requests:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Submit ad hoc request (client)
+ *     description: Submits a new ad hoc request from a client.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [projectId, title, description, requestType]
+ *             properties:
+ *               projectId:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               requestType:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *               urgency:
+ *                 type: string
+ *               attachmentFileId:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Request submitted
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Project not found
+ */
 router.post(
   '/my-requests',
   authenticateToken,
@@ -423,7 +484,29 @@ router.post(
   })
 );
 
-// Approve ad hoc request quote (client)
+/**
+ * @swagger
+ * /api/ad-hoc-requests/my-requests/{requestId}/approve:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Approve ad hoc request quote (client)
+ *     description: Client approves the quoted price for an ad hoc request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Quote approved
+ *       400:
+ *         description: Quote not available for approval
+ *       404:
+ *         description: Request not found
+ */
 router.post(
   '/my-requests/:requestId/approve',
   authenticateToken,
@@ -456,7 +539,29 @@ router.post(
   })
 );
 
-// Decline ad hoc request quote (client)
+/**
+ * @swagger
+ * /api/ad-hoc-requests/my-requests/{requestId}/decline:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Decline ad hoc request quote (client)
+ *     description: Client declines the quoted price for an ad hoc request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Quote declined
+ *       400:
+ *         description: Quote not available for decline
+ *       404:
+ *         description: Request not found
+ */
 router.post(
   '/my-requests/:requestId/decline',
   authenticateToken,
@@ -493,7 +598,44 @@ router.post(
 // ADMIN ENDPOINTS
 // =====================================================
 
-// Get all ad hoc requests
+/**
+ * @swagger
+ * /api/ad-hoc-requests:
+ *   get:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Get all ad hoc requests (admin)
+ *     description: Returns all ad hoc requests with optional filtering.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: clientId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: requestType
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: urgency
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of all ad hoc requests
+ */
 router.get(
   '/',
   authenticateToken,
@@ -535,7 +677,25 @@ router.get(
   })
 );
 
-// Get time entries for an ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}/time-entries:
+ *   get:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Get time entries for a request (admin)
+ *     description: Returns time entries linked to an ad hoc request task.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of time entries
+ */
 router.get(
   '/:requestId/time-entries',
   authenticateToken,
@@ -558,7 +718,47 @@ router.get(
   })
 );
 
-// Log time for an ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}/time-entries:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Log time for a request (admin)
+ *     description: Logs a time entry for an ad hoc request task.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [userName, hours, date]
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               hours:
+ *                 type: number
+ *               date:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               billable:
+ *                 type: boolean
+ *               hourlyRate:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Time logged
+ *       400:
+ *         description: Request not linked to task
+ */
 router.post(
   '/:requestId/time-entries',
   authenticateToken,
@@ -594,7 +794,25 @@ router.post(
   })
 );
 
-// Get single ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}:
+ *   get:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Get a single ad hoc request (admin)
+ *     description: Returns details of a specific ad hoc request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Request details
+ */
 router.get(
   '/:requestId',
   authenticateToken,
@@ -606,7 +824,53 @@ router.get(
   })
 );
 
-// Create ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Create ad hoc request (admin)
+ *     description: Admin creates a new ad hoc request with full details.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [projectId, clientId, title, description, requestType]
+ *             properties:
+ *               projectId:
+ *                 type: integer
+ *               clientId:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               requestType:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *               urgency:
+ *                 type: string
+ *               estimatedHours:
+ *                 type: number
+ *               flatRate:
+ *                 type: number
+ *               hourlyRate:
+ *                 type: number
+ *               quotedPrice:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Ad hoc request created
+ *       400:
+ *         description: Validation error
+ */
 router.post(
   '/',
   authenticateToken,
@@ -690,7 +954,25 @@ router.post(
   })
 );
 
-// Update ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}:
+ *   put:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Update ad hoc request (admin)
+ *     description: Updates an ad hoc request. Auto-creates invoice when completing.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Ad hoc request updated
+ */
 router.put(
   '/:requestId',
   authenticateToken,
@@ -778,7 +1060,27 @@ router.put(
   })
 );
 
-// Send quote to client
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}/send-quote:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Send quote to client (admin)
+ *     description: Sends the ad hoc request quote to the client via email.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Quote sent
+ *       400:
+ *         description: No quote details or client email
+ */
 router.post(
   '/:requestId/send-quote',
   authenticateToken,
@@ -898,7 +1200,42 @@ ${BUSINESS_INFO.email}
   })
 );
 
-// Generate invoice from a completed ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}/invoice:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Generate invoice from request (admin)
+ *     description: Creates an invoice from a completed ad hoc request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               useTimeEntries:
+ *                 type: boolean
+ *                 default: true
+ *               dueDate:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               terms:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Invoice created
+ *       400:
+ *         description: Request must be completed
+ */
 router.post(
   '/:requestId/invoice',
   authenticateToken,
@@ -950,7 +1287,42 @@ router.post(
   })
 );
 
-// Bundle multiple ad hoc requests into a single invoice
+/**
+ * @swagger
+ * /api/ad-hoc-requests/invoice/bundle:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Bundle requests into invoice (admin)
+ *     description: Bundles multiple completed ad hoc requests into a single invoice.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [requestIds]
+ *             properties:
+ *               requestIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *               useTimeEntries:
+ *                 type: boolean
+ *                 default: true
+ *               dueDate:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               terms:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Bundled invoice created
+ *       400:
+ *         description: All requests must be same project/client and completed
+ */
 router.post(
   '/invoice/bundle',
   authenticateToken,
@@ -1027,7 +1399,29 @@ router.post(
   })
 );
 
-// Monthly ad hoc summary for recurring clients
+/**
+ * @swagger
+ * /api/ad-hoc-requests/summary/monthly:
+ *   get:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Get monthly ad hoc summary (admin)
+ *     description: Returns monthly ad hoc request invoicing summary grouped by client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: months
+ *         schema:
+ *           type: integer
+ *           default: 6
+ *       - in: query
+ *         name: clientId
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Monthly summary data
+ */
 router.get(
   '/summary/monthly',
   authenticateToken,
@@ -1070,7 +1464,51 @@ router.get(
   })
 );
 
-// Convert approved ad hoc request to task(s)
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}/convert-to-task:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Convert request to task (admin)
+ *     description: Converts an approved ad hoc request into project task(s).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               milestoneId:
+ *                 type: integer
+ *               assignedTo:
+ *                 type: string
+ *               dueDate:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *               subtasks:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *     responses:
+ *       201:
+ *         description: Request converted to task
+ *       400:
+ *         description: Request must be approved
+ *       409:
+ *         description: Already converted
+ */
 router.post(
   '/:requestId/convert-to-task',
   authenticateToken,
@@ -1150,7 +1588,31 @@ router.post(
   })
 );
 
-// Bulk delete ad hoc requests
+/**
+ * @swagger
+ * /api/ad-hoc-requests/bulk-delete:
+ *   post:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Bulk delete requests (admin)
+ *     description: Soft-deletes multiple ad hoc requests at once.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [requestIds]
+ *             properties:
+ *               requestIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: Requests deleted
+ */
 router.post(
   '/bulk-delete',
   authenticateToken,
@@ -1181,7 +1643,25 @@ router.post(
   })
 );
 
-// Soft delete ad hoc request
+/**
+ * @swagger
+ * /api/ad-hoc-requests/{requestId}:
+ *   delete:
+ *     tags: [Ad-hoc Requests]
+ *     summary: Delete ad hoc request (admin)
+ *     description: Soft-deletes an ad hoc request.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Ad hoc request deleted
+ */
 router.delete(
   '/:requestId',
   authenticateToken,

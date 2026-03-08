@@ -26,7 +26,23 @@ const router = express.Router();
 // =====================================================
 
 /**
- * Get all email templates
+ * @swagger
+ * /api/email-templates:
+ *   get:
+ *     tags: [Email Templates]
+ *     summary: Get all email templates
+ *     description: Returns all email templates with optional category filtering.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter by template category
+ *     responses:
+ *       200:
+ *         description: List of email templates
  */
 router.get(
   '/',
@@ -40,7 +56,17 @@ router.get(
 );
 
 /**
- * Get template categories
+ * @swagger
+ * /api/email-templates/categories:
+ *   get:
+ *     tags: [Email Templates]
+ *     summary: Get template categories
+ *     description: Returns all available email template categories.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of categories
  */
 router.get(
   '/categories',
@@ -53,7 +79,25 @@ router.get(
 );
 
 /**
- * Get a specific template
+ * @swagger
+ * /api/email-templates/{id}:
+ *   get:
+ *     tags: [Email Templates]
+ *     summary: Get a specific template
+ *     description: Returns a specific email template by ID.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template details
+ *       404:
+ *         description: Template not found
  */
 router.get(
   '/:id',
@@ -75,7 +119,45 @@ router.get(
 );
 
 /**
- * Create a new template
+ * @swagger
+ * /api/email-templates:
+ *   post:
+ *     tags: [Email Templates]
+ *     summary: Create a new email template
+ *     description: Creates a new email template with subject, HTML body, and optional variables.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, subject, body_html]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               body_html:
+ *                 type: string
+ *               body_text:
+ *                 type: string
+ *               variables:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               is_active:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Template created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/',
@@ -107,7 +189,27 @@ router.post(
 );
 
 /**
- * Update a template
+ * @swagger
+ * /api/email-templates/{id}:
+ *   put:
+ *     tags: [Email Templates]
+ *     summary: Update an email template
+ *     description: Updates an existing email template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template updated
+ *       404:
+ *         description: Template not found
+ *       403:
+ *         description: Cannot modify system template
  */
 router.put(
   '/:id',
@@ -164,7 +266,27 @@ router.put(
 );
 
 /**
- * Delete a template
+ * @swagger
+ * /api/email-templates/{id}:
+ *   delete:
+ *     tags: [Email Templates]
+ *     summary: Delete an email template
+ *     description: Deletes an email template. System templates cannot be deleted.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template deleted
+ *       404:
+ *         description: Template not found
+ *       403:
+ *         description: Cannot delete system template
  */
 router.delete(
   '/:id',
@@ -197,7 +319,23 @@ router.delete(
 // =====================================================
 
 /**
- * Get version history for a template
+ * @swagger
+ * /api/email-templates/{id}/versions:
+ *   get:
+ *     tags: [Email Templates]
+ *     summary: Get version history
+ *     description: Returns the version history for an email template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of template versions
  */
 router.get(
   '/:id/versions',
@@ -215,7 +353,30 @@ router.get(
 );
 
 /**
- * Get a specific version
+ * @swagger
+ * /api/email-templates/{id}/versions/{version}:
+ *   get:
+ *     tags: [Email Templates]
+ *     summary: Get a specific version
+ *     description: Returns a specific version of an email template.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: version
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template version details
+ *       404:
+ *         description: Version not found
  */
 router.get(
   '/:id/versions/:version',
@@ -239,7 +400,30 @@ router.get(
 );
 
 /**
- * Restore a previous version
+ * @swagger
+ * /api/email-templates/{id}/versions/{version}/restore:
+ *   post:
+ *     tags: [Email Templates]
+ *     summary: Restore a previous version
+ *     description: Restores an email template to a previous version.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: version
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template restored to specified version
+ *       404:
+ *         description: Version not found
  */
 router.post(
   '/:id/versions/:version/restore',
@@ -267,7 +451,33 @@ router.post(
 // =====================================================
 
 /**
- * Preview a template with sample data
+ * @swagger
+ * /api/email-templates/{id}/preview:
+ *   post:
+ *     tags: [Email Templates]
+ *     summary: Preview a template
+ *     description: Renders a preview of an email template with sample data.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sample_data:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Template preview with rendered content
+ *       404:
+ *         description: Template not found
  */
 router.post(
   '/:id/preview',
@@ -295,7 +505,39 @@ router.post(
 );
 
 /**
- * Preview raw content (before saving)
+ * @swagger
+ * /api/email-templates/preview:
+ *   post:
+ *     tags: [Email Templates]
+ *     summary: Preview raw template content
+ *     description: Renders a preview of raw template content before saving.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [subject, body_html]
+ *             properties:
+ *               subject:
+ *                 type: string
+ *               body_html:
+ *                 type: string
+ *               body_text:
+ *                 type: string
+ *               variables:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               sample_data:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Rendered preview
+ *       400:
+ *         description: Missing required fields
  */
 router.post(
   '/preview',
@@ -323,7 +565,37 @@ router.post(
 );
 
 /**
- * Send a test email
+ * @swagger
+ * /api/email-templates/{id}/test:
+ *   post:
+ *     tags: [Email Templates]
+ *     summary: Send a test email
+ *     description: Sends a test email using the template with sample data.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [to_email]
+ *             properties:
+ *               to_email:
+ *                 type: string
+ *               sample_data:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Test email sent
+ *       404:
+ *         description: Template not found
  */
 router.post(
   '/:id/test',
@@ -378,7 +650,35 @@ router.post(
 // =====================================================
 
 /**
- * Get send logs
+ * @swagger
+ * /api/email-templates/logs/sends:
+ *   get:
+ *     tags: [Email Templates]
+ *     summary: Get email send logs
+ *     description: Returns email send logs with optional filtering.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: templateId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: recipientEmail
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *     responses:
+ *       200:
+ *         description: List of send logs
  */
 router.get(
   '/logs/sends',

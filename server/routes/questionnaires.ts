@@ -92,7 +92,24 @@ const QuestionnaireValidationSchemas = {
 // =====================================================
 
 /**
- * Get all questionnaire responses for the authenticated client
+ * @swagger
+ * /api/questionnaires/my-responses:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get client questionnaire responses
+ *     description: Returns all questionnaire responses for the authenticated client with stats.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Client responses with stats
+ *       401:
+ *         description: Not authenticated
  */
 router.get(
   '/my-responses',
@@ -113,7 +130,27 @@ router.get(
 );
 
 /**
- * Get a specific response with questionnaire details (for answering)
+ * @swagger
+ * /api/questionnaires/responses/{id}:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get a specific response
+ *     description: Returns a specific questionnaire response with full questionnaire details.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Response with questionnaire details
+ *       403:
+ *         description: Access denied
+ *       404:
+ *         description: Response not found
  */
 router.get(
   '/responses/:id',
@@ -149,7 +186,35 @@ router.get(
 );
 
 /**
- * Save progress on a questionnaire response
+ * @swagger
+ * /api/questionnaires/responses/{id}/save:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Save progress on a response
+ *     description: Saves partial answers without submitting the questionnaire.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               answers:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Progress saved
+ *       403:
+ *         description: Access denied
+ *       404:
+ *         description: Response not found
  */
 router.post(
   '/responses/:id/save',
@@ -185,8 +250,35 @@ router.post(
 );
 
 /**
- * Submit a completed questionnaire response
- * On completion: generates PDF, saves to project Files, emits workflow event
+ * @swagger
+ * /api/questionnaires/responses/{id}/submit:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Submit a completed response
+ *     description: Submits a completed questionnaire response. Generates PDF and emits workflow event.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               answers:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Questionnaire submitted
+ *       400:
+ *         description: Already submitted
+ *       403:
+ *         description: Access denied
  */
 router.post(
   '/responses/:id/submit',
@@ -269,7 +361,26 @@ router.post(
 // =====================================================
 
 /**
- * Get all questionnaires (admin)
+ * @swagger
+ * /api/questionnaires:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get all questionnaires (admin)
+ *     description: Returns all questionnaires with optional filtering.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: project_type
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: active_only
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: List of questionnaires
  */
 router.get(
   '/',
@@ -285,7 +396,25 @@ router.get(
 );
 
 /**
- * Get a specific questionnaire (admin)
+ * @swagger
+ * /api/questionnaires/{id}:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get a specific questionnaire (admin)
+ *     description: Returns a specific questionnaire by ID.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Questionnaire details
+ *       404:
+ *         description: Questionnaire not found
  */
 router.get(
   '/:id',
@@ -308,7 +437,43 @@ router.get(
 );
 
 /**
- * Create a new questionnaire (admin)
+ * @swagger
+ * /api/questionnaires:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Create a new questionnaire (admin)
+ *     description: Creates a new questionnaire with questions.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, questions]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               project_type:
+ *                 type: string
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               is_active:
+ *                 type: boolean
+ *               auto_send_on_project_create:
+ *                 type: boolean
+ *               display_order:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Questionnaire created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/',
@@ -348,7 +513,25 @@ router.post(
 );
 
 /**
- * Update a questionnaire (admin)
+ * @swagger
+ * /api/questionnaires/{id}:
+ *   put:
+ *     tags: [Questionnaires]
+ *     summary: Update a questionnaire (admin)
+ *     description: Updates an existing questionnaire.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Questionnaire updated
+ *       404:
+ *         description: Questionnaire not found
  */
 router.put(
   '/:id',
@@ -372,7 +555,23 @@ router.put(
 );
 
 /**
- * Delete a questionnaire (admin)
+ * @swagger
+ * /api/questionnaires/{id}:
+ *   delete:
+ *     tags: [Questionnaires]
+ *     summary: Delete a questionnaire (admin)
+ *     description: Deletes a questionnaire.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Questionnaire deleted
  */
 router.delete(
   '/:id',
@@ -392,7 +591,29 @@ router.delete(
 );
 
 /**
- * Bulk delete questionnaires (admin)
+ * @swagger
+ * /api/questionnaires/bulk-delete:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Bulk delete questionnaires (admin)
+ *     description: Deletes multiple questionnaires at once.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [questionnaireIds]
+ *             properties:
+ *               questionnaireIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: Questionnaires deleted
  */
 router.post(
   '/bulk-delete',
@@ -429,7 +650,17 @@ router.post(
 // =====================================================
 
 /**
- * Get all pending responses (admin)
+ * @swagger
+ * /api/questionnaires/responses/pending:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get all pending responses (admin)
+ *     description: Returns all pending questionnaire responses.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending responses
  */
 router.get(
   '/responses/pending',
@@ -442,7 +673,41 @@ router.get(
 );
 
 /**
- * Send a questionnaire to a client (admin)
+ * @swagger
+ * /api/questionnaires/{id}/send:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Send questionnaire to a client (admin)
+ *     description: Sends a questionnaire to a specific client, creating a response record.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [client_id]
+ *             properties:
+ *               client_id:
+ *                 type: integer
+ *               project_id:
+ *                 type: integer
+ *               due_date:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Questionnaire sent to client
+ *       400:
+ *         description: Already sent to this client
+ *       404:
+ *         description: Questionnaire not found
  */
 router.post(
   '/:id/send',
@@ -496,7 +761,27 @@ router.post(
 );
 
 /**
- * Get responses for a specific client (admin)
+ * @swagger
+ * /api/questionnaires/client/{clientId}/responses:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get responses for a specific client (admin)
+ *     description: Returns all questionnaire responses for a specific client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: clientId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Client responses with stats
  */
 router.get(
   '/client/:clientId/responses',
@@ -518,7 +803,23 @@ router.get(
 );
 
 /**
- * Send reminder for a response (admin)
+ * @swagger
+ * /api/questionnaires/responses/{id}/remind:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Send reminder for a response (admin)
+ *     description: Sends a reminder notification for a pending questionnaire response.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Reminder sent
  */
 router.post(
   '/responses/:id/remind',
@@ -538,7 +839,23 @@ router.post(
 );
 
 /**
- * Delete a response (admin)
+ * @swagger
+ * /api/questionnaires/responses/{id}:
+ *   delete:
+ *     tags: [Questionnaires]
+ *     summary: Delete a response (admin)
+ *     description: Deletes a questionnaire response.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Response deleted
  */
 router.delete(
   '/responses/:id',
@@ -562,7 +879,30 @@ router.delete(
 // =====================================================
 
 /**
- * Download questionnaire response as PDF (admin)
+ * @swagger
+ * /api/questionnaires/responses/{id}/pdf:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Download response as PDF (admin)
+ *     description: Downloads a questionnaire response as a PDF document.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Response not found
  */
 router.get(
   '/responses/:id/pdf',
@@ -608,7 +948,29 @@ router.get(
 );
 
 /**
- * Export questionnaire response as JSON (admin)
+ * @swagger
+ * /api/questionnaires/responses/{id}/export:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Export response as JSON (admin)
+ *     description: Exports a questionnaire response as a JSON file download.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: JSON file
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Response not found
  */
 router.get(
   '/responses/:id/export',
@@ -652,8 +1014,27 @@ router.get(
 );
 
 /**
- * Regenerate PDF for a completed questionnaire response (admin)
- * Useful if PDF was not generated on completion or needs to be updated
+ * @swagger
+ * /api/questionnaires/responses/{id}/regenerate-pdf:
+ *   post:
+ *     tags: [Questionnaires]
+ *     summary: Regenerate PDF for a response (admin)
+ *     description: Regenerates the PDF for a completed questionnaire response and saves to project files.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: PDF regenerated
+ *       400:
+ *         description: Not completed or no project
+ *       404:
+ *         description: Response not found
  */
 router.post(
   '/responses/:id/regenerate-pdf',

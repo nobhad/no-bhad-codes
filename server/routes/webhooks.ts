@@ -95,8 +95,19 @@ router.use(authenticateToken);
 router.use(requireAdmin);
 
 /**
- * GET /api/v1/webhooks
- * List all webhooks
+ * @swagger
+ * /api/webhooks/webhooks:
+ *   get:
+ *     tags: [Webhooks]
+ *     summary: List all webhooks
+ *     description: Returns all configured webhooks.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of webhooks
+ *       500:
+ *         description: Internal error
  */
 router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -112,8 +123,25 @@ router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Resp
 }));
 
 /**
- * GET /api/v1/webhooks/:id
- * Get webhook by ID
+ * @swagger
+ * /api/webhooks/webhooks/{id}:
+ *   get:
+ *     tags: [Webhooks]
+ *     summary: Get webhook by ID
+ *     description: Returns a specific webhook configuration (secret key excluded).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Webhook details
+ *       404:
+ *         description: Webhook not found
  */
 router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -141,9 +169,42 @@ router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: 
 }));
 
 /**
- * POST /api/v1/webhooks
- * Create new webhook
- * Body: { name, url, events[], payloadTemplate, method?, headers? }
+ * @swagger
+ * /api/webhooks/webhooks:
+ *   post:
+ *     tags: [Webhooks]
+ *     summary: Create a new webhook
+ *     description: Creates a new webhook with URL, events, and payload template.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, url, events, payloadTemplate]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               url:
+ *                 type: string
+ *               events:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               payloadTemplate:
+ *                 type: string
+ *               method:
+ *                 type: string
+ *                 enum: [GET, POST, PUT, PATCH, DELETE]
+ *               headers:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Webhook created
+ *       400:
+ *         description: Validation error
  */
 router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -200,8 +261,25 @@ router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allo
 }));
 
 /**
- * PUT /api/v1/webhooks/:id
- * Update webhook configuration
+ * @swagger
+ * /api/webhooks/webhooks/{id}:
+ *   put:
+ *     tags: [Webhooks]
+ *     summary: Update webhook configuration
+ *     description: Updates an existing webhook configuration.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Webhook updated
+ *       404:
+ *         description: Webhook not found
  */
 router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -237,8 +315,25 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
 }));
 
 /**
- * DELETE /api/v1/webhooks/:id
- * Delete webhook (and all associated deliveries)
+ * @swagger
+ * /api/webhooks/webhooks/{id}:
+ *   delete:
+ *     tags: [Webhooks]
+ *     summary: Delete a webhook
+ *     description: Deletes a webhook and all associated deliveries.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Webhook deleted
+ *       500:
+ *         description: Internal error
  */
 router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -259,9 +354,35 @@ router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, re
 }));
 
 /**
- * PATCH /api/v1/webhooks/:id/toggle
- * Toggle webhook active/inactive
- * Body: { active: boolean }
+ * @swagger
+ * /api/webhooks/webhooks/{id}/toggle:
+ *   patch:
+ *     tags: [Webhooks]
+ *     summary: Toggle webhook active/inactive
+ *     description: Toggles a webhook between active and inactive states.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [active]
+ *             properties:
+ *               active:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Webhook toggled
+ *       404:
+ *         description: Webhook not found
  */
 router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.toggle), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -293,9 +414,37 @@ router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.to
 }));
 
 /**
- * POST /api/v1/webhooks/:id/test
- * Test webhook by sending sample payload
- * Body: { eventType, sampleData? }
+ * @swagger
+ * /api/webhooks/webhooks/{id}/test:
+ *   post:
+ *     tags: [Webhooks]
+ *     summary: Test a webhook
+ *     description: Tests a webhook by sending a sample payload.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [eventType]
+ *             properties:
+ *               eventType:
+ *                 type: string
+ *               sampleData:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Test webhook triggered
+ *       404:
+ *         description: Webhook not found
  */
 router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -330,9 +479,42 @@ router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test,
 }));
 
 /**
- * GET /api/v1/webhooks/:id/deliveries
- * List webhook deliveries with filtering
- * Query: status?, eventType?, limit?, offset?
+ * @swagger
+ * /api/webhooks/webhooks/{id}/deliveries:
+ *   get:
+ *     tags: [Webhooks]
+ *     summary: List webhook deliveries
+ *     description: Returns webhook delivery history with filtering and pagination.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, success, failed]
+ *       - in: query
+ *         name: eventType
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *     responses:
+ *       200:
+ *         description: List of deliveries with pagination
  */
 router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -378,8 +560,30 @@ router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedReq
 }));
 
 /**
- * GET /api/v1/webhooks/:id/deliveries/:deliveryId
- * Get specific delivery details
+ * @swagger
+ * /api/webhooks/webhooks/{id}/deliveries/{deliveryId}:
+ *   get:
+ *     tags: [Webhooks]
+ *     summary: Get specific delivery details
+ *     description: Returns details of a specific webhook delivery.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: deliveryId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Delivery details
+ *       404:
+ *         description: Delivery not found
  */
 router.get(
   '/webhooks/:id/deliveries/:deliveryId',
@@ -410,8 +614,23 @@ router.get(
 );
 
 /**
- * GET /api/v1/webhooks/:id/stats
- * Get delivery statistics for webhook
+ * @swagger
+ * /api/webhooks/webhooks/{id}/stats:
+ *   get:
+ *     tags: [Webhooks]
+ *     summary: Get webhook delivery statistics
+ *     description: Returns delivery statistics for a specific webhook.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Delivery statistics
  */
 router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -433,9 +652,35 @@ router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest,
 }));
 
 /**
- * POST /api/v1/webhooks/:id/retry
- * Manually retry failed delivery
- * Body: { deliveryId }
+ * @swagger
+ * /api/webhooks/webhooks/{id}/retry:
+ *   post:
+ *     tags: [Webhooks]
+ *     summary: Retry failed delivery
+ *     description: Manually retries a failed webhook delivery.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [deliveryId]
+ *             properties:
+ *               deliveryId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Delivery queued for retry
+ *       404:
+ *         description: Delivery not found
  */
 router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retry), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -474,8 +719,25 @@ router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retr
 }));
 
 /**
- * POST /api/v1/webhooks/:id/secret/regenerate
- * Regenerate webhook secret key for security rotation
+ * @swagger
+ * /api/webhooks/webhooks/{id}/secret/regenerate:
+ *   post:
+ *     tags: [Webhooks]
+ *     summary: Regenerate webhook secret
+ *     description: Regenerates the webhook secret key for security rotation.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: New secret key returned
+ *       500:
+ *         description: Internal error
  */
 router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -505,9 +767,31 @@ router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: Authenti
 }));
 
 /**
- * POST /api/v1/webhooks/events/trigger
- * Manually trigger webhook event (for testing/validation)
- * Body: { eventType, data? }
+ * @swagger
+ * /api/webhooks/events/trigger:
+ *   post:
+ *     tags: [Webhooks]
+ *     summary: Trigger webhook event
+ *     description: Manually triggers a webhook event for testing and validation.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [eventType]
+ *             properties:
+ *               eventType:
+ *                 type: string
+ *               data:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Event triggered
+ *       400:
+ *         description: eventType required
  */
 router.post('/events/trigger', validateRequest(WebhookValidationSchemas.triggerEvent, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {

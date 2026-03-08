@@ -84,7 +84,17 @@ const ClientValidationSchemas = {
 // =====================================================
 
 /**
- * GET /me - Get current client's profile
+ * @swagger
+ * /api/clients/me:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me - Get current client's profile
+ *     description: GET /me - Get current client's profile.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me',
@@ -113,7 +123,17 @@ router.get(
 );
 
 /**
- * PUT /me - Update current client's profile
+ * @swagger
+ * /api/clients/me:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me - Update current client's profile
+ *     description: PUT /me - Update current client's profile.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me',
@@ -156,7 +176,17 @@ router.put(
 );
 
 /**
- * PUT /me/password - Change current client's password
+ * @swagger
+ * /api/clients/me/password:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/password - Change current client's password
+ *     description: PUT /me/password - Change current client's password.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/password',
@@ -210,8 +240,17 @@ router.put(
 );
 
 /**
- * PUT /me/notifications - Update notification preferences
- * Uses notification_preferences table (consolidated from legacy clients columns)
+ * @swagger
+ * /api/clients/me/notifications:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/notifications - Update notification preferences
+ *     description: PUT /me/notifications - Update notification preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/notifications',
@@ -237,7 +276,17 @@ router.put(
 );
 
 /**
- * GET /me/notifications - Get notification preferences
+ * @swagger
+ * /api/clients/me/notifications:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/notifications - Get notification preferences
+ *     description: GET /me/notifications - Get notification preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/notifications',
@@ -264,7 +313,17 @@ router.get(
 );
 
 /**
- * GET /me/billing - Get billing information
+ * @swagger
+ * /api/clients/me/billing:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/billing - Get billing information
+ *     description: GET /me/billing - Get billing information.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/billing',
@@ -294,7 +353,17 @@ router.get(
 );
 
 /**
- * PUT /me/billing - Update billing information
+ * @swagger
+ * /api/clients/me/billing:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/billing - Update billing information
+ *     description: PUT /me/billing - Update billing information.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/billing',
@@ -337,7 +406,17 @@ router.put(
 );
 
 /**
- * GET /me/dashboard - Get client dashboard stats and recent activity
+ * @swagger
+ * /api/clients/me/dashboard:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/dashboard - Get client dashboard stats and recent activity
+ *     description: GET /me/dashboard - Get client dashboard stats and recent activity.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/dashboard',
@@ -514,7 +593,19 @@ router.get(
 // ADMIN CLIENT ENDPOINTS
 // =====================================================
 
-// Get all clients (admin only)
+/**
+ * @swagger
+ * /api/clients:
+ *   get:
+ *     tags: [Clients]
+ *     summary: Get all clients (admin only)
+ *     description: Get all clients (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/',
   authenticateToken,
@@ -592,7 +683,17 @@ router.get(
 // =====================================================
 
 /**
- * GET /clients/tags - Get all tags
+ * @swagger
+ * /api/clients/tags:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/tags - Get all tags
+ *     description: GET /clients/tags - Get all tags.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/tags',
@@ -606,7 +707,17 @@ router.get(
 );
 
 /**
- * POST /clients/tags - Create a new tag
+ * @swagger
+ * /api/clients/tags:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/tags - Create a new tag
+ *     description: POST /clients/tags - Create a new tag.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/tags',
@@ -625,7 +736,23 @@ router.post(
 );
 
 /**
- * PUT /clients/tags/:tagId - Update a tag
+ * @swagger
+ * /api/clients/tags/{tagId}:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /clients/tags/:tagId - Update a tag
+ *     description: PUT /clients/tags/:tagId - Update a tag.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tagId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/tags/:tagId',
@@ -642,7 +769,23 @@ router.put(
 );
 
 /**
- * DELETE /clients/tags/:tagId - Delete a tag
+ * @swagger
+ * /api/clients/tags/{tagId}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: DELETE /clients/tags/:tagId - Delete a tag
+ *     description: DELETE /clients/tags/:tagId - Delete a tag.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tagId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/tags/:tagId',
@@ -659,7 +802,23 @@ router.delete(
 );
 
 /**
- * GET /clients/by-tag/:tagId - Get all clients with a specific tag
+ * @swagger
+ * /api/clients/by-tag/{tagId}:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/by-tag/:tagId - Get all clients with a specific tag
+ *     description: GET /clients/by-tag/:tagId - Get all clients with a specific tag.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tagId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/by-tag/:tagId',
@@ -679,7 +838,25 @@ router.get(
 // SINGLE CLIENT ENDPOINTS (/:id routes)
 // =====================================================
 
-// Get single client (admin or own profile)
+/**
+ * @swagger
+ * /api/clients/{id}:
+ *   get:
+ *     tags: [Clients]
+ *     summary: Get single client (admin or own profile)
+ *     description: Get single client (admin or own profile).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id',
   authenticateToken,
@@ -756,7 +933,19 @@ router.get(
   })
 );
 
-// Create new client (admin only)
+/**
+ * @swagger
+ * /api/clients:
+ *   post:
+ *     tags: [Clients]
+ *     summary: Create new client (admin only)
+ *     description: Create new client (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/',
   authenticateToken,
@@ -896,7 +1085,25 @@ router.post(
   })
 );
 
-// Update client (admin or own profile)
+/**
+ * @swagger
+ * /api/clients/{id}:
+ *   put:
+ *     tags: [Clients]
+ *     summary: Update client (admin or own profile)
+ *     description: Update client (admin or own profile).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.put(
   '/:id',
   authenticateToken,
@@ -985,7 +1192,25 @@ router.put(
   })
 );
 
-// Get client's projects (admin only)
+/**
+ * @swagger
+ * /api/clients/{id}/projects:
+ *   get:
+ *     tags: [Clients]
+ *     summary: Get client's projects (admin only)
+ *     description: Get client's projects (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 router.get(
   '/:id/projects',
   authenticateToken,
@@ -1015,7 +1240,25 @@ router.get(
   })
 );
 
-// Send invitation to client (admin only)
+/**
+ * @swagger
+ * /api/clients/{id}/send-invite:
+ *   post:
+ *     tags: [Clients]
+ *     summary: Send invitation to client (admin only)
+ *     description: Send invitation to client (admin only).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ */
 router.post(
   '/:id/send-invite',
   authenticateToken,
@@ -1145,7 +1388,25 @@ No Bhad Codes Team
   })
 );
 
-// Delete client (admin only) - soft delete with 30-day recovery
+/**
+ * @swagger
+ * /api/clients/{id}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: Delete client (admin only) - soft delete with 30-day recovery
+ *     description: Delete client (admin only) - soft delete with 30-day recovery.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ */
 router.delete(
   '/:id',
   authenticateToken,
@@ -1179,7 +1440,23 @@ router.delete(
 // =====================================================
 
 /**
- * GET /clients/:id/contacts - Get all contacts for a client
+ * @swagger
+ * /api/clients/{id}/contacts:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/contacts - Get all contacts for a client
+ *     description: GET /clients/:id/contacts - Get all contacts for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/contacts',
@@ -1198,7 +1475,23 @@ router.get(
 );
 
 /**
- * POST /clients/:id/contacts - Create a new contact for a client
+ * @swagger
+ * /api/clients/{id}/contacts:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/:id/contacts - Create a new contact for a client
+ *     description: POST /clients/:id/contacts - Create a new contact for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/:id/contacts',
@@ -1241,7 +1534,23 @@ router.post(
 );
 
 /**
- * PUT /clients/contacts/:contactId - Update a contact
+ * @swagger
+ * /api/clients/contacts/{contactId}:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /clients/contacts/:contactId - Update a contact
+ *     description: PUT /clients/contacts/:contactId - Update a contact.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/contacts/:contactId',
@@ -1261,7 +1570,23 @@ router.put(
 );
 
 /**
- * DELETE /clients/contacts/:contactId - Delete a contact
+ * @swagger
+ * /api/clients/contacts/{contactId}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: DELETE /clients/contacts/:contactId - Delete a contact
+ *     description: DELETE /clients/contacts/:contactId - Delete a contact.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/contacts/:contactId',
@@ -1281,7 +1606,28 @@ router.delete(
 );
 
 /**
- * POST /clients/:id/contacts/:contactId/set-primary - Set primary contact
+ * @swagger
+ * /api/clients/{id}/contacts/{contactId}/set-primary:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/:id/contacts/:contactId/set-primary - Set primary contact
+ *     description: POST /clients/:id/contacts/:contactId/set-primary - Set primary contact.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/:id/contacts/:contactId/set-primary',
@@ -1310,7 +1656,23 @@ router.post(
 // =====================================================
 
 /**
- * GET /clients/:id/activities - Get activity timeline for a client
+ * @swagger
+ * /api/clients/{id}/activities:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/activities - Get activity timeline for a client
+ *     description: GET /clients/:id/activities - Get activity timeline for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/activities',
@@ -1338,7 +1700,23 @@ router.get(
 );
 
 /**
- * POST /clients/:id/activities - Log an activity for a client
+ * @swagger
+ * /api/clients/{id}/activities:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/:id/activities - Log an activity for a client
+ *     description: POST /clients/:id/activities - Log an activity for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/:id/activities',
@@ -1375,7 +1753,17 @@ router.post(
 );
 
 /**
- * GET /clients/activities/recent - Get recent activities across all clients
+ * @swagger
+ * /api/clients/activities/recent:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/activities/recent - Get recent activities across all clients
+ *     description: GET /clients/activities/recent - Get recent activities across all clients.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/activities/recent',
@@ -1427,7 +1815,23 @@ function toApiNote(n: {
 }
 
 /**
- * GET /clients/:id/notes - Get notes for a client
+ * @swagger
+ * /api/clients/{id}/notes:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/notes - Get notes for a client
+ *     description: GET /clients/:id/notes - Get notes for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/notes',
@@ -1446,7 +1850,23 @@ router.get(
 );
 
 /**
- * POST /clients/:id/notes - Add note to a client
+ * @swagger
+ * /api/clients/{id}/notes:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/:id/notes - Add note to a client
+ *     description: POST /clients/:id/notes - Add note to a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/:id/notes',
@@ -1472,7 +1892,23 @@ router.post(
 );
 
 /**
- * PUT /clients/notes/:noteId - Update a note (e.g. is_pinned)
+ * @swagger
+ * /api/clients/notes/{noteId}:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /clients/notes/:noteId - Update a note (e.g. is_pinned)
+ *     description: PUT /clients/notes/:noteId - Update a note (e.g. is_pinned).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/notes/:noteId',
@@ -1498,7 +1934,23 @@ router.put(
 );
 
 /**
- * DELETE /clients/notes/:noteId - Delete a note
+ * @swagger
+ * /api/clients/notes/{noteId}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: DELETE /clients/notes/:noteId - Delete a note
+ *     description: DELETE /clients/notes/:noteId - Delete a note.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/notes/:noteId',
@@ -1522,7 +1974,17 @@ router.delete(
 // =====================================================
 
 /**
- * GET /clients/custom-fields - Get all custom field definitions
+ * @swagger
+ * /api/clients/custom-fields:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/custom-fields - Get all custom field definitions
+ *     description: GET /clients/custom-fields - Get all custom field definitions.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/custom-fields',
@@ -1536,7 +1998,17 @@ router.get(
 );
 
 /**
- * POST /clients/custom-fields - Create a custom field definition
+ * @swagger
+ * /api/clients/custom-fields:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/custom-fields - Create a custom field definition
+ *     description: POST /clients/custom-fields - Create a custom field definition.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/custom-fields',
@@ -1579,7 +2051,23 @@ router.post(
 );
 
 /**
- * PUT /clients/custom-fields/:fieldId - Update a custom field definition
+ * @swagger
+ * /api/clients/custom-fields/{fieldId}:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /clients/custom-fields/:fieldId - Update a custom field definition
+ *     description: PUT /clients/custom-fields/:fieldId - Update a custom field definition.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: fieldId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/custom-fields/:fieldId',
@@ -1598,7 +2086,23 @@ router.put(
 );
 
 /**
- * DELETE /clients/custom-fields/:fieldId - Delete a custom field (marks as inactive)
+ * @swagger
+ * /api/clients/custom-fields/{fieldId}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: DELETE /clients/custom-fields/:fieldId - Delete a custom field (marks as inactive)
+ *     description: DELETE /clients/custom-fields/:fieldId - Delete a custom field (marks as inactive).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: fieldId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/custom-fields/:fieldId',
@@ -1617,7 +2121,23 @@ router.delete(
 );
 
 /**
- * GET /clients/:id/custom-fields - Get custom field values for a client
+ * @swagger
+ * /api/clients/{id}/custom-fields:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/custom-fields - Get custom field values for a client
+ *     description: GET /clients/:id/custom-fields - Get custom field values for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/custom-fields',
@@ -1636,7 +2156,23 @@ router.get(
 );
 
 /**
- * PUT /clients/:id/custom-fields - Set custom field values for a client
+ * @swagger
+ * /api/clients/{id}/custom-fields:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /clients/:id/custom-fields - Set custom field values for a client
+ *     description: PUT /clients/:id/custom-fields - Set custom field values for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/:id/custom-fields',
@@ -1671,7 +2207,23 @@ router.put(
 // =====================================================
 
 /**
- * GET /clients/:id/tags - Get tags for a client
+ * @swagger
+ * /api/clients/{id}/tags:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/tags - Get tags for a client
+ *     description: GET /clients/:id/tags - Get tags for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/tags',
@@ -1690,7 +2242,28 @@ router.get(
 );
 
 /**
- * POST /clients/:id/tags/:tagId - Add a tag to a client
+ * @swagger
+ * /api/clients/{id}/tags/{tagId}:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/:id/tags/:tagId - Add a tag to a client
+ *     description: POST /clients/:id/tags/:tagId - Add a tag to a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: tagId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/:id/tags/:tagId',
@@ -1715,7 +2288,28 @@ router.post(
 );
 
 /**
- * DELETE /clients/:id/tags/:tagId - Remove a tag from a client
+ * @swagger
+ * /api/clients/{id}/tags/{tagId}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: DELETE /clients/:id/tags/:tagId - Remove a tag from a client
+ *     description: DELETE /clients/:id/tags/:tagId - Remove a tag from a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: tagId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/:id/tags/:tagId',
@@ -1744,7 +2338,23 @@ router.delete(
 // =====================================================
 
 /**
- * GET /clients/:id/health - Get health score for a client
+ * @swagger
+ * /api/clients/{id}/health:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/health - Get health score for a client
+ *     description: GET /clients/:id/health - Get health score for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/health',
@@ -1763,7 +2373,23 @@ router.get(
 );
 
 /**
- * POST /clients/:id/health/recalculate - Recalculate health score for a client
+ * @swagger
+ * /api/clients/{id}/health/recalculate:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /clients/:id/health/recalculate - Recalculate health score for a client
+ *     description: POST /clients/:id/health/recalculate - Recalculate health score for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/:id/health/recalculate',
@@ -1783,7 +2409,17 @@ router.post(
 );
 
 /**
- * GET /clients/at-risk - Get all at-risk clients
+ * @swagger
+ * /api/clients/at-risk:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/at-risk - Get all at-risk clients
+ *     description: GET /clients/at-risk - Get all at-risk clients.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/at-risk',
@@ -1796,7 +2432,23 @@ router.get(
 );
 
 /**
- * GET /clients/:id/stats - Get comprehensive stats for a client
+ * @swagger
+ * /api/clients/{id}/stats:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/:id/stats - Get comprehensive stats for a client
+ *     description: GET /clients/:id/stats - Get comprehensive stats for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/:id/stats',
@@ -1819,7 +2471,23 @@ router.get(
 // =====================================================
 
 /**
- * PUT /clients/:id/crm - Update CRM-specific fields for a client
+ * @swagger
+ * /api/clients/{id}/crm:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /clients/:id/crm - Update CRM-specific fields for a client
+ *     description: PUT /clients/:id/crm - Update CRM-specific fields for a client.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/:id/crm',
@@ -1839,7 +2507,17 @@ router.put(
 );
 
 /**
- * GET /clients/follow-up - Get clients due for follow-up
+ * @swagger
+ * /api/clients/follow-up:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /clients/follow-up - Get clients due for follow-up
+ *     description: GET /clients/follow-up - Get clients due for follow-up.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/follow-up',
@@ -1858,7 +2536,17 @@ router.get(
 import { timelineService } from '../services/timeline-service.js';
 
 /**
- * GET /me/timeline - Get current client's activity timeline
+ * @swagger
+ * /api/clients/me/timeline:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/timeline - Get current client's activity timeline
+ *     description: GET /me/timeline - Get current client's activity timeline.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/timeline',
@@ -1889,7 +2577,17 @@ router.get(
 );
 
 /**
- * GET /me/timeline/summary - Get recent activity summary for dashboard
+ * @swagger
+ * /api/clients/me/timeline/summary:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/timeline/summary - Get recent activity summary for dashboard
+ *     description: GET /me/timeline/summary - Get recent activity summary for dashboard.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/timeline/summary',
@@ -1910,7 +2608,17 @@ router.get(
 );
 
 /**
- * GET /me/notifications - Get current client's notification preferences
+ * @swagger
+ * /api/clients/me/notifications:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/notifications - Get current client's notification preferences
+ *     description: GET /me/notifications - Get current client's notification preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/notifications',
@@ -1926,7 +2634,17 @@ router.get(
 );
 
 /**
- * PUT /me/notifications - Update current client's notification preferences
+ * @swagger
+ * /api/clients/me/notifications:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/notifications - Update current client's notification preferences
+ *     description: PUT /me/notifications - Update current client's notification preferences.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/notifications',
@@ -1947,7 +2665,17 @@ router.put(
 );
 
 /**
- * GET /me/notifications/history - Get notification history for current client
+ * @swagger
+ * /api/clients/me/notifications/history:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/notifications/history - Get notification history for current client
+ *     description: GET /me/notifications/history - Get notification history for current client.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/notifications/history',
@@ -1972,7 +2700,23 @@ router.get(
 );
 
 /**
- * PUT /me/notifications/:id/read - Mark a single notification as read
+ * @swagger
+ * /api/clients/me/notifications/{id}/read:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/notifications/:id/read - Mark a single notification as read
+ *     description: PUT /me/notifications/:id/read - Mark a single notification as read.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/notifications/:id/read',
@@ -2005,7 +2749,17 @@ router.put(
 );
 
 /**
- * PUT /me/notifications/mark-all-read - Mark all notifications as read
+ * @swagger
+ * /api/clients/me/notifications/mark-all-read:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/notifications/mark-all-read - Mark all notifications as read
+ *     description: PUT /me/notifications/mark-all-read - Mark all notifications as read.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/notifications/mark-all-read',
@@ -2035,7 +2789,17 @@ router.put(
 const CONTACT_COLUMNS = 'id, client_id, first_name, last_name, email, phone, title, department, role, is_primary, notes, created_at, updated_at';
 
 /**
- * GET /me/contacts - List client's own contacts
+ * @swagger
+ * /api/clients/me/contacts:
+ *   get:
+ *     tags: [Clients]
+ *     summary: GET /me/contacts - List client's own contacts
+ *     description: GET /me/contacts - List client's own contacts.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.get(
   '/me/contacts',
@@ -2057,7 +2821,17 @@ router.get(
 );
 
 /**
- * POST /me/contacts - Add a new contact
+ * @swagger
+ * /api/clients/me/contacts:
+ *   post:
+ *     tags: [Clients]
+ *     summary: POST /me/contacts - Add a new contact
+ *     description: POST /me/contacts - Add a new contact.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created successfully
  */
 router.post(
   '/me/contacts',
@@ -2091,7 +2865,23 @@ router.post(
 );
 
 /**
- * PUT /me/contacts/:id - Update a contact
+ * @swagger
+ * /api/clients/me/contacts/{id}:
+ *   put:
+ *     tags: [Clients]
+ *     summary: PUT /me/contacts/:id - Update a contact
+ *     description: PUT /me/contacts/:id - Update a contact.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
  */
 router.put(
   '/me/contacts/:id',
@@ -2154,7 +2944,23 @@ router.put(
 );
 
 /**
- * DELETE /me/contacts/:id - Remove a contact
+ * @swagger
+ * /api/clients/me/contacts/{id}:
+ *   delete:
+ *     tags: [Clients]
+ *     summary: DELETE /me/contacts/:id - Remove a contact
+ *     description: DELETE /me/contacts/:id - Remove a contact.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
  */
 router.delete(
   '/me/contacts/:id',

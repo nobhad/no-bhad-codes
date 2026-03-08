@@ -20,7 +20,15 @@ const router = express.Router();
 // =====================================================
 
 /**
- * Get all active categories with article counts
+ * @swagger
+ * /api/kb/categories:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get all active categories
+ *     description: Returns all active knowledge base categories with article counts.
+ *     responses:
+ *       200:
+ *         description: List of categories
  */
 router.get(
   '/categories',
@@ -31,7 +39,24 @@ router.get(
 );
 
 /**
- * Get a category by slug
+ * @swagger
+ * /api/kb/categories/{slug}:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get a category by slug
+ *     description: Returns a specific category and its articles by URL slug.
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category URL slug
+ *     responses:
+ *       200:
+ *         description: Category with articles
+ *       404:
+ *         description: Category not found
  */
 router.get(
   '/categories/:slug',
@@ -49,7 +74,22 @@ router.get(
 );
 
 /**
- * Get featured articles
+ * @swagger
+ * /api/kb/featured:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get featured articles
+ *     description: Returns featured knowledge base articles.
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Maximum number of articles to return
+ *     responses:
+ *       200:
+ *         description: List of featured articles
  */
 router.get(
   '/featured',
@@ -61,7 +101,31 @@ router.get(
 );
 
 /**
- * Search articles
+ * @swagger
+ * /api/kb/search:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Search articles
+ *     description: Searches knowledge base articles by query string.
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *           minLength: 2
+ *         description: Search query
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Maximum results
+ *     responses:
+ *       200:
+ *         description: Search results
+ *       400:
+ *         description: Query too short
  */
 router.get(
   '/search',
@@ -87,7 +151,28 @@ router.get(
 );
 
 /**
- * Get an article by category and article slug
+ * @swagger
+ * /api/kb/articles/{categorySlug}/{articleSlug}:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get an article by slugs
+ *     description: Returns a specific article by its category and article URL slugs.
+ *     parameters:
+ *       - in: path
+ *         name: categorySlug
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: articleSlug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Article details
+ *       404:
+ *         description: Article not found
  */
 router.get(
   '/articles/:categorySlug/:articleSlug',
@@ -107,7 +192,35 @@ router.get(
 );
 
 /**
- * Submit feedback for an article
+ * @swagger
+ * /api/kb/articles/{id}/feedback:
+ *   post:
+ *     tags: [Knowledge Base]
+ *     summary: Submit article feedback
+ *     description: Submits helpful/not helpful feedback for a knowledge base article.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [isHelpful]
+ *             properties:
+ *               isHelpful:
+ *                 type: boolean
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Feedback submitted
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/articles/:id/feedback',
@@ -140,7 +253,17 @@ router.post(
 // =====================================================
 
 /**
- * Get all categories (including inactive) for admin
+ * @swagger
+ * /api/kb/admin/categories:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get all categories (admin)
+ *     description: Returns all categories including inactive ones for admin management.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all categories
  */
 router.get(
   '/admin/categories',
@@ -153,7 +276,39 @@ router.get(
 );
 
 /**
- * Create a new category
+ * @swagger
+ * /api/kb/admin/categories:
+ *   post:
+ *     tags: [Knowledge Base]
+ *     summary: Create a new category
+ *     description: Creates a new knowledge base category.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, slug]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               slug:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               icon:
+ *                 type: string
+ *               color:
+ *                 type: string
+ *               sort_order:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Category created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/admin/categories',
@@ -180,7 +335,25 @@ router.post(
 );
 
 /**
- * Update a category
+ * @swagger
+ * /api/kb/admin/categories/{id}:
+ *   put:
+ *     tags: [Knowledge Base]
+ *     summary: Update a category
+ *     description: Updates an existing knowledge base category.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Category updated
+ *       404:
+ *         description: Category not found
  */
 router.put(
   '/admin/categories/:id',
@@ -204,7 +377,25 @@ router.put(
 );
 
 /**
- * Delete a category
+ * @swagger
+ * /api/kb/admin/categories/{id}:
+ *   delete:
+ *     tags: [Knowledge Base]
+ *     summary: Delete a category
+ *     description: Deletes a knowledge base category.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Category deleted
+ *       400:
+ *         description: Invalid category ID
  */
 router.delete(
   '/admin/categories/:id',
@@ -223,7 +414,23 @@ router.delete(
 );
 
 /**
- * Get all articles for admin (including unpublished)
+ * @swagger
+ * /api/kb/admin/articles:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get all articles (admin)
+ *     description: Returns all articles including unpublished ones for admin management.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter by category slug
+ *     responses:
+ *       200:
+ *         description: List of all articles
  */
 router.get(
   '/admin/articles',
@@ -250,7 +457,25 @@ router.get(
 );
 
 /**
- * Get a single article for admin
+ * @swagger
+ * /api/kb/admin/articles/{id}:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get a single article (admin)
+ *     description: Returns a specific article by ID for admin editing.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Article details
+ *       404:
+ *         description: Article not found
  */
 router.get(
   '/admin/articles/:id',
@@ -274,7 +499,43 @@ router.get(
 );
 
 /**
- * Create a new article
+ * @swagger
+ * /api/kb/admin/articles:
+ *   post:
+ *     tags: [Knowledge Base]
+ *     summary: Create a new article
+ *     description: Creates a new knowledge base article.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [category_id, title, slug, content]
+ *             properties:
+ *               category_id:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               slug:
+ *                 type: string
+ *               summary:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               keywords:
+ *                 type: string
+ *               is_featured:
+ *                 type: boolean
+ *               is_published:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Article created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/admin/articles',
@@ -305,7 +566,25 @@ router.post(
 );
 
 /**
- * Update an article
+ * @swagger
+ * /api/kb/admin/articles/{id}:
+ *   put:
+ *     tags: [Knowledge Base]
+ *     summary: Update an article
+ *     description: Updates an existing knowledge base article.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Article updated
+ *       404:
+ *         description: Article not found
  */
 router.put(
   '/admin/articles/:id',
@@ -329,7 +608,25 @@ router.put(
 );
 
 /**
- * Delete an article
+ * @swagger
+ * /api/kb/admin/articles/{id}:
+ *   delete:
+ *     tags: [Knowledge Base]
+ *     summary: Delete an article
+ *     description: Deletes a knowledge base article.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Article deleted
+ *       400:
+ *         description: Invalid article ID
  */
 router.delete(
   '/admin/articles/:id',
@@ -348,7 +645,17 @@ router.delete(
 );
 
 /**
- * Get knowledge base statistics
+ * @swagger
+ * /api/kb/admin/stats:
+ *   get:
+ *     tags: [Knowledge Base]
+ *     summary: Get knowledge base statistics
+ *     description: Returns statistics about the knowledge base including article and category counts.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Knowledge base statistics
  */
 router.get(
   '/admin/stats',
