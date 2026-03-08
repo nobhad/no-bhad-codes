@@ -88,6 +88,101 @@ type FileCategory =
   | 'contract'
   | 'invoice';
 
+type DeliverableStatus = 'draft' | 'pending_review' | 'in_review' | 'changes_requested' | 'approved' | 'rejected';
+
+interface FileRecord {
+  id: number;
+  project_id: number;
+  filename: string;
+  original_filename: string;
+  file_path: string;
+  file_size: number | null;
+  mime_type: string | null;
+  file_type: string | null;
+  description: string | null;
+  uploaded_by: string | null;
+  created_at: string;
+  folder_id: number | null;
+  version: number;
+  is_archived: boolean;
+  archived_at: string | null;
+  archived_by: string | null;
+  expires_at: string | null;
+  access_count: number;
+  last_accessed_at: string | null;
+  download_count: number;
+  checksum: string | null;
+  is_locked: boolean;
+  locked_by: string | null;
+  locked_at: string | null;
+  category: FileCategory;
+}
+
+interface FileWithProject extends FileRecord {
+  project_name: string;
+}
+
+interface FileWithFolder extends FileRecord {
+  folder_name: string | null;
+}
+
+interface DeliverableWorkflow {
+  id: number;
+  file_id: number;
+  project_id: number;
+  status: DeliverableStatus;
+  version: number;
+  submitted_at: string | null;
+  submitted_by: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  approved_at: string | null;
+  approved_by: string | null;
+  rejection_reason: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface FileWithDeliverableWorkflow extends FileRecord {
+  workflow_status: DeliverableStatus | null;
+  submitted_at: string | null;
+  reviewed_at: string | null;
+  approved_at: string | null;
+  reviewed_by: string | null;
+  approved_by: string | null;
+  rejection_reason: string | null;
+}
+
+interface PendingReviewDeliverable extends FileRecord {
+  workflow_status: DeliverableStatus;
+  submitted_at: string | null;
+  submitted_by: string | null;
+  project_name: string;
+  client_name: string | null;
+}
+
+interface DeliverableReviewComment {
+  id: number;
+  workflow_id: number;
+  author_email: string;
+  author_name: string | null;
+  author_type: 'admin' | 'client';
+  comment: string;
+  comment_type: 'feedback' | 'approval' | 'rejection' | 'revision_request';
+  created_at: string;
+}
+
+interface DeliverableHistoryEntry {
+  id: number;
+  workflow_id: number;
+  from_status: string | null;
+  to_status: string;
+  changed_by: string;
+  notes: string | null;
+  created_at: string;
+}
+
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
 // ============================================
@@ -136,10 +231,10 @@ class FileService {
    */
   async getFileById(
     fileId: number
-  ): Promise<{ id: number; project_id: number; [key: string]: unknown } | null> {
+  ): Promise<FileRecord | null> {
     const db = getDatabase();
     const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ?`, [fileId]);
-    return file as { id: number; project_id: number; [key: string]: unknown } | null;
+    return (file as FileRecord) ?? null;
   }
 
   // ============================================
@@ -513,7 +608,7 @@ class FileService {
   /**
    * Get files by tag
    */
-  async getFilesByTag(projectId: number, tagId: number): Promise<any[]> {
+  async getFilesByTag(projectId: number, tagId: number): Promise<FileRecord[]> {
     const db = getDatabase();
     return db.all(
       `SELECT f.*
@@ -721,7 +816,7 @@ class FileService {
   /**
    * Get archived files for a project
    */
-  async getArchivedFiles(projectId: number): Promise<any[]> {
+  async getArchivedFiles(projectId: number): Promise<FileRecord[]> {
     const db = getDatabase();
     return db.all(
       `SELECT ${FILE_COLUMNS} FROM files WHERE project_id = ? AND is_archived = TRUE ORDER BY archived_at DESC`,
@@ -740,7 +835,7 @@ class FileService {
   /**
    * Get files expiring soon
    */
-  async getExpiringFiles(daysAhead: number = 7): Promise<any[]> {
+  async getExpiringFiles(daysAhead: number = 7): Promise<FileWithProject[]> {
     const db = getDatabase();
     return db.all(
       `SELECT f.*, p.project_name
@@ -820,7 +915,7 @@ class FileService {
   /**
    * Get files by category
    */
-  async getFilesByCategory(projectId: number, category: FileCategory): Promise<any[]> {
+  async getFilesByCategory(projectId: number, category: FileCategory): Promise<FileRecord[]> {
     const db = getDatabase();
     return db.all(
       `SELECT ${FILE_COLUMNS} FROM files WHERE project_id = ? AND category = ? AND is_archived = FALSE ORDER BY created_at DESC`,
@@ -893,7 +988,7 @@ class FileService {
       include_archived?: boolean;
       limit?: number;
     } = {}
-  ): Promise<any[]> {
+  ): Promise<FileWithFolder[]> {
     const db = getDatabase();
     const searchPattern = `%${query}%`;
 
@@ -945,7 +1040,7 @@ class FileService {
   /**
    * Create or get deliverable workflow for a file
    */
-  async getOrCreateDeliverableWorkflow(fileId: number, projectId: number): Promise<any> {
+  async getOrCreateDeliverableWorkflow(fileId: number, projectId: number): Promise<DeliverableWorkflow> {
     const db = getDatabase();
 
     // Check if workflow exists
@@ -966,7 +1061,7 @@ class FileService {
   /**
    * Get deliverable workflow by file ID
    */
-  async getDeliverableWorkflow(fileId: number): Promise<any> {
+  async getDeliverableWorkflow(fileId: number): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     return db.get(`SELECT ${DELIVERABLE_WORKFLOW_COLUMNS} FROM deliverable_workflows WHERE file_id = ?`, [fileId]);
   }
@@ -974,7 +1069,7 @@ class FileService {
   /**
    * Get all deliverables for a project with workflow status
    */
-  async getProjectDeliverables(projectId: number, status?: string): Promise<any[]> {
+  async getProjectDeliverables(projectId: number, status?: string): Promise<FileWithDeliverableWorkflow[]> {
     const db = getDatabase();
     let sql = `
       SELECT f.*, dw.status as workflow_status, dw.submitted_at, dw.reviewed_at,
@@ -997,7 +1092,7 @@ class FileService {
   /**
    * Submit deliverable for review
    */
-  async submitForReview(fileId: number, submittedBy: string, notes?: string): Promise<any> {
+  async submitForReview(fileId: number, submittedBy: string, notes?: string): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const file = await this.getFileById(fileId);
     if (!file) throw new Error('File not found');
@@ -1030,7 +1125,7 @@ class FileService {
   /**
    * Start review of deliverable
    */
-  async startReview(fileId: number, reviewerEmail: string): Promise<any> {
+  async startReview(fileId: number, reviewerEmail: string): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1052,7 +1147,7 @@ class FileService {
   /**
    * Request changes to deliverable
    */
-  async requestChanges(fileId: number, reviewerEmail: string, feedback: string): Promise<any> {
+  async requestChanges(fileId: number, reviewerEmail: string, feedback: string): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1083,7 +1178,7 @@ class FileService {
   /**
    * Approve deliverable
    */
-  async approveDeliverable(fileId: number, approverEmail: string, comment?: string): Promise<any> {
+  async approveDeliverable(fileId: number, approverEmail: string, comment?: string): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1115,7 +1210,7 @@ class FileService {
   /**
    * Reject deliverable
    */
-  async rejectDeliverable(fileId: number, reviewerEmail: string, reason: string): Promise<any> {
+  async rejectDeliverable(fileId: number, reviewerEmail: string, reason: string): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1144,7 +1239,7 @@ class FileService {
   /**
    * Resubmit deliverable (after changes requested)
    */
-  async resubmitDeliverable(fileId: number, submittedBy: string, notes?: string): Promise<any> {
+  async resubmitDeliverable(fileId: number, submittedBy: string, notes?: string): Promise<DeliverableWorkflow | undefined> {
     const db = getDatabase();
     const workflow = await this.getDeliverableWorkflow(fileId);
     if (!workflow) throw new Error('Deliverable workflow not found');
@@ -1180,7 +1275,7 @@ class FileService {
     comment: string,
     commentType: 'feedback' | 'approval' | 'rejection' | 'revision_request' = 'feedback',
     authorName?: string
-  ): Promise<any> {
+  ): Promise<DeliverableReviewComment | undefined> {
     const db = getDatabase();
 
     // Look up user ID for author during transition period
@@ -1198,7 +1293,7 @@ class FileService {
   /**
    * Get review comments for a deliverable
    */
-  async getReviewComments(fileId: number): Promise<any[]> {
+  async getReviewComments(fileId: number): Promise<DeliverableReviewComment[]> {
     const db = getDatabase();
     return db.all(
       `SELECT drc.*
@@ -1213,7 +1308,7 @@ class FileService {
   /**
    * Get deliverable history
    */
-  async getDeliverableHistory(fileId: number): Promise<any[]> {
+  async getDeliverableHistory(fileId: number): Promise<DeliverableHistoryEntry[]> {
     const db = getDatabase();
     return db.all(
       `SELECT dh.*
@@ -1246,7 +1341,7 @@ class FileService {
   /**
    * Get deliverables pending review (for admin dashboard)
    */
-  async getPendingReviewDeliverables(): Promise<any[]> {
+  async getPendingReviewDeliverables(): Promise<PendingReviewDeliverable[]> {
     const db = getDatabase();
     return db.all(
       `SELECT f.*, dw.status as workflow_status, dw.submitted_at, dw.submitted_by,
@@ -1321,7 +1416,7 @@ class FileService {
     fileSize: number;
     fileType: string;
     uploadedBy: string;
-  }): Promise<{ id: number; project_id: number; [key: string]: unknown }> {
+  }): Promise<FileRecord> {
     const db = getDatabase();
 
     // Determine file type category based on mime type
@@ -1358,11 +1453,11 @@ class FileService {
       throw new Error('Failed to create file entry from deliverable');
     }
 
-    return this.getFileById(result.lastID) as Promise<{
-      id: number;
-      project_id: number;
-      [key: string]: unknown;
-    }>;
+    const file = await this.getFileById(result.lastID);
+    if (!file) {
+      throw new Error('Failed to retrieve created file entry');
+    }
+    return file;
   }
 }
 

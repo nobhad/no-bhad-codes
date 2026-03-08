@@ -136,7 +136,7 @@ router.get(
 
     // Get project with client info
     let query = '';
-    let params: any[] = [projectId];
+    let params: (string | number | null)[] = [projectId];
 
     if (isAdmin) {
       query = `

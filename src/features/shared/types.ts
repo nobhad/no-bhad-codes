@@ -138,5 +138,5 @@ export interface ModuleRegistration {
   name: string;
   roles: UserRole[];
 
-  loader: () => Promise<{ default: any }>;
+  loader: () => Promise<{ default: unknown }>;
 }

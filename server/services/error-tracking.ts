@@ -19,9 +19,9 @@ export interface ErrorContext {
     method: string;
     url: string;
     headers?: Record<string, string>;
-    body?: any;
+    body?: Record<string, unknown>;
   };
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
   tags?: Record<string, string>;
   level?: 'error' | 'warning' | 'info' | 'debug';
 }
@@ -224,7 +224,7 @@ export class ErrorTrackingService {
   /**
    * Start a performance transaction
    */
-  startTransaction(name: string, operation: string = 'http'): any {
+  startTransaction(name: string, operation: string = 'http'): Sentry.Span | undefined {
     if (!this.isInitialized) {
       return undefined;
     }
@@ -248,7 +248,7 @@ export class ErrorTrackingService {
     message: string;
     category?: string;
     level?: 'error' | 'warning' | 'info' | 'debug';
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
   }): void {
     if (!this.isInitialized) {
       return;

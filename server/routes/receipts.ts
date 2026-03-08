@@ -131,7 +131,20 @@ router.get(
              ORDER BY r.created_at DESC
              LIMIT 100`
           );
-          receipts = rows.map((row: any) => ({
+          interface ReceiptRow {
+            id: number;
+            receipt_number: string;
+            invoice_id: number;
+            payment_id: number | null;
+            amount: number | string;
+            file_id: number | null;
+            created_at: string;
+            invoice_number: string;
+            client_name: string;
+            client_email: string;
+            project_name: string | null;
+          }
+          receipts = (rows as ReceiptRow[]).map((row) => ({
             id: row.id,
             receiptNumber: row.receipt_number,
             invoiceId: row.invoice_id,
@@ -142,7 +155,7 @@ router.get(
             invoiceNumber: row.invoice_number,
             clientName: row.client_name,
             clientEmail: row.client_email,
-            projectName: row.project_name
+            projectName: row.project_name ?? undefined
           }));
         }
       } else {

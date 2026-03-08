@@ -76,7 +76,7 @@ export interface DeliverableReview {
 /**
  * Initialize deliverable tables
  */
-export async function initializeDeliverableTables(db: any): Promise<void> {
+export async function initializeDeliverableTables(db: { run(sql: string): Promise<unknown> }): Promise<void> {
   // Deliverables table
   await db.run(`
     CREATE TABLE IF NOT EXISTS deliverables (

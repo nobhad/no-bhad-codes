@@ -40,7 +40,7 @@ class ComponentStore {
     // Also register in the main container for consistency
     container.register(
       definition.name,
-      definition.factory as (props: ComponentProps) => Promise<unknown>,
+      definition.factory,
       {
         singleton: definition.singleton ?? false,
         dependencies: []

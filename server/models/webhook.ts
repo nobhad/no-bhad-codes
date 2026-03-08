@@ -42,7 +42,7 @@ export interface WebhookPayload {
   event_type: string;
   event_id: string;
   timestamp: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 /**

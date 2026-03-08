@@ -32,7 +32,7 @@ export interface LogEntry {
   level: LogLevelType;
   message: string;
   category?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   error?: Error;
   userId?: string;
   requestId?: string;
@@ -43,6 +43,21 @@ export interface LogEntry {
 /**
  * Log output format type
  */
+/** Minimal request interface for logging (avoids Express dependency) */
+interface LoggableRequest {
+  method: string;
+  url: string;
+  ip?: string;
+  id?: string;
+  user?: { id: string };
+  get(name: string): string | undefined;
+}
+
+/** Minimal response interface for logging (avoids Express dependency) */
+interface LoggableResponse {
+  statusCode: number;
+}
+
 export type LogFormat = 'json' | 'text';
 
 /**
@@ -390,7 +405,7 @@ export class LoggerService {
   /**
    * Log HTTP request
    */
-  async logRequest(req: any, res: any, duration?: number): Promise<void> {
+  async logRequest(req: LoggableRequest, res: LoggableResponse, duration?: number): Promise<void> {
     const message = `${req.method} ${req.url} ${res.statusCode}`;
     const metadata = {
       method: req.method,
@@ -429,7 +444,7 @@ export class LoggerService {
   /**
    * Log security event
    */
-  async logSecurity(event: string, details: Record<string, any> = {}, req?: any): Promise<void> {
+  async logSecurity(event: string, details: Record<string, unknown> = {}, req?: LoggableRequest): Promise<void> {
     await this.warn(`Security Event: ${event}`, {
       category: 'SECURITY',
       metadata: details,
@@ -442,7 +457,7 @@ export class LoggerService {
   /**
    * Log database operation
    */
-  async logDatabase(operation: string, details: Record<string, any> = {}): Promise<void> {
+  async logDatabase(operation: string, details: Record<string, unknown> = {}): Promise<void> {
     await this.info(`Database: ${operation}`, {
       category: 'DATABASE',
       metadata: details

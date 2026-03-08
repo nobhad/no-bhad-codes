@@ -40,8 +40,9 @@ const commands = {
 
     try {
       await migrator.migrate();
-    } catch (error: any) {
-      console.error('❌ Migration failed:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Migration failed:', message);
       process.exit(1);
     } finally {
       db.close();
@@ -55,8 +56,9 @@ const commands = {
 
     try {
       await migrator.rollback();
-    } catch (error: any) {
-      console.error('❌ Rollback failed:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Rollback failed:', message);
       process.exit(1);
     } finally {
       db.close();
@@ -93,8 +95,9 @@ const commands = {
       } else {
         console.log('✅ All migrations are up to date!');
       }
-    } catch (error: any) {
-      console.error('❌ Failed to get status:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Failed to get status:', message);
       process.exit(1);
     } finally {
       db.close();
@@ -113,8 +116,9 @@ const commands = {
     try {
       const filepath = MigrationManager.createMigration(migrationName, MIGRATIONS_DIR);
       console.log(`✅ Created migration: ${filepath}`);
-    } catch (error: any) {
-      console.error('❌ Failed to create migration:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Failed to create migration:', message);
       process.exit(1);
     }
   },
@@ -150,7 +154,7 @@ if (!commands[command as keyof typeof commands]) {
   process.exit(1);
 }
 
-commands[command as keyof typeof commands]().catch((error: any) => {
+commands[command as keyof typeof commands]().catch((error: unknown) => {
   console.error('❌ Command failed:', error);
   process.exit(1);
 });

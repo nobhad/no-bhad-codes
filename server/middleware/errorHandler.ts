@@ -23,7 +23,7 @@ interface LoggingRequest extends Request {
  * Sanitize request body/headers by removing sensitive fields
  * Uses case-insensitive matching for HTTP headers
  */
-function sanitizeRequestData(data: any): any {
+function sanitizeRequestData(data: unknown): Record<string, unknown> | unknown {
   if (!data || typeof data !== 'object') return data;
 
   const sensitiveFields = [
@@ -64,7 +64,8 @@ function sanitizeRequestData(data: any): any {
     'session_id'
   ];
 
-  const sanitized = { ...data };
+  const record = data as Record<string, unknown>;
+  const sanitized = { ...record };
   const sensitiveSet = new Set(sensitiveFields.map((f) => f.toLowerCase()));
 
   for (const key of Object.keys(sanitized)) {
@@ -151,7 +152,7 @@ export const errorHandler = (
   });
 };
 
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown> | unknown) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };

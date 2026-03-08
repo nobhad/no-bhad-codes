@@ -41,8 +41,20 @@ router.get(
     );
 
     // Map to consistent field names
+    interface FileRow {
+      id: number;
+      filename: string;
+      original_filename: string;
+      file_size: number;
+      mime_type: string;
+      file_type: string | null;
+      file_path: string;
+      description: string | null;
+      uploaded_by: string;
+      created_at: string;
+    }
     sendSuccess(res, {
-      files: files.map((f: any) => ({
+      files: (files as FileRow[]).map((f) => ({
         ...f,
         size: f.file_size
       }))

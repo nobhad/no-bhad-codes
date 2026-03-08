@@ -15,6 +15,83 @@ import {
 import { safeJsonParseArray } from '../utils/safe-json.js';
 
 // ============================================
+// DB Row Interfaces - Typed shapes for raw database rows
+// ============================================
+
+type QueryParam = string | number | boolean | null;
+
+interface DeliverableRow {
+  id: number;
+  project_id: number;
+  type: string;
+  title: string;
+  description: string;
+  status: string;
+  approval_status: string;
+  round_number: number;
+  created_by_id: number;
+  reviewed_by_id: number | null;
+  review_deadline: string | null;
+  approved_at: string | null;
+  locked: number | boolean;
+  tags: string;
+  archived_file_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CommentRow {
+  id: number;
+  deliverable_id: number;
+  author_id: number;
+  comment_text: string;
+  x_position: number | null;
+  y_position: number | null;
+  annotation_type: string;
+  element_id: string | null;
+  resolved: number | boolean;
+  resolved_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ReviewRow {
+  id: number;
+  deliverable_id: number;
+  reviewer_id: number;
+  decision: string;
+  feedback: string | null;
+  design_elements_reviewed: string;
+  review_duration_minutes: number | null;
+  created_at: string;
+}
+
+interface CreateDeliverableOptions {
+  tags?: string;
+  reviewDeadline?: string;
+  roundNumber?: number;
+}
+
+interface ProjectDeliverablesOptions {
+  status?: string;
+  roundNumber?: number;
+  limit?: number;
+  offset?: number;
+}
+
+interface CommentOptions {
+  x?: number;
+  y?: number;
+  annotationType?: string;
+  elementId?: string;
+}
+
+interface CommentFilterOptions {
+  resolved?: boolean;
+  elementId?: string;
+}
+
+// ============================================
 // Column Constants - Explicit column lists for SELECT queries
 // ============================================
 
@@ -65,7 +142,7 @@ export class DeliverableService {
     description: string,
     type: string,
     createdById: number,
-    options?: { tags?: string; reviewDeadline?: string; roundNumber?: number }
+    options?: CreateDeliverableOptions
   ): Promise<Deliverable> {
     const roundNumber = options?.roundNumber || 1;
 
@@ -96,7 +173,7 @@ export class DeliverableService {
   async getDeliverableById(id: number): Promise<Deliverable | null> {
     const row = await this.db.get(`SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE id = ?`, [id]);
     if (!row) return null;
-    return this.formatDeliverable(row);
+    return this.formatDeliverable(row as DeliverableRow);
   }
 
   /**
@@ -104,10 +181,10 @@ export class DeliverableService {
    */
   async getProjectDeliverables(
     projectId: number,
-    options?: { status?: string; roundNumber?: number; limit?: number; offset?: number }
+    options?: ProjectDeliverablesOptions
   ): Promise<{ deliverables: Deliverable[]; total: number }> {
     let query = `SELECT ${DELIVERABLE_COLUMNS} FROM deliverables WHERE project_id = ?`;
-    const params: any[] = [projectId];
+    const params: QueryParam[] = [projectId];
 
     if (options?.status) {
       query += ' AND status = ?';
@@ -137,7 +214,7 @@ export class DeliverableService {
 
     const rows = await this.db.all(query, params);
     return {
-      deliverables: rows.map((row: any) => this.formatDeliverable(row)),
+      deliverables: rows.map((row: unknown) => this.formatDeliverable(row as DeliverableRow)),
       total: Number(countResult?.count) || 0
     };
   }
@@ -317,7 +394,7 @@ export class DeliverableService {
     deliverableId: number,
     authorId: number,
     text: string,
-    options?: { x?: number; y?: number; annotationType?: string; elementId?: string }
+    options?: CommentOptions
   ): Promise<DeliverableComment> {
     const result = await this.db.run(
       `INSERT INTO deliverable_comments (deliverable_id, author_id, comment_text, x_position, y_position, annotation_type, element_id)
@@ -345,7 +422,7 @@ export class DeliverableService {
   async getCommentById(id: number): Promise<DeliverableComment | null> {
     const row = await this.db.get(`SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE id = ?`, [id]);
     if (!row) return null;
-    return this.formatComment(row);
+    return this.formatComment(row as CommentRow);
   }
 
   /**
@@ -353,10 +430,10 @@ export class DeliverableService {
    */
   async getDeliverableComments(
     deliverableId: number,
-    options?: { resolved?: boolean; elementId?: string }
+    options?: CommentFilterOptions
   ): Promise<DeliverableComment[]> {
     let query = `SELECT ${DELIVERABLE_COMMENT_COLUMNS} FROM deliverable_comments WHERE deliverable_id = ?`;
-    const params: any[] = [deliverableId];
+    const params: QueryParam[] = [deliverableId];
 
     if (options?.resolved !== undefined) {
       query += ' AND resolved = ?';
@@ -371,7 +448,7 @@ export class DeliverableService {
     query += ' ORDER BY created_at DESC';
 
     const rows = await this.db.all(query, params);
-    return rows.map((row: any) => this.formatComment(row));
+    return rows.map((row: unknown) => this.formatComment(row as CommentRow));
   }
 
   /**
@@ -497,7 +574,7 @@ export class DeliverableService {
   async getReviewById(id: number): Promise<DeliverableReview | null> {
     const row = await this.db.get(`SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE id = ?`, [id]);
     if (!row) return null;
-    return this.formatReview(row);
+    return this.formatReview(row as ReviewRow);
   }
 
   /**
@@ -508,20 +585,20 @@ export class DeliverableService {
       `SELECT ${DELIVERABLE_REVIEW_COLUMNS} FROM deliverable_reviews WHERE deliverable_id = ? ORDER BY created_at DESC`,
       [deliverableId]
     );
-    return rows.map((row: any) => this.formatReview(row));
+    return rows.map((row: unknown) => this.formatReview(row as ReviewRow));
   }
 
   // ===== HELPER METHODS =====
 
-  private formatDeliverable(row: any): Deliverable {
+  private formatDeliverable(row: DeliverableRow): Deliverable {
     return {
       id: row.id,
       project_id: row.project_id,
-      type: row.type,
+      type: row.type as Deliverable['type'],
       title: row.title,
       description: row.description,
-      status: row.status,
-      approval_status: row.approval_status,
+      status: row.status as Deliverable['status'],
+      approval_status: row.approval_status as Deliverable['approval_status'],
       round_number: row.round_number,
       created_by_id: row.created_by_id,
       reviewed_by_id: row.reviewed_by_id,
@@ -535,7 +612,7 @@ export class DeliverableService {
     };
   }
 
-  private formatComment(row: any): DeliverableComment {
+  private formatComment(row: CommentRow): DeliverableComment {
     return {
       id: row.id,
       deliverable_id: row.deliverable_id,
@@ -543,7 +620,7 @@ export class DeliverableService {
       comment_text: row.comment_text,
       x_position: row.x_position,
       y_position: row.y_position,
-      annotation_type: row.annotation_type,
+      annotation_type: row.annotation_type as DeliverableComment['annotation_type'],
       element_id: row.element_id,
       resolved: Boolean(row.resolved),
       resolved_at: row.resolved_at,
@@ -552,18 +629,18 @@ export class DeliverableService {
     };
   }
 
-  private formatReview(row: any): DeliverableReview {
+  private formatReview(row: ReviewRow): DeliverableReview {
     return {
       id: row.id,
       deliverable_id: row.deliverable_id,
       reviewer_id: row.reviewer_id,
-      decision: row.decision,
-      feedback: row.feedback,
+      decision: row.decision as DeliverableReview['decision'],
+      feedback: row.feedback ?? '',
       design_elements_reviewed: safeJsonParseArray(
         row.design_elements_reviewed,
         'design elements reviewed'
       ),
-      review_duration_minutes: row.review_duration_minutes,
+      review_duration_minutes: row.review_duration_minutes ?? 0,
       created_at: row.created_at
     };
   }
@@ -586,12 +663,12 @@ export const deliverableService = {
     desc: string,
     type: string,
     cid: number,
-    opts?: any
+    opts?: CreateDeliverableOptions
   ) => getDeliverableService().createDeliverable(pid, title, desc, type, cid, opts),
   getDeliverableById: (id: number) => getDeliverableService().getDeliverableById(id),
-  getProjectDeliverables: (pid: number, opts?: any) =>
+  getProjectDeliverables: (pid: number, opts?: ProjectDeliverablesOptions) =>
     getDeliverableService().getProjectDeliverables(pid, opts),
-  updateDeliverable: (id: number, updates: any) =>
+  updateDeliverable: (id: number, updates: Partial<Deliverable>) =>
     getDeliverableService().updateDeliverable(id, updates),
   lockDeliverable: (id: number, rid: number) => getDeliverableService().lockDeliverable(id, rid),
   requestRevision: (id: number, reason: string, rid: number) =>
@@ -609,10 +686,10 @@ export const deliverableService = {
   getVersionById: (id: number) => getDeliverableService().getVersionById(id),
   getDeliverableVersions: (did: number) => getDeliverableService().getDeliverableVersions(did),
   getLatestVersion: (did: number) => getDeliverableService().getLatestVersion(did),
-  addComment: (did: number, aid: number, text: string, opts?: any) =>
+  addComment: (did: number, aid: number, text: string, opts?: CommentOptions) =>
     getDeliverableService().addComment(did, aid, text, opts),
   getCommentById: (id: number) => getDeliverableService().getCommentById(id),
-  getDeliverableComments: (did: number, opts?: any) =>
+  getDeliverableComments: (did: number, opts?: CommentFilterOptions) =>
     getDeliverableService().getDeliverableComments(did, opts),
   resolveComment: (id: number) => getDeliverableService().resolveComment(id),
   deleteComment: (id: number) => getDeliverableService().deleteComment(id),
@@ -620,9 +697,9 @@ export const deliverableService = {
     getDeliverableService().createDesignElement(did, name, desc),
   getDesignElementById: (id: number) => getDeliverableService().getDesignElementById(id),
   getDeliverableElements: (did: number) => getDeliverableService().getDeliverableElements(did),
-  updateElementApprovalStatus: (eid: number, status: any) =>
+  updateElementApprovalStatus: (eid: number, status: 'pending' | 'approved' | 'revision_needed') =>
     getDeliverableService().updateElementApprovalStatus(eid, status),
-  createReview: (did: number, rid: number, decision: any, feedback?: string, elements?: number[]) =>
+  createReview: (did: number, rid: number, decision: 'approved' | 'revision_needed' | 'rejected', feedback?: string, elements?: number[]) =>
     getDeliverableService().createReview(did, rid, decision, feedback, elements),
   getReviewById: (id: number) => getDeliverableService().getReviewById(id),
   getDeliverableReviews: (did: number) => getDeliverableService().getDeliverableReviews(did),

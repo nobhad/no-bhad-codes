@@ -246,7 +246,7 @@ export class SanitizationUtils {
   /**
    * Sanitize form data object
    */
-  static sanitizeFormData(data: Record<string, any>): Record<string, string> {
+  static sanitizeFormData(data: Record<string, unknown>): Record<string, string> {
     const sanitized: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(data)) {

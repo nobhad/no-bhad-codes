@@ -23,11 +23,11 @@ export class StateManager<T = AppState> {
 
   private selectors = new Map<
     string,
-    { selector: StateSelector<T, any>; lastValue: any; listeners: ((value: any) => void)[] }
+    { selector: StateSelector<T, unknown>; lastValue: unknown; listeners: ((value: unknown) => void)[] }
   >();
 
 
-  private computed = new Map<string, ComputedProperty<T, any>>();
+  private computed = new Map<string, ComputedProperty<T, unknown>>();
   private reducers = new Map<string, StateReducer<T>>();
   private middleware: StateMiddleware<T>[] = [];
   private history: { state: T; action?: StateAction<T>; timestamp: number }[] = [];
@@ -272,9 +272,9 @@ export class StateManager<T = AppState> {
     const currentValue = selector(this.state);
 
     this.selectors.set(id, {
-      selector,
+      selector: selector as StateSelector<T, unknown>,
       lastValue: currentValue,
-      listeners: [listener]
+      listeners: [listener as (value: unknown) => void]
     });
 
     // Call immediately with current value
@@ -296,11 +296,11 @@ export class StateManager<T = AppState> {
   ): () => void {
     const currentValue = selector(this.state);
 
-    const computedProp: ComputedProperty<T, U> = {
-      selector,
+    const computedProp: ComputedProperty<T, unknown> = {
+      selector: selector as StateSelector<T, unknown>,
       dependencies,
       lastValue: currentValue,
-      listeners: listener ? [listener] : []
+      listeners: listener ? [listener as (value: unknown) => void] : []
     };
 
     this.computed.set(name, computedProp);

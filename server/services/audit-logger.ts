@@ -35,6 +35,35 @@ const AUDIT_LOG_COLUMNS = `
   metadata, created_at
 `.replace(/\s+/g, ' ').trim();
 
+// Database row returned from audit_logs table
+interface AuditLogRow {
+  id: number;
+  user_id: number | null;
+  user_email: string | null;
+  user_type: string;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_name: string | null;
+  old_value: string | null;
+  new_value: string | null;
+  changes: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  request_path: string | null;
+  request_method: string | null;
+  metadata: string | null;
+  created_at: string;
+}
+
+// Parsed audit log with JSON fields deserialized
+interface ParsedAuditLog extends Omit<AuditLogRow, 'old_value' | 'new_value' | 'changes' | 'metadata'> {
+  old_value: Record<string, unknown> | null;
+  new_value: Record<string, unknown> | null;
+  changes: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+}
+
 // Audit action types - expandable string type
 export type AuditAction = string;
 
@@ -591,10 +620,10 @@ export const auditLogger = {
     endDate?: string;
     limit?: number;
     offset?: number;
-  }): Promise<any[]> {
+  }): Promise<ParsedAuditLog[]> {
     const db = getDatabase();
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: (string | number)[] = [];
 
     if (filters.userId) {
       conditions.push('user_id = ?');
@@ -635,7 +664,7 @@ export const auditLogger = {
     );
 
     // Parse JSON fields safely
-    return logs.map((log: any) => ({
+    return logs.map((log: AuditLogRow) => ({
       ...log,
       old_value: safeJsonParseOrNull(log.old_value, 'audit log old_value'),
       new_value: safeJsonParseOrNull(log.new_value, 'audit log new_value'),

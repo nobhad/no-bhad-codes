@@ -22,7 +22,7 @@ import { LazyTabRoute } from './LazyTabRoute';
 // HELPER: wrap named export for React.lazy
 // ============================================
 
-function lazyNamed<T extends React.ComponentType<any>>(
+function lazyNamed<T extends React.ComponentType<Record<string, unknown>>>(
   loader: () => Promise<{ [key: string]: T }>
 ): React.LazyExoticComponent<T> {
   return React.lazy(() =>

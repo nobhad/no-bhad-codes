@@ -29,6 +29,8 @@ type DataSource =
 type Frequency = 'daily' | 'weekly' | 'monthly' | 'quarterly';
 type AlertCondition = 'above' | 'below' | 'equals' | 'change_above' | 'change_below';
 
+type SqlParam = string | number | boolean | null;
+
 interface DateRange {
   start: string;
   end: string;
@@ -39,7 +41,7 @@ interface ReportFilters {
   clientId?: number;
   projectId?: number;
   status?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | DateRange | undefined;
 }
 
 interface SavedReport {
@@ -84,7 +86,7 @@ interface DashboardWidget {
   widget_type: WidgetType;
   title: string | null;
   data_source: DataSource;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   position_x: number;
   position_y: number;
   width: number;
@@ -102,7 +104,60 @@ interface KPISnapshot {
   value: number;
   previous_value: number | null;
   change_percent: number | null;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+interface ReportDataResult {
+  data: Record<string, unknown>[];
+  summary: Record<string, unknown>;
+}
+
+/** Raw DB row for saved_reports (JSON fields are strings) */
+interface SavedReportRow extends Omit<SavedReport, 'filters' | 'columns'> {
+  filters: string;
+  columns: string | null;
+}
+
+/** Raw DB row for report_schedules (JSON fields are strings) */
+interface ReportScheduleRow extends Omit<ReportSchedule, 'recipients'> {
+  recipients: string;
+}
+
+/** Raw DB row for dashboard_widgets (JSON fields are strings) */
+interface DashboardWidgetRow extends Omit<DashboardWidget, 'config'> {
+  config: string;
+}
+
+/** Raw DB row for kpi_snapshots (JSON fields are strings) */
+interface KPISnapshotRow extends Omit<KPISnapshot, 'metadata'> {
+  metadata: string | null;
+}
+
+/** Raw DB row for metric_alerts (JSON fields are strings) */
+interface MetricAlertRow extends Omit<MetricAlert, 'notification_emails'> {
+  notification_emails: string;
+}
+
+interface DashboardPreset {
+  id: number;
+  name: string;
+  description: string | null;
+  is_default: boolean;
+}
+
+interface ReportRun {
+  id: number;
+  report_id: number;
+  schedule_id: number | null;
+  run_type: string;
+  status: string;
+  started_at: string | null;
+  completed_at: string | null;
+  row_count: number | null;
+  file_path: string | null;
+  error_message: string | null;
+  run_by: string | null;
   created_at: string;
 }
 
@@ -225,7 +280,7 @@ class AnalyticsService {
 
     const reports = await db.all(query, params);
 
-    return reports.map((r: any) => ({
+    return reports.map((r: SavedReportRow) => ({
       ...r,
       filters: safeJsonParseObject(r.filters, 'report filters'),
       columns: r.columns ? safeJsonParseArray<string>(r.columns, 'report columns') : null
@@ -270,7 +325,7 @@ class AnalyticsService {
     const db = getDatabase();
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: SqlParam[] = [];
 
     if (data.name !== undefined) {
       updates.push('name = ?');
@@ -411,7 +466,7 @@ class AnalyticsService {
 
     const schedules = await db.all(query, params);
 
-    return schedules.map((s: any) => ({
+    return schedules.map((s: ReportScheduleRow) => ({
       ...s,
       recipients: safeJsonParseArray(s.recipients, 'schedule recipients')
     }));
@@ -455,7 +510,7 @@ class AnalyticsService {
     const db = getDatabase();
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: SqlParam[] = [];
 
     if (data.name !== undefined) {
       updates.push('name = ?');
@@ -525,7 +580,7 @@ class AnalyticsService {
        ORDER BY next_send_at ASC`
     );
 
-    return schedules.map((s: any) => ({
+    return schedules.map((s: ReportScheduleRow) => ({
       ...s,
       recipients: safeJsonParseArray(s.recipients, 'schedule recipients')
     }));
@@ -627,7 +682,7 @@ class AnalyticsService {
       [userEmail]
     );
 
-    return widgets.map((w: any) => ({
+    return widgets.map((w: DashboardWidgetRow) => ({
       ...w,
       config: safeJsonParseObject(w.config, 'widget config')
     }));
@@ -641,7 +696,7 @@ class AnalyticsService {
     widget_type: WidgetType;
     title?: string;
     data_source: DataSource;
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
     position_x?: number;
     position_y?: number;
     width?: number;
@@ -696,7 +751,7 @@ class AnalyticsService {
     widgetId: number,
     data: Partial<{
       title: string;
-      config: Record<string, any>;
+      config: Record<string, unknown>;
       position_x: number;
       position_y: number;
       width: number;
@@ -708,7 +763,7 @@ class AnalyticsService {
     const db = getDatabase();
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: SqlParam[] = [];
 
     if (data.title !== undefined) {
       updates.push('title = ?');
@@ -828,7 +883,7 @@ class AnalyticsService {
   /**
    * Get dashboard presets
    */
-  async getPresets(): Promise<any[]> {
+  async getPresets(): Promise<DashboardPreset[]> {
     const db = getDatabase();
     const presets = await db.all(
       'SELECT id, name, description, is_default FROM dashboard_presets WHERE is_active = TRUE ORDER BY is_default DESC, name'
@@ -915,10 +970,10 @@ class AnalyticsService {
    * Calculate current KPIs
    */
   private async calculateKPIs(): Promise<
-    { type: string; value: number; metadata?: Record<string, any> }[]
+    { type: string; value: number; metadata?: Record<string, unknown> }[]
     > {
     const db = getDatabase();
-    const kpis: { type: string; value: number; metadata?: Record<string, any> }[] = [];
+    const kpis: { type: string; value: number; metadata?: Record<string, unknown> }[] = [];
 
     // Total revenue (paid invoices)
     const revenue = await db.get(
@@ -1015,7 +1070,7 @@ class AnalyticsService {
 
     const snapshots = await db.all(query, params);
 
-    return snapshots.map((s: any) => ({
+    return snapshots.map((s: KPISnapshotRow) => ({
       ...s,
       metadata: safeJsonParseObject(s.metadata, 'snapshot metadata')
     }));
@@ -1038,7 +1093,7 @@ class AnalyticsService {
       ORDER BY k1.kpi_type
     `);
 
-    return snapshots.map((s: any) => ({
+    return snapshots.map((s: KPISnapshotRow) => ({
       ...s,
       metadata: safeJsonParseObject(s.metadata, 'snapshot metadata')
     }));
@@ -1084,7 +1139,7 @@ class AnalyticsService {
     const db = getDatabase();
     const alerts = await db.all(`SELECT ${METRIC_ALERT_COLUMNS} FROM metric_alerts ORDER BY name`);
 
-    return alerts.map((a: any) => ({
+    return alerts.map((a: MetricAlertRow) => ({
       ...a,
       notification_emails: safeJsonParseArray<string>(a.notification_emails, 'alert emails')
     }));
@@ -1124,7 +1179,7 @@ class AnalyticsService {
     const db = getDatabase();
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: SqlParam[] = [];
 
     if (data.name !== undefined) {
       updates.push('name = ?');
@@ -1227,7 +1282,7 @@ class AnalyticsService {
   async generateReportData(
     reportType: ReportType,
     filters: ReportFilters = {}
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     switch (reportType) {
     case 'revenue':
       return this.generateRevenueReport(filters);
@@ -1250,7 +1305,7 @@ class AnalyticsService {
 
   private async generateRevenueReport(
     filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
     try {
       let query = `
@@ -1297,7 +1352,7 @@ class AnalyticsService {
 
   private async generatePipelineReport(
     _filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1326,7 +1381,7 @@ class AnalyticsService {
 
   private async generateProjectReport(
     filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
 
     let query = `
@@ -1367,7 +1422,7 @@ class AnalyticsService {
 
   private async generateClientReport(
     _filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1396,7 +1451,7 @@ class AnalyticsService {
 
   private async generateTeamReport(
     _filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1426,7 +1481,7 @@ class AnalyticsService {
 
   private async generateLeadReport(
     _filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
 
     const data = await db.all(`
@@ -1458,7 +1513,7 @@ class AnalyticsService {
 
   private async generateInvoiceReport(
     filters: ReportFilters
-  ): Promise<{ data: any[]; summary: Record<string, any> }> {
+  ): Promise<ReportDataResult> {
     const db = getDatabase();
 
     let query = `
@@ -1531,7 +1586,7 @@ class AnalyticsService {
     return this.toggleFavorite(reportId);
   }
 
-  async runReport(reportId: number): Promise<{ data: any[]; summary: Record<string, any> }> {
+  async runReport(reportId: number): Promise<ReportDataResult> {
     const report = await this.getReport(reportId);
     return this.generateReportData(report.report_type, report.filters || {});
   }
@@ -1609,7 +1664,7 @@ class AnalyticsService {
     );
   }
 
-  async getDashboardPresets(): Promise<any[]> {
+  async getDashboardPresets(): Promise<DashboardPreset[]> {
     return this.getPresets();
   }
 
@@ -1649,7 +1704,7 @@ class AnalyticsService {
   }
 
   // Quick Analytics
-  async getRevenueAnalytics(days?: number): Promise<{ data: any[]; summary: Record<string, any> }> {
+  async getRevenueAnalytics(days?: number): Promise<ReportDataResult> {
     const dateRange = this.daysToDateRange(days);
     try {
       return await this.generateReportData('revenue', { dateRange });
@@ -1662,20 +1717,20 @@ class AnalyticsService {
     }
   }
 
-  async getPipelineAnalytics(): Promise<{ data: any[]; summary: Record<string, any> }> {
+  async getPipelineAnalytics(): Promise<ReportDataResult> {
     return this.generateReportData('pipeline', {});
   }
 
-  async getProjectAnalytics(days?: number): Promise<{ data: any[]; summary: Record<string, any> }> {
+  async getProjectAnalytics(days?: number): Promise<ReportDataResult> {
     const dateRange = this.daysToDateRange(days);
     return this.generateReportData('project', { dateRange });
   }
 
-  async getClientAnalytics(): Promise<{ data: any[]; summary: Record<string, any> }> {
+  async getClientAnalytics(): Promise<ReportDataResult> {
     return this.generateReportData('client', {});
   }
 
-  async getTeamAnalytics(days?: number): Promise<{ data: any[]; summary: Record<string, any> }> {
+  async getTeamAnalytics(days?: number): Promise<ReportDataResult> {
     const dateRange = this.daysToDateRange(days);
     return this.generateReportData('team', { dateRange });
   }
@@ -1691,7 +1746,7 @@ class AnalyticsService {
     };
   }
 
-  async getReportRuns(reportId?: number, _limit?: number): Promise<any[]> {
+  async getReportRuns(reportId?: number, _limit?: number): Promise<ReportRun[]> {
     const db = getDatabase();
     let query = `SELECT ${REPORT_RUN_COLUMNS} FROM report_runs`;
     const params: number[] = [];

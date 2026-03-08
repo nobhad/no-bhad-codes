@@ -174,7 +174,7 @@ export class WebhookService {
    * Trigger webhook for event
    * Finds matching webhooks and executes them
    */
-  async triggerEvent(eventType: string, eventData: Record<string, any>): Promise<void> {
+  async triggerEvent(eventType: string, eventData: Record<string, unknown>): Promise<void> {
     const webhooks = await this.listWebhooks(true); // Get active only
     const matching = webhooks.filter((w) => w.events.includes(eventType));
 
@@ -189,7 +189,7 @@ export class WebhookService {
   private async executeWebhook(
     webhook: WebhookConfig,
     eventType: string,
-    eventData: Record<string, any>
+    eventData: Record<string, unknown>
   ): Promise<void> {
     const payload = this.buildPayload(eventType, eventData, webhook.payload_template);
     const signature = this.generateSignature(payload, webhook.secret_key);
@@ -463,7 +463,7 @@ export class WebhookService {
    */
   private buildPayload(
     eventType: string,
-    eventData: Record<string, any>,
+    eventData: Record<string, unknown>,
     template: string
   ): WebhookPayload {
     let payloadStr = template;
@@ -598,7 +598,7 @@ export const webhookService = {
   deleteWebhook: async (id: number) => getWebhookService().deleteWebhook(id),
   toggleWebhook: async (id: number, active: boolean) =>
     getWebhookService().toggleWebhook(id, active),
-  triggerEvent: async (eventType: string, eventData: WebhookPayload) =>
+  triggerEvent: async (eventType: string, eventData: Record<string, unknown>) =>
     getWebhookService().triggerEvent(eventType, eventData),
   getDeliveryById: async (id: number) => getWebhookService().getDeliveryById(id),
   getWebhookDeliveries: async (webhookId: number, options?: {

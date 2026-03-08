@@ -16,6 +16,7 @@ import {
   isUserAdmin
 } from '../../middleware/access-control.js';
 import { InvoiceCreateData, InvoiceLineItem } from '../../services/invoice-service.js';
+import type { InvoiceStatus } from '../../types/invoice-types.js';
 import { emailService } from '../../services/email-service.js';
 import { getDatabase } from '../../database/init.js';
 import { getString } from '../../database/row-helpers.js';
@@ -27,7 +28,9 @@ import {
   errorResponseWithPayload,
   sendSuccess,
   sendCreated,
-  sanitizeErrorMessage
+  sendPaginated,
+  sanitizeErrorMessage,
+  parsePaginationQuery
 } from '../../utils/api-response.js';
 import { sendPdfResponse } from '../../utils/pdf-generator.js';
 import { workflowTriggerService } from '../../services/workflow-trigger-service.js';
@@ -49,15 +52,18 @@ const InvoiceValidationSchemas = {
         type: 'array' as const,
         minLength: 1,
         maxLength: 100,
-        customValidator: (items: Array<{ description?: string; quantity?: number; rate?: number }>) => {
+        customValidator: (items: unknown) => {
+          if (!Array.isArray(items)) return 'Line items must be an array';
           for (const item of items) {
-            if (!item.description || typeof item.description !== 'string') {
+            if (typeof item !== 'object' || item === null) return 'Each line item must be an object';
+            const entry = item as Record<string, unknown>;
+            if (!entry.description || typeof entry.description !== 'string') {
               return 'Each line item must have a description';
             }
-            if (typeof item.quantity !== 'number' || item.quantity <= 0) {
+            if (typeof entry.quantity !== 'number' || entry.quantity <= 0) {
               return 'Each line item must have a positive quantity';
             }
-            if (typeof item.rate !== 'number' || item.rate < 0) {
+            if (typeof entry.rate !== 'number' || entry.rate < 0) {
               return 'Each line item must have a valid rate';
             }
           }
@@ -104,12 +110,10 @@ router.get(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 100;
-    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
-
-    if (isNaN(limit) || limit < 0 || isNaN(offset) || offset < 0) {
-      return errorResponse(res, 'Invalid pagination parameters', 400, 'VALIDATION_ERROR');
-    }
+    const { page, perPage, limit, offset } = parsePaginationQuery(
+      req.query as Record<string, unknown>,
+      { perPage: 100 }
+    );
 
     try {
       // If filters provided, delegate to searchInvoices for advanced filtering
@@ -153,10 +157,22 @@ router.get(
         const searchParam = req.query.search as string | undefined;
         const search = searchParam ? searchParam.substring(0, 200) : undefined;
 
-        const filters: any = {
+        const filters: {
+          clientId?: number;
+          projectId?: number;
+          status?: InvoiceStatus;
+          invoiceType?: 'standard' | 'deposit';
+          search?: string;
+          dateFrom?: string;
+          dateTo?: string;
+          minAmount?: number;
+          maxAmount?: number;
+          limit: number;
+          offset: number;
+        } = {
           clientId,
           projectId,
-          status: req.query.status as string | undefined,
+          status: req.query.status as InvoiceStatus | undefined,
           invoiceType: req.query.invoiceType as 'standard' | 'deposit' | undefined,
           search,
           dateFrom: req.query.dateFrom as string | undefined,
@@ -168,7 +184,11 @@ router.get(
         };
 
         const result = await getInvoiceService().searchInvoices(filters);
-        return sendSuccess(res, { invoices: result.invoices.map(toSnakeCaseInvoice) });
+        return sendPaginated(res, result.invoices.map(toSnakeCaseInvoice), {
+          page,
+          perPage,
+          total: result.total
+        });
       }
 
       const invoices = await getInvoiceService().getAllInvoices(limit, offset);
@@ -591,6 +611,10 @@ router.get(
     const searchParam = req.query.search as string | undefined;
     const search = searchParam ? searchParam.substring(0, 200) : undefined;
 
+    const { page, perPage, limit, offset } = parsePaginationQuery(
+      req.query as Record<string, unknown>
+    );
+
     const filters = {
       clientId: req.query.clientId ? parseInt(req.query.clientId as string, 10) : undefined,
       projectId: req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined,
@@ -603,18 +627,17 @@ router.get(
       dueDateTo: req.query.dueDateTo as string | undefined,
       minAmount: req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined,
       maxAmount: req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0
+      limit,
+      offset
     };
 
     try {
       const result = await getInvoiceService().searchInvoices(filters);
 
-      sendSuccess(res, {
-        invoices: result.invoices.map(toSnakeCaseInvoice),
-        total: result.total,
-        limit: filters.limit,
-        offset: filters.offset
+      sendPaginated(res, result.invoices.map(toSnakeCaseInvoice), {
+        page,
+        perPage,
+        total: result.total
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to search invoices', 500, 'SEARCH_FAILED', {

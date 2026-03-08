@@ -614,7 +614,7 @@ export class VisitorTrackingService {
   private trackInteraction(
     type: InteractionEvent['type'],
     element: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>
   ): void {
     if (!this.currentSession) return;
 
