@@ -24,7 +24,6 @@
 @import "../shared/portal-badges.css";
 @import "../shared/portal-kanban.css";
 @import "../shared/portal-tags.css";
-@import "../shared/portal-timeline.css";
 @import "../shared/portal-charts.css";
 @import "../shared/portal-tooltips.css";
 @import "../shared/portal-progress.css";
@@ -51,8 +50,6 @@
 @import "./dashboard.css";
 @import "./projects.css";
 @import "./settings.css";
-@import "./onboarding.css";
-@import "./questionnaires.css";
 @import "./help.css";
 @import "./requests.css";
 @import "./documents.css";
