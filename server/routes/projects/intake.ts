@@ -82,7 +82,7 @@ router.get(
     // Find the intake file for this project
     const intakeFile = await db.get(
       `SELECT ${FILE_COLUMNS} FROM files
-       WHERE project_id = ?
+       WHERE project_id = ? AND deleted_at IS NULL
        AND (original_filename LIKE '%intake%' OR filename LIKE 'intake_%' OR filename LIKE 'admin_project_%' OR filename LIKE 'project_intake_%' OR filename LIKE 'nobhadcodes_intake_%')
        AND mime_type = 'application/json'
        ORDER BY created_at DESC

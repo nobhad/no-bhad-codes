@@ -138,7 +138,7 @@ router.get(
           p.client_id
         FROM files f
         JOIN projects p ON f.project_id = p.id
-        WHERE f.created_at IS NOT NULL
+        WHERE f.created_at IS NOT NULL AND f.deleted_at IS NULL
       )
       ORDER BY date DESC
       LIMIT 20`

@@ -31,6 +31,7 @@ import {
 } from '../utils/api-response.js';
 import { validateRequest } from '../middleware/validation.js';
 import { VALIDATION_PATTERNS } from '../../shared/validation/patterns.js';
+import { softDeleteService } from '../services/soft-delete-service.js';
 
 /** Database row type for file records */
 interface FileRow {
@@ -195,7 +196,7 @@ async function canAccessFile(req: AuthenticatedRequest, fileId: number): Promise
     `SELECT 1
      FROM files f
      LEFT JOIN projects p ON f.project_id = p.id
-     WHERE f.id = ?
+     WHERE f.id = ? AND f.deleted_at IS NULL
        AND (
          f.uploaded_by = ?
          OR f.uploaded_by = ?
@@ -640,7 +641,7 @@ router.get(
       const files = await db.all(
         `SELECT id, project_id, filename, original_filename, mime_type, file_size, file_path, uploaded_by, created_at, description, shared_with_client, shared_at, shared_by
          FROM files
-         WHERE project_id = ?
+         WHERE project_id = ? AND deleted_at IS NULL
          ORDER BY created_at DESC`,
         [projectId]
       );
@@ -711,7 +712,8 @@ router.get(
                p.project_name as project_name
         FROM files f
         LEFT JOIN projects p ON f.project_id = p.id
-        WHERE (f.uploaded_by = ? OR (p.client_id = ? AND f.shared_with_client = TRUE))
+        WHERE f.deleted_at IS NULL
+          AND (f.uploaded_by = ? OR (p.client_id = ? AND f.shared_with_client = TRUE))
       `;
       const params: (string | number)[] = [clientId, clientId];
 
@@ -817,7 +819,7 @@ router.get(
         `SELECT f.*, p.client_id
          FROM files f
          LEFT JOIN projects p ON f.project_id = p.id
-         WHERE f.id = ?`,
+         WHERE f.id = ? AND f.deleted_at IS NULL`,
         [fileId]
       );
 
@@ -909,7 +911,7 @@ router.delete(
         `SELECT f.*, p.client_id
          FROM files f
          LEFT JOIN projects p ON f.project_id = p.id
-         WHERE f.id = ?`,
+         WHERE f.id = ? AND f.deleted_at IS NULL`,
         [fileId]
       );
 
@@ -943,25 +945,9 @@ router.delete(
         );
       }
 
-      // Delete from database
-      await db.run('DELETE FROM files WHERE id = ?', [fileId]);
-
-      // Validate path before deletion to prevent path traversal attacks
-      const deleteFilePathStr = getString(file, 'file_path');
-      if (isPathSafe(deleteFilePathStr)) {
-        // Try to delete the physical file - use resolveFilePath for consistency
-        const filePath = resolveFilePath(deleteFilePathStr);
-        if (existsSync(filePath)) {
-          const fs = await import('fs/promises');
-          await fs.unlink(filePath);
-        }
-      } else {
-        await logger.error('Path traversal attempt detected during delete:', {
-          error: new Error('Path traversal'),
-          category: 'UPLOAD',
-          metadata: { filePath: file.file_path }
-        });
-      }
+      // Soft delete the DB record - keep file on disk for recovery
+      const deletedBy = userEmail || 'unknown';
+      await softDeleteService.softDelete('file', fileId, deletedBy);
 
       sendSuccess(res, undefined, 'File deleted successfully');
     } catch (dbError) {

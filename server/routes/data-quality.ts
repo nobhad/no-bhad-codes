@@ -67,8 +67,38 @@ router.use(requireAdmin);
 // =====================================================
 
 /**
- * POST /api/data-quality/duplicates/scan
- * Scan for duplicates across entities
+ * @swagger
+ * /api/data-quality/duplicates/scan:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Scan for duplicate records
+ *     description: Scan for duplicates across clients and leads. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               company:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               website:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Duplicate scan results
+ *       500:
+ *         description: Scan failed
  */
 router.post('/duplicates/scan', async (req: Request, res: Response) => {
   try {
@@ -103,8 +133,32 @@ router.post('/duplicates/scan', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/duplicates/check
- * Check a single record for duplicates (used during intake)
+ * @swagger
+ * /api/data-quality/duplicates/check:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Check record for duplicates
+ *     description: Check a single record for duplicates during intake. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Duplicate check results
+ *       400:
+ *         description: At least email or name required
  */
 router.post('/duplicates/check', async (req: Request, res: Response) => {
   try {
@@ -147,8 +201,41 @@ router.post('/duplicates/check', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/duplicates/merge
- * Merge duplicate records
+ * @swagger
+ * /api/data-quality/duplicates/merge:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Merge duplicate records
+ *     description: Merge identified duplicate records into a primary record. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - keepId
+ *               - keepType
+ *               - mergeIds
+ *             properties:
+ *               keepId:
+ *                 type: integer
+ *               keepType:
+ *                 type: string
+ *               mergeIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *               fieldSelections:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Records merged
+ *       400:
+ *         description: Validation error
  */
 router.post('/duplicates/merge', async (req: Request, res: Response) => {
   try {
@@ -183,8 +270,34 @@ router.post('/duplicates/merge', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/duplicates/dismiss
- * Dismiss a duplicate match (mark as not duplicate)
+ * @swagger
+ * /api/data-quality/duplicates/dismiss:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Dismiss a duplicate match
+ *     description: Mark a duplicate match as not a duplicate. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               primaryId:
+ *                 type: integer
+ *               primaryType:
+ *                 type: string
+ *               dismissedId:
+ *                 type: integer
+ *               dismissedType:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Duplicate dismissed
  */
 router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
   try {
@@ -221,8 +334,18 @@ router.post('/duplicates/dismiss', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/data-quality/duplicates/history
- * Get duplicate detection/resolution history
+ * @swagger
+ * /api/data-quality/duplicates/history:
+ *   get:
+ *     tags:
+ *       - Data Quality
+ *     summary: Get duplicate detection history
+ *     description: Retrieve duplicate detection and resolution history. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Detection and resolution logs
  */
 router.get('/duplicates/history', async (_req: Request, res: Response) => {
   try {
@@ -253,8 +376,31 @@ router.get('/duplicates/history', async (_req: Request, res: Response) => {
 // =====================================================
 
 /**
- * POST /api/data-quality/validate/email
- * Validate an email address
+ * @swagger
+ * /api/data-quality/validate/email:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Validate an email address
+ *     description: Validate email format and check for common issues. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Validation result
+ *       400:
+ *         description: Email is required
  */
 router.post('/validate/email', (req: Request, res: Response) => {
   try {
@@ -277,8 +423,26 @@ router.post('/validate/email', (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/validate/phone
- * Validate a phone number
+ * @swagger
+ * /api/data-quality/validate/phone:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Validate a phone number
+ *     description: Validate phone number format. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Validation result
  */
 router.post('/validate/phone', (req: Request, res: Response) => {
   try {
@@ -293,8 +457,26 @@ router.post('/validate/phone', (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/validate/url
- * Validate a URL
+ * @swagger
+ * /api/data-quality/validate/url:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Validate a URL
+ *     description: Validate URL format. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Validation result
  */
 router.post('/validate/url', (req: Request, res: Response) => {
   try {
@@ -309,8 +491,41 @@ router.post('/validate/url', (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/validate/file
- * Validate file metadata
+ * @swagger
+ * /api/data-quality/validate/file:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Validate file metadata
+ *     description: Validate file name, type, and size against allowed categories. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - filename
+ *               - mimeType
+ *               - sizeBytes
+ *             properties:
+ *               filename:
+ *                 type: string
+ *               mimeType:
+ *                 type: string
+ *               sizeBytes:
+ *                 type: integer
+ *               allowedCategories:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Validation result
+ *       400:
+ *         description: Missing required fields
  */
 router.post('/validate/file', (req: Request, res: Response) => {
   try {
@@ -333,8 +548,34 @@ router.post('/validate/file', (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/validate/object
- * Validate an entire object against a schema
+ * @swagger
+ * /api/data-quality/validate/object:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Validate object against schema
+ *     description: Validate an entire data object against a schema definition. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - data
+ *               - schema
+ *             properties:
+ *               data:
+ *                 type: object
+ *               schema:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Validation result
+ *       400:
+ *         description: data and schema are required
  */
 router.post('/validate/object', (req: Request, res: Response) => {
   try {
@@ -357,8 +598,33 @@ router.post('/validate/object', (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/sanitize
- * Sanitize input text
+ * @swagger
+ * /api/data-quality/sanitize:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Sanitize input text
+ *     description: Sanitize input text by removing potentially dangerous content. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - input
+ *             properties:
+ *               input:
+ *                 type: string
+ *               options:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Sanitized result
+ *       400:
+ *         description: Input is required
  */
 router.post('/sanitize', (req: Request, res: Response) => {
   try {
@@ -381,8 +647,31 @@ router.post('/sanitize', (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/security/check
- * Check input for security threats (XSS, SQL injection)
+ * @swagger
+ * /api/data-quality/security/check:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Check for security threats
+ *     description: Detect XSS and SQL injection patterns in input. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - input
+ *             properties:
+ *               input:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Security check results
+ *       400:
+ *         description: Input is required
  */
 router.post('/security/check', async (req: Request, res: Response) => {
   try {
@@ -431,8 +720,18 @@ router.post('/security/check', async (req: Request, res: Response) => {
 // =====================================================
 
 /**
- * GET /api/data-quality/metrics
- * Get data quality metrics
+ * @swagger
+ * /api/data-quality/metrics:
+ *   get:
+ *     tags:
+ *       - Data Quality
+ *     summary: Get data quality metrics
+ *     description: Retrieve current data quality statistics. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Quality metrics
  */
 router.get('/metrics', async (_req: Request, res: Response) => {
   try {
@@ -450,8 +749,18 @@ router.get('/metrics', async (_req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/metrics/calculate
- * Trigger data quality calculation and store results
+ * @swagger
+ * /api/data-quality/metrics/calculate:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Calculate and store quality metrics
+ *     description: Trigger data quality calculation and persist results. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Metrics calculated and stored
  */
 router.post('/metrics/calculate', async (_req: Request, res: Response) => {
   try {
@@ -485,8 +794,24 @@ router.post('/metrics/calculate', async (_req: Request, res: Response) => {
 });
 
 /**
- * GET /api/data-quality/metrics/history
- * Get historical data quality metrics
+ * @swagger
+ * /api/data-quality/metrics/history:
+ *   get:
+ *     tags:
+ *       - Data Quality
+ *     summary: Get quality metrics history
+ *     description: Retrieve historical data quality metrics. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: days
+ *         schema:
+ *           type: integer
+ *           default: 30
+ *     responses:
+ *       200:
+ *         description: Metrics history
  */
 router.get('/metrics/history', async (req: Request, res: Response) => {
   try {
@@ -519,8 +844,18 @@ router.get('/metrics/history', async (req: Request, res: Response) => {
 // =====================================================
 
 /**
- * GET /api/data-quality/rate-limits/stats
- * Get rate limiting statistics
+ * @swagger
+ * /api/data-quality/rate-limits/stats:
+ *   get:
+ *     tags:
+ *       - Data Quality
+ *     summary: Get rate limit statistics
+ *     description: Retrieve rate limiting statistics and blocked IPs. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Rate limit stats
  */
 router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
   try {
@@ -538,8 +873,37 @@ router.get('/rate-limits/stats', async (_req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/rate-limits/block
- * Block an IP address
+ * @swagger
+ * /api/data-quality/rate-limits/block:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Block an IP address
+ *     description: Manually block an IP address from accessing the API. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ip
+ *               - reason
+ *             properties:
+ *               ip:
+ *                 type: string
+ *               reason:
+ *                 type: string
+ *               expiresAt:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: IP blocked
+ *       400:
+ *         description: ip and reason required
  */
 router.post('/rate-limits/block', async (req: Request, res: Response) => {
   try {
@@ -567,8 +931,31 @@ router.post('/rate-limits/block', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/data-quality/rate-limits/unblock
- * Unblock an IP address
+ * @swagger
+ * /api/data-quality/rate-limits/unblock:
+ *   post:
+ *     tags:
+ *       - Data Quality
+ *     summary: Unblock an IP address
+ *     description: Remove an IP block. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ip
+ *             properties:
+ *               ip:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: IP unblocked
+ *       400:
+ *         description: ip is required
  */
 router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
   try {
@@ -596,8 +983,28 @@ router.post('/rate-limits/unblock', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/data-quality/validation-errors
- * Get validation error logs
+ * @swagger
+ * /api/data-quality/validation-errors:
+ *   get:
+ *     tags:
+ *       - Data Quality
+ *     summary: Get validation error logs
+ *     description: Retrieve validation error log entries. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *       - in: query
+ *         name: errorType
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Validation error logs
  */
 router.get('/validation-errors', async (req: Request, res: Response) => {
   try {

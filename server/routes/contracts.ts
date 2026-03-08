@@ -117,7 +117,43 @@ const ContractValidationSchemas = {
 // CONTRACT ENDPOINTS
 // ===================================
 
-// Get all contracts
+/**
+ * @swagger
+ * /api/contracts:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: List all contracts
+ *     description: Retrieve all contracts with optional filtering by project, client, or status. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: integer
+ *         description: Filter by project ID
+ *       - in: query
+ *         name: clientId
+ *         schema:
+ *           type: integer
+ *         description: Filter by client ID
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [draft, sent, signed, expired, cancelled, active, renewed]
+ *         description: Filter by contract status
+ *     responses:
+ *       200:
+ *         description: List of contracts
+ *       400:
+ *         description: Invalid status parameter
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Admin access required
+ */
 router.get(
   '/',
   authenticateToken,
@@ -146,7 +182,37 @@ router.get(
   })
 );
 
-// Bulk delete contracts
+/**
+ * @swagger
+ * /api/contracts/bulk-delete:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Bulk cancel contracts
+ *     description: Cancel multiple contracts at once by setting their status to cancelled. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - contractIds
+ *             properties:
+ *               contractIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: Contracts cancelled
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
+ */
 router.post(
   '/bulk-delete',
   authenticateToken,
@@ -176,7 +242,47 @@ router.post(
   })
 );
 
-// Create contract from template
+/**
+ * @swagger
+ * /api/contracts/from-template:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Create contract from template
+ *     description: Create a new contract using an existing template. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - templateId
+ *               - projectId
+ *               - clientId
+ *             properties:
+ *               templateId:
+ *                 type: integer
+ *               projectId:
+ *                 type: integer
+ *               clientId:
+ *                 type: integer
+ *               status:
+ *                 type: string
+ *                 enum: [draft, sent, signed, expired, cancelled, active, renewed]
+ *               expiresAt:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: Contract created from template
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
+ */
 router.post(
   '/from-template',
   authenticateToken,
@@ -219,7 +325,30 @@ router.post(
   })
 );
 
-// Get single contract
+/**
+ * @swagger
+ * /api/contracts/{contractId}:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: Get a contract by ID
+ *     description: Retrieve a single contract. Requires authorization to access the contract.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Contract details
+ *       400:
+ *         description: Invalid contract ID
+ *       404:
+ *         description: Contract not found
+ */
 router.get(
   '/:contractId',
   authenticateToken,
@@ -241,7 +370,30 @@ router.get(
   })
 );
 
-// Contract activity timeline
+/**
+ * @swagger
+ * /api/contracts/{contractId}/activity:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: Get contract activity timeline
+ *     description: Retrieve the signature and activity log for a contract. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Activity timeline
+ *       400:
+ *         description: Invalid contract ID
+ *       404:
+ *         description: Contract not found
+ */
 router.get(
   '/:contractId/activity',
   authenticateToken,
@@ -275,7 +427,44 @@ router.get(
   })
 );
 
-// Create contract
+/**
+ * @swagger
+ * /api/contracts:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Create a new contract
+ *     description: Create a contract with content for a project and client. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - projectId
+ *               - clientId
+ *               - content
+ *             properties:
+ *               projectId:
+ *                 type: integer
+ *               clientId:
+ *                 type: integer
+ *               content:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, sent, signed, expired, cancelled, active, renewed]
+ *     responses:
+ *       201:
+ *         description: Contract created
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated
+ */
 router.post(
   '/',
   authenticateToken,
@@ -311,7 +500,41 @@ router.post(
   })
 );
 
-// Update contract
+/**
+ * @swagger
+ * /api/contracts/{contractId}:
+ *   put:
+ *     tags:
+ *       - Contracts
+ *     summary: Update a contract
+ *     description: Update contract content or status. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, sent, signed, expired, cancelled, active, renewed]
+ *     responses:
+ *       200:
+ *         description: Contract updated
+ *       400:
+ *         description: Invalid contract ID or status
+ *       401:
+ *         description: Not authenticated
+ */
 router.put(
   '/:contractId',
   authenticateToken,
@@ -333,7 +556,30 @@ router.put(
   })
 );
 
-// Send contract for signature
+/**
+ * @swagger
+ * /api/contracts/{contractId}/send:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Send contract for signature
+ *     description: Email the contract to the client with a signature link. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Contract sent for signature
+ *       400:
+ *         description: Invalid contract ID or missing client email
+ *       404:
+ *         description: Project not found
+ */
 router.post(
   '/:contractId/send',
   authenticateToken,
@@ -443,7 +689,30 @@ router.post(
   })
 );
 
-// Resend reminder for unsigned contract
+/**
+ * @swagger
+ * /api/contracts/{contractId}/resend-reminder:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Resend signature reminder
+ *     description: Send a reminder email for an unsigned contract. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Reminder sent
+ *       400:
+ *         description: No active signature token or invalid email
+ *       404:
+ *         description: Project not found
+ */
 router.post(
   '/:contractId/resend-reminder',
   authenticateToken,
@@ -542,7 +811,28 @@ router.post(
   })
 );
 
-// Expire contract
+/**
+ * @swagger
+ * /api/contracts/{contractId}/expire:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Expire a contract
+ *     description: Set contract status to expired and invalidate signature token. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Contract expired
+ *       400:
+ *         description: Invalid contract ID
+ */
 router.post(
   '/:contractId/expire',
   authenticateToken,
@@ -580,7 +870,36 @@ router.post(
   })
 );
 
-// Create amendment linked to original contract
+/**
+ * @swagger
+ * /api/contracts/{contractId}/amendment:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Create a contract amendment
+ *     description: Create an amendment linked to an existing contract. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Amendment created
+ *       400:
+ *         description: Invalid contract ID
+ */
 router.post(
   '/:contractId/amendment',
   authenticateToken,
@@ -610,7 +929,30 @@ router.post(
   })
 );
 
-// Send renewal reminder
+/**
+ * @swagger
+ * /api/contracts/{contractId}/renewal-reminder:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Send renewal reminder
+ *     description: Email a renewal reminder for an expiring contract. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Renewal reminder sent
+ *       400:
+ *         description: No client email on file
+ *       404:
+ *         description: Project not found
+ */
 router.post(
   '/:contractId/renewal-reminder',
   authenticateToken,
@@ -694,7 +1036,28 @@ router.post(
   })
 );
 
-// Cancel contract
+/**
+ * @swagger
+ * /api/contracts/{contractId}:
+ *   delete:
+ *     tags:
+ *       - Contracts
+ *     summary: Cancel a contract
+ *     description: Set contract status to cancelled. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Contract cancelled
+ *       400:
+ *         description: Invalid contract ID
+ */
 router.delete(
   '/:contractId',
   authenticateToken,
@@ -716,7 +1079,20 @@ router.delete(
 // ===================================
 
 /**
- * GET /api/contracts/my - Get contracts for the authenticated client
+ * @swagger
+ * /api/contracts/my:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: Get client contracts
+ *     description: Retrieve all non-cancelled contracts for the authenticated client.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Client contracts list
+ *       401:
+ *         description: Not authenticated
  */
 router.get(
   '/my',
@@ -753,7 +1129,28 @@ router.get(
 // TEMPLATE ENDPOINTS
 // ===================================
 
-// Get all templates
+/**
+ * @swagger
+ * /api/contracts/templates:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: List contract templates
+ *     description: Retrieve all contract templates with optional type filter. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [service-agreement, nda, scope-of-work, maintenance, custom]
+ *     responses:
+ *       200:
+ *         description: List of templates
+ *       400:
+ *         description: Invalid template type
+ */
 router.get(
   '/templates',
   authenticateToken,
@@ -770,7 +1167,28 @@ router.get(
   })
 );
 
-// Get single template
+/**
+ * @swagger
+ * /api/contracts/templates/{templateId}:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: Get a contract template
+ *     description: Retrieve a single contract template by ID. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template details
+ *       400:
+ *         description: Invalid template ID
+ */
 router.get(
   '/templates/:templateId',
   authenticateToken,
@@ -787,7 +1205,40 @@ router.get(
   })
 );
 
-// Create template
+/**
+ * @swagger
+ * /api/contracts/templates:
+ *   post:
+ *     tags:
+ *       - Contracts
+ *     summary: Create a contract template
+ *     description: Create a new reusable contract template. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - type
+ *               - content
+ *             properties:
+ *               name:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [service-agreement, nda, scope-of-work, maintenance, custom]
+ *               content:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Template created
+ *       400:
+ *         description: Validation error
+ */
 router.post(
   '/templates',
   authenticateToken,
@@ -809,7 +1260,28 @@ router.post(
   })
 );
 
-// Update template
+/**
+ * @swagger
+ * /api/contracts/templates/{templateId}:
+ *   put:
+ *     tags:
+ *       - Contracts
+ *     summary: Update a contract template
+ *     description: Update an existing contract template. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template updated
+ *       400:
+ *         description: Validation error
+ */
 router.put(
   '/templates/:templateId',
   authenticateToken,
@@ -831,7 +1303,28 @@ router.put(
   })
 );
 
-// Delete template
+/**
+ * @swagger
+ * /api/contracts/templates/{templateId}:
+ *   delete:
+ *     tags:
+ *       - Contracts
+ *     summary: Delete a contract template
+ *     description: Delete a contract template by ID. Admin only.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Template deleted
+ *       400:
+ *         description: Invalid template ID
+ */
 router.delete(
   '/templates/:templateId',
   authenticateToken,

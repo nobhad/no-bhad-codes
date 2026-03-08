@@ -137,8 +137,8 @@ router.get(
     const upcomingMilestones = await db.all(
       `
     SELECT id, title, description, due_date, is_completed
-    FROM milestones 
-    WHERE project_id = ? AND is_completed = 0
+    FROM milestones
+    WHERE project_id = ? AND is_completed = 0 AND deleted_at IS NULL
     ORDER BY due_date ASC
     LIMIT 3
   `,

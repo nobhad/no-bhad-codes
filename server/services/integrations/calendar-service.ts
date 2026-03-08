@@ -14,7 +14,7 @@
  * 4. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
  */
 
-import { getDatabase } from '../../database/init';
+import { getDatabase } from '../../database/init.js';
 import { logger } from '../logger.js';
 
 // ============================================

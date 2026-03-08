@@ -71,7 +71,7 @@ export async function calculateMilestoneProgress(milestoneId: number): Promise<M
         SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
       FROM project_tasks
-      WHERE milestone_id = ?`,
+      WHERE milestone_id = ? AND deleted_at IS NULL`,
       [milestoneId]
     )) as { total: number; completed: number; in_progress: number; pending: number };
 
@@ -114,7 +114,7 @@ export async function calculateProjectProgress(projectId: number): Promise<Proje
         COUNT(*) as total,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
       FROM project_tasks
-      WHERE project_id = ? AND milestone_id IS NOT NULL`,
+      WHERE project_id = ? AND milestone_id IS NOT NULL AND deleted_at IS NULL`,
       [projectId]
     )) as { total: number; completed: number };
 
@@ -127,7 +127,7 @@ export async function calculateProjectProgress(projectId: number): Promise<Proje
         COUNT(*) as total,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
       FROM project_tasks
-      WHERE project_id = ? AND milestone_id IS NULL`,
+      WHERE project_id = ? AND milestone_id IS NULL AND deleted_at IS NULL`,
       [projectId]
     )) as { total: number; completed: number };
 
@@ -273,7 +273,7 @@ export async function recalculateProjectProgress(projectId: number): Promise<{
 
   try {
     // Get all milestones for project
-    const milestones = (await db.all('SELECT id FROM milestones WHERE project_id = ?', [
+    const milestones = (await db.all('SELECT id FROM milestones WHERE project_id = ? AND deleted_at IS NULL', [
       projectId
     ])) as Array<{ id: number }>;
 
@@ -339,8 +339,8 @@ export async function getMilestonesWithProgress(projectId: number): Promise<
         COUNT(t.id) as total_tasks,
         SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks
       FROM milestones m
-      LEFT JOIN project_tasks t ON m.id = t.milestone_id
-      WHERE m.project_id = ?
+      LEFT JOIN project_tasks t ON m.id = t.milestone_id AND t.deleted_at IS NULL
+      WHERE m.project_id = ? AND m.deleted_at IS NULL
       GROUP BY m.id
       ORDER BY m.sort_order, m.due_date`,
       [projectId]

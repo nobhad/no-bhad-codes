@@ -60,7 +60,7 @@ router.get(
         END as status,
         COALESCE(d.revision_count, 1) as version,
         0 as comments,
-        (SELECT COUNT(*) FROM files f WHERE f.entity_type = 'deliverable' AND f.entity_id = d.id) as attachments,
+        (SELECT COUNT(*) FROM files f WHERE f.entity_type = 'deliverable' AND f.entity_id = d.id AND f.deleted_at IS NULL) as attachments,
         d.created_at as createdAt,
         d.updated_at as updatedAt,
         d.due_date as dueDate
@@ -128,7 +128,7 @@ router.get(
     const attachments = await db.all(`
       SELECT id, filename, file_path as filePath, file_size as fileSize, created_at as createdAt
       FROM files
-      WHERE entity_type = 'deliverable' AND entity_id = ?
+      WHERE entity_type = 'deliverable' AND entity_id = ? AND deleted_at IS NULL
     `, [reviewId]);
 
     sendSuccess(res, { review: { ...review, attachments } });

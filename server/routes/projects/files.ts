@@ -34,7 +34,7 @@ router.get(
     SELECT id, filename, original_filename, file_size, mime_type, file_type,
            file_path, description, uploaded_by, created_at
     FROM files
-    WHERE project_id = ?
+    WHERE project_id = ? AND deleted_at IS NULL
     ORDER BY created_at DESC
   `,
       [projectId]

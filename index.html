@@ -198,6 +198,23 @@
       html[data-initial-page='project-detail']:not(.js-ready) .intro-morph-overlay {
         display: none !important;
       }
+
+      /* When on portal login page, show portal-login, hide others */
+      html[data-initial-page='portal-login']:not(.js-ready) #portal-login {
+        display: grid !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      html[data-initial-page='portal-login']:not(.js-ready) #intro,
+      html[data-initial-page='portal-login']:not(.js-ready) #about,
+      html[data-initial-page='portal-login']:not(.js-ready) #contact,
+      html[data-initial-page='portal-login']:not(.js-ready) #projects,
+      html[data-initial-page='portal-login']:not(.js-ready) #project-detail {
+        display: none !important;
+      }
+      html[data-initial-page='portal-login']:not(.js-ready) .intro-morph-overlay {
+        display: none !important;
+      }
     </style>
 
     <!-- SEO -->
@@ -1239,8 +1256,6 @@
             <form
               id="portal-page-login-form"
               class="portal-page-form"
-              method="post"
-              action="/api/auth/portal-login"
               novalidate
             >
               <div class="portal-page-field">
@@ -1350,6 +1365,149 @@
             </form>
           </div>
         </div>
+        <script>
+          (function () {
+            var form = document.getElementById('portal-page-login-form');
+            var magicForm = document.getElementById('portal-page-magic-form');
+            var magicToggle = document.getElementById('portal-page-magic-toggle');
+            var backToLogin = document.getElementById('portal-page-back-to-login');
+
+            if (!form) return;
+
+            /* Password toggle */
+            var pwToggle = document.getElementById('portal-page-pw-toggle');
+            if (pwToggle) {
+              pwToggle.addEventListener('click', function () {
+                var input = document.getElementById('portal-page-password');
+                if (!input) return;
+                var isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                pwToggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+              });
+            }
+
+            /* Toggle between password and magic link forms */
+            if (magicToggle && magicForm) {
+              magicToggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                form.style.display = 'none';
+                magicForm.style.display = 'flex';
+              });
+            }
+            if (backToLogin && magicForm) {
+              backToLogin.addEventListener('click', function (e) {
+                e.preventDefault();
+                magicForm.style.display = 'none';
+                form.style.display = 'flex';
+              });
+            }
+
+            /* Login form submission */
+            form.addEventListener('submit', async function (e) {
+              e.preventDefault();
+
+              var emailInput = document.getElementById('portal-page-email');
+              var passwordInput = document.getElementById('portal-page-password');
+              var errorEl = document.getElementById('portal-page-auth-error');
+              var submitBtn = form.querySelector('.portal-page-submit');
+              var btnText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+              var btnLoading = submitBtn ? submitBtn.querySelector('.btn-loading') : null;
+
+              if (errorEl) errorEl.textContent = '';
+
+              var email = emailInput ? emailInput.value.trim() : '';
+              var password = passwordInput ? passwordInput.value : '';
+
+              if (!email || !password) {
+                if (errorEl) errorEl.textContent = 'Please enter your email and password.';
+                return;
+              }
+
+              if (submitBtn) submitBtn.disabled = true;
+              if (btnText) btnText.style.display = 'none';
+              if (btnLoading) btnLoading.style.display = 'inline';
+
+              try {
+                var response = await fetch('/api/auth/portal-login', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ email: email, password: password })
+                });
+
+                var data = await response.json();
+
+                if (response.ok && data.success) {
+                  var user = data.data ? data.data.user : null;
+                  var isAdmin = user && user.isAdmin;
+
+                  // Store auth session for client-side auth gate
+                  if (user && data.data) {
+                    var expiryMs = 24 * 60 * 60 * 1000; // default 24h
+                    var expiresIn = data.data.expiresIn || '';
+                    var m = expiresIn.match && expiresIn.match(/^(\d+)([hdm])$/);
+                    if (m) {
+                      var val = parseInt(m[1], 10);
+                      if (m[2] === 'h') expiryMs = val * 60 * 60 * 1000;
+                      else if (m[2] === 'd') expiryMs = val * 24 * 60 * 60 * 1000;
+                      else if (m[2] === 'm') expiryMs = val * 60 * 1000;
+                    }
+                    sessionStorage.setItem('nbw_auth_user', JSON.stringify(user));
+                    sessionStorage.setItem('nbw_auth_role', user.role || (isAdmin ? 'admin' : 'client'));
+                    sessionStorage.setItem('nbw_auth_expiry', (Date.now() + expiryMs).toString());
+                    sessionStorage.setItem('nbw_auth_session_id', 'sess_' + Math.random().toString(36).substring(2));
+                  }
+
+                  window.location.href = isAdmin ? '/admin/' : '/dashboard';
+                } else {
+                  if (errorEl) errorEl.textContent = data.error || 'Invalid credentials';
+                }
+              } catch (err) {
+                console.error('Login error:', err);
+                if (errorEl) errorEl.textContent = 'Connection error. Please try again.';
+              } finally {
+                if (submitBtn) submitBtn.disabled = false;
+                if (btnText) btnText.style.display = 'inline';
+                if (btnLoading) btnLoading.style.display = 'none';
+              }
+            });
+
+            /* Magic link form submission */
+            if (magicForm) {
+              magicForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                var emailInput = document.getElementById('portal-page-magic-email');
+                var errorEl = document.getElementById('portal-page-magic-error');
+                var successEl = document.getElementById('portal-page-magic-success');
+                var submitBtn = magicForm.querySelector('.portal-page-magic-submit');
+
+                if (errorEl) errorEl.textContent = '';
+                var email = emailInput ? emailInput.value.trim() : '';
+                if (!email) {
+                  if (errorEl) errorEl.textContent = 'Please enter your email address.';
+                  return;
+                }
+
+                if (submitBtn) submitBtn.disabled = true;
+
+                try {
+                  await fetch('/api/auth/magic-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email: email })
+                  });
+                  if (successEl) successEl.style.display = 'block';
+                } catch (err) {
+                  console.error('Magic link error:', err);
+                  if (errorEl) errorEl.textContent = 'Failed to send link. Please try again.';
+                } finally {
+                  if (submitBtn) submitBtn.disabled = false;
+                }
+              });
+            }
+          })();
+        </script>
       </section>
     </main>
 

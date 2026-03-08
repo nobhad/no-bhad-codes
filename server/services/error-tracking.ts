@@ -84,18 +84,12 @@ export class ErrorTrackingService {
       Sentry.graphqlIntegration()
     ];
 
-    // Profiling integration is optional and may not be available
+    // Profiling integration requires @sentry/profiling-node to be installed
     if (enableProfiling) {
-      try {
-        const { nodeProfilingIntegration } = require('@sentry/profiling-node');
-        integrations.push(nodeProfilingIntegration());
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.warn(
-          '⚠️ Sentry profiling integration not available:',
-          errorMessage
-        );
-      }
+      console.warn(
+        'Sentry profiling requested but dynamic import is not supported synchronously.',
+        'Install @sentry/profiling-node and import it statically if profiling is needed.'
+      );
     }
 
     Sentry.init({

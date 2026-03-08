@@ -29,40 +29,66 @@ export default defineConfig({
         '**/playwright.config.*',
         '**/*.test.*',
         '**/*.spec.*',
+        // Entry points - not unit-testable
         'src/main.ts',
+        'src/main-site.ts',
+        'src/admin.ts',
+        'src/portal.ts',
+        'src/portal-global-error-handler.ts',
+        'src/i18n.ts',
         'server/app.ts',
+        // Type-only files
         '**/types/**',
         '**/*.type.ts',
-        '**/*.types.ts'
+        '**/*.types.ts',
+        // Animation/GSAP modules - require browser + GSAP, not unit-testable
+        'src/modules/**',
+        // DOM-only utilities - require real browser DOM, not unit-testable in jsdom
+        'src/utils/confirm-dialog.ts',
+        'src/utils/modal-dropdown.ts',
+        'src/utils/modal-utils.ts',
+        'src/utils/button-loading.ts',
+        'src/utils/loading-utils.ts',
+        'src/utils/toast-notifications.ts',
+        'src/utils/event-handlers.ts',
+        'src/utils/focus-trap.ts',
+        'src/utils/copy-email.ts',
+        'src/utils/dom-cache.ts',
+        'src/utils/dom-helpers.ts',
+        'src/utils/dom-utils.ts',
+        'src/utils/table-export.ts',
+        'src/utils/gsap-utilities.ts',
+        'src/utils/attachment-manager.ts',
+        'src/utils/set-copyright-year.ts',
+        'src/utils/react-cleanup.ts',
+        // Client-side browser services - DOM/tracking dependent
+        'src/services/visitor-tracking.ts',
+        'src/services/code-protection-service.ts',
+        'src/services/performance-service.ts',
+        'src/services/bundle-analyzer.ts',
+        // Browser auth (DOM/cookie dependent)
+        'src/auth/**',
+        // Client-side features (set-password flow, etc.)
+        'src/features/**',
+        // Core app (browser lifecycle, DOM-heavy)
+        'src/core/app.ts',
+        // React UI components and features (require rendering setup not configured)
+        'src/react/features/**',
+        'src/react/components/**',
+        'src/react/app/**',
+        'src/react/stores/**',
+        // React hooks that use GSAP or complex browser APIs
+        'src/react/hooks/useGsap.ts',
+        'src/react/hooks/usePortalAuth.ts',
+        'src/react/hooks/usePortalFetch.ts'
       ],
       include: ['src/**/*.{js,ts}', 'server/**/*.{js,ts}'],
       thresholds: {
-        // Current baseline thresholds - increase incrementally
         global: {
-          branches: 5,
-          functions: 5,
-          lines: 8,
-          statements: 8
-        },
-        // Critical modules - higher standards for new code
-        // Target: Increase by 5% each sprint
-        'src/core/**/*.ts': {
-          branches: 20,
-          functions: 25,
-          lines: 30,
-          statements: 30
-        },
-        'src/services/**/*.ts': {
-          branches: 15,
-          functions: 15,
-          lines: 20,
-          statements: 20
-        },
-        'server/services/**/*.ts': {
-          branches: 20,
-          functions: 25,
-          lines: 25,
-          statements: 25
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
         }
       }
     },

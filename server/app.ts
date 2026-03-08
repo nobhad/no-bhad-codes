@@ -17,7 +17,7 @@ import {
 } from './observability/metrics.js';
 
 import express from 'express';
-import { i18nMiddleware } from './middleware/i18n-middleware';
+import { i18nMiddleware } from './middleware/i18n-middleware.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';

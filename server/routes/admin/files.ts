@@ -12,6 +12,7 @@ import { asyncHandler } from '../../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../../middleware/auth.js';
 import { errorResponse, sendSuccess } from '../../utils/api-response.js';
 import { getDatabase } from '../../database/init.js';
+import { softDeleteService } from '../../services/soft-delete-service.js';
 
 const FILE_COLUMNS = `
   id, project_id, filename, original_filename, file_path, file_size, mime_type,
@@ -53,7 +54,7 @@ router.get(
       FROM files f
       LEFT JOIN projects p ON f.project_id = p.id
       LEFT JOIN clients c ON p.client_id = c.id
-      WHERE 1=1
+      WHERE f.deleted_at IS NULL
     `;
     const params: (string | number)[] = [];
 
@@ -95,12 +96,13 @@ router.delete(
 
     const db = getDatabase();
 
-    const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ?`, [fileId]);
+    const file = await db.get(`SELECT ${FILE_COLUMNS} FROM files WHERE id = ? AND deleted_at IS NULL`, [fileId]);
     if (!file) {
       return errorResponse(res, 'File not found', 404, 'NOT_FOUND');
     }
 
-    await db.run('DELETE FROM files WHERE id = ?', [fileId]);
+    const adminEmail = req.user?.email || 'admin';
+    await softDeleteService.softDelete('file', fileId, adminEmail);
 
     sendSuccess(res, undefined, 'File deleted');
   })
