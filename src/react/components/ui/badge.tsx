@@ -4,13 +4,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@react/lib/utils';
 
 const badgeVariants = cva(
-  'tw-badge',
+  'status-badge',
   {
     variants: {
       variant: {
         default: '',
-        secondary: 'tw-:opacity-70',
-        destructive: '',
+        secondary: 'status-badge--muted',
+        destructive: 'status-badge--danger',
         outline: ''
       }
     },

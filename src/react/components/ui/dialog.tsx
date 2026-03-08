@@ -18,10 +18,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn(
-      'portal-modal-overlay tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0',
-      className
-    )}
+    className={cn('portal-modal-overlay', className)}
     {...props}
   />
 ));
@@ -35,16 +32,13 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      className={cn(
-        'portal-modal tw-:fixed tw-:left-[50%] tw-:top-[50%] tw-:z-50 tw-:translate-x-[-50%] tw-:translate-y-[-50%] tw-:duration-200 tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[state=closed]:slide-out-to-left-1/2 tw-:data-[state=closed]:slide-out-to-top-[48%] tw-:data-[state=open]:slide-in-from-left-1/2 tw-:data-[state=open]:slide-in-from-top-[48%]',
-        className
-      )}
+      className={cn('portal-modal', className)}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="btn-close tw-:absolute tw-:right-4 tw-:top-4 tw-:opacity-70 tw-:transition-opacity tw-:hover:opacity-100 tw-:focus:outline-none tw-:disabled:pointer-events-none">
-        <X className="tw-:h-4 tw-:w-4" />
-        <span className="tw-:sr-only">Close</span>
+      <DialogPrimitive.Close className="portal-modal-close">
+        <X className="icon-sm" />
+        <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
@@ -56,7 +50,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('portal-modal-header tw-:flex-col tw-:space-y-1.5', className)}
+    className={cn('portal-modal-header flex-col gap-1', className)}
     {...props}
   />
 );
@@ -67,10 +61,7 @@ const DialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      'tw-:flex tw-:flex-col-reverse tw-:sm:flex-row tw-:sm:justify-end tw-:sm:space-x-2',
-      className
-    )}
+    className={cn('portal-modal-footer', className)}
     {...props}
   />
 );
@@ -94,7 +85,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('tw-:text-sm text-muted', className)}
+    className={cn('portal-modal-description', className)}
     {...props}
   />
 ));

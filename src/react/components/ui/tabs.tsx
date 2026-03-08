@@ -13,7 +13,7 @@ const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn('tw-tab-list', className)}
+    className={cn('tab-list', className)}
     {...props}
   />
 ));
@@ -26,7 +26,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'tw-tab tw-:data-[state=active]:text-white tw-:data-[state=active]:border-b-2 tw-:data-[state=active]:border-white tw-:disabled:pointer-events-none tw-:disabled:opacity-50',
+      'tab',
       className
     )}
     {...props}
@@ -40,7 +40,7 @@ const TabsContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={cn('tw-:mt-2 tw-:outline-none', className)}
+    className={cn('mt-1', className)}
     {...props}
   />
 ));
