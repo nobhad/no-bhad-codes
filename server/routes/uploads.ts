@@ -25,6 +25,7 @@ import { getString } from '../database/row-helpers.js';
 import {
   errorResponse,
   errorResponseWithPayload,
+  sanitizeErrorMessage,
   sendSuccess,
   sendCreated
 } from '../utils/api-response.js';
@@ -1460,10 +1461,10 @@ router.use(
       });
     }
 
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    if (errorMessage.includes('File type not allowed')) {
+    const rawMessage = error instanceof Error ? error.message : '';
+    if (rawMessage.includes('File type not allowed')) {
       return errorResponseWithPayload(res, 'File type not allowed', 400, 'INVALID_FILE_TYPE', {
-        message: errorMessage
+        message: sanitizeErrorMessage(error, 'File type not allowed')
       });
     }
 

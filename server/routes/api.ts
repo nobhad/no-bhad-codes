@@ -19,7 +19,7 @@ import { logger } from '../services/logger.js';
 import { getDatabase } from '../database/init.js';
 import { emailService } from '../services/email-service.js';
 import { getSchedulerService } from '../services/scheduler-service.js';
-import { errorResponse, errorResponseWithPayload, sendSuccess } from '../utils/api-response.js';
+import { errorResponse, errorResponseWithPayload, sanitizeErrorMessage, sendSuccess } from '../utils/api-response.js';
 
 // Explicit column lists for SELECT queries (avoid SELECT *)
 const PROJECT_COLUMNS = `
@@ -539,7 +539,7 @@ router.use(
     }
 
     const status = (error as { status?: number })?.status ?? 500;
-    const message = error instanceof Error ? error.message : 'Internal server error';
+    const message = sanitizeErrorMessage(error, 'Internal server error');
     const code = (error as { code?: string })?.code ?? 'INTERNAL_ERROR';
     errorResponseWithPayload(res, message, status, code, {
       requestId: req.headers['x-request-id']
