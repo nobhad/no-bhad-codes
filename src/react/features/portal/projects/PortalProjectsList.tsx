@@ -202,7 +202,7 @@ export function PortalProjectsList({
     transform: transformProjectsResponse
   });
 
-  const items = projects ?? [];
+  const items = React.useMemo(() => projects ?? [], [projects]);
 
   // Table filters
   const {

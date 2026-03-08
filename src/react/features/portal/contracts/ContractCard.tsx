@@ -15,7 +15,7 @@ interface ContractCardProps {
   onNavigate?: (entityType: string, entityId: string) => void;
 }
 
-export const ContractCard = React.memo(function ContractCard({ contract, onNavigate }: ContractCardProps) {
+export const ContractCard = React.memo(({ contract, onNavigate }: ContractCardProps) => {
   const overdue = isOverdue(contract.expiresAt ?? undefined);
   const dueDaysText = getDueDaysText(contract.expiresAt ?? undefined);
 

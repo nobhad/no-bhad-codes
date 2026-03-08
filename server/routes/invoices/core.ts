@@ -562,8 +562,8 @@ router.get(
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     // Define valid statuses for type checking
-    type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
-    const validStatuses: InvoiceStatus[] = [
+    type SearchInvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+    const validStatuses: SearchInvoiceStatus[] = [
       'draft',
       'sent',
       'viewed',
@@ -574,16 +574,16 @@ router.get(
     ];
 
     // Parse status - can be single value or comma-separated
-    let status: InvoiceStatus | InvoiceStatus[] | undefined;
+    let status: SearchInvoiceStatus | SearchInvoiceStatus[] | undefined;
     if (req.query.status) {
       const statusStr = req.query.status as string;
       if (statusStr.includes(',')) {
         const statuses = statusStr
           .split(',')
-          .filter((s) => validStatuses.includes(s as InvoiceStatus)) as InvoiceStatus[];
+          .filter((s) => validStatuses.includes(s as SearchInvoiceStatus)) as SearchInvoiceStatus[];
         status = statuses.length > 0 ? statuses : undefined;
-      } else if (validStatuses.includes(statusStr as InvoiceStatus)) {
-        status = statusStr as InvoiceStatus;
+      } else if (validStatuses.includes(statusStr as SearchInvoiceStatus)) {
+        status = statusStr as SearchInvoiceStatus;
       }
     }
 

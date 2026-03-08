@@ -92,7 +92,7 @@ export interface TableStatsProps {
   tooltip?: string;
 }
 
-export const TableStats = React.memo(function TableStats({ items, tooltip }: TableStatsProps) {
+export const TableStats = React.memo(({ items, tooltip }: TableStatsProps) => {
   const visibleItems = items.filter(item => {
     if (!item.variant || item.variant === 'default') return true;
     return typeof item.value === 'number' ? item.value > 0 : item.value !== '0';

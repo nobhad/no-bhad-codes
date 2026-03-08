@@ -39,7 +39,7 @@ export function PortalDeliverables({
     url: API_ENDPOINTS.DELIVERABLES_MY,
     transform: (raw) => (raw as PortalDeliverablesResponse).deliverables || []
   });
-  const items = deliverables ?? [];
+  const items = useMemo(() => deliverables ?? [], [deliverables]);
 
   const {
     filterValues,

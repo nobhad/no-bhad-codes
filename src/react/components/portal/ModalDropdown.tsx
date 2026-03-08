@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useCallback, useRef, useEffect, useId } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect, useId } from 'react';
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { useScaleIn } from '@react/hooks/useGsap';
@@ -74,7 +74,10 @@ export function ModalDropdown({
   const listRef = useRef<HTMLDivElement>(null);
 
   // Convert value to array for consistent handling
-  const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
+  const selectedValues = useMemo(
+    () => (Array.isArray(value) ? value : value ? [value] : []),
+    [value]
+  );
 
   // Filter options based on search
   const filteredOptions = searchable
@@ -265,7 +268,7 @@ export function ModalDropdown({
 
     document.addEventListener('keydown', handleTrapFocus);
     return () => document.removeEventListener('keydown', handleTrapFocus);
-  }, [isOpen, handleClose, searchable]);
+  }, [isOpen, handleClose, searchable, dropdownRef]);
 
   return (
     <div className={cn('modal-dropdown-container', className)}>

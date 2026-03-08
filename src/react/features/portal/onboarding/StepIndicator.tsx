@@ -13,12 +13,12 @@ import type { StepIndicatorProps, OnboardingStep } from './types';
  * StepIndicator Component
  * Displays progress through the wizard steps
  */
-export const StepIndicator = React.memo(function StepIndicator({
+export const StepIndicator = React.memo(({
   steps,
   currentStep,
   completedSteps,
   onStepClick
-}: StepIndicatorProps) {
+}: StepIndicatorProps) => {
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
   const isStepCompleted = (stepId: OnboardingStep): boolean => {
@@ -111,12 +111,12 @@ export const StepIndicator = React.memo(function StepIndicator({
  * A more detailed version showing step titles (for larger screens)
  * Brutalist design: transparent backgrounds, no border-radius, monospace font
  */
-export const StepIndicatorDetailed = React.memo(function StepIndicatorDetailed({
+export const StepIndicatorDetailed = React.memo(({
   steps,
   currentStep,
   completedSteps,
   onStepClick
-}: StepIndicatorProps) {
+}: StepIndicatorProps) => {
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
   const isStepCompleted = (stepId: OnboardingStep): boolean => {

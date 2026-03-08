@@ -48,7 +48,7 @@ describe('SanitizationUtils', () => {
     });
 
     it('escapes single quotes', () => {
-      expect(SanitizationUtils.escapeHtml("it's")).toBe('it&#x27;s');
+      expect(SanitizationUtils.escapeHtml('it\'s')).toBe('it&#x27;s');
     });
 
     it('escapes backticks', () => {

@@ -30,27 +30,6 @@ interface RouteErrorBoundaryState {
 }
 
 // ============================================
-// LOCATION-AWARE RESET WRAPPER
-// ============================================
-
-/**
- * Functional wrapper that resets the class-based error boundary
- * whenever the route location changes. This means navigating
- * away from a crashed tab automatically clears the error.
- */
-export function RouteErrorBoundary({ children }: RouteErrorBoundaryProps) {
-  const location = useLocation();
-
-  // Use location.pathname as the key so the boundary remounts
-  // (and resets its error state) on every route change.
-  return (
-    <RouteErrorBoundaryInner key={location.pathname}>
-      {children}
-    </RouteErrorBoundaryInner>
-  );
-}
-
-// ============================================
 // CLASS-BASED ERROR BOUNDARY
 // ============================================
 
@@ -90,6 +69,27 @@ class RouteErrorBoundaryInner extends React.Component<
 
     return this.props.children;
   }
+}
+
+// ============================================
+// LOCATION-AWARE RESET WRAPPER
+// ============================================
+
+/**
+ * Functional wrapper that resets the class-based error boundary
+ * whenever the route location changes. This means navigating
+ * away from a crashed tab automatically clears the error.
+ */
+export function RouteErrorBoundary({ children }: RouteErrorBoundaryProps) {
+  const location = useLocation();
+
+  // Use location.pathname as the key so the boundary remounts
+  // (and resets its error state) on every route change.
+  return (
+    <RouteErrorBoundaryInner key={location.pathname}>
+      {children}
+    </RouteErrorBoundaryInner>
+  );
 }
 
 // ============================================

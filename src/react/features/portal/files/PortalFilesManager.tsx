@@ -208,7 +208,7 @@ interface FolderTreeProps {
   onSelectFolder: (folderId: string) => void;
 }
 
-const FolderTree = React.memo(function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) {
+const FolderTree = React.memo(({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) => {
   return (
     <div className="folder-tree">
       {/* All Files */}
@@ -267,8 +267,8 @@ export function PortalFilesManager({
     transform: transformFilesResponse
   });
 
-  const files = filesData?.files ?? [];
-  const projects = filesData?.projects ?? [];
+  const files = useMemo(() => filesData?.files ?? [], [filesData?.files]);
+  const projects = useMemo(() => filesData?.projects ?? [], [filesData?.projects]);
 
   // Local state for upload, filters, and delete
   const [isUploading, setIsUploading] = useState(false);

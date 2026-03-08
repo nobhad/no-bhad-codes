@@ -18,7 +18,7 @@ import { generateDefaultMilestones } from './milestone-generator.js';
 import { getString, getNumber } from '../database/row-helpers.js';
 import { logger } from './logger.js';
 import { emailService } from './email-service.js';
-import { getBaseUrl, getPortalUrl } from '../config/environment.js';
+import { getPortalUrl } from '../config/environment.js';
 
 // ============================================
 // Types

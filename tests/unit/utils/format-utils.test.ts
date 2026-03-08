@@ -296,8 +296,8 @@ describe('escapeHtml', () => {
     expect(escapeHtml('"hello"')).toBe('&quot;hello&quot;');
   });
 
-  it("escapes single quotes", () => {
-    expect(escapeHtml("it's")).toBe('it&#x27;s');
+  it('escapes single quotes', () => {
+    expect(escapeHtml('it\'s')).toBe('it&#x27;s');
   });
 
   it('escapes backticks', () => {

@@ -53,7 +53,7 @@ export function PortalApprovals({
     url: API_ENDPOINTS.APPROVALS_PENDING,
     transform: (raw) => (raw as PendingApprovalsResponse).approvals || []
   });
-  const items = approvals ?? [];
+  const items = useMemo(() => approvals ?? [], [approvals]);
 
   const [submittingIds, setSubmittingIds] = useState<Set<number>>(new Set());
 

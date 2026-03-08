@@ -102,7 +102,7 @@ interface ActivityListProps {
   onNavigate?: (tab: string, entityId?: string) => void;
 }
 
-const ActivityList = React.memo(function ActivityList({ activities, onNavigate }: ActivityListProps) {
+const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) => {
   if (activities.length === 0) {
     return (
       <EmptyState message="No recent activity" />

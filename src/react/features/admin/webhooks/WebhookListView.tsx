@@ -18,7 +18,6 @@ import { IconButton } from '@react/factories';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
-import { formatDate } from '@react/utils/formatDate';
 import {
   PortalTable,
   PortalTableHeader,
@@ -32,7 +31,6 @@ import {
 } from '@react/components/portal/PortalTable';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
-import type { SortConfig } from '../types';
 import {
   WEBHOOKS_FILTER_CONFIG,
   filterWebhook,

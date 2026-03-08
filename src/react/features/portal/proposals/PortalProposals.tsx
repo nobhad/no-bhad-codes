@@ -39,7 +39,7 @@ export function PortalProposals({
     url: API_ENDPOINTS.PROPOSALS_MY,
     transform: (raw) => (raw as PortalProposalsResponse).proposals || []
   });
-  const items = proposals ?? [];
+  const items = useMemo(() => proposals ?? [], [proposals]);
 
   const {
     filterValues,

@@ -155,11 +155,11 @@ interface PortalTableEmptyProps {
   message?: string;
 }
 
-const PortalTableEmpty = React.memo(function PortalTableEmpty({
+const PortalTableEmpty = React.memo(({
   colSpan,
   icon,
   message = 'No data available'
-}: PortalTableEmptyProps) {
+}: PortalTableEmptyProps) => {
   return (
     <tr>
       <td colSpan={colSpan}>
