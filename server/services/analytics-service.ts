@@ -841,69 +841,72 @@ class AnalyticsService {
   // ============================================
 
   /**
-   * Capture KPI snapshot
+   * Capture KPI snapshot with idempotency and transaction safety.
+   *
+   * If a snapshot for today already exists, it is updated atomically.
+   * All KPI inserts/updates are wrapped in a single database transaction
+   * so partial runs never produce duplicate or inconsistent data.
    */
   async captureSnapshot(): Promise<number> {
     const db = getDatabase();
     const today = new Date().toISOString().split('T')[0];
 
-    // Check if snapshot already exists for today
+    // Calculate KPIs outside the transaction (read-only aggregation queries)
+    const kpis = await this.calculateKPIs();
+
+    // Idempotency check: determine if we should insert or update
     const existing = await db.get('SELECT id FROM kpi_snapshots WHERE snapshot_date = ? LIMIT 1', [
       today
     ]);
 
-    if (existing) {
-      // Update existing snapshots
-      return this.updateTodaySnapshots(today);
-    }
+    // Wrap all writes in a transaction to prevent partial snapshot data
+    await db.transaction(async (ctx) => {
+      if (existing) {
+        // Update existing snapshots atomically
+        for (const kpi of kpis) {
+          await ctx.run(
+            `UPDATE kpi_snapshots SET value = ?, metadata = ?, updated_at = CURRENT_TIMESTAMP
+             WHERE snapshot_date = ? AND kpi_type = ?`,
+            [kpi.value, JSON.stringify(kpi.metadata || {}), today, kpi.type]
+          );
+        }
+      } else {
+        // Insert new snapshots atomically
+        for (const kpi of kpis) {
+          // Get previous value for change tracking (read within transaction for consistency)
+          const prevRow = await ctx.get<{ value: number }>(
+            `SELECT value FROM kpi_snapshots
+             WHERE kpi_type = ? AND snapshot_date < ?
+             ORDER BY snapshot_date DESC LIMIT 1`,
+            [kpi.type, today]
+          );
 
-    // Capture various KPIs
-    const kpis = await this.calculateKPIs();
+          const previousValue = prevRow?.value !== undefined ? Number(prevRow.value) : null;
+          const changePercent =
+            previousValue !== null && previousValue !== 0
+              ? ((kpi.value - previousValue) / previousValue) * 100
+              : null;
 
-    for (const kpi of kpis) {
-      // Get previous value
-      const previous = await db.get(
-        `SELECT value FROM kpi_snapshots
-         WHERE kpi_type = ? AND snapshot_date < ?
-         ORDER BY snapshot_date DESC LIMIT 1`,
-        [kpi.type, today]
-      );
+          await ctx.run(
+            `INSERT INTO kpi_snapshots (snapshot_date, kpi_type, value, previous_value, change_percent, metadata)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+              today,
+              kpi.type,
+              kpi.value,
+              previousValue,
+              changePercent,
+              JSON.stringify(kpi.metadata ?? {})
+            ]
+          );
+        }
+      }
+    });
 
-      const previousValue = previous?.value !== undefined ? Number(previous.value) : null;
-      const changePercent =
-        previousValue !== null ? ((kpi.value - previousValue) / previousValue) * 100 : null;
-
-      await db.run(
-        `INSERT INTO kpi_snapshots (snapshot_date, kpi_type, value, previous_value, change_percent, metadata)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          today,
-          kpi.type,
-          kpi.value,
-          previousValue,
-          changePercent,
-          JSON.stringify(kpi.metadata ?? {})
-        ]
-      );
-    }
-
-    return kpis.length;
-  }
-
-  /**
-   * Update today's snapshots
-   */
-  private async updateTodaySnapshots(date: string): Promise<number> {
-    const db = getDatabase();
-    const kpis = await this.calculateKPIs();
-
-    for (const kpi of kpis) {
-      await db.run(
-        `UPDATE kpi_snapshots SET value = ?, metadata = ?
-         WHERE snapshot_date = ? AND kpi_type = ?`,
-        [kpi.value, JSON.stringify(kpi.metadata || {}), date, kpi.type]
-      );
-    }
+    logger.info(`[ANALYTICS] KPI snapshot captured for ${today}: ${kpis.length} metrics`, {
+      category: 'analytics',
+      metadata: { date: today, metricCount: kpis.length, mode: existing ? 'update' : 'insert' }
+    });
 
     return kpis.length;
   }

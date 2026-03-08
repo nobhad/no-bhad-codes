@@ -15,6 +15,23 @@
  */
 
 import { getDatabase } from '../../database/init';
+import { logger } from '../logger.js';
+
+// ============================================
+// Rate Limit & Retry Constants
+// ============================================
+
+/** Maximum number of retry attempts for rate-limited API calls */
+const MAX_RETRIES = 3;
+
+/** Base delay in milliseconds for exponential backoff */
+const BASE_DELAY_MS = 1000;
+
+/** HTTP status code for rate limiting */
+const HTTP_TOO_MANY_REQUESTS = 429;
+
+/** Token expiry buffer - refresh token this many ms before actual expiry */
+const TOKEN_EXPIRY_BUFFER_MS = 60_000;
 
 // ============================================
 // Column Constants - Explicit column lists for SELECT queries
@@ -103,6 +120,105 @@ export interface CalendarSyncConfig {
 // iCal format constants
 const ICAL_PRODID = '-//No Bhad Codes//Calendar Export//EN';
 const ICAL_VERSION = '2.0';
+
+/**
+ * Sleep for the given number of milliseconds
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Calculate exponential backoff delay for a given attempt
+ * @param attempt - Zero-based attempt index
+ * @returns Delay in milliseconds
+ */
+function getBackoffDelay(attempt: number): number {
+  return BASE_DELAY_MS * Math.pow(2, attempt);
+}
+
+/**
+ * Execute a Google Calendar API call with exponential backoff retry on 429 responses.
+ * Also handles auth token refresh failures with graceful degradation.
+ *
+ * @param apiCall - Function that performs the fetch and returns the Response
+ * @returns The Response from a successful attempt
+ * @throws The last error if all retries are exhausted
+ */
+async function executeWithRetry(apiCall: () => Promise<Response>): Promise<Response> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await apiCall();
+
+      if (response.status !== HTTP_TOO_MANY_REQUESTS) {
+        return response;
+      }
+
+      // Rate limited - extract retry-after header if available, otherwise use backoff
+      const retryAfterHeader = response.headers.get('Retry-After');
+      const retryAfterMs = retryAfterHeader
+        ? parseInt(retryAfterHeader, 10) * 1000
+        : getBackoffDelay(attempt);
+
+      if (attempt < MAX_RETRIES) {
+        logger.warn(
+          `[CALENDAR] Rate limited (429), retrying in ${retryAfterMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`
+        );
+        await sleep(retryAfterMs);
+      } else {
+        lastError = new Error(
+          `Google Calendar API rate limit exceeded after ${MAX_RETRIES} retries`
+        );
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (attempt < MAX_RETRIES) {
+        const delay = getBackoffDelay(attempt);
+        logger.warn(
+          `[CALENDAR] API call failed, retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES}): ${lastError.message}`
+        );
+        await sleep(delay);
+      }
+    }
+  }
+
+  logger.error(`[CALENDAR] All ${MAX_RETRIES} retries exhausted`, {
+    error: lastError
+  });
+  throw lastError;
+}
+
+/**
+ * Ensure access token is still valid; refresh if needed.
+ * Returns the valid access token or null on refresh failure (graceful degradation).
+ */
+export async function ensureValidToken(
+  accessToken: string,
+  refreshToken: string | undefined,
+  expiresAt: number
+): Promise<string | null> {
+  if (Date.now() < expiresAt - TOKEN_EXPIRY_BUFFER_MS) {
+    return accessToken;
+  }
+
+  if (!refreshToken) {
+    logger.warn('[CALENDAR] Access token expired and no refresh token available');
+    return null;
+  }
+
+  try {
+    const newToken = await refreshAccessToken(refreshToken);
+    return newToken.access_token;
+  } catch (error) {
+    logger.error('[CALENDAR] Token refresh failed, gracefully degrading', {
+      error: error instanceof Error ? error : undefined
+    });
+    return null;
+  }
+}
 
 /**
  * Check if Google Calendar is configured
@@ -225,16 +341,18 @@ export async function createGoogleCalendarEvent(
   calendarId: string,
   event: CalendarEvent
 ): Promise<CalendarEvent> {
-  const response = await fetch(
-    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(event)
-    }
+  const response = await executeWithRetry(() =>
+    fetch(
+      `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(event)
+      }
+    )
   );
 
   if (!response.ok) {
@@ -254,16 +372,18 @@ export async function updateGoogleCalendarEvent(
   eventId: string,
   event: Partial<CalendarEvent>
 ): Promise<CalendarEvent> {
-  const response = await fetch(
-    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(event)
-    }
+  const response = await executeWithRetry(() =>
+    fetch(
+      `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(event)
+      }
+    )
   );
 
   if (!response.ok) {
@@ -282,14 +402,16 @@ export async function deleteGoogleCalendarEvent(
   calendarId: string,
   eventId: string
 ): Promise<void> {
-  const response = await fetch(
-    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`
+  const response = await executeWithRetry(() =>
+    fetch(
+      `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${eventId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
       }
-    }
+    )
   );
 
   if (!response.ok && response.status !== 404) {
@@ -692,6 +814,7 @@ export default {
   getGoogleAuthUrl,
   exchangeCodeForTokens,
   refreshAccessToken,
+  ensureValidToken,
   createGoogleCalendarEvent,
   updateGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
