@@ -5,16 +5,13 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, ChevronDown, ChevronUp, BookOpen, RefreshCw } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
-import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-
-const logger = createLogger('HelpCenter');
 
 // ============================================================================
 // CONSTANTS
@@ -47,47 +44,16 @@ export interface HelpCenterProps {
 
 export function HelpCenter({ getAuthToken }: HelpCenterProps) {
   const containerRef = useFadeIn();
-  const [articles, setArticles] = useState<HelpArticle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES_VALUE);
   const [expandedArticleId, setExpandedArticleId] = useState<number | null>(null);
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
-  const fetchArticles = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.KNOWLEDGE_BASE, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load help articles');
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setArticles((payload.articles as HelpArticle[]) || []);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load articles';
-      logger.error('Failed to load help articles:', err);
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+  const { data, isLoading, error, refetch } = useListFetch<HelpArticle>({
+    endpoint: API_ENDPOINTS.KNOWLEDGE_BASE,
+    getAuthToken,
+    itemsKey: 'articles'
+  });
+  const articles = useMemo(() => data?.items ?? [], [data]);
 
   // Derive unique categories from articles
   const categories = useMemo(() => {
@@ -120,14 +86,14 @@ export function HelpCenter({ getAuthToken }: HelpCenterProps) {
 
   // Error state
   if (error) {
-    return <ErrorState message={error} onRetry={fetchArticles} />;
+    return <ErrorState message={error} onRetry={refetch} />;
   }
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="perf-header">
         <h2 className="heading perf-heading">Help Center</h2>
-        <button className="btn btn-secondary" onClick={fetchArticles}>
+        <button className="btn btn-secondary" onClick={refetch}>
           <RefreshCw className="btn-icon-left" />
           Refresh
         </button>

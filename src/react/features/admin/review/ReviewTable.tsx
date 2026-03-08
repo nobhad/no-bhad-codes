@@ -5,16 +5,13 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
 import { Eye, RefreshCw } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
-import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-
-const logger = createLogger('ReviewTable');
 
 // ============================================================================
 // TYPES
@@ -53,44 +50,13 @@ const STATUS_CLASS_MAP: Record<string, string> = {
 
 export function ReviewTable({ getAuthToken, showNotification: _showNotification, onNavigate }: ReviewTableProps) {
   const containerRef = useFadeIn();
-  const [reviews, setReviews] = useState<ReviewItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
-  const fetchReviews = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?scope=client`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load design reviews');
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setReviews((payload.reviews as ReviewItem[]) || []);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load reviews';
-      logger.error('Failed to load reviews:', err);
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
+  const { data, isLoading, error, refetch } = useListFetch<ReviewItem>({
+    endpoint: `${API_ENDPOINTS.ADMIN.DESIGN_REVIEWS}?scope=client`,
+    getAuthToken,
+    itemsKey: 'reviews'
+  });
+  const reviews = useMemo(() => data?.items ?? [], [data]);
 
   function handleViewReview(review: ReviewItem) {
     if (review.url) {
@@ -107,14 +73,14 @@ export function ReviewTable({ getAuthToken, showNotification: _showNotification,
 
   // Error state
   if (error) {
-    return <ErrorState message={error} onRetry={fetchReviews} />;
+    return <ErrorState message={error} onRetry={refetch} />;
   }
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="perf-header">
         <h2 className="heading perf-heading">Design Reviews</h2>
-        <button className="btn btn-secondary" onClick={fetchReviews}>
+        <button className="btn btn-secondary" onClick={refetch}>
           <RefreshCw className="btn-icon-left" />
           Refresh
         </button>

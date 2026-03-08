@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   FileUp,
   FileCheck,
@@ -30,10 +30,10 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { DOCUMENT_REQUESTS_FILTER_CONFIG } from '../shared/filterConfigs';
+import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('DocumentRequestsTable');
 
@@ -60,6 +60,14 @@ interface DocumentRequestStats {
   approved: number;
   overdue: number;
 }
+
+const DEFAULT_DOCUMENT_REQUEST_STATS: DocumentRequestStats = {
+  total: 0,
+  pending: 0,
+  submitted: 0,
+  approved: 0,
+  overdue: 0
+};
 
 interface DocumentRequestsTableProps {
   /** Auth token getter for API calls */
@@ -135,7 +143,17 @@ function sortDocumentRequests(a: DocumentRequest, b: DocumentRequest, sort: Sort
 export function DocumentRequestsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DocumentRequestsTableProps) {
   const containerRef = useFadeIn();
 
-  // Build headers helper with auth token
+  // Data fetching via useListFetch
+  const { data, isLoading, error, refetch, setData } = useListFetch<DocumentRequest, DocumentRequestStats>({
+    endpoint: API_ENDPOINTS.DOCUMENT_REQUESTS,
+    getAuthToken,
+    defaultStats: DEFAULT_DOCUMENT_REQUEST_STATS,
+    itemsKey: 'requests'
+  });
+  const requests = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_DOCUMENT_REQUEST_STATS, [data]);
+
+  // Build headers helper for mutation calls
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -146,16 +164,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     }
     return headers;
   }, [getAuthToken]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<DocumentRequest[]>([]);
-  const [stats, setStats] = useState<DocumentRequestStats>({
-    total: 0,
-    pending: 0,
-    submitted: 0,
-    approved: 0,
-    overdue: 0
-  });
 
   // Filtering and sorting
   const {
@@ -196,36 +204,6 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
     items: paginatedRequests
   });
 
-  const loadRequests = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.DOCUMENT_REQUESTS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load document requests');
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setRequests((payload.requests as DocumentRequest[]) || []);
-      setStats((payload.stats as DocumentRequestStats) || {
-        total: 0,
-        pending: 0,
-        submitted: 0,
-        approved: 0,
-        overdue: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load document requests');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
@@ -238,13 +216,14 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
       if (!response.ok) throw new Error('Failed to update request');
 
-      setRequests((prev) =>
-        prev.map((request) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((request) =>
           request.id === requestId
             ? { ...request, status: newStatus as DocumentRequest['status'] }
             : request
         )
-      );
+      } : prev);
       showNotification?.('Request status updated', 'success');
     } catch (err) {
       logger.error('Failed to update request status:', err);
@@ -267,7 +246,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
       if (!response.ok) throw new Error('Failed to delete requests');
 
-      setRequests((prev) => prev.filter((r) => !ids.includes(r.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((r) => !ids.includes(r.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} request${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -414,7 +393,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={loadRequests} />
+            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedRequests.length === 0 ? (

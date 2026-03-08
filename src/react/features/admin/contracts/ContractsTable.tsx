@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   FileText,
   Inbox,
@@ -11,6 +11,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { Checkbox } from '@react/components/ui/checkbox';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
@@ -43,7 +44,6 @@ import { CONTRACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('ContractsTable');
 
@@ -81,6 +81,14 @@ const CONTRACT_STATUS_CONFIG: Record<string, { label: string; icon: React.ReactN
   signed: { label: 'Signed', icon: <CheckCircle /> },
   expired: { label: 'Expired', icon: <Clock /> },
   cancelled: { label: 'Cancelled', icon: <XCircle /> }
+};
+
+const DEFAULT_CONTRACT_STATS: ContractStats = {
+  total: 0,
+  draft: 0,
+  pending: 0,
+  signed: 0,
+  expired: 0
 };
 
 interface ContractsTableProps {
@@ -138,7 +146,7 @@ function sortContracts(a: Contract, b: Contract, sort: SortConfig): number {
 export function ContractsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ContractsTableProps) {
   const containerRef = useFadeIn();
 
-  // Build headers helper with auth token
+  // Build headers helper with auth token (used by mutation calls)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -149,16 +157,15 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     }
     return headers;
   }, [getAuthToken]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [stats, setStats] = useState<ContractStats>({
-    total: 0,
-    draft: 0,
-    pending: 0,
-    signed: 0,
-    expired: 0
+
+  const { data, isLoading, error, refetch, setData } = useListFetch<Contract, ContractStats>({
+    endpoint: API_ENDPOINTS.CONTRACTS,
+    getAuthToken,
+    defaultStats: DEFAULT_CONTRACT_STATS,
+    itemsKey: 'contracts'
   });
+  const contracts = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_CONTRACT_STATS, [data]);
 
   // Filtering and sorting
   const {
@@ -199,38 +206,6 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
     items: paginatedContracts
   });
 
-  const loadContracts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(API_ENDPOINTS.CONTRACTS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load contracts');
-
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setContracts((payload.contracts as Contract[]) || []);
-      setStats((payload.stats as ContractStats) || {
-        total: 0,
-        draft: 0,
-        pending: 0,
-        signed: 0,
-        expired: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load contracts');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    loadContracts();
-  }, [loadContracts]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (contractId: number, newStatus: string) => {
     try {
@@ -243,19 +218,20 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
       if (!response.ok) throw new Error('Failed to update contract');
 
-      setContracts((prev) =>
-        prev.map((contract) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((contract) =>
           contract.id === contractId
             ? { ...contract, status: newStatus as Contract['status'] }
             : contract
         )
-      );
+      } : prev);
       showNotification?.('Contract status updated', 'success');
     } catch (err) {
       logger.error('Failed to update contract status:', err);
       showNotification?.('Failed to update contract status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   const handleSendContract = useCallback(async (contractId: number) => {
     try {
@@ -267,19 +243,20 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
       if (!response.ok) throw new Error('Failed to send contract');
 
-      setContracts((prev) =>
-        prev.map((contract) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((contract) =>
           contract.id === contractId
             ? { ...contract, status: 'sent', sentAt: new Date().toISOString() }
             : contract
         )
-      );
+      } : prev);
       showNotification?.('Contract sent', 'success');
     } catch (err) {
       logger.error('Failed to send contract:', err);
       showNotification?.('Failed to send contract', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [getHeaders, showNotification, setData]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -296,14 +273,17 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
       if (!response.ok) throw new Error('Failed to delete contracts');
 
-      setContracts((prev) => prev.filter((c) => !ids.includes(c.id)));
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.filter((c) => !ids.includes(c.id))
+      } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} contract${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
       logger.error('Failed to delete contracts:', err);
       showNotification?.('Failed to delete contracts', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, getHeaders, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -448,7 +428,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={8} message={error} onRetry={loadContracts} />
+            <PortalTableError colSpan={8} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={8} rows={5} />
           ) : paginatedContracts.length === 0 ? (

@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Play,
-  Square,
   Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
@@ -11,7 +9,6 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { formatDateShort } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import {
   PortalTable,
   PortalTableHeader,
@@ -26,6 +23,7 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { TIME_TRACKING_FILTER_CONFIG, TIME_TRACKING_DATE_RANGE_OPTIONS, TIME_TRACKING_BILLABLE_OPTIONS } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
@@ -33,6 +31,14 @@ import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('TimeTrackingTable');
+
+const DEFAULT_TIME_STATS: TimeStats = {
+  totalHours: 0,
+  billableHours: 0,
+  billedHours: 0,
+  unbilledHours: 0,
+  totalValue: 0
+};
 
 interface TimeEntry {
   id: number;
@@ -109,16 +115,6 @@ function sortTimeEntries(a: TimeEntry, b: TimeEntry, sort: SortConfig): number {
 
 export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNotification }: TimeTrackingTableProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [entries, setEntries] = useState<TimeEntry[]>([]);
-  const [stats, setStats] = useState<TimeStats>({
-    totalHours: 0,
-    billableHours: 0,
-    billedHours: 0,
-    unbilledHours: 0,
-    totalValue: 0
-  });
 
   // Active timer
   const [activeTimer, setActiveTimer] = useState<{
@@ -132,7 +128,25 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
   // Date range affects API call, stays outside the hook
   const [dateRange, setDateRange] = useState<string>('week');
 
-  // Auth headers helper
+  // Build dynamic endpoint with query params
+  const timeEntriesEndpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (projectId) params.set('projectId', projectId);
+    params.set('range', dateRange);
+    return `${API_ENDPOINTS.ADMIN.TIME_ENTRIES}?${params}`;
+  }, [projectId, dateRange]);
+
+  const { data, isLoading, error, refetch, setData } = useListFetch<TimeEntry, TimeStats>({
+    endpoint: timeEntriesEndpoint,
+    getAuthToken,
+    defaultStats: DEFAULT_TIME_STATS,
+    itemsKey: 'entries',
+    deps: [timeEntriesEndpoint]
+  });
+  const entries = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_TIME_STATS, [data]);
+
+  // Auth headers helper (kept for mutation calls)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -177,41 +191,6 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
     return () => clearInterval(interval);
   }, [activeTimer]);
 
-  const loadTimeEntries = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams();
-      if (projectId) params.set('projectId', projectId);
-      params.set('range', dateRange);
-
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.TIME_ENTRIES}?${params}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load time entries');
-
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setEntries((data.entries as TimeEntry[]) || []);
-      setStats((data.stats as TimeStats) || {
-        totalHours: 0,
-        billableHours: 0,
-        billedHours: 0,
-        unbilledHours: 0,
-        totalValue: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load time entries');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [projectId, dateRange, getHeaders]);
-
-  useEffect(() => {
-    loadTimeEntries();
-  }, [loadTimeEntries]);
-
   async function startTimer() {
     try {
       const response = await fetch(API_ENDPOINTS.ADMIN.TIME_ENTRIES_START, {
@@ -250,7 +229,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
 
       setActiveTimer(null);
       setTimerDisplay('00:00:00');
-      loadTimeEntries();
+      refetch();
       showNotification?.('Timer stopped', 'success');
     } catch (err) {
       logger.error('Failed to stop timer:', err);
@@ -378,7 +357,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={7} message={error} onRetry={loadTimeEntries} />
+            <PortalTableError colSpan={7} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={7} rows={5} />
           ) : paginatedEntries.length === 0 ? (

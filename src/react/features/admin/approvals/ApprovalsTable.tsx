@@ -5,13 +5,13 @@
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { formatDate } from '@react/utils/formatDate';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('ApprovalsTable');
@@ -51,10 +51,15 @@ const STATUS_CLASS_MAP: Record<string, string> = {
 
 export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTableProps) {
   const containerRef = useFadeIn();
-  const [approvals, setApprovals] = useState<ApprovalItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
+  const { data, isLoading, error, refetch, setData } = useListFetch<ApprovalItem>({
+    endpoint: API_ENDPOINTS.APPROVALS_PENDING,
+    getAuthToken,
+    itemsKey: 'approvals'
+  });
+  const approvals = useMemo(() => data?.items ?? [], [data]);
+
+  // Auth headers helper (kept for mutation calls)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -66,30 +71,6 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
     return headers;
   }, [getAuthToken]);
 
-  const fetchApprovals = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.APPROVALS_PENDING, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load approvals');
-      const payload = unwrapApiData<Record<string, unknown>>(await response.json());
-      setApprovals((payload.approvals as ApprovalItem[]) || []);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load approvals';
-      logger.error('Failed to load approvals:', err);
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getHeaders]);
-
-  useEffect(() => {
-    fetchApprovals();
-  }, [fetchApprovals]);
-
   async function handleRespond(approvalId: number, action: 'approve' | 'decline') {
     try {
       const response = await fetch(buildEndpoint.approvalRespond(approvalId), {
@@ -100,7 +81,7 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
       });
       if (!response.ok) throw new Error(`Failed to ${action} request`);
 
-      setApprovals((prev) => prev.filter((a) => a.id !== approvalId));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((a) => a.id !== approvalId) } : prev);
       showNotification?.(
         `Request ${action === 'approve' ? 'approved' : 'declined'} successfully`,
         'success'
@@ -118,14 +99,14 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
 
   // Error state
   if (error) {
-    return <ErrorState message={error} onRetry={fetchApprovals} />;
+    return <ErrorState message={error} onRetry={refetch} />;
   }
 
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="section">
       <div className="perf-header">
         <h2 className="heading perf-heading">Pending Approvals</h2>
-        <button className="btn btn-secondary" onClick={fetchApprovals}>
+        <button className="btn btn-secondary" onClick={refetch}>
           <RefreshCw className="btn-icon-left" />
           Refresh
         </button>

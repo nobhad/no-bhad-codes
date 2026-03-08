@@ -1,19 +1,16 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  Upload,
   Folder,
   File,
   FileText,
   FileImage,
   FileVideo,
   FileAudio,
-  Inbox,
-  FolderPlus
+  Inbox
 } from 'lucide-react';
 import { IconButton } from '@react/factories';
 import { formatDateShort } from '@react/utils/formatDate';
-import { PortalButton } from '@react/components/portal/PortalButton';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
 import { TablePagination } from '@react/components/portal/TablePagination';
@@ -31,13 +28,19 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { FILES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 const logger = createLogger('FilesManager');
+
+const DEFAULT_FILE_STATS: FileStats = {
+  totalFiles: 0,
+  totalFolders: 0,
+  totalSize: 0
+};
 
 interface FileItem {
   id: number;
@@ -135,20 +138,30 @@ function sortFiles(a: FileItem, b: FileItem, sort: SortConfig): number {
 
 export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, showNotification }: FilesManagerProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [stats, setStats] = useState<FileStats>({
-    totalFiles: 0,
-    totalFolders: 0,
-    totalSize: 0
-  });
 
   // View state
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [_currentPath, _setCurrentPath] = useState<string[]>([]);
 
-  // Auth headers helper
+  // Build dynamic endpoint with query params
+  const filesEndpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (projectId) params.set('projectId', projectId);
+    if (clientId) params.set('clientId', clientId);
+    return `${API_ENDPOINTS.ADMIN.FILES}?${params}`;
+  }, [projectId, clientId]);
+
+  const { data, isLoading, error, refetch, setData } = useListFetch<FileItem, FileStats>({
+    endpoint: filesEndpoint,
+    getAuthToken,
+    defaultStats: DEFAULT_FILE_STATS,
+    itemsKey: 'files',
+    deps: [filesEndpoint]
+  });
+  const files = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_FILE_STATS, [data]);
+
+  // Auth headers helper (kept for mutation calls)
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -176,39 +189,6 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     sortFn: sortFiles,
     defaultSort: { column: 'name', direction: 'asc' }
   });
-
-  const loadFiles = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams();
-      if (projectId) params.set('projectId', projectId);
-      if (clientId) params.set('clientId', clientId);
-
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.FILES}?${params}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load files');
-
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setFiles((data.files as FileItem[]) || []);
-      setStats((data.stats as FileStats) || {
-        totalFiles: 0,
-        totalFolders: 0,
-        totalSize: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load files');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [projectId, clientId, getHeaders]);
-
-  useEffect(() => {
-    loadFiles();
-  }, [loadFiles]);
 
   const filteredFiles = useMemo(() => applyFilters(files), [applyFilters, files]);
 
@@ -243,7 +223,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
 
       if (!response.ok) throw new Error('Failed to delete file');
 
-      setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((f) => f.id !== fileId) } : prev);
       showNotification?.('File deleted successfully', 'success');
     } catch (err) {
       logger.error('Failed to delete file:', err);
@@ -265,8 +245,9 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
       if (!response.ok) throw new Error(`Failed to ${action} file`);
 
       // Update local state
-      setFiles((prev) =>
-        prev.map((f) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((f) =>
           f.id === file.id
             ? {
               ...f,
@@ -275,7 +256,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
             }
             : f
         )
-      );
+      } : prev);
 
       showNotification?.(
         isCurrentlyShared ? 'File access revoked from client' : 'File shared with client',
@@ -382,7 +363,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
 
           <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <PortalTableError colSpan={6} message={error} onRetry={loadFiles} />
+              <PortalTableError colSpan={6} message={error} onRetry={refetch} />
             ) : isLoading ? (
               <PortalTableLoading colSpan={6} rows={5} />
             ) : paginatedFiles.length === 0 ? (

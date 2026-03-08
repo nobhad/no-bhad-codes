@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   Package,
   AlertCircle,
@@ -37,9 +37,9 @@ import { usePagination } from '@react/hooks/usePagination';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { useSelection } from '@react/hooks/useSelection';
 import { DELIVERABLES_FILTER_CONFIG } from '../shared/filterConfigs';
+import { useListFetch } from '@react/factories/useDataFetch';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('DeliverablesTable');
@@ -69,6 +69,15 @@ interface DeliverableStats {
   delivered: number;
   overdue: number;
 }
+
+const DEFAULT_DELIVERABLE_STATS: DeliverableStats = {
+  total: 0,
+  pending: 0,
+  inProgress: 0,
+  review: 0,
+  delivered: 0,
+  overdue: 0
+};
 
 interface DeliverablesTableProps {
   projectId?: string;
@@ -132,9 +141,27 @@ function sortDeliverables(a: Deliverable, b: Deliverable, sort: SortConfig): num
 
 export function DeliverablesTable({ projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: DeliverablesTableProps) {
   const containerRef = useFadeIn();
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Build headers helper with auth token
+  // Build endpoint with optional projectId query param
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (projectId) params.set('projectId', projectId);
+    const qs = params.toString();
+    return qs ? `${API_ENDPOINTS.ADMIN.DELIVERABLES}?${qs}` : API_ENDPOINTS.ADMIN.DELIVERABLES;
+  }, [projectId]);
+
+  // Data fetching via useListFetch
+  const { data, isLoading, error, refetch, setData } = useListFetch<Deliverable, DeliverableStats>({
+    endpoint,
+    getAuthToken,
+    defaultStats: DEFAULT_DELIVERABLE_STATS,
+    itemsKey: 'deliverables',
+    deps: [endpoint]
+  });
+  const deliverables = useMemo(() => data?.items ?? [], [data]);
+  const stats = useMemo(() => data?.stats ?? DEFAULT_DELIVERABLE_STATS, [data]);
+
+  // Build headers helper for mutation calls
   const getHeaders = useCallback(() => {
     const token = getAuthToken?.();
     const headers: Record<string, string> = {
@@ -145,16 +172,6 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     }
     return headers;
   }, [getAuthToken]);
-  const [error, setError] = useState<string | null>(null);
-  const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
-  const [stats, setStats] = useState<DeliverableStats>({
-    total: 0,
-    pending: 0,
-    inProgress: 0,
-    review: 0,
-    delivered: 0,
-    overdue: 0
-  });
 
   // Filtering and sorting
   const {
@@ -195,39 +212,6 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
     items: paginatedDeliverables
   });
 
-  const loadDeliverables = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (projectId) params.set('projectId', projectId);
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.DELIVERABLES}?${params}`, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load deliverables');
-      const payload = unwrapApiData<{ deliverables?: Deliverable[]; stats?: DeliverableStats }>(await response.json());
-      setDeliverables(payload.deliverables || []);
-      setStats(payload.stats || {
-        total: 0,
-        pending: 0,
-        inProgress: 0,
-        review: 0,
-        delivered: 0,
-        overdue: 0
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load deliverables');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [projectId, getHeaders]);
-
-  useEffect(() => {
-    loadDeliverables();
-  }, [loadDeliverables]);
-
   // Status change handler
   const handleStatusChange = useCallback(async (deliverableId: number, newStatus: string) => {
     try {
@@ -240,13 +224,14 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
       if (!response.ok) throw new Error('Failed to update deliverable');
 
-      setDeliverables((prev) =>
-        prev.map((d) =>
+      setData((prev) => prev ? {
+        ...prev,
+        items: prev.items.map((d) =>
           d.id === deliverableId
             ? { ...d, status: newStatus as Deliverable['status'] }
             : d
         )
-      );
+      } : prev);
       showNotification?.('Deliverable status updated', 'success');
     } catch (err) {
       logger.error('Failed to update deliverable status:', err);
@@ -269,7 +254,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
       if (!response.ok) throw new Error('Failed to delete deliverables');
 
-      setDeliverables((prev) => prev.filter((d) => !ids.includes(d.id)));
+      setData((prev) => prev ? { ...prev, items: prev.items.filter((d) => !ids.includes(d.id)) } : prev);
       selection.clearSelection();
       showNotification?.(`Deleted ${ids.length} deliverable${ids.length !== 1 ? 's' : ''}`, 'success');
     } catch (err) {
@@ -425,7 +410,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
         <PortalTableBody animate={!isLoading && !error}>
           {error ? (
-            <PortalTableError colSpan={8} message={error} onRetry={loadDeliverables} />
+            <PortalTableError colSpan={8} message={error} onRetry={refetch} />
           ) : isLoading ? (
             <PortalTableLoading colSpan={8} rows={5} />
           ) : paginatedDeliverables.length === 0 ? (

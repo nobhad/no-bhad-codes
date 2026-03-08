@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Inbox, CheckSquare } from 'lucide-react';
+import { useMemo } from 'react';
+import { Inbox } from 'lucide-react';
 import { IconButton } from '@react/factories';
+import { useListFetch } from '@react/factories/useDataFetch';
 import { TablePagination } from '@react/components/portal/TablePagination';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { SearchFilter, FilterDropdown } from '@react/components/portal/TableFilters';
@@ -25,7 +26,6 @@ import { useTableFilters } from '@react/hooks/useTableFilters';
 import { TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
 
 interface Task {
   id: number;
@@ -121,22 +121,25 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
 }
 
 export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getAuthToken, showNotification: _showNotification }: TasksManagerProps) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [viewMode, setViewMode] = React.useState<ViewMode>('list');
 
-  // Auth headers helper
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
+  // Build endpoint with query params
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    if (clientId) params.append('client_id', clientId);
+    if (projectId) params.append('project_id', projectId);
+    if (assigneeId) params.append('assignee_id', assigneeId);
+    const qs = params.toString();
+    return qs ? `${API_ENDPOINTS.ADMIN.TASKS}?${qs}` : API_ENDPOINTS.ADMIN.TASKS;
+  }, [clientId, projectId, assigneeId]);
+
+  const { data, isLoading, error, refetch } = useListFetch<Task>({
+    endpoint,
+    getAuthToken,
+    itemsKey: 'tasks',
+    deps: [endpoint]
+  });
+  const tasks = useMemo(() => data?.items ?? [], [data]);
 
   const containerRef = useFadeIn<HTMLDivElement>();
 
@@ -156,35 +159,6 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
     sortFn: sortTasks,
     defaultSort: { column: 'created_at', direction: 'desc' }
   });
-
-  const fetchTasks = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams();
-      if (clientId) params.append('client_id', clientId);
-      if (projectId) params.append('project_id', projectId);
-      if (assigneeId) params.append('assignee_id', assigneeId);
-
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.TASKS}?${params}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch tasks');
-
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
-      setTasks((data.tasks as Task[]) || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId, projectId, assigneeId, getHeaders]);
-
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
 
   const filteredTasks = useMemo(() => applyFilters(tasks), [applyFilters, tasks]);
 
@@ -297,7 +271,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="table-loading-state">
         <div className="loading-spinner" />
@@ -351,7 +325,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
         </>
       }
       pagination={
-        viewMode === 'list' && !loading && filteredTasks.length > 0 ? (
+        viewMode === 'list' && !isLoading && filteredTasks.length > 0 ? (
           <TablePagination
             pageInfo={pagination.pageInfo}
             page={pagination.page}
@@ -408,10 +382,10 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
             </PortalTableRow>
           </PortalTableHeader>
 
-          <PortalTableBody animate={!loading && !error}>
+          <PortalTableBody animate={!isLoading && !error}>
             {error ? (
-              <PortalTableError colSpan={7} message={error} onRetry={fetchTasks} />
-            ) : loading ? (
+              <PortalTableError colSpan={7} message={error} onRetry={refetch} />
+            ) : isLoading ? (
               <PortalTableLoading colSpan={7} rows={5} />
             ) : paginatedTasks.length === 0 ? (
               <PortalTableEmpty
