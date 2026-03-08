@@ -254,6 +254,7 @@ export function useDataFetch<T, P = void>(
     };
     // Deps array is intentionally spread from options to support dynamic dependency arrays.
     // This allows consumers to pass custom dependencies that trigger refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchOnMount, ...deps]);
 
   return {
