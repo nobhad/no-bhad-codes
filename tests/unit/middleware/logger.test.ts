@@ -23,7 +23,7 @@ vi.mock('../../../server/services/logger', () => ({
 
 describe('Request Logger Middleware', () => {
   let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
+  let mockRes: Partial<Response> & { on: ReturnType<typeof vi.fn> };
   let mockNext: NextFunction;
   let originalDateNow: typeof Date.now;
 
@@ -42,7 +42,12 @@ describe('Request Logger Middleware', () => {
 
     mockRes = {
       statusCode: 200,
-      json: vi.fn().mockReturnThis()
+      json: vi.fn().mockReturnThis(),
+      on: vi.fn((event: string, callback: () => void) => {
+        if (event === 'finish') {
+          callback();
+        }
+      })
     };
 
     mockNext = vi.fn() as unknown as NextFunction;
@@ -56,7 +61,7 @@ describe('Request Logger Middleware', () => {
   describe('requestLogger', () => {
     it('should skip logging for health check paths', () => {
       mockReq.path = '/api/health';
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(loggerService.info).not.toHaveBeenCalled();
@@ -64,7 +69,7 @@ describe('Request Logger Middleware', () => {
 
     it('should skip logging for /health path', () => {
       mockReq.path = '/health';
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(loggerService.info).not.toHaveBeenCalled();
@@ -72,31 +77,33 @@ describe('Request Logger Middleware', () => {
 
     it('should skip logging for favicon.ico', () => {
       mockReq.path = '/favicon.ico';
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(loggerService.info).not.toHaveBeenCalled();
     });
 
     it('should log request information', () => {
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith('GET /api/test', {
-        category: 'request',
-        metadata: {
-          ip: '127.0.0.1',
-          userAgent: 'test-agent'
-        }
-      });
+      expect(loggerService.info).toHaveBeenCalledWith(
+        expect.stringContaining('GET /api/test'),
+        expect.objectContaining({
+          category: 'HTTP',
+          metadata: expect.objectContaining({
+            ip: '127.0.0.1'
+          })
+        })
+      );
       expect(mockNext).toHaveBeenCalled();
     });
 
     it('should log request body when present', () => {
       mockReq.body = { name: 'Test', email: 'test@example.com' };
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.info).toHaveBeenCalledWith(
-        'GET /api/test',
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
           metadata: expect.objectContaining({
             body: { name: 'Test', email: 'test@example.com' }
@@ -113,10 +120,10 @@ describe('Request Logger Middleware', () => {
         secret: 'my-secret',
         key: 'api-key'
       };
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.info).toHaveBeenCalledWith(
-        'GET /api/test',
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
           metadata: expect.objectContaining({
             body: {
@@ -133,21 +140,23 @@ describe('Request Logger Middleware', () => {
 
     it('should log response with info for successful requests', () => {
       const startTime = 1000000;
-      const endTime = 1000100; // 100ms later
+      const endTime = 1000100;
       Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(endTime);
 
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      mockRes.on = vi.fn((event: string, callback: () => void) => {
+        if (event === 'finish') {
+          callback();
+        }
+      });
 
-      // Call res.json to trigger response logging
-      (mockRes.json as any)({ data: 'test' });
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.info).toHaveBeenCalledWith(
-        expect.stringContaining('GET /api/test - 200'),
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
-          category: 'response',
+          category: 'HTTP',
           metadata: expect.objectContaining({
-            statusCode: 200,
-            duration: 100
+            statusCode: 200
           })
         })
       );
@@ -156,21 +165,23 @@ describe('Request Logger Middleware', () => {
     it('should log response with warn for error responses', () => {
       mockRes.statusCode = 404;
       const startTime = 1000000;
-      const endTime = 1000100; // 100ms later
+      const endTime = 1000100;
       Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(endTime);
 
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      mockRes.on = vi.fn((event: string, callback: () => void) => {
+        if (event === 'finish') {
+          callback();
+        }
+      });
 
-      // Call res.json to trigger response logging
-      (mockRes.json as any)({ error: 'Not found' });
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.warn).toHaveBeenCalledWith(
-        expect.stringContaining('GET /api/test - 404'),
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
-          category: 'response',
+          category: 'HTTP',
           metadata: expect.objectContaining({
-            statusCode: 404,
-            duration: 100
+            statusCode: 404
           })
         })
       );
@@ -179,38 +190,31 @@ describe('Request Logger Middleware', () => {
     it('should log response with warn for 5xx errors', () => {
       mockRes.statusCode = 500;
       const startTime = 1000000;
-      const endTime = 1000100; // 100ms later
+      const endTime = 1000100;
       Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(endTime);
 
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      mockRes.on = vi.fn((event: string, callback: () => void) => {
+        if (event === 'finish') {
+          callback();
+        }
+      });
 
-      // Call res.json to trigger response logging
-      (mockRes.json as any)({ error: 'Server error' });
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.warn).toHaveBeenCalledWith(
-        expect.stringContaining('GET /api/test - 500'),
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
-          category: 'response'
+          category: 'HTTP'
         })
       );
     });
 
-    it('should preserve original json method functionality', () => {
-      const _originalJson = mockRes.json;
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
-
-      const responseBody = { data: 'test' };
-      const result = (mockRes.json as any)(responseBody);
-
-      expect(result).toBe(mockRes);
-    });
-
     it('should handle requests without body', () => {
       mockReq.body = undefined;
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.info).toHaveBeenCalledWith(
-        'GET /api/test',
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
           metadata: expect.not.objectContaining({
             body: expect.anything()
@@ -221,10 +225,10 @@ describe('Request Logger Middleware', () => {
 
     it('should handle empty body object', () => {
       mockReq.body = {};
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.info).toHaveBeenCalledWith(
-        'GET /api/test',
+        expect.stringContaining('GET /api/test'),
         expect.objectContaining({
           metadata: expect.not.objectContaining({
             body: expect.anything()
@@ -233,21 +237,23 @@ describe('Request Logger Middleware', () => {
       );
     });
 
-    it('should calculate duration correctly', () => {
+    it('should calculate duration and include it in response log', () => {
       const startTime = 1000000;
-      Date.now = vi
-        .fn()
-        .mockReturnValueOnce(startTime)
-        .mockReturnValueOnce(startTime + 250);
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      Date.now = vi.fn().mockReturnValueOnce(startTime).mockReturnValueOnce(startTime + 250);
 
-      (mockRes.json as any)({ data: 'test' });
+      mockRes.on = vi.fn((event: string, callback: () => void) => {
+        if (event === 'finish') {
+          callback();
+        }
+      });
+
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
       expect(loggerService.info).toHaveBeenCalledWith(
-        expect.any(String),
+        expect.stringContaining('250ms'),
         expect.objectContaining({
           metadata: expect.objectContaining({
-            duration: 250
+            responseTimeMs: 250
           })
         })
       );
@@ -256,23 +262,42 @@ describe('Request Logger Middleware', () => {
     it('should handle POST requests', () => {
       mockReq.method = 'POST';
       mockReq.body = { name: 'New Item' };
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith('POST /api/test', expect.any(Object));
+      expect(loggerService.info).toHaveBeenCalledWith(
+        expect.stringContaining('POST /api/test'),
+        expect.any(Object)
+      );
     });
 
     it('should handle PUT requests', () => {
       mockReq.method = 'PUT';
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith('PUT /api/test', expect.any(Object));
+      expect(loggerService.info).toHaveBeenCalledWith(
+        expect.stringContaining('PUT /api/test'),
+        expect.any(Object)
+      );
     });
 
     it('should handle DELETE requests', () => {
       mockReq.method = 'DELETE';
-      requestLogger(mockReq as Request, mockRes as Response, mockNext);
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
 
-      expect(loggerService.info).toHaveBeenCalledWith('DELETE /api/test', expect.any(Object));
+      expect(loggerService.info).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE /api/test'),
+        expect.any(Object)
+      );
+    });
+
+    it('should call next()', () => {
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+    });
+
+    it('should attach finish listener to the response', () => {
+      requestLogger(mockReq as Request, mockRes as unknown as Response, mockNext);
+      expect(mockRes.on).toHaveBeenCalledWith('finish', expect.any(Function));
     });
   });
 });

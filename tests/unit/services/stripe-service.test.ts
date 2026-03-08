@@ -20,6 +20,22 @@ vi.mock('../../../server/database/init', () => ({
   getDatabase: () => mockDb
 }));
 
+// Mock environment config
+vi.mock('../../../server/config/environment', () => ({
+  default: {
+    NODE_ENV: 'test',
+    JWT_SECRET: 'test-secret',
+    APP_URL: 'http://localhost:3000',
+    FRONTEND_URL: 'http://localhost:3000',
+    PORT: 3000
+  },
+  getBaseUrl: vi.fn(() => 'http://localhost:3000'),
+  getAdminUrl: vi.fn(() => 'http://localhost:3000/admin'),
+  getPortalUrl: vi.fn(() => 'http://localhost:3000/client/portal'),
+  validateConfig: vi.fn(),
+  getConfigSummary: vi.fn(() => ({}))
+}));
+
 // Mock crypto module
 vi.mock('crypto', () => ({
   createHmac: vi.fn(() => ({
