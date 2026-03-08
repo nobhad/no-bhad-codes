@@ -33,7 +33,9 @@
   border-right: none;
 }
 
-/* Sidebar Content - flex child, takes remaining space after logo */
+/* Sidebar Content - flex child, takes remaining space.
+   Top padding matches .sidebar-footer bottom padding for symmetry.
+   No bottom padding — .sidebar-footer handles that. */
 .sidebar-content {
   display: flex;
   flex-direction: column;
@@ -41,7 +43,7 @@
   gap: 0;
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Collapsed sidebar content — only override what changes from base .sidebar-content */
@@ -49,7 +51,6 @@
   align-items: center;
 }
 
-/* Sidebar logo styles in shared/portal-layout.css */
 
 /* Sidebar Footer - pushed to bottom via margin-top: auto.
    Bottom padding provides visual balance below Sign Out button. */
@@ -60,6 +61,7 @@
   padding: 0 0 var(--space-2);
   margin-top: auto;
   border-top: none;
+  flex-shrink: 0;
 }
 
 /* Logout button uses .sidebar-btn class - inherits all sidebar button styles */
@@ -118,228 +120,12 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 /* Focus indicators inherited from global :focus-visible rule in reset.css */
 
-/* Collapsed footer positioning */
+/* Collapsed footer positioning — bottom padding only (matches base .sidebar-footer) */
 .sidebar.collapsed .sidebar-footer {
-  padding: var(--space-2);
+  padding: 0 0 var(--space-2);
   display: flex;
   justify-content: center;
 }
-
-/* Footer button styling - base styles in shared/portal-buttons.css */
-
-/* Sidebar Toggle Button */
-.sidebar-toggle {
-  position: absolute;
-  top: var(--space-1);
-  right: calc(-1 * var(--icon-size-xs));
-  background: var(--portal-bg-light);
-  border: var(--portal-border);
-  border-radius: var(--portal-radius-full);
-  width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-  cursor: pointer;
-  z-index: var(--z-index-10);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-2xs);
-  transition: background var(--transition-fast);
-}
-
-.sidebar-toggle:hover {
-  background: var(--color-primary);
-}
-
-.sidebar-toggle .toggle-icon {
-  transition: transform var(--transition-fast);
-}
-
-.sidebar.collapsed .sidebar-toggle .toggle-icon {
-  transform: rotate(180deg);
-}
-
-/* Collapsed state logo styles in shared/portal-layout.css */
-
-/* Hide content when collapsed */
-.sidebar.collapsed .client-name,
-.sidebar.collapsed .project-name,
-.sidebar.collapsed .subitem-name,
-.sidebar.collapsed .account-item-title,
-.sidebar.collapsed .logout-text,
-.sidebar.collapsed h3 {
-  display: none;
-}
-
-.sidebar.collapsed .project-subitems,
-.sidebar.collapsed .account-list {
-  display: none;
-}
-
-.sidebar.collapsed .client-header,
-.sidebar.collapsed .account-header,
-.sidebar.collapsed .projects-header {
-  justify-content: center;
-  padding: 0.5rem;
-}
-
-/* Client Header */
-.client-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 0 1.5rem 0;
-  padding: 0 1.5rem 1rem 1.5rem;
-  border-bottom: none;
-}
-
-.client-name {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xl);
-  color: var(--portal-text-primary);
-  margin: 0;
-  text-transform: uppercase;
-  flex: 1;
-}
-
-/* Client Dropdown */
-.client-dropdown {
-  position: relative;
-}
-
-.dropdown-btn {
-  width: var(--portal-btn-icon-size);
-  height: var(--portal-btn-icon-size);
-  padding: 0;
-  background: var(--portal-bg-light);
-  color: var(--portal-text-primary);
-  border: var(--portal-border);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dropdown-btn:hover {
-  background: var(--color-primary);
-}
-
-.dropdown-icon {
-  font-size: var(--font-size-lg);
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: var(--portal-bg-dark);
-  border: var(--portal-border);
-  min-width: 180px;
-  z-index: var(--z-index-portal-dropdown, 9700);
-}
-
-/* Base display/alignment/gap from reset.css universal icon-text rule */
-.dropdown-item {
-  width: 100%;
-  padding: var(--space-1-5) var(--space-2);
-  background: transparent;
-  color: var(--portal-text-primary);
-  border: none;
-  border-bottom: var(--portal-border);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-weight: var(--font-weight-semibold);
-  text-align: left;
-}
-
-.dropdown-item:last-child {
-  border-bottom: none;
-}
-
-.dropdown-item:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-}
-
-.item-icon {
-  font-size: var(--font-size-base);
-}
-
-/* Logout Button (sidebar footer) */
-/* Base display/alignment/gap from reset.css universal icon-text rule */
-.logout-btn {
-  background: transparent;
-  color: var(--portal-text-primary);
-  border: var(--portal-border);
-  padding: var(--space-1) var(--space-2);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-weight: var(--font-weight-medium);
-}
-
-.logout-btn:hover {
-  background: var(--color-primary);
-  color: var(--portal-bg-dark);
-  transform: translateY(-1px);
-}
-
-.logout-icon {
-  font-size: var(--font-size-sm);
-}
-
-/* Sidebar footer for projects sidebar */
-.projects-sidebar.collapsed .logout-text {
-  display: none;
-}
-
-.projects-sidebar.collapsed .logout-btn {
-  padding: 0.5rem;
-  min-width: 2rem;
-  height: 2rem;
-  justify-content: center;
-}
-
-.projects-sidebar.collapsed .toggle-icon {
-  transform: rotate(180deg);
-}
-
-.projects-sidebar.collapsed .client-header {
-  justify-content: center;
-  padding: 0.5rem;
-}
-
-.projects-sidebar.collapsed .account-header {
-  justify-content: center;
-  padding: 0.5rem;
-}
-
-.projects-sidebar.collapsed .projects-header {
-  justify-content: center;
-  padding: 0.5rem;
-}
-
-.projects-sidebar.collapsed .client-name,
-.projects-sidebar.collapsed .project-name,
-.projects-sidebar.collapsed .subitem-name,
-.projects-sidebar.collapsed .account-item-title,
-.projects-sidebar.collapsed h3 {
-  display: none;
-}
-
-.projects-sidebar.collapsed .project-subitems {
-  display: none;
-}
-
-.projects-sidebar.collapsed .account-list {
-  display: none;
-}
-
-/* =====================================================
-   SHARED SIDEBAR - Uses .sidebar-buttons .sidebar-btn pattern
-   All button styles are in portal-buttons.css
-   ===================================================== */
-
-/* .sidebar-footer base styles at line 62 — do not duplicate here */
 
 /* Logout button hover - red color for destructive action */
 .portal .sidebar-btn.btn-logout:hover,
@@ -416,7 +202,7 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
 @media (--laptop) {
   .portal .sidebar:not(.collapsed) .sidebar-content {
-    padding: 0 0.5rem;
+    padding: 0 0.5rem 0;
     gap: 0.5rem;
     align-items: center;
     overflow: hidden;
@@ -431,9 +217,8 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     overflow: hidden;
   }
 
-  /* Sidebar logo styles in shared/portal-layout.css */
-
-  /* Sidebar footer - shared for both portals */
+  
+  /* Sidebar footer - shared for both portals. Bottom padding only. */
   .portal .sidebar:not(.collapsed) .sidebar-footer {
     position: sticky;
     bottom: 0;
@@ -442,23 +227,9 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     display: flex;
     justify-content: center;
     background: transparent;
-    padding: 0.75rem 0;
+    padding: 0 0 var(--space-2);
     margin-top: auto;
     flex-shrink: 0;
-  }
-
-  /* Hide text elements - only for non-collapsed auto-collapse */
-  .portal .sidebar:not(.collapsed) .client-name,
-  .portal .sidebar:not(.collapsed) .project-name,
-  .portal .sidebar:not(.collapsed) .subitem-name,
-  .portal .sidebar:not(.collapsed) .account-item-title,
-  .portal .sidebar:not(.collapsed) h3 {
-    display: none;
-  }
-
-  .portal .sidebar:not(.collapsed) .project-subitems,
-  .portal .sidebar:not(.collapsed) .account-list {
-    display: none;
   }
 
   /* Badge positioning when sidebar auto-collapses */
@@ -496,13 +267,12 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
 
   .portal .sidebar:not(.collapsed) .sidebar-content {
     display: flex;
-    padding: 0 0.5rem;
+    padding: 0 0.5rem 0;
     gap: 0.5rem;
     align-items: center;
   }
 
-  /* Sidebar logo styles in shared/portal-layout.css */
-
+  
   /* Sidebar buttons layout - button styles in shared/portal-buttons.css */
   .portal .sidebar:not(.collapsed) .sidebar-buttons {
     width: 100%;
@@ -519,9 +289,6 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
     justify-content: center;
   }
 
-  .portal .sidebar:not(.collapsed) .sidebar-toggle {
-    display: flex;
-  }
 }
 
 /* Collapsed sidebar mobile - uses responsive layer for priority over auto-collapse */
@@ -534,22 +301,6 @@ html[data-theme="dark"] .btn-theme-toggle .moon-icon {
       max-width: 0;
       overflow: hidden;
     }
-  }
-}
-
-@media (--mobile) {
-  /* Hide text elements in auto-collapsed state (not manually collapsed) */
-  .portal .sidebar:not(.collapsed) .client-name,
-  .portal .sidebar:not(.collapsed) .project-name,
-  .portal .sidebar:not(.collapsed) .subitem-name,
-  .portal .sidebar:not(.collapsed) .account-item-title,
-  .portal .sidebar:not(.collapsed) h3 {
-    display: none;
-  }
-
-  .portal .sidebar:not(.collapsed) .project-subitems,
-  .portal .sidebar:not(.collapsed) .account-list {
-    display: none;
   }
 }
 

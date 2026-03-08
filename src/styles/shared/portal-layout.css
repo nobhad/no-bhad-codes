@@ -702,66 +702,10 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal .sidebar-content {
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   flex: 1;
-}
-
-/* Toggle button styling - for toggle buttons inside sidebar-nav */
-.portal .sidebar-nav .sidebar-toggle-btn {
-  padding: var(--space-1-5) var(--space-2);
-  margin-bottom: var(--space-3);
-  min-height: var(--portal-btn-icon-size-sm);
-  color: var(--portal-text-secondary);
-  opacity: 0.7;
-  justify-content: flex-start;
-  font-size: var(--font-size-xs);
-  background: transparent;
-  border: none;
-  border-radius: var(--portal-radius-sm);
-  cursor: pointer;
-  transition:
-    opacity var(--transition-fast),
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.portal .sidebar-nav .sidebar-toggle-btn:hover {
-  opacity: 1;
-  color: var(--portal-text-light);
-  background: var(--portal-bg-hover);
-}
-
-.portal .sidebar-nav .sidebar-toggle-btn:is(.active, :focus) {
-  background: transparent;
-  color: var(--portal-text-secondary);
-}
-
-.portal .sidebar-nav .sidebar-toggle-btn .btn-text {
-  display: inline;
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Collapsed toggle button */
-.portal .sidebar.collapsed .sidebar-nav .sidebar-toggle-btn {
-  justify-content: center;
-}
-
-.portal .sidebar.collapsed .sidebar-nav .sidebar-toggle-btn .btn-text {
-  display: none;
-}
-
-.portal .sidebar.collapsed .sidebar-nav .sidebar-toggle-btn .btn-icon {
-  transform: scaleX(-1);
-  transition: transform var(--transition-medium);
-}
-
-.portal .sidebar:not(.collapsed) .sidebar-nav .sidebar-toggle-btn .btn-icon {
-  transform: scaleX(1);
-  transition: transform var(--transition-medium);
 }
 
 /* Keyboard shortcut badges */
@@ -859,11 +803,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: none;
 }
 
-/* Logo transitions */
-.portal :is(.sidebar-logo, .sidebar-collapsed-logo) {
-  transition: opacity var(--transition-medium);
-}
-
 /* Nav item active state - left accent bar */
 .portal .sidebar-buttons .sidebar-btn.active {
   position: relative;
@@ -884,121 +823,11 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: none;
 }
 
-/* Sidebar branding - hide full logo */
-.portal :is(.portal-body .sidebar .sidebar-logo, .portal-body .sidebar-logo, .sidebar-logo) {
-  display: none;
-}
-
-/* Sidebar branding - hide when global header is visible */
-/* Branding is now in portal-global-header, not sidebar */
-.portal .sidebar-collapsed-logo {
-  display: none;
-}
-
-/* When sidebar is OPEN - move avatar slightly left */
-.portal .sidebar:not(.collapsed) .sidebar-collapsed-logo {
-  padding-left: 8px;
-}
-
-.portal .sidebar-collapsed-logo-img {
-  width: var(--icon-size-2xl);
-  height: var(--icon-size-2xl);
-  min-width: var(--icon-size-2xl);
-  min-height: var(--icon-size-2xl);
-  max-width: var(--icon-size-2xl);
-  max-height: var(--icon-size-2xl);
-  filter: invert(1);
-  flex-shrink: 0;
-}
-
-.portal .sidebar-collapsed-logo::after {
-  content: "NO BHAD CODES";
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-regular);
-  color: var(--portal-text-light);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-title);
-  white-space: nowrap;
-}
-
-.portal .sidebar.collapsed .sidebar-collapsed-logo::after {
-  display: none;
-}
-
-.portal .sidebar.collapsed .sidebar-collapsed-logo {
-  justify-content: center;
-  padding: 0;
-  margin: var(--portal-header-top, 20px) auto var(--space-3);
-}
-
-/* Label styling - only layout here */
-.portal .sidebar-section-label {
-  padding: var(--space-2) 0 var(--space-1);
-  margin-bottom: 0;
-}
-
-/* Sidebar nav layout - toggle button at bottom */
-.portal .sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.portal .sidebar-nav > .sidebar-section {
-  order: 0;
-}
-
-.portal .sidebar-nav > .sidebar-toggle-btn {
-  order: 100;
-  margin-top: auto;
-}
-
 /* =====================================================
    SIDEBAR RESPONSIVE
-   Mobile drawer, tablet auto-collapse
+   Mobile drawer — canonical rules in responsive/breakpoints.css
+   (@layer responsive). Tablet-to-laptop auto-collapse below.
    ===================================================== */
-
-@media (--mobile) {
-  /* Mobile: sidebar is 56px icon strip by default, hidden when collapsed */
-  .portal .portal-body .sidebar {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
-  }
-
-  .portal .portal-body .sidebar.collapsed {
-    width: 0;
-    min-width: 0;
-    max-width: 0;
-    overflow: hidden;
-    padding: 0;
-  }
-
-  .portal .portal-body .sidebar .sidebar-buttons .sidebar-btn {
-    justify-content: center;
-  }
-
-  .portal .portal-body .sidebar .sidebar-buttons .sidebar-btn .btn-text {
-    display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-shortcut {
-    display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-logo {
-    display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-collapsed-logo {
-    display: flex;
-  }
-
-  .portal .dashboard-content {
-    width: 100%;
-  }
-}
 
 @media (--tablet-to-laptop) {
   .portal .portal-body .sidebar {
@@ -1017,26 +846,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 
   .portal .portal-body .sidebar .sidebar-shortcut {
     display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-logo {
-    display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-collapsed-logo {
-    display: flex;
-  }
-}
-
-@media (--desktop-xl) {
-  .portal .sidebar-collapsed-logo::after {
-    display: none;
-  }
-
-  .portal .sidebar-collapsed-logo {
-    justify-content: center;
-    padding: 0;
-    margin: var(--portal-header-top, 20px) auto var(--portal-nav-gap, 24px);
   }
 }
 
@@ -1276,8 +1085,8 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* =====================================================
-   REACT COMPONENT LAYOUT CLASSES (tw-*)
-   Migrated from brutalist.css for consolidation
+   REACT COMPONENT LAYOUT CLASSES
+   Consolidated from brutalist.css
    ===================================================== */
 
 /* Section layout */
@@ -1401,8 +1210,8 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* =====================================================
-   REACT UTILITY CLASSES (tw-*)
-   Flexbox, grid, spacing utilities
+   LAYOUT UTILITY CLASSES
+   Flexbox, grid, spacing, sizing utilities
    ===================================================== */
 
 /* Flexbox */
@@ -1431,11 +1240,7 @@ html[data-theme="light"] .portal .funnel-value {
 .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .col-span-2 { grid-column: span 2 / span 2; }
 
-@media (--laptop-up) {
-  .lg\:tw-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .lg\:tw-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .lg\:tw-col-span-2 { grid-column: span 2 / span 2; }
-}
+/* tw-* responsive grid aliases removed — use semantic class names directly */
 
 /* Gap */
 .gap-0 { gap: 0; }
@@ -1569,17 +1374,17 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Animation */
 .animate-spin {
-  animation: tw-spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes tw-spin {
+@keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 /* =====================================================
-   PORTAL TYPOGRAPHY - GENERIC CLASSES
-   Use these names directly; tw-* aliases kept for migration only.
+   PORTAL TYPOGRAPHY
+   Headings, labels, text utilities, status colors
    ===================================================== */
 .heading {
   font-family: var(--font-family-mono, monospace);
@@ -1589,7 +1394,6 @@ html[data-theme="light"] .portal .funnel-value {
 }
 
 /* Category/group label — small caps, muted */
-.section-title,
 .section-title {
   font-size: var(--font-size-2xs, 11px);
   font-weight: var(--font-weight-bold);
@@ -1673,7 +1477,7 @@ html[data-theme="light"] .portal .funnel-value {
 .bg-transparent { background: transparent; }
 
 /* =====================================================
-   TW-* BORDER CLASSES
+   BORDER UTILITY CLASSES
    ===================================================== */
 .border { border: var(--border-width) solid var(--portal-alpha-white-30); }
 .border-2 { border-width: 2px; }
@@ -1700,13 +1504,13 @@ html[data-theme="light"] .portal .funnel-value {
 .ring-white { --ring: var(--portal-border-color); }
 
 /* =====================================================
-   TW-* SIZING UTILITY CLASSES
+   SIZING UTILITY CLASSES
    ===================================================== */
 .min-h-96 { min-height: 24rem; } /* 384px */
 .min-h-400 { min-height: 400px; }
 
 /* =====================================================
-   TW-* MISC UTILITY CLASSES
+   MISC UTILITY CLASSES
    ===================================================== */
 .fill-current { fill: currentColor; }
 .resize-none { resize: none; }
@@ -1728,8 +1532,7 @@ html[data-theme="light"] .portal .funnel-value {
    For use with createSection.tsx factory components
    ===================================================== */
 
-/* Gap utilities */
-.gap-0 { gap: 0; }
+/* Semantic gap utilities (gap-0 through gap-6 defined in LAYOUT UTILITY CLASSES above) */
 .gap-sm { gap: var(--space-1); }
 .gap-md { gap: var(--portal-section-gap, var(--space-3)); }
 .gap-lg { gap: var(--space-4); }
@@ -1760,7 +1563,7 @@ html[data-theme="light"] .portal .funnel-value {
   color: var(--portal-text-secondary);
 }
 
-/* .section-title definition consolidated to TW-* TYPOGRAPHY section above */
+/* .section-title definition consolidated to PORTAL TYPOGRAPHY section above */
 
 .section-actions {
   display: flex;
@@ -1792,21 +1595,9 @@ html[data-theme="light"] .portal .funnel-value {
   align-items: center;
 }
 
-/* Flex alignment */
-.items-start { align-items: flex-start; }
-.items-center { align-items: center; }
-.items-end { align-items: flex-end; }
+/* Additional flex utilities (base set defined in LAYOUT UTILITY CLASSES above) */
 .items-stretch { align-items: stretch; }
-
-/* Flex justify */
-.justify-start { justify-content: flex-start; }
-.justify-center { justify-content: center; }
-.justify-end { justify-content: flex-end; }
-.justify-between { justify-content: space-between; }
 .justify-around { justify-content: space-around; }
-
-/* Flex wrap */
-.flex-wrap { flex-wrap: wrap; }
 
 /* Grid columns */
 .portal-grid-1 {

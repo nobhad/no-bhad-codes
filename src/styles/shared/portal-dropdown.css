@@ -243,6 +243,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--portal-bg-hover);
 }
 
+/* Remove global focus ring from all dropdown items */
+.portal-dropdown-item:focus-visible,
+.portal-dropdown-checkbox-item:focus-visible,
+.portal-dropdown-radio-item:focus-visible,
+.portal-dropdown-sub-trigger:focus-visible {
+  box-shadow: none;
+}
+
 .portal-dropdown-item[data-disabled] {
   pointer-events: none;
   opacity: 0.5;
@@ -721,22 +729,6 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   position: relative;
   background-color: transparent;
   box-shadow: none;
-}
-
-/* ================================================
-   STATUS DOT - ROOT LEVEL STYLING
-   Single source of truth for ALL status indicators
-   ================================================ */
-
-/* Base status dot - used in triggers AND menu items */
-.status-dot {
-  width: var(--status-dot-size, 8px);
-  height: var(--status-dot-size, 8px);
-  min-width: var(--status-dot-size, 8px);
-  min-height: var(--status-dot-size, 8px);
-  border-radius: var(--portal-radius-full);
-  flex-shrink: 0;
-  background-color: var(--portal-text-muted);
 }
 
 /* ================================================

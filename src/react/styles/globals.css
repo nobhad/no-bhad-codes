@@ -1,20 +1,19 @@
 /**
- * React/Tailwind globals for Shadcn/ui components
+ * React globals for Shadcn/ui components
  * This file only affects React components in /src/react/
- * All classes are prefixed with 'tw-' to avoid conflicts with existing CSS
  *
  * NOTE: We skip @tailwind base to avoid conflicting with existing CSS @layer base
  * Our existing CSS already has a reset/base layer
  *
- * IMPORTANT: All tw-* component classes are now defined in the portal-*.css files:
- * - portal-buttons.css: tw-btn-*, tw-btn-primary, tw-btn-secondary, etc.
- * - portal-forms.css: tw-input, tw-select, tw-textarea, tw-checkbox
- * - portal-tabs.css: tw-tab-list, tw-tab, tw-tab-active
- * - portal-components.css: tw-empty-state, tw-loading, tw-error, tw-dropdown-*, tw-badge, tw-status-dot
- * - admin/modals.css: portal-modal-*, portal-modal-overlay, portal-modal-header, etc.
- * - portal-layout.css: tw-flex, tw-grid, tw-gap-*, tw-container, tw-section, tw-panel, tw-card, etc.
- * - portal-stat-cards.css: tw-stat-card, tw-stat-value, tw-stat-label
- * - portal-files.css: tw-dropzone, tw-dropzone-*
+ * Component classes use semantic names from the portal CSS system:
+ * - portal-buttons.css: btn, btn-primary, btn-secondary, btn-link, btn-sm, btn-lg
+ * - portal-forms.css: form-input, form-select, form-textarea
+ * - portal-tabs.css: tab-list, tab, tab-active
+ * - portal-dropdown.css: portal-dropdown-content, portal-dropdown-item, portal-dropdown-separator
+ * - portal-badges.css: status-badge, status-badge--muted, status-badge--danger
+ * - admin/modals.css: portal-modal, portal-modal-overlay, portal-modal-header, portal-modal-footer
+ * - portal-tables.css: data-table
+ * - base/utilities.css: flex, items-center, gap-*, p-*, etc.
  */
 
 @tailwind components;

@@ -24,20 +24,10 @@
 /* Global SVG stroke-width and color - class-controlled via CSS variables.
    Applied globally to override Lucide's inline stroke-width="2" attribute.
    Color inherits from parent via currentColor (set by icon class or parent). */
-svg.lucide,
-.icon-xs,
-.icon-sm,
-.icon-md,
-.icon-lg,
-.icon-xl {
+svg.lucide {
   stroke-width: var(--svg-stroke-width, 2.5) !important;
   color: currentColor;
 }
-
-/* Kanban: extracted to portal-kanban.css */
-/* Tag Input: extracted to portal-tags.css */
-/* Timeline: extracted to portal-timeline.css */
-/* Charts: extracted to portal-charts.css */
 
 /* =====================================================
    :HAS() AUTOMATIC STYLING
@@ -375,7 +365,8 @@ a.text-danger:hover {
 
 /* =====================================================
    ICON SIZING UTILITIES
-   Uses CSS variables from variables.css for consistency
+   Uses CSS variables from variables.css for consistency.
+   Stroke-width set globally; color inherits via currentColor.
    ===================================================== */
 
 .icon-xs {
@@ -399,13 +390,15 @@ a.text-danger:hover {
   height: var(--icon-size-xl);
 }
 
-/* Flex shrink prevention for icons */
+/* Shared properties for all icon sizes */
 .icon-xs,
 .icon-sm,
 .icon-md,
 .icon-lg,
 .icon-xl {
   flex-shrink: 0;
+  stroke-width: var(--svg-stroke-width, 2.5) !important;
+  color: currentColor;
 }
 
 /* =====================================================
@@ -435,8 +428,6 @@ a.text-danger:hover {
   cursor: not-allowed;
   pointer-events: none;
 }
-
-/* Tooltips: extracted to portal-tooltips.css */
 
 /* =====================================================
    COPY EMAIL PATTERN
@@ -501,8 +492,6 @@ a.text-danger:hover {
   color: var(--color-error-500);
   text-decoration: underline;
 }
-
-/* Progress bar: extracted to portal-progress.css */
 
 /* ============================================
    ERROR BOUNDARY COMPONENT
@@ -673,12 +662,7 @@ a.text-danger:hover {
   border-radius: 0;
 }
 
-.status-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: var(--portal-radius-full);
-  background: currentColor;
-}
+/* .status-dot base definition moved to portal-badges.css */
 
 /* Table row selected state */
 .table-row-selected {
@@ -1406,20 +1390,10 @@ a.text-danger:hover {
 }
 
 /* ============================================
-   QUESTIONNAIRE VIEW COMPONENT
-   ============================================ */
-
-/* ============================================
    SHARED PORTAL CARD LAYOUT CLASSES
    ============================================ */
 
-/* Card header — flex row with title+status */
-.portal-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
+/* .portal-card-header moved to portal-cards.css */
 
 /* Title group — icon + name, truncatable */
 .portal-card-title-group {
@@ -1592,7 +1566,7 @@ a.text-danger:hover {
   gap: var(--space-1);
 }
 
-@media (max-width: 480px) {
+@media (--small-mobile) {
   .ovdash-quick-actions {
     grid-template-columns: 1fr;
   }
@@ -1662,11 +1636,6 @@ a.text-danger:hover {
 /* ============================================
    PORTAL MESSAGES COMPONENT
    ============================================ */
-
-/* Thread list item - border handled by .list-item base class */
-.message-thread-item {
-  /* No additional border - .list-item provides border-bottom */
-}
 
 /* Thread content flex */
 .message-thread-content {
@@ -1784,13 +1753,6 @@ a.text-danger:hover {
 }
 
 /* ============================================
-   PORTAL PROJECTS LIST COMPONENT
-   ============================================ */
-
-/* Card header row */
-/* projlist-* classes removed — migrated to portal-card-* shared classes */
-
-/* ============================================
    INVOICES TAB COMPONENT
    ============================================ */
 
@@ -1852,15 +1814,3 @@ a.text-danger:hover {
   text-align: right;
 }
 
-/* ============================================
-   AD-HOC REQUESTS COMPONENT
-   ============================================ */
-
-/* Header row */
-/* adhoc-* classes removed — migrated to portal-card-header + PortalModal */
-
-/* ============================================
-   PORTAL APPROVALS COMPONENT
-   ============================================ */
-
-/* approvals-* classes removed — migrated to portal-card-header shared classes */
