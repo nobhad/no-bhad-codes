@@ -476,7 +476,7 @@ export function ProjectsTable({
                   <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="status-dropdown-trigger">
+                        <button className="status-dropdown-trigger" aria-label="Change project status">
                           <StatusBadge status={getStatusVariant(project.status)}>
                             {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
                           </StatusBadge>

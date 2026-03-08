@@ -512,7 +512,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
+                      <button className="status-dropdown-trigger" aria-label="Change contract status">
                         <StatusBadge status={getStatusVariant(contract.status)} size="sm">
                           {CONTRACT_STATUS_CONFIG[contract.status]?.label || contract.status}
                         </StatusBadge>

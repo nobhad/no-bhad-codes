@@ -109,7 +109,7 @@ export function LoadingState({
       >
         <div className={`skeleton-container skeleton-${skeletonType}`} aria-hidden="true">
           {Array.from({ length: skeletonCount }).map((_, i) => (
-            <SkeletonItem key={i} type={skeletonType} />
+            <SkeletonItem key={`skeleton-${i}`} type={skeletonType} />
           ))}
         </div>
         <span className="sr-only">{message}</span>

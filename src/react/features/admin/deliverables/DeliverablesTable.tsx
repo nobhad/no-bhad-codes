@@ -471,7 +471,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
+                      <button className="status-dropdown-trigger" aria-label="Change deliverable status">
                         <StatusBadge status={getStatusVariant(deliverable.status)} size="sm">
                           {DELIVERABLE_STATUS_CONFIG[deliverable.status]?.label || deliverable.status.replace('-', ' ')}
                         </StatusBadge>

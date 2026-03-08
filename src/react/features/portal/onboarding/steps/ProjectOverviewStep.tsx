@@ -55,7 +55,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Project Name */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">
+          <label className="field-label" htmlFor="project-name">
             Project Name <span className="text-primary">*</span>
           </label>
           <div className="relative">
@@ -63,6 +63,7 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
               <FolderKanban className="icon-xs" />
             </div>
             <input
+              id="project-name"
               type="text"
               placeholder="My Awesome Project"
               value={projectOverview.projectName}
@@ -77,10 +78,11 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Project Type */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">
+          <label className="field-label" htmlFor="project-type">
             Project Type <span className="text-primary">*</span>
           </label>
           <select
+            id="project-type"
             value={projectOverview.projectType}
             onChange={(e) => handleChange('projectType', e.target.value)}
             className={cn('select w-full', getFieldError('projectType') && 'border-primary')}
@@ -100,10 +102,11 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Project Description */}
       <div className="flex flex-col gap-1 mt-4">
-        <label className="field-label">
+        <label className="field-label" htmlFor="project-description">
           Project Description <span className="text-primary">*</span>
         </label>
         <textarea
+          id="project-description"
           value={projectOverview.projectDescription}
           onChange={(e) => handleChange('projectDescription', e.target.value)}
           placeholder="Describe your project goals, what you want to achieve, and any specific requirements..."
@@ -130,12 +133,13 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Target Launch Date */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">Target Launch Date</label>
+          <label className="field-label" htmlFor="project-launch-date">Target Launch Date</label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <Calendar className="icon-xs" />
             </div>
             <input
+              id="project-launch-date"
               type="date"
               value={projectOverview.targetLaunchDate}
               onChange={(e) => handleChange('targetLaunchDate', e.target.value)}
@@ -149,12 +153,13 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
         {/* Budget Range */}
         <div className="flex flex-col gap-1">
-          <label className="field-label">Budget Range</label>
+          <label className="field-label" htmlFor="project-budget">Budget Range</label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
               <DollarSign className="icon-xs" />
             </div>
             <select
+              id="project-budget"
               value={projectOverview.budget}
               onChange={(e) => handleChange('budget', e.target.value)}
               className="select w-full pl-10"
@@ -175,12 +180,13 @@ export function ProjectOverviewStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Target Audience */}
       <div className="flex flex-col gap-1 mt-4">
-        <label className="field-label">Target Audience</label>
+        <label className="field-label" htmlFor="project-target-audience">Target Audience</label>
         <div className="relative">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted">
             <Users className="icon-xs" />
           </div>
           <input
+            id="project-target-audience"
             type="text"
             placeholder="Who is this project for? (e.g., small business owners, tech enthusiasts)"
             value={projectOverview.targetAudience}

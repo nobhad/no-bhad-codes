@@ -488,7 +488,7 @@ export function LeadsTable({
                   <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                     <PortalDropdown>
                       <PortalDropdownTrigger asChild>
-                        <button className="status-dropdown-trigger">
+                        <button className="status-dropdown-trigger" aria-label="Change lead status">
                           <StatusBadge status={getStatusVariant(lead.status)}>
                             {LEAD_STATUS_CONFIG[lead.status]?.label || lead.status}
                           </StatusBadge>

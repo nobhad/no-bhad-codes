@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import {
   Building2,
   CreditCard,
@@ -194,11 +194,12 @@ export function BusinessConfiguration({ getAuthToken, showNotification, overview
         <FormField label="Default Currency" icon={<CreditCard className="icon-sm" />} value={invoiceSettings.defaultCurrency} onChange={(v) => updateInvoiceField('defaultCurrency', v)} />
         <FormField label="Invoice Prefix" icon={<FileText className="icon-sm" />} value={invoiceSettings.prefix} onChange={(v) => updateInvoiceField('prefix', v)} placeholder="INV-" />
         <div className="config-form-field config-form-field--wide">
-          <label className="config-form-label">
+          <label className="config-form-label" htmlFor="config-payment-terms">
             <FileText className="icon-sm" />
             <span>Default Payment Terms</span>
           </label>
           <textarea
+            id="config-payment-terms"
             className="form-input config-textarea"
             value={invoiceSettings.defaultTerms}
             onChange={(e) => updateInvoiceField('defaultTerms', e.target.value)}
@@ -348,13 +349,15 @@ function FormField({ label, icon, value, onChange, type = 'text', placeholder }:
   type?: string;
   placeholder?: string;
 }) {
+  const fieldId = useId();
   return (
     <div className="config-form-field">
-      <label className="config-form-label">
+      <label className="config-form-label" htmlFor={fieldId}>
         {icon}
         <span>{label}</span>
       </label>
       <input
+        id={fieldId}
         className="form-input"
         type={type}
         value={value}

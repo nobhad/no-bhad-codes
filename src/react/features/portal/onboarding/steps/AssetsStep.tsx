@@ -235,6 +235,7 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
                     onClick={() => handleRemoveFile(file.id)}
                     className="icon-btn"
                     title="Remove file"
+                    aria-label="Remove file"
                   >
                     <X className="icon-xs" />
                   </button>
@@ -272,8 +273,9 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
 
       {/* Existing Assets */}
       <div className="flex flex-col gap-1">
-        <label className="field-label">Existing Assets</label>
+        <label className="field-label" htmlFor="assets-existing">Existing Assets</label>
         <textarea
+          id="assets-existing"
           value={assets.existingAssets}
           onChange={(e) => handleChange('existingAssets', e.target.value)}
           placeholder="Do you have existing assets like photography, icons, or illustrations? Where can we access them?"
@@ -284,8 +286,9 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
 
       {/* Content Access */}
       <div className="flex flex-col gap-1 mt-4">
-        <label className="field-label">Content & Access Details</label>
+        <label className="field-label" htmlFor="assets-content-access">Content & Access Details</label>
         <textarea
+          id="assets-content-access"
           value={assets.contentAccess}
           onChange={(e) => handleChange('contentAccess', e.target.value)}
           placeholder="Any login credentials, API keys, or access details we'll need? (You can also share these securely later)"

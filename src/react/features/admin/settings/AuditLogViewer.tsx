@@ -164,11 +164,12 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
         <div className="audit-filters">
           <div className="audit-filter-row">
             <div className="audit-filter-field">
-              <label className="config-form-label">
+              <label className="config-form-label" htmlFor="audit-filter-action">
                 <Search className="icon-sm" />
                 <span>Action</span>
               </label>
               <input
+                id="audit-filter-action"
                 className="form-input"
                 value={filterAction}
                 onChange={(e) => setFilterAction(e.target.value)}
@@ -176,11 +177,12 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
               />
             </div>
             <div className="audit-filter-field">
-              <label className="config-form-label">
+              <label className="config-form-label" htmlFor="audit-filter-entity">
                 <Search className="icon-sm" />
                 <span>Entity Type</span>
               </label>
               <input
+                id="audit-filter-entity"
                 className="form-input"
                 value={filterEntity}
                 onChange={(e) => setFilterEntity(e.target.value)}
@@ -188,11 +190,12 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
               />
             </div>
             <div className="audit-filter-field">
-              <label className="config-form-label">
+              <label className="config-form-label" htmlFor="audit-filter-user">
                 <Search className="icon-sm" />
                 <span>User Email</span>
               </label>
               <input
+                id="audit-filter-user"
                 className="form-input"
                 value={filterUser}
                 onChange={(e) => setFilterUser(e.target.value)}

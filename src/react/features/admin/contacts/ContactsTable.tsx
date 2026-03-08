@@ -490,7 +490,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
+                      <button className="status-dropdown-trigger" aria-label="Change contact status">
                         <StatusBadge status={getStatusVariant(contact.status)} size="sm">
                           {CONTACT_STATUS_CONFIG[contact.status]?.label || contact.status}
                         </StatusBadge>

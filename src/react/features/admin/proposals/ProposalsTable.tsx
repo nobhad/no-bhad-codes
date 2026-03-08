@@ -485,7 +485,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
+                      <button className="status-dropdown-trigger" aria-label="Change proposal status">
                         <StatusBadge status={getStatusVariant(proposal.status)} size="sm">
                           {PROPOSAL_STATUS_CONFIG[proposal.status]?.label || proposal.status}
                         </StatusBadge>

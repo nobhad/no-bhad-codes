@@ -480,7 +480,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                 >
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
-                      <button type="button" className="status-dropdown-trigger">
+                      <button type="button" className="status-dropdown-trigger" aria-label="Change workflow status">
                         <StatusBadge status={getStatusVariant(workflow.status)} size="sm">
                           {WORKFLOW_STATUS_CONFIG[workflow.status]?.label || workflow.status}
                         </StatusBadge>

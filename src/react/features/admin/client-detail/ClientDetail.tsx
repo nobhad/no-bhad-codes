@@ -231,7 +231,7 @@ export function ClientDetail({
               </h1>
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="btn-unstyled">
+                  <button className="btn-unstyled" aria-label="Change client status">
                     <span className="badge">
                       {CLIENT_STATUS_CONFIG[client.status]?.label || client.status}
                     </span>
@@ -284,7 +284,7 @@ export function ClientDetail({
 
           <PortalDropdown>
             <PortalDropdownTrigger asChild>
-              <button className="icon-btn">
+              <button className="icon-btn" aria-label="More actions">
                 <MoreHorizontal className="icon-lg" />
               </button>
             </PortalDropdownTrigger>

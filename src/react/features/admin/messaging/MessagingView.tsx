@@ -280,6 +280,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="input messaging-search-input"
+              aria-label="Search conversations"
             />
           </div>
 
@@ -382,13 +383,14 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                 <button
                   onClick={() => toggleStar(selectedConversation.id, selectedConversation.isStarred)}
                   className={cn('icon-btn', selectedConversation.isStarred ? 'text-primary' : 'text-muted')}
+                  aria-label={selectedConversation.isStarred ? 'Unstar conversation' : 'Star conversation'}
                 >
                   <Star
                     className="messaging-star-icon"
                     style={{ fill: selectedConversation.isStarred ? 'currentColor' : 'none' }}
                   />
                 </button>
-                <button className="icon-btn">
+                <button className="icon-btn" aria-label="More actions">
                   <MoreHorizontal className="messaging-more-icon" />
                 </button>
               </div>
@@ -455,7 +457,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
             {/* Message Input */}
             <div className="messaging-compose">
               <div className="messaging-compose-row">
-                <button className="icon-btn">
+                <button className="icon-btn" aria-label="Attach file">
                   <Paperclip className="messaging-attachment-icon" />
                 </button>
                 <div className="messaging-compose-input-container">
@@ -471,12 +473,14 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
                     placeholder="Type a message..."
                     rows={1}
                     className="textarea messaging-compose-textarea"
+                    aria-label="Message"
                   />
                 </div>
                 <button
                   className="btn-primary messaging-compose-send-btn"
                   onClick={sendMessage}
                   disabled={!newMessage.trim() || sending}
+                  aria-label="Send message"
                 >
                   <Send className="messaging-send-icon" />
                 </button>

@@ -248,8 +248,9 @@ function ContactForm({
     <div className="portal-card flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label text-xs mb-1 block">First Name *</label>
+          <label className="label text-xs mb-1 block" htmlFor="contact-first-name">First Name *</label>
           <input
+            id="contact-first-name"
             className="form-input w-full"
             value={formData.first_name}
             onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
@@ -257,8 +258,9 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label text-xs mb-1 block">Last Name *</label>
+          <label className="label text-xs mb-1 block" htmlFor="contact-last-name">Last Name *</label>
           <input
+            id="contact-last-name"
             className="form-input w-full"
             value={formData.last_name}
             onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
@@ -268,8 +270,9 @@ function ContactForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label text-xs mb-1 block">Email</label>
+          <label className="label text-xs mb-1 block" htmlFor="contact-email">Email</label>
           <input
+            id="contact-email"
             className="form-input w-full"
             type="email"
             value={formData.email || ''}
@@ -278,8 +281,9 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label text-xs mb-1 block">Phone</label>
+          <label className="label text-xs mb-1 block" htmlFor="contact-phone">Phone</label>
           <input
+            id="contact-phone"
             className="form-input w-full"
             value={formData.phone || ''}
             onChange={(e) => updateField('phone', e.target.value)}
@@ -289,8 +293,9 @@ function ContactForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label text-xs mb-1 block">Title</label>
+          <label className="label text-xs mb-1 block" htmlFor="contact-title">Title</label>
           <input
+            id="contact-title"
             className="form-input w-full"
             value={formData.title || ''}
             onChange={(e) => updateField('title', e.target.value)}
@@ -298,8 +303,9 @@ function ContactForm({
           />
         </div>
         <div>
-          <label className="label text-xs mb-1 block">Role</label>
+          <label className="label text-xs mb-1 block" htmlFor="contact-role">Role</label>
           <select
+            id="contact-role"
             className="form-input w-full"
             value={formData.role}
             onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}

@@ -503,7 +503,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                 <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                   <PortalDropdown>
                     <PortalDropdownTrigger asChild>
-                      <button className="status-dropdown-trigger">
+                      <button className="status-dropdown-trigger" aria-label="Change request status">
                         <StatusBadge status={getStatusVariant(request.status)} size="sm">
                           {AD_HOC_STATUS_CONFIG[request.status]?.label || request.status.replace('-', ' ')}
                         </StatusBadge>

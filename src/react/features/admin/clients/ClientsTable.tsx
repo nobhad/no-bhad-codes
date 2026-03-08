@@ -562,7 +562,7 @@ export function ClientsTable({
                     <PortalTableCell className="status-cell" onClick={(e) => e.stopPropagation()}>
                       <PortalDropdown>
                         <PortalDropdownTrigger asChild>
-                          <button className="status-dropdown-trigger">
+                          <button className="status-dropdown-trigger" aria-label="Change client status">
                             <StatusBadge status={inviteStatus === 'not-invited' ? 'not-invited' : getStatusVariant(client.status)}>
                               {inviteStatus === 'not-invited' ? 'Not Invited' :
                                 inviteStatus === 'invited' ? 'Invited' :

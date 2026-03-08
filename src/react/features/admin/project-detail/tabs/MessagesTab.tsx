@@ -168,6 +168,7 @@ export function MessagesTab({
             placeholder="Type a message..."
             rows={2}
             className="textarea msgtab-textarea"
+            aria-label="Message"
           />
           <PortalButton
             className="msgtab-send-btn"

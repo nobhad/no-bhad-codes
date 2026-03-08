@@ -322,6 +322,7 @@ export function InvoicesTab({
                           className="icon-btn"
                           onClick={() => onViewInvoice?.(invoice.id)}
                           title="View invoice"
+                          aria-label="View invoice"
                         >
                           <Eye className="icon-md" />
                         </button>
@@ -332,6 +333,7 @@ export function InvoicesTab({
                             onClick={() => handleSend(invoice.id)}
                             disabled={actionLoading?.type === 'send' && actionLoading?.id === invoice.id}
                             title="Send invoice"
+                            aria-label="Send invoice"
                           >
                             <Send className="icon-md" />
                           </button>
@@ -345,6 +347,7 @@ export function InvoicesTab({
                               markPaidDialog.open();
                             }}
                             title="Mark as paid"
+                            aria-label="Mark as paid"
                           >
                             <Check className="icon-md" />
                           </button>
@@ -356,6 +359,7 @@ export function InvoicesTab({
                             onClick={() => handleDownloadPdf(invoice.id)}
                             disabled={actionLoading?.type === 'download' && actionLoading?.id === invoice.id}
                             title="Download PDF"
+                            aria-label="Download PDF"
                           >
                             <Download className="icon-md" />
                           </button>

@@ -95,8 +95,9 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Color Preferences */}
       <div className="flex flex-col gap-1 mt-4">
-        <label className="field-label">Color Preferences</label>
+        <label className="field-label" htmlFor="req-color-prefs">Color Preferences</label>
         <input
+          id="req-color-prefs"
           type="text"
           value={requirements.colorPreferences}
           onChange={(e) => handleChange('colorPreferences', e.target.value)}
@@ -181,11 +182,12 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Integrations */}
       <div className="mt-6 flex flex-col gap-1">
-        <label className="field-label flex items-center gap-1">
+        <label className="field-label flex items-center gap-1" htmlFor="req-integrations">
           <Link2 className="icon-xs" />
           Third-party Integrations
         </label>
         <textarea
+          id="req-integrations"
           value={requirements.integrations}
           onChange={(e) => handleChange('integrations', e.target.value)}
           placeholder="List any third-party services or APIs you need to integrate with (e.g., Stripe, Mailchimp, Salesforce)"
@@ -196,11 +198,12 @@ export function RequirementsStep({ data, onUpdate, errors }: StepProps) {
 
       {/* Additional Notes */}
       <div className="flex flex-col gap-1 mt-4">
-        <label className="field-label flex items-center gap-1">
+        <label className="field-label flex items-center gap-1" htmlFor="req-additional-notes">
           <FileText className="icon-xs" />
           Additional Notes
         </label>
         <textarea
+          id="req-additional-notes"
           value={requirements.additionalNotes}
           onChange={(e) => handleChange('additionalNotes', e.target.value)}
           placeholder="Anything else we should know about your requirements?"

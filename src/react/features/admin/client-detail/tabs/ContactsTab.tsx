@@ -214,6 +214,7 @@ export function ContactsTab({
         <button
           onClick={handleCancel}
           className="icon-btn"
+          aria-label="Cancel editing"
         >
           <X className="icon-md" />
         </button>

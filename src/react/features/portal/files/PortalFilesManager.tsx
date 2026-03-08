@@ -208,7 +208,7 @@ interface FolderTreeProps {
   onSelectFolder: (folderId: string) => void;
 }
 
-function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) {
+const FolderTree = React.memo(function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: FolderTreeProps) {
   return (
     <div className="folder-tree">
       {/* All Files */}
@@ -237,7 +237,7 @@ function FolderTree({ folders, selectedFolder, totalCount, onSelectFolder }: Fol
       ))}
     </div>
   );
-}
+});
 
 // ============================================================================
 // MAIN COMPONENT
@@ -466,6 +466,7 @@ export function PortalFilesManager({
               className="select"
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
+              aria-label="Filter by project"
             >
               <option value="all">All Projects</option>
               {projects.map((project) => (
@@ -478,6 +479,7 @@ export function PortalFilesManager({
               className="select"
               value={selectedFileType}
               onChange={(e) => setSelectedFileType(e.target.value)}
+              aria-label="Filter by file type"
             >
               <option value="all">All Types</option>
               <option value="image">Images</option>
@@ -515,6 +517,7 @@ export function PortalFilesManager({
                   className="select w-full"
                   value={selectedFolder}
                   onChange={(e) => setSelectedFolder(e.target.value)}
+                  aria-label="Select folder"
                 >
                   <option value="all">All Files ({files.length})</option>
                   {folderCategories.map((folder) => (

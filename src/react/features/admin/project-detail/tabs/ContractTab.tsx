@@ -212,6 +212,7 @@ export function ContractTab({
                     className="icon-btn"
                     onClick={() => handleDownload(file)}
                     title="Download"
+                    aria-label="Download file"
                   >
                     <Download className="icon-md" />
                   </button>

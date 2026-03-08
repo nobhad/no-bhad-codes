@@ -487,7 +487,7 @@ function FilesGrid({
     return (
       <div className="files-grid">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="file-card file-card-skeleton" />
+          <div key={`skeleton-${i}`} className="file-card file-card-skeleton" />
         ))}
       </div>
     );

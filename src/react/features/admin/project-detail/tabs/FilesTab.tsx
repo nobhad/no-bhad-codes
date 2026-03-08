@@ -26,6 +26,7 @@ import type { ProjectFile } from '../../types';
 import { FILE_CATEGORY_OPTIONS } from '../../types';
 import { formatDate, formatFileSize } from '@/utils/format-utils';
 import { NOTIFICATIONS, fileUploadMessage } from '@/constants/notifications';
+import { KEYS } from '@/constants/keyboard';
 
 interface FilesTabProps {
   files: ProjectFile[];
@@ -174,6 +175,15 @@ export function FilesTab({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        aria-label="Upload files - drag and drop or click to select"
       >
         <input
           ref={fileInputRef}
@@ -324,6 +334,7 @@ export function FilesTab({
                           className="icon-btn"
                           onClick={() => handleDownload(file)}
                           title="Download"
+                          aria-label="Download file"
                         >
                           <Download className="icon-md" />
                         </button>
@@ -335,6 +346,7 @@ export function FilesTab({
                           deleteDialog.open();
                         }}
                         title="Delete"
+                        aria-label="Delete file"
                       >
                         <Trash2 className="icon-md" />
                       </button>

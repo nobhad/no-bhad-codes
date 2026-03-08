@@ -323,6 +323,7 @@ function SearchBar({ query, onChange, onClear }: SearchBarProps) {
           placeholder="Search help articles..."
           value={query}
           onChange={(e) => onChange(e.target.value)}
+          aria-label="Search help articles"
         />
         {query && (
           <button

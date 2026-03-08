@@ -118,6 +118,7 @@ export function AdHocRequestCard({
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
+              aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
             >
               {isExpanded ? (
                 <ChevronUp className="icon-xs" />
@@ -174,6 +175,7 @@ export function AdHocRequestCard({
                           download={attachment.filename}
                           className="icon-btn"
                           onClick={(e) => e.stopPropagation()}
+                          aria-label={`Download ${attachment.filename}`}
                         >
                           <Download className="icon-xs" />
                         </a>
