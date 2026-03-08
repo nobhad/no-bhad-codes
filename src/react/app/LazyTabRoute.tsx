@@ -14,6 +14,7 @@ import * as React from 'react';
 import { usePortalStore } from '../stores/portal-store';
 import { usePortalContext } from './PortalProviders';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ErrorBoundary } from '../components/portal/ErrorBoundary';
 
 interface LazyTabRouteProps {
   tabId: string;
@@ -59,10 +60,19 @@ export function LazyTabRoute({ tabId, children }: LazyTabRouteProps) {
     ...(tabId === 'client-detail' ? { onBack: () => navigate('/clients') } : {})
   }), [navigate, showNotification, getAuthToken, params, tabId]);
 
-  // Clone child element with injected props
+  // Clone child element with injected props, wrapped in an error boundary
+  // so a crash in one tab does not affect the portal layout or other tabs.
   if (React.isValidElement(children)) {
-    return React.cloneElement(children, childProps);
+    return (
+      <ErrorBoundary componentName={tabId}>
+        {React.cloneElement(children, childProps)}
+      </ErrorBoundary>
+    );
   }
 
-  return <>{children}</>;
+  return (
+    <ErrorBoundary componentName={tabId}>
+      {children}
+    </ErrorBoundary>
+  );
 }

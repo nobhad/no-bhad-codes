@@ -18,6 +18,7 @@ import { Outlet } from 'react-router-dom';
 import { PortalSidebar } from './PortalSidebar';
 import { PortalHeader } from './PortalHeader';
 import { PortalSubtabs } from './PortalSubtabs';
+import { RouteErrorBoundary } from '../components/portal/RouteErrorBoundary';
 import { useSidebarCollapsed, usePortalRole } from '../stores/portal-store';
 import { PORTAL_SELECTORS } from '../config/portal-constants';
 
@@ -51,9 +52,11 @@ export function PortalLayout() {
 
         <div className="dashboard-content" id="dashboard-content">
           <PortalSubtabs />
-          <React.Suspense fallback={<TabLoadingFallback />}>
-            <Outlet />
-          </React.Suspense>
+          <RouteErrorBoundary>
+            <React.Suspense fallback={<TabLoadingFallback />}>
+              <Outlet />
+            </React.Suspense>
+          </RouteErrorBoundary>
         </div>
       </div>
     </>
