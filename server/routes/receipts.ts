@@ -10,7 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
-import { sendSuccess, errorResponse, errorResponseWithPayload } from '../utils/api-response.js';
+import { sendSuccess, errorResponse, errorResponseWithPayload, sanitizeErrorMessage } from '../utils/api-response.js';
 import { sendPdfResponse } from '../utils/pdf-generator.js';
 import { receiptService, Receipt } from '../services/receipt-service.js';
 import { getDatabase } from '../database/init.js';
@@ -156,7 +156,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
       });
     }
   })
@@ -201,12 +201,12 @@ router.get(
       const receipt = await receiptService.getReceiptById(receiptId);
       sendSuccess(res, { receipt: toSnakeCaseReceipt(receipt) });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Receipt not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to retrieve receipt', 500, 'RETRIEVAL_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to retrieve receipt')
       });
     }
   })
@@ -253,7 +253,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
       });
     }
   })
@@ -310,12 +310,12 @@ router.get(
 
       sendPdfResponse(res, pdfBytes, { filename, disposition });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Receipt not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to generate receipt PDF', 500, 'PDF_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to generate receipt PDF')
       });
     }
   })
@@ -359,7 +359,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve receipts', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve receipts')
       });
     }
   })

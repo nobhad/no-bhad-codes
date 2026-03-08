@@ -354,6 +354,35 @@ export function sendPaginated<T>(
 // UTILITIES
 // ============================================
 
+const GENERIC_ERROR_MESSAGE = 'An unexpected error occurred';
+const FALLBACK_ERROR_MESSAGE = 'Unknown error';
+
+/**
+ * Returns a client-safe error message.
+ * In production, returns a generic message to avoid leaking
+ * internal details (stack traces, DB errors, file paths, etc.).
+ * In development, returns the real error message for debugging.
+ *
+ * IMPORTANT: Always log the real error separately for debugging.
+ * This function is ONLY for the message sent to the client.
+ *
+ * @param error - The caught error (unknown type from catch blocks)
+ * @param fallback - Optional custom generic message for production
+ * @returns A sanitized string safe to send to clients
+ */
+export function sanitizeErrorMessage(
+  error: unknown,
+  fallback: string = GENERIC_ERROR_MESSAGE
+): string {
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isProduction) {
+    return fallback;
+  }
+
+  return error instanceof Error ? error.message : FALLBACK_ERROR_MESSAGE;
+}
+
 /**
  * Get default error code for status
  */

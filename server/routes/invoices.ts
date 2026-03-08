@@ -19,6 +19,7 @@ import { softDeleteService } from '../services/soft-delete-service.js';
 import {
   errorResponse,
   errorResponseWithPayload,
+  sanitizeErrorMessage,
   sendSuccess,
   sendCreated
 } from '../utils/api-response.js';
@@ -128,7 +129,7 @@ router.post(
         500,
         'CREATION_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to create milestone invoice')
         }
       );
     }
@@ -167,7 +168,7 @@ router.get(
         500,
         'RETRIEVAL_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to retrieve milestone invoices')
         }
       );
     }
@@ -212,7 +213,7 @@ router.put(
         500,
         'LINK_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to link invoice to milestone')
         }
       );
     }
@@ -257,12 +258,12 @@ router.put(
         const invoice = await getInvoiceService().updateInvoiceStatus(invoiceId, req.body.status);
         sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice status updated');
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        if (message.includes('not found')) {
+        const rawMessage = error instanceof Error ? error.message : '';
+        if (rawMessage.includes('not found')) {
           return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
         }
         return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', {
-          message
+          message: sanitizeErrorMessage(error, 'Failed to update invoice')
         });
       }
       return;
@@ -272,15 +273,15 @@ router.put(
       const invoice = await getInvoiceService().updateInvoice(invoiceId, req.body);
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Invoice updated successfully');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('Only draft invoices can be edited')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('Only draft invoices can be edited')) {
         return errorResponse(res, 'Only draft invoices can be edited', 400, 'INVALID_STATUS');
       }
-      if (message.includes('not found')) {
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       return errorResponseWithPayload(res, 'Failed to update invoice', 500, 'UPDATE_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to update invoice')
       });
     }
   })
@@ -322,8 +323,8 @@ router.get(
       const invoice = await getInvoiceService().getInvoiceById(invoiceId);
       sendSuccess(res, { invoice });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       return errorResponse(res, 'Failed to retrieve invoice', 500, 'RETRIEVAL_FAILED');
@@ -387,8 +388,9 @@ router.delete(
 
       sendSuccess(res, { action: 'soft_deleted' }, result.message);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      errorResponseWithPayload(res, 'Failed to delete invoice', 500, 'DELETE_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to delete invoice', 500, 'DELETE_FAILED', {
+        message: sanitizeErrorMessage(error, 'Failed to delete invoice')
+      });
     }
   })
 );
@@ -439,13 +441,12 @@ router.post(
         'Invoice duplicated successfully'
       );
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to duplicate invoice', 500, 'DUPLICATE_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to duplicate invoice')
       });
     }
   })
@@ -524,16 +525,18 @@ router.post(
           : 'Partial payment recorded successfully';
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, paymentMessage);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const rawMessage = error instanceof Error ? error.message : '';
 
-      if (message.includes('not found')) {
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
 
-      if (message.includes('already fully paid') || message.includes('cancelled')) {
-        return errorResponse(res, message, 400, 'PAYMENT_NOT_ALLOWED');
+      if (rawMessage.includes('already fully paid') || rawMessage.includes('cancelled')) {
+        return errorResponse(res, sanitizeErrorMessage(error, 'Payment not allowed'), 400, 'PAYMENT_NOT_ALLOWED');
       }
-      errorResponseWithPayload(res, 'Failed to record payment', 500, 'PAYMENT_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to record payment', 500, 'PAYMENT_FAILED', {
+        message: sanitizeErrorMessage(error, 'Failed to record payment')
+      });
     }
   })
 );
@@ -576,7 +579,7 @@ router.post(
         500,
         'CHECK_OVERDUE_FAILED',
         {
-          message: error instanceof Error ? error.message : 'Unknown error'
+          message: sanitizeErrorMessage(error, 'Failed to check overdue invoices')
         }
       );
     }
@@ -639,7 +642,7 @@ router.get(
       sendSuccess(res, { terms: terms.map(toSnakeCasePaymentTerms) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payment terms', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve payment terms')
       });
     }
   })
@@ -690,7 +693,7 @@ router.post(
       sendCreated(res, { terms: toSnakeCasePaymentTerms(terms) }, 'Payment terms preset created');
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create payment terms', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to create payment terms')
       });
     }
   })
@@ -726,12 +729,12 @@ router.post(
       const invoice = await getInvoiceService().applyPaymentTerms(invoiceId, termsId);
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Payment terms applied');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice or payment terms not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to apply payment terms', 500, 'UPDATE_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to apply payment terms')
       });
     }
   })
@@ -771,12 +774,12 @@ router.put(
 
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Tax and discount updated');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('draft')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('draft')) {
         return errorResponse(res, 'Only draft invoices can be modified', 400, 'INVALID_STATUS');
       }
       errorResponseWithPayload(res, 'Failed to update tax/discount', 500, 'UPDATE_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to update tax/discount')
       });
     }
   })
@@ -815,12 +818,12 @@ router.get(
         lateFeeAppliedAt: invoice.lateFeeAppliedAt
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to calculate late fee', 500, 'CALCULATION_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to calculate late fee')
       });
     }
   })
@@ -849,14 +852,16 @@ router.post(
       const invoice = await getInvoiceService().applyLateFee(invoiceId);
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Late fee applied');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('already been applied')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('already been applied')) {
         return errorResponse(res, 'Late fee already applied', 400, 'ALREADY_APPLIED');
       }
-      if (message.includes('No late fee applicable')) {
+      if (rawMessage.includes('No late fee applicable')) {
         return errorResponse(res, 'No late fee applicable', 400, 'NOT_APPLICABLE');
       }
-      errorResponseWithPayload(res, 'Failed to apply late fee', 500, 'APPLY_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to apply late fee', 500, 'APPLY_FAILED', {
+        message: sanitizeErrorMessage(error, 'Failed to apply late fee')
+      });
     }
   })
 );
@@ -879,7 +884,7 @@ router.post(
       sendSuccess(res, { count }, `Late fees applied to ${count} invoices`);
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to process late fees', 500, 'PROCESS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to process late fees')
       });
     }
   })
@@ -912,7 +917,7 @@ router.get(
       sendSuccess(res, { payments: payments.map(toSnakeCasePayment) });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve payment history', 500, 'RETRIEVAL_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve payment history')
       });
     }
   })
@@ -962,8 +967,9 @@ router.post(
         'Payment recorded'
       );
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      errorResponseWithPayload(res, 'Failed to record payment', 500, 'RECORD_FAILED', { message });
+      errorResponseWithPayload(res, 'Failed to record payment', 500, 'RECORD_FAILED', {
+        message: sanitizeErrorMessage(error, 'Failed to record payment')
+      });
     }
   })
 );
@@ -996,12 +1002,12 @@ router.put(
       const invoice = await getInvoiceService().updateInternalNotes(invoiceId, internalNotes || '');
       sendSuccess(res, { invoice: toSnakeCaseInvoice(invoice) }, 'Internal notes updated');
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message.includes('not found')) {
+      const rawMessage = error instanceof Error ? error.message : '';
+      if (rawMessage.includes('not found')) {
         return errorResponse(res, 'Invoice not found', 404, 'NOT_FOUND');
       }
       errorResponseWithPayload(res, 'Failed to update internal notes', 500, 'UPDATE_FAILED', {
-        message
+        message: sanitizeErrorMessage(error, 'Failed to update internal notes')
       });
     }
   })
@@ -1044,7 +1050,7 @@ router.get(
       });
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to retrieve statistics', 500, 'STATS_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to retrieve statistics')
       });
     }
   })
@@ -1088,7 +1094,7 @@ router.post(
       );
     } catch (error: unknown) {
       errorResponseWithPayload(res, 'Failed to create invoice', 500, 'CREATION_FAILED', {
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error, 'Failed to create invoice')
       });
     }
   })

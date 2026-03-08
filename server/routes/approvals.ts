@@ -12,7 +12,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
 import { approvalService, EntityType, WorkflowType } from '../services/approval-service.js';
 import { getDatabase } from '../database/init.js';
-import { errorResponse, sendSuccess } from '../utils/api-response.js';
+import { errorResponse, sanitizeErrorMessage, sendSuccess } from '../utils/api-response.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -247,8 +247,7 @@ router.post(
 
       sendSuccess(res, { instance }, 'Approval workflow started', 201);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to start workflow';
-      return errorResponse(res, message, 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to start workflow'), 400);
     }
   })
 );
@@ -371,8 +370,7 @@ router.post(
       const instance = await approvalService.approve(requestId, approverEmail, comment);
       sendSuccess(res, { instance }, 'Approved');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to approve';
-      return errorResponse(res, message, 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to approve'), 400);
     }
   })
 );
@@ -413,8 +411,7 @@ router.post(
       const instance = await approvalService.reject(requestId, approverEmail, reason);
       sendSuccess(res, { instance }, 'Rejected');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to reject';
-      return errorResponse(res, message, 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to reject'), 400);
     }
   })
 );
@@ -440,8 +437,7 @@ router.post(
       const instance = await approvalService.cancelWorkflow(instanceId, cancelledBy, reason);
       sendSuccess(res, { instance }, 'Workflow cancelled');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to cancel workflow';
-      return errorResponse(res, message, 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to cancel workflow'), 400);
     }
   })
 );
