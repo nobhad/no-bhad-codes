@@ -21,10 +21,10 @@
   align-items: center;
   gap: var(--icon-gap-md);
   padding: var(--space-3) var(--space-4);
-  background: var(--portal-bg-darker);
-  border: var(--border-width) solid var(--portal-border-dark);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
+  border: var(--border-width) solid var(--portal-border-dark, var(--color-border-primary));
   box-shadow: none;
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-inverse));
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   pointer-events: auto;
@@ -67,7 +67,7 @@
 }
 
 .toast-action {
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-inverse));
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
   border-bottom: var(--border-width) solid transparent;
@@ -87,7 +87,7 @@
   border: none;
   padding: var(--space-1);
   cursor: pointer;
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary, var(--color-text-secondary));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,8 +100,8 @@
 }
 
 .toast-close:hover {
-  background: var(--portal-bg-medium);
-  color: var(--portal-text-light);
+  background: var(--portal-bg-medium, var(--color-surface-tertiary));
+  color: var(--portal-text-light, var(--color-text-inverse));
 }
 
 .toast-close svg {

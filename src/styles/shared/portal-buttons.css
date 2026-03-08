@@ -255,10 +255,9 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   align-items: center;
   gap: var(--icon-gap-sm, 8px);
   width: 100%;
-  padding: clamp(0.55rem, 1.3vw, 0.75rem) var(--space-3) clamp(0.55rem, 1.3vw, 0.75rem)
-    var(--sidebar-icon-indent, 18px);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent, 18px);
   font-family: var(--font-family-mono);
-  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  font-size: var(--portal-nav-font-size);
   font-weight: var(--font-weight-medium);
   text-align: left;
   justify-content: flex-start;
@@ -268,10 +267,11 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   overflow: hidden;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-primary);
   cursor: pointer;
   transition: color var(--transition-fast);
   border-radius: 0;
+  text-decoration: none;
 }
 .portal .sidebar-btn:hover,
 .portal .sidebar-btn.active {
@@ -710,8 +710,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
    .btn-primary, .btn-secondary, .btn-outline, .btn-danger get full styling
    from form-buttons.css (components layer). We exclude them here so the
    pages-layer ghost override doesn't strip their borders/backgrounds. */
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger),
-.tw-btn {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -728,13 +727,11 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   transition: color var(--transition-fast);
 }
 
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):hover,
-.tw-btn:hover {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn):hover {
   color: var(--color-primary);
 }
 
-.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):disabled,
-.tw-btn:disabled {
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.sidebar-btn):disabled {
   color: var(--portal-text-muted);
   cursor: not-allowed;
 }

@@ -14,7 +14,7 @@
   height: 20px;
   border: var(--border-width) solid var(--color-border);
   border-top-color: var(--color-primary);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   animation: spin 0.8s linear infinite;
 }
 
@@ -64,7 +64,7 @@ button[aria-busy="true"] .loading-spinner {
   height: 16px;
   border: var(--border-width) solid transparent;
   border-top-color: currentColor;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
 .btn.loading .btn-loader {
@@ -115,7 +115,7 @@ button[aria-busy="true"] .loading-spinner {
 .skeleton-card {
   padding: 1rem;
   background: var(--color-bg-secondary);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   margin-bottom: 0.5rem;
 }
 
@@ -128,7 +128,7 @@ button[aria-busy="true"] .loading-spinner {
     var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
@@ -187,7 +187,7 @@ button[aria-busy="true"] .loading-spinner {
     var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--portal-radius-sm) var(--portal-radius-sm) 0 0;
+  border-radius: var(--portal-radius-sm, 4px) var(--portal-radius-sm, 4px) 0 0;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
@@ -419,7 +419,7 @@ p.empty-state {
   height: 24px;
   border: var(--border-width-thick) solid var(--color-border);
   border-top-color: var(--color-primary);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   animation: spin 0.8s linear infinite;
   flex-shrink: 0;
 }
@@ -624,7 +624,7 @@ p.empty-state {
   padding: 0.75rem 1rem;
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-danger);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   box-shadow: var(--shadow-elevated-sm);
   z-index: var(--z-index-loading);
   animation: slide-in-right 0.3s ease;
@@ -715,9 +715,9 @@ p.empty-state {
 }
 
 .error-state-secondary:hover {
-  background: var(--portal-bg-hover, var(--portal-alpha-white-10));
-  border-color: var(--portal-text-light);
-  color: var(--portal-text-light);
+  background: var(--portal-bg-hover, var(--color-state-hover));
+  border-color: var(--portal-text-light, var(--color-text-inverse));
+  color: var(--portal-text-light, var(--color-text-inverse));
 }
 
 /* Skeleton container wrapper */
@@ -742,7 +742,7 @@ p.empty-state {
 
 .skeleton-table .skeleton-item {
   padding: var(--space-1) 0;
-  border-bottom: var(--border-width) solid var(--portal-border-color);
+  border-bottom: var(--border-width) solid var(--portal-border-color, var(--color-border-primary));
 }
 
 /* Loading state skeleton modifier - hide default spinner */
@@ -761,7 +761,7 @@ p.empty-state {
     var(--color-skeleton-base) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 

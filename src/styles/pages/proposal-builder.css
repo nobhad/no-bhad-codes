@@ -14,12 +14,12 @@
 
 :root {
   /* Proposal builder colors */
-  --proposal-bg: var(--portal-bg-dark);
-  --proposal-card-bg: var(--portal-bg-medium);
-  --proposal-card-border: var(--portal-border-medium);
-  --proposal-card-hover: var(--portal-bg-hover);
-  --proposal-text: var(--portal-text-light);
-  --proposal-text-muted: var(--portal-text-muted);
+  --proposal-bg: var(--portal-bg-dark, var(--color-bg-tertiary));
+  --proposal-card-bg: var(--portal-bg-medium, var(--color-surface-tertiary));
+  --proposal-card-border: var(--portal-border-medium, var(--color-border-primary));
+  --proposal-card-hover: var(--portal-bg-hover, var(--color-state-hover));
+  --proposal-text: var(--portal-text-light, var(--color-text-inverse));
+  --proposal-text-muted: var(--portal-text-muted, var(--color-text-tertiary));
   --proposal-accent: var(--color-primary);
   --proposal-success: var(--color-success);
   --proposal-highlight: rgba(var(--color-primary-rgb), 0.15);
@@ -43,7 +43,7 @@
   background: var(--proposal-bg);
   color: var(--proposal-text);
   padding: var(--proposal-spacing-xl);
-  border-radius: var(--portal-radius-lg);
+  border-radius: var(--portal-radius-lg, 12px);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -85,8 +85,8 @@
   align-items: center;
   gap: var(--proposal-spacing-sm);
   padding: var(--proposal-spacing-sm) var(--proposal-spacing-md);
-  border-radius: var(--portal-radius-pill);
-  background: var(--portal-bg-medium);
+  border-radius: var(--portal-radius-pill, 9999px);
+  background: var(--portal-bg-medium, var(--color-surface-tertiary));
   opacity: 0.5;
   transition:
     opacity 0.3s ease,
@@ -106,8 +106,8 @@
 .step-number {
   width: 24px;
   height: 24px;
-  border-radius: var(--portal-radius-full);
-  background: var(--portal-alpha-white-20);
+  border-radius: var(--portal-radius-full, 50%);
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,7 +123,7 @@
 .step-divider {
   width: 40px;
   height: 2px;
-  background: var(--portal-border-medium);
+  background: var(--portal-border-medium, var(--color-border-primary));
 }
 
 @media (--mobile) {
@@ -177,7 +177,7 @@
 .maintenance-card {
   background: var(--proposal-card-bg);
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-lg);
+  border-radius: var(--portal-radius-lg, 12px);
   padding: var(--proposal-spacing-lg);
   position: relative;
   transition:
@@ -213,7 +213,7 @@
   background: var(--proposal-accent);
   color: var(--proposal-text);
   padding: var(--space-1) var(--space-4);
-  border-radius: var(--portal-radius-pill);
+  border-radius: var(--portal-radius-pill, 9999px);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -287,7 +287,7 @@
   width: 100%;
   padding: var(--proposal-spacing-md);
   border: var(--border-width) solid var(--proposal-accent);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   background: transparent;
   color: var(--proposal-accent);
   font-size: var(--font-size-base);
@@ -322,7 +322,7 @@
 
 .comparison-table-wrapper {
   overflow-x: auto;
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   border: var(--border-width) solid var(--proposal-card-border);
 }
 
@@ -340,7 +340,7 @@
 }
 
 .comparison-table th {
-  background: var(--portal-bg-medium);
+  background: var(--portal-bg-medium, var(--color-surface-tertiary));
   font-weight: var(--font-weight-semibold);
   color: var(--proposal-text);
 }
@@ -364,7 +364,7 @@
 }
 
 .category-row td {
-  background: var(--portal-bg-darker);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   font-size: var(--font-size-xs);
@@ -436,7 +436,7 @@
   padding: var(--proposal-spacing-md);
   background: var(--proposal-card-bg);
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   transition:
     border-color 0.3s ease,
     background-color 0.3s ease;
@@ -469,7 +469,7 @@
   width: 20px;
   height: 20px;
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-xs);
+  border-radius: var(--portal-radius-xs, 2px);
   flex-shrink: 0;
   transition:
     border-color 0.3s ease,
@@ -545,7 +545,7 @@
   background: var(--proposal-accent);
   color: var(--proposal-text);
   padding: var(--space-1) var(--space-4);
-  border-radius: var(--portal-radius-pill);
+  border-radius: var(--portal-radius-pill, 9999px);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -618,7 +618,7 @@
 .summary-section {
   background: var(--proposal-card-bg);
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   padding: var(--proposal-spacing-lg);
   margin-bottom: var(--proposal-spacing-md);
 }
@@ -716,9 +716,9 @@
   grid-template-columns: 140px 1.6fr 120px 100px 100px 90px 90px 32px;
   gap: var(--proposal-spacing-sm);
   align-items: center;
-  background: var(--portal-bg-darker);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   padding: var(--proposal-spacing-sm);
 }
 
@@ -726,8 +726,8 @@
   width: 100%;
   padding: var(--space-1) var(--icon-gap-md);
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-bg-darker);
+  border-radius: var(--portal-radius-sm, 4px);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
   color: var(--proposal-text);
   font-size: var(--font-size-sm);
   font-family: inherit;
@@ -779,8 +779,8 @@
   width: 100%;
   padding: var(--proposal-spacing-md);
   border: var(--border-width) solid var(--proposal-card-border);
-  border-radius: var(--portal-radius-md);
-  background: var(--portal-bg-darker);
+  border-radius: var(--portal-radius-md, 8px);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
   color: var(--proposal-text);
   font-size: var(--font-size-base);
   font-family: inherit;
@@ -798,9 +798,9 @@
 }
 
 .summary-total {
-  background: var(--portal-bg-darker);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
   border: var(--border-width) solid var(--proposal-accent);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   padding: var(--proposal-spacing-lg);
 }
 
@@ -837,7 +837,7 @@
    ============================================================================ */
 
 .proposal-price-bar {
-  background: var(--portal-bg-darker);
+  background: var(--portal-bg-darker, var(--color-bg-secondary));
   border-top: var(--border-width) solid var(--proposal-card-border);
   padding: var(--proposal-spacing-md) var(--proposal-spacing-lg);
   margin: var(--proposal-spacing-lg) calc(var(--proposal-spacing-xl) * -1);
@@ -898,7 +898,7 @@
 
 .proposal-btn {
   padding: var(--proposal-spacing-md) var(--proposal-spacing-xl);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;

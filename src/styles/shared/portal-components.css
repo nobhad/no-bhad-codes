@@ -596,20 +596,20 @@ a.text-danger:hover {
    ===================================================== */
 
 /* Progress bars */
-.tw-progress-track {
+.progress-track {
   height: 4px;
   background: var(--portal-alpha-white-20);
   overflow: hidden;
 }
 
-.tw-progress-bar {
+.progress-bar {
   height: 100%;
   background: var(--portal-text-light);
   transition: width var(--transition-normal);
 }
 
 /* List items */
-.tw-list-item {
+.list-item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -622,24 +622,24 @@ a.text-danger:hover {
   transition: background-color var(--transition-fast);
 }
 
-.tw-list-item:hover {
+.list-item:hover {
   background: var(--portal-alpha-white-05);
 }
 
-.tw-list-item:last-child {
+.list-item:last-child {
   border-bottom: none;
 }
 
 /* Modals/Popups — see admin/modals.css for portal-modal-* definitions */
 
 /* Dropdown menus */
-.tw-dropdown {
+.dropdown {
   background: var(--portal-bg-pitch);
   border: var(--border-width) solid var(--portal-alpha-white-30);
   padding: var(--space-1) 0;
 }
 
-.tw-dropdown-item {
+.dropdown-item {
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm, 14px);
   font-family: var(--font-family-mono, monospace);
@@ -648,18 +648,18 @@ a.text-danger:hover {
   transition: all var(--transition-fast);
 }
 
-.tw-dropdown-item:hover {
+.dropdown-item:hover {
   background: var(--portal-alpha-white-10);
   color: var(--portal-text-light);
 }
 
-.tw-dropdown-item-active {
+.dropdown-item-active {
   background: var(--portal-alpha-white-10);
   color: var(--portal-text-light);
 }
 
 /* Badges/Status */
-.tw-badge {
+.badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1-5);
@@ -673,7 +673,7 @@ a.text-danger:hover {
   border-radius: 0;
 }
 
-.tw-status-dot {
+.status-dot {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: var(--portal-radius-full);
@@ -681,7 +681,7 @@ a.text-danger:hover {
 }
 
 /* Table row selected state */
-.tw-table-row-selected {
+.table-row-selected {
   background: var(--portal-alpha-white-10);
 }
 
@@ -871,22 +871,22 @@ a.text-danger:hover {
 }
 
 /* Grid with 4 columns */
-.tw-grid-4-cols {
+.grid-4-cols {
   grid-template-columns: repeat(4, 1fr);
 }
 
 /* Grid with 6 columns */
-.tw-grid-6-cols {
+.grid-6-cols {
   grid-template-columns: repeat(6, 1fr);
 }
 
 /* Grid with 2 columns */
-.tw-grid-2-cols {
+.grid-2-cols {
   grid-template-columns: repeat(2, 1fr);
 }
 
 /* Span all columns */
-.tw-col-span-full {
+.col-span-full {
   grid-column: 1 / -1;
 }
 
@@ -1663,9 +1663,9 @@ a.text-danger:hover {
    PORTAL MESSAGES COMPONENT
    ============================================ */
 
-/* Thread list item - border handled by .tw-list-item base class */
+/* Thread list item - border handled by .list-item base class */
 .message-thread-item {
-  /* No additional border - .tw-list-item provides border-bottom */
+  /* No additional border - .list-item provides border-bottom */
 }
 
 /* Thread content flex */

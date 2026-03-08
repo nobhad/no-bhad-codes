@@ -25,16 +25,16 @@
 @media (hover: hover) {
   /* Portal buttons hover - uses token variables */
   .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):hover {
-    background: var(--portal-btn-hover-bg);
-    color: var(--portal-btn-hover-color);
-    box-shadow: var(--portal-btn-shadow-hover);
+    background: var(--portal-btn-hover-bg, var(--color-dark));
+    color: var(--portal-btn-hover-color, var(--color-light));
+    box-shadow: var(--portal-btn-shadow-hover, none);
   }
 
   /* .icon-btn hover: portal-buttons.css */
 
   /* Sidebar button hover */
-  .portal .sidebar-buttons .btn:hover,
-  .portal .sidebar-buttons .btn:hover .btn-icon {
+  .portal .sidebar-buttons .sidebar-btn:hover,
+  .portal .sidebar-buttons .sidebar-btn:hover .btn-icon {
     color: var(--color-primary);
   }
 
@@ -51,25 +51,25 @@
 
   /* Table row hover */
   .portal .data-table tbody tr:hover {
-    background: var(--portal-bg-hover);
+    background: var(--portal-bg-hover, var(--color-state-hover));
   }
 
   /* Dropdown item hover - ONLY for modal dropdowns, NOT table dropdowns */
   /* Table dropdowns use --portal-bg-hover defined in portal-dropdown.css */
   .custom-dropdown[data-modal-dropdown] .custom-dropdown-item:hover {
     background: var(--color-primary);
-    color: var(--portal-text-light);
+    color: var(--portal-text-light, var(--color-text-inverse));
   }
 
   /* Card hover states */
   .portal-card:hover {
-    border-color: var(--portal-border-medium);
+    border-color: var(--portal-border-medium, var(--color-border-primary));
   }
 
   /* File item hover */
   .file-item:hover,
   .folder-item:hover {
-    background: var(--portal-bg-hover);
+    background: var(--portal-bg-hover, var(--color-state-hover));
   }
 
   /* Link hover */
@@ -84,19 +84,19 @@
 
   /* Pagination hover */
   .pagination-btn:hover:not(:disabled) {
-    background: var(--portal-bg-hover);
-    border-color: var(--portal-border-medium);
+    background: var(--portal-bg-hover, var(--color-state-hover));
+    border-color: var(--portal-border-medium, var(--color-border-primary));
   }
 
   .pagination-page-btn:hover:not(.active) {
-    background: var(--portal-bg-hover);
-    border-color: var(--portal-border-dark);
+    background: var(--portal-bg-hover, var(--color-state-hover));
+    border-color: var(--portal-border-dark, var(--color-border-primary));
   }
 
   /* Export button hover */
   .btn-export:hover {
-    background: var(--portal-bg-hover);
-    border-color: var(--portal-border-medium);
+    background: var(--portal-bg-hover, var(--color-state-hover));
+    border-color: var(--portal-border-medium, var(--color-border-primary));
   }
 
   /* Bulk action hover */
@@ -109,8 +109,8 @@
 @media (hover: none) {
   /* Buttons show feedback on active/press - uses token variables */
   .portal :is(.btn, .btn-primary, .btn-secondary, .btn-outline, button[type="submit"]):active {
-    background: var(--portal-btn-hover-bg);
-    color: var(--portal-btn-hover-color);
+    background: var(--portal-btn-hover-bg, var(--color-dark));
+    color: var(--portal-btn-hover-color, var(--color-light));
     transform: scale(0.98);
   }
 
@@ -123,7 +123,7 @@
 
   /* Show active state instead */
   .portal .data-table tbody tr:active {
-    background: var(--portal-bg-hover);
+    background: var(--portal-bg-hover, var(--color-state-hover));
   }
 }
 
@@ -186,7 +186,7 @@
   }
 
   /* Sidebar collapsed buttons */
-  .portal .sidebar.collapsed .sidebar-buttons .btn {
+  .portal .sidebar.collapsed .sidebar-buttons .sidebar-btn {
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -411,60 +411,10 @@
  * that have dynamic toolbars (address bar, etc.)
  */
 
-/* Client portal layout */
-.client-portal-main {
-  height: 100vh;
-  height: 100dvh;
-}
-
-.client-portal-main .dashboard-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-}
-
-.client-dashboard {
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-}
-
-.dashboard-layout {
-  height: 100vh;
-  height: 100dvh;
-}
-
-.dashboard-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-}
-
-.dashboard-content {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-/* Sidebar - shared portal styling */
-.portal .sidebar {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-/* Portal dashboard container */
-.portal .dashboard-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
-}
+/* Portal layout dvh — .portal-body is the SINGLE source of truth for
+   viewport height (set in shared/portal-layout.css with dvh fallback).
+   Sidebar and dashboard-content use height: 100% to inherit.
+   Do NOT set 100vh/100dvh on individual containers here. */
 
 /* Modal overlay - use dvh for proper sizing */
 .modal-overlay,
@@ -524,7 +474,7 @@
 /* Prevent text selection on interactive elements for better touch UX */
 @media (pointer: coarse) {
   .btn,
-  .sidebar-buttons .btn,
+  .sidebar-buttons .sidebar-btn,
   .custom-dropdown-trigger,
   .portal-tab,
   .admin-tab {

@@ -20,11 +20,11 @@
 .field-label,
 .meta-label {
   display: block;
-  font-size: var(--portal-label-size);
-  font-weight: var(--portal-label-weight);
-  color: var(--portal-label-color);
+  font-size: var(--portal-label-size, var(--font-size-xs));
+  font-weight: var(--portal-label-weight, var(--font-weight-medium));
+  color: var(--portal-label-color, var(--color-text-secondary));
   text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing);
+  letter-spacing: var(--portal-label-spacing, var(--letter-spacing-label));
   margin-bottom: var(--portal-field-label-gap, 0.25rem);
   line-height: var(--line-height-tight);
 }
@@ -41,10 +41,10 @@
   letter-spacing: normal;
 }
 .field-label--muted {
-  color: var(--portal-text-muted);
+  color: var(--portal-text-muted, var(--color-text-tertiary));
 }
 .field-label--light {
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-inverse));
   font-weight: var(--font-weight-semibold);
 }
 .field-label--primary {
@@ -60,7 +60,7 @@
 .meta-value {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-inverse));
   line-height: var(--line-height-snug);
 }
 
@@ -72,10 +72,10 @@
   font-size: var(--font-size-lg);
 }
 .meta-value--secondary {
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary, var(--color-text-secondary));
 }
 .meta-value--muted {
-  color: var(--portal-text-muted);
+  color: var(--portal-text-muted, var(--color-text-tertiary));
 }
 .meta-value--primary {
   color: var(--color-primary);
@@ -168,18 +168,18 @@
    STAT LABEL - Compact variant for stat cards
    ===================================================== */
 .stat-label {
-  font-size: var(--portal-label-size);
-  font-weight: var(--portal-label-weight);
-  color: var(--portal-label-color);
+  font-size: var(--portal-label-size, var(--font-size-xs));
+  font-weight: var(--portal-label-weight, var(--font-weight-medium));
+  color: var(--portal-label-color, var(--color-text-secondary));
   text-transform: uppercase;
-  letter-spacing: var(--portal-label-spacing);
+  letter-spacing: var(--portal-label-spacing, var(--letter-spacing-label));
   margin: 0;
 }
 
 .stat-value {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-inverse));
   line-height: var(--line-height-tight);
 }
 

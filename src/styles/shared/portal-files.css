@@ -563,7 +563,7 @@
    Used by React FileUploadDropzone component
    ===================================================== */
 
-.tw-dropzone {
+.dropzone {
   border-style: dashed;
   border-width: 2px;
   border-color: var(--portal-border-color);
@@ -577,44 +577,44 @@
   transition: border-color var(--transition-fast);
 }
 
-.tw-dropzone:hover,
-.tw-dropzone.is-drag-active {
+.dropzone:hover,
+.dropzone.is-drag-active {
   border-color: var(--portal-text-light);
 }
 
-.tw-dropzone.is-error {
+.dropzone.is-error {
   border-color: var(--color-error);
 }
 
-.tw-dropzone.is-success {
+.dropzone.is-success {
   border-color: var(--portal-text-light);
 }
 
-.tw-dropzone-content {
+.dropzone-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-1, 0.5rem);
 }
 
-.tw-dropzone-text {
+.dropzone-text {
   font-size: var(--font-size-xs, 12px);
   text-align: center;
 }
 
-.tw-dropzone-hint {
+.dropzone-hint {
   font-size: var(--font-size-2xs, 11px);
   color: var(--portal-text-muted);
 }
 
-.tw-dropzone-actions {
+.dropzone-actions {
   display: flex;
   align-items: center;
   gap: var(--space-1, 0.5rem);
 }
 
 /* Progress bar max width */
-.tw-dropzone .tw-progress-track {
+.dropzone .progress-track {
   width: 100%;
   max-width: 16rem;
 }

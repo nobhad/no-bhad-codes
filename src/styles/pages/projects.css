@@ -112,7 +112,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   background: var(--color-surface);
   color: var(--color-text-primary);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--portal-radius-pill);
+  border-radius: var(--portal-radius-pill, 9999px);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-decoration: none;
@@ -142,15 +142,15 @@ div.page-hero-desktop[data-hero-page="projects"] {
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  background: var(--portal-alpha-white-20);
-  border-radius: var(--portal-radius-pill);
+  background: var(--portal-alpha-white-20, rgba(255, 255, 255, 0.2));
+  border-radius: var(--portal-radius-pill, 9999px);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   line-height: 1;
 }
 
 .filter-btn.active .filter-count {
-  background: var(--portal-alpha-black-20);
+  background: var(--portal-alpha-black-20, rgba(0, 0, 0, 0.2));
 }
 
 /* ===============================================
@@ -177,7 +177,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 .project-card {
   background: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--portal-radius-lg);
+  border-radius: var(--portal-radius-lg, 12px);
   overflow: hidden;
   transition: all var(--transition-normal) var(--ease-out);
   height: 100%;
@@ -269,7 +269,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   background: var(--color-primary);
   color: var(--color-bg);
   padding: 0.25rem 0.5rem;
-  border-radius: var(--portal-radius-xs);
+  border-radius: var(--portal-radius-xs, 2px);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
@@ -295,7 +295,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   background: var(--color-bg);
   color: var(--color-text-primary);
   padding: 0.25rem 0.5rem;
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
   font-size: var(--font-size-xs);
   border: var(--border-width) solid var(--color-border);
 }
@@ -312,7 +312,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 
 .project-card-status {
   padding: 0.25rem 0.5rem;
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   text-transform: capitalize;
@@ -347,7 +347,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   height: 40px;
   border: var(--border-width-thick) solid var(--color-border);
   border-top-color: var(--color-primary);
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   margin: 0 auto 1rem;
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
 }
@@ -542,7 +542,7 @@ div.page-hero-desktop {
   max-width: none;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 4px 12px var(--portal-alpha-black-15));
+  filter: drop-shadow(0 4px 12px var(--portal-alpha-black-15, rgba(0, 0, 0, 0.15)));
   transition: transform var(--transition-mouse) var(--easing-spring);
 }
 
@@ -708,7 +708,7 @@ div.page-hero-desktop {
 .round-label {
   background-color: var(--color-dark);
   padding: var(--icon-gap-xs) var(--space-1-5);
-  border-radius: var(--portal-radius-xl);
+  border-radius: var(--portal-radius-xl, 16px);
   box-shadow: var(--shadow-elevated-sm);
   color: var(--color-light);
   flex-shrink: 0;
@@ -748,7 +748,7 @@ div.page-hero-desktop {
 .projects-section .heading-divider {
   background-color: var(--color-dark);
   height: 4px;
-  border-radius: var(--portal-radius-xs) 0 var(--portal-radius-sm) var(--portal-radius-xs);
+  border-radius: var(--portal-radius-xs, 2px) 0 var(--portal-radius-sm, 4px) var(--portal-radius-xs, 2px);
   transform: scaleX(0);
   transform-origin: bottom left;
   animation: scale-in-left var(--transition-long, 0.8s) cubic-bezier(0.3, 0.9, 0.3, 0.9) 0.4s
@@ -1103,8 +1103,8 @@ div.page-hero-desktop {
   inset: 0;
   background: repeating-linear-gradient(
     0deg,
-    var(--portal-alpha-black-10) 0px,
-    var(--portal-alpha-black-10) 1px,
+    var(--portal-alpha-black-10, rgba(0, 0, 0, 0.1)) 0px,
+    var(--portal-alpha-black-10, rgba(0, 0, 0, 0.1)) 1px,
     transparent 1px,
     transparent 2px
   );
@@ -1124,7 +1124,7 @@ div.page-hero-desktop {
 .crt-tv__glare {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 30%, var(--portal-alpha-white-08) 0%, transparent 50%);
+  background: radial-gradient(ellipse at 30% 30%, var(--portal-alpha-white-08, rgba(255, 255, 255, 0.08)) 0%, transparent 50%);
   pointer-events: none;
 }
 

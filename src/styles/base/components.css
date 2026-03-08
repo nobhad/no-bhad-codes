@@ -58,9 +58,9 @@
  */
 .portal-label {
   font-family: var(--font-family-sans);
-  font-size: var(--portal-label-size);
+  font-size: var(--portal-label-size, var(--font-size-xs));
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-secondary);
+  color: var(--portal-text-secondary, var(--color-text-secondary));
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
 }

@@ -566,7 +566,7 @@
   z-index: var(--z-index-content);
 }
 
-.messaging-search-container .tw-input,
+.messaging-search-container .input,
 .messaging-search-container input {
   padding-left: 2.5rem !important;
 }

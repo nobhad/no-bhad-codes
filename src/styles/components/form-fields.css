@@ -46,7 +46,7 @@ input[type="radio"] {
   border-radius: clamp(6px, 1.5vw, 12px);
   font-size: clamp(0.75rem, 2vw, 1rem);
   background-color: var(--color-black);
-  color: var(--portal-text-light);
+  color: var(--portal-text-light, var(--color-text-primary));
   font-family: inherit;
   box-sizing: border-box;
   transition: all var(--transition-fast);
@@ -62,7 +62,7 @@ input[type="radio"] {
 .form-container textarea::placeholder,
 .login-form textarea::placeholder {
   font-weight: var(--font-weight-regular);
-  color: var(--portal-text-muted);
+  color: var(--portal-text-muted, var(--color-text-tertiary));
   opacity: 1;
 }
 

@@ -54,7 +54,7 @@
   max-height: 100%; /* Don't exceed parent */
   background: var(--color-terminal-bg-panel);
   border: var(--border-width) solid var(--color-terminal-border);
-  border-radius: var(--portal-radius-md);
+  border-radius: var(--portal-radius-md, 8px);
   overflow: hidden;
   box-shadow: var(--shadow-terminal);
 }
@@ -81,7 +81,7 @@
 .terminal-btn {
   width: 12px;
   height: 12px;
-  border-radius: var(--portal-radius-full);
+  border-radius: var(--portal-radius-full, 50%);
   border: none;
   cursor: default;
 }
@@ -155,7 +155,7 @@
 .terminal-body::-webkit-scrollbar-thumb,
 .terminal-window::-webkit-scrollbar-thumb {
   background: var(--color-terminal-scrollbar);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
 }
 
 .terminal-body::-webkit-scrollbar-thumb:hover,
@@ -284,7 +284,7 @@ input.terminal-input:-webkit-autofill,
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: all var(--transition-mouse);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
 }
 
 .terminal-send:hover:not(:disabled),
@@ -374,7 +374,7 @@ input.terminal-input:-webkit-autofill,
   min-width: 0;
   height: 6px;
   background: var(--color-terminal-border);
-  border-radius: var(--portal-radius-xs);
+  border-radius: var(--portal-radius-xs, 2px);
   overflow: hidden;
   display: block;
   border: none;
@@ -384,7 +384,7 @@ input.terminal-input:-webkit-autofill,
 .terminal-progress .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-terminal-green-dark), var(--color-terminal-green));
-  border-radius: var(--portal-radius-xs);
+  border-radius: var(--portal-radius-xs, 2px);
   transition: width var(--transition-normal) ease;
 }
 
@@ -523,7 +523,7 @@ body[data-page="client-intake"] .terminal-window {
 
 .terminal-chat::-webkit-scrollbar-thumb {
   background: var(--color-terminal-scrollbar);
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
 }
 
 .terminal-chat::-webkit-scrollbar-thumb:hover {
@@ -544,7 +544,7 @@ body[data-page="client-intake"] .terminal-window {
   transition: background-color var(--transition-mouse) ease;
   padding: var(--space-0-5) var(--space-1);
   margin-left: calc(-1 * var(--space-1));
-  border-radius: var(--portal-radius-xs);
+  border-radius: var(--portal-radius-xs, 2px);
 }
 
 .chat-message.clickable-message:hover {
@@ -728,7 +728,7 @@ body[data-page="client-intake"] .terminal-window {
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   text-align: left;
-  border-radius: var(--portal-radius-sm);
+  border-radius: var(--portal-radius-sm, 4px);
 }
 
 .terminal .confirm-btn:hover {

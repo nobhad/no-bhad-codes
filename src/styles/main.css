@@ -97,9 +97,9 @@
 /* Contact page */
 @import "./pages/contact.css" layer(pages);
 
-/* Admin dashboard — shared portal first, page overrides last */
-@import "./admin/index.css" layer(pages);
+/* Admin dashboard */
 @import "./pages/admin.css" layer(pages);
+@import "./admin/index.css" layer(pages);
 
 /* Client portal */
 @import "./pages/client.css" layer(pages);
@@ -108,14 +108,6 @@
 
 /* Projects page */
 @import "./pages/projects.css" layer(pages);
-
-/* Project detail — imported WITHOUT layer wrapper.
-   In Vite dev mode, bare @import inside a layered file does NOT inherit
-   the parent layer, making it unlayered (highest priority). The previous
-   session moved it to layer(pages), but that caused its rules to lose
-   to higher layers (states, responsive). Importing unlayered here ensures
-   project-detail styles always win the cascade. */
-@import "./pages/projects-detail.css";
 
 /* Terminal intake form */
 @import "./pages/terminal-intake.css" layer(pages);
@@ -145,27 +137,7 @@
  * 8. UTILITIES LAYER (can override everything)
  * ============================================ */
 @layer utilities {
-  /* Skip link for keyboard navigation accessibility */
-  .skip-link {
-    position: absolute;
-    top: -100%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: var(--z-index-portal-confirm, 9900);
-    padding: var(--space-3) var(--space-6);
-    background-color: var(--color-dark);
-    color: var(--color-light);
-    text-decoration: none;
-    font-weight: var(--font-weight-semibold);
-    border-radius: var(--portal-radius-sm);
-    transition: top var(--transition-mouse) ease;
-  }
-
-  .skip-link:focus {
-    top: 10px;
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
+  /* Utilities layer - reserved for high-priority overrides */
 }
 
 /* ============================================
@@ -255,8 +227,11 @@ body {
     visibility: visible;
   }
 
-  .contact-section .section-heading {
+  .contact-section h2 {
     margin-bottom: 1.5rem;
+    text-align: left;
+    width: 100%;
+    letter-spacing: 0.1em;
   }
 }
 
@@ -279,9 +254,9 @@ html[data-theme="dark"] .tech-stack {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   margin: 0;
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   text-align: left;
-  letter-spacing: var(--letter-spacing-widest);
+  letter-spacing: 0.1em;
 }
 
 .tech-list {
@@ -290,7 +265,7 @@ html[data-theme="dark"] .tech-stack {
 }
 
 .closing-statement {
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   text-align: left;
   font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   color: var(--color-primary, var(--color-text-primary));

@@ -59,7 +59,7 @@
 
 /* Universal: Any container with positioned icon + input - ensure proper left padding */
 .portal [class*="search-container"] input,
-.portal [class*="search-container"] .tw-input {
+.portal [class*="search-container"] .input {
   padding-left: 2.5rem !important;
 }
 
@@ -514,7 +514,7 @@ input.search-bar-input {
    ===================================================== */
 
 /* Text input */
-.tw-input {
+.input {
   width: 100%;
   padding: 0.5rem 0.75rem 0.5rem 1rem;
   font-size: var(--font-size-sm, 14px);
@@ -527,26 +527,26 @@ input.search-bar-input {
   outline: none;
 }
 
-.tw-input::placeholder {
+.input::placeholder {
   color: var(--portal-text-muted);
 }
 
-.tw-input:focus {
+.input:focus {
   border-color: var(--portal-text-light);
 }
 
-.tw-input:disabled {
+.input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tw-input-error {
+.input-error {
   border-color: var(--color-error) !important;
 }
 
 
 /* Select dropdown */
-.tw-select {
+.select {
   padding: 0.5rem 2.5rem 0.5rem 1rem;
   font-size: var(--font-size-sm, 14px);
   font-weight: var(--font-weight-bold);
@@ -564,17 +564,17 @@ input.search-bar-input {
   background-size: 12px;
 }
 
-.tw-select:focus {
+.select:focus {
   border-color: var(--portal-text-light);
 }
 
-.tw-select:disabled {
+.select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Textarea */
-.tw-textarea {
+.textarea {
   width: 100%;
   padding: 0.5rem 0.75rem 0.5rem 1rem;
   font-size: var(--font-size-sm, 14px);
@@ -589,15 +589,15 @@ input.search-bar-input {
   min-height: 100px;
 }
 
-.tw-textarea::placeholder {
+.textarea::placeholder {
   color: var(--portal-text-muted);
 }
 
-.tw-textarea:focus {
+.textarea:focus {
   border-color: var(--portal-text-light);
 }
 
-.tw-textarea:disabled {
+.textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
