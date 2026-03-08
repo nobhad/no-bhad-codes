@@ -54,12 +54,12 @@ export function AssetsStep({ data, onUpdate, errors: _errors }: StepProps) {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const assets = data.assets || {
+  const assets = useMemo(() => data.assets || {
     files: [],
     logoProvided: false,
     existingAssets: '',
     contentAccess: ''
-  };
+  }, [data.assets]);
 
   const handleChange = useCallback((field: keyof AssetData, value: UploadedFile[] | boolean | string) => {
     onUpdate({
