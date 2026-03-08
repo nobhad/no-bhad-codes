@@ -6,10 +6,10 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="tw-:relative tw-:w-full tw-:overflow-auto">
+  <div className="relative w-full overflow-auto">
     <table
       ref={ref}
-      className={cn('tw-table', className)}
+      className={cn('data-table', className)}
       {...props}
     />
   </div>
@@ -30,7 +30,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn('tw-:[&_tr:last-child]:border-0', className)}
+    className={cn('', className)}
     {...props}
   />
 ));
@@ -42,10 +42,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn(
-      'tw-:border-t tw-:border-portal-border tw-:font-medium tw-:[&>tr]:last:border-b-0',
-      className
-    )}
+    className={cn('border-t font-medium', className)}
     {...props}
   />
 ));
@@ -57,7 +54,7 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={cn('tw-table-row', className)}
+    className={cn('', className)}
     {...props}
   />
 ));
@@ -69,7 +66,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
-    className={cn('tw-table-header tw-:px-4', className)}
+    className={cn('', className)}
     {...props}
   />
 ));
@@ -81,7 +78,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn('tw-table-cell tw-:px-4', className)}
+    className={cn('', className)}
     {...props}
   />
 ));
@@ -93,7 +90,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn('tw-:mt-4 tw-:text-sm text-muted', className)}
+    className={cn('mt-1 text-sm text-muted', className)}
     {...props}
   />
 ));

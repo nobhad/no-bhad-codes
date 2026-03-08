@@ -27,14 +27,14 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      'tw-dropdown-item tw-:flex tw-:cursor-default tw-:select-none tw-:items-center tw-:gap-2 tw-:outline-none tw-:[&_svg]:pointer-events-none tw-:[&_svg]:size-4 tw-:[&_svg]:shrink-0',
-      inset && 'tw-:pl-8',
+      'portal-dropdown-sub-trigger',
+      inset && 'inset',
       className
     )}
     {...props}
   >
     {children}
-    <ChevronRight className="tw-:ml-auto" />
+    <ChevronRight className="chevron-icon" />
   </DropdownMenuPrimitive.SubTrigger>
 ));
 DropdownMenuSubTrigger.displayName =
@@ -46,10 +46,7 @@ const DropdownMenuSubContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.SubContent
     ref={ref}
-    className={cn(
-      'tw-dropdown tw-:z-50 tw-:min-w-[8rem] tw-:overflow-hidden tw-:shadow-lg tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[side=bottom]:slide-in-from-top-2 tw-:data-[side=left]:slide-in-from-right-2 tw-:data-[side=right]:slide-in-from-left-2 tw-:data-[side=top]:slide-in-from-bottom-2 tw-:origin-[--radix-dropdown-menu-content-transform-origin]',
-      className
-    )}
+    className={cn('portal-dropdown-sub-content', className)}
     {...props}
   />
 ));
@@ -64,10 +61,7 @@ const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={cn(
-        'tw-dropdown tw-:z-50 tw-:max-h-[var(--radix-dropdown-menu-content-available-height)] tw-:min-w-[8rem] tw-:overflow-y-auto tw-:overflow-x-hidden tw-:shadow-md tw-:data-[state=open]:animate-in tw-:data-[state=closed]:animate-out tw-:data-[state=closed]:fade-out-0 tw-:data-[state=open]:fade-in-0 tw-:data-[state=closed]:zoom-out-95 tw-:data-[state=open]:zoom-in-95 tw-:data-[side=bottom]:slide-in-from-top-2 tw-:data-[side=left]:slide-in-from-right-2 tw-:data-[side=right]:slide-in-from-left-2 tw-:data-[side=top]:slide-in-from-bottom-2 tw-:origin-[--radix-dropdown-menu-content-transform-origin]',
-        className
-      )}
+      className={cn('portal-dropdown-content', className)}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
@@ -83,8 +77,8 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'tw-dropdown-item tw-:relative tw-:flex tw-:cursor-default tw-:select-none tw-:items-center tw-:gap-2 tw-:outline-none tw-:data-[disabled]:pointer-events-none tw-:data-[disabled]:opacity-50 tw-:[&_svg]:pointer-events-none tw-:[&_svg]:size-4 tw-:[&_svg]:shrink-0',
-      inset && 'tw-:pl-8',
+      'portal-dropdown-item',
+      inset && 'inset',
       className
     )}
     {...props}
@@ -98,16 +92,13 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 >(({ className, children, checked, ...props }, ref) => (
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
-    className={cn(
-      'tw-dropdown-item tw-:relative tw-:flex tw-:cursor-default tw-:select-none tw-:items-center tw-:py-1.5 tw-:pl-8 tw-:pr-2 tw-:outline-none tw-:data-[disabled]:pointer-events-none tw-:data-[disabled]:opacity-50',
-      className
-    )}
+    className={cn('portal-dropdown-checkbox-item', className)}
     checked={checked}
     {...props}
   >
-    <span className="tw-:absolute tw-:left-2 tw-:flex tw-:h-3.5 tw-:w-3.5 tw-:items-center tw-:justify-center">
+    <span className="indicator-wrapper">
       <DropdownMenuPrimitive.ItemIndicator>
-        <Check className="tw-:h-4 tw-:w-4" />
+        <Check className="check-icon" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -122,15 +113,12 @@ const DropdownMenuRadioItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
-    className={cn(
-      'tw-dropdown-item tw-:relative tw-:flex tw-:cursor-default tw-:select-none tw-:items-center tw-:py-1.5 tw-:pl-8 tw-:pr-2 tw-:outline-none tw-:data-[disabled]:pointer-events-none tw-:data-[disabled]:opacity-50',
-      className
-    )}
+    className={cn('portal-dropdown-radio-item', className)}
     {...props}
   >
-    <span className="tw-:absolute tw-:left-2 tw-:flex tw-:h-3.5 tw-:w-3.5 tw-:items-center tw-:justify-center">
+    <span className="indicator-wrapper">
       <DropdownMenuPrimitive.ItemIndicator>
-        <Circle className="tw-:h-2 tw-:w-2 tw-:fill-current" />
+        <Circle className="radio-dot" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -147,8 +135,8 @@ const DropdownMenuLabel = React.forwardRef<
   <DropdownMenuPrimitive.Label
     ref={ref}
     className={cn(
-      'label tw-:px-2 tw-:py-1.5',
-      inset && 'tw-:pl-8',
+      'portal-dropdown-label',
+      inset && 'inset',
       className
     )}
     {...props}
@@ -162,7 +150,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn('tw-divider tw-:-mx-1 tw-:my-1', className)}
+    className={cn('portal-dropdown-separator', className)}
     {...props}
   />
 ));
@@ -174,7 +162,7 @@ const DropdownMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn('tw-:ml-auto tw-:text-xs tw-:tracking-widest tw-:opacity-60', className)}
+      className={cn('portal-dropdown-shortcut', className)}
       {...props}
     />
   );

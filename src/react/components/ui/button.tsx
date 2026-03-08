@@ -14,12 +14,12 @@ const buttonVariants = cva(
         outline: 'btn-secondary',
         secondary: 'btn-secondary',
         ghost: 'btn-ghost',
-        link: 'btn-ghost tw-:underline-offset-4 tw-:hover:underline'
+        link: 'btn-link'
       },
       size: {
         default: '',
-        sm: 'tw-:text-sm tw-:px-3 tw-:py-1',
-        lg: 'tw-:text-lg tw-:px-8 tw-:py-3',
+        sm: 'btn-sm',
+        lg: 'btn-lg',
         icon: 'btn-icon'
       }
     },
