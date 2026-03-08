@@ -15,11 +15,11 @@
 >
   <% columns.forEach(function(col) { %>
     <% if (col.id === '_select') { %>
-      <td class="select-col bulk-select-cell">
+      <td class="col-checkbox">
         <input type="checkbox" class="table-checkbox row-checkbox" data-row-id="<%= row.id %>" aria-label="Select row" />
       </td>
     <% } else if (col.id === '_actions') { %>
-      <td class="actions-cell actions-col">
+      <td class="col-actions">
         <button type="button" class="btn-icon" data-action="view" data-row-id="<%= row.id %>" title="View details" aria-label="View">
           <svg class="lucide-icon" width="16" height="16"><use href="#icon-eye"></use></svg>
         </button>

@@ -6,11 +6,11 @@
     <tr>
       <% tableDef.columns.forEach(function(col) { %>
         <% if (col.id === '_select') { %>
-          <th class="select-col bulk-select-cell" scope="col">
+          <th class="col-checkbox" scope="col">
             <input type="checkbox" class="table-checkbox" data-action="select-all" aria-label="Select all rows" />
           </th>
         <% } else if (col.id === '_actions') { %>
-          <th class="actions-col" scope="col"></th>
+          <th class="col-actions" scope="col"></th>
         <% } else { %>
           <th
             class="<%= col.className || '' %><%= col.sortable ? ' sortable' : '' %><%= col.hideMobile ? ' hide-mobile' : '' %><%= col.hideTablet ? ' hide-tablet' : '' %>"
