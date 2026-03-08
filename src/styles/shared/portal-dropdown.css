@@ -15,18 +15,6 @@
  */
 
 /* ================================================
-   DROPDOWN SPACING - SINGLE SOURCE OF TRUTH
-   Symmetric padding for all dropdowns
-   ================================================ */
-:root {
-  /* Symmetric horizontal padding - same on both sides */
-  --dropdown-padding-x: var(--space-1-5);  /* 12px */
-  --dropdown-padding-y: var(--space-1);    /* 8px */
-  /* Status dropdown width - fits longest status labels */
-  --status-dropdown-width: 160px;
-}
-
-/* ================================================
    Radix UI Portal Dropdown (PortalDropdown.tsx)
    ================================================ */
 
@@ -52,13 +40,13 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 .data-table .portal-dropdown-content:has(.status-indicator),
 .portal-dropdown-content:has(.status-indicator) {
   padding: 0;
-  min-width: var(--status-dropdown-width, 130px);
-  width: var(--status-dropdown-width, 130px);
+  min-width: var(--status-dropdown-width);
+  width: var(--status-dropdown-width);
 }
 
 /* Status dropdown items - MUST match trigger exactly */
 .portal-dropdown-content:has(.status-indicator) .portal-dropdown-item {
-  min-width: var(--status-dropdown-width, 130px);
+  min-width: var(--status-dropdown-width);
   width: 100%;
   box-sizing: border-box;
 }
@@ -157,13 +145,13 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 /* Remove top border when positioned below trigger - seamless connection */
 .portal-dropdown-content[data-side="bottom"] {
   border-top: none;
-  margin-top: calc(-1 * var(--border-width, 1px));
+  margin-top: calc(-1 * var(--border-width));
 }
 
 /* Remove bottom border when positioned above trigger */
 .portal-dropdown-content[data-side="top"] {
   border-bottom: none;
-  margin-bottom: calc(-1 * var(--border-width, 1px));
+  margin-bottom: calc(-1 * var(--border-width));
 }
 
 /* Sub content - same styling as main content */
@@ -1466,7 +1454,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   transition: background-color var(--transition-fast);
 }
 .modal-dropdown-option:hover {
-  background: var(--portal-alpha-white-5, rgba(255, 255, 255, 0.05));
+  background: var(--portal-alpha-white-05);
 }
 .modal-dropdown-option.is-focused {
   background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));

@@ -7,6 +7,10 @@
  * Portal-specific CSS variable overrides.
  * All portal theme values are defined here — this is the ONLY place.
  *
+ * LOAD ORDER: Imported UNLAYERED in admin.css and portal.css only.
+ * NOT in @layer tokens. This ensures portal overrides beat all layered styles.
+ * Main site pages do NOT load this file — complete style isolation.
+ *
  * Strategy: portal overrides the same semantic variables the main site uses
  * (--color-text-*, --color-bg-*, --color-border-*) within portal scope.
  * Components use one consistent variable name everywhere.
@@ -164,6 +168,69 @@
   --dashboard-title-margin: var(--space-3);
 
   /* ----------------------------------------
+   * PORTAL HEADER / SIDEBAR LAYOUT TOKENS
+   * ---------------------------------------- */
+  --portal-header-height: 56px;
+  --portal-header-top: 20px;
+  --portal-header-height-line: 32px;
+  --portal-nav-gap: var(--space-6);
+  --sidebar-icon-indent: 18px;
+  --portal-page-bottom: var(--space-6);
+  --sidebar-collapsed-width: var(--space-7); /* 56px */
+
+  /* ----------------------------------------
+   * FORM / FIELD TOKENS
+   * ---------------------------------------- */
+  --portal-placeholder-color: var(--color-text-tertiary);
+  --portal-field-label-gap: var(--field-label-value-gap); /* 0.125rem */
+  --action-bar-item-height: var(--portal-btn-icon-size); /* 36px */
+
+  /* ----------------------------------------
+   * TABLE TOKENS
+   * ---------------------------------------- */
+  --table-header-height: var(--space-4);
+  --table-row-height: var(--space-5);
+  --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
+  --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
+  --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
+  --table-actions-gap: var(--space-0-5);
+  --table-header-font-size: var(--font-size-xs);
+  --table-cell-font-size: var(--font-size-sm);
+  --table-header-font-weight: var(--font-weight-medium);
+  --table-header-letter-spacing: var(--letter-spacing-label);
+  --table-bg: transparent;
+  --table-header-color: var(--color-text-secondary);
+  --table-cell-color: var(--color-text-primary);
+  --table-identity-max-width: calc(var(--space-base) * 27.5);
+  --table-truncate-max-width: calc(var(--space-base) * 37.5);
+  --table-checkbox-width: var(--space-5);
+  --table-cell-max-width: calc(var(--space-base) * 25);
+  --table-name-max-width: calc(var(--space-base) * 31.25);
+  --table-compact-max-width: calc(var(--space-base) * 15);
+  --table-icon-size: var(--icon-size-md);
+  --table-cell-icon-size: var(--table-icon-size);
+  --table-action-icon-size: var(--table-icon-size);
+  --table-sort-indicator-size: calc(var(--icon-size-xs) - 2px);
+  --table-pagination-btn-size: 28px;
+  --table-pagination-btn-size-touch: 44px;
+  --table-mobile-label-width: 48%;
+  --table-mobile-label-padding: 0.75em;
+  --table-mobile-card-gap: var(--space-2);
+  --table-mobile-card-padding: var(--space-2) var(--space-3);
+  --table-col-xs: calc(var(--space-base) * 7.5);
+  --table-col-sm: calc(var(--space-base) * 12.5);
+  --table-col-md: calc(var(--space-base) * 18.75);
+  --table-col-lg: calc(var(--space-base) * 25);
+  --table-col-xl: calc(var(--space-base) * 35);
+
+  /* ----------------------------------------
+   * DROPDOWN TOKENS
+   * ---------------------------------------- */
+  --dropdown-padding-x: var(--space-1-5);
+  --dropdown-padding-y: var(--space-1);
+  --status-dropdown-width: 160px;
+
+  /* ----------------------------------------
    * OVERRIDE SEMANTIC COLOR TOKENS
    * Portal uses inverted color scheme
    * ---------------------------------------- */
@@ -312,8 +379,37 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --form-btn-shadow: rgba(0, 0, 0, 0.15);
 }
 
-/* Apply to html element as well for full coverage */
+/* ============================================
+ * ADMIN-ONLY TOKENS
+ * Activity type colors for admin client detail
+ * ============================================ */
+[data-page="admin"] {
+  --activity-email-color: var(--app-color-info);
+  --activity-invoice-color: var(--app-color-success);
+  --activity-project-color: var(--color-admin-purple);
+  --activity-file-color: var(--app-color-warning);
+  --activity-message-color: var(--color-cyan);
+  --activity-contact-color: var(--color-pink);
+  --activity-status-color: var(--app-color-warning);
+}
+
+/* ============================================
+ * HTML ELEMENT - PORTAL DARK MODE
+ * Must define --color-bg-primary on html itself since html does not have
+ * data-page="admin" — without this, html inherits the main-site :root value.
+ * ============================================ */
+html:has(body[data-page="admin"]),
+html:has(body[data-page="client-portal"]) {
+  --color-bg-primary: var(--portal-neutral-0); /* Portal dark = black */
+  background-color: var(--color-bg-primary);
+  height: 100%;
+}
+
+/* ============================================
+ * HTML ELEMENT - PORTAL LIGHT MODE
+ * ============================================ */
 html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
-  background-color: var(--color-bg-primary, var(--color-off-white));
+  --color-bg-primary: var(--color-off-white); /* Portal light = off-white */
+  background-color: var(--color-bg-primary);
 }

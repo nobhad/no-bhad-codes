@@ -15,7 +15,7 @@ button:has(> svg) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--icon-gap-md, 0.5rem);
+  gap: var(--icon-gap-md);
 }
 
 /* Icon before text (default order).
@@ -145,8 +145,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .btn-filled {
   background: var(--color-primary);
   color: var(--color-white);
-  border: var(--portal-btn-border-width, 2px) solid var(--color-primary);
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border: var(--portal-btn-border-width) solid var(--color-primary);
+  border-bottom-width: var(--portal-btn-border-bottom-width);
   border-bottom-color: var(--portal-btn-border-color, var(--color-white));
 }
 .btn-filled:hover {
@@ -167,8 +167,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .btn-auth {
   width: 100%;
   padding: var(--space-1-5) var(--space-3);
-  border: var(--portal-btn-border-width, 2px) solid currentColor;
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
+  border: var(--portal-btn-border-width) solid currentColor;
+  border-bottom-width: var(--portal-btn-border-bottom-width);
   border-radius: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -206,10 +206,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .portal .sidebar-btn {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-md, 0.5rem);
+  gap: var(--icon-gap-md);
   width: 100%;
   min-height: var(--space-5); /* 40px — matches collapsed icon-only height */
-  padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent, 18px);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--sidebar-icon-indent);
   font-family: var(--font-family-mono);
   font-size: var(--portal-nav-font-size);
   font-weight: var(--font-weight-medium);
@@ -238,8 +238,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 .portal .sidebar-btn .btn-icon {
   flex-shrink: 0;
-  width: var(--sidebar-icon-size, 20px);
-  height: var(--sidebar-icon-size, 20px);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
 }
 .portal .sidebar-btn .btn-text {
   flex: 1;
@@ -258,10 +258,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--portal-btn-icon-size, 36px);
-  height: var(--portal-btn-icon-size, 36px);
-  min-width: var(--portal-btn-icon-size, 36px);
-  min-height: var(--portal-btn-icon-size, 36px);
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
+  min-width: var(--portal-btn-icon-size);
+  min-height: var(--portal-btn-icon-size);
   padding: 0;
   background: transparent;
   border: none;
@@ -559,8 +559,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 /* Icon sizing - SAME SIZE as open state, use --sidebar-icon-size */
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn .btn-icon {
   margin: 0;
-  width: var(--sidebar-icon-size, 20px);
-  height: var(--sidebar-icon-size, 20px);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
 }
 
 .portal :is(.sidebar.collapsed, .sidebar.icon-only) .sidebar-btn:is(.active, :hover) .btn-icon svg {
@@ -610,8 +610,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   /* Icon sizing - SAME SIZE regardless of sidebar state, use --sidebar-icon-size */
   .portal .sidebar .sidebar-btn .btn-icon {
     margin: 0;
-    width: var(--sidebar-icon-size, 20px);
-    height: var(--sidebar-icon-size, 20px);
+    width: var(--sidebar-icon-size);
+    height: var(--sidebar-icon-size);
   }
 
   .portal .sidebar .sidebar-btn:is(.active, :hover) .btn-icon svg {
@@ -662,7 +662,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  font-size: var(--portal-btn-font-size, 16px);
+  font-size: var(--portal-btn-font-size);
   font-weight: var(--font-weight-regular);
   font-family: var(--font-family-mono, monospace);
   background: transparent;
@@ -699,8 +699,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* All actionable items in action bar - consistent height */
 .action-bar > :is(button, .btn, .btn-primary, .btn-secondary, .btn-outline, select, .form-select, [class*="dropdown-trigger"], [class*="date-selector"]) {
-  height: var(--action-bar-item-height, 36px);
-  min-height: var(--action-bar-item-height, 36px);
+  height: var(--action-bar-item-height);
+  min-height: var(--action-bar-item-height);
   box-sizing: border-box;
 }
 

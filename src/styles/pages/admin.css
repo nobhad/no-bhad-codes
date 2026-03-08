@@ -17,17 +17,6 @@
 
 /* Portal theme variables and admin overrides are in variables.css */
 
-/* ================================================
-   PORTAL COLOR HIERARCHY
-   ================================================
-   Canvas (body): --color-bg-primary (#000000) - pure black base
-   Sidebar:       --color-bg-primary (#000000) - matches canvas
-   Cards/Panels:  --color-bg-secondary (#0a0a0a) - subtle elevation
-   Nested:        --color-bg-tertiary (#1a1a1a) - inside cards
-   Hover:         --color-bg-hover (#1a1a1a) - interactive
-   Inputs:        --color-bg-primary (#000000) - recessed
-   ================================================ */
-
 /* Page background - pitch black as base canvas */
 body[data-page="admin"] {
   background: var(--color-bg-primary);
@@ -1158,7 +1147,7 @@ body.modal-open .dashboard-content {
  * ============================================ */
 
 [data-page="admin"] .portal-body {
-  margin-top: var(--portal-header-height, 56px);
+  margin-top: var(--portal-header-height);
 }
 
 [data-page="admin"] .portal-body .sidebar {

@@ -24,15 +24,12 @@
 @import "../shared/portal-badges.css";
 @import "../shared/portal-kanban.css";
 @import "../shared/portal-tags.css";
-@import "../shared/portal-timeline.css";
 @import "../shared/portal-charts.css";
 @import "../shared/portal-tooltips.css";
 @import "../shared/portal-progress.css";
 @import "../shared/portal-components.css";
 @import "../shared/portal-tabs.css";
 @import "../shared/notification-bell.css";
-@import "../shared/rich-text-editor.css";
-
 /* Portal layout and sidebar (shared) */
 @import "../shared/portal-sidebar.css";
 
@@ -70,13 +67,3 @@
 /* Unified modal system */
 @import "../shared/modal-system.css";
 
-/* Activity type colors for admin client detail */
-:root {
-  --activity-email-color: var(--app-color-info);
-  --activity-invoice-color: var(--app-color-success);
-  --activity-project-color: var(--color-admin-purple);
-  --activity-file-color: var(--app-color-warning);
-  --activity-message-color: var(--color-cyan);
-  --activity-contact-color: var(--color-pink);
-  --activity-status-color: var(--app-color-warning);
-}

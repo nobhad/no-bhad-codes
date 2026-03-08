@@ -28,7 +28,7 @@
   font-size: var(--font-size-xl);
   color: var(--color-text-primary);
   letter-spacing: var(--letter-spacing-normal);
-  line-height: var(--portal-header-height-line, 32px);
+  line-height: var(--portal-header-height-line);
   padding-top: var(--space-3);
   margin-bottom: var(--space-2);
 }
@@ -123,7 +123,7 @@
    ===================================================== */
 
 .overview-panel {
-  background: transparent;
+  background: var(--color-bg-primary);
   /* Explicit fallback: 2px border if variables fail */
   border: var(--border-width, 2px) solid var(--color-border-primary, currentColor);
   overflow: hidden;
