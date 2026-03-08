@@ -73,8 +73,6 @@ export interface PortalFeatures {
   notificationBell: boolean;
   /** Show subtabs navigation */
   subtabs: boolean;
-  /** Show secondary sidebar */
-  secondarySidebar: boolean;
   /** Show mobile menu toggle */
   mobileMenuToggle: boolean;
   /** Show theme toggle button */
@@ -617,8 +615,7 @@ export function getFeaturesForRole(role: UserRole): PortalFeatures {
     notificationBell: true, // Shared: both roles
     themeToggle: true, // Shared: both roles
     mobileMenuToggle: role === 'client', // Client only (admin has sidebar toggle)
-    subtabs: true, // Both roles
-    secondarySidebar: false // Removed — not used
+    subtabs: true // Both roles
   };
 }
 
