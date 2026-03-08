@@ -471,7 +471,7 @@ function FilesGrid({
   if (files.length === 0) {
     return (
       <div className="empty-state">
-        <Inbox className="empty-state-icon" />
+        <Inbox className="empty-icon" />
         <p className="empty-message">
           {hasActiveFilters ? 'No files match your filters' : 'No files yet'}
         </p>
