@@ -358,7 +358,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected ? true : selection.someSelected ? 'indeterminate' : false}
                 onCheckedChange={selection.toggleSelectAll}
@@ -382,7 +382,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
             >
               Updated
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -405,7 +405,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                 selected={selection.isSelected(workflow)}
               >
                 <PortalTableCell
-                  className="bulk-select-cell"
+                  className="col-checkbox"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Checkbox
@@ -460,7 +460,7 @@ export function WorkflowsTable({ getAuthToken, showNotification, onNavigate, def
                 <PortalTableCell className="date-cell">
                   {formatDate(workflow.updatedAt)}
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton
                       action="edit"

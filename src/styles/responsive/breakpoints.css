@@ -217,11 +217,11 @@
       padding: 0;
     }
 
-    .portal .sidebar .sidebar-buttons .sidebar-btn .btn-text {
+    .portal .sidebar .sidebar-buttons .nav-btn .nav-label {
       display: none;
     }
 
-    .portal .sidebar .sidebar-buttons .sidebar-btn {
+    .portal .sidebar .sidebar-buttons .nav-btn {
       justify-content: center;
     }
 

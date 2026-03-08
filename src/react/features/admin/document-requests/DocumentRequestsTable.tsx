@@ -361,7 +361,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
@@ -387,7 +387,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
               Due Date
             </PortalTableHead>
             <PortalTableHead className="docs-col">Docs</PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -409,7 +409,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                 clickable
                 selected={selection.isSelected(request)}
               >
-                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(request)}
                     onCheckedChange={() => selection.toggleSelection(request)}
@@ -454,7 +454,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
                     </span>
                   )}
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {request.status === 'pending' && (

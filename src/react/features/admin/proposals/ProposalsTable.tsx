@@ -390,7 +390,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
@@ -422,7 +422,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
             >
               Dates
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -444,7 +444,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
                 clickable
                 selected={selection.isSelected(proposal)}
               >
-                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(proposal)}
                     onCheckedChange={() => selection.toggleSelection(proposal)}
@@ -502,7 +502,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
                     )}
                   </div>
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {proposal.status === 'draft' && (

@@ -535,7 +535,7 @@ export function PortalFilesManager({
                     <PortalTableHead className="name-col">File</PortalTableHead>
                     <PortalTableHead className="size-col">Size</PortalTableHead>
                     <PortalTableHead className="date-col">Uploaded</PortalTableHead>
-                    <PortalTableHead className="actions-col">Actions</PortalTableHead>
+                    <PortalTableHead className="col-actions">Actions</PortalTableHead>
                   </PortalTableRow>
                 </PortalTableHeader>
                 <PortalTableBody animate>
@@ -577,7 +577,7 @@ export function PortalFilesManager({
                               {formatCardDate(file.uploadedAt)}
                             </span>
                           </PortalTableCell>
-                          <PortalTableCell className="actions-cell">
+                          <PortalTableCell className="col-actions">
                             <div className="table-actions">
                               <IconButton
                                 action="view"

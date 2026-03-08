@@ -811,7 +811,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   pointer-events: auto;
 }
 
-[data-page="admin"] .sidebar-footer .sidebar-btn {
+[data-page="admin"] .sidebar-footer .nav-btn {
   pointer-events: auto;
   cursor: pointer;
   z-index: var(--z-index-max);

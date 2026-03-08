@@ -4,9 +4,9 @@
     <!-- Navigation Buttons -->
     <div class="sidebar-buttons">
       <% config.navigation.forEach(item => { %>
-        <button class="btn sidebar-btn<%= item.active ? ' active' : '' %>" id="btn-<%= item.id %>" data-tab="<%= item.dataTab || item.id %>"<% if (item.shortcut) { %> data-shortcut="<%= item.shortcut %>"<% } %> aria-label="<%= item.ariaLabel || item.label %>">
-          <%- item.icon.replace('<svg ', '<svg class="btn-icon" aria-hidden="true" ') %>
-          <span class="btn-text"><%= item.label %></span>
+        <button class="nav-btn<%= item.active ? ' active' : '' %>" id="btn-<%= item.id %>" data-tab="<%= item.dataTab || item.id %>"<% if (item.shortcut) { %> data-shortcut="<%= item.shortcut %>"<% } %> aria-label="<%= item.ariaLabel || item.label %>">
+          <%- item.icon.replace('<svg ', '<svg class="nav-icon" aria-hidden="true" ') %>
+          <span class="nav-label"><%= item.label %></span>
           <% if (item.badge) { %>
             <span class="sidebar-badge" id="<%= item.badge %>" aria-label="<%= item.label.toLowerCase() %> count"></span>
           <% } %>
@@ -16,9 +16,9 @@
 
     <!-- Sign Out Button -->
     <div class="sidebar-footer">
-      <button type="button" class="btn sidebar-btn btn-logout" id="btn-logout" aria-label="Sign out">
-        <%- icons.logOut.replace('<svg ', '<svg class="btn-icon" aria-hidden="true" ') %>
-        <span class="btn-text">Sign Out</span>
+      <button type="button" class="nav-btn btn-logout" id="btn-logout" aria-label="Sign out">
+        <%- icons.logOut.replace('<svg ', '<svg class="nav-icon" aria-hidden="true" ') %>
+        <span class="nav-label">Sign Out</span>
       </button>
     </div>
   </div>

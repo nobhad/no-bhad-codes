@@ -14,13 +14,13 @@
  * ============================================ */
 
 /* Base button styling - uses token variables
-   NOTE: .icon-btn and .sidebar-btn are excluded - they have separate styling in portal-buttons.css */
-.btn:not(.icon-btn):not(.sidebar-btn),
+   NOTE: .icon-btn and .nav-btn are excluded - they have separate styling in portal-buttons.css */
+.btn:not(.icon-btn):not(.nav-btn),
 .form-button,
 .login-btn,
-.btn-primary:not(.icon-btn):not(.sidebar-btn),
-.btn-secondary:not(.icon-btn):not(.sidebar-btn),
-.btn-outline:not(.icon-btn):not(.sidebar-btn) {
+.btn-primary:not(.icon-btn):not(.nav-btn),
+.btn-secondary:not(.icon-btn):not(.nav-btn),
+.btn-outline:not(.icon-btn):not(.nav-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -49,12 +49,12 @@
    Ensures SVGs match button text color (white) instead of default grey.
    Only sets color: inherit; to let SVG's stroke="currentColor" work.
    Does NOT override fill/stroke to preserve icon styling (Lucide uses fill="none"). */
-.btn:not(.icon-btn):not(.sidebar-btn) svg,
+.btn:not(.icon-btn):not(.nav-btn) svg,
 .form-button svg,
 .login-btn svg,
-.btn-primary:not(.icon-btn):not(.sidebar-btn) svg,
-.btn-secondary:not(.icon-btn):not(.sidebar-btn) svg,
-.btn-outline:not(.icon-btn):not(.sidebar-btn) svg,
+.btn-primary:not(.icon-btn):not(.nav-btn) svg,
+.btn-secondary:not(.icon-btn):not(.nav-btn) svg,
+.btn-outline:not(.icon-btn):not(.nav-btn) svg,
 button.btn svg,
 button.btn-primary svg,
 button.btn-secondary svg {
@@ -62,12 +62,12 @@ button.btn-secondary svg {
 }
 
 /* Hover state */
-.btn:not(.icon-btn):not(.sidebar-btn):hover,
+.btn:not(.icon-btn):not(.nav-btn):hover,
 .form-button:hover,
 .login-btn:hover,
-.btn-primary:not(.icon-btn):not(.sidebar-btn):hover,
-.btn-secondary:not(.icon-btn):not(.sidebar-btn):hover,
-.btn-outline:not(.icon-btn):not(.sidebar-btn):hover {
+.btn-primary:not(.icon-btn):not(.nav-btn):hover,
+.btn-secondary:not(.icon-btn):not(.nav-btn):hover,
+.btn-outline:not(.icon-btn):not(.nav-btn):hover {
   background: var(--portal-btn-hover-bg, var(--color-dark));
   color: var(--portal-btn-hover-color, var(--color-light));
   border-color: var(--portal-btn-hover-border, var(--color-dark));
@@ -75,8 +75,8 @@ button.btn-secondary svg {
 }
 
 /* Focus state */
-.btn:not(.icon-btn):not(.sidebar-btn):focus,
-.btn:not(.icon-btn):not(.sidebar-btn):focus-visible,
+.btn:not(.icon-btn):not(.nav-btn):focus,
+.btn:not(.icon-btn):not(.nav-btn):focus-visible,
 .form-button:focus,
 .form-button:focus-visible,
 .login-btn:focus,
@@ -116,7 +116,7 @@ input.form-button.form-valid {
  * ============================================ */
 
 @media (--small-mobile) {
-  .btn:not(.sidebar-btn),
+  .btn:not(.nav-btn),
   .form-button,
   .login-btn {
     padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
@@ -130,7 +130,7 @@ input.form-button.form-valid {
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .btn:not(.sidebar-btn),
+  .btn:not(.nav-btn),
   .form-button,
   .login-btn {
     border-width: var(--border-width-thick);
@@ -139,7 +139,7 @@ input.form-button.form-valid {
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .btn:not(.sidebar-btn),
+  .btn:not(.nav-btn),
   .form-button,
   .login-btn {
     transition: none;

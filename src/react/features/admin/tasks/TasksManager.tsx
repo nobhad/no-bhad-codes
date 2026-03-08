@@ -378,7 +378,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                 Due Date
               </PortalTableHead>
               <PortalTableHead className="text-right">Hours</PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
 
@@ -455,7 +455,7 @@ export function TasksManager({ clientId, projectId, assigneeId, onNavigate, getA
                       )}
                     </span>
                   </PortalTableCell>
-                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <PortalButton
                         variant="ghost"

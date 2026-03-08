@@ -198,7 +198,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
             >
               Last Updated
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -259,7 +259,7 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                     : null
                   }
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton
                       action="view"

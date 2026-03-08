@@ -386,7 +386,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
@@ -422,7 +422,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
             >
               Created
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -444,7 +444,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                 clickable
                 selected={selection.isSelected(contract)}
               >
-                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(contract)}
                     onCheckedChange={() => selection.toggleSelection(contract)}
@@ -516,7 +516,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
                   </PortalDropdown>
                 </PortalTableCell>
                 <PortalTableCell className="date-cell">{formatDate(contract.createdAt)}</PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="view" title="View" />
                     {contract.status === 'draft' && (

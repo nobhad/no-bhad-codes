@@ -182,7 +182,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
               Articles
             </PortalTableHead>
             <PortalTableHead className="text-center">Active</PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -222,7 +222,7 @@ export function CategoriesTable({ onNavigate: _onNavigate, getAuthToken, showNot
                     <XCircle className="cell-icon-sm status-cancelled" />
                   )}
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="edit" title="Edit" />
                     <IconButton action="delete" title="Delete" />

@@ -357,7 +357,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
               >
                 Modified
               </PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
 
@@ -408,7 +408,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
                     {file.type !== 'folder' && formatFileSize(file.size || 0)}
                   </PortalTableCell>
                   <PortalTableCell className="date-cell">{formatDateShort(file.updatedAt)}</PortalTableCell>
-                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       {file.type !== 'folder' && (
                         <>
@@ -472,7 +472,7 @@ function FilesGrid({
     return (
       <div className="empty-state">
         <Inbox className="empty-state-icon" />
-        <p className="empty-state-text">
+        <p className="empty-message">
           {hasActiveFilters ? 'No files match your filters' : 'No files yet'}
         </p>
       </div>

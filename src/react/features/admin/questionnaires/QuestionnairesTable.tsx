@@ -388,7 +388,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       <PortalTable>
         <PortalTableHeader>
           <PortalTableRow>
-            <PortalTableHead className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+            <PortalTableHead className="col-checkbox" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={selection.allSelected}
                 onCheckedChange={selection.toggleSelectAll}
@@ -414,7 +414,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
               Due Date
             </PortalTableHead>
             <PortalTableHead className="progress-col">Progress</PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -436,7 +436,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                 clickable
                 selected={selection.isSelected(questionnaire)}
               >
-                <PortalTableCell className="bulk-select-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selection.isSelected(questionnaire)}
                     onCheckedChange={() => selection.toggleSelection(questionnaire)}
@@ -483,7 +483,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                     </span>
                   </div>
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton
                       action="view"

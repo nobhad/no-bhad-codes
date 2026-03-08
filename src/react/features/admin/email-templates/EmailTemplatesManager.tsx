@@ -227,7 +227,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
             >
               Updated
             </PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -272,7 +272,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
                   </StatusBadge>
                 </PortalTableCell>
                 <PortalTableCell className="date-cell">{formatDate(template.updated_at)}</PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="edit" title="Edit" />
                     <IconButton action="delete" title="Delete" />

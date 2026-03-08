@@ -351,7 +351,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
               Duration
             </PortalTableHead>
             <PortalTableHead className="text-center">Billable</PortalTableHead>
-            <PortalTableHead className="actions-col">Actions</PortalTableHead>
+            <PortalTableHead className="col-actions">Actions</PortalTableHead>
           </PortalTableRow>
         </PortalTableHeader>
 
@@ -393,7 +393,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
                 <PortalTableCell className="text-center">
                   <span className={entry.billable ? 'status-dot status-completed' : 'status-dot status-muted'} />
                 </PortalTableCell>
-                <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                   <div className="table-actions">
                     <IconButton action="edit" title="Edit entry" />
                   </div>

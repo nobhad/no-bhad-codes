@@ -163,7 +163,7 @@ export function WebhookDeliveriesView({
               >
                 Created At
               </PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
 
@@ -195,7 +195,7 @@ export function WebhookDeliveriesView({
                   <PortalTableCell className="date-cell">
                     {formatDate(delivery.createdAt)}
                   </PortalTableCell>
-                  <PortalTableCell className="actions-cell" onClick={(e) => e.stopPropagation()}>
+                  <PortalTableCell className="col-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="table-actions">
                       <IconButton
                         action="view"

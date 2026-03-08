@@ -222,7 +222,7 @@ export function PortalInvoicesTable({
               <PortalTableHead className="date-col" sortable sortDirection={sort?.column === 'date' ? sort.direction : null} onClick={() => toggleSort('date')}>Date</PortalTableHead>
               <PortalTableHead className="amount-col" sortable sortDirection={sort?.column === 'amount' ? sort.direction : null} onClick={() => toggleSort('amount')}>Amount</PortalTableHead>
               <PortalTableHead className="status-col" sortable sortDirection={sort?.column === 'status' ? sort.direction : null} onClick={() => toggleSort('status')}>Status</PortalTableHead>
-              <PortalTableHead className="actions-col">Actions</PortalTableHead>
+              <PortalTableHead className="col-actions">Actions</PortalTableHead>
             </PortalTableRow>
           </PortalTableHeader>
           <PortalTableBody animate>
@@ -264,7 +264,7 @@ export function PortalInvoicesTable({
                         {PORTAL_INVOICE_STATUS_CONFIG[invoice.status]?.label || invoice.status}
                       </StatusBadge>
                     </PortalTableCell>
-                    <PortalTableCell className="actions-cell">
+                    <PortalTableCell className="col-actions">
                       <div className="table-actions">
                         <IconButton
                           action="view"
