@@ -991,88 +991,101 @@ class ClientService {
     }
 
     // Calculate payment history score (0-25 points)
-    const paymentData = (await db.get(
-      `SELECT
-        COUNT(*) as total_invoices,
-        SUM(CASE WHEN status = 'paid' AND (paid_date IS NULL OR paid_date <= due_date) THEN 1 ELSE 0 END) as paid_on_time,
-        AVG(CASE WHEN status = 'paid' AND paid_date > due_date THEN julianday(paid_date) - julianday(due_date) ELSE 0 END) as avg_days_overdue
-       FROM active_invoices
-       WHERE client_id = ?`,
-      [clientId]
-    )) as { total_invoices: number; paid_on_time: number; avg_days_overdue: number } | undefined;
-
     let paymentScore = 25;
-    if (paymentData && paymentData.total_invoices > 0) {
-      const onTimeRate = paymentData.paid_on_time / paymentData.total_invoices;
-      paymentScore = Math.round(onTimeRate * 25);
-      // Penalize for average days overdue
-      if (paymentData.avg_days_overdue > 0) {
-        paymentScore = Math.max(
-          0,
-          paymentScore - Math.min(10, Math.floor(paymentData.avg_days_overdue / 7))
-        );
+    try {
+      const paymentData = (await db.get(
+        `SELECT
+          COUNT(*) as total_invoices,
+          SUM(CASE WHEN status = 'paid' AND (paid_date IS NULL OR paid_date <= due_date) THEN 1 ELSE 0 END) as paid_on_time,
+          AVG(CASE WHEN status = 'paid' AND paid_date > due_date THEN julianday(paid_date) - julianday(due_date) ELSE 0 END) as avg_days_overdue
+         FROM active_invoices
+         WHERE client_id = ?`,
+        [clientId]
+      )) as { total_invoices: number; paid_on_time: number; avg_days_overdue: number } | undefined;
+
+      if (paymentData && paymentData.total_invoices > 0) {
+        const onTimeRate = paymentData.paid_on_time / paymentData.total_invoices;
+        paymentScore = Math.round(onTimeRate * 25);
+        if (paymentData.avg_days_overdue > 0) {
+          paymentScore = Math.max(
+            0,
+            paymentScore - Math.min(10, Math.floor(paymentData.avg_days_overdue / 7))
+          );
+        }
       }
+    } catch {
+      paymentScore = 25;
     }
 
     // Calculate engagement score (0-25 points)
-    const messageData = (await db.get(
-      `SELECT COUNT(*) as message_count, MAX(created_at) as last_message
-       FROM active_messages
-       WHERE project_id IN (SELECT id FROM active_projects WHERE client_id = ?)`,
-      [clientId]
-    )) as { message_count: number; last_message: string | null } | undefined;
-
     let engagementScore = 25;
-    if (messageData) {
-      // Base score on message count
-      engagementScore = Math.min(15, Math.floor(messageData.message_count / 5));
-      // Add points for recent engagement
-      if (messageData.last_message) {
-        const daysSinceMessage = Math.floor(
-          (Date.now() - new Date(messageData.last_message).getTime()) / (1000 * 60 * 60 * 24)
-        );
-        if (daysSinceMessage < 7) engagementScore += 10;
-        else if (daysSinceMessage < 30) engagementScore += 5;
+    try {
+      const messageData = (await db.get(
+        `SELECT COUNT(*) as message_count, MAX(created_at) as last_message
+         FROM active_messages
+         WHERE project_id IN (SELECT id FROM active_projects WHERE client_id = ?)`,
+        [clientId]
+      )) as { message_count: number; last_message: string | null } | undefined;
+
+      if (messageData) {
+        engagementScore = Math.min(15, Math.floor(messageData.message_count / 5));
+        if (messageData.last_message) {
+          const daysSinceMessage = Math.floor(
+            (Date.now() - new Date(messageData.last_message).getTime()) / (1000 * 60 * 60 * 24)
+          );
+          if (daysSinceMessage < 7) engagementScore += 10;
+          else if (daysSinceMessage < 30) engagementScore += 5;
+        }
       }
+    } catch {
+      engagementScore = 25;
     }
 
     // Calculate project success score (0-25 points)
-    const projectData = (await db.get(
-      `SELECT
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-        SUM(CASE WHEN status = 'on-hold' THEN 1 ELSE 0 END) as on_hold
-       FROM active_projects
-       WHERE client_id = ?`,
-      [clientId]
-    )) as { total: number; completed: number; on_hold: number } | undefined;
-
     let projectScore = 25;
-    if (projectData && projectData.total > 0) {
-      const completionRate = projectData.completed / projectData.total;
-      const onHoldRate = projectData.on_hold / projectData.total;
-      projectScore = Math.round(completionRate * 20) + 5;
-      projectScore = Math.max(0, projectScore - Math.round(onHoldRate * 10));
+    try {
+      const projectData = (await db.get(
+        `SELECT
+          COUNT(*) as total,
+          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+          SUM(CASE WHEN status = 'on-hold' THEN 1 ELSE 0 END) as on_hold
+         FROM active_projects
+         WHERE client_id = ?`,
+        [clientId]
+      )) as { total: number; completed: number; on_hold: number } | undefined;
+
+      if (projectData && projectData.total > 0) {
+        const completionRate = projectData.completed / projectData.total;
+        const onHoldRate = projectData.on_hold / projectData.total;
+        projectScore = Math.round(completionRate * 20) + 5;
+        projectScore = Math.max(0, projectScore - Math.round(onHoldRate * 10));
+      }
+    } catch {
+      projectScore = 25;
     }
 
     // Calculate communication score (0-25 points)
-    const activityData = (await db.get(
-      `SELECT COUNT(*) as activity_count, MAX(created_at) as last_activity
-       FROM client_activities
-       WHERE client_id = ?`,
-      [clientId]
-    )) as { activity_count: number; last_activity: string | null } | undefined;
-
     let communicationScore = 25;
-    if (activityData && activityData.activity_count > 0) {
-      communicationScore = Math.min(15, Math.floor(activityData.activity_count / 3));
-      if (activityData.last_activity) {
-        const daysSinceActivity = Math.floor(
-          (Date.now() - new Date(activityData.last_activity).getTime()) / (1000 * 60 * 60 * 24)
-        );
-        if (daysSinceActivity < 7) communicationScore += 10;
-        else if (daysSinceActivity < 30) communicationScore += 5;
+    try {
+      const activityData = (await db.get(
+        `SELECT COUNT(*) as activity_count, MAX(created_at) as last_activity
+         FROM client_activities
+         WHERE client_id = ?`,
+        [clientId]
+      )) as { activity_count: number; last_activity: string | null } | undefined;
+
+      if (activityData && activityData.activity_count > 0) {
+        communicationScore = Math.min(15, Math.floor(activityData.activity_count / 3));
+        if (activityData.last_activity) {
+          const daysSinceActivity = Math.floor(
+            (Date.now() - new Date(activityData.last_activity).getTime()) / (1000 * 60 * 60 * 24)
+          );
+          if (daysSinceActivity < 7) communicationScore += 10;
+          else if (daysSinceActivity < 30) communicationScore += 5;
+        }
       }
+    } catch {
+      communicationScore = 25;
     }
 
     // Calculate total score
