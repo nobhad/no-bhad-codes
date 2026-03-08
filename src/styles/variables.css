@@ -461,3 +461,97 @@ img {
 /* Reduced motion, high contrast, and print styles are defined in reset.css
    (canonical source) and breakpoints.css (portal-specific overrides).
    DO NOT duplicate them here. */
+
+/* ============================================
+ * LAYOUT CONSTANTS
+ * Moved from base/layout.css
+ * ============================================ */
+:root {
+  --header-height: 60px;
+  --footer-height: 40px;
+  --size-container: min(1200px, 100vw - 2rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  --gap: clamp(0.75rem, 3vw, 1.5rem);
+  --section-padding: clamp(1rem, 5vw, 2rem);
+}
+
+/* ============================================
+ * SECTION & PAGE TRANSITIONS
+ * Moved from base/site-globals.css, main.css, components/page-transitions.css
+ * ============================================ */
+:root {
+  --blur-amount: 4px;
+  --drop-distance: 20px;
+  --transition-enter: 0.3s;
+  --transition-exit: 0.2s;
+  --stagger-delay: 0.05s;
+  --page-transition-duration: var(--transition-length);
+  --page-blur-amount: 12px;
+}
+
+/* ============================================
+ * NAVIGATION
+ * Moved from components/nav-base.css
+ * ============================================ */
+:root {
+  --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
+  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
+  --menu-multiplier: 0.15;
+  --list-multiplier: 0.12;
+  --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
+  --menu-button-size: clamp(2rem, 4vw, 2.5rem);
+  --theme-button-size: clamp(2rem, 4vw, 2.5rem);
+  --menu-width-desktop: 35rem;
+  --menu-width-tablet: 32rem;
+  --menu-width-mobile: 100vw;
+  --menu-border-radius: 1.25rem;
+  --menu-height: 100vh;
+  --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+  --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+  --color-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+ * BUSINESS CARD
+ * Moved from components/business-card.css
+ * ============================================ */
+:root {
+  --business-card-width-svg: 1069.5;
+  --business-card-height-svg: 599.3;
+  --business-card-aspect-ratio: 1.784582;
+  --business-card-base-width: 35vw;
+  --business-card-base-height: calc(var(--business-card-base-width) / var(--business-card-aspect-ratio));
+  --business-card-large-width: 525px;
+  --business-card-large-height: calc(var(--business-card-large-width) / var(--business-card-aspect-ratio));
+  --business-card-medium-width: 420px;
+  --business-card-medium-height: calc(var(--business-card-medium-width) / var(--business-card-aspect-ratio));
+  --business-card-small-width: 350px;
+  --business-card-small-height: calc(var(--business-card-small-width) / var(--business-card-aspect-ratio));
+  --business-card-tiny-width: 280px;
+  --business-card-tiny-height: calc(var(--business-card-tiny-width) / var(--business-card-aspect-ratio));
+}
+
+/* ============================================
+ * CONTACT FORM
+ * Moved from pages/contact.css
+ * ============================================ */
+:root {
+  --contact-input-height: clamp(52px, 14vw, 60px);
+  --contact-input-width: min(520px, 100%);
+  --contact-textarea-height: 175px;
+  --contact-textarea-width: min(520px, 100%);
+  --contact-field-gap: 0;
+  --contact-row-gap: 0;
+  --contact-layout-height: 480px;
+  --contact-field-border-width: var(--border-width);
+  --contact-field-border-color: var(--color-text-primary);
+}
+
+/* ============================================
+ * TERMINAL
+ * Moved from pages/terminal-intake.css
+ * ============================================ */
+:root {
+  --terminal-font-family: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --terminal-line-height: 1.7;
+}

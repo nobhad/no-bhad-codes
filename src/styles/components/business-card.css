@@ -60,45 +60,6 @@
 }
 
 /* ==========================================
-   BUSINESS CARD ASPECT RATIO VARIABLES
-   ========================================== */
-:root {
-  /* SVG card dimensions: 1069.5 x 599.3 pixels (business-card_front.svg viewBox) */
-  --business-card-width-svg: 1069.5;
-  --business-card-height-svg: 599.3;
-
-  /* Exact aspect ratio: 1069.5 ÷ 599.3 = 1.784582 */
-  --business-card-aspect-ratio: 1.784582;
-
-  /* Responsive base dimensions */
-  --business-card-base-width: 35vw;
-  --business-card-base-height: calc(
-    var(--business-card-base-width) / var(--business-card-aspect-ratio)
-  );
-
-  /* Fixed size dimensions */
-  --business-card-large-width: 525px;
-  --business-card-large-height: calc(
-    var(--business-card-large-width) / var(--business-card-aspect-ratio)
-  ); /* 294.32px */
-
-  --business-card-medium-width: 420px;
-  --business-card-medium-height: calc(
-    var(--business-card-medium-width) / var(--business-card-aspect-ratio)
-  ); /* 235.46px */
-
-  --business-card-small-width: 350px;
-  --business-card-small-height: calc(
-    var(--business-card-small-width) / var(--business-card-aspect-ratio)
-  ); /* 196.22px */
-
-  --business-card-tiny-width: 280px;
-  --business-card-tiny-height: calc(
-    var(--business-card-tiny-width) / var(--business-card-aspect-ratio)
-  ); /* 156.97px */
-}
-
-/* ==========================================
    BUSINESS CARD CONTAINER - CLS PREVENTION
    ========================================== */
 

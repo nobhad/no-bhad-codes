@@ -77,9 +77,6 @@
 /* Loading states */
 @import "./components/loading.css" layer(components);
 
-/* Portfolio carousel */
-@import "./components/portfolio-carousel.css" layer(components);
-
 /* Intro morph animation */
 @import "./components/intro-morph.css" layer(components);
 
@@ -144,15 +141,6 @@
  * UNLAYERED STYLES (highest specificity)
  * These override all layers when needed.
  * ============================================ */
-
-/* Section transition variables */
-:root {
-  --blur-amount: 4px;
-  --drop-distance: 20px;
-  --transition-enter: 0.3s;
-  --transition-exit: 0.2s;
-  --stagger-delay: 0.05s;
-}
 
 /* Theme integration */
 body {
