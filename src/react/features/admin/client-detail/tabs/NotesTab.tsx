@@ -6,6 +6,8 @@ import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/Confir
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ClientNote } from '../../types';
+import { formatRelativeTime } from '../../../../../utils/format-utils';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
 
 interface NotesTabProps {
   notes: ClientNote[];
@@ -16,35 +18,9 @@ interface NotesTabProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-/**
- * Format date
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffDays === 0) {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit'
-    });
-  }
-
-  if (diffDays === 1) {
-    return 'Yesterday';
-  }
-
-  if (diffDays < 7) {
-    return date.toLocaleDateString('en-US', { weekday: 'long' });
-  }
-
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-  });
+/** Format date using shared relative time utility */
+function formatNoteDate(dateString: string): string {
+  return formatRelativeTime(dateString);
 }
 
 /**
@@ -101,7 +77,7 @@ export function NotesTab({
   // Submit
   const handleSubmit = useCallback(async () => {
     if (!noteContent.trim()) {
-      showNotification?.('Note content is required', 'error');
+      showNotification?.(NOTIFICATIONS.note.CONTENT_REQUIRED, 'error');
       return;
     }
 
@@ -111,18 +87,18 @@ export function NotesTab({
       if (editingId) {
         const success = await onUpdateNote(editingId, noteContent.trim());
         if (success) {
-          showNotification?.('Note updated', 'success');
+          showNotification?.(NOTIFICATIONS.note.UPDATED, 'success');
           handleCancel();
         } else {
-          showNotification?.('Failed to update note', 'error');
+          showNotification?.(NOTIFICATIONS.note.UPDATE_FAILED, 'error');
         }
       } else {
         const success = await onAddNote(noteContent.trim());
         if (success) {
-          showNotification?.('Note added', 'success');
+          showNotification?.(NOTIFICATIONS.note.ADDED, 'success');
           handleCancel();
         } else {
-          showNotification?.('Failed to add note', 'error');
+          showNotification?.(NOTIFICATIONS.note.ADD_FAILED, 'error');
         }
       }
     } finally {
@@ -144,9 +120,9 @@ export function NotesTab({
 
     const success = await onDeleteNote(noteToDelete.id);
     if (success) {
-      showNotification?.('Note deleted', 'success');
+      showNotification?.(NOTIFICATIONS.note.DELETED, 'success');
     } else {
-      showNotification?.('Failed to delete note', 'error');
+      showNotification?.(NOTIFICATIONS.note.DELETE_FAILED, 'error');
     }
     setNoteToDelete(null);
   }, [noteToDelete, onDeleteNote, showNotification]);
@@ -156,9 +132,9 @@ export function NotesTab({
     async (note: ClientNote) => {
       const success = await onTogglePin(note.id, !note.is_pinned);
       if (success) {
-        showNotification?.(note.is_pinned ? 'Note unpinned' : 'Note pinned', 'success');
+        showNotification?.(note.is_pinned ? NOTIFICATIONS.note.UNPINNED : NOTIFICATIONS.note.PINNED, 'success');
       } else {
-        showNotification?.('Failed to update note', 'error');
+        showNotification?.(NOTIFICATIONS.note.PIN_FAILED, 'error');
       }
     },
     [onTogglePin, showNotification]
@@ -185,6 +161,7 @@ export function NotesTab({
         placeholder="Write a note..."
         rows={4}
         className="textarea"
+        aria-label={editingId ? 'Edit note' : 'New note'}
         autoFocus
       />
 
@@ -219,7 +196,7 @@ export function NotesTab({
             <Pin className="icon-xs active-primary" />
           )}
           <span className="text-muted text-xs">
-            {formatDate(note.created_at)}
+            {formatNoteDate(note.created_at)}
             {note.updated_at !== note.created_at && ' (edited)'}
           </span>
         </div>
@@ -276,10 +253,9 @@ export function NotesTab({
           Notes ({notes.length})
         </h2>
         {!isAdding && !editingId && (
-          <button className="btn-secondary" onClick={handleStartAdd}>
-            <Plus className="icon-md" />
+          <PortalButton variant="secondary" onClick={handleStartAdd} icon={<Plus className="icon-md" />}>
             Add Note
-          </button>
+          </PortalButton>
         )}
       </div>
 

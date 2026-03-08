@@ -24,6 +24,8 @@ import {
 import { EmptyState } from '@react/components/portal/EmptyState';
 import type { ProjectFile } from '../../types';
 import { FILE_CATEGORY_OPTIONS } from '../../types';
+import { formatDate, formatFileSize } from '../../../../../utils/format-utils';
+import { NOTIFICATIONS, fileUploadMessage } from '../../../../../constants/notifications';
 
 interface FilesTabProps {
   files: ProjectFile[];
@@ -31,29 +33,6 @@ interface FilesTabProps {
   onDeleteFile: (id: number) => Promise<boolean>;
   onToggleSharing: (id: number) => Promise<boolean>;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
-
-/**
- * Format file size for display
- */
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
-
-/**
- * Format date for display
- */
-function formatDate(date: string): string {
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${month}/${day}/${year}`;
 }
 
 /**
@@ -112,19 +91,8 @@ export function FilesTab({
 
       setIsUploading(false);
 
-      if (failCount === 0) {
-        showNotification?.(
-          `Uploaded ${successCount} file${successCount !== 1 ? 's' : ''}`,
-          'success'
-        );
-      } else if (successCount > 0) {
-        showNotification?.(
-          `Uploaded ${successCount}, failed ${failCount}`,
-          'warning'
-        );
-      } else {
-        showNotification?.('Failed to upload files', 'error');
-      }
+      const uploadType = failCount === 0 ? 'success' : successCount > 0 ? 'warning' : 'error';
+      showNotification?.(fileUploadMessage(successCount, failCount), uploadType);
 
       // Reset
       if (fileInputRef.current) {
@@ -160,9 +128,9 @@ export function FilesTab({
 
     const success = await onDeleteFile(deletingFileId);
     if (success) {
-      showNotification?.('File deleted', 'success');
+      showNotification?.(NOTIFICATIONS.file.DELETED, 'success');
     } else {
-      showNotification?.('Failed to delete file', 'error');
+      showNotification?.(NOTIFICATIONS.file.DELETE_FAILED, 'error');
     }
     setDeletingFileId(null);
   }, [deletingFileId, onDeleteFile, showNotification]);
@@ -177,11 +145,11 @@ export function FilesTab({
       if (success) {
         const file = files.find((f) => f.id === id);
         showNotification?.(
-          file?.is_shared ? 'File is now private' : 'File is now shared with client',
+          file?.is_shared ? NOTIFICATIONS.file.NOW_PRIVATE : NOTIFICATIONS.file.NOW_SHARED,
           'success'
         );
       } else {
-        showNotification?.('Failed to update sharing', 'error');
+        showNotification?.(NOTIFICATIONS.file.SHARE_FAILED, 'error');
       }
     },
     [files, onToggleSharing, showNotification]
@@ -236,14 +204,14 @@ export function FilesTab({
             <span className="text-muted pd-hint">Category:</span>
             <PortalDropdown>
               <PortalDropdownTrigger asChild>
-                <button className="form-input files-category-select dropdown-trigger" type="button">
+                <button className="files-category-trigger dropdown-trigger" type="button">
                   {selectedCategory
                     ? FILE_CATEGORY_OPTIONS.find((o) => o.value === selectedCategory)?.label || selectedCategory
                     : 'None'}
                   <ChevronDown className="dropdown-caret" />
                 </button>
               </PortalDropdownTrigger>
-              <PortalDropdownContent align="start" sideOffset={0}>
+              <PortalDropdownContent align="center" sideOffset={4}>
                 <PortalDropdownItem
                   className={cn(!selectedCategory && 'is-active')}
                   onSelect={() => setSelectedCategory('')}
@@ -281,21 +249,28 @@ export function FilesTab({
       ) : (
         <div className="panel contract-panel-no-padding">
           <table className="pd-full-width">
+            <colgroup>
+              <col className="files-col-name" />
+              <col className="files-col-size" />
+              <col className="files-col-date" />
+              <col className="files-col-shared" />
+              <col className="files-col-actions" />
+            </colgroup>
             <thead>
               <tr className="files-table-header">
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   File
                 </th>
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   Size
                 </th>
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   Uploaded
                 </th>
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-center">
                   Shared
                 </th>
-                <th className="label pd-table-cell pd-cell-right">
+                <th scope="col" className="label pd-table-cell pd-cell-right">
                   Actions
                 </th>
               </tr>
@@ -304,7 +279,7 @@ export function FilesTab({
               {files.map((file) => (
                 <tr
                   key={file.id}
-                  className="list-item files-table-row"
+                  className="files-table-row"
                 >
                   <td className="pd-table-cell">
                     <div className="pd-row-tight">
@@ -327,11 +302,12 @@ export function FilesTab({
                   <td className="pd-table-cell text-muted">
                     {formatDate(file.created_at)}
                   </td>
-                  <td className="pd-table-cell">
+                  <td className="pd-table-cell pd-cell-center">
                     <button
                       className="icon-btn"
                       onClick={() => handleToggleSharing(file.id)}
                       title={file.is_shared ? 'Shared with client - click to make private' : 'Private - click to share'}
+                      aria-label={file.is_shared ? 'Make private' : 'Share with client'}
                       disabled={togglingFileId === file.id}
                     >
                       {file.is_shared ? (
@@ -341,7 +317,7 @@ export function FilesTab({
                       )}
                     </button>
                   </td>
-                  <td className="pd-table-cell">
+                  <td className="pd-table-cell pd-cell-right">
                     <div className="pd-row-end">
                       {file.download_url && (
                         <button

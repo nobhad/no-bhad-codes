@@ -42,6 +42,7 @@ import { IntakeTab } from './tabs/IntakeTab';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '../../../../constants/api-endpoints';
+import { NOTIFICATIONS, statusUpdatedMessage } from '../../../../constants/notifications';
 
 interface ProjectDetailProps {
   /** Project ID to display */
@@ -133,9 +134,9 @@ export function ProjectDetail({
     async (newStatus: ProjectStatus) => {
       const success = await updateProject({ status: newStatus });
       if (success) {
-        showNotification?.(`Status updated to ${PROJECT_STATUS_CONFIG[newStatus].label}`, 'success');
+        showNotification?.(statusUpdatedMessage(PROJECT_STATUS_CONFIG[newStatus].label), 'success');
       } else {
-        showNotification?.('Failed to update status', 'error');
+        showNotification?.(NOTIFICATIONS.project.STATUS_UPDATE_FAILED, 'error');
       }
     },
     [updateProject, showNotification]
@@ -145,10 +146,10 @@ export function ProjectDetail({
   const handleArchive = useCallback(async () => {
     const success = await updateProject({ status: 'cancelled' });
     if (success) {
-      showNotification?.('Project archived', 'success');
+      showNotification?.(NOTIFICATIONS.project.ARCHIVED, 'success');
       onBack?.();
     } else {
-      showNotification?.('Failed to archive project', 'error');
+      showNotification?.(NOTIFICATIONS.project.ARCHIVE_FAILED, 'error');
     }
   }, [updateProject, showNotification, onBack]);
 
@@ -170,24 +171,24 @@ export function ProjectDetail({
       });
 
       if (response.ok) {
-        showNotification?.('Project deleted', 'success');
+        showNotification?.(NOTIFICATIONS.project.DELETED, 'success');
         onBack?.();
       } else {
-        showNotification?.('Failed to delete project', 'error');
+        showNotification?.(NOTIFICATIONS.project.DELETE_FAILED, 'error');
       }
     } catch {
-      showNotification?.('Failed to delete project', 'error');
+      showNotification?.(NOTIFICATIONS.project.DELETE_FAILED, 'error');
     }
   }, [projectId, getAuthToken, showNotification, onBack]);
 
   // Handle duplicate (placeholder - would need API support)
   const handleDuplicate = useCallback(() => {
-    showNotification?.('Duplicate feature coming soon', 'info');
+    showNotification?.(NOTIFICATIONS.project.DUPLICATE_COMING_SOON, 'info');
   }, [showNotification]);
 
   // Handle generate documents (placeholder)
   const handleGenerateDocuments = useCallback(() => {
-    showNotification?.('Document generation coming soon', 'info');
+    showNotification?.(NOTIFICATIONS.project.DOCS_COMING_SOON, 'info');
   }, [showNotification]);
 
   // Loading state
@@ -281,6 +282,7 @@ export function ProjectDetail({
             className="icon-btn"
             onClick={() => onEdit?.(projectId)}
             title="Edit Project"
+            aria-label="Edit Project"
           >
             <Pencil className="icon-md" />
           </button>
@@ -340,6 +342,7 @@ export function ProjectDetail({
           totalPaid={totalPaid}
           onUpdateProject={updateProject}
           onAddMilestone={addMilestone}
+          onUpdateMilestone={updateMilestone}
           onToggleMilestone={toggleMilestoneComplete}
           onDeleteMilestone={deleteMilestone}
           onNavigate={onNavigate}
@@ -377,7 +380,6 @@ export function ProjectDetail({
       <TabPanel tabId="invoices" isActive={activeTab === 'invoices'}>
         <InvoicesTab
           invoices={invoices}
-          projectId={projectId}
           showNotification={showNotification}
         />
       </TabPanel>

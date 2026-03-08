@@ -15,25 +15,14 @@ import { EmptyState } from '@react/components/portal/EmptyState';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
 import type { Project, ProjectFile } from '../../types';
-import { formatCurrency } from '../../../../../utils/format-utils';
+import { formatCurrency, formatDate } from '../../../../../utils/format-utils';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
 
 interface ContractTabProps {
   project: Project;
   files: ProjectFile[];
   onDownloadFile?: (file: ProjectFile) => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
-}
-
-/**
- * Format date for display
- */
-function formatDate(date: string | undefined): string {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
 }
 
 /**
@@ -90,12 +79,12 @@ export function ContractTab({
 
   // Handle generate contract (placeholder)
   const handleGenerateContract = () => {
-    showNotification?.('Contract generation coming soon', 'info');
+    showNotification?.(NOTIFICATIONS.contract.GENERATE_COMING_SOON, 'info');
   };
 
   // Handle send for signature (placeholder)
   const handleSendForSignature = () => {
-    showNotification?.('E-signature integration coming soon', 'info');
+    showNotification?.(NOTIFICATIONS.contract.SIGNATURE_COMING_SOON, 'info');
   };
 
   return (
@@ -123,7 +112,7 @@ export function ContractTab({
               {isSigned && project.contract_signed_date && (
                 <div className="pd-row-compact text-muted pd-mt-2">
                   <Calendar className="icon-md" />
-                  <span>Signed on {formatDate(project.contract_signed_date)}</span>
+                  <span>Signed on {formatDate(project.contract_signed_date, 'label')}</span>
                 </div>
               )}
 
@@ -172,7 +161,7 @@ export function ContractTab({
           label="Project Timeline"
           value={
             project.start_date && project.end_date
-              ? `${formatDate(project.start_date)} - ${formatDate(project.end_date)}`
+              ? `${formatDate(project.start_date, 'label')} - ${formatDate(project.end_date, 'label')}`
               : project.timeline || 'Not specified'
           }
           icon={<Calendar className="icon-md" />}
@@ -213,7 +202,7 @@ export function ContractTab({
                       {file.original_name}
                     </span>
                     <div className="text-muted pd-hint">
-                      {formatDate(file.created_at)}
+                      {formatDate(file.created_at, 'label')}
                     </div>
                   </div>
                 </div>

@@ -23,7 +23,9 @@ import {
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
 import type { Invoice, InvoiceStatus } from '../../types';
 import { INVOICE_STATUS_CONFIG } from '../../types';
-import { formatCurrency } from '../../../../../utils/format-utils';
+import { formatCurrency, formatDate } from '../../../../../utils/format-utils';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { KEYS } from '../../../../../constants/keyboard';
 
 const STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'All Invoices' },
@@ -40,7 +42,6 @@ const STATUS_FILTER_LABELS: Record<string, string> = Object.fromEntries(
 
 interface InvoicesTabProps {
   invoices: Invoice[];
-  projectId: number;
   onViewInvoice?: (invoiceId: number) => void;
   onCreateInvoice?: () => void;
   onSendInvoice?: (invoiceId: number) => Promise<boolean>;
@@ -71,19 +72,6 @@ function isOverdue(invoice: Invoice): boolean {
 function getDisplayStatus(invoice: Invoice): InvoiceStatus {
   if (isOverdue(invoice)) return 'overdue';
   return invoice.status;
-}
-
-/**
- * Format date
- */
-function formatDate(date: string | undefined): string {
-  if (!date) return '';
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${month}/${day}/${year}`;
 }
 
 /**
@@ -151,9 +139,9 @@ export function InvoicesTab({
       setActionLoading(null);
 
       if (success) {
-        showNotification?.('Invoice sent', 'success');
+        showNotification?.(NOTIFICATIONS.invoice.SENT, 'success');
       } else {
-        showNotification?.('Failed to send invoice', 'error');
+        showNotification?.(NOTIFICATIONS.invoice.SEND_FAILED, 'error');
       }
     },
     [onSendInvoice, showNotification]
@@ -165,9 +153,9 @@ export function InvoicesTab({
     const success = await onMarkPaid(deletingInvoiceId);
 
     if (success) {
-      showNotification?.('Invoice marked as paid', 'success');
+      showNotification?.(NOTIFICATIONS.invoice.MARKED_PAID, 'success');
     } else {
-      showNotification?.('Failed to mark invoice as paid', 'error');
+      showNotification?.(NOTIFICATIONS.invoice.MARK_PAID_FAILED, 'error');
     }
     setDeletingInvoiceId(null);
   }, [onMarkPaid, deletingInvoiceId, showNotification]);
@@ -178,9 +166,9 @@ export function InvoicesTab({
     const success = await onDeleteInvoice(deletingInvoiceId);
 
     if (success) {
-      showNotification?.('Invoice deleted', 'success');
+      showNotification?.(NOTIFICATIONS.invoice.DELETED, 'success');
     } else {
-      showNotification?.('Failed to delete invoice', 'error');
+      showNotification?.(NOTIFICATIONS.invoice.DELETE_FAILED, 'error');
     }
     setDeletingInvoiceId(null);
   }, [onDeleteInvoice, deletingInvoiceId, showNotification]);
@@ -192,9 +180,9 @@ export function InvoicesTab({
       setActionLoading({ type: 'download', id: invoiceId });
       try {
         await onDownloadPdf(invoiceId);
-        showNotification?.('PDF downloaded', 'success');
+        showNotification?.(NOTIFICATIONS.invoice.PDF_DOWNLOADED, 'success');
       } catch {
-        showNotification?.('Failed to download PDF', 'error');
+        showNotification?.(NOTIFICATIONS.invoice.PDF_DOWNLOAD_FAILED, 'error');
       }
       setActionLoading(null);
     },
@@ -234,7 +222,7 @@ export function InvoicesTab({
                 <ChevronDown className="dropdown-caret" />
               </button>
             </PortalDropdownTrigger>
-            <PortalDropdownContent align="start" sideOffset={0}>
+            <PortalDropdownContent align="start" sideOffset={4}>
               {STATUS_FILTER_OPTIONS.map((opt) => (
                 <PortalDropdownItem
                   key={opt.value}
@@ -268,19 +256,19 @@ export function InvoicesTab({
           <table className="pd-full-width">
             <thead>
               <tr className="invtab-header-row">
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   Invoice #
                 </th>
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   Amount
                 </th>
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   Status
                 </th>
-                <th className="label pd-table-cell pd-cell-left">
+                <th scope="col" className="label pd-table-cell pd-cell-left">
                   Due Date
                 </th>
-                <th className="label pd-table-cell pd-cell-right">
+                <th scope="col" className="label pd-table-cell pd-cell-right">
                   Actions
                 </th>
               </tr>
@@ -296,8 +284,11 @@ export function InvoicesTab({
                 return (
                   <tr
                     key={invoice.id}
-                    className="list-item invtab-row"
+                    className="invtab-row"
                     onClick={() => onViewInvoice?.(invoice.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) { e.preventDefault(); onViewInvoice?.(invoice.id); } }}
                   >
                     <td className="pd-table-cell">
                       <span className="pd-highlight-value">
@@ -372,7 +363,7 @@ export function InvoicesTab({
 
                         <PortalDropdown>
                           <PortalDropdownTrigger asChild>
-                            <button className="icon-btn">
+                            <button className="icon-btn" aria-label="More actions">
                               <MoreHorizontal className="icon-md" />
                             </button>
                           </PortalDropdownTrigger>

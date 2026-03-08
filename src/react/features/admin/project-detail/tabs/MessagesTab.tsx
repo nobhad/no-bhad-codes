@@ -5,6 +5,8 @@ import { cn } from '@react/lib/utils';
 import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import type { Message } from '../../types';
+import { NOTIFICATIONS } from '../../../../../constants/notifications';
+import { KEYS } from '../../../../../constants/keyboard';
 
 interface MessagesTabProps {
   messages: Message[];
@@ -72,14 +74,14 @@ export function MessagesTab({
       setNewMessage('');
       textareaRef.current?.focus();
     } else {
-      showNotification?.('Failed to send message', 'error');
+      showNotification?.(NOTIFICATIONS.message.SEND_FAILED, 'error');
     }
   }, [newMessage, onSendMessage, showNotification]);
 
   // Handle keyboard shortcut (Ctrl/Cmd + Enter to send)
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
         e.preventDefault();
         handleSend();
       }
