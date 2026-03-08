@@ -87,10 +87,10 @@
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   line-height: var(--space-7, 2.75rem);
-  background-color: transparent;
+  background-color: inherit;
   color: var(--color-text-primary);
   box-sizing: border-box;
-  transition: border-color var(--transition-fast, 150ms);
+  transition: border-color var(--transition-fast);
   caret-color: var(--color-text-primary);
 }
 
@@ -169,7 +169,7 @@
 :is(.form-group label.field-label, label.field-label, .field-label) {
   position: static;
   display: block;
-  margin-bottom: var(--portal-field-label-gap, 0.125rem);
+  margin-bottom: var(--portal-field-label-gap);
   pointer-events: auto;
 }
 
@@ -300,8 +300,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   background: transparent;
   cursor: pointer;
   transition:
-    background-color var(--transition-fast, 150ms),
-    border-color var(--transition-fast, 150ms);
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .table-checkbox:hover {
@@ -357,7 +357,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color var(--transition-fast, 150ms);
+  transition: color var(--transition-fast);
 }
 .password-toggle:hover {
   color: var(--color-primary);
@@ -411,7 +411,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 input.search-bar-input {
   width: 100%;
   padding-right: var(--space-4);
-  background: transparent;
+  background: inherit;
   border: var(--portal-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -481,7 +481,7 @@ input.search-bar-input {
   font-size: var(--font-size-sm, 14px);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono, monospace);
-  background: transparent;
+  background: inherit;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
   color: var(--color-text-primary);
@@ -512,7 +512,7 @@ input.search-bar-input {
   font-size: var(--font-size-sm, 14px);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono, monospace);
-  background: transparent;
+  background-color: inherit;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
   color: var(--color-text-primary);
@@ -541,7 +541,7 @@ input.search-bar-input {
   font-size: var(--font-size-sm, 14px);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono, monospace);
-  background: transparent;
+  background: inherit;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
   color: var(--color-text-primary);
@@ -808,9 +808,9 @@ input.search-bar-input {
 /* Form field label */
 .form-field-label {
   display: block;
-  margin-bottom: var(--portal-field-label-gap, 0.125rem);
+  margin-bottom: var(--portal-field-label-gap);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium, 500);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);

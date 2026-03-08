@@ -12,60 +12,6 @@
   EXCEPTION: .slug-cell uses monospace font.
 */
 
-:root {
-  /* Table dimensions - compact Linear-style */
-  --table-header-height: var(--space-4);
-  --table-row-height: var(--space-5);
-  --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
-  --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
-  --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
-  --table-actions-gap: var(--space-0-5);
-
-  /* Table typography - derived from design system */
-  --table-header-font-size: var(--font-size-xs);
-  --table-cell-font-size: var(--font-size-sm);
-  --table-header-font-weight: var(--font-weight-medium, 500);
-  --table-header-letter-spacing: var(--letter-spacing-label);
-
-  /* Table colors - from portal variables */
-  --table-bg: transparent;
-  --table-header-color: var(--color-text-secondary);
-  --table-cell-color: var(--color-text-primary, var(--color-text-primary));
-
-  /* Table column sizing */
-  --table-identity-max-width: calc(var(--space-base) * 27.5);
-  --table-truncate-max-width: calc(var(--space-base) * 37.5);
-  --table-checkbox-width: var(--space-5);
-  --table-cell-max-width: calc(var(--space-base) * 25);
-  --table-name-max-width: calc(var(--space-base) * 31.25);
-  --table-compact-max-width: calc(var(--space-base) * 15);
-
-  /* Table icon sizing - SINGLE SOURCE OF TRUTH for ALL table icons
-     ALL icons in table rows (cell icons, status icons, action button icons)
-     MUST use this variable for uniform sizing */
-  --table-icon-size: var(--icon-size-md); /* 16px */
-  --table-cell-icon-size: var(--table-icon-size); /* Alias for clarity */
-  --table-action-icon-size: var(--table-icon-size); /* Action button SVGs */
-  --table-sort-indicator-size: calc(var(--icon-size-xs) - 2px);
-
-  /* Pagination button sizing - SINGLE SOURCE OF TRUTH */
-  --table-pagination-btn-size: 28px;
-  --table-pagination-btn-size-touch: 44px;
-
-  /* Table mobile layout */
-  --table-mobile-label-width: 48%;
-  --table-mobile-label-padding: 0.75em;
-  --table-mobile-card-gap: var(--space-2);
-  --table-mobile-card-padding: var(--space-2) var(--space-3);
-
-  /* Table column width scale */
-  --table-col-xs: calc(var(--space-base) * 7.5);
-  --table-col-sm: calc(var(--space-base) * 12.5);
-  --table-col-md: calc(var(--space-base) * 18.75);
-  --table-col-lg: calc(var(--space-base) * 25);
-  --table-col-xl: calc(var(--space-base) * 35);
-}
-
 /* ==============================================
    BASE TABLE STYLES
    ============================================== */

@@ -33,13 +33,13 @@ body:has(.portal) {
   left: 0;
   right: 0;
   width: 100%;
-  height: var(--portal-header-height, 56px);
+  height: var(--portal-header-height);
   background: var(--color-bg-primary);
   border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-6, 1.5rem);
+  padding: 0 var(--space-3);
   box-sizing: border-box;
   z-index: var(--z-index-nav);
   box-shadow: none;
@@ -51,7 +51,7 @@ body:has(.portal) {
 .portal-global-header-left {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 16px);
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
 }
@@ -59,7 +59,7 @@ body:has(.portal) {
 .portal-global-header-right {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 16px);
+  gap: var(--space-2);
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -68,12 +68,12 @@ body:has(.portal) {
 .portal-global-header .header-branding {
   display: flex;
   align-items: center;
-  gap: var(--icon-gap-md, 0.5rem);
+  gap: var(--icon-gap-md);
   text-decoration: none;
   color: var(--color-text-primary);
   transition: color var(--transition-mouse) ease;
   padding-left: calc((var(--space-7) - var(--icon-size-2xl)) / 2);
-  margin-left: calc(-1 * var(--space-6, 1.5rem));
+  margin-left: calc(-1 * var(--space-3));
 }
 
 .portal-global-header .header-branding:hover {
@@ -278,9 +278,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 .portal-body {
   display: flex;
   width: 100%;
-  height: calc(100vh - var(--portal-header-height, 56px));
-  height: calc(100dvh - var(--portal-header-height, 56px));
-  margin-top: var(--portal-header-height, 56px);
+  height: calc(100vh - var(--portal-header-height));
+  height: calc(100dvh - var(--portal-header-height));
+  margin-top: var(--portal-header-height);
   background: var(--color-bg-primary);
   overflow: hidden; /* Only .dashboard-content scrolls — sidebar stays fixed */
 }
@@ -290,13 +290,17 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    Ensures page title aligns with sidebar branding
    ===================================================== */
 
-:root {
-  --portal-header-top: 20px;
-  --portal-header-height-line: 32px;
-  --portal-nav-gap: var(--space-6);
-  --sidebar-icon-indent: 18px;
-  --portal-page-bottom: var(--space-6);
-}
+/* ================================================
+   PORTAL COLOR HIERARCHY
+   Defined in: src/design-system/tokens/portal-theme.css
+   ================================================
+   Canvas (body): --color-bg-primary  - base page background
+   Sidebar:       --color-bg-primary  - matches canvas
+   Cards/Panels:  --color-bg-primary  - matches canvas
+   Nested:        --color-bg-tertiary - inside cards
+   Hover:         --color-bg-hover    - interactive states
+   Inputs:        inherit from container
+   ================================================ */
 
 /* Dashboard content - scroll container next to sidebar.
    Block flow prevents content-wrapper from stretching to fill viewport
@@ -306,7 +310,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   display: block;
   flex: 1;
   min-width: 0;
-  padding: var(--portal-header-top, 20px) 24px var(--portal-page-bottom) 24px;
+  padding: var(--portal-header-top) var(--space-3) var(--portal-page-bottom) var(--space-3);
   overflow-y: auto;
   background: inherit;
 }
@@ -349,7 +353,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   align-items: center;
   margin-left: 0;
   /* Align with table cell padding for visual consistency */
-  padding-left: var(--table-cell-padding-x, 14px);
+  padding-left: var(--table-cell-padding-x);
 }
 
 /* Hide all header subtab groups by default */
@@ -787,7 +791,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  z-index: var(--z-nav, 100);
+  z-index: var(--z-nav);
   box-shadow: none;
   transition:
     opacity var(--transition-faster),
@@ -1087,7 +1091,7 @@ html[data-theme="light"] .portal .funnel-value {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  background: transparent;
+  background: var(--color-bg-primary);
   border: var(--border-width) solid var(--color-border-primary);
   padding: var(--portal-card-padding);
 }
@@ -1170,62 +1174,62 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Gap */
 .gap-0 { gap: 0; }
-.gap-1 { gap: var(--space-0-5, 0.25rem); }
-.gap-2 { gap: var(--space-1, 0.5rem); }
-.gap-3 { gap: var(--space-1-5, 0.75rem); }
-.gap-4 { gap: var(--space-2, 1rem); }
+.gap-1 { gap: var(--space-0-5); }
+.gap-2 { gap: var(--space-1); }
+.gap-3 { gap: var(--space-1-5); }
+.gap-4 { gap: var(--space-2); }
 
 /* Margin */
 .m-0 { margin: 0; }
-.mb-1 { margin-bottom: var(--space-0-5, 0.25rem); }
-.mb-2 { margin-bottom: var(--space-1, 0.5rem); }
-.mb-3 { margin-bottom: var(--space-1-5, 0.75rem); }
-.mb-4 { margin-bottom: var(--space-2, 1rem); }
-.mt-1 { margin-top: var(--space-0-5, 0.25rem); }
-.mt-2 { margin-top: var(--space-1, 0.5rem); }
-.mt-3 { margin-top: var(--space-1-5, 0.75rem); }
-.mt-4 { margin-top: var(--space-2, 1rem); }
-.ml-2 { margin-left: var(--space-1, 0.5rem); }
+.mb-1 { margin-bottom: var(--space-0-5); }
+.mb-2 { margin-bottom: var(--space-1); }
+.mb-3 { margin-bottom: var(--space-1-5); }
+.mb-4 { margin-bottom: var(--space-2); }
+.mt-1 { margin-top: var(--space-0-5); }
+.mt-2 { margin-top: var(--space-1); }
+.mt-3 { margin-top: var(--space-1-5); }
+.mt-4 { margin-top: var(--space-2); }
+.ml-2 { margin-left: var(--space-1); }
 
 /* Padding */
 .p-0 { padding: 0; }
-.p-1 { padding: var(--space-0-5, 0.25rem); }
-.p-2 { padding: var(--space-1, 0.5rem); }
-.p-3 { padding: var(--space-1-5, 0.75rem); }
-.p-4 { padding: var(--space-2, 1rem); }
-.px-3 { padding-left: var(--space-1-5, 0.75rem); padding-right: var(--space-1-5, 0.75rem); }
-.px-4 { padding-left: var(--space-2, 1rem); padding-right: var(--space-2, 1rem); }
-.py-1 { padding-top: var(--space-0-5, 0.25rem); padding-bottom: var(--space-0-5, 0.25rem); }
-.py-2 { padding-top: var(--space-1, 0.5rem); padding-bottom: var(--space-1, 0.5rem); }
-.py-8 { padding-top: var(--space-4, 2rem); padding-bottom: var(--space-4, 2rem); }
-.pt-2 { padding-top: var(--space-1, 0.5rem); }
-.pt-3 { padding-top: var(--space-1-5, 0.75rem); }
+.p-1 { padding: var(--space-0-5); }
+.p-2 { padding: var(--space-1); }
+.p-3 { padding: var(--space-1-5); }
+.p-4 { padding: var(--space-2); }
+.px-3 { padding-left: var(--space-1-5); padding-right: var(--space-1-5); }
+.px-4 { padding-left: var(--space-2); padding-right: var(--space-2); }
+.py-1 { padding-top: var(--space-0-5); padding-bottom: var(--space-0-5); }
+.py-2 { padding-top: var(--space-1); padding-bottom: var(--space-1); }
+.py-8 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+.pt-2 { padding-top: var(--space-1); }
+.pt-3 { padding-top: var(--space-1-5); }
 
 /* Width/Height */
 .w-full { width: 100%; }
 .w-fit { width: fit-content; }
 .w-px { width: 1px; }
-.w-1 { width: var(--space-0-5, 0.25rem); }
-.w-2 { width: var(--space-1, 0.5rem); }
-.w-3 { width: var(--space-1-5, 0.75rem); }
-.w-4 { width: var(--space-2, 1rem); }
-.w-5 { width: var(--space-2-5, 1.25rem); }
-.w-7 { width: var(--space-3-5, 1.75rem); }
-.w-8 { width: var(--space-4, 2rem); }
+.w-1 { width: var(--space-0-5); }
+.w-2 { width: var(--space-1); }
+.w-3 { width: var(--space-1-5); }
+.w-4 { width: var(--space-2); }
+.w-5 { width: var(--space-2-5); }
+.w-7 { width: var(--space-3-5); }
+.w-8 { width: var(--space-4); }
 .h-full { height: 100%; }
-.h-1 { height: var(--space-0-5, 0.25rem); }
-.h-2 { height: var(--space-1, 0.5rem); }
-.h-3 { height: var(--space-1-5, 0.75rem); }
-.h-4 { height: var(--space-2, 1rem); }
-.h-5 { height: var(--space-2-5, 1.25rem); }
-.h-6 { height: var(--space-3, 1.5rem); }
-.h-7 { height: var(--space-3-5, 1.75rem); }
-.h-8 { height: var(--space-4, 2rem); }
+.h-1 { height: var(--space-0-5); }
+.h-2 { height: var(--space-1); }
+.h-3 { height: var(--space-1-5); }
+.h-4 { height: var(--space-2); }
+.h-5 { height: var(--space-2-5); }
+.h-6 { height: var(--space-3); }
+.h-7 { height: var(--space-3-5); }
+.h-8 { height: var(--space-4); }
 .h-9 { height: 2.25rem; }
 
 /* Space between children */
-.space-y-1 > * + * { margin-top: var(--space-0-5, 0.25rem); }
-.space-y-2 > * + * { margin-top: var(--space-1, 0.5rem); }
+.space-y-1 > * + * { margin-top: var(--space-0-5); }
+.space-y-2 > * + * { margin-top: var(--space-1); }
 
 /* Additional margin utilities */
 .mt-0\.5 { margin-top: 0.125rem; }
