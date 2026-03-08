@@ -18,7 +18,8 @@
 
 ## Completed - Full Portal Audit Fix
 
-**Status:** 41/41 items COMPLETE
+**Status:** 42/42 items COMPLETE (v1 audit fully resolved)
+**Re-Audit (v2):** Expanded to 20 layers, 14 new items identified
 **Reference:** [FULL_PORTAL_AUDIT.md](./docs/FULL_PORTAL_AUDIT.md)
 
 ### Wave 1-4 (30 Priority Items) - ALL COMPLETE
@@ -75,9 +76,43 @@
 - [x] 2FA support (TOTP, migration 096, setup/verify/login/disable/status endpoints)
 - [x] Dead database table cleanup (migration 097, 10 unused tables dropped)
 
+### Wave 8 - COMPLETE
+
+- [x] Error message leakage sanitized (33 leaks fixed in 5 route files)
+
 ---
 
-## Files Modified (Audit Waves 1-6)
+## v2 Re-Audit Findings (New Items)
+
+### React Performance (Grade: C+)
+
+- [ ] Add React.memo to 79+ prop-receiving components (only 2/163 memoized)
+- [ ] Wrap 144 array operations in useMemo (filter/map/sort in render)
+- [ ] Split 7 remaining files over 700 lines (WebhooksManager 1,300, etc.)
+
+### Accessibility (Grade: C)
+
+- [ ] Add aria-label to 160 unlabeled buttons (37% coverage)
+- [ ] Fix 2 missing alt attributes (PortalHeader, MessageThread)
+- [ ] Associate 44 form inputs with labels via htmlFor (17% coverage)
+- [ ] Add keyboard support to 4 onClick-only non-interactive elements
+
+### Error Handling (Grade: B+)
+
+- [ ] Sanitize remaining 33+ route error messages (lower-risk files)
+- [ ] Add logging to silent catch in message-service.ts
+- [ ] Expand constraint error detection in global handler
+
+### Infrastructure
+
+- [ ] Add CI/CD pipeline (.github/workflows/)
+- [ ] Increase test coverage (currently 5-8%, target 70%)
+- [ ] Add eslint-plugin-react-hooks
+- [ ] Docker setup for deployment
+
+---
+
+## Files Modified (Audit Waves 1-8)
 
 ### Server
 
