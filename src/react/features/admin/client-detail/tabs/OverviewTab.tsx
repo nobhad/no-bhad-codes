@@ -22,7 +22,7 @@ import {
   PortalDropdownItem
 } from '@react/components/portal/PortalDropdown';
 import { StatCard, StatsRow } from '@react/components/portal/StatCard';
-import type { Client, ClientHealth, ClientDetailStats, ClientTag } from '../../types';
+import type { Client, ClientHealth, ClientDetailStats, ClientTag, ClientDetailTab } from '../../types';
 import { formatCurrency as formatCurrencyUtil, formatDate } from '@/utils/format-utils';
 import { HEALTH_SCORE } from '@/constants/thresholds';
 
@@ -35,6 +35,8 @@ interface OverviewTabProps {
   onUpdateClient: (updates: Partial<Client>) => Promise<boolean>;
   onAddTag: (tagId: number) => Promise<boolean>;
   onRemoveTag: (tagId: number) => Promise<boolean>;
+  onNavigate?: (tab: string, entityId?: string) => void;
+  onSwitchTab?: (tab: ClientDetailTab) => void;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
@@ -66,6 +68,8 @@ export function OverviewTab({
   availableTags,
   onAddTag,
   onRemoveTag,
+  onNavigate,
+  onSwitchTab,
   showNotification
 }: OverviewTabProps) {
   // Filter out already added tags
@@ -155,17 +159,20 @@ export function OverviewTab({
               value={stats.totalProjects || 0}
               icon={<FolderKanban className="icon-md text-muted" />}
               meta={`${stats.activeProjects || 0} active, ${stats.completedProjects || 0} completed`}
+              onClick={onSwitchTab ? () => onSwitchTab('projects') : undefined}
             />
             <StatCard
               label="Revenue"
               value={formatCurrency(stats.totalPaid)}
               icon={<TrendingUp className="icon-md text-muted" />}
               meta={`${formatCurrency(stats.totalInvoiced)} invoiced`}
+              onClick={onNavigate ? () => onNavigate('invoices') : undefined}
             />
             <StatCard
               label="Outstanding"
               value={formatCurrency(stats.totalOutstanding)}
               icon={<DollarSign className="icon-md text-muted" />}
+              onClick={onNavigate ? () => onNavigate('invoices') : undefined}
             />
           </StatsRow>
         )}
@@ -233,9 +240,19 @@ export function OverviewTab({
       <div className="layout-stack">
         {/* Contact Info */}
         <div className="panel">
-          <h3 className="section-title">
-            Contact Information
-          </h3>
+          <div className="layout-row-between">
+            <h3 className="section-title">
+              Contact Information
+            </h3>
+            {onSwitchTab && (
+              <button
+                className="client-nav-link text-sm"
+                onClick={() => onSwitchTab('contacts')}
+              >
+                View All Contacts
+              </button>
+            )}
+          </div>
 
           <div className="layout-stack">
             {client.contact_name && (

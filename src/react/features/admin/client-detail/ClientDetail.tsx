@@ -45,6 +45,8 @@ interface ClientDetailProps {
   onEdit?: (clientId: number) => void;
   /** Callback to view project */
   onViewProject?: (projectId: number) => void;
+  /** Cross-link navigation to other admin views */
+  onNavigate?: (tab: string, entityId?: string) => void;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
@@ -77,6 +79,7 @@ export function ClientDetail({
   onBack,
   onEdit,
   onViewProject,
+  onNavigate,
   showNotification
 }: ClientDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
@@ -310,6 +313,8 @@ export function ClientDetail({
           onUpdateClient={updateClient}
           onAddTag={addTag}
           onRemoveTag={removeTag}
+          onNavigate={onNavigate}
+          onSwitchTab={setActiveTab}
           showNotification={showNotification}
         />
       </TabPanel>
@@ -325,11 +330,18 @@ export function ClientDetail({
       </TabPanel>
 
       <TabPanel tabId="activity" isActive={activeTab === 'activity'}>
-        <ActivityTab activities={activities} />
+        <ActivityTab
+          activities={activities}
+          onNavigate={onNavigate}
+        />
       </TabPanel>
 
       <TabPanel tabId="projects" isActive={activeTab === 'projects'}>
-        <ProjectsTab projects={projects} onViewProject={onViewProject} />
+        <ProjectsTab
+          projects={projects}
+          onViewProject={onViewProject}
+          onNavigate={onNavigate}
+        />
       </TabPanel>
 
       <TabPanel tabId="notes" isActive={activeTab === 'notes'}>

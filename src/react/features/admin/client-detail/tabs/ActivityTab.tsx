@@ -18,6 +18,7 @@ import type { ClientActivity } from '../../types';
 
 interface ActivityTabProps {
   activities: ClientActivity[];
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 /**
@@ -125,7 +126,20 @@ function groupActivitiesByDate(
  * ActivityTab
  * Shows client activity timeline
  */
-export function ActivityTab({ activities }: ActivityTabProps) {
+/**
+ * Map activity type to a navigable route
+ */
+function getActivityRoute(type: string): string | null {
+  const routeMap: Record<string, string> = {
+    invoice: 'invoices',
+    project: 'projects',
+    message: 'messages',
+    file: 'files'
+  };
+  return routeMap[type] || null;
+}
+
+export function ActivityTab({ activities, onNavigate }: ActivityTabProps) {
   const groupedActivities = groupActivitiesByDate(activities);
 
   if (activities.length === 0) {
@@ -172,6 +186,12 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                   const iconColorVar = getActivityColorVar(activity.activityType);
                   const isLast = index === group.items.length - 1;
 
+                  const activityRoute = getActivityRoute(activity.activityType);
+                  const entityId = activity.metadata?.entityId as string | undefined
+                    ?? activity.metadata?.projectId as string | undefined
+                    ?? activity.metadata?.invoiceId as string | undefined;
+                  const isNavigable = onNavigate && activityRoute && entityId;
+
                   return (
                     <div key={activity.id} className="activity-event-row">
                       {/* Timeline dot */}
@@ -188,9 +208,18 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                       >
                         <div className="activity-event-header">
                           <div className="activity-event-body">
-                            <h4 className="heading">
-                              {activity.title}
-                            </h4>
+                            {isNavigable ? (
+                              <button
+                                className="heading client-nav-link"
+                                onClick={() => onNavigate(activityRoute, String(entityId))}
+                              >
+                                {activity.title}
+                              </button>
+                            ) : (
+                              <h4 className="heading">
+                                {activity.title}
+                              </h4>
+                            )}
                             {activity.description && (
                               <p className="text-muted text-sm description-text">
                                 {activity.description}

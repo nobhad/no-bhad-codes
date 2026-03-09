@@ -457,10 +457,25 @@ export function LeadsTable({
                       <span className="cell-subtitle">{decodeHtmlEntities(lead.email)}</span>
                       {(lead.company_name || lead.phone) && (
                         <span className="identity-company">
-                          {[
-                            lead.company_name && decodeHtmlEntities(lead.company_name),
-                            lead.phone
-                          ].filter(Boolean).join(' • ')}
+                          {lead.company_name && lead.client_id && onNavigate ? (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigate('client-detail', String(lead.client_id));
+                                }}
+                                className="cell-link-btn"
+                              >
+                                {decodeHtmlEntities(lead.company_name)}
+                              </button>
+                              {lead.phone && ` • ${lead.phone}`}
+                            </>
+                          ) : (
+                            [
+                              lead.company_name && decodeHtmlEntities(lead.company_name),
+                              lead.phone
+                            ].filter(Boolean).join(' • ')
+                          )}
                         </span>
                       )}
                       {/* Stacked content for narrow viewports */}

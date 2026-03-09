@@ -42,9 +42,12 @@ interface Questionnaire {
   id: number;
   title: string;
   description: string;
+  client_id: number;
   client_name: string;
+  project_id?: number;
   project_name: string | null;
-  status: 'draft' | 'sent' | 'in_progress' | 'completed' | 'expired';
+  questionnaire_name?: string;
+  status: 'draft' | 'sent' | 'pending' | 'in_progress' | 'completed' | 'expired';
   questions_count: number;
   responses_count: number;
   completion_rate: number;
@@ -70,6 +73,7 @@ interface QuestionnairesTableProps {
 
 const QUESTIONNAIRE_STATUS_CONFIG: Record<string, { label: string }> = {
   draft: { label: 'Draft' },
+  pending: { label: 'Pending' },
   sent: { label: 'Sent' },
   in_progress: { label: 'In Progress' },
   completed: { label: 'Completed' },
@@ -134,13 +138,13 @@ function sortQuestionnaires(a: Questionnaire, b: Questionnaire, sort: SortConfig
 export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: QuestionnairesTableProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
 
-  // Build endpoint URL with query params
+  // Build endpoint URL with query params — fetches responses (not templates)
   const endpoint = useMemo(() => {
     const params = new URLSearchParams();
     if (clientId) params.append('client_id', clientId);
     if (projectId) params.append('project_id', projectId);
     const query = params.toString();
-    return query ? `${API_ENDPOINTS.QUESTIONNAIRES}?${query}` : API_ENDPOINTS.QUESTIONNAIRES;
+    return query ? `${API_ENDPOINTS.QUESTIONNAIRES_RESPONSES}?${query}` : API_ENDPOINTS.QUESTIONNAIRES_RESPONSES;
   }, [clientId, projectId]);
 
   // Data fetching via useListFetch
@@ -426,17 +430,43 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                   <div className="cell-with-icon">
                     <ClipboardList className="cell-icon" />
                     <div className="cell-content">
-                      <span className="cell-title">{decodeHtmlEntities(questionnaire.title)}</span>
-                      {questionnaire.description && (
-                        <span className="cell-subtitle">{decodeHtmlEntities(questionnaire.description)}</span>
+                      <span className="cell-title">
+                        {decodeHtmlEntities(questionnaire.questionnaire_name || questionnaire.title)}
+                      </span>
+                      {questionnaire.project_name && (
+                        <span className="cell-subtitle">
+                          {questionnaire.project_id && onNavigate ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate('project-detail', String(questionnaire.project_id));
+                              }}
+                              className="cell-link-btn"
+                            >
+                              {decodeHtmlEntities(questionnaire.project_name)}
+                            </button>
+                          ) : (
+                            decodeHtmlEntities(questionnaire.project_name)
+                          )}
+                        </span>
                       )}
                     </div>
                   </div>
                 </PortalTableCell>
                 <PortalTableCell>
-                  <span className="table-link">
-                    {decodeHtmlEntities(questionnaire.client_name)}
-                  </span>
+                  {questionnaire.client_id && onNavigate ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate('client-detail', String(questionnaire.client_id));
+                      }}
+                      className="cell-link-btn"
+                    >
+                      {decodeHtmlEntities(questionnaire.client_name)}
+                    </button>
+                  ) : (
+                    decodeHtmlEntities(questionnaire.client_name)
+                  )}
                 </PortalTableCell>
                 <PortalTableCell>
                   <StatusBadge status={getStatusVariant(questionnaire.status)}>

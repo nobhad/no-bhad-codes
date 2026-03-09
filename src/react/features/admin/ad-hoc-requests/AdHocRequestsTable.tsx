@@ -238,7 +238,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       logger.error('Failed to update request status:', err);
       showNotification?.('Failed to update status', 'error');
     }
-  }, [showNotification]);
+  }, [setData, showNotification]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -257,7 +257,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
       logger.error('Failed to delete requests:', err);
       showNotification?.('Failed to delete requests', 'error');
     }
-  }, [selection, showNotification]);
+  }, [selection, setData, showNotification]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -437,6 +437,23 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                     <Zap className="cell-icon" />
                     <div className="cell-content">
                       <span className="cell-title">{request.title}</span>
+                      {request.projectName && (
+                        <span className="cell-subtitle">
+                          {request.projectId && onNavigate ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate('project-detail', String(request.projectId));
+                              }}
+                              className="cell-link-btn"
+                            >
+                              {request.projectName}
+                            </button>
+                          ) : (
+                            request.projectName
+                          )}
+                        </span>
+                      )}
                       {request.assignee && (
                         <span className="cell-subtitle">
                           <User className="cell-icon-sm" />
@@ -447,15 +464,19 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
                   </div>
                 </PortalTableCell>
                 <PortalTableCell>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigate?.('clients', String(request.clientId));
-                    }}
-                    className="cell-link-btn"
-                  >
-                    {request.clientName}
-                  </button>
+                  {request.clientId && onNavigate ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate('client-detail', String(request.clientId));
+                      }}
+                      className="cell-link-btn"
+                    >
+                      {request.clientName}
+                    </button>
+                  ) : (
+                    <span>{request.clientName}</span>
+                  )}
                 </PortalTableCell>
                 <PortalTableCell>
                   <span

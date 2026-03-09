@@ -129,6 +129,9 @@ function ClientDetailRoute(props: Record<string, unknown>) {
       clientId={clientId}
       onBack={() => navigate('/clients')}
       onViewProject={(pid: number) => navigate(`/project-detail/${pid}`)}
+      onNavigate={(tab: string, entityId?: string) => {
+        navigate(entityId ? `/${tab}/${entityId}` : `/${tab}`);
+      }}
       {...props}
     />
   );
