@@ -1,7 +1,7 @@
 # Messaging System
 
 **Status:** Complete
-**Last Updated:** February 3, 2026
+**Last Updated:** March 9, 2026
 
 ## Table of Contents
 
@@ -71,234 +71,86 @@ The messaging system provides real-time communication between clients and develo
 
 ## UI Implementation
 
-### HTML Structure
+### React Components (Current)
 
-#### Complete Messages Tab
+The admin project-level messaging is implemented entirely in React via the `MessageThread` factory.
 
-```html
-<!-- templates/pages/client-portal.ejs:128-181 -->
-<div class="tab-content" id="tab-messages">
-    <div class="page-header">
-        <h2>Messages</h2>
-    </div>
+#### MessageThread Factory
 
-    <!-- Messages Thread -->
-    <div class="messages-container cp-shadow">
-        <div class="messages-thread" id="messages-thread">
-            <!-- Message items rendered here -->
-        </div>
+`src/react/factories/MessageThread.tsx` — reusable thread component used in all admin messaging
+contexts. Renders:
 
-        <!-- Compose Message -->
-        <div class="message-compose">
-            <div class="message-input-wrapper">
-                <textarea id="message-input" class="form-textarea"
-                          placeholder="Type your message..."></textarea>
-                <button type="button" class="emoji-toggle-btn" id="emoji-toggle"
-                        aria-label="Open emoji picker">
-                    <!-- Smiley face SVG icon -->
-                </button>
-            </div>
-            <div class="emoji-picker-wrapper hidden" id="emoji-picker-wrapper">
-                <emoji-picker id="emoji-picker"></emoji-picker>
-            </div>
-            <button class="btn btn-secondary" id="btn-send-message">Send Message</button>
-        </div>
-    </div>
-</div>
+- Date separators between message days
+- Avatar + sender name (first bubble in a group only; continuation rows get a spacer)
+- Bubble row with inline hover actions (`msgtab-inline-actions`)
+- Reaction picker anchored above the Smile button via `.msgtab-reaction-anchor`
+- Footer (timestamp + read receipt) rendered outside `.msgtab-bubble-group` so the Smile button
+  vertically centers on the bubble alone
+- Inline edit form (replaces bubble; `Esc` cancels, `Cmd+Enter` saves)
+- Reaction emoji badges below the bubble
+
+```tsx
+<MessageThread
+  messages={threadMessages}
+  onSend={handleSend}
+  onEdit={handleEdit}
+  onReact={handleReact}
+  isLoading={isLoading}
+/>
 ```
 
-### Message Components
+#### MessagesTab (Admin Project Detail)
 
-#### Received Message Structure
-
-```html
-<div class="message message-received">
-    <div class="message-avatar">
-        <img src="/images/avatar.svg" alt="Noelle" class="avatar-img">
-    </div>
-    <div class="message-content">
-        <div class="message-header">
-            <span class="message-sender">Noelle</span>
-            <span class="message-time">Nov 30, 2025 at 10:30 AM</span>
-        </div>
-        <div class="message-body">
-            Welcome to your project portal!
-        </div>
-    </div>
-</div>
-```
-
-#### Sent Message Structure
-
-```html
-<div class="message message-sent">
-    <div class="message-content">
-        <div class="message-header">
-            <span class="message-sender">You</span>
-            <span class="message-time">Nov 30, 2025 at 11:15 AM</span>
-        </div>
-        <div class="message-body">
-            Thanks! Looking forward to seeing the initial designs.
-        </div>
-    </div>
-    <div class="message-avatar">
-        <div class="avatar-placeholder">YOU</div>
-    </div>
-</div>
-```
-
-### Emoji Picker
-
-**Package:** `emoji-picker-element` (vanilla JS/TS web component)
+`src/react/features/admin/project-detail/tabs/MessagesTab.tsx` — thin wrapper that maps admin
+`Message` (snake_case DB fields) to the `ThreadMessage` shape expected by `MessageThread`:
 
 ```typescript
-// src/features/client/client-portal.ts:15
-import 'emoji-picker-element';
+// Maps DB shape → factory shape
+const threadMessages = useMemo<ThreadMessage[]>(
+  () => messages.map((m) => ({
+    id: m.id,
+    content: m.content,
+    isOwn: m.sender_type === 'admin',
+    senderName: m.sender_name,
+    timestamp: m.created_at,
+    isEdited: !!m.edited_at,
+    readReceipt: m.is_read ? 'read' : 'sent',
+    reactions: reactions[m.id] || []
+  })),
+  [messages, reactions]
+);
 ```
 
-#### Event Handling
+#### MessageView (Admin Messaging Page)
 
-```typescript
-const emojiPicker = document.querySelector('emoji-picker');
-if (emojiPicker && messageInput) {
-  emojiPicker.addEventListener('emoji-click', ((e: CustomEvent) => {
-    const emoji = e.detail?.unicode;
-    if (emoji) {
-      const start = messageInput.selectionStart;
-      const end = messageInput.selectionEnd;
-      const text = messageInput.value;
-      messageInput.value = text.substring(0, start) + emoji + text.substring(end);
-      messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
-      messageInput.focus();
-    }
-  }) as EventListener);
-}
-```
+`src/react/features/admin/messaging/MessageView.tsx` — full conversation view with conversation
+list sidebar. Uses `MessageThread` for the thread panel.
 
-#### CSS Theming
+### CSS Classes
+
+Key CSS classes in `src/styles/shared/portal-messages.css` and `src/styles/admin/project-detail.css`:
 
 ```css
-.emoji-picker-wrapper emoji-picker {
-  width: 100%;
-  max-width: 400px;
-  --background: var(--color-neutral-100);
-  --border-color: #000000;
-  --indicator-color: var(--color-primary);
-  --input-border-color: var(--color-dark);
-  --button-active-background: var(--color-primary);
-  --button-hover-background: var(--color-neutral-200);
-}
+.msgtab-container        /* Outer panel wrapper */
+.msgtab-panel            /* Scrollable message list */
+.msgtab-thread           /* Message list container */
+.msgtab-row              /* Single message row */
+.msgtab-row.is-admin     /* Admin-sent message (right-aligned) */
+.msgtab-row.is-continuation /* Follow-up from same sender (no avatar) */
+.msgtab-bubble-group     /* Bubble only (footer is outside) */
+.msgtab-bubble           /* Message bubble */
+.msgtab-inline-actions   /* Hover action buttons beside bubble */
+.msgtab-reaction-anchor  /* Positions reaction picker above Smile btn */
+.msgtab-footer           /* Timestamp + read receipt row */
+.msgtab-date-sep         /* Date separator between days */
 ```
 
 ### Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
-| `Enter` | Send message |
-| `Shift + Enter` | New line in message |
-| `Tab` | Move focus from textarea to send button |
-
-### Mobile Responsiveness
-
-On mobile devices (< 768px):
-
-- Emoji picker hidden (difficult on touch)
-- Chat container takes most of screen height
-- Messages thread scrollable within container
-- Send button always visible
-- Message bubbles extend to edges
-- Avatar positioning optimized for touch
-
-```css
-@media (max-width: 768px) {
-  .emoji-picker-container {
-    display: none !important;
-  }
-
-  .messages-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 100px);
-  }
-
-  .messages-thread {
-    flex: 1;
-    min-height: 0;
-    max-height: none;
-    overflow-y: auto;
-  }
-}
-```
-
-### Styling
-
-#### Messages Container
-
-```css
-.messages-container {
-  background: var(--color-neutral-300);
-  border: 4px solid #000000;
-  padding: 1.5rem;
-}
-
-.messages-thread {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 1.5rem;
-}
-```
-
-#### Message Layout
-
-```css
-.message {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.message-received { flex-direction: row; }
-.message-sent { flex-direction: row-reverse; }
-
-.message-content {
-  max-width: 70%;
-  padding: 1rem;
-}
-
-.message-received .message-content {
-  background: var(--color-neutral-100);
-  border-radius: 0 12px 12px 12px;
-}
-
-.message-sent .message-content {
-  background: var(--color-primary);
-  color: var(--color-dark);
-  border-radius: 12px 0 12px 12px;
-}
-```
-
-#### Avatar Styles
-
-```css
-.message-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: var(--color-neutral-200);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 0.75rem;
-}
-```
+| `Cmd/Ctrl + Enter` | Send message (in compose textarea) |
+| `Escape` | Cancel inline edit |
 
 ---
 
@@ -907,20 +759,27 @@ const url = bustCache
 }
 ```
 
-### Module Architecture
+### Component Architecture
 
-**Module** (`src/features/admin/modules/admin-messaging.ts`):
+All admin messaging UI is React-based. The architecture uses a factory pattern:
 
-- State management for selected client/thread
-- API calls for messaging operations
+**`MessageThread` factory** (`src/react/factories/MessageThread.tsx`):
 
-**Renderer** (`src/features/admin/renderers/admin-messaging.renderer.ts`):
+- Self-contained thread rendering for any messaging context
+- Accepts `ThreadMessage[]` shape — context maps its own data to this shape
+- Handles: send, edit, react, date separators, read receipts, reaction picker
 
-- `renderThreadsList(threads)` - Renders thread list sidebar
-- `renderMessages(messages)` - Renders messages in thread view
-- `appendMessage(message)` - Optimistic UI update
-- `clearMessageInput()` - Clears compose textarea
-- `updateUnreadBadge(count)` - Updates sidebar badge
+**`MessagesTab`** (`src/react/features/admin/project-detail/tabs/MessagesTab.tsx`):
+
+- Thin data-mapping wrapper around `MessageThread`
+- Maps admin DB shape (snake_case) to `ThreadMessage` shape via `useMemo`
+- Only responsibility: data transformation + calling `onLoadMessages` on mount
+
+**`MessageView`** (`src/react/features/admin/messaging/MessageView.tsx`):
+
+- Full messaging page: conversation list sidebar + thread panel
+- Uses `MessageThread` for the thread display
+- Manages conversation selection state
 
 ### Email Notifications
 
@@ -942,12 +801,12 @@ await emailService.sendMessageNotification(clientEmail, {
 
 | File | Purpose |
 |------|---------|
-| `client/portal.html` | Messages HTML (tab-messages section) |
-| `src/features/client/modules/portal-messages.ts` | Client message module (~270 lines) |
-| `src/features/admin/modules/admin-messaging.ts` | Admin message module (~400 lines) |
-| `src/features/admin/renderers/admin-messaging.renderer.ts` | Admin messaging UI renderer |
-| `src/styles/shared/portal-messages.css` | Client message styling |
-| `src/styles/admin/project-detail.css` | Admin message styling |
+| `src/react/factories/MessageThread.tsx` | Reusable thread UI (React factory) |
+| `src/react/factories/index.ts` | Factory barrel export |
+| `src/react/features/admin/project-detail/tabs/MessagesTab.tsx` | Project-level thread (admin) |
+| `src/react/features/admin/messaging/MessageView.tsx` | Full conversation view (admin) |
+| `src/styles/shared/portal-messages.css` | Shared message component styles |
+| `src/styles/admin/project-detail.css` | Admin msgtab component styles |
 | `server/routes/messages.ts` | API endpoints |
 | `server/services/message-service.ts` | Message service (backend logic) |
 | `server/services/email-service.ts` | Email notifications |
@@ -956,6 +815,14 @@ await emailService.sendMessageNotification(clientEmail, {
 ---
 
 ## Change Log
+
+### March 9, 2026 - React Refactor
+
+- `MessagesTab` refactored to thin data-mapping wrapper around `MessageThread` factory
+- Reaction picker moved from `.msgtab-bubble-group` anchor to `.msgtab-reaction-anchor` wrapper around Smile button
+- Footer (timestamp + read receipt) moved outside `.msgtab-bubble-group` so inline actions center on bubble
+- `MessageView` uses `apiPut` for message edits
+- Updated File Locations and Component Architecture to reflect current React implementation
 
 ### February 3, 2026 - Documentation Consolidation
 

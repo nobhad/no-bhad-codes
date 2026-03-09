@@ -1,6 +1,6 @@
 # Design System
 
-**Last Updated:** February 20, 2026
+**Last Updated:** March 9, 2026
 
 This document is the single source of truth for the project's design system, combining CSS architecture, UX guidelines, and component standards.
 
@@ -99,14 +99,22 @@ This document is the single source of truth for the project's design system, com
 --color-brand-primary: #dc2626;   /* Same */
 ```
 
-**Portal Theme Variables** (defined under `[data-page="client-portal"], [data-page="admin"]`):
+**Portal Theme Variables** (defined in `src/design-system/tokens/portal-theme.css`,
+scoped to `body[data-page="admin"]` and `body[data-page="client-portal"]`):
+
+The portal overrides the same semantic `--color-*` tokens that the main site defines.
+All portal colors derive from two primary variables:
 
 | Category | Variables |
 |----------|-----------|
-| Text | `--portal-text-light`, `--portal-text-secondary`, `--portal-text-muted`, `--portal-text-dark` |
-| Backgrounds | `--portal-bg-darker`, `--portal-bg-dark`, `--portal-bg-medium`, `--portal-bg-light`, `--portal-bg-hover` |
-| Borders | `--portal-border-dark`, `--portal-border-medium`, `--portal-border-light`, `--portal-border` |
-| Radius | `--portal-radius-xs` (4px), `--portal-radius-sm` (6px), `--portal-radius-md` (8px), `--portal-radius-lg` (12px) |
+| Primaries | `--color-text-primary`, `--color-bg-primary` (all other colors derived from these) |
+| Text | `--color-text-secondary`, `--color-text-tertiary`, `--color-text-inverse` |
+| Backgrounds | `--color-bg-secondary/tertiary/raised/elevated/prominent/readonly/hover` |
+| Borders | `--color-border-primary`, `--color-border-secondary`, `--portal-border` (shorthand) |
+| Alpha | `--portal-alpha-white-*`, `--portal-alpha-black-*`, `--portal-alpha-primary-*` |
+| Radius | `--portal-radius-pill: 0` (brutalist — all border radii are 0) |
+| Layout | `--portal-card-padding`, `--portal-panel-padding-x`, `--portal-section-gap` |
+| Action gaps | `--action-btn-gap` (8px), `--table-actions-gap` (8px) |
 
 ### Typography
 
@@ -445,9 +453,9 @@ letter-spacing: var(--label-letter-spacing); /* 0.05em */
 
 ```css
 .portal-card {
-  background: var(--color-neutral-200);
-  border: 4px solid #000000;
-  padding: 1.5rem;
+  background: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-primary);
+  padding: var(--portal-card-padding);
 }
 ```
 
@@ -546,23 +554,9 @@ border-radius: var(--portal-radius-lg);
 
 ### Modals
 
-All modals use `createPortalModal()` from `/src/components/portal-modal.ts`:
-
-```typescript
-const modal = createPortalModal({
-  id: 'modal-id',
-  titleId: 'modal-title-id',
-  title: 'Modal Title',
-  onClose: () => modal.hide()
-});
-
-modal.body.innerHTML = `<!-- Content -->`;
-modal.footer.innerHTML = `
-  <button class="btn btn-outline">Cancel</button>
-  <button class="btn btn-primary">Save</button>
-`;
-modal.show();
-```
+Portal modals use CSS classes from `src/styles/shared/modal-system.css` and
+`src/styles/admin/modals.css`. The React portal uses `PortalModal` components
+defined in `src/react/components/portal/`.
 
 **Structure:**
 
