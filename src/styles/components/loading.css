@@ -467,8 +467,8 @@ p.empty-state {
 /* Empty state icon - for manual icon insertion */
 /* IMPORTANT: Uses inherit so Lucide SVGs get text color from parent */
 .empty-icon {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   color: inherit;
   flex-shrink: 0;
 }
@@ -480,8 +480,8 @@ p.empty-state {
 .error-state > svg,
 .empty-icon > svg,
 .error-state-icon > svg {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   flex-shrink: 0;
   color: inherit;
   stroke: currentColor;

@@ -612,8 +612,8 @@ html[data-theme="dark"] .coming-soon-banner {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   color: currentColor;
   transition: opacity var(--transition-normal) ease;
   filter: drop-shadow(0 2px 4px var(--color-shadow));

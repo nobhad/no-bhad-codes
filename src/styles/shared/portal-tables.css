@@ -1734,6 +1734,8 @@
   display: inline-block;
   vertical-align: middle;
   flex-shrink: 0;
+  width: var(--table-icon-size);
+  height: var(--table-icon-size);
 }
 
 /* ==============================================
