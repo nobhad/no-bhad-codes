@@ -143,10 +143,13 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   text-transform: inherit;
 }
 
-/* Remove bottom border on trigger when open - seamless connection */
+/* Remove bottom border on trigger when open - seamless connection.
+   Collapse the 3D bottom border (6px) to match the regular border (2px)
+   so the dropdown content sits flush with no visible gap. */
 .dropdown-trigger[data-state="open"],
 :is(.btn, .btn-secondary, .btn-primary, .btn-outline).dropdown-trigger[data-state="open"] {
   border-bottom-color: transparent;
+  border-bottom-width: var(--portal-btn-border-width, 2px);
 }
 
 /* Hover state for button dropdown triggers - ensure text visible */
@@ -168,16 +171,17 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
 }
 
-/* Remove top border when positioned below trigger - seamless connection */
+/* Remove top border when positioned below trigger - seamless connection.
+   margin-top offsets the trigger's normalized border-bottom-width (--portal-btn-border-width = 2px). */
 .portal-dropdown-content[data-side="bottom"] {
   border-top: none;
-  margin-top: calc(-1 * var(--border-width));
+  margin-top: calc(-1 * var(--portal-btn-border-width, 2px));
 }
 
 /* Remove bottom border when positioned above trigger */
 .portal-dropdown-content[data-side="top"] {
   border-bottom: none;
-  margin-bottom: calc(-1 * var(--border-width));
+  margin-bottom: calc(-1 * var(--portal-btn-border-width, 2px));
 }
 
 /* Sub content - same styling as main content */

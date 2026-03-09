@@ -1094,6 +1094,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  border-color: var(--color-white);
 }
 
 .contract-warning-icon {
@@ -1104,6 +1105,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Panel without padding (for tables) */
 .contract-panel-no-padding {
+  padding: 0;
   overflow: hidden;
 }
 
@@ -1114,15 +1116,18 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   gap: var(--space-6);
+  font-size: var(--font-size-sm);
 }
 
-/* Invoice filter select width */
+/* Invoice filter select — matches dropdown content min-width so trigger = content width */
 .invtab-filter {
-  min-width: 140px;
+  height: 36px;
+  min-width: var(--status-dropdown-width);
 }
 
 /* Invoice table panel (no extra padding) */
 .invtab-panel {
+  padding: 0;
   overflow: hidden;
 }
 
@@ -1210,6 +1215,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-4);
+  border-radius: 0;
 }
 
 /* Message thread column */
@@ -1235,6 +1241,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   width: var(--icon-size-2xl);
   height: var(--icon-size-2xl);
   flex-shrink: 0;
+  border-radius: 0;
 }
 
 /* Admin avatar — CSS mask matching header branding avatar */
@@ -1362,12 +1369,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .msgtab-bubble {
   padding: var(--space-2) var(--space-4);
   border: var(--portal-border);
+  border-radius: 0;
 }
 
 /* Message content text */
 .msgtab-content {
   margin: 0;
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
+  white-space: pre-wrap;
   word-wrap: break-word;
 }
 
@@ -1407,6 +1417,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex-direction: column;
   gap: var(--space-2);
   border-top: var(--portal-border);
+  border-radius: 0;
   /* Bleed border-top to panel edges by cancelling parent horizontal padding */
   margin-left: calc(-1 * var(--space-2));
   margin-right: calc(-1 * var(--space-2));
@@ -1416,6 +1427,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Message textarea full width */
 .msgtab-textarea {
   width: 100%;
+  min-height: 60px;
 }
 
 /* Send button spans full width matching textarea */
@@ -1451,4 +1463,5 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .notes-hint {
   font-size: var(--font-size-sm);
   margin-top: var(--space-2);
+  text-align: right;
 }

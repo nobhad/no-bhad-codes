@@ -222,7 +222,7 @@ export function InvoicesTab({
                 <ChevronDown className="dropdown-caret" />
               </button>
             </PortalDropdownTrigger>
-            <PortalDropdownContent align="start" sideOffset={4}>
+            <PortalDropdownContent align="start" sideOffset={0}>
               {STATUS_FILTER_OPTIONS.map((opt) => (
                 <PortalDropdownItem
                   key={opt.value}
