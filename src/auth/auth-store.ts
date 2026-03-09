@@ -232,6 +232,9 @@ function createAuthStore(): AuthStore {
 
     if (timeUntilRefresh > 0) {
       refreshTimer = window.setTimeout(doRefreshSession, timeUntilRefresh);
+    } else {
+      // Already past refresh threshold - refresh immediately
+      doRefreshSession();
     }
   }
 

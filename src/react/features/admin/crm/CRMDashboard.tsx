@@ -6,7 +6,7 @@ import { LoadingState } from '@react/factories';
 // Lazy load child components
 const LeadsTable = React.lazy(() => import('../leads/LeadsTable').then(m => ({ default: m.LeadsTable })));
 const ContactsTable = React.lazy(() => import('../contacts/ContactsTable').then(m => ({ default: m.ContactsTable })));
-const MessagingView = React.lazy(() => import('../messaging/MessagingView').then(m => ({ default: m.MessagingView })));
+const MessageView = React.lazy(() => import('../messaging/MessageView').then(m => ({ default: m.MessageView })));
 const MessagesTable = React.lazy(() => import('../messaging/MessagesTable').then(m => ({ default: m.MessagesTable })));
 const ClientsTable = React.lazy(() => import('../clients/ClientsTable').then(m => ({ default: m.ClientsTable })));
 
@@ -62,7 +62,7 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
     return (
       <div className="subtab-content-wrapper">
         <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
-          <MessagingView onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+          <MessageView onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
         </React.Suspense>
       </div>
     );

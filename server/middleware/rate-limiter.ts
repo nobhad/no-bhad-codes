@@ -200,80 +200,91 @@ export function createRateLimiter(config: RateLimitConfig) {
   } = config;
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    const ip = getClientIP(req);
-    const key = keyGenerator(req);
-    const now = Date.now();
+    try {
+      const ip = getClientIP(req);
+      const key = keyGenerator(req);
+      const now = Date.now();
 
-    // Check if IP is permanently blocked
-    if (await isIPBlocked(ip)) {
-      errorResponseWithPayload(res, 'Access denied', 403, 'IP_BLOCKED', {
-        message: 'Your IP address has been blocked'
-      });
-      return;
-    }
+      // Check if IP is permanently blocked
+      if (await isIPBlocked(ip)) {
+        errorResponseWithPayload(res, 'Access denied', 403, 'IP_BLOCKED', {
+          message: 'Your IP address has been blocked'
+        });
+        return;
+      }
 
-    // Get or create rate limit entry
-    let entry = rateLimitCache.get(key);
+      // Get or create rate limit entry
+      let entry = rateLimitCache.get(key);
 
-    // Check if currently blocked
-    if (entry?.blockedUntil && entry.blockedUntil > now) {
-      const retryAfter = Math.ceil((entry.blockedUntil - now) / 1000);
-      res.setHeader('Retry-After', retryAfter);
-      res.setHeader('X-RateLimit-Limit', maxRequests);
-      res.setHeader('X-RateLimit-Remaining', 0);
-      res.setHeader('X-RateLimit-Reset', Math.ceil(entry.blockedUntil / 1000));
+      // Check if currently blocked
+      if (entry?.blockedUntil && entry.blockedUntil > now) {
+        const retryAfter = Math.ceil((entry.blockedUntil - now) / 1000);
+        res.setHeader('Retry-After', retryAfter);
+        res.setHeader('X-RateLimit-Limit', maxRequests);
+        res.setHeader('X-RateLimit-Remaining', 0);
+        res.setHeader('X-RateLimit-Reset', Math.ceil(entry.blockedUntil / 1000));
 
-      errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
-        message: 'Rate limit exceeded. Please try again later.',
-        retryAfter
-      });
-      return;
-    }
+        errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
+          message: 'Rate limit exceeded. Please try again later.',
+          retryAfter
+        });
+        return;
+      }
 
-    // Reset window if expired
-    if (!entry || now - entry.windowStart > windowMs) {
-      entry = {
-        count: 0,
-        windowStart: now
-      };
-    }
+      // Reset window if expired
+      if (!entry || now - entry.windowStart > windowMs) {
+        entry = {
+          count: 0,
+          windowStart: now
+        };
+      }
 
-    // Increment request count
-    entry.count++;
+      // Increment request count
+      entry.count++;
 
-    // Check if limit exceeded
-    if (entry.count > maxRequests) {
-      entry.blockedUntil = now + blockDurationMs;
+      // Check if limit exceeded
+      if (entry.count > maxRequests) {
+        entry.blockedUntil = now + blockDurationMs;
+        rateLimitCache.set(key, entry);
+
+        const retryAfter = Math.ceil(blockDurationMs / 1000);
+        res.setHeader('Retry-After', retryAfter);
+        res.setHeader('X-RateLimit-Limit', maxRequests);
+        res.setHeader('X-RateLimit-Remaining', 0);
+        res.setHeader('X-RateLimit-Reset', Math.ceil(entry.blockedUntil / 1000));
+
+        // Log the rate limit event
+        await logRateLimitEvent(ip, req.path, entry.count, true, new Date(entry.blockedUntil));
+
+        errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
+          message: 'Rate limit exceeded. Please try again later.',
+          retryAfter
+        });
+        return;
+      }
+
+      // Update cache
       rateLimitCache.set(key, entry);
 
-      const retryAfter = Math.ceil(blockDurationMs / 1000);
-      res.setHeader('Retry-After', retryAfter);
+      // Set rate limit headers
+      const remaining = Math.max(0, maxRequests - entry.count);
+      const resetTime = Math.ceil((entry.windowStart + windowMs) / 1000);
+
       res.setHeader('X-RateLimit-Limit', maxRequests);
-      res.setHeader('X-RateLimit-Remaining', 0);
-      res.setHeader('X-RateLimit-Reset', Math.ceil(entry.blockedUntil / 1000));
+      res.setHeader('X-RateLimit-Remaining', remaining);
+      res.setHeader('X-RateLimit-Reset', resetTime);
 
-      // Log the rate limit event
-      await logRateLimitEvent(ip, req.path, entry.count, true, new Date(entry.blockedUntil));
-
-      errorResponseWithPayload(res, 'Too Many Requests', 429, 'RATE_LIMIT_EXCEEDED', {
-        message: 'Rate limit exceeded. Please try again later.',
-        retryAfter
+      next();
+    } catch (_error) {
+      // Rate limiting is security middleware - fail closed
+      logger.error('Rate limiter middleware error', {
+        error: _error instanceof Error ? _error : undefined
       });
-      return;
+
+      errorResponseWithPayload(res, 'Rate limiter error', 500, 'RATE_LIMIT_ERROR', {
+        message: 'An internal error occurred'
+      });
     }
-
-    // Update cache
-    rateLimitCache.set(key, entry);
-
-    // Set rate limit headers
-    const remaining = Math.max(0, maxRequests - entry.count);
-    const resetTime = Math.ceil((entry.windowStart + windowMs) / 1000);
-
-    res.setHeader('X-RateLimit-Limit', maxRequests);
-    res.setHeader('X-RateLimit-Remaining', remaining);
-    res.setHeader('X-RateLimit-Reset', resetTime);
-
-    next();
   };
 }
 

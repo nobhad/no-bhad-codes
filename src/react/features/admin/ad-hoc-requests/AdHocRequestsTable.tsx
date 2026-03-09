@@ -218,7 +218,7 @@ export function AdHocRequestsTable({ clientId, projectId, getAuthToken, showNoti
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.adHocRequest(requestId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });

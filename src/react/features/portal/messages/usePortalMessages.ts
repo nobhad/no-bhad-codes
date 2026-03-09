@@ -234,7 +234,7 @@ export function usePortalMessages({
       try {
         const data = await portalFetch<UpdateMessageResponse>(
           `${buildEndpoint.messageThreadMessages(selectedThread.id)}/${messageId}`,
-          { method: 'PATCH', body: { content } }
+          { method: 'PUT', body: { content } }
         );
 
         // Update message in state

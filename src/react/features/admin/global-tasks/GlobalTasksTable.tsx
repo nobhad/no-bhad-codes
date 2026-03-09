@@ -234,7 +234,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
   const handleStatusChange = useCallback(async (taskId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.adminTask(taskId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
@@ -259,7 +259,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
 
     const ids = selection.selectedItems.map((t) => t.id);
     try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.TASKS_BULK_DELETE, { ids });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.TASKS_BULK_DELETE, { taskIds: ids });
 
       if (!response.ok) throw new Error('Failed to delete tasks');
 

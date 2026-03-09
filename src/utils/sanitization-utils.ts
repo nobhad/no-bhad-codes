@@ -365,13 +365,6 @@ export class SanitizationUtils {
     };
 
     logger.warn('Security violation detected:', violation);
-
-    // In production, you might want to send this to your monitoring service
-    // fetch('/api/security-violation', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(violation)
-    // }).catch(() => {}); // Ignore errors
   }
 }
 

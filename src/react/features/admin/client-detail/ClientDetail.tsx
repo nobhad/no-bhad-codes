@@ -240,9 +240,6 @@ export function ClientDetail({
             </div>
 
             <div className="detail-meta">
-              {client.email && (
-                <span className="meta-value">{client.email}</span>
-              )}
               {client.client_type && (
                 <span className="meta-item">
                   <span className="field-label">Type:</span>{' '}

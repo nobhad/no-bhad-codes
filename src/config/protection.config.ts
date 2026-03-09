@@ -73,21 +73,6 @@ export const PROTECTION_CONFIG: CodeProtectionConfig = {
   onViolation: (type: string, details: unknown) => {
     console.warn(`🛡️ [Protection] ${type.toUpperCase()} violation detected:`, details);
 
-    // Optional: Send violation data to your analytics
-    // if (window.gtag) {
-    //   window.gtag('event', 'security_violation', {
-    //     violation_type: type,
-    //     user_agent: navigator.userAgent,
-    //     timestamp: Date.now()
-    //   });
-    // }
-
-    // Optional: Send to your backend
-    // fetch('/api/security-violation', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ type, details, timestamp: Date.now() })
-    // }).catch(() => {}); // Ignore errors
   }
 };
 

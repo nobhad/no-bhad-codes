@@ -195,7 +195,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.questionnaire(questionnaireId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
