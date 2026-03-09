@@ -120,7 +120,7 @@ export function EmailTemplatesManager({ onNavigate: _onNavigate, getAuthToken, s
     defaultStats: { total: 0, active: 0, categories: [] },
     itemsKey: 'templates'
   });
-  const templates = data?.items ?? [];
+  const templates = useMemo(() => data?.items ?? [], [data?.items]);
   const stats = data?.stats ?? { total: 0, active: 0, categories: [] };
 
   const {

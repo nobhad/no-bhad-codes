@@ -75,7 +75,7 @@ const KPI_ICONS: Record<string, React.ReactNode> = {
   target: <Target className="icon-lg" />
 };
 
-export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetricsProps) {
+export function PerformanceMetrics({ onNavigate, getAuthToken: _getAuthToken }: PerformanceMetricsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

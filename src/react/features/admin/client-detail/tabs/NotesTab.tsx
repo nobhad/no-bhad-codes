@@ -138,7 +138,7 @@ export function NotesTab({
 
   // Render note form
   const renderForm = () => (
-    <div className="panel panel-form-spacing">
+    <div className="panel">
       <div className="panel-header-row--compact">
         <h3 className="heading text-sm">
           {editingId ? 'Edit Note' : 'New Note'}

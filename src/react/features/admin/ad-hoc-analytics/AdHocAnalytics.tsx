@@ -59,7 +59,7 @@ interface AdHocAnalyticsProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function AdHocAnalytics({ getAuthToken, showNotification }: AdHocAnalyticsProps) {
+export function AdHocAnalytics({ getAuthToken: _getAuthToken, showNotification }: AdHocAnalyticsProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

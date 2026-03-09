@@ -114,7 +114,7 @@ const ActivityList = React.memo(({ activities, onNavigate }: ActivityListProps) 
       {activities.map((item, index) => (
         <li
           key={`${item.type}-${item.entityId ?? 'none'}-${index}`}
-          className="list-item activity-item"
+          className="list-item"
           onClick={
             item.entityId && onNavigate
               ? () => onNavigate(item.type, item.entityId)

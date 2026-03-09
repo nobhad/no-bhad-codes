@@ -119,7 +119,7 @@ function sortArticles(a: Article, b: Article, sort: SortConfig): number {
   }
 }
 
-export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
+export function ArticlesTable({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification: _showNotification, defaultPageSize = 25, overviewMode = false }: ArticlesTableProps) {
   const containerRef = useFadeIn();
 
   const [isLoading, setIsLoading] = useState(true);

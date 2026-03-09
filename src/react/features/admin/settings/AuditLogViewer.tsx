@@ -72,7 +72,7 @@ function getActionLabel(action: string): string {
   return ACTION_LABELS[action] || action.replace(/_/g, ' ');
 }
 
-export function AuditLogViewer({ getAuthToken, showNotification: _showNotification }: AuditLogViewerProps) {
+export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: _showNotification }: AuditLogViewerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

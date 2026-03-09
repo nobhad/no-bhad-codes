@@ -105,7 +105,7 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
   const [query, setQuery] = React.useState('');
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const listRef = React.useRef<HTMLUListElement>(null);
+  const listRef = React.useRef<HTMLUListElement>(null); // eslint-disable-line no-undef
   const overlayRef = useFadeIn<HTMLDivElement>();
   const panelRef = useScaleIn<HTMLDivElement>();
 

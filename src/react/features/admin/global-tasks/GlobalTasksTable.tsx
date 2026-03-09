@@ -148,7 +148,7 @@ function sortTasks(a: Task, b: Task, sort: SortConfig): number {
   }
 }
 
-export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: GlobalTasksTableProps) {
+export function GlobalTasksTable({ getAuthToken: _getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: GlobalTasksTableProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
 

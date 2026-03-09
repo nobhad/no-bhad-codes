@@ -206,7 +206,7 @@ export function ContactsTab({
 
   // Render contact form
   const renderForm = () => (
-    <div className="panel panel-form-spacing">
+    <div className="panel">
       <div className="panel-header-row">
         <h3 className="heading">
           {editingId ? 'Edit Contact' : 'Add Contact'}

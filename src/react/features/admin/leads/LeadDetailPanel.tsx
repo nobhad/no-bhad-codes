@@ -81,7 +81,7 @@ export function LeadDetailPanel({
   onClose,
   onStatusChange,
   onNavigate,
-  getAuthToken,
+  getAuthToken: _getAuthToken,
   showNotification
 }: LeadDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>('overview');
