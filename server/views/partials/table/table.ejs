@@ -11,7 +11,7 @@
 
   <% if (rows.length === 0) { %>
     <div class="table-empty-state">
-      <svg class="empty-icon lucide-icon" width="48" height="48" aria-hidden="true"><use href="#icon-<%= (tableDef.emptyIcon || 'inbox').toLowerCase() %>"></use></svg>
+      <svg class="empty-icon" aria-hidden="true"><use href="#icon-<%= (tableDef.emptyIcon || 'inbox').toLowerCase() %>"></use></svg>
       <p class="empty-message"><%= tableDef.emptyMessage || 'No data found' %></p>
     </div>
   <% } else { %>
