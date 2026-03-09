@@ -61,15 +61,17 @@
    * Use these instead of hardcoded gap values.
    */
 
-  /* Icon-text gaps - proportionate to icon size */
-  --icon-gap-xs: 6px; /* For 12-14px icons */
-  --icon-gap-sm: 8px; /* For 14-16px icons (DEFAULT) */
-  --icon-gap-md: 10px; /* For 16-20px icons */
-  --icon-gap-lg: 16px; /* For 20-24px icons - sidebar nav, loading states */
-  --icon-gap-xl: 20px; /* For 24px+ icons */
+  /* Icon-text gaps - proportionate to icon size
+   * Rule: icons next to text = 1em (same as text). Gap = one step larger.
+   * Each value bumped one step up from previous defaults. */
+  --icon-gap-xs: 8px;  /* bumped from 6px */
+  --icon-gap-sm: 10px; /* bumped from 8px */
+  --icon-gap-md: 12px; /* bumped from 10px */
+  --icon-gap-lg: 16px; /* sidebar nav, loading states — unchanged */
+  --icon-gap-xl: 20px; /* decorative/large contexts — unchanged */
 
-  /* Default icon gap - responsive, scales with viewport */
-  --icon-gap: clamp(6px, 0.5vw, 8px);
+  /* Default icon gap */
+  --icon-gap: clamp(8px, 0.75vw, 10px); /* bumped from clamp(6px, 0.5vw, 8px) */
 
   /* ============================================
    * PORTAL SECTION SPACING - Single Source of Truth
