@@ -110,6 +110,7 @@ export class FileTransport implements LogTransport {
     } catch (_error) {
       // File doesn't exist or other error - ignore
       // Use console.debug to avoid recursion in the logging service
+      // eslint-disable-next-line no-console
       console.debug('[FileTransport] Log rotation check failed', _error);
     }
   }

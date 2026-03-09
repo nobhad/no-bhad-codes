@@ -652,6 +652,50 @@ router.post(
 
 /**
  * @swagger
+ * /api/questionnaires/responses:
+ *   get:
+ *     tags: [Questionnaires]
+ *     summary: Get all questionnaire responses (admin)
+ *     description: Returns all questionnaire responses with optional filters.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: client_id
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: project_id
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of questionnaire responses
+ */
+router.get(
+  '/responses',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const clientId = req.query.client_id ? parseInt(req.query.client_id as string, 10) : undefined;
+    const projectId = req.query.project_id ? parseInt(req.query.project_id as string, 10) : undefined;
+    const status = req.query.status as string | undefined;
+
+    const responses = await questionnaireService.getAllResponses({
+      clientId,
+      projectId,
+      status: status as 'pending' | 'in_progress' | 'completed' | undefined
+    });
+    sendSuccess(res, { questionnaires: responses });
+  })
+);
+
+/**
+ * @swagger
  * /api/questionnaires/responses/pending:
  *   get:
  *     tags: [Questionnaires]

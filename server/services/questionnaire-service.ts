@@ -361,6 +361,50 @@ class QuestionnaireService {
   }
 
   /**
+   * Get all responses (admin view) with optional filters
+   */
+  async getAllResponses(options?: {
+    clientId?: number;
+    projectId?: number;
+    status?: ResponseStatus;
+  }): Promise<QuestionnaireResponse[]> {
+    const db = await getDatabase();
+
+    let query = `SELECT qr.*,
+            q.name as questionnaire_name,
+            q.description as questionnaire_description,
+            COALESCE(c.company_name, c.contact_name) as client_name,
+            p.project_name as project_name
+     FROM questionnaire_responses qr
+     LEFT JOIN questionnaires q ON qr.questionnaire_id = q.id
+     LEFT JOIN clients c ON qr.client_id = c.id
+     LEFT JOIN projects p ON qr.project_id = p.id
+     WHERE 1=1`;
+    const params: (number | string)[] = [];
+
+    if (options?.clientId) {
+      query += ' AND qr.client_id = ?';
+      params.push(options.clientId);
+    }
+    if (options?.projectId) {
+      query += ' AND qr.project_id = ?';
+      params.push(options.projectId);
+    }
+    if (options?.status) {
+      query += ' AND qr.status = ?';
+      params.push(options.status);
+    }
+
+    query += ` ORDER BY
+       CASE WHEN qr.due_date IS NULL THEN 1 ELSE 0 END,
+       qr.due_date ASC,
+       qr.created_at DESC`;
+
+    const rows = await db.all(query, params);
+    return rows.map((row) => this.mapResponseRow(row));
+  }
+
+  /**
    * Get all pending responses (admin view)
    */
   async getPendingResponses(): Promise<QuestionnaireResponse[]> {
