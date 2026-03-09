@@ -30,7 +30,29 @@ router.post(
   authenticateToken,
   requireAdmin,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { newClient, clientId, projectType, description, budget, timeline, notes } = req.body;
+    const {
+      newClient,
+      clientId,
+      projectType,
+      description,
+      budget,
+      timeline,
+      notes,
+      features,
+      pageCount,
+      integrations,
+      addons,
+      designLevel,
+      contentStatus,
+      brandAssets,
+      techComfort,
+      hostingPreference,
+      currentSite,
+      inspiration,
+      challenges,
+      additionalInfo,
+      referralSource
+    } = req.body;
 
     // Validate required project fields
     if (!projectType || !description || !budget || !timeline) {
@@ -59,8 +81,8 @@ router.post(
     try {
       // Create or validate client
       if (newClient) {
-        // Validate new client fields
-        if (!newClient.name || !newClient.email) {
+        // Validate new client fields (accepts contactName for React modal compatibility)
+        if (!newClient.contactName || !newClient.email) {
           return errorResponse(res, 'Client name and email are required', 400, ErrorCodes.VALIDATION_ERROR);
         }
 
@@ -81,13 +103,13 @@ router.post(
         const result = await db.run(
           `INSERT INTO clients (company_name, contact_name, email, phone, password_hash, status, client_type, created_at, updated_at)
            VALUES (?, ?, LOWER(?), ?, '', 'pending', 'business', datetime('now'), datetime('now'))`,
-          [newClient.company || null, newClient.name, newClient.email, newClient.phone || null]
+          [newClient.companyName || null, newClient.contactName, newClient.email, newClient.phone || null]
         );
         finalClientId = result.lastID!;
 
         clientData = {
-          contact_name: newClient.name,
-          company_name: newClient.company || null,
+          contact_name: newClient.contactName,
+          company_name: newClient.companyName || null,
           email: newClient.email.toLowerCase()
         };
 
@@ -116,9 +138,21 @@ router.post(
       const projectResult = await db.run(
         `INSERT INTO projects (
           client_id, project_name, description, status, project_type,
-          budget_range, timeline, additional_info, created_at, updated_at
-        ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-        [finalClientId, projectName, description, projectType, budget, timeline, notes || null]
+          budget_range, timeline, notes,
+          features, page_count, integrations, addons,
+          design_level, content_status, brand_assets,
+          tech_comfort, hosting_preference, current_site,
+          inspiration, challenges, additional_info, referral_source,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+        [
+          finalClientId, projectName, description, projectType, budget, timeline,
+          notes || null,
+          features || null, pageCount || null, integrations || null, addons || null,
+          designLevel || null, contentStatus || null, brandAssets || null,
+          techComfort || null, hostingPreference || null, currentSite || null,
+          inspiration || null, challenges || null, additionalInfo || null, referralSource || null
+        ]
       );
       const projectId = projectResult.lastID!;
 
@@ -135,7 +169,21 @@ router.post(
             description,
             budget,
             timeline,
-            notes: notes || null
+            notes: notes || null,
+            features: features || null,
+            pageCount: pageCount || null,
+            integrations: integrations || null,
+            addons: addons || null,
+            designLevel: designLevel || null,
+            contentStatus: contentStatus || null,
+            brandAssets: brandAssets || null,
+            techComfort: techComfort || null,
+            hostingPreference: hostingPreference || null,
+            currentSite: currentSite || null,
+            inspiration: inspiration || null,
+            challenges: challenges || null,
+            additionalInfo: additionalInfo || null,
+            referralSource: referralSource || null
           },
           projectId,
           projectName
@@ -222,6 +270,20 @@ interface AdminProjectData {
   budget: string;
   timeline: string;
   notes: string | null;
+  features: string | null;
+  pageCount: string | null;
+  integrations: string | null;
+  addons: string | null;
+  designLevel: string | null;
+  contentStatus: string | null;
+  brandAssets: string | null;
+  techComfort: string | null;
+  hostingPreference: string | null;
+  currentSite: string | null;
+  inspiration: string | null;
+  challenges: string | null;
+  additionalInfo: string | null;
+  referralSource: string | null;
 }
 
 async function saveAdminProjectAsFile(
@@ -232,6 +294,16 @@ async function saveAdminProjectAsFile(
   const db = getDatabase();
   const uploadsDir = getUploadsSubdir(UPLOAD_DIRS.INTAKE);
 
+  // Parse features string into array so intake PDF can iterate it
+  const featuresArray: string[] = data.features
+    ? data.features
+      .split(/[,\n]+/)
+      .map((f: string) => f.trim())
+      .filter(Boolean)
+    : [];
+
+  // Mirror the structure used by the client intake form so the intake PDF
+  // generation route can read this file identically to a client submission.
   const document = {
     submittedAt: new Date().toISOString(),
     projectId,
@@ -240,15 +312,35 @@ async function saveAdminProjectAsFile(
     clientInfo: {
       name: data.clientName,
       email: data.clientEmail,
+      projectFor: 'business',
       companyName: data.companyName
     },
     projectDetails: {
       type: data.projectType,
       description: data.description,
       timeline: data.timeline,
-      budget: data.budget
+      budget: data.budget,
+      features: featuresArray,
+      designLevel: data.designLevel || null
     },
-    additionalInfo: data.notes
+    technicalInfo: {
+      techComfort: data.techComfort || null,
+      domainHosting: data.hostingPreference || null
+    },
+    additionalInfo: data.additionalInfo || data.notes || null,
+    // Extended admin-only fields (not read by PDF generator but kept for records)
+    extendedScope: {
+      pageCount: data.pageCount,
+      integrations: data.integrations,
+      addons: data.addons,
+      contentStatus: data.contentStatus,
+      brandAssets: data.brandAssets,
+      currentSite: data.currentSite,
+      inspiration: data.inspiration,
+      challenges: data.challenges,
+      referralSource: data.referralSource
+    },
+    notes: data.notes
   };
 
   // Generate descriptive filename with NoBhadCodes branding
