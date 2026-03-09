@@ -54,7 +54,7 @@
   right: calc(-1 * var(--space-px) * 2);
   width: var(--space-1);
   height: var(--space-1);
-  background: var(--color-primary);
+  background: var(--color-accent);
   border-radius: var(--border-radius-full);
   z-index: var(--z-index-content);
 }
@@ -100,7 +100,7 @@
 /* Filter active state - uses .has-value class */
 .filter-dropdown-trigger.has-value,
 .filter-search-trigger.has-value {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .filter-count-badge {
@@ -111,7 +111,7 @@
   min-width: var(--space-2);
   height: var(--space-2);
   padding: 0 var(--space-0-5);
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-white);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);

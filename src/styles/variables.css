@@ -1,302 +1,87 @@
-/* 
-@file css/variables.css
-This CSS file defines global variables and font-face rules for consistent styling across the project.
-
-1. Font Face:
-    - Defines a custom font "PP Neue Corp Tight" with ultrabold weight (700).
-    - Font is loaded from an external URL in OpenType format.
-    - Font-display is set to "swap" for better performance.
-    - Defines Acme font from local assets and Google Fonts fallback.
-
-2. Root Variables:
-    - --size-container: Maximum width for containers.
-    - --container-padding: Padding inside containers.
-    - --gap: Default spacing between elements.
-    - --section-padding: Padding for sections.
-    - --color-neutral-300: Neutral color for light themes.
-    - --color-dark: Default dark color.
-    - --color-primary: Primary brand color.
-    - --color-primary-rgb: RGB values for the primary color.
-    - --color-neutral-100: Lightest neutral color for light themes.
-    - --color-neutral-200: Lighter neutral color for light themes.
-    - --color-neutral-800: Darkest neutral color for light themes.
-    - --color-shadow: Default shadow color with transparency.
-    - --cubic-default: Default cubic-bezier easing function for animations.
-    - --menu-padding: Padding for menu elements.
-    - --transition-fast: Fast transition duration with ease timing.
-    - --transition-medium: Medium transition duration with ease timing.
-    - --transition-slow: Slow transition duration with ease timing.
-    - --z-header: Z-index for header elements.
-    - --z-nav: Z-index for navigation elements.
-    - --z-modal: Z-index for modal elements.
-
-3. Dark Theme Variables:
-    - Overrides specific color variables for dark mode.
-    - --color-neutral-300: Neutral color for dark themes.
-    - --color-dark: Default light color for dark themes.
-    - --color-primary: Primary brand color for dark mode.
-    - --color-neutral-100: Lightest neutral color for dark themes.
-    - --color-neutral-200: Lighter neutral color for dark themes.
-    - --color-neutral-800: Darkest neutral color for dark themes.
-    - --color-shadow: Shadow color with increased transparency for dark mode.
+/*
+ * @file src/styles/variables.css
+ *
+ * This file contains:
+ * 1. OVERRIDES — fixed-rem font sizes that intentionally override the fluid
+ *    clamp() values defined in design-system/tokens/typography.css.
+ * 2. OVERRIDES — letter-spacing values wider than the design-system defaults,
+ *    used by the main site's display / nav contexts.
+ * 3. BASE STYLES — global HTML/body rules, grid utilities, layout utilities,
+ *    and responsive visibility helpers.
+ *
+ * TOKENS MIGRATED TO design-system/tokens/:
+ *   --font--acme / --font-family-acme       → typography.css
+ *   --font-weight-normal / --font-weight-base → typography.css
+ *   --font-size-* (duplicated names)         → typography.css (fluid values)
+ *   --border-width / --border-width-thick/heavy → borders.css
+ *   --svg-stroke-width                       → borders.css
+ *   --icon-size-* / --icon-text-size         → dimensions.css
+ *   --portal-nav-font-size                   → dimensions.css
+ *   --sidebar-icon-size                      → dimensions.css
+ *   --btn-portal-icon-* / --btn-table-*      → dimensions.css
+ *   --dropdown-caret-* / --dropdown-font-*   → dimensions.css
+ *   --status-dot-size / --status-dot-gap     → dimensions.css
+ *   --space-fluid-*                          → spacing.css
+ *   --cubic-default / --cubic-menu           → animations.css
+ *   --menu-padding                           → dimensions.css
+ *   --transition-faster/fast/medium/slow/slower → animations.css
+ *   --duration-faster/fast/medium/slow/slower   → animations.css
+ *   --blur-amount / --drop-distance / etc.   → animations.css
+ *   --z-header / --z-nav / --z-modal         → z-index.css
+ *   --modal-width-sm/md/lg                   → dimensions.css
+ *   --bp-xs/sm/md/lg/xl/2xl                  → breakpoints.css
+ *   --shadow-card / --shadow-content / etc.  → shadows.css
+ *   --shadow-dropdown-xl / --shadow-terminal → shadows.css
+ *   --shadow-button / --shadow-button-dark/pressed → shadows.css
+ *   --header-height / --footer-height        → dimensions.css
+ *   --size-container / --container-padding / --gap / --section-padding → dimensions.css
+ *   --nav-base-gap / --menu-* / --list-*     → dimensions.css
+ *   --business-card-*                        → dimensions.css
+ *   --contact-*                              → dimensions.css
+ *   --terminal-font-family / --terminal-line-height → dimensions.css
+ *   @custom-media breakpoints                → design-system/tokens/breakpoints.css
  */
 
 /* ============================================
- * CUSTOM MEDIA QUERIES
+ * FONT SIZE OVERRIDES
  * ============================================
- * Use these instead of hardcoded breakpoints:
- * @media (--small-mobile) { } - max-width: 479px
- * @media (--compact-mobile) { } - max-width: 600px
- * @media (--mobile) { }       - max-width: 767px
- * @media (--tablet) { }       - min-width: 768px
- * @media (--tablet-only) { }  - 768px to 991px
- * @media (--tablet-down) { }  - max-width: 991px
- * @media (--desktop) { }      - min-width: 992px
- * @media (--desktop-down) { } - max-width: 1023px
- * @media (--tablet-to-desktop) { } - 600px to 1100px (medium viewport range)
- * @media (--wide) { }         - min-width: 1200px
- * @media (--ultra-wide) { }   - min-width: 1400px
- * @media (--ultra-wide-down) { } - max-width: 1399px
- */
-/* Mobile breakpoints */
-@custom-media --xs-mobile (max-width: 400px); /* Very small phones */
-@custom-media --small-mobile (max-width: 479px);
-@custom-media --narrow-mobile (max-width: 500px); /* Narrow mobile threshold */
-@custom-media --sm-mobile (max-width: 576px); /* Bootstrap sm equivalent */
-@custom-media --compact-mobile (max-width: 600px); /* Portal sidebar collapse */
-@custom-media --mid-mobile (max-width: 700px); /* Mid-range mobile */
-@custom-media --mobile (max-width: 767px);
-
-/* Tablet breakpoints */
-@custom-media --tablet (min-width: 768px);
-@custom-media --tablet-only (min-width: 768px) and (max-width: 991px);
-@custom-media --tablet-landscape (max-width: 900px); /* Tablet in landscape orientation */
-@custom-media --tablet-wide (max-width: 960px); /* Wide tablet threshold */
-@custom-media --tablet-down (max-width: 991px); /* Everything below desktop */
-
-/* Desktop breakpoints */
-@custom-media --desktop (min-width: 992px);
-@custom-media --tablet-wide-up (min-width: 960px); /* Above tablet-wide threshold */
-@custom-media --desktop-down (max-width: 1023px); /* Everything below desktop */
-@custom-media --tablet-to-laptop (min-width: 768px) and (max-width: 1024px); /* Tablet to laptop range */
-@custom-media --laptop (max-width: 1024px); /* Small laptops */
-@custom-media --laptop-up (min-width: 1025px); /* Above laptop threshold */
-@custom-media --laptop-wide (max-width: 1100px); /* Wider laptop threshold */
-@custom-media --tablet-to-desktop (min-width: 600px) and (max-width: 1100px); /* Medium viewport range */
-@custom-media --laptop-to-wide (min-width: 1100px) and (max-width: 1300px); /* Laptop to wide range */
-@custom-media --desktop-wide (max-width: 1200px); /* Desktop to wide threshold */
-@custom-media --desktop-l (min-width: 1200px); /* Large desktop - CRT TV, side-by-side layouts */
-@custom-media --wide (min-width: 1200px);
-@custom-media --desktop-xl (max-width: 1280px); /* Extra large desktop */
-@custom-media --wide-down (max-width: 1300px); /* Below wide screens */
-@custom-media --ultra-wide (min-width: 1400px);
-@custom-media --ultra-wide-down (max-width: 1399px); /* Everything below ultra-wide */
-
-/* Font defined in typography.css */
-
+ * These fixed-rem values intentionally override the fluid clamp() values
+ * in design-system/tokens/typography.css for the main site.
+ * Portal pages rely on the fluid values from typography.css.
+ * ============================================ */
 :root {
-  /* Font Families */
-  --font--acme: "Acme", sans-serif;
-  --font-family-acme: var(--font--acme);
+  --font-size-2xs: 0.625rem; /* 10px — badges/tags */
+  --font-size-xs: 0.75rem;   /* 12px — table cells, secondary text */
+  --font-size-sm: 0.875rem;  /* 14px — body text, buttons */
+  --font-size-base: 1rem;    /* 16px — default body */
+  --font-size-lg: 1.125rem;  /* 18px — headings */
+  --font-size-xl: 1.25rem;   /* 20px — large headings */
+  --font-size-2xl: 1.5rem;   /* 24px — page titles */
+  --font-size-3xl: 2rem;     /* 32px — hero text */
 }
 
-/* Portal light mode overrides - see portal-theme.css */
-
+/* ============================================
+ * LETTER SPACING OVERRIDES
+ * ============================================
+ * The main site uses wider tracking than the design-system defaults.
+ * These override --letter-spacing-label, --letter-spacing-title, and
+ * --letter-spacing-wide defined in typography.css.
+ * ============================================ */
 :root {
-
-  /* Container and Layout - defined in base/layout.css */
-
-  /* Responsive Typography */
-  --font-size-2xs: 0.625rem; /* 10px - smallest, badges/tags */
-  --font-size-xs: 0.75rem; /* 12px - table cells, secondary text */
-  --font-size-sm: 0.875rem; /* 14px - body text, buttons */
-  --font-size-base: 1rem; /* 16px - default body */
-  --font-size-lg: 1.125rem; /* 18px - headings */
-  --font-size-xl: 1.25rem; /* 20px - large headings */
-  --font-size-2xl: 1.5rem; /* 24px - page titles */
-  --font-size-3xl: 2rem; /* 32px - hero text */
-
-  /* Border Width - DISCOTHÈQUE uses 2px borders consistently */
-  --border-width: 2px;
-  --border-width-thick: 3px;   /* For focus states, emphasized borders */
-  --border-width-heavy: 4px;   /* For strong visual emphasis */
-
-  /* SVG Stroke Width - matches border thickness for visual consistency */
-  --svg-stroke-width: 2.5;
-
-  /* Icon Sizes - standardized icon dimensions */
-  --icon-size-xs: 12px;
-  --icon-size-sm: 14px;
-  --icon-size-md: 16px;
-  --icon-size-lg: 20px;
-  --icon-size-xl: 24px;
-  --icon-size-2xl: 32px;
-
-  /* Icon-Text Size Matching - icons in same row as text MUST match text size */
-  --icon-text-size: var(--font-size-sm); /* 14px - matches body text */
-
-  /* Navigation Font Size - shared by header logo text + sidebar buttons */
-  --portal-nav-font-size: 1.25rem;
-
-  /* Sidebar Icon Size - SINGLE VALUE for both open & collapsed states */
-  --sidebar-icon-size: 20px;
-
-  /* Button Icon Sizes - portal icon button dimensions */
-  --btn-portal-icon-size: 32px;
-  --btn-portal-icon-size-sm: 28px;
-  --btn-portal-icon-size-xs: 24px;
-  --btn-table-icon-size: 24px;
-  --btn-portal-icon-inner-size: 14px; /* Icon SVG size inside buttons - matches text */
-
-  /* Dropdown caret sizing and spacing - consistent across all dropdowns */
-  --dropdown-caret-size: var(--icon-size-xs);
-  --dropdown-caret-gap: var(--space-2); /* Gap between text and caret */
-
-  /* Dropdown text styling - single source of truth for all dropdowns */
-  --dropdown-font-size: inherit;
-  --dropdown-font-weight: inherit;
-  --dropdown-font-family: inherit;
-  --dropdown-letter-spacing: inherit;
-  --dropdown-text-transform: none;
-
-  /* Status dot sizing - single source of truth for ALL status indicators */
-  --status-dot-size: 8px;
-  --status-dot-gap: var(--space-2); /* Gap between dot and text */
-
-  /* Font Weight aliases not in design-system tokens */
-  --font-weight-normal: 400;
-  --font-weight-base: 400;
-
-  /* Letter Spacing overrides - main site uses wider tracking than design-system defaults */
   --letter-spacing-label: 0.05em;
   --letter-spacing-title: 0.02em;
   --letter-spacing-wide: 0.08em;
-
-  /* Responsive (fluid) spacing - use for layout that should scale with viewport.
-     Fixed scale (--space-0, --space-1, ...) is in design-system/tokens/spacing.css */
-  --space-fluid-xs: clamp(0.25rem, 1vw, 0.5rem);
-  --space-fluid-sm: clamp(0.5rem, 2vw, 1rem);
-  --space-fluid-md: clamp(1rem, 3vw, 1.5rem);
-  --space-fluid-lg: clamp(1.5rem, 4vw, 2rem);
-  --space-fluid-xl: clamp(2rem, 5vw, 3rem);
-  --space-fluid-2xl: clamp(3rem, 6vw, 4rem);
-
-  /* Animations and Transitions */
-  --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --menu-padding: clamp(0.5rem, 2vw, 1rem);
-
-  /* Transition tokens - use for consistent animations */
-  --transition-faster: 0.15s ease;
-  --transition-fast: 0.2s ease;
-  --transition-medium: 0.3s ease;
-  --transition-slow: 0.4s ease;
-  --transition-slower: 0.5s ease;
-
-  /* Duration-only tokens - for complex multi-property transitions */
-  --duration-faster: 0.15s;
-  --duration-fast: 0.2s;
-  --duration-medium: 0.3s;
-  --duration-slow: 0.4s;
-  --duration-slower: 0.5s;
-
-  /* Z-index */
-  --z-header: 10;
-  --z-nav: 100;
-  --z-modal: 1000;
-
-  /* Modal sizes */
-  --modal-width-sm: 400px;
-  --modal-width-md: 560px;
-  --modal-width-lg: 860px;
-
-  /* Responsive Breakpoints */
-  --bp-xs: 320px;
-  --bp-sm: 576px;
-  --bp-md: 768px;
-  --bp-lg: 992px;
-  --bp-xl: 1200px;
-  --bp-2xl: 1400px;
-
-  /* ============================================
-   * SHADOW SYSTEM
-   * ============================================
-   * Standardized shadows for consistent depth across UI.
-   * Use these instead of hardcoding box-shadow values.
-   */
-
-  /* Card shadows - subtle elevation for cards and panels */
-  --shadow-card:
-    1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2),
-    0 2px 6px rgba(0, 0, 0, 0.15);
-
-  /* Content box shadows - medium elevation */
-  --shadow-content: 2px 2px 8px rgba(0, 0, 0, 0.4), 4px 4px 16px rgba(0, 0, 0, 0.3);
-
-  /* Sidebar/panel shadows - strong elevation for overlays */
-  --shadow-sidebar: 2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3);
-
-  /* Panel shadows - for floating panels with border emphasis */
-  --shadow-panel:
-    2px 0 4px rgba(0, 0, 0, 0.4), 4px 0 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.4),
-    0 4px 12px rgba(0, 0, 0, 0.3), -1px 0 1px rgba(0, 0, 0, 0.3), 0 -1px 1px rgba(0, 0, 0, 0.3);
-
-  /* Inset shadows - for progress bars and recessed elements */
-  --shadow-inset: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-inset-light:
-    inset 2px 2px 6px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(0, 0, 0, 0.15);
-
-  /* Spread shadows - for modals */
-  --shadow-spread:
-    4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
-
-  /* Elevated shadows - for floating elements */
-  --shadow-elevated-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-elevated-md: 0 8px 32px rgba(0, 0, 0, 0.1);
-  --shadow-elevated-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-elevated-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
-
-  /* Dropdown/menu shadows - top shadows for tabs */
-  --shadow-dropdown:
-    4px 0 12px rgba(0, 0, 0, 0.3), -4px 0 12px rgba(0, 0, 0, 0.3), 0 -4px 12px rgba(0, 0, 0, 0.3);
-
-  /* Large dropdown shadows - for modal-like dropdowns */
-  --shadow-dropdown-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
-
-  /* Terminal/modal shadows - layered depth effect */
-  --shadow-terminal: 4px 4px 10px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
-
-  /* Dark mode elevated shadow - stronger for contrast */
-  --shadow-elevated-dark: 0 8px 32px rgba(0, 0, 0, 0.75);
-
-  /* Button shadows - for 3D button effects */
-  --shadow-button: 6px 6px 12px rgba(0, 0, 0, 0.2), 12px 12px 24px rgba(0, 0, 0, 0.15);
-  --shadow-button-dark: 6px 6px 12px rgba(0, 0, 0, 0.5), 12px 12px 24px rgba(0, 0, 0, 0.4);
-  --shadow-button-pressed: 8px 8px 16px rgba(0, 0, 0, 0.55), 16px 16px 32px rgba(0, 0, 0, 0.45);
-
-  /* Overlay colors: single source in design-system/tokens/colors.css (--color-overlay-subtle, -light, -medium, -heavy, -dark). */
 }
 
 /* ============================================
- * PORTAL THEME VARIABLES
+ * --color-shadow OVERRIDE (navigation context)
  * ============================================
- * Portal-specific design tokens are defined in:
- * src/design-system/tokens/portal-theme.css
- *
- * This includes dark mode (DISCOTHÈQUE) and light mode overrides.
- */
-
-/* ============================================
- * COLOR VARIABLES
- * ============================================
- * NOTE: Color definitions have been consolidated into
- * src/design-system/tokens/colors.css
- *
- * Legacy variable names (--color-neutral-*, --fg, --bg, etc.)
- * are available as aliases in colors.css for backwards compatibility.
- *
- * New code should use semantic color tokens:
- * - --color-bg-primary, --color-text-primary, etc.
+ * Also defined as a legacy alias in colors.css (rgba(0, 0, 0, 0.2)).
+ * The nav section uses a stronger value.
  * ============================================ */
+:root {
+  --color-shadow: rgba(0, 0, 0, 0.5);
+}
 
 /* Base Styles with Improved Responsiveness */
 * {
@@ -461,97 +246,3 @@ img {
 /* Reduced motion, high contrast, and print styles are defined in reset.css
    (canonical source) and breakpoints.css (portal-specific overrides).
    DO NOT duplicate them here. */
-
-/* ============================================
- * LAYOUT CONSTANTS
- * Moved from base/layout.css
- * ============================================ */
-:root {
-  --header-height: 60px;
-  --footer-height: 40px;
-  --size-container: min(1200px, 100vw - 2rem);
-  --container-padding: clamp(1rem, 4vw, 2rem);
-  --gap: clamp(0.75rem, 3vw, 1.5rem);
-  --section-padding: clamp(1rem, 5vw, 2rem);
-}
-
-/* ============================================
- * SECTION & PAGE TRANSITIONS
- * Moved from base/site-globals.css, main.css, components/page-transitions.css
- * ============================================ */
-:root {
-  --blur-amount: 4px;
-  --drop-distance: 20px;
-  --transition-enter: 0.3s;
-  --transition-exit: 0.2s;
-  --stagger-delay: 0.05s;
-  --page-transition-duration: var(--transition-length);
-  --page-blur-amount: 12px;
-}
-
-/* ============================================
- * NAVIGATION
- * Moved from components/nav-base.css
- * ============================================ */
-:root {
-  --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
-  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
-  --menu-multiplier: 0.15;
-  --list-multiplier: 0.12;
-  --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
-  --menu-button-size: clamp(2rem, 4vw, 2.5rem);
-  --theme-button-size: clamp(2rem, 4vw, 2.5rem);
-  --menu-width-desktop: 35rem;
-  --menu-width-tablet: 32rem;
-  --menu-width-mobile: 100vw;
-  --menu-border-radius: 1.25rem;
-  --menu-height: 100vh;
-  --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
-  --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
-  --color-shadow: rgba(0, 0, 0, 0.5);
-}
-
-/* ============================================
- * BUSINESS CARD
- * Moved from components/business-card.css
- * ============================================ */
-:root {
-  --business-card-width-svg: 1069.5;
-  --business-card-height-svg: 599.3;
-  --business-card-aspect-ratio: 1.784582;
-  --business-card-base-width: 35vw;
-  --business-card-base-height: calc(var(--business-card-base-width) / var(--business-card-aspect-ratio));
-  --business-card-large-width: 525px;
-  --business-card-large-height: calc(var(--business-card-large-width) / var(--business-card-aspect-ratio));
-  --business-card-medium-width: 420px;
-  --business-card-medium-height: calc(var(--business-card-medium-width) / var(--business-card-aspect-ratio));
-  --business-card-small-width: 350px;
-  --business-card-small-height: calc(var(--business-card-small-width) / var(--business-card-aspect-ratio));
-  --business-card-tiny-width: 280px;
-  --business-card-tiny-height: calc(var(--business-card-tiny-width) / var(--business-card-aspect-ratio));
-}
-
-/* ============================================
- * CONTACT FORM
- * Moved from pages/contact.css
- * ============================================ */
-:root {
-  --contact-input-height: clamp(52px, 14vw, 60px);
-  --contact-input-width: min(520px, 100%);
-  --contact-textarea-height: 175px;
-  --contact-textarea-width: min(520px, 100%);
-  --contact-field-gap: 0;
-  --contact-row-gap: 0;
-  --contact-layout-height: 480px;
-  --contact-field-border-width: var(--border-width);
-  --contact-field-border-color: var(--color-text-primary);
-}
-
-/* ============================================
- * TERMINAL
- * Moved from pages/terminal-intake.css
- * ============================================ */
-:root {
-  --terminal-font-family: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --terminal-line-height: 1.7;
-}

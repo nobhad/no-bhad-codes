@@ -243,8 +243,8 @@
   line-height: var(--icon-size-lg);
   text-align: center;
   background: transparent;
-  border: var(--border-width) solid var(--color-primary);
-  color: var(--color-primary);
+  border: var(--border-width) solid var(--color-accent);
+  color: var(--color-accent);
   display: none;
   z-index: var(--z-index-elevated);
 }

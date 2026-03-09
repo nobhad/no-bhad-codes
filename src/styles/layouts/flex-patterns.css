@@ -38,6 +38,12 @@
   gap: var(--space-2);
 }
 
+/* Flex fill — takes all remaining space in a row/column */
+.flex-fill {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ============================================
  * VERTICAL LAYOUTS
  * ============================================ */

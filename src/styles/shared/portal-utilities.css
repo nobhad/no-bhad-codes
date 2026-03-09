@@ -271,7 +271,7 @@ a.text-danger:hover {
 }
 
 .text-primary {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .text-success {
@@ -375,7 +375,7 @@ a.text-danger:hover {
 }
 
 .interactive:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* =====================================================

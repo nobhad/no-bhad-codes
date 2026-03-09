@@ -57,7 +57,7 @@
 }
 
 .meta-value a:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: underline;
 }
 

@@ -78,8 +78,8 @@
 }
 
 .toast-action:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .toast-close {

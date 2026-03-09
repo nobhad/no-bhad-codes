@@ -12,6 +12,8 @@
   EXCEPTION: .slug-cell uses monospace font.
 */
 
+@layer components {
+
 /* ==============================================
    BASE TABLE STYLES
    ============================================== */
@@ -115,8 +117,8 @@
 
 .data-table tbody tr.row-focused td:first-child,
 .data-table tbody tr[data-focused="true"] td:first-child {
-  box-shadow: inset var(--space-px) 0 0 var(--color-primary),
-              inset calc(var(--space-px) * 2) 0 0 var(--color-primary);
+  box-shadow: inset var(--space-px) 0 0 var(--color-accent),
+              inset calc(var(--space-px) * 2) 0 0 var(--color-accent);
 }
 
 .data-table tbody tr.row-selected td,
@@ -127,6 +129,8 @@
 /* ==============================================
    TABLE ACTIONS
    ============================================== */
+
+} /* end @layer components */
 
 /* Table actions - use utilities layer for override priority */
 @layer utilities {
@@ -193,6 +197,8 @@
     background: transparent;
   }
 }
+
+@layer components {
 
 .data-table :is(th, td).col-actions,
 .data-table :is(th, td):last-child:has(.table-actions) {
@@ -418,8 +424,8 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .pagination-btn:disabled {
@@ -450,8 +456,8 @@
 }
 
 .pagination-page-btn:hover:not(.active) {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .pagination-page-btn.active {
@@ -468,7 +474,7 @@
 }
 
 .data-table td a:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: underline;
 }
 
@@ -716,6 +722,8 @@
    COLUMN TYPES - Width and alignment only
    ============================================== */
 
+} /* end @layer components */
+
 /* Checkbox column - use utilities layer for padding override */
 @layer utilities {
   .data-table .col-checkbox,
@@ -729,6 +737,8 @@
     padding-right: var(--space-1);
   }
 }
+
+@layer components {
 
 .data-table th,
 .data-table td {
@@ -904,6 +914,8 @@
    EMPTY/LOADING/ERROR STATES - utilities layer for override
    ============================================== */
 
+} /* end @layer components */
+
 @layer utilities {
   .data-table td[colspan],
   .data-table :is(td.error-row, td.loading-row, td.empty-row) {
@@ -915,6 +927,8 @@
     text-align: center;
   }
 }
+
+@layer components {
 
 /* ==============================================
    SORTABLE TABLE HEADERS
@@ -954,7 +968,7 @@
 
 .sort-header-btn .sort-indicator {
   font-size: var(--table-sort-indicator-size);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .data-table th.sortable .sort-icon,
@@ -984,7 +998,7 @@
 .data-table th.sortable .sort-icon svg.sort-desc,
 .data-table th.sortable .data-table-sort-icon svg.sort-asc,
 .data-table th.sortable .data-table-sort-icon svg.sort-desc {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* ==============================================
@@ -1002,9 +1016,13 @@
   text-decoration: underline;
 }
 
+} /* end @layer components */
+
 /* ==============================================
    RESPONSIVE - Mobile
    ============================================== */
+
+@layer responsive {
 
 @media (--mobile) {
   .data-table {
@@ -1464,6 +1482,10 @@
   }
 }
 
+} /* end @layer responsive */
+
+@layer components {
+
 /* =====================================================
    PROGRESSIVE ENHANCEMENT
    Hide JS-only elements until TableManager initializes.
@@ -1514,6 +1536,8 @@
   text-decoration: underline;
 }
 
+} /* end @layer components */
+
 /* Small mobile layout overrides - utilities layer for override */
 @layer utilities {
   @media (--small-mobile) {
@@ -1539,6 +1563,8 @@
     }
   }
 }
+
+@layer components {
 
 /* ==============================================
    EJS TABLE HEADER PARTIAL CLASSES
@@ -1600,7 +1626,7 @@
 
 .table-search-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .table-search-input::placeholder {
@@ -1692,7 +1718,7 @@
 /* Sort indicator in EJS sort buttons */
 .sort-indicator {
   font-size: var(--table-sort-indicator-size);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* ==============================================
@@ -1717,6 +1743,8 @@
    Used by server/views/partials/table/table-row.ejs
    ============================================== */
 
+} /* end @layer components */
+
 /* Select column (alias for col-checkbox) */
 @layer utilities {
   .data-table .col-checkbox {
@@ -1728,6 +1756,8 @@
     padding-right: var(--space-1);
   }
 }
+
+@layer components {
 
 /* Row checkbox */
 .row-checkbox {
@@ -1797,7 +1827,7 @@
 }
 
 .copy-cell-button:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .copy-cell-icon {
@@ -1849,7 +1879,7 @@
 
 .data-table-stat-value {
   font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .data-table-toolbar {
@@ -1882,8 +1912,8 @@
   /* Styled via data attributes in CSS */
 }
 .data-table-checkbox[data-state="checked"] {
-  background-color: var(--color-brand-primary, var(--color-primary));
-  border-color: var(--color-brand-primary, var(--color-primary));
+  background-color: var(--color-brand-primary, var(--color-accent));
+  border-color: var(--color-brand-primary, var(--color-accent));
 }
 
 .data-table-row-selected {
@@ -1944,3 +1974,5 @@
   padding-top: var(--space-0-5);
   padding-bottom: var(--space-0-5);
 }
+
+} /* end @layer components */

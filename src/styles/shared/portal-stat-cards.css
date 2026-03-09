@@ -79,7 +79,7 @@
 }
 
 .portal :is(.content-card, .template-card, .preview-card):hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 /* =====================================================
@@ -148,18 +148,18 @@
 }
 
 .portal .stat-card-clickable:hover :is(.stat-number, .stat-value) {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Active/selected state - subtle primary accent */
 .portal .stat-card-clickable.active,
 .portal .stat-card.active {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .portal .stat-card-clickable.active :is(.stat-number, .stat-value),
 .portal .stat-card.active :is(.stat-number, .stat-value) {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* =====================================================
@@ -215,7 +215,7 @@
 /* Primary color for KPI values (analytics, dashboards) */
 .portal .kpi-card :is(.kpi-card-value, .kpi-value),
 .portal .stat-value-primary {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* =====================================================

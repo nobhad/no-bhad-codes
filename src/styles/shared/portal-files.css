@@ -59,7 +59,7 @@
 }
 
 .portal .upload-dropzone:is(:hover, .dragover) {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   background: var(--color-bg-elevated);
 }
 
@@ -170,7 +170,7 @@
 
 .portal .folder-item.active {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .portal .folder-item svg {
@@ -269,7 +269,7 @@
 }
 
 .portal .files-filter-bar :is(.form-select, .form-input):focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   outline: none;
 }
 
@@ -359,7 +359,7 @@
 }
 
 .portal .file-icon.document {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .portal .file-icon.archive {
@@ -413,7 +413,7 @@
 }
 
 .portal .file-actions :is(.btn-preview, .btn-download):not(.icon-btn):hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-dark);
 }
 
@@ -423,16 +423,16 @@
    FILE DOWNLOAD LINK
    ===================================================== */
 .portal .file-download {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-primary);
+  border: var(--border-width) solid var(--color-accent);
   transition: all var(--transition-fast);
 }
 
 .portal .file-download:hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-dark);
 }
 
@@ -510,8 +510,8 @@
 }
 
 .portal .files-list-section .file-item:hover {
-  border-color: var(--color-primary);
-  border: var(--border-width) solid var(--color-primary);
+  border-color: var(--color-accent);
+  border: var(--border-width) solid var(--color-accent);
 }
 
 /* =====================================================
@@ -519,9 +519,14 @@
    Used by React FileUploadDropzone component
    ===================================================== */
 
+/* Admin files tab dropzone: override .panel solid border with dashed */
+.panel.files-dropzone {
+  border-style: dashed;
+}
+
 .dropzone {
   border-style: dashed;
-  border-width: 2px;
+  border-width: var(--border-width);
   border-color: var(--color-border-primary);
   display: flex;
   flex-direction: column;

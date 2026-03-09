@@ -126,7 +126,7 @@
   min-width: 18px;
   height: 18px;
   padding: 0 var(--space-1);
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg-tertiary);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
@@ -286,6 +286,11 @@
   color: var(--color-text-inverse);
 }
 
+/* Anchor for reaction picker popup — must be position:relative */
+.tw-relative {
+  position: relative;
+}
+
 /* Reaction picker */
 .portal .reaction-picker {
   position: absolute;
@@ -304,8 +309,17 @@
 }
 
 .portal .reaction-picker button {
+  border: none;
+  background: transparent;
   padding: var(--space-1);
   font-size: var(--font-size-base);
+  line-height: 1;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+}
+
+.portal .reaction-picker button:hover {
+  background: var(--color-bg-hover);
 }
 
 /* Message reactions */
@@ -329,12 +343,12 @@
 
 /* Pinned message indicator */
 .portal .message.pinned {
-  border-left: var(--border-width) solid var(--color-primary);
+  border-left: var(--border-width) solid var(--color-accent);
   padding-left: var(--space-2);
 }
 
 .portal .pin-message-btn.pinned {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Message attachments */
@@ -532,10 +546,26 @@
 /* Main container - override tw-panel padding for seamless borders */
 .messaging-panel-container {
   display: flex;
+  flex-direction: column;
+  gap: 0; /* Override .panel gap — borders handle visual separation */
   height: calc(100vh - 200px);
   min-height: 500px;
   overflow: hidden;
-  padding: 0; /* Remove tw-panel padding for seamless borders */
+  padding: 0;
+}
+
+/* Full-width search bar above both columns */
+.messaging-top-bar {
+  flex-shrink: 0;
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border-primary);
+}
+
+/* Two-column row: sidebar + main area */
+.messaging-columns {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
 /* Conversation list sidebar */
@@ -545,21 +575,27 @@
   border-right: var(--border-width) solid var(--color-border-primary);
 }
 
-/* Section header with border */
+/* Section header with border — single row: heading left, filter tabs right */
 .messaging-section-header {
-  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border-bottom: var(--border-width) solid var(--color-border-primary);
+  flex-shrink: 0;
 }
 
-/* Heading with badge */
+/* Heading with badge — no bottom margin (side-by-side layout) */
 .messaging-heading-with-badge {
   font-size: var(--font-size-base);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
 }
 
 /* Search input container with icon - extends .input-with-icon from portal-forms.css */
 .messaging-search-container {
   position: relative;
+  width: 100%;
 }
 
 .messaging-search-icon {
@@ -576,27 +612,31 @@
 
 .messaging-search-container .input,
 .messaging-search-container input {
+  width: 100%;
   padding-left: 2.5rem;
 }
 
-/* Filter tabs */
+/* Filter tabs — icon-only to prevent overflow in narrow sidebar */
 .messaging-filter-tabs {
-  margin-top: 0.75rem;
+  margin-top: 0;
   border-bottom: none;
-  gap: 0.25rem;
+  gap: var(--space-0-5);
+  flex-shrink: 0;
 }
 
+/* Icon-only tabs: hide text via font-size:0, icon retains explicit size */
 .messaging-filter-tab {
-  padding: 0.25rem 0.5rem;
-  font-size: var(--font-size-2xs);
+  font-size: 0;
+  padding: var(--space-1);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
 }
 
 .messaging-filter-tab-icon {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex-shrink: 0;
 }
 
 /* Avatar box */
@@ -676,13 +716,46 @@
 
 /* Message area */
 .messaging-main-area {
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  overflow: hidden;
+}
+
+/* MessageThread factory inside messaging-main-area:
+   Override the fixed 500px height from portal-tab-components.css and strip panel
+   chrome — the conversation header + messaging-main-area are already the container. */
+.messaging-main-area .msgtab-container {
+  height: auto;
+  flex: 1;
+  min-height: 0;       /* Allow flex child to shrink below content size */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Scroll area fills remaining space and scrolls */
+.messaging-main-area .msgtab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Reset msgtab-input-panel bleed margins — no panel padding to cancel here */
+.messaging-main-area .msgtab-input-panel {
+  margin-left: 0;
+  margin-right: 0;
+  padding: var(--space-2);
 }
 
 /* Conversation header */
 .messaging-conv-header {
   padding: 1rem;
-  border-bottom: var(--border-width) solid var(--color-border-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -765,6 +838,26 @@
   color: var(--color-text-tertiary);
 }
 
+/* Bubble footer: timestamp + read receipt inside bubble, bottom-right */
+.messaging-bubble-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.messaging-bubble-time {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+}
+
+.messaging-bubble-status {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+}
+
 .messaging-status-icon {
   width: 0.75rem;
   height: 0.75rem;
@@ -772,7 +865,7 @@
 
 /* Compose area */
 .messaging-compose {
-  padding: 1rem;
+  padding: 0 var(--space-2) var(--space-2);
   border-top: var(--border-width) solid var(--color-border-primary);
 }
 

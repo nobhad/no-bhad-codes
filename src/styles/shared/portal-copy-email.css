@@ -50,7 +50,7 @@
 }
 
 .meta-value-with-copy .copy-email-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Clickable entity nav link (client name in project detail, dashboard, etc.) */

@@ -154,7 +154,7 @@
 }
 
 .confirm-dialog-cancel:hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg-tertiary);
   box-shadow: none;
 }
@@ -162,11 +162,11 @@
 /* Confirm button - transparent bg, red text */
 .confirm-dialog-confirm {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .confirm-dialog-confirm:hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg-tertiary);
   box-shadow: none;
 }
@@ -186,7 +186,7 @@
 .confirm-dialog-btn:focus,
 .confirm-dialog-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .confirm-dialog-confirm.danger:focus,
@@ -196,7 +196,7 @@
 
 /* Active state for selection buttons (e.g., who cancelled) */
 .confirm-dialog-btn.active {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg-tertiary);
 }
 
@@ -208,7 +208,7 @@
 
 .confirm-dialog-btn:disabled:hover {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* ================================================
@@ -243,7 +243,7 @@
 
 .prompt-dialog-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--shadow-button-focus);
 }
 

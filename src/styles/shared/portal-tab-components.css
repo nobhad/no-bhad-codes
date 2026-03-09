@@ -37,11 +37,6 @@
   opacity: 0.5;
 }
 
-/* Checkbox no radius */
-.tasks-checkbox {
-  border-radius: 0;
-}
-
 /* Progress track with styling */
 .tasks-progress-track {
   margin-top: var(--space-2);
@@ -66,16 +61,6 @@
 /* Panel without padding */
 .contract-panel-no-padding {
   padding: 0;
-}
-
-/* Header with bottom border */
-.contract-files-header {
-  border-bottom: var(--border-width) solid var(--color-border-primary);
-}
-
-/* Empty state with custom padding */
-.contract-empty-state {
-  padding: var(--space-8);
 }
 
 /* Warning card with white border */
@@ -260,7 +245,7 @@
 
 /* Container height */
 .msgtab-container {
-  height: 500px;
+  height: clamp(600px, 70vh, 900px);
 }
 
 /* Panel no radius */
@@ -295,10 +280,14 @@
   min-height: 60px;
 }
 
-/* Keyboard shortcut badge */
-.msgtab-kbd {
-  font-size: var(--label-font-size);
-  padding: var(--space-px) var(--icon-gap-xs);
+/* Keyboard shortcut — reset badge bold/uppercase styles */
+kbd.msgtab-kbd {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 1px var(--space-1);
+  border-color: var(--color-border-primary);
 }
 
 /* ============================================
