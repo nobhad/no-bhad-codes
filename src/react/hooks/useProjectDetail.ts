@@ -71,7 +71,10 @@ export function useProjectDetail({
     messages,
     setMessages,
     loadMessages,
-    sendMessage
+    sendMessage,
+    editMessage,
+    reactions,
+    toggleReaction
   } = useProjectMessages(hookOptions);
 
   // Fetch all data in parallel (messages loaded on demand)
@@ -139,7 +142,10 @@ export function useProjectDetail({
     deleteFile,
     toggleFileSharing,
     loadMessages,
-    sendMessage
+    sendMessage,
+    editMessage,
+    reactions,
+    toggleReaction
   };
 }
 

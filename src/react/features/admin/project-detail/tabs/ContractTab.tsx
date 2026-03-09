@@ -93,14 +93,14 @@ export function ContractTab({
         <div className="contract-status-layout">
           <div className="layout-row-top gap-4">
             {isSigned ? (
-              <Check className="icon-xl" />
+              <Check className="icon-md" />
             ) : (
-              <FileSignature className="icon-xl" />
+              <FileSignature className="icon-md" />
             )}
 
             <div>
               <div className="layout-row">
-                <h3 className="heading pd-text-lg">
+                <h3 className="heading">
                   Contract Status
                 </h3>
                 <span className="badge">
@@ -138,7 +138,7 @@ export function ContractTab({
       </div>
 
       {/* Contract Terms */}
-      <StatsRow className="grid-2col">
+      <StatsRow className="grid-2col contract-stats-grid">
         <StatCard
           label="Contract Value"
           value={formatCurrency(project.price || project.budget)}
@@ -158,9 +158,9 @@ export function ContractTab({
 
       {/* Contract Files */}
       <div className="panel contract-panel-no-padding">
-        <div className="layout-row-between contract-files-header">
-          <div className="layout-row gap-2">
-            <FileText className="icon-md" />
+        <div className="section-header">
+          <div className="section-title-group">
+            <FileText className="section-icon" />
             <span className="heading">
               Contract Documents
             </span>
@@ -174,7 +174,6 @@ export function ContractTab({
           <EmptyState
             icon={<Inbox className="icon-lg" />}
             message="No contract documents. Upload contracts in the Files tab or generate one above."
-            className="contract-empty-state"
           />
         ) : (
           <div>
@@ -184,7 +183,7 @@ export function ContractTab({
                 className="list-item"
               >
                 <div className="layout-row">
-                  <FileText className="icon-lg" />
+                  <FileText className="icon-md" />
                   <div>
                     <span className="pd-highlight-value">
                       {file.original_name}
@@ -214,7 +213,7 @@ export function ContractTab({
       {/* Warning for unsigned contracts */}
       {!isSigned && project.status === 'active' && (
         <div className="portal-card contract-warning">
-          <AlertTriangle className="icon-lg contract-warning-icon" />
+          <AlertTriangle className="icon-md contract-warning-icon" />
           <div>
             <h4 className="heading">
               Contract Not Signed

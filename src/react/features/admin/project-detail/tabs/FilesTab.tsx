@@ -193,21 +193,24 @@ export function FilesTab({
           onChange={(e) => handleFileSelect(e.target.files)}
         />
 
-        <div className="layout-stack-center">
-          <Upload
-            className={cn(
-              'files-upload-icon',
-              isDragging && 'is-dragging'
-            )}
-          />
-          <div className="files-upload-text">
-            <p className="pd-highlight-value">
-              {isDragging ? 'Drop files here' : 'Drag and drop files here, or click to select'}
-            </p>
-            <p className="text-muted pd-hint pd-mt-1">
-              Supports images, PDFs, documents, and archives
-            </p>
-          </div>
+        <div className="files-dropzone-content">
+          <p className="pd-highlight-value files-upload-primary-text">
+            {isDragging ? 'Drop files here' : 'Drag and drop files here, or click to select'}
+          </p>
+
+          {/* Browse button */}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+          >
+            <Upload className="icon-sm" />
+            Browse Files
+          </button>
+
+          <p className="text-muted pd-hint">
+            Supports images, PDFs, documents, and archives
+          </p>
 
           {/* Category Selector */}
           <div className="layout-row gap-2 pd-mt-2" onClick={(e) => e.stopPropagation()}>
@@ -221,7 +224,7 @@ export function FilesTab({
                   <ChevronDown className="dropdown-caret" />
                 </button>
               </PortalDropdownTrigger>
-              <PortalDropdownContent align="center" sideOffset={4}>
+              <PortalDropdownContent align="start">
                 <PortalDropdownItem
                   className={cn(!selectedCategory && 'is-active')}
                   onSelect={() => setSelectedCategory('')}
