@@ -71,7 +71,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   background: transparent;
   border: none;
   color: var(--color-primary);
-  font-size: var(--font-size-sm, 12px);
+  font-size: var(--font-size-sm);
   cursor: pointer;
   padding: 0;
   text-decoration: none;
@@ -624,7 +624,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
  * ============================================ */
 .toggle-btn {
   flex: 1;
-  padding: 0.75rem 1.25rem;
+  padding: var(--space-1-5) var(--space-2-5);
   background: transparent;
   border: none;
   font-family: var(--portal-btn-font-family);
