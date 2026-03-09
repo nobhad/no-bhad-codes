@@ -63,8 +63,8 @@
 }
 
 .kanban-card-project svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
   opacity: 0.7;
   flex-shrink: 0;
 }
@@ -133,8 +133,8 @@
 }
 
 .task-meta svg {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
+  width: 1em;
+  height: 1em;
   opacity: 0.7;
 }
 

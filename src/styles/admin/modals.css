@@ -188,8 +188,8 @@
 }
 
 .portal-modal-title svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
   color: var(--color-text-primary);
   flex-shrink: 0;
 }

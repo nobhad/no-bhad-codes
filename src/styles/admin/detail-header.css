@@ -136,8 +136,8 @@
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
+  width: 1em;
+  height: 1em;
 }
 
 /* More menu dropdown panel */
@@ -187,8 +187,8 @@
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-item svg {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: 1em;
+  height: 1em;
   flex-shrink: 0;
 }
 
@@ -314,8 +314,8 @@
 }
 
 [data-page="admin"] .generate-document-menu.table-dropdown .custom-dropdown-item svg {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: 1em;
+  height: 1em;
   flex-shrink: 0;
 }
 

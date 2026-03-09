@@ -65,8 +65,8 @@
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  padding: var(--space-3);
   transition: border-color var(--transition-faster);
+  /* padding via portal-stat-cards.css: --portal-card-padding (higher specificity) */
 }
 
 .overview-stat-card:hover {
@@ -136,22 +136,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-1-5) var(--space-3);
+  padding: var(--portal-card-padding);
 }
 
-/* Section titles - layout only, typography from .field-label */
+/* Section titles - layout only, typography from .field-label
+   font-size set so child svg 1em = adjacent field-label size */
 .overview-panel-title {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);
   margin: 0;
+  font-size: var(--font-size-xs);
 }
 
-/* Panel icons - inherit color from parent */
+/* Panel icons - match adjacent field-label text size */
 .overview-panel-title > .panel-icon {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: 1em;
+  height: 1em;
   color: inherit;
+  flex-shrink: 0;
 }
 
 /* Panel action link - borderless, text-only */
@@ -173,45 +176,33 @@
   color: var(--color-accent);
 }
 
-/* Remove margin from panel-icon in action buttons (gap handles spacing) */
-.overview-panel-action > .panel-icon {
+/* Panel action icons - match action link text size (1em = --font-size-xs) */
+.overview-panel-action > :is(svg, .panel-icon) {
   margin-right: 0;
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
-}
-
-/* Consistent icon sizing across all overview panel contexts
-   Excludes empty state icons (.icon-xl etc.) which have their own sizing */
-.overview-panel svg:not(.icon-xs):not(.icon-sm):not(.icon-md):not(.icon-lg):not(.icon-xl) {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: 1em;
+  height: 1em;
   flex-shrink: 0;
 }
 
-/* Stat card icons - slightly larger for KPI prominence */
-.portal .overview-stat-card svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-}
-
-/* Panel action arrow - smaller, subtle */
-.overview-panel-action svg {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
+/* Stat card top row: set font-size context so icon 1em = field-label size */
+.stat-card-top {
+  font-size: var(--font-size-xs);
 }
 
 .overview-panel-body {
-  padding: var(--space-1-5) var(--space-3);
+  padding: var(--portal-card-padding);
 }
 
-/* Activity feeds handle their own horizontal padding; keep vertical consistent */
+/* Activity feeds handle their own padding per item (8px top/bottom, 24px sides).
+   Zero out the body padding entirely — items provide the spacing.
+   Small bottom padding so the last item isn't flush with the panel border. */
 .overview-panel-body:has(.activity-feed) {
-  padding: 0;
+  padding: 0 0 var(--space-1) 0;
 }
 
-/* Quick actions grid - override padding since ovdash-quick-actions handles layout */
+/* Quick actions grid uses same padding token */
 .overview-panel-body.ovdash-quick-actions {
-  padding: var(--space-1-5) var(--space-3) var(--space-2);
+  padding: var(--portal-card-padding);
 }
 
 .overview-panel-body--compact {
@@ -267,7 +258,7 @@
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: var(--color-text-tertiary);
+  background: var(--portal-alpha-white-08);
   overflow: hidden;
 }
 
