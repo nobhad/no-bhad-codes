@@ -441,15 +441,6 @@ body.modal-open .dashboard-content {
   background: var(--color-bg-readonly);
 }
 
-.stat-label {
-  font-family: var(--font-family-sans);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
-
 [data-page="admin"] #admin-page-title {
   font-family: var(--font-family-sans);
 }
@@ -526,8 +517,6 @@ body.modal-open .dashboard-content {
 
 .data-table-header h3 {
   order: 0;
-  margin: 0;
-  color: var(--color-text-secondary);
 }
 
 .data-table-header h3 .title-mobile {
@@ -674,27 +663,16 @@ body.modal-open .dashboard-content {
 }
 
 .set-password-form label {
-  display: block;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   margin-bottom: var(--space-1);
 }
 
 .set-password-form .form-input {
-  width: 100%;
   padding: var(--space-3);
   border: var(--portal-border);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
   font-size: var(--font-size-base);
-  box-sizing: border-box;
-}
-
-.set-password-form .form-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
 }
 
 .set-password-form .form-input[readonly] {

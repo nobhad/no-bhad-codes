@@ -125,27 +125,7 @@ body[data-page="client-landing"] .client-login .client-content {
   border-color: var(--color-danger-dark);
 }
 
-/* Password toggle - minimal styling */
-.password-input-wrapper {
-  position: relative;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  color: var(--color-text-primary);
-  transition: color var(--transition-normal) ease;
-}
-
-.password-toggle:hover {
-  color: var(--color-dark);
-}
+/* .password-input-wrapper and .password-toggle base styles in portal-forms.css */
 
 /* .btn-loader: components/loading.css */
 
@@ -164,10 +144,6 @@ body[data-page="client-landing"] .client-login .client-content {
 }
 
 /* ===============================================
-   ANIMATIONS - ALL CONTROLLED BY GSAP
-   =============================================== */
-
-/* ===============================================
    RESPONSIVE - MATCHES MAIN PAGE BREAKPOINTS
    =============================================== */
 
@@ -177,11 +153,7 @@ body[data-page="client-landing"] .client-login .client-content {
   }
 }
 
-@media (--small-mobile) {
-  .login-title {
-    font-size: var(--font-size-2xl);
-  }
-}
+/* .login-title at small-mobile: same value as mobile, no override needed */
 
 /* ===============================================
    INTAKE MODAL - FULL SCREEN OVERLAY (Client Landing Page Only)
@@ -224,7 +196,6 @@ body[data-page="client-landing"] .intake-modal-content {
   flex-direction: column;
   flex-shrink: 0;
   padding: 0;
-  box-sizing: border-box;
   border-radius: var(--border-radius-md);
 }
 
