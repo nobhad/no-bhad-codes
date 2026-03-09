@@ -37,15 +37,11 @@
 }
 
 .auth-form .form-input {
-  width: 100%;
   padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 14px);
   border: var(--border-width) solid var(--form-input-border, var(--color-neutral-400));
   border-radius: var(--border-radius-md);
   font-size: clamp(0.75rem, 2vw, 1rem);
   background-color: var(--color-neutral-100);
-  color: var(--color-text-primary);
-  font-family: inherit;
-  box-sizing: border-box;
   transition: all var(--transition-fast);
   height: clamp(32px, 8vw, 44px);
 }
@@ -80,46 +76,22 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 }
 
 /* Password Input Wrapper */
-.auth-form .password-input-wrapper {
-  position: relative;
-  width: 100%;
-}
-
 .auth-form .password-input-wrapper .form-input {
   padding-right: 2.5rem;
 }
 
-/* Password Toggle Icons */
+/* Password Toggle Icons - overrides base .password-toggle from portal-forms.css */
 .auth-form .password-toggle {
-  position: absolute;
   right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
   padding: 0.25rem;
   color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .auth-form .password-toggle:hover {
   color: var(--color-accent);
 }
 
-.auth-form .password-toggle .password-icon-hide {
-  display: none;
-}
-
-.auth-form .password-toggle.showing .password-icon-show {
-  display: none;
-}
-
-.auth-form .password-toggle.showing .password-icon-hide {
-  display: block;
-}
+/* Password icon show/hide states: base rules in portal-forms.css */
 
 /* Magic Link Info */
 .magic-link-info {
@@ -272,17 +244,12 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
 
 /* Responsive - Mobile */
 @media (--mobile) {
-  /* Show/hide for mobile */
-
   /* Hide login description on mobile */
   .login-description {
     display: none;
   }
 
-  /* Client landing page - header static, normal document flow */
-  body[data-page="client-landing"] .header {
-    position: static;
-  }
+  /* body[data-page="client-landing"] .header: static declared in first @media (--mobile) block above */
 
   /* Mobile portal layout - stacked layout */
   body[data-page="client-landing"] .mobile-portal-layout {
@@ -342,9 +309,7 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
     text-align: center;
   }
 
-  .mobile-login-form .form-input {
-    width: 100%;
-  }
+  /* .mobile-login-form .form-input width: 100% inherited from base .form-input */
 
   .mobile-login-form .btn-full {
     width: 100%;
@@ -403,7 +368,6 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
     min-height: calc(100dvh - var(--header-height));
     overflow: visible;
     padding: 1rem;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
