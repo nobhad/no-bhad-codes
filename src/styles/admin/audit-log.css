@@ -61,10 +61,6 @@
 .audit-th {
   text-align: left;
   padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   color: var(--color-text-secondary);
   border-bottom: var(--border-width) solid var(--color-border-primary);
   white-space: nowrap;

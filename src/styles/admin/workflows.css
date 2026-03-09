@@ -10,11 +10,7 @@
 
 .modal-body h4 {
   margin: var(--space-4) 0 var(--space-2) 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 .modal-body .form-group-checkbox {

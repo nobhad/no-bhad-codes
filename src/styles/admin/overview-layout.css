@@ -69,10 +69,6 @@
   /* padding via portal-stat-cards.css: --portal-card-padding (higher specificity) */
 }
 
-.overview-stat-card:hover {
-  border-color: var(--color-border-primary);
-}
-
 .stat-card-top {
   display: flex;
   align-items: center;
@@ -149,13 +145,7 @@
   font-size: var(--font-size-xs);
 }
 
-/* Panel icons - match adjacent field-label text size */
-.overview-panel-title > .panel-icon {
-  width: 1em;
-  height: 1em;
-  color: inherit;
-  flex-shrink: 0;
-}
+/* Panel icon sizing already handled by .portal .panel-icon in portal-cards.css */
 
 /* Panel action link - borderless, text-only */
 .overview-panel-action {
@@ -178,7 +168,6 @@
 
 /* Panel action icons - match action link text size (1em = --font-size-xs) */
 .overview-panel-action > :is(svg, .panel-icon) {
-  margin-right: 0;
   width: 1em;
   height: 1em;
   flex-shrink: 0;
@@ -304,10 +293,6 @@
   border-bottom: none;
   transition: background var(--transition-faster);
   cursor: default;
-}
-
-.activity-feed-item:last-child {
-  border-bottom: none;
 }
 
 .activity-feed-item:hover {

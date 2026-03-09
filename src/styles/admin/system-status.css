@@ -23,10 +23,6 @@
    Section (Services / Metrics / Incidents)
    ================================================ */
 .status-section-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-2) 0;
 }
@@ -41,7 +37,6 @@
 }
 
 .status-service-card {
-  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 
@@ -95,7 +90,6 @@
 }
 
 .status-metric-card {
-  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 
@@ -107,11 +101,7 @@
 }
 
 .status-metric-name {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 .status-metric-value {
@@ -152,7 +142,6 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
-  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 

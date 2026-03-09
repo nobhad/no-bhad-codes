@@ -54,7 +54,6 @@
 }
 
 .modal-header h2 {
-  margin: 0;
   flex: 1;
   display: flex;
   align-items: center;
@@ -195,7 +194,6 @@
 }
 
 .portal-modal-header h2 {
-  margin: 0;
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -208,12 +206,10 @@
 }
 
 .portal-modal-close {
-  background: none;
   border: none;
   font-size: var(--font-size-2xl);
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0;
   line-height: 1;
   transition: color var(--transition-faster);
 }
@@ -412,7 +408,6 @@
   display: grid;
   grid-template-columns: 140px 1fr;
   gap: 0 var(--portal-field-label-gap);
-  padding: 0;
 }
 
 .detail-label {
@@ -421,7 +416,6 @@
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-  margin-bottom: 0;
 }
 
 .detail-value {
@@ -538,7 +532,6 @@
 }
 
 .details-panel .close-btn {
-  background: none;
   border: none;
   font-size: var(--font-size-2xl);
   color: var(--color-text-secondary);
@@ -645,9 +638,6 @@
   .detail-row {
     grid-template-columns: 1fr;
     gap: var(--space-0-5);
-  }
-  .detail-label {
-    margin-bottom: 0;
   }
 }
 

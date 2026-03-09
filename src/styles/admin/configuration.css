@@ -79,11 +79,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 .config-textarea {
@@ -172,10 +168,7 @@
 }
 
 .config-overview-label {
-  font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 .config-overview-value {
@@ -224,16 +217,12 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   color: var(--color-text-secondary);
 }
 
 .snapshot-card-title svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  width: 1em;
+  height: 1em;
   color: var(--color-text-tertiary);
 }
 
@@ -259,10 +248,7 @@
 }
 
 .snapshot-field-label {
-  font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   min-width: 64px;
   flex-shrink: 0;
 }
@@ -283,10 +269,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
   color: var(--color-text-secondary);
 }
 
@@ -310,10 +292,7 @@
 }
 
 .snapshot-stat-label {
-  font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 /* Snapshot count badge (in header) */

@@ -212,8 +212,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   color: var(--color-accent);
 }
 
-/* h3 styling centralized in admin.css */
-
 /* Settings tab sections - darker background and equal heights */
 [data-page="admin"] #pd-tab-settings .settings-grid {
   align-items: stretch;
@@ -386,8 +384,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Text color inherited from portal theme — no overrides needed */
 /* .empty-state, .loading-state, .error-state styling from components/loading.css */
-
-/* h3 styling centralized in admin.css */
 
 /* Milestones List - flex layout from shared/portal-components.css :has() rule */
 
@@ -891,11 +887,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   font-weight: var(--font-weight-semibold);
 }
 
-/* Large text display (e.g., timeline, contract value) */
-.pd-text-lg {
-  font-size: var(--font-size-lg);
-}
-
 /* Completed / strikethrough text */
 .pd-completed-text {
   text-decoration: line-through;
@@ -912,11 +903,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Hint text (small, secondary) */
 .pd-hint {
   font-size: var(--font-size-sm);
-}
-
-/* Extra-small text */
-.pd-text-xs {
-  font-size: var(--font-size-xs);
 }
 
 /* --- Spacing utilities --- */
@@ -1380,7 +1366,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-0-5);
+  gap: var(--action-btn-gap);
   visibility: hidden;
   /* Client messages: actions sit to the RIGHT of the bubble */
   order: 1;
@@ -1408,12 +1394,10 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   height: var(--font-size-sm);
 }
 
-/* Bubble + footer stacked vertically — reaction picker anchors here */
+/* Bubble only — footer lives outside so Smile icon centers on bubble height */
 .msgtab-bubble-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-0-5);
-  position: relative;
 }
 
 /* Message bubble — border and color shared by both admin and client */

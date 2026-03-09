@@ -15,8 +15,8 @@
 
 /* Individual question item */
 [data-page="admin"] .question-item {
-  background-color: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
+  background-color: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 
@@ -35,8 +35,8 @@
 
 [data-page="admin"] .question-type-select {
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-background);
+  border: var(--border-width) solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
 }
@@ -61,8 +61,8 @@
 [data-page="admin"] .question-text {
   width: 100%;
   padding: var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-background);
+  border: var(--border-width) solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
 }
@@ -82,8 +82,8 @@
 [data-page="admin"] .question-options-input {
   width: 100%;
   padding: var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-background);
+  border: var(--border-width) solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: inherit;
@@ -113,8 +113,8 @@
 
 [data-page="admin"] .response-answer-item {
   padding: var(--space-3);
-  background-color: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
+  background-color: var(--color-bg-primary);
+  border: var(--border-width) solid var(--color-border-primary);
 }
 
 [data-page="admin"] .response-question {
@@ -169,7 +169,7 @@
 /* HR separator in form */
 [data-page="admin"] #questionnaire-form hr {
   border: none;
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border-primary);
   margin: var(--space-4) 0;
 }
 
@@ -195,7 +195,7 @@
 [data-page="admin"] .question-conditional {
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: var(--border-width) dashed var(--color-border);
+  border-top: var(--border-width) dashed var(--color-border-primary);
 }
 
 [data-page="admin"] .question-conditional-toggle {
@@ -218,14 +218,14 @@
   gap: var(--space-2);
   margin-top: var(--space-2);
   padding: var(--space-2);
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-bg-hover);
 }
 
 [data-page="admin"] .conditional-question-select,
 [data-page="admin"] .conditional-value-select {
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-border);
-  background-color: var(--color-background);
+  border: var(--border-width) solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   min-width: 150px;

@@ -121,11 +121,8 @@
    ============================================ */
 
 .lead-task-item {
-  display: flex;
-  align-items: center;
   gap: var(--icon-gap);
   padding: var(--space-1);
-  background: transparent;
   margin-bottom: var(--space-1);
   border: var(--border-width) solid var(--color-border-primary);
 }
@@ -144,7 +141,6 @@
    ============================================ */
 
 .lead-note-item {
-  background: transparent;
   padding: var(--space-1-5);
   margin-bottom: var(--space-1);
   border: var(--border-width) solid var(--color-border-primary);
