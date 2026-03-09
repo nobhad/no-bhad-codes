@@ -168,8 +168,8 @@
 /* Note: Base .status-indicator now uses inherit, this is redundant but kept for explicitness */
 
 .status-indicator .status-dot {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
+  width: var(--status-dot-size, 8px);
+  height: var(--status-dot-size, 8px);
   border-radius: var(--border-radius-full);
   flex-shrink: 0;
   background-color: var(--color-text-tertiary);

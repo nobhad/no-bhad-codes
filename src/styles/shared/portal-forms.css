@@ -317,8 +317,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   color: var(--color-accent);
 }
 .password-toggle svg {
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
+  width: 1em;
+  height: 1em;
 }
 .password-toggle .password-icon-hide {
   display: none;
@@ -799,8 +799,8 @@ input.search-bar-input {
 }
 
 .form-field-icon svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
 }
 
 .form-field-icon-left {

@@ -84,12 +84,6 @@
   gap: var(--space-2);
 }
 
-.settings-form .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
 .form-help {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
@@ -117,20 +111,17 @@
 }
 
 .portal .settings-form-section .section-icon {
-  width: var(--icon-size-sm, 16px);
-  height: var(--icon-size-sm, 16px);
+  width: 1em;
+  height: 1em;
   color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
 
+/* .section-title base styles provided by shared label aliases (portal-cards.css).
+   Only override font-size (base vs sm) and reset margin here. */
 .portal .settings-form-section .section-title {
   margin: 0;
-  font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-  color: var(--color-text-secondary);
 }
 
 .portal .settings-form-section .section-description {
@@ -201,7 +192,6 @@
 .portal .notification-option-label {
   font-family: var(--font-family-mono, monospace);
   font-size: var(--font-size-base);
-  color: var(--color-text-primary);
 }
 
 .portal .notification-option-description {

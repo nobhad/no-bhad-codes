@@ -191,14 +191,14 @@
    ===================================================== */
 
 :is(.portal-tabs button, .portal-tab, .portal-tab-icon) svg {
-  width: var(--icon-size-xs, 14px);
-  height: var(--icon-size-xs, 14px);
+  width: 1em;
+  height: 1em;
   flex-shrink: 0;
 }
 
 :is(.view-toggle button, .view-toggle-option) svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
 }
 
 /* Hide icons in tabs - use text only like header subtabs */
@@ -350,8 +350,8 @@
   }
 
   :is(.view-toggle button, .view-toggle-option) svg {
-    width: var(--icon-size-xs);
-    height: var(--icon-size-xs);
+    width: 1em;
+    height: 1em;
   }
 
   .portal-tab-panel {
