@@ -87,7 +87,7 @@
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   line-height: var(--space-7);
-  background-color: inherit;
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   box-sizing: border-box;
   transition: border-color var(--transition-fast);

@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
   AUTH_VERIFY_INVITATION: '/api/auth/verify-invitation',
   AUTH_SET_PASSWORD: '/api/auth/set-password',
   AUTH_ADMIN_LOGIN: '/api/auth/admin/login',
+  AUTH_MAGIC_LINK: '/api/auth/magic-link',
 
   // Admin-specific endpoints (require admin authentication)
   ADMIN: {
@@ -253,6 +254,7 @@ export const buildEndpoint = {
   adminConversation: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}`,
   adminConversationRead: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/read`,
   adminConversationStar: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/star`,
+  adminConversationMessages: (id: number | string) => `${API_ENDPOINTS.ADMIN.MESSAGES_CONVERSATIONS}/${id}/messages`,
 
   // Message Threads (Portal)
   messageThread: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}`,

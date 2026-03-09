@@ -517,14 +517,6 @@ router.get(
   }
 );
 
-// Handle 404 for unmatched API routes
-router.use(async (req, res) => {
-  await logger.error('API route not found');
-  errorResponseWithPayload(res, 'API endpoint not found', 404, ErrorCodes.ENDPOINT_NOT_FOUND, {
-    path: req.path
-  });
-});
-
 // Error handler for API routes
 router.use(
   async (

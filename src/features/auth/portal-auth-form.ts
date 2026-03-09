@@ -181,7 +181,7 @@ function setupMagicLinkForm(): void {
     setButtonLoading(magicForm, true);
 
     try {
-      const response = await apiPost('/api/auth/magic-link', { email });
+      const response = await apiPost(API_ENDPOINTS.AUTH_MAGIC_LINK, { email });
       const data = await response.json();
 
       if (response.ok && data.success) {

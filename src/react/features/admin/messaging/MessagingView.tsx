@@ -126,7 +126,7 @@ export function MessagingView({ getAuthToken, showNotification, onNavigate, defa
     setNewMessage('');
 
     try {
-      const response = await apiPost(`/api/admin/messages/conversations/${selectedConversation.id}/messages`, { content: messageContent });
+      const response = await apiPost(buildEndpoint.adminConversationMessages(selectedConversation.id), { content: messageContent });
 
       if (!response.ok) throw new Error('Failed to send message');
 

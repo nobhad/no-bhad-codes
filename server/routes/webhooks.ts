@@ -96,7 +96,7 @@ router.use(requireAdmin);
 
 /**
  * @swagger
- * /api/webhooks/webhooks:
+ * /api/webhooks:
  *   get:
  *     tags: [Webhooks]
  *     summary: List all webhooks
@@ -109,7 +109,7 @@ router.use(requireAdmin);
  *       500:
  *         description: Internal error
  */
-router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.get('/', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const webhooks = await webhookService.listWebhooks();
     sendSuccess(res, { webhooks });
@@ -124,7 +124,7 @@ router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Resp
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}:
+ * /api/webhooks/{id}:
  *   get:
  *     tags: [Webhooks]
  *     summary: Get webhook by ID
@@ -143,7 +143,7 @@ router.get('/webhooks', asyncHandler(async (req: AuthenticatedRequest, res: Resp
  *       404:
  *         description: Webhook not found
  */
-router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -170,7 +170,7 @@ router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: 
 
 /**
  * @swagger
- * /api/webhooks/webhooks:
+ * /api/webhooks:
  *   post:
  *     tags: [Webhooks]
  *     summary: Create a new webhook
@@ -206,7 +206,7 @@ router.get('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: 
  *       400:
  *         description: Validation error
  */
-router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', validateRequest(WebhookValidationSchemas.create, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const {
       name,
@@ -262,7 +262,7 @@ router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allo
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}:
+ * /api/webhooks/{id}:
  *   put:
  *     tags: [Webhooks]
  *     summary: Update webhook configuration
@@ -281,7 +281,7 @@ router.post('/webhooks', validateRequest(WebhookValidationSchemas.create, { allo
  *       404:
  *         description: Webhook not found
  */
-router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', validateRequest(WebhookValidationSchemas.update, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -316,7 +316,7 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}:
+ * /api/webhooks/{id}:
  *   delete:
  *     tags: [Webhooks]
  *     summary: Delete a webhook
@@ -335,7 +335,7 @@ router.put('/webhooks/:id', validateRequest(WebhookValidationSchemas.update, { a
  *       500:
  *         description: Internal error
  */
-router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -355,7 +355,7 @@ router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, re
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}/toggle:
+ * /api/webhooks/{id}/toggle:
  *   patch:
  *     tags: [Webhooks]
  *     summary: Toggle webhook active/inactive
@@ -384,7 +384,7 @@ router.delete('/webhooks/:id', asyncHandler(async (req: AuthenticatedRequest, re
  *       404:
  *         description: Webhook not found
  */
-router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.toggle), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id/toggle', validateRequest(WebhookValidationSchemas.toggle), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -415,7 +415,7 @@ router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.to
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}/test:
+ * /api/webhooks/{id}/test:
  *   post:
  *     tags: [Webhooks]
  *     summary: Test a webhook
@@ -446,7 +446,7 @@ router.patch('/webhooks/:id/toggle', validateRequest(WebhookValidationSchemas.to
  *       404:
  *         description: Webhook not found
  */
-router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/test', validateRequest(WebhookValidationSchemas.test, { allowUnknownFields: true }), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -480,7 +480,7 @@ router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test,
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}/deliveries:
+ * /api/webhooks/{id}/deliveries:
  *   get:
  *     tags: [Webhooks]
  *     summary: List webhook deliveries
@@ -516,7 +516,7 @@ router.post('/webhooks/:id/test', validateRequest(WebhookValidationSchemas.test,
  *       200:
  *         description: List of deliveries with pagination
  */
-router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id/deliveries', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -586,7 +586,7 @@ router.get('/webhooks/:id/deliveries', asyncHandler(async (req: AuthenticatedReq
  *         description: Delivery not found
  */
 router.get(
-  '/webhooks/:id/deliveries/:deliveryId',
+  '/:id/deliveries/:deliveryId',
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id, deliveryId } = req.params;
@@ -615,7 +615,7 @@ router.get(
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}/stats:
+ * /api/webhooks/{id}/stats:
  *   get:
  *     tags: [Webhooks]
  *     summary: Get webhook delivery statistics
@@ -632,7 +632,7 @@ router.get(
  *       200:
  *         description: Delivery statistics
  */
-router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id/stats', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -653,7 +653,7 @@ router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest,
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}/retry:
+ * /api/webhooks/{id}/retry:
  *   post:
  *     tags: [Webhooks]
  *     summary: Retry failed delivery
@@ -682,7 +682,7 @@ router.get('/webhooks/:id/stats', asyncHandler(async (req: AuthenticatedRequest,
  *       404:
  *         description: Delivery not found
  */
-router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retry), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/retry', validateRequest(WebhookValidationSchemas.retry), asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);
@@ -720,7 +720,7 @@ router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retr
 
 /**
  * @swagger
- * /api/webhooks/webhooks/{id}/secret/regenerate:
+ * /api/webhooks/{id}/secret/regenerate:
  *   post:
  *     tags: [Webhooks]
  *     summary: Regenerate webhook secret
@@ -739,7 +739,7 @@ router.post('/webhooks/:id/retry', validateRequest(WebhookValidationSchemas.retr
  *       500:
  *         description: Internal error
  */
-router.post('/webhooks/:id/secret/regenerate', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/secret/regenerate', asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const webhookId = parseInt(id, 10);

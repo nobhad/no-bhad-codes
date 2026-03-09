@@ -330,7 +330,7 @@
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"] {
-  --color-text-primary: #333333;
+  --color-text-primary: var(--color-gray-900);
   --color-bg-primary: var(--color-off-white);
 
   /* Shadow intensity is lower in light mode */

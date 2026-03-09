@@ -25,7 +25,7 @@
     try {
       var savedTheme = localStorage.getItem('theme');
       if (!savedTheme) {
-        savedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        savedTheme = 'light';
       }
       document.documentElement.setAttribute('data-theme', savedTheme);
     } catch (e) {
