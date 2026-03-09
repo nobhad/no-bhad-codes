@@ -17,7 +17,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiGet, apiPut, parseApiResponse } from '@/utils/api-client';
 
 interface BusinessInfo {
   name: string;
@@ -43,7 +43,6 @@ interface InvoiceSettings {
 
 interface BusinessConfigurationProps {
   onNavigate?: (tab: string, entityId?: string) => void;
-  getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   overviewMode?: boolean;
 }
@@ -56,7 +55,7 @@ const SECTIONS: { id: ActiveSection; label: string; icon: React.ReactNode }[] = 
   { id: 'invoice', label: 'Invoice Settings', icon: <FileText className="icon-sm" /> }
 ];
 
-export function BusinessConfiguration({ getAuthToken, showNotification, overviewMode }: BusinessConfigurationProps) {
+export function BusinessConfiguration({ showNotification, overviewMode }: BusinessConfigurationProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -74,30 +73,19 @@ export function BusinessConfiguration({ getAuthToken, showNotification, overview
     defaultCurrency: 'USD', defaultTerms: '', prefix: 'INV-', nextSequence: 1
   });
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }, [getAuthToken]);
-
   const loadSettings = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const [bizRes, payRes, invRes] = await Promise.all([
-        fetch(API_ENDPOINTS.ADMIN.SETTINGS_BUSINESS_INFO, { headers: getHeaders(), credentials: 'include' }),
-        fetch(API_ENDPOINTS.ADMIN.SETTINGS_PAYMENT, { headers: getHeaders(), credentials: 'include' }),
-        fetch(API_ENDPOINTS.ADMIN.SETTINGS_INVOICE, { headers: getHeaders(), credentials: 'include' })
+        apiGet(API_ENDPOINTS.ADMIN.SETTINGS_BUSINESS_INFO),
+        apiGet(API_ENDPOINTS.ADMIN.SETTINGS_PAYMENT),
+        apiGet(API_ENDPOINTS.ADMIN.SETTINGS_INVOICE)
       ]);
 
-      if (!bizRes.ok || !payRes.ok || !invRes.ok) {
-        throw new Error('Failed to load settings');
-      }
-
-      const bizData = unwrapApiData<BusinessInfo>(await bizRes.json());
-      const payData = unwrapApiData<PaymentSettings>(await payRes.json());
-      const invData = unwrapApiData<InvoiceSettings>(await invRes.json());
+      const bizData = await parseApiResponse<BusinessInfo>(bizRes);
+      const payData = await parseApiResponse<PaymentSettings>(payRes);
+      const invData = await parseApiResponse<InvoiceSettings>(invRes);
 
       setBusinessInfo(bizData);
       setPaymentSettings(payData);
@@ -108,32 +96,26 @@ export function BusinessConfiguration({ getAuthToken, showNotification, overview
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      const headers = getHeaders();
-      const opts: RequestInit = { method: 'PUT', headers, credentials: 'include' };
-
       const requests: Promise<Response>[] = [];
 
       if (activeSection === 'business' || overviewMode) {
-        requests.push(fetch(API_ENDPOINTS.ADMIN.SETTINGS_BUSINESS_INFO, { ...opts, body: JSON.stringify(businessInfo) }));
+        requests.push(apiPut(API_ENDPOINTS.ADMIN.SETTINGS_BUSINESS_INFO, businessInfo));
       }
       if (activeSection === 'payment' || overviewMode) {
-        requests.push(fetch(API_ENDPOINTS.ADMIN.SETTINGS_PAYMENT, { ...opts, body: JSON.stringify(paymentSettings) }));
+        requests.push(apiPut(API_ENDPOINTS.ADMIN.SETTINGS_PAYMENT, paymentSettings));
       }
       if (activeSection === 'invoice' || overviewMode) {
-        requests.push(fetch(API_ENDPOINTS.ADMIN.SETTINGS_INVOICE, {
-          ...opts,
-          body: JSON.stringify({
-            defaultCurrency: invoiceSettings.defaultCurrency,
-            defaultTerms: invoiceSettings.defaultTerms,
-            prefix: invoiceSettings.prefix
-          })
+        requests.push(apiPut(API_ENDPOINTS.ADMIN.SETTINGS_INVOICE, {
+          defaultCurrency: invoiceSettings.defaultCurrency,
+          defaultTerms: invoiceSettings.defaultTerms,
+          prefix: invoiceSettings.prefix
         }));
       }
 
@@ -148,7 +130,7 @@ export function BusinessConfiguration({ getAuthToken, showNotification, overview
     } finally {
       setIsSaving(false);
     }
-  }, [activeSection, businessInfo, paymentSettings, invoiceSettings, getHeaders, showNotification, overviewMode]);
+  }, [activeSection, businessInfo, paymentSettings, invoiceSettings, showNotification, overviewMode]);
 
   const updateBusinessField = (field: keyof BusinessInfo, value: string) => {
     setBusinessInfo(prev => ({ ...prev, [field]: value }));

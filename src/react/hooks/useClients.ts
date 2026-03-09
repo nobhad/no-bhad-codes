@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Client, ClientStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiPost, apiDelete } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -82,12 +82,7 @@ export function useClients({
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include',
-        signal
-      });
+      const response = await apiFetch(API_ENDPOINTS.CLIENTS, { signal });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch clients: ${response.statusText}`);
@@ -106,18 +101,13 @@ export function useClients({
     } finally {
       setIsLoading(false);
     }
-  }, [getAuthToken]);
+  }, []);
 
   // Update a single client
   const updateClient = useCallback(
     async (id: number, updates: Partial<Client>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.CLIENTS}/${id}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update client: ${response.statusText}`);
@@ -135,7 +125,7 @@ export function useClients({
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Archive multiple clients (set status to inactive)
@@ -166,11 +156,7 @@ export function useClients({
 
       try {
         for (const id of ids) {
-          const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}`, {
-            method: 'DELETE',
-            headers: buildAuthHeaders(getAuthToken),
-            credentials: 'include'
-          });
+          const response = await apiDelete(`${API_ENDPOINTS.CLIENTS}/${id}`);
 
           if (response.ok) {
             success++;
@@ -190,18 +176,14 @@ export function useClients({
 
       return { success, failed };
     },
-    [getAuthToken]
+    []
   );
 
   // Send invitation to client
   const sendInvite = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${id}/send-invite`, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include'
-        });
+        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${id}/send-invite`);
 
         if (!response.ok) {
           throw new Error(`Failed to send invite: ${response.statusText}`);
@@ -223,7 +205,7 @@ export function useClients({
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Auto-fetch on mount with AbortController cleanup

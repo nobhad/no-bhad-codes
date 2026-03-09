@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Lead, LeadStatus, LeadStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiPost, apiDelete } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -90,12 +90,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.LEADS, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include',
-        signal
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.LEADS, { signal });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch leads: ${response.statusText}`);
@@ -115,7 +110,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
     } finally {
       setIsLoading(false);
     }
-  }, [getAuthToken]);
+  }, []);
 
   // Update a single lead
   const updateLead = useCallback(
@@ -127,12 +122,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
             ? `${API_ENDPOINTS.ADMIN.LEADS}/${id}/status`
             : `${API_ENDPOINTS.ADMIN.LEADS}/${id}`;
 
-        const response = await fetch(endpoint, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(endpoint, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update lead: ${response.statusText}`);
@@ -148,19 +138,14 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Bulk update lead status
   const bulkUpdateStatus = useCallback(
     async (ids: number[], status: LeadStatus): Promise<boolean> => {
       try {
-        const response = await fetch(API_ENDPOINTS.ADMIN.LEADS_BULK_STATUS, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify({ projectIds: ids, status })
-        });
+        const response = await apiPost(API_ENDPOINTS.ADMIN.LEADS_BULK_STATUS, { projectIds: ids, status });
 
         if (!response.ok) {
           throw new Error(`Failed to bulk update: ${response.statusText}`);
@@ -178,7 +163,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Delete multiple leads
@@ -188,15 +173,8 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
       let failed = 0;
 
       try {
-        const headers = buildAuthHeaders(getAuthToken);
-
         // Try bulk endpoint first
-        const response = await fetch(API_ENDPOINTS.ADMIN.LEADS_BULK_DELETE, {
-          method: 'POST',
-          headers,
-          credentials: 'include',
-          body: JSON.stringify({ leadIds: ids })
-        });
+        const response = await apiPost(API_ENDPOINTS.ADMIN.LEADS_BULK_DELETE, { leadIds: ids });
 
         if (response.ok) {
           const json = await response.json();
@@ -207,11 +185,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
         } else {
           // Fallback to individual deletes
           for (const id of ids) {
-            const deleteResponse = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/${id}`, {
-              method: 'DELETE',
-              headers,
-              credentials: 'include'
-            });
+            const deleteResponse = await apiDelete(`${API_ENDPOINTS.ADMIN.LEADS}/${id}`);
             if (deleteResponse.ok) {
               success++;
             } else {
@@ -230,7 +204,7 @@ export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {
 
       return { success, failed };
     },
-    [getAuthToken]
+    []
   );
 
   // Auto-fetch on mount with AbortController cleanup
