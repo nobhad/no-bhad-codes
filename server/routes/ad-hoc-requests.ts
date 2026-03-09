@@ -1622,7 +1622,7 @@ router.post(
     const { requestIds } = req.body;
 
     if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
-      return errorResponse(res, 'requestIds array is required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(res, 'requestIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const deletedBy = req.user?.email || String(req.user?.id || 'system');

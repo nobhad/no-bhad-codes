@@ -17,7 +17,7 @@ import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middle
 import { rateLimit } from '../middleware/security.js';
 import { settingsService } from '../services/settings-service.js';
 import { auditLogger } from '../services/audit-logger.js';
-import { errorResponse, sendSuccess } from '../utils/api-response.js';
+import { errorResponse, sendSuccess, ErrorCodes } from '../utils/api-response.js';
 import { validateRequest, ValidationSchema } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -380,7 +380,7 @@ router.get(
     const setting = await settingsService.getSetting(key);
 
     if (!setting) {
-      return errorResponse(res, 'Setting not found', 404);
+      return errorResponse(res, 'Setting not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, {
@@ -433,7 +433,7 @@ router.put(
     const { value, type, description } = req.body;
 
     if (value === undefined) {
-      return errorResponse(res, 'Value is required', 400);
+      return errorResponse(res, 'Value is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const setting = await settingsService.setSetting(req.params.key, value, {
@@ -483,7 +483,7 @@ router.delete(
     const deleted = await settingsService.deleteSetting(req.params.key);
 
     if (!deleted) {
-      return errorResponse(res, 'Setting not found', 404);
+      return errorResponse(res, 'Setting not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     await auditLogger.log({

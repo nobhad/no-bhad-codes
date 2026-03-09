@@ -168,7 +168,7 @@ router.get(
 
     const workflow = await approvalService.getWorkflowDefinition(id);
     if (!workflow) {
-      return errorResponse(res, 'Workflow not found', 404);
+      return errorResponse(res, 'Workflow not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const steps = await approvalService.getWorkflowSteps(id);
@@ -232,7 +232,8 @@ router.post(
       return errorResponse(
         res,
         `Invalid entity_type. Must be one of: ${validEntityTypes.join(', ')}`,
-        400
+        400,
+        ErrorCodes.VALIDATION_ERROR
       );
     }
 
@@ -240,7 +241,8 @@ router.post(
       return errorResponse(
         res,
         `Invalid workflow_type. Must be one of: ${validWorkflowTypes.join(', ')}`,
-        400
+        400,
+        ErrorCodes.VALIDATION_ERROR
       );
     }
 
@@ -311,7 +313,7 @@ router.post(
       req.body;
 
     if (!step_order || !approver_type || !approver_value) {
-      return errorResponse(res, 'step_order, approver_type, and approver_value are required', 400);
+      return errorResponse(res, 'step_order, approver_type, and approver_value are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const step = await approvalService.addWorkflowStep({
@@ -383,7 +385,7 @@ router.post(
 
       sendCreated(res, { instance }, 'Approval workflow started');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to start workflow'), 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to start workflow'), 400, ErrorCodes.VALIDATION_ERROR);
     }
   })
 );
@@ -434,7 +436,7 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const email = req.user?.email;
     if (!email) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const approvals = await approvalService.getPendingApprovalsForUser(email);
@@ -528,7 +530,7 @@ router.get(
 
     const instance = await approvalService.getWorkflowInstance(id);
     if (!instance) {
-      return errorResponse(res, 'Workflow instance not found', 404);
+      return errorResponse(res, 'Workflow instance not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const requests = await approvalService.getApprovalRequests(id);
@@ -595,7 +597,7 @@ router.post(
       )) as { approver_email?: string } | undefined;
 
       if (!request || request.approver_email !== approverEmail) {
-        return errorResponse(res, 'Access denied', 403);
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
       }
     }
 
@@ -603,7 +605,7 @@ router.post(
       const instance = await approvalService.approve(requestId, approverEmail, comment);
       sendSuccess(res, { instance }, 'Approved');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to approve'), 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to approve'), 400, ErrorCodes.VALIDATION_ERROR);
     }
   })
 );
@@ -654,7 +656,7 @@ router.post(
 
     const { reason } = req.body;
     if (!reason) {
-      return errorResponse(res, 'Reason is required when rejecting', 400);
+      return errorResponse(res, 'Reason is required when rejecting', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const approverEmail = req.user?.email || 'unknown';
@@ -667,7 +669,7 @@ router.post(
       )) as { approver_email?: string } | undefined;
 
       if (!request || request.approver_email !== approverEmail) {
-        return errorResponse(res, 'Access denied', 403);
+        return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
       }
     }
 
@@ -675,7 +677,7 @@ router.post(
       const instance = await approvalService.reject(requestId, approverEmail, reason);
       sendSuccess(res, { instance }, 'Rejected');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to reject'), 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to reject'), 400, ErrorCodes.VALIDATION_ERROR);
     }
   })
 );
@@ -728,7 +730,7 @@ router.post(
       const instance = await approvalService.cancelWorkflow(instanceId, cancelledBy, reason);
       sendSuccess(res, { instance }, 'Workflow cancelled');
     } catch (error) {
-      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to cancel workflow'), 400);
+      return errorResponse(res, sanitizeErrorMessage(error, 'Failed to cancel workflow'), 400, ErrorCodes.VALIDATION_ERROR);
     }
   })
 );

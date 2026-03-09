@@ -241,7 +241,7 @@ router.post(
       if (isNaN(id) || id <= 0) continue;
 
       const result = await db.run(
-        'UPDATE proposals SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
+        'UPDATE proposal_requests SET deleted_at = datetime(\'now\') WHERE id = ? AND deleted_at IS NULL',
         [id]
       );
       if (result.changes && result.changes > 0) {

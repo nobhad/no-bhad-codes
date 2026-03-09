@@ -44,13 +44,13 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const status = await clientInfoService.getClientInfoStatus(clientId);
 
     if (!status) {
-      return errorResponse(res, 'Client not found', 404);
+      return errorResponse(res, 'Client not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { status });
@@ -79,7 +79,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const items = await clientInfoService.getMissingItems(clientId);
@@ -110,7 +110,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const progress = await clientInfoService.getOnboardingProgress(clientId);
@@ -158,11 +158,11 @@ router.post(
     const { step, stepData, projectId } = req.body;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     if (typeof step !== 'number' || step < 1 || step > 5) {
-      return errorResponse(res, 'step must be a number between 1 and 5', 400);
+      return errorResponse(res, 'step must be a number between 1 and 5', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     const progress = await clientInfoService.saveOnboardingProgress(
@@ -207,7 +207,7 @@ router.post(
     const { finalData } = req.body;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const progress = await clientInfoService.completeOnboarding(clientId, finalData);
@@ -304,7 +304,7 @@ router.get(
     const status = await clientInfoService.getClientInfoStatus(clientId);
 
     if (!status) {
-      return errorResponse(res, 'Client not found', 404);
+      return errorResponse(res, 'Client not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { status });

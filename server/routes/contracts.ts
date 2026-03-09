@@ -223,7 +223,7 @@ router.post(
     const { contractIds } = req.body;
 
     if (!contractIds || !Array.isArray(contractIds) || contractIds.length === 0) {
-      return errorResponse(res, 'contractIds array is required', 400, ErrorCodes.VALIDATION_ERROR);
+      return errorResponse(res, 'contractIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     let deleted = 0;

@@ -120,7 +120,7 @@ router.get(
     const status = req.query.status as ResponseStatus | undefined;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const responses = await questionnaireService.getClientResponses(clientId, status);
@@ -161,7 +161,7 @@ router.get(
     const responseId = parseInt(req.params.id, 10);
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     if (isNaN(responseId) || responseId <= 0) {
@@ -171,12 +171,12 @@ router.get(
     const response = await questionnaireService.getResponse(responseId);
 
     if (!response) {
-      return errorResponse(res, 'Response not found', 404);
+      return errorResponse(res, 'Response not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Verify client owns this response (unless admin)
     if (req.user?.type !== 'admin' && response.client_id !== clientId) {
-      return errorResponse(res, 'Access denied', 403);
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
     }
 
     // Get the full questionnaire
@@ -227,7 +227,7 @@ router.post(
     const { answers } = req.body;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     if (isNaN(responseId) || responseId <= 0) {
@@ -237,11 +237,11 @@ router.post(
     // Verify ownership
     const existing = await questionnaireService.getResponse(responseId);
     if (!existing) {
-      return errorResponse(res, 'Response not found', 404);
+      return errorResponse(res, 'Response not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     if (existing.client_id !== clientId) {
-      return errorResponse(res, 'Access denied', 403);
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
     }
 
     const response = await questionnaireService.saveProgress(responseId, answers || {});
@@ -291,7 +291,7 @@ router.post(
     const { answers } = req.body;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     if (isNaN(responseId) || responseId <= 0) {
@@ -301,15 +301,15 @@ router.post(
     // Verify ownership
     const existing = await questionnaireService.getResponse(responseId);
     if (!existing) {
-      return errorResponse(res, 'Response not found', 404);
+      return errorResponse(res, 'Response not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     if (existing.client_id !== clientId) {
-      return errorResponse(res, 'Access denied', 403);
+      return errorResponse(res, 'Access denied', 403, ErrorCodes.FORBIDDEN);
     }
 
     if (existing.status === 'completed') {
-      return errorResponse(res, 'Questionnaire already submitted', 400);
+      return errorResponse(res, 'Questionnaire already submitted', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Submit the response
@@ -430,7 +430,7 @@ router.get(
 
     const questionnaire = await questionnaireService.getQuestionnaire(id);
     if (!questionnaire) {
-      return errorResponse(res, 'Questionnaire not found', 404);
+      return errorResponse(res, 'Questionnaire not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { questionnaire });
@@ -493,7 +493,7 @@ router.post(
     } = req.body;
 
     if (!name || !questions || !Array.isArray(questions)) {
-      return errorResponse(res, 'name and questions array are required', 400);
+      return errorResponse(res, 'name and questions array are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const createdBy = req.user?.email;
@@ -548,7 +548,7 @@ router.put(
 
     const questionnaire = await questionnaireService.updateQuestionnaire(id, req.body);
     if (!questionnaire) {
-      return errorResponse(res, 'Questionnaire not found', 404);
+      return errorResponse(res, 'Questionnaire not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { questionnaire }, 'Questionnaire updated');
@@ -625,7 +625,7 @@ router.post(
     const { questionnaireIds } = req.body;
 
     if (!questionnaireIds || !Array.isArray(questionnaireIds) || questionnaireIds.length === 0) {
-      return errorResponse(res, 'questionnaireIds array is required', 400);
+      return errorResponse(res, 'questionnaireIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     let deleted = 0;
@@ -724,13 +724,13 @@ router.post(
     }
 
     if (!client_id) {
-      return errorResponse(res, 'client_id is required', 400);
+      return errorResponse(res, 'client_id is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     // Check if questionnaire exists
     const questionnaire = await questionnaireService.getQuestionnaire(questionnaireId);
     if (!questionnaire) {
-      return errorResponse(res, 'Questionnaire not found', 404);
+      return errorResponse(res, 'Questionnaire not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Check if already sent
@@ -918,12 +918,12 @@ router.get(
 
     const response = await questionnaireService.getResponse(responseId);
     if (!response) {
-      return errorResponse(res, 'Response not found', 404);
+      return errorResponse(res, 'Response not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const questionnaire = await questionnaireService.getQuestionnaire(response.questionnaire_id);
     if (!questionnaire) {
-      return errorResponse(res, 'Questionnaire not found', 404);
+      return errorResponse(res, 'Questionnaire not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Generate PDF
@@ -986,12 +986,12 @@ router.get(
 
     const response = await questionnaireService.getResponse(responseId);
     if (!response) {
-      return errorResponse(res, 'Response not found', 404);
+      return errorResponse(res, 'Response not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const questionnaire = await questionnaireService.getQuestionnaire(response.questionnaire_id);
     if (!questionnaire) {
-      return errorResponse(res, 'Questionnaire not found', 404);
+      return errorResponse(res, 'Questionnaire not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Get JSON export
@@ -1050,15 +1050,15 @@ router.post(
 
     const response = await questionnaireService.getResponse(responseId);
     if (!response) {
-      return errorResponse(res, 'Response not found', 404);
+      return errorResponse(res, 'Response not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     if (response.status !== 'completed') {
-      return errorResponse(res, 'Can only regenerate PDF for completed questionnaires', 400);
+      return errorResponse(res, 'Can only regenerate PDF for completed questionnaires', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     if (!response.project_id) {
-      return errorResponse(res, 'Cannot save PDF: questionnaire has no associated project', 400);
+      return errorResponse(res, 'Cannot save PDF: questionnaire has no associated project', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Generate and save PDF to project Files

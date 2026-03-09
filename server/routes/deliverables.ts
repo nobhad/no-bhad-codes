@@ -218,7 +218,7 @@ router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
       error: err instanceof Error ? err : new Error(String(err)),
       category: 'DELIVERABLE'
     });
-    errorResponse(res, 'Failed to fetch deliverables');
+    errorResponse(res, 'Failed to fetch deliverables', 500, ErrorCodes.INTERNAL_ERROR);
   }
 });
 
