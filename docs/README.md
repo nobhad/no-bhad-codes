@@ -27,6 +27,7 @@ The Backend refers to the complete portal system with two interfaces:
 |Document|Description|
 |----------|-------------|
 |**[Admin Dashboard](./features/ADMIN_DASHBOARD.md)**|Leads, projects, clients, messaging, analytics|
+|**[Portal Architecture](./features/PORTAL_ARCHITECTURE.md)**|React SPA architecture, routing, auth, Zustand store|
 
 ### Main Site Features
 
@@ -160,21 +161,15 @@ src/
 │   ├── services-config.ts  # Service registrations
 │   └── modules-config.ts   # Module definitions
 ├── features/               # Feature modules (domain-driven)
-│   ├── admin/              # Admin dashboard
-│   │   ├── admin-dashboard.ts      # Main coordinator
-│   │   ├── admin-project-details.ts
-│   │   ├── admin-auth.ts
-│   │   ├── admin-security.ts
-│   │   ├── services/       # Extracted services (data, chart, export)
-│   │   ├── renderers/      # UI renderers (contacts, messaging, performance)
-│   │   ├── project-details/ # Project detail components
-│   │   └── modules/        # Extracted admin modules
-│   ├── client/             # Client portal
-│   │   ├── client-portal.ts
-│   │   ├── terminal-intake.ts
-│   │   ├── proposal-builder.ts
-│   │   └── modules/        # Extracted portal modules
 │   └── main-site/          # Main site features
+├── react/                  # React portal SPA
+│   ├── app/                # Root components (PortalApp, PortalRoutes, PortalLayout)
+│   ├── stores/             # Zustand stores (portal-store.ts)
+│   ├── hooks/              # Auth hooks (usePortalAuth.ts)
+│   ├── features/
+│   │   ├── admin/          # Admin-only feature modules (25+)
+│   │   └── portal/         # Client-only feature modules (15+)
+│   └── components/         # Shared React components
 ├── modules/                # Reusable UI modules
 │   ├── base.ts            # Base module class
 │   ├── theme.ts           # Theme switching

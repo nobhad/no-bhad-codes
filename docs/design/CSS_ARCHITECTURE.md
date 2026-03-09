@@ -56,35 +56,43 @@ Defined in `src/design-system/tokens/colors.css`. Used across the entire applica
 --color-overlay-subtle, --color-overlay-light, --color-overlay-medium
 ```
 
-### Portal: `--portal-*`
+### Portal: `--color-*` (portal-scoped overrides)
 
-Defined in `src/design-system/tokens/portal-theme.css`. Scoped to `[data-page="admin"]` and `[data-page="client-portal"]` selectors. These are the primary variables for portal UI.
+Defined in `src/design-system/tokens/portal-theme.css`. Scoped to `body[data-page="admin"]` and `body[data-page="client-portal"]` selectors. These override the global `--color-*` tokens for portal UI.
+
+The entire portal theme derives from two primary variables:
+
+```css
+--color-text-primary   /* Dark: #ffffff / Light: #333333 */
+--color-bg-primary     /* Dark: #000000 / Light: var(--color-off-white) */
+```
+
+All other portal colors are derived from these two using `color-mix()`:
 
 ```css
 /* Text */
---portal-text-light, --portal-text-primary, --portal-text-secondary
---portal-text-muted, --portal-text-dark
+--color-text-secondary     /* Same as primary */
+--color-text-tertiary      /* 60% text mixed into bg */
+--color-text-inverse       /* Same as bg-primary */
 
-/* Backgrounds */
---portal-bg-pitch, --portal-bg-darkest, --portal-bg-darker, --portal-bg-dark
---portal-bg-medium, --portal-bg-light, --portal-bg-lighter
---portal-bg-hover, --portal-bg-readonly
+/* Background ramp */
+--color-bg-secondary       /* ~4% text into bg */
+--color-bg-tertiary        /* ~10% text into bg */
+--color-bg-elevated        /* ~16.5% text into bg */
+--color-bg-input           /* ~23% text into bg */
+--color-bg-hover           /* ~29% text into bg */
 
 /* Borders */
---portal-border-color, --portal-border-subtle
---portal-border (shorthand: var(--border-width) solid var(--portal-border-color))
+--color-border-primary     /* Same as color-text-primary */
+--color-border-secondary   /* 8% text mixed into transparent */
 
 /* Alpha channels */
---portal-alpha-white-02 through --portal-alpha-white-50
---portal-alpha-black-04 through --portal-alpha-black-80
+--portal-alpha-white-02 through --portal-alpha-white-50  /* color-mix derived */
+--portal-alpha-black-04 through --portal-alpha-black-80  /* color-mix derived */
 --portal-alpha-primary-08, --portal-alpha-primary-10, --portal-alpha-primary-20
 
-/* Border radius (brutalist: all 0 except --portal-radius-full) */
---portal-radius-xs through --portal-radius-xl: 0
---portal-radius-full: 50%
-
-/* Neutral ramp (dark mode) */
---portal-neutral-0 through --portal-neutral-900
+/* Neutral scale */
+--color-neutral-100 through --color-neutral-900  /* color-mix derived */
 
 /* Hover/focus states */
 --hover-bg-color, --hover-text-color, --hover-icon-color
@@ -221,7 +229,6 @@ src/
       site.css                   # Main marketing site bundle
       portal.css                 # Client portal bundle
       admin.css                  # Admin dashboard bundle
-      light-mode.css             # Shared portal light mode element overrides
     shared/
       portal-badges.css          # Status badges
       portal-buttons.css         # Portal button styles
@@ -241,7 +248,6 @@ src/
       portal-tables.css          # Table components
       portal-tabs.css            # Tab navigation
       portal-tags.css            # Tag/label components
-      portal-timeline.css        # Timeline components
       portal-tooltips.css        # Tooltip styles
       confirm-dialog.css         # Confirmation dialog
       details-card.css           # Detail view cards
@@ -249,7 +255,6 @@ src/
       modal-system.css           # Modal framework
       notification-bell.css      # Notification bell icon
       portal-auth.css            # Auth page portal styles
-      rich-text-editor.css       # Rich text editor
       table-filters.css          # Table filter UI
       toast-notifications.css    # Toast messages
     components/
@@ -267,7 +272,6 @@ src/
       business-card.css          # Business card (main site)
       intro-morph.css            # Intro morph animation (main site)
       intro-nav.css              # Intro navigation (main site)
-      portfolio-carousel.css     # Portfolio carousel (main site)
       page-transitions.css       # Page transition states
     admin/
       index.css                  # Admin styles entry
@@ -345,9 +349,9 @@ Client portal. Adds navigation, footer, client-portal styles, light mode overrid
 
 Admin dashboard. Adds navigation, command palette, inline edit, admin styles, light mode overrides.
 
-### Light Mode Bundle (`light-mode.css`)
+### Light Mode
 
-Shared between admin and portal bundles. Applies light mode element styles and admin-only alpha overlay inversions. Variable definitions live in `portal-theme.css`; this file handles element selectors that reference those variables.
+Light mode is handled entirely by 2–3 variable overrides directly in `src/design-system/tokens/portal-theme.css`. No separate `light-mode.css` file exists. Since all other portal colors derive from `--color-text-primary` and `--color-bg-primary` via `color-mix()`, changing these two values automatically re-derives the entire theme.
 
 ---
 
@@ -506,21 +510,27 @@ The portal uses a "DISCOTHEQUE" brutalist design with two modes:
 
 ### Dark Mode (Default)
 
-- Black background (`--portal-bg-pitch: #000`)
-- White text (`--portal-text-primary: #fff`)
-- White borders (`--portal-border-color: #fff`)
+- Black background (`--color-bg-primary: #000000`)
+- White text (`--color-text-primary: #ffffff`)
+- White borders (`--color-border-primary` = same as text primary)
 - 0 border-radius everywhere (sharp corners)
 - Monospace font (Inconsolata)
+- All other colors automatically derived via `color-mix()` from these two values
 
 ### Light Mode
 
-Activated by `html[data-theme="light"]`. Inverts all portal variables:
+Activated by `html[data-theme="light"]`. Only three variables change:
 
-- White background (`--portal-bg-pitch: #fff`)
-- Black text (`--portal-text-primary: #000`)
-- Black borders (`--portal-border-color: #000`)
+```css
+html[data-theme="light"] body[data-page="admin"],
+html[data-theme="light"] body[data-page="client-portal"] {
+  --color-text-primary: #333333;
+  --color-bg-primary: var(--color-off-white);
+  --form-btn-shadow: var(--portal-alpha-black-15);
+}
+```
 
-Light mode variable definitions live in `src/design-system/tokens/portal-theme.css`. Element-level style applications live in `src/styles/bundles/light-mode.css`.
+All other portal colors automatically re-derive from the updated primaries. No element-level overrides needed.
 
 ### Portal Scoping
 
@@ -655,3 +665,59 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 | Responsive overrides | `src/styles/responsive/` |
 | Mobile fixes | `src/styles/mobile/` |
 | Page-specific (main site) | `src/styles/pages/` |
+
+---
+
+## Recent Changes
+
+### CSS Class Renames
+
+| Old Class | New Class | Location |
+|-----------|-----------|----------|
+| `.empty-state-icon` | `.empty-icon` | `src/styles/components/loading.css` |
+
+### SVG Color Baseline (reset.css)
+
+All portal SVGs default to `--color-text-primary` via a rule in `src/styles/base/reset.css`:
+
+```css
+/* All portal SVGs inherit primary text color */
+.portal svg {
+  color: var(--color-text-primary);
+}
+
+/* Interactive elements override to inherit parent context */
+.portal button svg,
+.portal a svg {
+  color: inherit;
+}
+```
+
+This ensures standalone icons (empty states, headings, stat cards) always render at the correct text color. Interactive elements (buttons, links) still pick up their parent's hover/active color.
+
+### Avatar CSS Mask Technique (portal-layout.css)
+
+The header avatar uses a CSS mask instead of `<img>` so it responds to `--color-text-primary` in both themes:
+
+```css
+.portal-global-header .header-avatar {
+  display: inline-block;
+  background-color: var(--color-text-primary);
+  mask-image: url('/images/avatar_small_sidebar.svg');
+  mask-size: contain;
+  -webkit-mask-image: url('/images/avatar_small_sidebar.svg');
+  -webkit-mask-size: contain;
+}
+```
+
+The React component renders `<span className="header-avatar" aria-hidden="true" />` rather than an `<img>`.
+
+### Primary Border Variable
+
+`--color-border-primary` is defined in `portal-theme.css` as:
+
+```css
+--color-border-primary: var(--color-text-primary);
+```
+
+This ensures borders always match text color in both themes without a separate light-mode override.

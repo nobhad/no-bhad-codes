@@ -32,8 +32,9 @@ Enterprise-Level Client Management System with Portfolio
 
 ### Technology Stack
 
-- **Frontend**: TypeScript, Vite, GSAP
-- **Architecture**: Dependency Injection, Module Pattern, Service-Oriented
+- **Frontend**: TypeScript + React 18 + Zustand, Vite, GSAP
+- **Portal Architecture**: React SPA, React Router v6, Zustand state management
+- **Main Site Architecture**: Dependency Injection, Module Pattern, Service-Oriented
 - **Styling**: CSS Modules, Design System, Responsive Design
 - **Build**: Vite with advanced code splitting
 - **Testing**: Vitest (unit), Playwright (e2e)
@@ -75,60 +76,40 @@ no-bhad-codes/
 │   │   │       └── app-state.ts     # App instance, middleware, reducers
 │   │   │
 │   │   ├── 🎯 FEATURES (Domain-Driven)
-│   │   │   ├── admin/               # Admin management
-│   │   │   │   ├── admin-dashboard.ts      # Main coordinator
-│   │   │   │   ├── admin-auth.ts           # Admin authentication
-│   │   │   │   ├── admin-project-details.ts
-│   │   │   │   ├── admin-security.ts
-│   │   │   │   ├── admin-types.ts
-│   │   │   │   ├── modules/                # 28 admin modules
-│   │   │   │   │   ├── index.ts            # Module exports
-│   │   │   │   │   ├── admin-ad-hoc-analytics.ts
-│   │   │   │   │   ├── admin-ad-hoc-requests.ts
-│   │   │   │   │   ├── admin-analytics.ts
-│   │   │   │   │   ├── admin-client-details.ts
-│   │   │   │   │   ├── admin-clients.ts
-│   │   │   │   │   ├── admin-contacts.ts
-│   │   │   │   │   ├── admin-contracts.ts
-│   │   │   │   │   ├── admin-deleted-items.ts
-│   │   │   │   │   ├── admin-deliverables.ts
-│   │   │   │   │   ├── admin-design-review.ts
-│   │   │   │   │   ├── admin-document-requests.ts
-│   │   │   │   │   ├── admin-email-templates.ts
-│   │   │   │   │   ├── admin-files.ts
-│   │   │   │   │   ├── admin-global-tasks.ts
-│   │   │   │   │   ├── admin-invoices.ts
-│   │   │   │   │   ├── admin-knowledge-base.ts
-│   │   │   │   │   ├── admin-leads.ts
-│   │   │   │   │   ├── admin-messaging.ts
-│   │   │   │   │   ├── admin-overview.ts
-│   │   │   │   │   ├── admin-performance.ts
-│   │   │   │   │   ├── admin-projects.ts
-│   │   │   │   │   ├── admin-proposals.ts
-│   │   │   │   │   ├── admin-questionnaires.ts
-│   │   │   │   │   ├── admin-system-status.ts
-│   │   │   │   │   ├── admin-tasks.ts
-│   │   │   │   │   ├── admin-time-tracking.ts
-│   │   │   │   │   └── admin-workflows.ts
-│   │   │   │   ├── project-details/        # Project detail components (12 files)
-│   │   │   │   │   ├── index.ts, types.ts, dom-cache.ts
-│   │   │   │   │   ├── actions.ts, documents.ts, files.ts
-│   │   │   │   │   ├── invoices.ts, invoice-actions.ts
-│   │   │   │   │   ├── invoice-modals.ts, invoice-scheduling.ts
-│   │   │   │   │   ├── messages.ts, milestones.ts
-│   │   │   │   ├── services/               # Extracted services
-│   │   │   │   │   ├── admin-data.service.ts
-│   │   │   │   │   ├── admin-chart.service.ts
-│   │   │   │   │   └── admin-export.service.ts
-│   │   │   │   └── renderers/              # Extracted renderers
-│   │   │   │       ├── admin-contacts.renderer.ts
-│   │   │   │       ├── admin-messaging.renderer.ts
-│   │   │   │       └── admin-performance.renderer.ts
-│   │   │   ├── client/              # Client portal
-│   │   │   │   ├── client-portal.ts
-│   │   │   │   ├── terminal-intake.ts, proposal-builder*.ts
-│   │   │   │   └── modules/         # portal-*, proposal-builder-data
-│   │   │   └── main-site/           # Main site (e.g. admin-login.ts)
+│   │   │   └── main-site/           # Main site (landing, contact, etc.)
+│   │
+│   ├── 🚀 REACT PORTAL (src/react/)
+│   │   ├── app/
+│   │   │   ├── PortalApp.tsx        # Root SPA with providers
+│   │   │   ├── PortalRoutes.tsx     # All routes (lazy-loaded, role-based)
+│   │   │   ├── PortalLayout.tsx     # Sidebar + header + main content
+│   │   │   ├── PortalSidebar.tsx    # Navigation sidebar
+│   │   │   ├── PortalHeader.tsx     # Global header
+│   │   │   ├── mount-portal.tsx     # SPA mount factory
+│   │   │   └── LazyTabRoute.tsx     # Lazy route wrapper
+│   │   ├── stores/
+│   │   │   └── portal-store.ts      # Zustand store (role, tab, theme, sidebar)
+│   │   ├── hooks/
+│   │   │   └── usePortalAuth.ts     # Auth hook (bridges HttpOnly JWT to React)
+│   │   ├── features/
+│   │   │   ├── admin/               # Admin-only feature modules (25+ features)
+│   │   │   │   ├── clients/, contacts/, leads/, crm/
+│   │   │   │   ├── projects/, project-detail/, tasks/
+│   │   │   │   ├── invoices/, contracts/, proposals/
+│   │   │   │   ├── files/, document-requests/, questionnaires/
+│   │   │   │   ├── settings/, knowledge-base/, workflows/
+│   │   │   │   ├── integrations/, data-quality/, analytics/
+│   │   │   │   ├── modals/          # AdminModalsProvider + modal components
+│   │   │   │   └── shared/          # Shared filter configs
+│   │   │   └── portal/              # Client-only feature modules (15+ features)
+│   │   │       ├── dashboard/, projects/, messages/, files/
+│   │   │       ├── invoices/, contracts/, proposals/, approvals/
+│   │   │       ├── questionnaires/, deliverables/, ad-hoc-requests/
+│   │   │       ├── settings/, help/, onboarding/, preview/
+│   │   │       └── shared/          # Shared filter configs
+│   │   └── components/
+│   │       └── portal/              # Shared React portal components
+│   │           └── NotificationBell.tsx
 │   │   │
 │   │   ├── 🧩 MODULES (Reusable UI — under src/modules/)
 │   │   │   ├── core/base.ts         # Base module class

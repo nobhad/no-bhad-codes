@@ -12,7 +12,7 @@ import type {
   UpdateMessageResponse
 } from './types';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData, getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
 
@@ -99,10 +99,7 @@ export function usePortalMessages({
       setMessagesError(null);
 
       try {
-        const response = await fetch(buildEndpoint.messageThreadMessages(threadId), {
-          method: 'GET',
-          headers: buildHeaders(),
-          credentials: 'include',
+        const response = await apiFetch(buildEndpoint.messageThreadMessages(threadId), {
           signal: abortControllerRef.current.signal
         });
 
@@ -122,7 +119,7 @@ export function usePortalMessages({
         setMessagesLoading(false);
       }
     },
-    [buildHeaders]
+    []
   );
 
   /**
@@ -175,12 +172,10 @@ export function usePortalMessages({
             formData.append('attachments', file);
           });
 
-          // Only set Authorization (browser sets Content-Type with boundary for FormData)
-          const authHeaders = buildHeaders();
+          // Raw fetch for FormData — add CSRF protection manually
+          const csrfToken = getCsrfToken();
           const headers: Record<string, string> = {};
-          if (authHeaders['Authorization']) {
-            headers['Authorization'] = authHeaders['Authorization'];
-          }
+          if (csrfToken) headers[CSRF_HEADER_NAME] = csrfToken;
 
           const response = await fetch(url, {
             method: 'POST',
@@ -226,7 +221,7 @@ export function usePortalMessages({
         return false;
       }
     },
-    [selectedThread, buildHeaders, portalFetch]
+    [selectedThread, portalFetch]
   );
 
   /**
