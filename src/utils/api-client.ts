@@ -277,6 +277,25 @@ export async function apiPut(
 }
 
 /**
+ * Convenience method for PATCH requests with JSON body
+ */
+export async function apiPatch(
+  url: string,
+  body?: unknown,
+  options: RequestInit = {}
+): Promise<Response> {
+  return apiFetch(url, {
+    ...options,
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+}
+
+/**
  * Convenience method for DELETE requests
  */
 export async function apiDelete(url: string, options: RequestInit = {}): Promise<Response> {

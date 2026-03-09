@@ -259,6 +259,9 @@ export const buildEndpoint = {
   // Message Threads (Portal)
   messageThread: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}`,
   messageThreadMessages: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/threads/${id}/messages`,
+  messageItem: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}`,
+  messageReactions: (id: number | string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}/reactions`,
+  messageReaction: (id: number | string, emoji: string) => `${API_ENDPOINTS.MESSAGES}/messages/${id}/reactions/${encodeURIComponent(emoji)}`,
 
   // Questionnaires
   questionnaire: (id: number | string) => `${API_ENDPOINTS.QUESTIONNAIRES}/${id}`,

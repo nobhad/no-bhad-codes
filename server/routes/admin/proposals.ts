@@ -145,6 +145,54 @@ router.post(
 );
 
 /**
+ * PUT /api/admin/proposals/:proposalId - Update a proposal
+ */
+router.put(
+  '/proposals/:proposalId',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const proposalId = parseInt(req.params.proposalId, 10);
+
+    if (isNaN(proposalId) || proposalId <= 0) {
+      return errorResponse(res, 'Invalid proposal ID', 400, ErrorCodes.INVALID_ID);
+    }
+
+    const { status, admin_notes } = req.body;
+
+    const updates: string[] = [];
+    const values: (string | number)[] = [];
+
+    if (status !== undefined) {
+      updates.push('status = ?');
+      values.push(status);
+    }
+    if (admin_notes !== undefined) {
+      updates.push('admin_notes = ?');
+      values.push(admin_notes);
+    }
+
+    if (updates.length === 0) {
+      return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
+    }
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(proposalId);
+
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE proposal_requests SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    const updated = await db.get(`SELECT ${PROPOSAL_REQUEST_COLUMNS} FROM proposal_requests WHERE id = ?`, [proposalId]);
+
+    sendSuccess(res, { proposal: updated });
+  })
+);
+
+/**
  * DELETE /api/admin/proposals/:proposalId - Delete a proposal
  */
 router.delete(

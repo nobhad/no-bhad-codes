@@ -70,7 +70,7 @@ export const APP_CONSTANTS = {
 
   // Theme colors (use CSS variables when possible, these are fallbacks)
   THEME: {
-    PRIMARY: 'var(--color-primary, #dc2626)',
+    PRIMARY: 'var(--color-accent, #dc2626)',
     SECONDARY: 'var(--color-secondary, #ff6b6b)',
     DARK: 'var(--color-dark, #000000)',
     LIGHT: 'var(--color-light, #ffffff)',
@@ -83,7 +83,7 @@ export const APP_CONSTANTS = {
   // Chart color CSS variable mappings
   // Use getChartColors() to read these at runtime
   CHART_COLOR_VARS: {
-    PRIMARY: '--color-primary',
+    PRIMARY: '--color-accent',
     SECONDARY: '--color-success-500',
     TERTIARY: '--color-warning-500',
     QUATERNARY: '--color-gray-400',
@@ -260,7 +260,7 @@ export function getStorageKey(key: keyof typeof APP_CONSTANTS.STORAGE_KEYS): str
  * Chart color fallbacks for SSR or when CSS variables unavailable
  */
 const CHART_COLOR_FALLBACKS: Record<string, string> = {
-  '--color-primary': '#00aff0',
+  '--color-accent': '#00aff0',
   '--color-success-500': '#10b981',
   '--color-warning-500': '#f59e0b',
   '--color-error-500': '#ef4444',

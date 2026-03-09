@@ -74,6 +74,79 @@ router.get(
 );
 
 /**
+ * PUT /api/admin/deliverables/:id - Update a deliverable
+ */
+router.put(
+  '/deliverables/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const id = parseInt(req.params.id, 10);
+
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid deliverable ID', 400, ErrorCodes.INVALID_ID);
+    }
+
+    const { status, title, description, due_date } = req.body;
+
+    const updates: string[] = [];
+    const values: (string | number | null)[] = [];
+
+    if (status !== undefined) {
+      updates.push('status = ?');
+      values.push(status);
+    }
+    if (title !== undefined) {
+      updates.push('title = ?');
+      values.push(title);
+    }
+    if (description !== undefined) {
+      updates.push('description = ?');
+      values.push(description);
+    }
+    if (due_date !== undefined) {
+      updates.push('due_date = ?');
+      values.push(due_date);
+    }
+
+    if (updates.length === 0) {
+      return errorResponse(res, 'No fields to update', 400, ErrorCodes.NO_FIELDS);
+    }
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(id);
+
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE deliverables SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    const updated = await db.get(`
+      SELECT
+        d.id,
+        d.project_id as projectId,
+        d.title,
+        d.description,
+        d.status,
+        d.due_date as dueDate,
+        d.completed_at as completedAt,
+        d.created_at as createdAt,
+        d.updated_at as updatedAt,
+        p.project_name as projectName,
+        c.company_name as clientName
+      FROM deliverables d
+      LEFT JOIN projects p ON d.project_id = p.id
+      LEFT JOIN clients c ON p.client_id = c.id
+      WHERE d.id = ?
+    `, [id]);
+
+    sendSuccess(res, { deliverable: updated });
+  })
+);
+
+/**
  * POST /api/admin/deliverables/bulk-delete - Bulk delete deliverables
  */
 router.post(

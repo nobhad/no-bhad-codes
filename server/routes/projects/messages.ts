@@ -29,7 +29,7 @@ router.get(
 
     const messages = await db.all(
       `
-    SELECT id, sender_type, sender_name, message as content, read_at, created_at
+    SELECT id, sender_type, sender_name, message as content, read_at, edited_at, created_at
     FROM messages
     WHERE project_id = ? AND context_type = 'project'
     ORDER BY created_at ASC
@@ -87,7 +87,7 @@ router.post(
 
     const newMessage = await db.get(
       `
-    SELECT id, sender_type, sender_name, message as content, read_at, created_at
+    SELECT id, sender_type, sender_name, message as content, read_at, edited_at, created_at
     FROM messages WHERE id = ?
   `,
       [result.lastID]

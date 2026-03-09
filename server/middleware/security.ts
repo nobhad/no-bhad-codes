@@ -189,7 +189,7 @@ export function ipFilter(
     } catch (_error) {
       await logger.error('IP filter middleware error');
 
-      next(); // Allow through on error
+      errorResponse(res, 'IP filter error', 500, 'IP_FILTER_ERROR');
     }
   };
 }
@@ -270,7 +270,7 @@ export function requestSizeLimit(
     } catch (_error) {
       await logger.error('Request size limit middleware error');
 
-      next();
+      errorResponse(res, 'Request validation error', 500, 'REQUEST_VALIDATION_ERROR');
     }
   };
 }
@@ -360,9 +360,12 @@ export function suspiciousActivityDetector(
 
       // Check for SQL injection patterns
       const sqlPatterns = [
-        /(\b(select|insert|update|delete|drop|union|exec)\b)/gi,
-        /('|(\\')|(;)|(--)|(\|\|))/g,
-        /(script|javascript|vbscript|onload|onerror)/gi
+        // SQL injection: require SQL keyword followed by SQL syntax (FROM, INTO, SET, TABLE, ALL)
+        /\b(select\s+.+\s+from|insert\s+into|update\s+.+\s+set|delete\s+from|drop\s+(table|database)|union\s+(all\s+)?select|exec(\s+|\())/gi,
+        // Dangerous SQL comment/termination patterns (but not lone semicolons or hyphens)
+        /(('\s*;\s*(drop|delete|update|insert|select))|('--)|(\|\|))/gi,
+        // Script injection
+        /(<script|javascript\s*:|vbscript\s*:|\bon(load|error|click|mouseover)\s*=)/gi
       ];
 
       if (sqlPatterns.some((pattern) => pattern.test(fullUrl) || pattern.test(body))) {

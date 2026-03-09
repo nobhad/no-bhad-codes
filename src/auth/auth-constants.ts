@@ -88,8 +88,8 @@ export const AUTH_TIMING = {
   /** Admin session timeout in milliseconds (2 hours) */
   ADMIN_SESSION_TIMEOUT_MS: 2 * 60 * 60 * 1000,
 
-  /** Client session timeout in milliseconds (7 days) */
-  CLIENT_SESSION_TIMEOUT_MS: 7 * 24 * 60 * 60 * 1000,
+  /** Client session timeout in milliseconds (1 day - matches server JWT expiry) */
+  CLIENT_SESSION_TIMEOUT_MS: 24 * 60 * 60 * 1000,
 
   /** Token refresh buffer (5 minutes before expiry) */
   REFRESH_BUFFER_MS: 5 * 60 * 1000,
