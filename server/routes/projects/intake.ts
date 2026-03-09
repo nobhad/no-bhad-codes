@@ -70,7 +70,7 @@ router.get(
     );
 
     if (!project) {
-      return errorResponse(res, 'Project not found', 404);
+      return errorResponse(res, 'Project not found', 404, ErrorCodes.PROJECT_NOT_FOUND);
     }
 
     const p = project as Record<string, unknown>;
@@ -91,7 +91,7 @@ router.get(
     );
 
     if (!intakeFile) {
-      return errorResponse(res, 'Intake form not found for this project', 404);
+      return errorResponse(res, 'Intake form not found for this project', 404, ErrorCodes.FILE_NOT_FOUND);
     }
 
     // Check cache first (use intake file's updated_at for freshness)
@@ -121,7 +121,7 @@ router.get(
     // Read the intake JSON file
     const filePath = join(process.cwd(), getString(intakeFileRecord, 'file_path'));
     if (!existsSync(filePath)) {
-      return errorResponse(res, 'Intake file not found on disk', 404);
+      return errorResponse(res, 'Intake file not found on disk', 404, ErrorCodes.FILE_NOT_FOUND);
     }
 
     let intakeData: IntakeDocument;
@@ -129,7 +129,7 @@ router.get(
       const fileContent = readFileSync(filePath, 'utf-8');
       intakeData = JSON.parse(fileContent);
     } catch {
-      return errorResponse(res, 'Failed to read intake file', 500);
+      return errorResponse(res, 'Failed to read intake file', 500, ErrorCodes.INTERNAL_ERROR);
     }
 
     // Helper functions

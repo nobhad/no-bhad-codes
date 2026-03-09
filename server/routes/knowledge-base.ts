@@ -64,7 +64,7 @@ router.get(
     const category = await knowledgeBaseService.getCategoryBySlug(req.params.slug);
 
     if (!category) {
-      return errorResponse(res, 'Category not found', 404);
+      return errorResponse(res, 'Category not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const articles = await knowledgeBaseService.getArticlesByCategory(req.params.slug);
@@ -133,7 +133,7 @@ router.get(
     const queryParam = req.query.q as string;
 
     if (!queryParam || queryParam.length < 2) {
-      return errorResponse(res, 'Search query must be at least 2 characters', 400);
+      return errorResponse(res, 'Search query must be at least 2 characters', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     // Truncate search query to prevent DoS
@@ -181,7 +181,7 @@ router.get(
     const article = await knowledgeBaseService.getArticleBySlug(categorySlug, articleSlug);
 
     if (!article || !article.is_published) {
-      return errorResponse(res, 'Article not found', 404);
+      return errorResponse(res, 'Article not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Increment view count
@@ -233,7 +233,7 @@ router.post(
     }
 
     if (typeof isHelpful !== 'boolean') {
-      return errorResponse(res, 'isHelpful must be a boolean', 400);
+      return errorResponse(res, 'isHelpful must be a boolean', 400, ErrorCodes.VALIDATION_ERROR);
     }
 
     await knowledgeBaseService.submitFeedback({
@@ -318,7 +318,7 @@ router.post(
     const { name, slug, description, icon, color, sort_order } = req.body;
 
     if (!name || !slug) {
-      return errorResponse(res, 'name and slug are required', 400);
+      return errorResponse(res, 'name and slug are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const category = await knowledgeBaseService.createCategory({
@@ -369,7 +369,7 @@ router.put(
     const category = await knowledgeBaseService.updateCategory(id, req.body);
 
     if (!category) {
-      return errorResponse(res, 'Category not found', 404);
+      return errorResponse(res, 'Category not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { category }, 'Category updated');
@@ -491,7 +491,7 @@ router.get(
     const article = await knowledgeBaseService.getArticleById(id);
 
     if (!article) {
-      return errorResponse(res, 'Article not found', 404);
+      return errorResponse(res, 'Article not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { article });
@@ -546,7 +546,7 @@ router.post(
       req.body;
 
     if (!category_id || !title || !slug || !content) {
-      return errorResponse(res, 'category_id, title, slug, and content are required', 400);
+      return errorResponse(res, 'category_id, title, slug, and content are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const article = await knowledgeBaseService.createArticle({
@@ -600,7 +600,7 @@ router.put(
     const article = await knowledgeBaseService.updateArticle(id, req.body);
 
     if (!article) {
-      return errorResponse(res, 'Article not found', 404);
+      return errorResponse(res, 'Article not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { article }, 'Article updated');

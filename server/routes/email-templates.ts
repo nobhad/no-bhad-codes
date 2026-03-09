@@ -111,7 +111,7 @@ router.get(
 
     const template = await emailTemplateService.getTemplate(id);
     if (!template) {
-      return errorResponse(res, 'Template not found', 404);
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { template });
@@ -168,7 +168,7 @@ router.post(
       req.body;
 
     if (!name || !subject || !body_html) {
-      return errorResponse(res, 'name, subject, and body_html are required', 400);
+      return errorResponse(res, 'name, subject, and body_html are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const data: CreateTemplateData = {
@@ -252,13 +252,13 @@ router.put(
         change_reason
       );
       if (!template) {
-        return errorResponse(res, 'Template not found', 404);
+        return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
       }
 
       sendSuccess(res, { template }, 'Template updated');
     } catch (error) {
       if (error instanceof Error && error.message.includes('system template')) {
-        return errorResponse(res, error.message, 403);
+        return errorResponse(res, error.message, 403, ErrorCodes.FORBIDDEN);
       }
       throw error;
     }
@@ -301,13 +301,13 @@ router.delete(
     try {
       const deleted = await emailTemplateService.deleteTemplate(id);
       if (!deleted) {
-        return errorResponse(res, 'Template not found', 404);
+        return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
       }
 
       sendSuccess(res, undefined, 'Template deleted');
     } catch (error) {
       if (error instanceof Error && error.message.includes('system template')) {
-        return errorResponse(res, error.message, 403);
+        return errorResponse(res, error.message, 403, ErrorCodes.FORBIDDEN);
       }
       throw error;
     }
@@ -392,7 +392,7 @@ router.get(
 
     const v = await emailTemplateService.getVersion(id, version);
     if (!v) {
-      return errorResponse(res, 'Version not found', 404);
+      return errorResponse(res, 'Version not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { version: v });
@@ -439,7 +439,7 @@ router.post(
 
     const template = await emailTemplateService.restoreVersion(id, version, req.user?.email);
     if (!template) {
-      return errorResponse(res, 'Version not found', 404);
+      return errorResponse(res, 'Version not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { template }, `Template restored to version ${version}`);
@@ -491,7 +491,7 @@ router.post(
 
     const template = await emailTemplateService.getTemplate(id);
     if (!template) {
-      return errorResponse(res, 'Template not found', 404);
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Use provided sample data or generate from variables
@@ -547,7 +547,7 @@ router.post(
     const { subject, body_html, body_text, variables, sample_data } = req.body;
 
     if (!subject || !body_html) {
-      return errorResponse(res, 'subject and body_html are required', 400);
+      return errorResponse(res, 'subject and body_html are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     // Generate sample data from variables if not provided
@@ -610,12 +610,12 @@ router.post(
     const { to_email, sample_data } = req.body;
 
     if (!to_email) {
-      return errorResponse(res, 'to_email is required', 400);
+      return errorResponse(res, 'to_email is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const template = await emailTemplateService.getTemplate(id);
     if (!template) {
-      return errorResponse(res, 'Template not found', 404);
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     // Generate preview content
@@ -623,7 +623,7 @@ router.post(
 
     const preview = await emailTemplateService.previewTemplate(id, data);
     if (!preview) {
-      return errorResponse(res, 'Failed to generate preview', 500);
+      return errorResponse(res, 'Failed to generate preview', 500, ErrorCodes.INTERNAL_ERROR);
     }
 
     // Log the send attempt (actual sending would use email service)

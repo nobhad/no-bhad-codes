@@ -145,7 +145,7 @@ router.get(
     const status = req.query.status as RequestStatus | undefined;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const requests = await documentRequestService.getClientRequests(clientId, status);
@@ -186,7 +186,7 @@ router.post(
     }
 
     if (!clientEmail) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const request = await documentRequestService.markViewed(id, clientEmail);
@@ -239,11 +239,11 @@ router.post(
     }
 
     if (!fileId) {
-      return errorResponse(res, 'fileId is required', 400);
+      return errorResponse(res, 'fileId is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     if (!uploaderEmail) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const request = await documentRequestService.uploadDocument(id, fileId, uploaderEmail);
@@ -273,7 +273,7 @@ router.get(
     const clientId = req.user?.id;
 
     if (!clientId) {
-      return errorResponse(res, 'Not authenticated', 401);
+      return errorResponse(res, 'Not authenticated', 401, ErrorCodes.NOT_AUTHENTICATED);
     }
 
     const requests = await documentRequestService.getClientPendingRequests(clientId);
@@ -496,7 +496,7 @@ router.get(
 
     const request = await documentRequestService.getRequest(id);
     if (!request) {
-      return errorResponse(res, 'Request not found', 404);
+      return errorResponse(res, 'Request not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     const history = await documentRequestService.getRequestHistory(id);
@@ -528,14 +528,20 @@ router.put(
     const db = getDatabase();
 
     await db.run(
-      `UPDATE document_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      'UPDATE document_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [status, id]
     );
 
-    const updated = await db.get(`SELECT * FROM document_requests WHERE id = ?`, [id]);
+    const updated = await db.get(
+      `SELECT id, client_id, project_id, requested_by, title, description, document_type,
+              priority, status, due_date, file_id, uploaded_by, uploaded_at, reviewed_by,
+              reviewed_at, review_notes, rejection_reason, is_required, created_at, updated_at
+       FROM document_requests WHERE id = ?`,
+      [id]
+    );
 
     if (!updated) {
-      return errorResponse(res, 'Document request not found', 404);
+      return errorResponse(res, 'Document request not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { request: updated });
@@ -600,7 +606,7 @@ router.post(
     } = req.body;
 
     if (!client_id || !title) {
-      return errorResponse(res, 'client_id and title are required', 400);
+      return errorResponse(res, 'client_id and title are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const requestedBy = req.user?.email || 'admin';
@@ -659,7 +665,7 @@ router.post(
     const { client_id, template_ids, project_id } = req.body;
 
     if (!client_id || !template_ids || !Array.isArray(template_ids)) {
-      return errorResponse(res, 'client_id and template_ids array are required', 400);
+      return errorResponse(res, 'client_id and template_ids array are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const requestedBy = req.user?.email || 'admin';
@@ -823,7 +829,7 @@ router.post(
     }
 
     if (!reason) {
-      return errorResponse(res, 'Rejection reason is required', 400);
+      return errorResponse(res, 'Rejection reason is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const request = await documentRequestService.rejectRequest(id, reviewerEmail, reason);
@@ -949,7 +955,7 @@ router.post(
     const { requestIds } = req.body;
 
     if (!requestIds || !Array.isArray(requestIds) || requestIds.length === 0) {
-      return errorResponse(res, 'requestIds array is required', 400);
+      return errorResponse(res, 'requestIds array is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     let deleted = 0;
@@ -1031,7 +1037,7 @@ router.get(
 
     const template = await documentRequestService.getTemplate(id);
     if (!template) {
-      return errorResponse(res, 'Template not found', 404);
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { template });
@@ -1080,7 +1086,7 @@ router.post(
     const { name, title, description, document_type, is_required, days_until_due } = req.body;
 
     if (!name || !title) {
-      return errorResponse(res, 'name and title are required', 400);
+      return errorResponse(res, 'name and title are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const createdBy = req.user?.email;
@@ -1134,7 +1140,7 @@ router.put(
 
     const template = await documentRequestService.updateTemplate(id, req.body);
     if (!template) {
-      return errorResponse(res, 'Template not found', 404);
+      return errorResponse(res, 'Template not found', 404, ErrorCodes.NOT_FOUND);
     }
 
     sendSuccess(res, { template }, 'Template updated');
@@ -1270,7 +1276,7 @@ router.post(
     const { client_id, project_type, project_id, required_only } = req.body;
 
     if (!client_id || !project_type) {
-      return errorResponse(res, 'client_id and project_type are required', 400);
+      return errorResponse(res, 'client_id and project_type are required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
     }
 
     const requestedBy = req.user?.email || 'admin';
