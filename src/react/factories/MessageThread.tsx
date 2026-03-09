@@ -1,36 +1,69 @@
+/**
+ * ===============================================
+ * MESSAGE THREAD (REACT FACTORY)
+ * ===============================================
+ * @file src/react/factories/MessageThread.tsx
+ *
+ * Reusable admin message thread component.
+ * Best-practice layout:
+ *   - Sender name above first bubble in a group (other messages only)
+ *   - Timestamp + read receipt below bubble (footer)
+ *   - Inline hover action buttons beside the bubble (react + edit)
+ *   - Date separators between message days
+ *   - Avatar spacer on continuation rows
+ *   - Edit form replaces bubble inline
+ *   - Reaction picker popup on emoji button
+ */
+
 import * as React from 'react';
-import { useCallback, useState, useRef, useEffect } from 'react';
-import {
-  MessageSquare,
-  User,
-  Pencil,
-  Smile,
-  X,
-  Check,
-  CheckCheck
-} from 'lucide-react';
-import { PortalButton } from '@react/components/portal/PortalButton';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { User, MessageSquare, CheckCheck, Smile, Pencil, X, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
-import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
-import type { Message, MessageReaction } from '../../types';
-import { NOTIFICATIONS } from '@/constants/notifications';
+import { PortalButton } from '@react/components/portal/PortalButton';
+import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
 import { KEYS } from '@/constants/keyboard';
+
+// ============================================
+// CONSTANTS
+// ============================================
 
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'] as const;
 
-interface MessagesTabProps {
-  messages: Message[];
-  isLoading: boolean;
-  onSendMessage: (content: string) => Promise<boolean>;
-  onLoadMessages: () => Promise<void>;
-  onEditMessage: (messageId: number, content: string) => Promise<boolean>;
-  reactions: Record<number, MessageReaction[]>;
-  onToggleReaction: (messageId: number, emoji: string) => Promise<boolean>;
-  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+// ============================================
+// PUBLIC TYPES
+// ============================================
+
+export interface ThreadMessage {
+  id: number;
+  content: string;
+  /** Pre-computed by caller: true when the sender is "self" (admin in admin context) */
+  isOwn: boolean;
+  senderName?: string;
+  timestamp: string;
+  isEdited?: boolean;
+  /** Read receipt status for own messages */
+  readReceipt?: 'sent' | 'delivered' | 'read';
+  /** Emoji reactions */
+  reactions?: Array<{ emoji: string; count: number; reacted: boolean }>;
 }
+
+export interface MessageThreadProps {
+  messages: ThreadMessage[];
+  isLoading: boolean;
+  onSend: (content: string) => Promise<boolean>;
+  onReact?: (messageId: number, emoji: string) => Promise<boolean>;
+  onEdit?: (messageId: number, content: string) => Promise<boolean>;
+  showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  className?: string;
+}
+
+// ============================================
+// HELPERS
+// ============================================
 
 function formatMessageTime(date: string): string {
   const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
   if (isToday) {
@@ -44,7 +77,6 @@ function formatMessageTime(date: string): string {
   });
 }
 
-/** Returns a short label for a date separator, e.g. "Today", "Yesterday", "Mar 9" */
 function formatDateSeparator(date: string): string {
   const d = new Date(date);
   const now = new Date();
@@ -58,42 +90,59 @@ function isSameDay(a: string, b: string): boolean {
   return new Date(a).toDateString() === new Date(b).toDateString();
 }
 
+// ============================================
+// COMPONENT
+// ============================================
+
 /**
- * MessagesTab
- * Thread-based messaging with best-practice layout:
- *   - Sender name above first bubble in a group (client messages)
- *   - Timestamp + edited marker + read receipt below bubble
- *   - Inline hover action buttons beside bubble
- *   - Date separators between days
+ * MessageThread
+ *
+ * Drop-in thread UI for admin messaging contexts.
+ * Manages compose state internally; caller owns data and send/edit/react logic.
+ *
+ * @example
+ * <MessageThread
+ *   messages={messages.map((m) => ({
+ *     id: m.id,
+ *     content: m.content,
+ *     isOwn: m.senderType === 'admin',
+ *     senderName: m.senderName,
+ *     timestamp: m.timestamp,
+ *     readReceipt: m.status,
+ *   }))}
+ *   isLoading={isLoading}
+ *   onSend={handleSend}
+ *   onEdit={handleEdit}
+ *   onReact={handleReact}
+ *   showNotification={showNotification}
+ * />
  */
-export function MessagesTab({
+export function MessageThread({
   messages,
   isLoading,
-  onSendMessage,
-  onLoadMessages,
-  onEditMessage,
-  reactions,
-  onToggleReaction,
-  showNotification
-}: MessagesTabProps) {
-  const [newMessage, setNewMessage] = useState('');
+  onSend,
+  onReact,
+  onEdit,
+  showNotification,
+  className
+}: MessageThreadProps) {
+  const [draft, setDraft] = useState('');
   const [isSending, setIsSending] = useState(false);
+
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+
   const [pickerOpenId, setPickerOpenId] = useState<number | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    onLoadMessages();
-  }, [onLoadMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Close picker on outside click
+  // Close reaction picker on outside click
   useEffect(() => {
     if (pickerOpenId === null) return;
     const handleClick = () => setPickerOpenId(null);
@@ -102,20 +151,21 @@ export function MessagesTab({
   }, [pickerOpenId]);
 
   const handleSend = useCallback(async () => {
-    if (!newMessage.trim()) return;
+    const content = draft.trim();
+    if (!content || isSending) return;
     setIsSending(true);
-    const success = await onSendMessage(newMessage.trim());
+    const success = await onSend(content);
     setIsSending(false);
     if (success) {
-      setNewMessage('');
+      setDraft('');
       textareaRef.current?.focus();
     } else {
-      showNotification?.(NOTIFICATIONS.message.SEND_FAILED, 'error');
+      showNotification?.('Failed to send message', 'error');
     }
-  }, [newMessage, onSendMessage, showNotification]);
+  }, [draft, isSending, onSend, showNotification]);
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
         e.preventDefault();
         handleSend();
@@ -124,7 +174,7 @@ export function MessagesTab({
     [handleSend]
   );
 
-  const handleStartEdit = useCallback((message: Message) => {
+  const handleStartEdit = useCallback((message: ThreadMessage) => {
     setEditingId(message.id);
     setEditContent(message.content);
     setPickerOpenId(null);
@@ -136,122 +186,131 @@ export function MessagesTab({
   }, []);
 
   const handleSaveEdit = useCallback(async () => {
-    if (editingId === null || !editContent.trim()) return;
+    if (editingId === null || !editContent.trim() || !onEdit) return;
     setIsSavingEdit(true);
-    const success = await onEditMessage(editingId, editContent.trim());
+    const success = await onEdit(editingId, editContent.trim());
     setIsSavingEdit(false);
     if (success) {
       setEditingId(null);
       setEditContent('');
     } else {
-      showNotification?.(NOTIFICATIONS.message.EDIT_FAILED, 'error');
+      showNotification?.('Failed to save edit', 'error');
     }
-  }, [editingId, editContent, onEditMessage, showNotification]);
+  }, [editingId, editContent, onEdit, showNotification]);
 
   const handleReaction = useCallback(
     async (messageId: number, emoji: string) => {
       setPickerOpenId(null);
-      const success = await onToggleReaction(messageId, emoji);
+      if (!onReact) return;
+      const success = await onReact(messageId, emoji);
       if (!success) {
-        showNotification?.(NOTIFICATIONS.message.REACTION_FAILED, 'error');
+        showNotification?.('Failed to add reaction', 'error');
       }
     },
-    [onToggleReaction, showNotification]
+    [onReact, showNotification]
   );
 
   return (
-    <div className="panel msgtab-container">
-      {/* Messages List */}
+    <div className={cn('msgtab-container panel', className)}>
+      {/* Scroll area */}
       <div className="scroll-container msgtab-panel">
-        {isLoading ? (
+        {isLoading && messages.length === 0 ? (
           <LoadingState message="Loading messages..." />
         ) : messages.length === 0 ? (
           <EmptyState
             icon={<MessageSquare className="icon-lg" />}
-            message="No messages yet. Start a conversation with your client."
+            message="No messages yet. Start a conversation."
           />
         ) : (
           <div className="msgtab-thread">
             {messages.map((message, index) => {
-              const isAdmin = message.sender_type === 'admin';
-              const isEditing = editingId === message.id;
-              const messageReactions = reactions[message.id] || [];
               const prevMessage = index > 0 ? messages[index - 1] : null;
-
-              // Date separator when day changes
-              const showDateSep = !prevMessage || !isSameDay(prevMessage.created_at, message.created_at);
-
-              // Group logic: hide sender name when previous message is from the same sender
+              const showDateSep = !prevMessage || !isSameDay(prevMessage.timestamp, message.timestamp);
               const isContinuation =
                 !showDateSep &&
                 prevMessage &&
-                prevMessage.sender_type === message.sender_type;
+                prevMessage.isOwn === message.isOwn;
+
+              const isEditing = editingId === message.id;
 
               return (
                 <React.Fragment key={message.id}>
                   {/* Date separator */}
                   {showDateSep && (
-                    <div className="msgtab-date-sep" aria-label={formatDateSeparator(message.created_at)}>
-                      <span className="msgtab-date-label">{formatDateSeparator(message.created_at)}</span>
+                    <div
+                      className="msgtab-date-sep"
+                      aria-label={formatDateSeparator(message.timestamp)}
+                    >
+                      <span className="msgtab-date-label">
+                        {formatDateSeparator(message.timestamp)}
+                      </span>
                     </div>
                   )}
 
-                  <div className={cn('msgtab-row', isAdmin && 'is-admin', isContinuation && 'is-continuation')}>
-                    {/* Avatar — hidden for continuation rows */}
+                  <div
+                    className={cn(
+                      'msgtab-row',
+                      message.isOwn && 'is-admin',
+                      isContinuation && 'is-continuation'
+                    )}
+                  >
+                    {/* Avatar or spacer */}
                     {!isContinuation ? (
                       <div
-                        className={cn('msgtab-avatar', isAdmin ? 'is-admin' : 'is-client')}
+                        className={cn('msgtab-avatar', message.isOwn ? 'is-admin' : 'is-client')}
                         aria-hidden="true"
                       >
-                        {!isAdmin && <User className="icon-md" />}
+                        {!message.isOwn && <User className="icon-md" />}
                       </div>
                     ) : (
                       <div className="msgtab-avatar-spacer" aria-hidden="true" />
                     )}
 
-                    {/* Content wrap: sender → bubble-row → reactions */}
-                    <div className={cn('msgtab-content-wrap', isAdmin && 'is-admin')}>
-                      {/* Sender name (client messages, first in group only) */}
-                      {!isAdmin && !isContinuation && (
+                    {/* Content wrap */}
+                    <div className={cn('msgtab-content-wrap', message.isOwn && 'is-admin')}>
+                      {/* Sender name — other messages, first in group */}
+                      {!message.isOwn && !isContinuation && (
                         <span className="msgtab-sender">
-                          {message.sender_name || 'Client'}
+                          {message.senderName ?? 'Client'}
                         </span>
                       )}
 
-                      {/* Bubble row: [inline actions] beside [bubble-group] */}
+                      {/* Bubble row: [inline actions] + [bubble-group] */}
                       <div className="msgtab-bubble-row">
-                        {/* Inline hover actions */}
+                        {/* Inline hover actions — always in flow, hidden until hover */}
                         {!isEditing && (
                           <div className="msgtab-inline-actions">
                             {/* Reaction picker */}
-                            <span className="tw-relative">
-                              <button
-                                className="icon-btn message-action-btn"
-                                aria-label="Add reaction"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPickerOpenId(pickerOpenId === message.id ? null : message.id);
-                                }}
-                              >
-                                <Smile className="icon-sm" />
-                              </button>
-                              <div
-                                className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {QUICK_EMOJIS.map((emoji) => (
-                                  <button
-                                    key={emoji}
-                                    onClick={() => handleReaction(message.id, emoji)}
-                                    aria-label={`React with ${emoji}`}
-                                  >
-                                    {emoji}
-                                  </button>
-                                ))}
-                              </div>
-                            </span>
-                            {/* Edit — admin messages only */}
-                            {isAdmin && (
+                            {onReact && (
+                              <span className="tw-relative">
+                                <button
+                                  className="icon-btn message-action-btn"
+                                  aria-label="Add reaction"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPickerOpenId(pickerOpenId === message.id ? null : message.id);
+                                  }}
+                                >
+                                  <Smile className="icon-sm" />
+                                </button>
+                                <div
+                                  className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {QUICK_EMOJIS.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleReaction(message.id, emoji)}
+                                      aria-label={`React with ${emoji}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              </span>
+                            )}
+                            {/* Edit — own messages only, when onEdit provided */}
+                            {message.isOwn && onEdit && (
                               <button
                                 className="icon-btn message-action-btn"
                                 aria-label="Edit message"
@@ -301,23 +360,28 @@ export function MessagesTab({
                               </div>
                             </div>
                           ) : (
-                            <div className={cn('msgtab-bubble', isAdmin ? 'is-admin' : 'is-client')}>
+                            <div className={cn('msgtab-bubble', message.isOwn ? 'is-admin' : 'is-client')}>
                               <p className="msgtab-content">{message.content}</p>
                             </div>
                           )}
 
-                          {/* Footer: timestamp + edited + read receipt */}
+                          {/* Footer: edited + time + read receipt */}
                           {!isEditing && (
-                            <div className={cn('msgtab-footer', isAdmin && 'is-admin')}>
-                              {message.edited_at && (
+                            <div className={cn('msgtab-footer', message.isOwn && 'is-admin')}>
+                              {message.isEdited && (
                                 <span className="message-edited">(edited)</span>
                               )}
                               <span className="msgtab-time">
-                                {formatMessageTime(message.created_at)}
+                                {formatMessageTime(message.timestamp)}
                               </span>
-                              {/* Read receipt for own messages */}
-                              {isAdmin && (
-                                <span className="msgtab-receipt" aria-label="Sent">
+                              {message.isOwn && (
+                                <span
+                                  className={cn(
+                                    'msgtab-receipt',
+                                    message.readReceipt === 'read' && 'is-read'
+                                  )}
+                                  aria-label={message.readReceipt ?? 'sent'}
+                                >
                                   <CheckCheck className="icon-xs" />
                                 </span>
                               )}
@@ -326,14 +390,14 @@ export function MessagesTab({
                         </div>
                       </div>
 
-                      {/* Reaction badges below bubble-row */}
-                      {messageReactions.length > 0 && (
+                      {/* Reaction badges */}
+                      {message.reactions && message.reactions.length > 0 && (
                         <div className="message-reactions">
-                          {messageReactions.map((r) => (
+                          {message.reactions.map((r) => (
                             <button
                               key={r.emoji}
                               className={cn('reaction-badge', r.reacted && 'is-reacted')}
-                              onClick={() => handleReaction(message.id, r.emoji)}
+                              onClick={() => onReact?.(message.id, r.emoji)}
                               aria-label={`${r.emoji} ${r.count}`}
                             >
                               {r.emoji} {r.count}
@@ -351,12 +415,12 @@ export function MessagesTab({
         )}
       </div>
 
-      {/* Message Input */}
+      {/* Compose input */}
       <div className="msgtab-input-panel">
         <textarea
           ref={textareaRef}
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           rows={2}
@@ -367,7 +431,7 @@ export function MessagesTab({
           variant="primary"
           className="msgtab-send-btn"
           onClick={handleSend}
-          disabled={!newMessage.trim()}
+          disabled={!draft.trim() || isSending}
           loading={isSending}
         >
           Send Message

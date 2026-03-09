@@ -522,7 +522,17 @@ export interface Message {
   sender_name?: string;
   content: string;
   is_read: boolean;
+  edited_at?: string;
   created_at: string;
+}
+
+/**
+ * Aggregated reaction group for a message
+ */
+export interface MessageReaction {
+  emoji: string;
+  count: number;
+  reacted: boolean;
 }
 
 /**
