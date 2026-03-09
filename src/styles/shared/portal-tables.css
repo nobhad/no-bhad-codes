@@ -177,6 +177,8 @@
     gap: var(--table-actions-gap);
     flex-wrap: nowrap;
     justify-content: flex-end;
+    /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
+    --portal-btn-icon-size: var(--icon-size-sm);
   }
 
   /* Actions cell - DO NOT use display:flex on td, it breaks table-cell behavior */
@@ -222,26 +224,9 @@
   gap: var(--table-actions-gap);
 }
 
-/* Table action icon buttons - match text size (14px) */
-.data-table .table-actions .icon-btn,
-.data-table .col-actions .icon-btn,
-.table-actions .icon-btn {
-  width: var(--space-3);
-  height: var(--space-3);
-  min-width: var(--space-3);
-  min-height: var(--space-3);
-  max-width: var(--space-3);
-  max-height: var(--space-3);
-  padding: 0;
-}
-
-/* Action button SVGs - match cell text size (1em) */
-.data-table .table-actions .icon-btn svg,
-.data-table .col-actions .icon-btn svg,
-.table-actions .icon-btn svg {
-  width: 1em;
-  height: 1em;
-}
+/* Icon size is controlled via --portal-btn-icon-size scoped on .table-actions
+   and .data-table-row-actions containers — the unlayered .icon-btn base rule
+   reads the token via DOM inheritance, making @layer overrides unnecessary. */
 
 /* ==============================================
    TABLE HEADER
@@ -1967,7 +1952,9 @@
 .data-table-row-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-0-5);
+  gap: var(--table-actions-gap);
+  /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
+  --portal-btn-icon-size: var(--icon-size-sm);
 }
 
 .form-select-sm {
