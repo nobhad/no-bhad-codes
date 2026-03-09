@@ -118,7 +118,7 @@ const TasksKanban = React.memo(({ tasks }: { tasks: TaskItem[] }) => {
   );
 });
 
-export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboardProps) {
+export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: OverviewDashboardProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -186,7 +186,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
       {/* Stats Strip */}
       <div className="overview-stats-strip">
         {snapshotMetrics.map((metric) => (
-          <div key={metric.label} className="overview-stat-card overview-panel">
+          <div key={metric.label} className="overview-stat-card">
             <div className="stat-card-top">
               {metric.icon}
               <span className="field-label">{metric.label}</span>
@@ -200,7 +200,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
       {attentionItems.length > 0 && (
         <div className="overview-stats-strip" style={{ gridTemplateColumns: `repeat(${attentionItems.length}, 1fr)` }}>
           {attentionItems.map((item) => (
-            <button key={item.type} onClick={item.action} className="overview-stat-card overview-panel">
+            <button key={item.type} onClick={item.action} className="overview-stat-card">
               <div className="stat-card-top">
                 {item.icon}
                 <span className="field-label">{item.label}</span>
@@ -236,21 +236,8 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
                 <ul className="activity-feed">
                   {activeProjects.slice(0, 5).map((project) => (
                     <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('projects', String(project.id))}>
-                      <div className="activity-body ovdash-flex-1">
+                      <div className="activity-body">
                         <span className="activity-text">{project.name}</span>
-                        {project.client_id ? (
-                          <button
-                            className="client-nav-link activity-time"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onNavigate?.('client-detail', String(project.client_id));
-                            }}
-                          >
-                            {project.client}
-                          </button>
-                        ) : (
-                          <span className="activity-time">{project.client}</span>
-                        )}
                       </div>
                       <div className="progress-cell">
                         <div className="progress-bar ovdash-progress-width">
@@ -292,7 +279,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken }: OverviewDashboar
                   {upcomingTasks.slice(0, 5).map((task) => (
                     <li key={task.id} className="activity-feed-item">
                       <span className="activity-dot" data-priority={task.priority} style={{ background: getPriorityColor(task.priority), borderColor: getPriorityColor(task.priority) }} />
-                      <div className="activity-body ovdash-flex-1">
+                      <div className="activity-body">
                         <span className="activity-text">{task.title}</span>
                         <span className="activity-time">{task.projectName}</span>
                       </div>

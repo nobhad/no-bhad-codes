@@ -59,6 +59,9 @@
    ===================================================== */
 
 .overview-stat-card {
+  background: var(--color-bg-primary);
+  border: var(--border-width, 2px) solid var(--color-border-primary, currentColor);
+  overflow: hidden;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
@@ -257,12 +260,14 @@
   display: flex;
   align-items: center;
   gap: var(--icon-gap-sm);
+  flex: 1;
 }
 
 .progress-bar {
   flex: 1;
-  height: var(--border-width);
-  background: var(--color-border-secondary, var(--portal-alpha-white-08));
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-text-tertiary);
   overflow: hidden;
 }
 
@@ -302,7 +307,7 @@
 
 .activity-feed-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
   border-bottom: none;
@@ -454,4 +459,48 @@
   .overview-stats-strip {
     grid-template-columns: 1fr;
   }
+}
+
+/* =====================================================
+   OVERVIEW DASHBOARD HELPERS
+   ===================================================== */
+
+/* Error state panel */
+.ovdash-error-panel {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+/* Error message spacing */
+.ovdash-error-message {
+  margin-bottom: var(--space-2);
+}
+
+/* Clickable list item */
+.ovdash-clickable {
+  cursor: pointer;
+}
+
+/* Active projects progress bar — wider track for overview panel */
+.ovdash-progress-width {
+  min-width: 6rem;
+}
+
+/* Quick actions grid - 2x2, collapses to single column on small screens */
+.ovdash-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1-5);
+}
+
+@media (--small-mobile) {
+  .ovdash-quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Quick action buttons - ensure visible borders with thicker bottom */
+.ovdash-quick-actions .btn-secondary {
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
+  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
 }

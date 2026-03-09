@@ -723,8 +723,8 @@
 }
 
 /* MessageThread factory inside messaging-main-area:
-   Override the fixed 500px height from portal-tab-components.css and strip panel
-   chrome — the conversation header + messaging-main-area are already the container. */
+   Override height/chrome from project-detail.css (.msgtab-container) —
+   the conversation header + messaging-main-area are already the container. */
 .messaging-main-area .msgtab-container {
   height: auto;
   flex: 1;
@@ -1139,4 +1139,41 @@
 /* Hidden file input */
 .file-input-hidden {
   display: none;
+}
+
+/* =====================================================
+   MESSAGE THREAD LIST ITEMS
+   ===================================================== */
+
+/* Thread content flex */
+.message-thread-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Thread header/footer row */
+.message-thread-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Thread preview row with top margin */
+.message-thread-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.125rem;
+}
+
+/* Thread list no gap */
+.message-thread-list {
+  gap: 0;
+}
+
+/* Timestamp no shrink */
+.message-timestamp {
+  flex-shrink: 0;
 }
