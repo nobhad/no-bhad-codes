@@ -446,7 +446,7 @@ export function suspiciousActivityDetector(
     } catch (_error) {
       await logger.error('Suspicious activity detector error');
 
-      next();
+      errorResponse(res, 'Security check failed', 500, 'SECURITY_CHECK_ERROR');
     }
   };
 }
