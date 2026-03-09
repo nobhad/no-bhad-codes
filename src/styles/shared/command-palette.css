@@ -34,8 +34,8 @@
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-primary);
-  border: var(--portal-border);
+  background: var(--color-bg-secondary);
+  border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
@@ -56,7 +56,7 @@
   width: var(--cmd-palette-search-icon-size);
   height: var(--cmd-palette-search-icon-size);
   flex-shrink: 0;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
 }
 
 .command-palette-input {
@@ -64,22 +64,32 @@
   background: transparent;
   border: none;
   outline: none;
+  box-shadow: none;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   font-family: inherit;
 }
 
+/* Suppress the portal-wide input focus ring — palette has its own focus treatment */
+.command-palette-input:focus,
+.command-palette-input:focus-visible {
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
 .command-palette-input::placeholder {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
+  opacity: 0.5;
 }
 
 .command-palette-kbd {
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   font-family: inherit;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
   padding: calc(var(--space-px) * 2) calc(var(--space-px) * 6);
   line-height: 1.4;
@@ -91,7 +101,7 @@
 
 .command-palette-divider {
   height: var(--border-width);
-  background: var(--color-border-primary);
+  background: var(--color-text-primary);
 }
 
 /* ============================================
@@ -109,7 +119,7 @@
 .command-palette-empty {
   padding: var(--space-6) var(--space-4);
   text-align: center;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
 }
 
@@ -124,7 +134,7 @@
   padding: var(--space-2) var(--space-3);
   border-radius: var(--border-radius-md);
   cursor: pointer;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   transition: background-color 0.1s ease, color 0.1s ease;
 }
@@ -157,7 +167,7 @@
 
 .command-palette-item-group {
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   text-transform: capitalize;
 }
 
@@ -165,9 +175,9 @@
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   font-family: inherit;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
   padding: var(--space-px) calc(var(--space-px) * 5);
   min-width: var(--cmd-palette-item-icon-size);
@@ -183,7 +193,7 @@
   display: flex;
   gap: var(--space-4);
   padding: var(--space-2) var(--space-4);
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--border-width) solid var(--color-text-primary);
   background: var(--color-bg-secondary);
 }
 
@@ -192,14 +202,15 @@
   align-items: center;
   gap: var(--space-1);
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
 }
 
 .command-palette-hint kbd {
   font-family: inherit;
   font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
   background: var(--color-bg-secondary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--border-width) solid var(--color-text-primary);
   border-radius: var(--border-radius-sm);
   padding: 0 var(--space-0-5);
   min-width: var(--cmd-palette-item-icon-size);
