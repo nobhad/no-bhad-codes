@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { User, MessageSquare, CheckCheck, Smile, Pencil, X, Check } from 'lucide-react';
+import { User, MessageSquare, CheckCheck, Smile, X, Check } from 'lucide-react';
 import { cn } from '@react/lib/utils';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { LoadingState, EmptyState } from '@react/factories/StateDisplay';
@@ -137,6 +137,8 @@ export function MessageThread({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressActivated = useRef(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -210,6 +212,32 @@ export function MessageThread({
     [onReact, showNotification]
   );
 
+  const handleBubbleTouchStart = useCallback((messageId: number) => {
+    longPressActivated.current = false;
+    if (!onReact) return;
+    longPressTimer.current = setTimeout(() => {
+      longPressActivated.current = true;
+      setPickerOpenId(messageId);
+    }, 500);
+  }, [onReact]);
+
+  const handleBubbleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleBubbleClick = useCallback((message: ThreadMessage) => {
+    if (longPressActivated.current) {
+      longPressActivated.current = false;
+      return;
+    }
+    if (message.isOwn && onEdit) {
+      handleStartEdit(message);
+    }
+  }, [handleStartEdit, onEdit]);
+
   return (
     <div className={cn('msgtab-container panel', className)}>
       {/* Scroll area */}
@@ -280,50 +308,41 @@ export function MessageThread({
                         {/* Inline hover actions — always in flow, hidden until hover */}
                         {!isEditing && (
                           <div className="msgtab-inline-actions">
-                            {/* Reaction picker */}
                             {onReact && (
-                              <span className="tw-relative">
-                                <button
-                                  className="icon-btn message-action-btn"
-                                  aria-label="Add reaction"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPickerOpenId(pickerOpenId === message.id ? null : message.id);
-                                  }}
-                                >
-                                  <Smile className="icon-sm" />
-                                </button>
-                                <div
-                                  className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {QUICK_EMOJIS.map((emoji) => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => handleReaction(message.id, emoji)}
-                                      aria-label={`React with ${emoji}`}
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
-                                </div>
-                              </span>
-                            )}
-                            {/* Edit — own messages only, when onEdit provided */}
-                            {message.isOwn && onEdit && (
                               <button
                                 className="icon-btn message-action-btn"
-                                aria-label="Edit message"
-                                onClick={() => handleStartEdit(message)}
+                                aria-label="Add reaction"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPickerOpenId(pickerOpenId === message.id ? null : message.id);
+                                }}
                               >
-                                <Pencil className="icon-sm" />
+                                <Smile className="icon-sm" />
                               </button>
                             )}
                           </div>
                         )}
 
-                        {/* Bubble group: bubble + footer stacked */}
+                        {/* Bubble group: bubble + footer stacked — reaction picker anchors here */}
                         <div className="msgtab-bubble-group">
+                          {/* Reaction picker — positioned above bubble, triggered by Smile btn or long press */}
+                          {onReact && (
+                            <div
+                              className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {QUICK_EMOJIS.map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => handleReaction(message.id, emoji)}
+                                  aria-label={`React with ${emoji}`}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
                           {isEditing ? (
                             <div className="message-edit-form">
                               <textarea
@@ -360,7 +379,16 @@ export function MessageThread({
                               </div>
                             </div>
                           ) : (
-                            <div className={cn('msgtab-bubble', message.isOwn ? 'is-admin' : 'is-client')}>
+                            <div
+                              className={cn('msgtab-bubble', message.isOwn ? 'is-admin' : 'is-client', message.isOwn && onEdit && 'is-editable')}
+                              onClick={() => handleBubbleClick(message)}
+                              onTouchStart={() => handleBubbleTouchStart(message.id)}
+                              onTouchEnd={handleBubbleTouchEnd}
+                              onTouchCancel={handleBubbleTouchEnd}
+                              onContextMenu={(e) => e.preventDefault()}
+                              role={message.isOwn && onEdit ? 'button' : undefined}
+                              aria-label={message.isOwn && onEdit ? 'Click to edit message' : undefined}
+                            >
                               <p className="msgtab-content">{message.content}</p>
                             </div>
                           )}
