@@ -321,9 +321,12 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   min-width: var(--portal-btn-icon-size-xs);
   min-height: var(--portal-btn-icon-size-xs);
 }
-.icon-btn svg {
-  width: var(--portal-btn-icon-inner-size);
-  height: var(--portal-btn-icon-inner-size);
+/* Icon button SVG — matches context text size */
+.icon-btn svg,
+.portal .nav-btn > svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
 }
 
 /* Icon button focus */
@@ -394,9 +397,8 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     .data-table td .icon-btn svg,
     .table-actions .icon-btn svg,
     .col-actions .icon-btn svg {
-      /* Use unified table icon size from portal-tables.css */
-      width: var(--table-action-icon-size, var(--icon-size-md));
-      height: var(--table-action-icon-size, var(--icon-size-md));
+      width: 1em;
+      height: 1em;
     }
   }
 }
@@ -481,9 +483,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
     box-shadow: none;
   }
 
-  /* MASTER SELECTOR: Every SVG in table icon buttons
-     Uses --table-action-icon-size from portal-tables.css for uniform sizing
-     with ALL other table icons (cell-icon, cell-icon-sm, etc.) */
+  /* MASTER SELECTOR: Every SVG in table icon buttons — match cell text size (1em) */
   td .icon-btn svg,
   td > .icon-btn svg,
   td button.icon-btn svg,
@@ -502,13 +502,12 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   .portal td .icon-btn svg,
   .portal .col-actions .icon-btn svg,
   .portal .table-actions .icon-btn svg {
-    /* Use unified table icon size - NO !important, cascade handles specificity */
-    width: var(--table-action-icon-size, var(--icon-size-md));
-    height: var(--table-action-icon-size, var(--icon-size-md));
-    min-width: var(--table-action-icon-size, var(--icon-size-md));
-    min-height: var(--table-action-icon-size, var(--icon-size-md));
-    max-width: var(--table-action-icon-size, var(--icon-size-md));
-    max-height: var(--table-action-icon-size, var(--icon-size-md));
+    width: 1em;
+    height: 1em;
+    min-width: 1em;
+    min-height: 1em;
+    max-width: 1em;
+    max-height: 1em;
     flex-shrink: 0;
   }
 }

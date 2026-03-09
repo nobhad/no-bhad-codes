@@ -342,6 +342,16 @@ html[data-theme="light"] .portal :is(
   margin-bottom: var(--space-2);
 }
 
+/* Clickable card variant - interactive with hover feedback */
+.portal .portal-card.clickable {
+  cursor: pointer;
+  transition: border-color var(--transition-faster);
+}
+
+.portal .portal-card.clickable:hover {
+  border-color: var(--color-border-primary);
+}
+
 /* Card body - standard content area */
 .portal .portal-card-body {
   color: var(--color-text-primary);
