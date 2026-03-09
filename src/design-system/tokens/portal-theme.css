@@ -74,6 +74,8 @@ body[data-page="client-portal"] {
 
   /* Portal border shorthand — convenience alias */
   --portal-border: var(--border-width) solid var(--color-border-primary);
+  /* Input border — 1px since inputs are nested inside bordered panels */
+  --portal-input-border: var(--border-width-px) solid var(--color-border-primary);
 
   /* Table border alias */
   --table-border-color: var(--color-border-primary);
@@ -107,10 +109,10 @@ body[data-page="client-portal"] {
   --portal-alpha-black-80: rgba(0, 0, 0, 0.8);
 
   /* Semantic color alphas - for colored highlights/backgrounds */
-  --portal-alpha-primary-08: rgba(var(--color-primary-rgb), 0.08);
-  --portal-alpha-primary-10: rgba(var(--color-primary-rgb), 0.1);
-  --portal-alpha-primary-20: rgba(var(--color-primary-rgb), 0.2);
-  --portal-alpha-primary-25: rgba(var(--color-primary-rgb), 0.25);
+  --portal-alpha-primary-08: rgba(var(--color-accent-rgb), 0.08);
+  --portal-alpha-primary-10: rgba(var(--color-accent-rgb), 0.1);
+  --portal-alpha-primary-20: rgba(var(--color-accent-rgb), 0.2);
+  --portal-alpha-primary-25: rgba(var(--color-accent-rgb), 0.25);
   --portal-alpha-success-10: rgba(var(--color-success-rgb), 0.1);
   --portal-alpha-success-15: rgba(var(--color-success-rgb), 0.15);
   --portal-alpha-success-25: rgba(var(--color-success-rgb), 0.25);
@@ -137,7 +139,7 @@ body[data-page="client-portal"] {
   /* ----------------------------------------
    * FOCUS STATE COLORS
    * ---------------------------------------- */
-  --focus-ring-color: var(--color-primary);
+  --focus-ring-color: var(--color-accent);
   --focus-ring-width: var(--border-width);
   --focus-ring-offset: var(--space-0);
   --focus-ring: 0 0 0 var(--focus-ring-width) var(--portal-alpha-primary-25);
@@ -165,7 +167,7 @@ body[data-page="client-portal"] {
   /* ----------------------------------------
    * LABEL STYLING
    * ---------------------------------------- */
-  --label-font-size: var(--font-size-xs);
+  --label-font-size: var(--font-size-sm);
   --label-color: var(--color-text-primary);
   --label-font-weight: var(--font-weight-medium);
   --label-text-transform: uppercase;
@@ -213,7 +215,7 @@ body[data-page="client-portal"] {
   --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
   --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
   --table-actions-gap: var(--space-0-5);
-  --table-header-font-size: var(--font-size-xs);
+  --table-header-font-size: var(--font-size-sm);
   --table-cell-font-size: var(--font-size-sm);
   --table-header-font-weight: var(--font-weight-medium);
   --table-header-letter-spacing: var(--letter-spacing-label);
@@ -365,4 +367,102 @@ html[data-theme="light"]:has(body[data-page="admin"]),
 html[data-theme="light"]:has(body[data-page="client-portal"]) {
   --color-bg-primary: var(--color-off-white); /* Portal light = off-white */
   background-color: var(--color-bg-primary);
+}
+
+/* ============================================
+ * SVG COLOR — UNLAYERED (beats all @layer rules)
+ * Ensures all lucide SVGs use primary text color inside the portal.
+ * svg.lucide { color: currentColor } in portal-utilities.css (layer pages)
+ * would otherwise inherit from nearest ancestor — this locks it to primary.
+ * ============================================ */
+.portal svg.lucide {
+  color: var(--color-text-primary);
+}
+
+/* Active/hover nav items — icon must match text color (same variable) */
+.portal .nav-btn:is(.active, :hover) svg.lucide {
+  color: var(--color-accent);
+}
+
+/* Active subtab items — icon must match tab text color */
+.portal .portal-tabs button.active svg.lucide,
+.portal .portal-subtab.active svg.lucide,
+.portal .tab-active svg.lucide {
+  color: var(--color-accent);
+}
+
+/* Hover / active variants — icon-btn states */
+.portal .icon-btn:hover svg.lucide,
+.portal .icon-btn:focus-visible svg.lucide {
+  color: var(--color-accent);
+}
+
+.portal .icon-btn.icon-btn-primary svg.lucide,
+.portal .icon-btn.icon-btn-active svg.lucide {
+  color: var(--color-accent);
+}
+
+.portal .icon-btn.icon-btn-success svg.lucide {
+  color: var(--color-success);
+}
+
+.portal .icon-btn.icon-btn-warning svg.lucide {
+  color: var(--color-warning);
+}
+
+/* Checkbox check icon — must contrast against the filled background */
+.portal .portal-checkbox[data-state="checked"] svg.lucide,
+.portal .portal-checkbox.is-completed svg.lucide {
+  color: var(--color-bg-primary);
+  stroke-width: 3.5;
+}
+
+/* Table checkbox — checkmark must be light against brand-primary background */
+.portal .data-table-checkbox[data-state="checked"] svg.lucide {
+  color: var(--color-off-white);
+}
+
+/* Muted contexts — text-muted containers should pass through muted color */
+.portal .text-muted svg.lucide {
+  color: var(--color-text-secondary);
+}
+
+/* =================================================================
+   ROOT SVG COLOR — always follow parent's color context.
+   Overrides reset.css fixed --color-text-primary so SVGs remain
+   visible when parent hover/active state changes color.
+   ================================================================= */
+.portal svg.lucide {
+  color: currentColor;
+}
+
+/* Status dot in dropdown items: use base icon-size-xs (12px), not full 1em.
+   Also slightly increase gap between dot and label for readability. */
+.portal .portal-dropdown-item .status-dot {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+  min-width: var(--icon-size-xs);
+  min-height: var(--icon-size-xs);
+}
+
+.portal .portal-dropdown-item .status-indicator {
+  gap: var(--icon-gap-sm);
+}
+
+/* =================================================================
+   ROOT DROPDOWN OPEN STATE — seamless trigger + panel join
+   Must be unlayered (portal-theme.css) to beat any context-specific
+   open-state border-color overrides (e.g. project-detail.css accent).
+   Excludes .icon-btn (... menus) and .notification-bell-btn.
+   ================================================================= */
+
+/* When open: normalize border color to match dropdown panel, remove bottom */
+.portal [aria-haspopup="menu"][data-state="open"]:not(.icon-btn):not(.notification-bell-btn) {
+  border-color: var(--color-border-primary);
+  border-bottom-color: transparent;
+}
+
+/* Badge child inside an open trigger also loses its bottom border */
+.portal [aria-haspopup="menu"][data-state="open"]:not(.icon-btn):not(.notification-bell-btn) .badge {
+  border-bottom-color: transparent;
 }

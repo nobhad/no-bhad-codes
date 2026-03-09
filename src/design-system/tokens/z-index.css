@@ -39,6 +39,16 @@
   --z-index-content: 1;
   --z-index-elevated: 10;
 
+  /* ============================================
+   * LEGACY SHORT-NAME ALIASES (migrated from variables.css)
+   * ============================================
+   * Many components reference these short names directly.
+   * Kept as aliases pointing at the proper z-index scale.
+   */
+  --z-header: 10;   /* Alias for --z-index-elevated (header) */
+  --z-nav: 100;     /* Alias for --z-index-nav */
+  --z-modal: 1000;  /* Alias for portal modal range */
+
   /* Navigation layers */
   --z-index-nav-backdrop: 90;
   --z-index-nav: 100;

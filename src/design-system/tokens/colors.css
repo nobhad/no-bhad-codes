@@ -120,7 +120,7 @@
   --color-state-active: rgba(0, 0, 0, 0.1);
   --color-state-selected: rgba(0, 0, 0, 0.08);
   --color-state-disabled: var(--color-gray-400);
-  --color-primary-10: rgba(var(--color-brand-primary-rgb), 0.1);
+  --color-accent-10: rgba(var(--color-brand-primary-rgb), 0.1);
 
   /* Hover Element Colors — for components with inverted hover (solid bg flip) */
   --color-hover-bg: var(--color-gray-900);     /* Solid bg on hover (inverted) */
@@ -257,8 +257,9 @@ html[data-theme="light"] {
   /* Legacy semantic colors - Main site light theme (matched to live deploy) */
   --color-dark: #333333;
   --color-light: #ffffff;
-  --color-primary: var(--color-brand-primary);
-  --color-primary-rgb: var(--color-brand-primary-rgb);
+  --color-primary: var(--color-text-primary);
+  --color-accent-rgb: var(--color-brand-primary-rgb);
+  --color-accent-hover: var(--color-brand-accent);
   --color-secondary: var(--color-brand-secondary);
   --color-accent: var(--color-brand-accent);
   --color-border: #000000;
