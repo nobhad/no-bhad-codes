@@ -26,11 +26,13 @@ import { extrasRouter } from './proposals/extras.js';
 
 const router = express.Router();
 
+// extrasRouter must come before coreRouter — it contains GET /my which would
+// otherwise be shadowed by coreRouter's GET /:id wildcard route.
+router.use(extrasRouter);
 router.use(coreRouter);
 router.use(pdfRouter);
 router.use(templatesRouter);
 router.use(versionsRouter);
 router.use(signingRouter);
-router.use(extrasRouter);
 
 export default router;
