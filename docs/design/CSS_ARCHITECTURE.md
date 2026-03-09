@@ -1,6 +1,6 @@
 # CSS Architecture
 
-**Last Updated:** March 7, 2026
+**Last Updated:** March 9, 2026
 
 This document defines the CSS architecture, naming conventions, and design token system used throughout the application.
 
@@ -152,9 +152,17 @@ New code should use the semantic tokens (`--color-*`, `--portal-*`, `--status-*`
 
 ```css
 /* Spacing (src/design-system/tokens/spacing.css) */
---space-0 through --space-32      /* Fixed 8px grid scale */
---icon-gap-xs through --icon-gap-xl
---portal-section-gap, --dashboard-section-gap
+--space-0 through --space-32          /* Fixed 8px grid scale */
+--icon-gap-xs through --icon-gap-xl   /* Icon-to-text gap scale */
+--portal-section-gap                  /* 24px — gap between sections */
+--dashboard-section-gap               /* 48px — dashboard major section gap */
+--dashboard-grid-gap                  /* 24px — gap between dashboard cards */
+--dashboard-card-gap                  /* 16px — gap within dashboard cards */
+--dashboard-panel-gap                 /* 28px — gap between content areas */
+
+/* Action button gaps (src/design-system/tokens/portal-theme.css) */
+--action-btn-gap                      /* 8px — icon/action button cluster gap */
+--table-actions-gap                   /* 8px — table row action button gap */
 
 /* Typography (src/design-system/tokens/typography.css) */
 --font-family-sans, --font-family-serif, --font-family-mono
@@ -465,10 +473,19 @@ Defined in `src/styles/shared/portal-layout.css` and `src/styles/shared/portal-c
 Defined in `src/styles/shared/portal-tables.css`.
 
 ```css
-.data-table
-.data-table th
-.data-table td
+.data-table                   /* Base table */
+.data-table th / .data-table td
+.col-actions                  /* Actions column cell (EJS tables) */
+.table-actions                /* Row action button container (EJS tables) */
+.data-table-row-actions       /* Row action button container (React DataTable) */
 ```
+
+Both `.table-actions` and `.data-table-row-actions` scope `--portal-btn-icon-size` to
+`--icon-size-sm` (16px) so icon buttons in table rows are smaller than the default 36px.
+Gap between row action buttons is controlled by `--table-actions-gap` (8px).
+
+Icon buttons in tables should be bare `<button class="icon-btn">` — no extra wrapper gap needed
+since the scoped `--portal-btn-icon-size` token keeps buttons compact.
 
 ### Forms
 
@@ -508,25 +525,24 @@ Defined in `src/styles/shared/modal-system.css` and `src/styles/admin/modals.css
 
 The portal uses a "DISCOTHEQUE" brutalist design with two modes:
 
-### Dark Mode (Default)
+### Light Mode (Default)
 
-- Black background (`--color-bg-primary: #000000`)
-- White text (`--color-text-primary: #ffffff`)
-- White borders (`--color-border-primary` = same as text primary)
+- Off-white background (`--color-bg-primary: #e0e0e0`)
+- Near-black text (`--color-text-primary: #333333`)
+- Dark borders (`--color-border-primary` = same as text primary)
 - 0 border-radius everywhere (sharp corners)
 - Monospace font (Inconsolata)
 - All other colors automatically derived via `color-mix()` from these two values
 
-### Light Mode
+### Dark Mode
 
-Activated by `html[data-theme="light"]`. Only three variables change:
+Activated by `html[data-theme="dark"]`. Only two variables change on the body:
 
 ```css
-html[data-theme="light"] body[data-page="admin"],
-html[data-theme="light"] body[data-page="client-portal"] {
-  --color-text-primary: #333333;
-  --color-bg-primary: var(--color-off-white);
-  --form-btn-shadow: var(--portal-alpha-black-15);
+html[data-theme="dark"] body[data-page="admin"],
+html[data-theme="dark"] body[data-page="client-portal"] {
+  --color-text-primary: #ffffff;
+  --color-bg-primary: #171717;
 }
 ```
 
@@ -670,11 +686,35 @@ Additional granular breakpoints are available. See `src/styles/variables.css` fo
 
 ## Recent Changes
 
+### March 9, 2026 — Action Button Gaps, Icon Sizing, Dead CSS Removal
+
+**New tokens** added to `portal-theme.css`:
+
+- `--action-btn-gap: var(--space-1)` (8px) — use on all icon/action button cluster containers
+  (`.panel-actions`, `.note-actions`, `.message-actions`, `.inline-edit-actions`, etc.)
+- `--table-actions-gap: var(--space-1)` (8px) — row-level table action buttons specifically
+
+**Table row action buttons** — `.table-actions` and `.data-table-row-actions` now scope
+`--portal-btn-icon-size: var(--icon-size-sm)` directly on the container. This means the `.icon-btn`
+base rule reads the scoped token and renders at 16px without needing separate size overrides.
+
+**Icon sizes** — All SVG icon width/height declarations in portal CSS files changed from
+`var(--icon-size-sm)` / `var(--icon-size-xs)` to `1em`. This lets icons scale proportionally
+with their parent's `font-size`, making them context-aware.
+
+**Redundant styles removed** — Labels (`font-size`, `text-transform`, `letter-spacing`),
+`background: transparent`, `color: var(--color-text-primary)`, and `margin: 0` declarations
+removed from 20+ files where they were already covered by portal-theme.css or portal-cards.css.
+
+**portal-cards.css** `.portal-section` rule extended to also cover `.analytics-chart-card`
+and `.kpi-card` so those get `border + transparent bg` without per-file declarations.
+
 ### CSS Class Renames
 
 | Old Class | New Class | Location |
 |-----------|-----------|----------|
 | `.empty-state-icon` | `.empty-icon` | `src/styles/components/loading.css` |
+| `.tw-relative` (reaction anchor) | `.msgtab-reaction-anchor` | `portal-messages.css` |
 
 ### SVG Color Baseline (reset.css)
 

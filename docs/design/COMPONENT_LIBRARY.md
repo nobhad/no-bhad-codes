@@ -1,68 +1,116 @@
 # Component Library Documentation
 
-**Last Updated:** February 15, 2026
+**Last Updated:** March 9, 2026
 
 ---
 
-## Component Inventory with Visual Examples
+## Overview
 
-| Component            | Description                  | Example Preview |
-|----------------------|------------------------------|----------------|
-| ButtonComponent      | Standard button UI           | ![Button Preview](../mockups/3d-button-preview.html) |
-| ModalComponent       | Modal dialog                 | ![Modal Preview](../mockups/portal-header-dropdown.html) |
-| TagInput             | Tag entry/input field        | ![TagInput Preview](../mockups/client-portal-designs.html) |
-| StatusBadge          | Status indicator badge       | ![Badge Preview](../mockups/portal-header-icon.html) |
-| ConsentBanner        | Cookie consent banner        | ![ConsentBanner Preview](../mockups/portal-variants.html) |
-| AnalyticsDashboard   | Analytics dashboard widget   | ![Analytics Preview](../mockups/client-portal-sections.html) |
-| ViewToggle           | Toggle between views         | ![ViewToggle Preview](../mockups/portal-variants.html) |
-| Dropdown             | Dropdown menu                | ![Dropdown Preview](../mockups/portal-header-dropdown.html) |
-| PortalModal          | Portal modal dialog          | ![PortalModal Preview](../mockups/portal-header-dropdown.html) |
-| ...                  | ...                          | ...            |
+All portal UI components are React components located under `src/react/`. The legacy
+`src/components/` vanilla TS directory no longer exists — it was removed in the March 2026
+portal audit.
 
 ---
 
-## API Reference for Each Component
+## Factory Components
 
-- See TypeScript types in each component file under `src/components/`
-- Example:
-  - ButtonComponent: `ButtonProps`, `ButtonState` ([button-component.ts](../../src/components/button-component.ts))
-  - ModalComponent: `ModalProps`, `ModalState` ([modal-component.ts](../../src/components/modal-component.ts))
-  - TagInput: `TagInputConfig`, `TagInputTag` ([tag-input.ts](../../src/components/tag-input.ts))
-  - StatusBadge: `StatusBadgeVariant` ([status-badge.ts](../../src/components/status-badge.ts))
-  - ...
+Reusable building blocks shared across multiple features. Located in `src/react/factories/`.
 
----
-
-## CSS Variable Dependencies
-
-- All components use CSS variables for color, spacing, and typography.
-- See `docs/design/DESIGN_SYSTEM.md` for global variables.
-- Example variables:
-  - `--color-primary`, `--color-accent`, `--spacing-xs`, `--font-size-base`
-- Component-specific variables are documented in each component's CSS or style file.
+| Component | File | Purpose |
+|-----------|------|---------|
+| `MessageThread` | `MessageThread.tsx` | Chat thread rendering (send, edit, react, receipts) |
+| `IconButton` / `TableActions` | `IconButton.tsx` | Icon button primitives and table action wrapper |
+| `DataTable` | (see DataTable/) | Generic sortable/filterable data table |
+| `InlineEdit` | `InlineEdit.tsx` | Click-to-edit inline field |
+| `SearchFilter` / `TableFilters` | `TableFilters.tsx` | Table filter bar components |
 
 ---
 
-## Accessibility Notes (ARIA, Keyboard)
+## Portal UI Components
 
-- All interactive components use ARIA roles and attributes.
-- Button: `role="button"`, supports keyboard activation (Enter/Space)
-- Modal: `role="dialog"`, focus trap, ESC to close
-- Dropdown: `role="menu"`, keyboard navigation
-- StatusBadge: `aria-label` for status
-- See [Design System - Accessibility](./DESIGN_SYSTEM.md#accessibility--states) for detailed guidelines.
+Located in `src/react/components/portal/`.
 
----
-
-## Migration Guide from Inline Patterns
-
-- Replace inline button markup with `<ButtonComponent />` or `createButton()`
-- Use `ModalComponent` for dialogs instead of custom HTML
-- Use `TagInput` for tag entry fields
-- Use `StatusBadge` for status indicators
-- See `src/components/index.ts` for grouped exports and recommended usage
-- Refactor legacy code to use component props/types for consistency
+| Component | File | Purpose |
+|-----------|------|---------|
+| `PortalButton` | `PortalButton.tsx` | Button with portal design tokens |
+| `DataTable` | `DataTable/DataTable.tsx` | Generic data table (React-based tables) |
+| `EmptyState` / `LoadingState` | `EmptyState.tsx` | Empty and loading state displays |
+| `SearchBar` | `SearchBar.tsx` | Search input with icon |
 
 ---
 
-For full inventory and updates, see `src/components/` and mockups in `mockups/`.
+## CSS Classes (Portal Design System)
+
+All component styling uses CSS classes from `src/styles/`. See `docs/design/CSS_ARCHITECTURE.md`
+for the full catalog and naming conventions.
+
+### Buttons
+
+```css
+.btn            /* Base */
+.btn-primary    /* Primary action */
+.btn-secondary  /* Secondary/cancel */
+.btn-danger     /* Destructive */
+.btn-ghost      /* Minimal */
+.icon-btn       /* Icon-only (square, uses --portal-btn-icon-size) */
+```
+
+### Status Badges
+
+```css
+.status-badge
+.status-badge-active / -pending / -completed / -cancelled
+```
+
+### Tables
+
+```css
+.data-table              /* Base table */
+.col-actions             /* Actions column (EJS) */
+.table-actions           /* Row action container (EJS) */
+.data-table-row-actions  /* Row action container (React DataTable) */
+```
+
+### Forms
+
+```css
+.form-group
+.field-label
+.form-input / .form-textarea / .form-select
+```
+
+### Layout
+
+```css
+.portal-section    /* Bordered section container */
+.portal-card       /* Card with padding */
+.panel             /* Panel container */
+.panel-actions     /* Icon button cluster in panel header */
+```
+
+---
+
+## Accessibility Notes
+
+- All interactive components use ARIA roles and attributes
+- `icon-btn` buttons require `title` or `aria-label`
+- Modals use `.portal-modal` with `role="dialog"` and focus trap
+- Dropdowns use `aria-haspopup="menu"` and `aria-expanded`
+
+---
+
+## Icon Usage
+
+Use Lucide React icons exclusively. No emojis in UI.
+
+```tsx
+import { Pencil, Trash2, Check, X } from 'lucide-react';
+
+<button className="icon-btn" title="Edit">
+  <Pencil />
+</button>
+```
+
+SVG icon sizes default to `1em` — set `font-size` on the parent to control icon size.
+Within table action containers, `--portal-btn-icon-size` is automatically scoped to
+`--icon-size-sm` (16px).
