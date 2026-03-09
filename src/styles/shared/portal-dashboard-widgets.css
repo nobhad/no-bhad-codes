@@ -75,7 +75,7 @@
 .portal .upcoming-tasks {
   background: transparent;
   border: var(--portal-border);
-  padding: var(--space-3);
+  padding: var(--portal-card-padding);
 }
 
 .portal .upcoming-tasks .section-header-inline {

@@ -35,7 +35,7 @@ body[data-page="client-portal"] {
    Only client-specific padding overrides here. */
 .dashboard-content {
   flex: 1;
-  padding: 0 clamp(0.75rem, 2vw, 1.5rem) var(--portal-page-bottom);
+  padding: var(--portal-page-top) clamp(0.75rem, 2vw, 1.5rem) var(--portal-page-bottom);
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;

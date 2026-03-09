@@ -1,10 +1,20 @@
 /* =====================================================
    SHARED PORTAL SIDEBAR
-   Main navigation sidebar with collapse states
-   Used by both admin and client portal
+   @file src/styles/shared/portal-sidebar.css
 
-   NOTE: This file is in the 'portals' CSS layer which has higher
-   priority than 'components' layer, so most !important is not needed.
+   Single source of truth for all sidebar styles:
+   - Base layout and collapse states
+   - Nav button styles (visual overrides; button structure in portal-buttons.css)
+   - Badge notification system
+   - Keyboard shortcut display
+   - Tooltip on collapsed items
+   - Active nav item accent bar
+   - Focus state suppression
+   - Responsive breakpoints (tablet-to-laptop, mobile)
+
+   Admin-specific overrides: styles/pages/admin.css
+   Touch targets for collapsed buttons: styles/mobile/responsive-fixes.css
+   Mobile width/hide: styles/responsive/breakpoints.css (@layer responsive)
    ===================================================== */
 
 /* Shared sidebar - same for both admin and client portal */
@@ -23,6 +33,8 @@
   z-index: auto;
   box-shadow: none;
   flex-shrink: 0;
+  overflow: visible; /* Allow badge to sit up/right without clipping */
+  overscroll-behavior: contain;
 }
 
 .sidebar.collapsed {
@@ -42,6 +54,7 @@
   gap: 0;
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
+  overflow: visible;
 }
 
 /* Collapsed sidebar content — only override what changes from base .sidebar-content */
@@ -419,6 +432,17 @@
   opacity: 0.5;
 }
 
+/* Highlight shortcut on nav-btn hover */
+.portal .sidebar-buttons .nav-btn:hover .sidebar-shortcut {
+  opacity: 0.9;
+}
+
+/* Active button shortcut */
+.portal .sidebar-buttons .nav-btn.active .sidebar-shortcut {
+  color: var(--color-accent);
+  opacity: 0.8;
+}
+
 /* Subtle on active button */
 .portal .sidebar .btn.active .sidebar-shortcut {
   opacity: 0.3;
@@ -432,6 +456,111 @@
 /* Mobile - hide shortcuts */
 @media (--mobile) {
   .portal .sidebar-shortcut {
+    display: none;
+  }
+}
+
+/* =====================================================
+   FOCUS STATES
+   Disable focus outlines on sidebar navigation elements
+   (sidebar uses color/opacity cues instead)
+   ===================================================== */
+
+/* Disable focus outline on ALL sidebar elements */
+.sidebar :is(:focus, :focus-visible),
+.sidebar :is(.nav-btn, .icon-btn, a, button, .sidebar-toggle-btn):is(:focus, :focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* =====================================================
+   ACTIVE NAV ITEM - LEFT ACCENT BAR
+   Left-edge accent indicator for the active route
+   ===================================================== */
+
+/* Nav item active state - left accent bar */
+.portal .sidebar-buttons .nav-btn.active {
+  position: relative;
+}
+
+.portal .sidebar-buttons .nav-btn.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: var(--border-width-thick);
+  background: var(--color-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Collapsed sidebar - hide accent bar (icon-only mode) */
+.portal .sidebar.collapsed .sidebar-buttons .nav-btn.active::before {
+  display: none;
+}
+
+/* =====================================================
+   TOOLTIPS ON COLLAPSED NAV ITEMS
+   CSS-only tooltip shown on hover when sidebar is icon-only
+   ===================================================== */
+
+.portal .sidebar.collapsed .nav-btn::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + var(--space-1-5));
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-title);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: var(--z-nav);
+  box-shadow: none;
+  transition:
+    opacity var(--transition-faster),
+    visibility var(--transition-faster);
+}
+
+.portal .sidebar.collapsed .nav-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Toggle button has no tooltip */
+.portal .sidebar.collapsed .sidebar-toggle-btn::after {
+  display: none;
+}
+
+/* =====================================================
+   RESPONSIVE - TABLET TO LAPTOP AUTO-COLLAPSE
+   Auto-collapse sidebar between tablet and laptop widths
+   ===================================================== */
+
+@media (--tablet-to-laptop) {
+  .portal .portal-body .sidebar {
+    width: var(--sidebar-collapsed-width);
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
+  }
+
+  .portal .portal-body .sidebar .sidebar-buttons .nav-btn {
+    justify-content: center;
+  }
+
+  .portal .portal-body .sidebar .sidebar-buttons .nav-btn .nav-label {
+    display: none;
+  }
+
+  .portal .portal-body .sidebar .sidebar-shortcut {
     display: none;
   }
 }

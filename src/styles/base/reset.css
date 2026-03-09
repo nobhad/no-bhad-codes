@@ -336,9 +336,13 @@ summary::-webkit-details-marker {
 /* All portal SVGs default to primary text color.
    Ensures standalone icons (empty states, headings, table icons, etc.)
    always render in the correct text color rather than browser default or
-   an inherited muted/secondary color from an ancestor. */
+   an inherited muted/secondary color from an ancestor.
+   align-self: center ensures SVGs center in their flex parent's cross-axis
+   regardless of the parent's align-items setting (display: block from the
+   media reset kills vertical-align, so this is the correct root fix). */
 .portal svg {
   color: var(--color-text-primary);
+  align-self: center;
 }
 
 /* Interactive elements: SVGs follow parent's color context instead of

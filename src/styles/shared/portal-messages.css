@@ -291,15 +291,17 @@
   position: relative;
 }
 
-/* Reaction picker */
+/* Reaction picker — floats beside the trigger, vertically centered with it */
 .portal .reaction-picker {
   position: absolute;
-  top: 100%;
-  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  right: calc(100% + var(--space-1));
   background: var(--color-bg-tertiary);
   border: var(--portal-border);
   padding: var(--space-1);
   display: flex;
+  align-items: center;
   gap: var(--space-1);
   z-index: var(--z-index-elevated);
 }
@@ -316,6 +318,9 @@
   line-height: 1;
   cursor: pointer;
   border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .portal .reaction-picker button:hover {
@@ -554,10 +559,13 @@
   padding: 0;
 }
 
-/* Full-width search bar above both columns */
+/* Title + search bar above both columns — stacked column */
 .messaging-top-bar {
   flex-shrink: 0;
-  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
   border-bottom: var(--border-width) solid var(--color-border-primary);
 }
 
@@ -575,21 +583,20 @@
   border-right: var(--border-width) solid var(--color-border-primary);
 }
 
-/* Section header with border — single row: heading left, filter tabs right */
+/* Section header — filter tabs only (title moved to messaging-top-bar) */
 .messaging-section-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-1);
+  padding: var(--space-1-5) var(--space-3);
   border-bottom: var(--border-width) solid var(--color-border-primary);
   flex-shrink: 0;
 }
 
-/* Heading with badge — no bottom margin (side-by-side layout) */
+/* Heading with badge — in top bar, stacked above search */
 .messaging-heading-with-badge {
   font-size: var(--font-size-base);
-  margin-bottom: 0;
+  margin: 0;
 }
 
 /* Search input container with icon - extends .input-with-icon from portal-forms.css */
@@ -1047,6 +1054,12 @@
 .message-action-btn {
   height: 24px;
   width: 24px;
+}
+
+.message-action-btn:focus,
+.message-action-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .message-action-btn.danger:hover {

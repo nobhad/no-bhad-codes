@@ -13,12 +13,7 @@ body:has(.portal) {
   overscroll-behavior: none;
 }
 
-/* Allow sidebar badge to sit up/right of button without clipping */
-.portal .sidebar {
-  overflow: visible;
-  overscroll-behavior: contain;
-}
-
+/* Prevent content area elastic bounce */
 .portal .dashboard-content {
   overscroll-behavior: contain;
 }
@@ -445,17 +440,6 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   min-height: 100%;
 }
 
-/* =====================================================
-   SIDEBAR TOGGLE IN SIDEBAR
-   Toggle flip handled in portal-sidebar.css via svg selector
-   ===================================================== */
-
-/* Disable focus outline on ALL sidebar elements */
-.sidebar :is(:focus, :focus-visible),
-.sidebar :is(.nav-btn, .icon-btn, a, button, .sidebar-toggle-btn):is(:focus, :focus-visible) {
-  outline: none;
-  box-shadow: none;
-}
 
 /* =====================================================
    CONSISTENT SECTION SPACING - SINGLE SOURCE OF TRUTH
@@ -692,165 +676,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   }
 }
 
-/* =====================================================
-   SIDEBAR REFINEMENTS
-   Toggle button, collapsed states, tooltips, branding
-   ===================================================== */
-
-/* Sidebar width transition - smooth collapse */
-.portal .sidebar {
-  transition:
-    width var(--transition-medium),
-    min-width var(--transition-medium);
-}
-
-.portal .sidebar-content {
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-/* Keyboard shortcut badges */
-.portal .sidebar-shortcut {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
-  padding: 0 var(--space-0-5);
-  background: transparent;
-  border: var(--portal-border);
-  border-radius: var(--border-radius-sm);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-tertiary);
-  letter-spacing: 0;
-  text-transform: none;
-  line-height: 1;
-  flex-shrink: 0;
-  transition:
-    opacity var(--transition-fast),
-    border-color var(--transition-fast);
-  opacity: 0.5;
-}
-
-.portal .sidebar-buttons .nav-btn:hover .sidebar-shortcut {
-  opacity: 0.9;
-  border-color: var(--color-bg-elevated);
-}
-
-.portal .sidebar-buttons .nav-btn.active .sidebar-shortcut {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  opacity: 0.8;
-}
-
-.portal .sidebar.collapsed .sidebar-shortcut {
-  display: none;
-}
-
-/* Collapsed state - center icons, hide text */
-.portal .sidebar.collapsed .sidebar-buttons .nav-btn {
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
-  position: relative;
-}
-
-.portal .sidebar.collapsed .nav-btn .nav-label {
-  display: none;
-}
-
-.portal .sidebar.collapsed .sidebar-footer .nav-btn {
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* Tooltips on collapsed nav items */
-.portal .sidebar.collapsed .nav-btn::after {
-  content: attr(aria-label);
-  position: absolute;
-  left: calc(100% + var(--space-1-5));
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--border-radius-sm);
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-title);
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  z-index: var(--z-nav);
-  box-shadow: none;
-  transition:
-    opacity var(--transition-faster),
-    visibility var(--transition-faster);
-}
-
-.portal .sidebar.collapsed .nav-btn:hover::after {
-  opacity: 1;
-  visibility: visible;
-}
-
-.portal .sidebar.collapsed .sidebar-toggle-btn::after {
-  display: none;
-}
-
-/* Nav item active state - left accent bar */
-.portal .sidebar-buttons .nav-btn.active {
-  position: relative;
-}
-
-.portal .sidebar-buttons .nav-btn.active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 20%;
-  bottom: 20%;
-  width: var(--border-width-thick);
-  background: var(--color-accent);
-  border-radius: 0 2px 2px 0;
-}
-
-.portal .sidebar.collapsed .sidebar-buttons .nav-btn.active::before {
-  display: none;
-}
-
-/* =====================================================
-   SIDEBAR RESPONSIVE
-   Mobile drawer — canonical rules in responsive/breakpoints.css
-   (@layer responsive). Tablet-to-laptop auto-collapse below.
-   ===================================================== */
-
-@media (--tablet-to-laptop) {
-  .portal .portal-body .sidebar {
-    width: var(--sidebar-collapsed-width);
-    min-width: var(--sidebar-collapsed-width);
-    max-width: var(--sidebar-collapsed-width);
-  }
-
-  .portal .portal-body .sidebar .sidebar-buttons .nav-btn {
-    justify-content: center;
-  }
-
-  .portal .portal-body .sidebar .sidebar-buttons .nav-btn .nav-label {
-    display: none;
-  }
-
-  .portal .portal-body .sidebar .sidebar-shortcut {
-    display: none;
-  }
-}
+/* Sidebar styles consolidated in shared/portal-sidebar.css */
 
 /* Prevent horizontal scrolling in tables and force content to wrap */
 table {
@@ -912,10 +738,16 @@ td {
 .portal h4,
 .portal h5,
 .portal h6 {
-  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-family-sans);
   letter-spacing: var(--letter-spacing-tightest, -0.09em);
   text-shadow: none;
   color: var(--color-text-primary);
+}
+
+/* Serif display font — detail header entity names + deliverable milestone names */
+.portal .detail-name-row h1,
+.portal .deliv-milestone-header h4 {
+  font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
 }
 
 .portal .page-header h2,
@@ -1308,7 +1140,7 @@ html[data-theme="light"] .portal .funnel-value {
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
   color: var(--color-text-primary);
-  margin: 0;
+  margin: 0 0 var(--space-2) 0;
 }
 
 /* Uppercase filter/form label */

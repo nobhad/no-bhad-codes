@@ -158,7 +158,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* .portal is a scoping wrapper, NOT a layout container.
    .portal-body handles the sidebar+content flex layout. */
 
-/* Sidebar — height: 100% inherited from .portal-body via portal-layout.css.
+/* Sidebar — base styles in portal-sidebar.css.
    Only admin-specific width/z-index overrides here. */
 [data-page="admin"] .sidebar {
   width: var(--sidebar-width-open);
@@ -184,7 +184,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* Dashboard Content Area — admin-specific overrides only.
    Base layout (flex, height, min-width) set in shared/portal-layout.css */
 [data-page="admin"] .dashboard-content {
-  padding: 0 clamp(var(--space-1-5), 2vw, var(--space-3)) var(--portal-page-bottom);
+  padding: var(--portal-page-top) clamp(var(--space-1-5), 2vw, var(--space-3)) var(--portal-page-bottom);
   overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
