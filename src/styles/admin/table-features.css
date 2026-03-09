@@ -160,8 +160,8 @@
   /* Pagination buttons use --table-pagination-btn-size from portal-tables.css */
 
   .pagination-btn svg {
-    width: var(--icon-size-sm);
-    height: var(--icon-size-sm);
+    width: 1em;
+    height: 1em;
   }
 }
 

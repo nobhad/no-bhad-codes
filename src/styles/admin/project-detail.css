@@ -1198,6 +1198,18 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   border-bottom: var(--portal-border);
 }
 
+/* Milestone title row: font-size matches h4 so 1em icon = heading size */
+.deliv-milestone-title-row {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+/* Icon sized to 1em — inherits heading size from title row context */
+.deliv-milestone-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
 /* Deliverables milestone description */
 .deliv-milestone-desc {
   margin-top: var(--space-1);
@@ -1222,7 +1234,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Deliverable item row */
 .deliv-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-3);
 }
 
@@ -1408,6 +1420,16 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   padding: var(--space-2) var(--space-4);
   border: var(--portal-border);
   border-radius: 0;
+}
+
+/* Editable bubble — own messages with onEdit wired up */
+.msgtab-bubble.is-editable {
+  cursor: text;
+  transition: border-color var(--transition-faster);
+}
+
+.msgtab-bubble.is-editable:hover {
+  border-color: var(--color-border-secondary);
 }
 
 /* Message content text */

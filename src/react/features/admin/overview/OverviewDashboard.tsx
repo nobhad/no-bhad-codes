@@ -235,7 +235,7 @@ export function OverviewDashboard({ onNavigate, getAuthToken: _getAuthToken }: O
               ) : (
                 <ul className="activity-feed">
                   {activeProjects.slice(0, 5).map((project) => (
-                    <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('projects', String(project.id))}>
+                    <li key={project.id} className="activity-feed-item ovdash-clickable" onClick={() => onNavigate?.('project-detail', String(project.id))}>
                       <div className="activity-body">
                         <span className="activity-text">{project.name}</span>
                       </div>
