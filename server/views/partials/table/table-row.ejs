@@ -20,8 +20,8 @@
       </td>
     <% } else if (col.id === '_actions') { %>
       <td class="col-actions">
-        <button type="button" class="btn-icon" data-action="view" data-row-id="<%= row.id %>" title="View details" aria-label="View">
-          <svg class="lucide-icon" width="16" height="16"><use href="#icon-eye"></use></svg>
+        <button type="button" class="icon-btn" data-action="view" data-row-id="<%= row.id %>" title="View details" aria-label="View">
+          <svg class="lucide-icon" aria-hidden="true"><use href="#icon-eye"></use></svg>
         </button>
       </td>
     <% } else { %>
