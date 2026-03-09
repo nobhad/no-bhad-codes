@@ -16,7 +16,8 @@ import {
   Archive,
   FileText,
   Trash2,
-  FolderKanban
+  FolderKanban,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton, TabList, TabPanel } from '@react/factories';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -39,6 +40,7 @@ import { TasksTab } from './tabs/TasksTab';
 import { ContractTab } from './tabs/ContractTab';
 import { NotesTab } from './tabs/NotesTab';
 import { IntakeTab } from './tabs/IntakeTab';
+import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import type { ProjectDetailTab, ProjectStatus } from '../types';
 import { PROJECT_STATUS_CONFIG, PROJECT_TYPE_LABELS } from '../types';
 import { buildEndpoint } from '@/constants/api-endpoints';
@@ -123,7 +125,10 @@ export function ProjectDetail({
     deleteFile,
     toggleFileSharing,
     loadMessages,
-    sendMessage
+    sendMessage,
+    editMessage,
+    reactions,
+    toggleReaction
   } = useProjectDetail({ projectId, getAuthToken });
 
   // Dialogs
@@ -227,10 +232,11 @@ export function ProjectDetail({
               </h1>
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="btn-unstyled" aria-label="Change project status">
-                    <span className="badge">
+                  <button className="files-category-trigger dropdown-trigger" aria-label="Change project status">
+                    <StatusBadge status={getStatusVariant(project.status)}>
                       {PROJECT_STATUS_CONFIG[project.status]?.label || project.status}
-                    </span>
+                    </StatusBadge>
+                    <ChevronDown className="dropdown-caret" />
                   </button>
                 </PortalDropdownTrigger>
                 <PortalDropdownContent>
@@ -241,7 +247,9 @@ export function ProjectDetail({
                         key={status}
                         onClick={() => handleStatusChange(status as ProjectStatus)}
                       >
-                        <span className="badge">{config.label}</span>
+                        <StatusBadge status={getStatusVariant(status)}>
+                          {config.label}
+                        </StatusBadge>
                       </PortalDropdownItem>
                     ))}
                 </PortalDropdownContent>
@@ -362,6 +370,9 @@ export function ProjectDetail({
           isLoading={isLoading}
           onSendMessage={sendMessage}
           onLoadMessages={loadMessages}
+          onEditMessage={editMessage}
+          reactions={reactions}
+          onToggleReaction={toggleReaction}
           showNotification={showNotification}
         />
       </TabPanel>

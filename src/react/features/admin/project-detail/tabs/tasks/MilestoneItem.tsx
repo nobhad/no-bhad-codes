@@ -1,15 +1,13 @@
 import { useCallback, useReducer } from 'react';
 import {
-  Check,
   Trash2,
   Pencil,
-  ChevronDown,
-  ChevronRight,
   Calendar,
   GripVertical
 } from 'lucide-react';
-import { IconButton } from '@react/factories';
+import { IconButton, AccordionItem } from '@react/factories';
 import { cn } from '@react/lib/utils';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import type { ProjectMilestone } from '../../../types';
 import { formatDate } from '@/utils/format-utils';
@@ -141,113 +139,89 @@ export function MilestoneItem({
     }
   }, [milestone.id, editState, onUpdate, showNotification]);
 
-  return (
-    <div className="milestone-item-wrapper">
-      {/* Milestone Header */}
-      <div
-        className="milestone-item"
-        onClick={() => onToggleExpand(milestone.id)}
-        role="button"
-        tabIndex={0}
-        aria-expanded={isExpanded}
-        onKeyDown={(e) => {
-          if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
-            e.preventDefault();
-            onToggleExpand(milestone.id);
-          }
-        }}
-      >
-        {/* Drag Handle */}
-        <GripVertical className="icon-md tasks-drag-handle" />
+  const header = (
+    <>
+      {/* Drag Handle */}
+      <GripVertical className="icon-md tasks-drag-handle" />
 
-        {/* Checkbox */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleToggle();
-          }}
-          className={cn(
-            'tasks-checkbox',
-            milestone.is_completed && 'is-completed'
-          )}
-          aria-label={milestone.is_completed ? 'Mark incomplete' : 'Mark complete'}
-        >
-          {milestone.is_completed && (
-            <Check className="icon-sm text-dark" />
-          )}
-        </button>
+      {/* Checkbox */}
+      <Checkbox
+        checked={milestone.is_completed}
+        onCheckedChange={() => handleToggle()}
+        onClick={(e) => e.stopPropagation()}
+        aria-label={milestone.is_completed ? 'Mark incomplete' : 'Mark complete'}
+      />
 
-        {/* Title and Progress */}
-        <div className="flex-fill">
-          <div className="milestone-content">
-            <span
-              className={cn(
-                'milestone-title',
-                milestone.is_completed && 'completed'
-              )}
-            >
-              {milestone.title}
-            </span>
-
-            {milestone.task_count !== undefined && milestone.task_count > 0 && (
-              <span className="text-muted pd-text-xs">
-                ({milestone.completed_task_count || 0}/{milestone.task_count} tasks)
-              </span>
+      {/* Title and Progress */}
+      <div className="flex-fill">
+        <div className="milestone-content">
+          <span
+            className={cn(
+              'milestone-title',
+              milestone.is_completed && 'completed'
             )}
-          </div>
+          >
+            {milestone.title}
+          </span>
 
-          {/* Task Progress Bar */}
           {milestone.task_count !== undefined && milestone.task_count > 0 && (
-            <div className="progress-bar-sm tasks-progress-track">
-              <div
-                className="progress-fill"
-                style={{ width: `${taskProgress}%` }}
-              />
-            </div>
+            <span className="text-muted pd-text-xs">
+              ({milestone.completed_task_count || 0}/{milestone.task_count} tasks)
+            </span>
           )}
         </div>
 
-        {/* Due Date */}
-        {milestone.due_date && (
-          <span className="text-muted layout-row gap-1 pd-text-xs">
-            <Calendar className="icon-sm" />
-            {formatDate(milestone.due_date, 'label')}
-          </span>
-        )}
-
-        {/* Order indicator */}
-        <span className="text-muted tasks-order-indicator">
-          #{index + 1}
-        </span>
-
-        {/* Expand icon */}
-        {isExpanded ? (
-          <ChevronDown className="icon-sm" />
-        ) : (
-          <ChevronRight className="icon-sm" />
+        {/* Task Progress Bar */}
+        {milestone.task_count !== undefined && milestone.task_count > 0 && (
+          <div className="progress-bar-sm tasks-progress-track">
+            <div
+              className="progress-fill"
+              style={{ width: `${taskProgress}%` }}
+            />
+          </div>
         )}
       </div>
 
-      {/* Expanded Content */}
-      {isExpanded && (
-        <div className="milestone-expanded-content tasks-expanded-content">
-          {editState.isEditing ? (
-            <MilestoneEditForm
-              editState={editState}
-              dispatch={dispatch}
-              onSave={handleSaveEdit}
-              onCancel={handleCancelEdit}
-            />
-          ) : (
-            <MilestoneDetails
-              milestone={milestone}
-              onStartEdit={handleStartEdit}
-              onRequestDelete={() => onRequestDelete(milestone.id)}
-            />
-          )}
-        </div>
+      {/* Due Date */}
+      {milestone.due_date && (
+        <span className="layout-row gap-1 pd-text-xs">
+          <Calendar className="icon-sm" />
+          {formatDate(milestone.due_date, 'label')}
+        </span>
       )}
-    </div>
+
+      {/* Order indicator */}
+      <span className="text-muted tasks-order-indicator">
+        #{index + 1}
+      </span>
+    </>
+  );
+
+  return (
+    <AccordionItem
+      header={header}
+      isExpanded={isExpanded}
+      onToggle={() => onToggleExpand(milestone.id)}
+      wrapperClassName="milestone-item-wrapper"
+      triggerClassName="milestone-item"
+      contentClassName="milestone-expanded-content tasks-expanded-content"
+      ariaLabel={`Milestone: ${milestone.title}`}
+    >
+      {editState.isEditing ? (
+        <MilestoneEditForm
+          editState={editState}
+          dispatch={dispatch}
+          onSave={handleSaveEdit}
+          onCancel={handleCancelEdit}
+        />
+      ) : (
+        <MilestoneDetails
+          milestone={milestone}
+          onStartEdit={handleStartEdit}
+          onRequestDelete={() => onRequestDelete(milestone.id)}
+        />
+      )}
+    </AccordionItem>
   );
 }
 
@@ -360,7 +334,7 @@ function MilestoneDetails({ milestone, onStartEdit, onRequestDelete }: Milestone
           }}
           aria-label="Edit milestone"
         >
-          <Pencil className="icon-sm" />
+          <Pencil className="icon-md" />
         </button>
         <button
           className="icon-btn"
@@ -370,7 +344,7 @@ function MilestoneDetails({ milestone, onStartEdit, onRequestDelete }: Milestone
           }}
           aria-label="Delete milestone"
         >
-          <Trash2 className="icon-sm" />
+          <Trash2 className="icon-md" />
         </button>
       </div>
     </>

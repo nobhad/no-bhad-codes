@@ -80,32 +80,33 @@ export function TasksTab({
 
   return (
     <div className="section">
-      {/* Header with progress */}
-      <div className="layout-row-between">
-        <div className="layout-row gap-4">
-          <div>
-            <span className="text-muted">Progress: </span>
-            <span className="pd-highlight-value">
-              {progress}%
-            </span>
+      {/* Header with progress + progress bar */}
+      <div className="tasks-progress-block">
+        <div className="layout-row-between">
+          <div className="layout-row gap-4">
+            <div>
+              <span className="text-muted">Progress: </span>
+              <span className="pd-highlight-value">
+                {progress}%
+              </span>
+            </div>
+            <div>
+              <span className="text-muted">Completed: </span>
+              <span className="pd-highlight-value">
+                {completedCount}/{totalCount}
+              </span>
+            </div>
           </div>
-          <div>
-            <span className="text-muted">Completed: </span>
-            <span className="pd-highlight-value">
-              {completedCount}/{totalCount}
-            </span>
-          </div>
+
+          <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
         </div>
 
-        <IconButton action="add" onClick={() => setShowAddForm(true)} title="Add Milestone" />
-      </div>
-
-      {/* Progress Bar */}
-      <div className="progress-bar-sm">
-        <div
-          className="progress-fill"
-          style={{ width: `${progress}%` }}
-        />
+        <div className="progress-bar-sm">
+          <div
+            className="progress-fill"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
 
       {/* Add Milestone Form */}

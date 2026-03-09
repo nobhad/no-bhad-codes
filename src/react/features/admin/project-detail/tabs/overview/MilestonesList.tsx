@@ -1,15 +1,13 @@
 import * as React from 'react';
 import { useCallback, useState } from 'react';
 import {
-  Check,
   Trash2,
   Pencil,
-  ChevronDown,
-  ChevronRight,
   ListTodo
 } from 'lucide-react';
-import { IconButton } from '@react/factories';
+import { IconButton, AccordionItem } from '@react/factories';
 import { cn } from '@react/lib/utils';
+import { Checkbox } from '@react/components/ui/checkbox';
 import { PortalButton } from '@react/components/portal/PortalButton';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
@@ -194,37 +192,16 @@ export function MilestonesList({
           />
         ) : (
           <div className="milestone-list">
-            {milestones.map((milestone) => (
-              <div key={milestone.id} className="milestone-item-wrapper">
-                {/* Milestone row */}
-                <div className="milestone-item">
-                  <button
-                    className={cn(
-                      'milestone-checkbox',
-                      milestone.is_completed && 'is-completed'
-                    )}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleMilestone(milestone.id);
-                    }}
+            {milestones.map((milestone) => {
+              const header = (
+                <>
+                  <Checkbox
+                    checked={milestone.is_completed}
+                    onCheckedChange={() => handleToggleMilestone(milestone.id)}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     aria-label={milestone.is_completed ? 'Mark incomplete' : 'Mark complete'}
-                  >
-                    {milestone.is_completed && <Check className="icon-sm" />}
-                  </button>
-
-                  <div
-                    className="milestone-content"
-                    onClick={() => toggleMilestoneExpand(milestone.id)}
-                    role="button"
-                    tabIndex={0}
-                    aria-expanded={expandedMilestones.has(milestone.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === KEYS.ENTER || e.key === KEYS.SPACE) {
-                        e.preventDefault();
-                        toggleMilestoneExpand(milestone.id);
-                      }
-                    }}
-                  >
+                  />
+                  <div className="flex-fill milestone-content">
                     <span
                       className={cn(
                         'milestone-title',
@@ -233,97 +210,91 @@ export function MilestonesList({
                     >
                       {decodeHtmlEntities(milestone.title)}
                     </span>
-
                     {milestone.due_date && (
                       <span className="milestone-due">{formatDate(milestone.due_date)}</span>
                     )}
                   </div>
+                </>
+              );
 
-                  <button
-                    className="icon-btn"
-                    onClick={() => toggleMilestoneExpand(milestone.id)}
-                    aria-label={expandedMilestones.has(milestone.id) ? 'Collapse' : 'Expand'}
-                  >
-                    {expandedMilestones.has(milestone.id) ? (
-                      <ChevronDown className="icon-sm" />
-                    ) : (
-                      <ChevronRight className="icon-sm" />
-                    )}
-                  </button>
-                </div>
+              return (
+                <AccordionItem
+                  key={milestone.id}
+                  header={header}
+                  isExpanded={expandedMilestones.has(milestone.id)}
+                  onToggle={() => toggleMilestoneExpand(milestone.id)}
+                  wrapperClassName="milestone-item-wrapper"
+                  triggerClassName="milestone-item"
+                  contentClassName="milestone-expanded-content"
+                  ariaLabel={`Milestone: ${milestone.title}`}
+                >
+                  {editingMilestoneId === milestone.id ? (
+                    <div className="milestone-add-form">
+                      <PortalInput
+                        placeholder="Milestone title..."
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === KEYS.ENTER) handleSaveEdit();
+                          if (e.key === KEYS.ESCAPE) handleCancelEdit();
+                        }}
+                        autoFocus
+                        className="flex-1"
+                      />
+                      <PortalButton variant="primary" size="sm" onClick={handleSaveEdit} loading={isSavingEdit}>
+                        Save
+                      </PortalButton>
+                      <PortalButton variant="ghost" onClick={handleCancelEdit}>
+                        Cancel
+                      </PortalButton>
+                    </div>
+                  ) : (
+                    <>
+                      {milestone.description && (
+                        <p className="milestone-description">
+                          {decodeHtmlEntities(milestone.description)}
+                        </p>
+                      )}
 
-                {/* Expanded Content */}
-                {expandedMilestones.has(milestone.id) && (
-                  <div className="milestone-expanded-content">
-                    {editingMilestoneId === milestone.id ? (
-                      /* Inline edit form */
-                      <div className="milestone-add-form">
-                        <PortalInput
-                          placeholder="Milestone title..."
-                          value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === KEYS.ENTER) handleSaveEdit();
-                            if (e.key === KEYS.ESCAPE) handleCancelEdit();
+                      {milestone.deliverables && milestone.deliverables.length > 0 && (
+                        <ul className="milestone-deliverables">
+                          {milestone.deliverables.map((deliverable, idx) => (
+                            <li key={idx} className="milestone-description">
+                              <span>•</span>
+                              {deliverable}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      <div className="milestone-actions">
+                        <button
+                          className="icon-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartEdit(milestone);
                           }}
-                          autoFocus
-                          className="flex-1"
-                        />
-                        <PortalButton variant="primary" size="sm" onClick={handleSaveEdit} loading={isSavingEdit}>
-                          Save
-                        </PortalButton>
-                        <PortalButton variant="ghost" onClick={handleCancelEdit}>
-                          Cancel
-                        </PortalButton>
+                          aria-label="Edit milestone"
+                        >
+                          <Pencil className="icon-md" />
+                        </button>
+                        <button
+                          className="icon-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingMilestoneId(milestone.id);
+                            deleteDialog.open();
+                          }}
+                          aria-label="Delete milestone"
+                        >
+                          <Trash2 className="icon-md" />
+                        </button>
                       </div>
-                    ) : (
-                      <>
-                        {milestone.description && (
-                          <p className="milestone-description">
-                            {decodeHtmlEntities(milestone.description)}
-                          </p>
-                        )}
-
-                        {milestone.deliverables && milestone.deliverables.length > 0 && (
-                          <ul className="milestone-deliverables">
-                            {milestone.deliverables.map((deliverable, idx) => (
-                              <li key={idx} className="milestone-description">
-                                <span>•</span>
-                                {deliverable}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
-                        <div className="milestone-actions">
-                          <button
-                            className="icon-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStartEdit(milestone);
-                            }}
-                            aria-label="Edit milestone"
-                          >
-                            <Pencil className="icon-sm" />
-                          </button>
-                          <button
-                            className="icon-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeletingMilestoneId(milestone.id);
-                              deleteDialog.open();
-                            }}
-                            aria-label="Delete milestone"
-                          >
-                            <Trash2 className="icon-sm" />
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                    </>
+                  )}
+                </AccordionItem>
+              );
+            })}
           </div>
         )}
       </div>
