@@ -536,17 +536,22 @@ The portal uses a "DISCOTHEQUE" brutalist design with two modes:
 
 ### Dark Mode
 
-Activated by `html[data-theme="dark"]`. Only two variables change on the body:
+Activated by `html[data-theme="dark"]`. Four variables change on the body:
 
 ```css
 html[data-theme="dark"] body[data-page="admin"],
 html[data-theme="dark"] body[data-page="client-portal"] {
   --color-text-primary: #ffffff;
-  --color-bg-primary: #171717;
+  --color-bg-primary:   #171717;
+  --color-bg-hover:     #000000;
+  --form-btn-shadow:    var(--portal-alpha-black-30);
 }
 ```
 
-All other portal colors automatically re-derive from the updated primaries. No element-level overrides needed.
+All other colors (text ramp, background ramp, borders, alpha layers) automatically re-derive
+from the updated primaries via `color-mix()`. `--color-border-primary` is defined in the base
+block as `var(--color-text-primary)`, so it automatically becomes white in dark mode without
+a separate override.
 
 ### Portal Scoping
 
