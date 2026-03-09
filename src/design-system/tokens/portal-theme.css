@@ -52,7 +52,8 @@ body[data-page="client-portal"] {
    * TEXT COLORS — derived from primaries
    * ---------------------------------------- */
   --color-text-secondary: var(--color-text-primary);
-  --color-text-tertiary: var(--color-gray-500);
+  --color-text-tertiary: var(--color-text-primary);
+  --color-text-muted: var(--color-text-primary);
   --color-text-inverse: var(--color-bg-primary);
 
   /* ----------------------------------------
