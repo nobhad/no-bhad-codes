@@ -165,7 +165,7 @@ export function MilestoneItem({
           </span>
 
           {milestone.task_count !== undefined && milestone.task_count > 0 && (
-            <span className="text-muted pd-text-xs">
+            <span className="text-muted text-xs">
               ({milestone.completed_task_count || 0}/{milestone.task_count} tasks)
             </span>
           )}
@@ -184,7 +184,7 @@ export function MilestoneItem({
 
       {/* Due Date */}
       {milestone.due_date && (
-        <span className="layout-row gap-1 pd-text-xs">
+        <span className="layout-row gap-1 text-xs">
           <Calendar className="icon-sm" />
           {formatDate(milestone.due_date, 'label')}
         </span>
@@ -319,7 +319,7 @@ function MilestoneDetails({ milestone, onStartEdit, onRequestDelete }: Milestone
 
       {/* Completed Date */}
       {milestone.is_completed && milestone.completed_date && (
-        <div className="pd-highlight-value pd-text-xs pd-mt-3">
+        <div className="pd-highlight-value text-xs pd-mt-3">
           Completed on {formatDate(milestone.completed_date, 'label')}
         </div>
       )}

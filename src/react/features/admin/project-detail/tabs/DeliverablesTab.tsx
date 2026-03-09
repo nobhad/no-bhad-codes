@@ -149,7 +149,7 @@ export function DeliverablesTab({
 
                     {/* Due Date */}
                     {milestone.due_date && (
-                      <span className="text-muted layout-row gap-1 pd-text-xs">
+                      <span className="text-muted layout-row gap-1 text-xs">
                         <Calendar className="icon-sm" />
                         {formatDate(milestone.due_date, 'label')}
                       </span>
