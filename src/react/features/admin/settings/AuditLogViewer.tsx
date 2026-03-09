@@ -32,9 +32,11 @@ interface AuditLogViewerProps {
   onNavigate?: (tab: string, entityId?: string) => void;
   getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  overviewMode?: boolean;
 }
 
 const PAGE_SIZE = 50;
+const OVERVIEW_PAGE_SIZE = 5;
 
 const ACTION_LABELS: Record<string, string> = {
   create: 'Created',
@@ -72,7 +74,7 @@ function getActionLabel(action: string): string {
   return ACTION_LABELS[action] || action.replace(/_/g, ' ');
 }
 
-export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: _showNotification }: AuditLogViewerProps) {
+export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: _showNotification, overviewMode = false }: AuditLogViewerProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
     setError(null);
     try {
       const params = new URLSearchParams();
-      params.set('limit', String(PAGE_SIZE));
+      params.set('limit', String(overviewMode ? OVERVIEW_PAGE_SIZE : PAGE_SIZE));
       params.set('offset', String(page * PAGE_SIZE));
       if (filterAction) params.set('action', filterAction);
       if (filterEntity) params.set('entityType', filterEntity);
@@ -137,20 +139,22 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
         ]} />
       }
       actions={
-        <>
-          <button
-            className={`config-section-tab ${showFilters ? 'is-active' : ''}`}
-            onClick={() => setShowFilters(!showFilters)}
-            title="Toggle filters"
-          >
-            <Filter className="icon-sm" />
-          </button>
-          <IconButton action="refresh" onClick={loadLogs} title="Refresh" loading={isLoading} />
-        </>
+        !overviewMode ? (
+          <>
+            <button
+              className={`config-section-tab ${showFilters ? 'is-active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+              title="Toggle filters"
+            >
+              <Filter className="icon-sm" />
+            </button>
+            <IconButton action="refresh" onClick={loadLogs} title="Refresh" loading={isLoading} />
+          </>
+        ) : undefined
       }
     >
       {/* Filters bar */}
-      {showFilters && (
+      {!overviewMode && showFilters && (
         <div className="audit-filters">
           <div className="audit-filter-row">
             <div className="audit-filter-field">
@@ -264,7 +268,7 @@ export function AuditLogViewer({ getAuthToken: _getAuthToken, showNotification: 
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {!overviewMode && totalPages > 1 && (
             <div className="audit-pagination">
               <button
                 className="audit-page-btn"

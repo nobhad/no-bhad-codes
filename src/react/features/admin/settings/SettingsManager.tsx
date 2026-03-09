@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/factories';
 
@@ -9,6 +9,7 @@ const WorkflowsTable = React.lazy(() => import('../workflows/WorkflowsTable').th
 const EmailTemplatesManager = React.lazy(() => import('../email-templates/EmailTemplatesManager').then(m => ({ default: m.EmailTemplatesManager })));
 const BusinessConfiguration = React.lazy(() => import('./BusinessConfiguration').then(m => ({ default: m.BusinessConfiguration })));
 const AuditLogViewer = React.lazy(() => import('./AuditLogViewer').then(m => ({ default: m.AuditLogViewer })));
+const SettingsOverview = React.lazy(() => import('./SettingsOverview').then(m => ({ default: m.SettingsOverview })));
 
 interface SettingsManagerProps {
   getAuthToken?: () => string | null;
@@ -39,6 +40,10 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
   }, []);
 
   const sharedProps = useMemo(() => ({ onNavigate, getAuthToken, showNotification }), [onNavigate, getAuthToken, showNotification]);
+
+  const handleSubtabNavigate = useCallback((subtab: string) => {
+    document.dispatchEvent(new CustomEvent('systemSubtabChange', { detail: { subtab } }));
+  }, []);
 
   // Configuration subtab
   if (activeSubtab === 'configuration') {
@@ -95,19 +100,11 @@ export function SettingsManager({ getAuthToken, showNotification, onNavigate }: 
     );
   }
 
-  // Overview - show configuration + system health stacked
+  // Overview - lightweight snapshot cards
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="subtab-content-wrapper">
-      <React.Suspense fallback={<LoadingState message="Loading configuration..." />}>
-        <section className="overview-table-section">
-          <BusinessConfiguration {...sharedProps} overviewMode />
-        </section>
-      </React.Suspense>
-
-      <React.Suspense fallback={<LoadingState message="Loading system status..." />}>
-        <section className="overview-table-section">
-          <SystemStatusDashboard {...sharedProps} />
-        </section>
+      <React.Suspense fallback={<LoadingState message="Loading settings overview..." />}>
+        <SettingsOverview getAuthToken={getAuthToken} onSubtabNavigate={handleSubtabNavigate} />
       </React.Suspense>
     </div>
   );
