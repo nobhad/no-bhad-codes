@@ -132,7 +132,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken, showNotification }: SystemStatusDashboardProps) {
+export function SystemStatusDashboard({ onNavigate: _onNavigate, getAuthToken: _getAuthToken, showNotification }: SystemStatusDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

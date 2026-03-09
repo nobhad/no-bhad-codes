@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Inbox } from 'lucide-react';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { TableLayout, TableStats } from '@react/components/portal/TableLayout';

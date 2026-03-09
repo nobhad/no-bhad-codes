@@ -79,7 +79,7 @@ function validateFile(file: File): string | null {
 export function DocumentRequestCard({
   request,
   onUploadSuccess,
-  getAuthToken,
+  getAuthToken: _getAuthToken,
   showNotification
 }: DocumentRequestCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);

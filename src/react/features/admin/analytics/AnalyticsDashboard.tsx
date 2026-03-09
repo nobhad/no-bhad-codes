@@ -313,7 +313,7 @@ const KpiCard = React.memo(({ kpi }: { kpi: KPI }) => {
 // AnalyticsDashboard
 // ============================================
 
-export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
+export function AnalyticsDashboard({ getAuthToken: _getAuthToken }: AnalyticsDashboardProps) {
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -437,7 +437,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
               <ChevronDown className="dropdown-caret" />
             </button>
           </PortalDropdownTrigger>
-          <PortalDropdownContent align="start" sideOffset={0}>
+          <PortalDropdownContent align="start" sideOffset={-4}>
             {dateRangeOptions.map((option) => (
               <PortalDropdownItem
                 key={option.value}
