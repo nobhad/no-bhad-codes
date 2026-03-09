@@ -146,9 +146,11 @@ body[data-page="client-portal"] {
 
   /* ----------------------------------------
    * CARD & PANEL TOKENS
+   * Single source of truth for all card/panel content padding.
+   * Use --portal-card-padding on every card, panel header, panel body.
    * ---------------------------------------- */
-  --portal-card-padding: var(--space-1-5) var(--space-2); /* 12px 16px — on 8px grid */
-  --portal-panel-padding-x: var(--space-2); /* 16px — on 8px grid */
+  --portal-card-padding: var(--space-1-5) var(--space-3); /* 12px 24px — on 8px grid */
+  --portal-panel-padding-x: var(--space-3); /* 24px — on 8px grid */
   --portal-list-item-padding: var(--space-1) var(--portal-panel-padding-x);
 
   /* ----------------------------------------
@@ -196,6 +198,7 @@ body[data-page="client-portal"] {
   --portal-header-height-line: var(--space-4);   /* 32px */
   --portal-nav-gap: var(--space-6);
   --sidebar-icon-indent: calc(var(--space-base) * 2.25); /* 18px */
+  --portal-page-top: var(--space-3);
   --portal-page-bottom: var(--space-6);
   --sidebar-collapsed-width: var(--space-7); /* 56px */
 
@@ -465,4 +468,17 @@ html[data-theme="light"]:has(body[data-page="client-portal"]) {
 /* Badge child inside an open trigger also loses its bottom border */
 .portal [aria-haspopup="menu"][data-state="open"]:not(.icon-btn):not(.notification-bell-btn) .badge {
   border-bottom-color: transparent;
+}
+
+/* ============================================
+ * RESPONSIVE CARD PADDING
+ * Reduce card/panel padding on small screens.
+ * Overrides --portal-card-padding token defined in :root above.
+ * ============================================ */
+@media (--compact-mobile) {
+  body[data-page="admin"],
+  body[data-page="client-portal"] {
+    --portal-card-padding: var(--space-1) var(--space-2); /* 8px 16px */
+    --portal-panel-padding-x: var(--space-2); /* 16px */
+  }
 }
