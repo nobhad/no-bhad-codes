@@ -333,6 +333,22 @@ summary::-webkit-details-marker {
   color: inherit; /* Inherits from parent's hover color */
 }
 
+/* All portal SVGs default to primary text color.
+   Ensures standalone icons (empty states, headings, table icons, etc.)
+   always render in the correct text color rather than browser default or
+   an inherited muted/secondary color from an ancestor. */
+.portal svg {
+  color: var(--color-text-primary);
+}
+
+/* Interactive elements: SVGs follow parent's color context instead of
+   the baseline above, so button variants, hover states, danger/success
+   colors, and nav active states all continue to work correctly. */
+.portal button svg,
+.portal a svg {
+  color: inherit;
+}
+
 details:focus-within {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
