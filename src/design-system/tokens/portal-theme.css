@@ -208,6 +208,8 @@ body[data-page="client-portal"] {
   --portal-placeholder-color: var(--color-text-tertiary);
   --portal-field-label-gap: var(--field-label-value-gap); /* 0.125rem */
   --action-bar-item-height: var(--portal-btn-icon-size); /* 36px */
+  /* Gap between adjacent icon/action buttons (edit, delete, save, close clusters) */
+  --action-btn-gap: var(--space-1); /* 8px */
 
   /* ----------------------------------------
    * TABLE TOKENS
@@ -217,7 +219,7 @@ body[data-page="client-portal"] {
   --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
   --table-cell-padding-y: clamp(var(--space-0-5), 1vw, var(--space-1-5));
   --table-outer-padding: clamp(var(--space-1-5), 3vw, var(--space-3));
-  --table-actions-gap: var(--space-0-5);
+  --table-actions-gap: 0;
   --table-header-font-size: var(--font-size-sm);
   --table-cell-font-size: var(--font-size-sm);
   --table-header-font-weight: var(--font-weight-medium);
