@@ -127,7 +127,6 @@ export function cache(
 
         // Add cache headers
         res.set('X-Cache', 'HIT');
-        res.set('X-Cache-Key', cacheKey);
 
         res.status(cached.status || 200).json(cached.body);
         return;
@@ -135,7 +134,6 @@ export function cache(
 
       logger.info(`Cache MISS: ${cacheKey}`);
       res.set('X-Cache', 'MISS');
-      res.set('X-Cache-Key', cacheKey);
 
       // Intercept response
       const originalJson = res.json.bind(res);
