@@ -15,7 +15,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { formatTimeAgo } from '@/utils/time-utils';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiPut } from '@/utils/api-client';
 import { MessageThread } from '@react/factories';
 
 const logger = createLogger('MessageView');
@@ -23,14 +23,13 @@ const logger = createLogger('MessageView');
 interface Message {
   id: number;
   content: string;
-  senderId: number;
   senderName: string;
   senderType: 'admin' | 'client';
-  timestamp: string;
-  status: 'sent' | 'delivered' | 'read';
+  /** ISO timestamp — server returns this as `createdAt` */
+  createdAt: string;
+  isRead?: number;
   isEdited?: boolean;
   reactions?: Array<{ emoji: string; count: number; reacted: boolean }>;
-  attachments?: { id: number; name: string; url: string }[];
 }
 
 interface Conversation {
@@ -138,11 +137,7 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
 
   const handleEdit = useCallback(async (messageId: number, content: string): Promise<boolean> => {
     try {
-      const response = await apiFetch(buildEndpoint.messageItem(messageId), {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
-      });
+      const response = await apiPut(buildEndpoint.messageItem(messageId), { message: content });
       if (!response.ok) return false;
       setMessages((prev) =>
         prev.map((m) => m.id === messageId ? { ...m, content, isEdited: true } : m)
@@ -367,8 +362,8 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                   content: m.content,
                   isOwn: m.senderType === 'admin',
                   senderName: m.senderName,
-                  timestamp: m.timestamp,
-                  readReceipt: m.status,
+                  timestamp: m.createdAt,
+                  readReceipt: m.isRead ? 'read' : 'sent',
                   isEdited: m.isEdited,
                   reactions: m.reactions
                 }))}

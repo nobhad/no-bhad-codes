@@ -4,15 +4,18 @@
  * ===============================================
  * @file src/react/factories/MessageThread.tsx
  *
- * Reusable admin message thread component.
- * Best-practice layout:
+ * Reusable message thread component for all admin messaging contexts.
+ * Layout:
  *   - Sender name above first bubble in a group (other messages only)
- *   - Timestamp + read receipt below bubble (footer)
- *   - Inline hover action buttons beside the bubble (react + edit)
+ *   - Footer (timestamp + read receipt) below the bubble-row, outside
+ *     msgtab-bubble-group so the Smile button centers on the bubble alone
+ *   - Inline hover actions beside the bubble (Smile for reactions only)
+ *   - Click own bubble to edit inline (no separate edit button)
+ *   - Long-press bubble on mobile (pointer: coarse) to open reaction picker
  *   - Date separators between message days
  *   - Avatar spacer on continuation rows
- *   - Edit form replaces bubble inline
- *   - Reaction picker popup on emoji button
+ *   - Edit form replaces bubble inline; Esc cancels, Cmd+Enter saves
+ *   - Reaction picker anchored above the Smile button via msgtab-reaction-anchor
  */
 
 import * as React from 'react';
@@ -309,40 +312,39 @@ export function MessageThread({
                         {!isEditing && (
                           <div className="msgtab-inline-actions">
                             {onReact && (
-                              <button
-                                className="icon-btn message-action-btn"
-                                aria-label="Add reaction"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPickerOpenId(pickerOpenId === message.id ? null : message.id);
-                                }}
-                              >
-                                <Smile className="icon-sm" />
-                              </button>
+                              <div className="msgtab-reaction-anchor">
+                                <button
+                                  className="icon-btn message-action-btn"
+                                  aria-label="Add reaction"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPickerOpenId(pickerOpenId === message.id ? null : message.id);
+                                  }}
+                                >
+                                  <Smile className="icon-sm" />
+                                </button>
+                                {/* Reaction picker — anchored above the Smile button */}
+                                <div
+                                  className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {QUICK_EMOJIS.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleReaction(message.id, emoji)}
+                                      aria-label={`React with ${emoji}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
                             )}
                           </div>
                         )}
 
-                        {/* Bubble group: bubble + footer stacked — reaction picker anchors here */}
+                        {/* Bubble group: bubble only (footer is outside so Smile centers on bubble) */}
                         <div className="msgtab-bubble-group">
-                          {/* Reaction picker — positioned above bubble, triggered by Smile btn or long press */}
-                          {onReact && (
-                            <div
-                              className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {QUICK_EMOJIS.map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => handleReaction(message.id, emoji)}
-                                  aria-label={`React with ${emoji}`}
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-
                           {isEditing ? (
                             <div className="message-edit-form">
                               <textarea
@@ -392,31 +394,31 @@ export function MessageThread({
                               <p className="msgtab-content">{message.content}</p>
                             </div>
                           )}
-
-                          {/* Footer: edited + time + read receipt */}
-                          {!isEditing && (
-                            <div className={cn('msgtab-footer', message.isOwn && 'is-admin')}>
-                              {message.isEdited && (
-                                <span className="message-edited">(edited)</span>
-                              )}
-                              <span className="msgtab-time">
-                                {formatMessageTime(message.timestamp)}
-                              </span>
-                              {message.isOwn && (
-                                <span
-                                  className={cn(
-                                    'msgtab-receipt',
-                                    message.readReceipt === 'read' && 'is-read'
-                                  )}
-                                  aria-label={message.readReceipt ?? 'sent'}
-                                >
-                                  <CheckCheck className="icon-xs" />
-                                </span>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </div>
+
+                      {/* Footer: below bubble-row so Smile aligns with bubble only */}
+                      {!isEditing && (
+                        <div className={cn('msgtab-footer', message.isOwn && 'is-admin')}>
+                          {message.isEdited && (
+                            <span className="message-edited">(edited)</span>
+                          )}
+                          <span className="msgtab-time">
+                            {formatMessageTime(message.timestamp)}
+                          </span>
+                          {message.isOwn && (
+                            <span
+                              className={cn(
+                                'msgtab-receipt',
+                                message.readReceipt === 'read' && 'is-read'
+                              )}
+                              aria-label={message.readReceipt ?? 'sent'}
+                            >
+                              <CheckCheck className="icon-xs" />
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       {/* Reaction badges */}
                       {message.reactions && message.reactions.length > 0 && (

@@ -1,22 +1,7 @@
 import * as React from 'react';
-import { useCallback, useState, useRef, useEffect } from 'react';
-import {
-  MessageSquare,
-  User,
-  Pencil,
-  Smile,
-  X,
-  Check,
-  CheckCheck
-} from 'lucide-react';
-import { PortalButton } from '@react/components/portal/PortalButton';
-import { cn } from '@react/lib/utils';
-import { EmptyState, LoadingState } from '@react/components/portal/EmptyState';
+import { useEffect, useMemo } from 'react';
+import { MessageThread, type ThreadMessage } from '@react/factories';
 import type { Message, MessageReaction } from '../../types';
-import { NOTIFICATIONS } from '@/constants/notifications';
-import { KEYS } from '@/constants/keyboard';
-
-const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'] as const;
 
 interface MessagesTabProps {
   messages: Message[];
@@ -29,42 +14,10 @@ interface MessagesTabProps {
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-function formatMessageTime(date: string): string {
-  const d = new Date(date);
-  const now = new Date();
-  const isToday = d.toDateString() === now.toDateString();
-  if (isToday) {
-    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  }
-  return d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  });
-}
-
-/** Returns a short label for a date separator, e.g. "Today", "Yesterday", "Mar 9" */
-function formatDateSeparator(date: string): string {
-  const d = new Date(date);
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function isSameDay(a: string, b: string): boolean {
-  return new Date(a).toDateString() === new Date(b).toDateString();
-}
-
 /**
  * MessagesTab
- * Thread-based messaging with best-practice layout:
- *   - Sender name above first bubble in a group (client messages)
- *   - Timestamp + edited marker + read receipt below bubble
- *   - Inline hover action buttons beside bubble
- *   - Date separators between days
+ * Thin data-mapping wrapper around the MessageThread factory.
+ * Maps admin Message (snake_case DB fields) → ThreadMessage (factory shape).
  */
 export function MessagesTab({
   messages,
@@ -76,306 +29,33 @@ export function MessagesTab({
   onToggleReaction,
   showNotification
 }: MessagesTabProps) {
-  const [newMessage, setNewMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState('');
-  const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const [pickerOpenId, setPickerOpenId] = useState<number | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   useEffect(() => {
     onLoadMessages();
   }, [onLoadMessages]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Close picker on outside click
-  useEffect(() => {
-    if (pickerOpenId === null) return;
-    const handleClick = () => setPickerOpenId(null);
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [pickerOpenId]);
-
-  const handleSend = useCallback(async () => {
-    if (!newMessage.trim()) return;
-    setIsSending(true);
-    const success = await onSendMessage(newMessage.trim());
-    setIsSending(false);
-    if (success) {
-      setNewMessage('');
-      textareaRef.current?.focus();
-    } else {
-      showNotification?.(NOTIFICATIONS.message.SEND_FAILED, 'error');
-    }
-  }, [newMessage, onSendMessage, showNotification]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
-        e.preventDefault();
-        handleSend();
-      }
-    },
-    [handleSend]
-  );
-
-  const handleStartEdit = useCallback((message: Message) => {
-    setEditingId(message.id);
-    setEditContent(message.content);
-    setPickerOpenId(null);
-  }, []);
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingId(null);
-    setEditContent('');
-  }, []);
-
-  const handleSaveEdit = useCallback(async () => {
-    if (editingId === null || !editContent.trim()) return;
-    setIsSavingEdit(true);
-    const success = await onEditMessage(editingId, editContent.trim());
-    setIsSavingEdit(false);
-    if (success) {
-      setEditingId(null);
-      setEditContent('');
-    } else {
-      showNotification?.(NOTIFICATIONS.message.EDIT_FAILED, 'error');
-    }
-  }, [editingId, editContent, onEditMessage, showNotification]);
-
-  const handleReaction = useCallback(
-    async (messageId: number, emoji: string) => {
-      setPickerOpenId(null);
-      const success = await onToggleReaction(messageId, emoji);
-      if (!success) {
-        showNotification?.(NOTIFICATIONS.message.REACTION_FAILED, 'error');
-      }
-    },
-    [onToggleReaction, showNotification]
+  const threadMessages = useMemo<ThreadMessage[]>(
+    () =>
+      messages.map((m) => ({
+        id: m.id,
+        content: m.content,
+        isOwn: m.sender_type === 'admin',
+        senderName: m.sender_name,
+        timestamp: m.created_at,
+        isEdited: !!m.edited_at,
+        readReceipt: m.is_read ? 'read' : 'sent',
+        reactions: reactions[m.id] || []
+      })),
+    [messages, reactions]
   );
 
   return (
-    <div className="panel msgtab-container">
-      {/* Messages List */}
-      <div className="scroll-container msgtab-panel">
-        {isLoading ? (
-          <LoadingState message="Loading messages..." />
-        ) : messages.length === 0 ? (
-          <EmptyState
-            icon={<MessageSquare className="icon-lg" />}
-            message="No messages yet. Start a conversation with your client."
-          />
-        ) : (
-          <div className="msgtab-thread">
-            {messages.map((message, index) => {
-              const isAdmin = message.sender_type === 'admin';
-              const isEditing = editingId === message.id;
-              const messageReactions = reactions[message.id] || [];
-              const prevMessage = index > 0 ? messages[index - 1] : null;
-
-              // Date separator when day changes
-              const showDateSep = !prevMessage || !isSameDay(prevMessage.created_at, message.created_at);
-
-              // Group logic: hide sender name when previous message is from the same sender
-              const isContinuation =
-                !showDateSep &&
-                prevMessage &&
-                prevMessage.sender_type === message.sender_type;
-
-              return (
-                <React.Fragment key={message.id}>
-                  {/* Date separator */}
-                  {showDateSep && (
-                    <div className="msgtab-date-sep" aria-label={formatDateSeparator(message.created_at)}>
-                      <span className="msgtab-date-label">{formatDateSeparator(message.created_at)}</span>
-                    </div>
-                  )}
-
-                  <div className={cn('msgtab-row', isAdmin && 'is-admin', isContinuation && 'is-continuation')}>
-                    {/* Avatar — hidden for continuation rows */}
-                    {!isContinuation ? (
-                      <div
-                        className={cn('msgtab-avatar', isAdmin ? 'is-admin' : 'is-client')}
-                        aria-hidden="true"
-                      >
-                        {!isAdmin && <User className="icon-md" />}
-                      </div>
-                    ) : (
-                      <div className="msgtab-avatar-spacer" aria-hidden="true" />
-                    )}
-
-                    {/* Content wrap: sender → bubble-row → reactions */}
-                    <div className={cn('msgtab-content-wrap', isAdmin && 'is-admin')}>
-                      {/* Sender name (client messages, first in group only) */}
-                      {!isAdmin && !isContinuation && (
-                        <span className="msgtab-sender">
-                          {message.sender_name || 'Client'}
-                        </span>
-                      )}
-
-                      {/* Bubble row: [inline actions] beside [bubble-group] */}
-                      <div className="msgtab-bubble-row">
-                        {/* Inline hover actions */}
-                        {!isEditing && (
-                          <div className="msgtab-inline-actions">
-                            {/* Reaction picker */}
-                            <span className="tw-relative">
-                              <button
-                                className="icon-btn message-action-btn"
-                                aria-label="Add reaction"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPickerOpenId(pickerOpenId === message.id ? null : message.id);
-                                }}
-                              >
-                                <Smile className="icon-sm" />
-                              </button>
-                              <div
-                                className={cn('reaction-picker', pickerOpenId !== message.id && 'hidden')}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {QUICK_EMOJIS.map((emoji) => (
-                                  <button
-                                    key={emoji}
-                                    onClick={() => handleReaction(message.id, emoji)}
-                                    aria-label={`React with ${emoji}`}
-                                  >
-                                    {emoji}
-                                  </button>
-                                ))}
-                              </div>
-                            </span>
-                            {/* Edit — admin messages only */}
-                            {isAdmin && (
-                              <button
-                                className="icon-btn message-action-btn"
-                                aria-label="Edit message"
-                                onClick={() => handleStartEdit(message)}
-                              >
-                                <Pencil className="icon-sm" />
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Bubble group: bubble + footer stacked */}
-                        <div className="msgtab-bubble-group">
-                          {isEditing ? (
-                            <div className="message-edit-form">
-                              <textarea
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === KEYS.ESCAPE) handleCancelEdit();
-                                  if ((e.metaKey || e.ctrlKey) && e.key === KEYS.ENTER) {
-                                    e.preventDefault();
-                                    handleSaveEdit();
-                                  }
-                                }}
-                                className="textarea message-edit-textarea"
-                                rows={2}
-                                autoFocus
-                                aria-label="Edit message"
-                              />
-                              <div className="message-edit-actions">
-                                <button
-                                  className="icon-btn message-action-btn"
-                                  onClick={handleCancelEdit}
-                                  aria-label="Cancel edit"
-                                >
-                                  <X className="icon-sm" />
-                                </button>
-                                <button
-                                  className="icon-btn message-action-btn"
-                                  onClick={handleSaveEdit}
-                                  disabled={isSavingEdit || !editContent.trim()}
-                                  aria-label="Save edit"
-                                >
-                                  <Check className="icon-sm" />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className={cn('msgtab-bubble', isAdmin ? 'is-admin' : 'is-client')}>
-                              <p className="msgtab-content">{message.content}</p>
-                            </div>
-                          )}
-
-                          {/* Footer: timestamp + edited + read receipt */}
-                          {!isEditing && (
-                            <div className={cn('msgtab-footer', isAdmin && 'is-admin')}>
-                              {message.edited_at && (
-                                <span className="message-edited">(edited)</span>
-                              )}
-                              <span className="msgtab-time">
-                                {formatMessageTime(message.created_at)}
-                              </span>
-                              {/* Read receipt for own messages */}
-                              {isAdmin && (
-                                <span className="msgtab-receipt" aria-label="Sent">
-                                  <CheckCheck className="icon-xs" />
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Reaction badges below bubble-row */}
-                      {messageReactions.length > 0 && (
-                        <div className="message-reactions">
-                          {messageReactions.map((r) => (
-                            <button
-                              key={r.emoji}
-                              className={cn('reaction-badge', r.reacted && 'is-reacted')}
-                              onClick={() => handleReaction(message.id, r.emoji)}
-                              aria-label={`${r.emoji} ${r.count}`}
-                            >
-                              {r.emoji} {r.count}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </React.Fragment>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Message Input */}
-      <div className="msgtab-input-panel">
-        <textarea
-          ref={textareaRef}
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          rows={2}
-          className="textarea msgtab-textarea"
-          aria-label="Message"
-        />
-        <PortalButton
-          variant="primary"
-          className="msgtab-send-btn"
-          onClick={handleSend}
-          disabled={!newMessage.trim()}
-          loading={isSending}
-        >
-          Send Message
-        </PortalButton>
-        <div className="text-muted pd-hint">
-          Press <kbd className="badge msgtab-kbd">Cmd+Enter</kbd> to send
-        </div>
-      </div>
-    </div>
+    <MessageThread
+      messages={threadMessages}
+      isLoading={isLoading}
+      onSend={onSendMessage}
+      onEdit={onEditMessage}
+      onReact={onToggleReaction}
+      showNotification={showNotification}
+    />
   );
 }
