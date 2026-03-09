@@ -15,6 +15,12 @@
  * (--color-text-*, --color-bg-*, --color-border-*) within portal scope.
  * Components use one consistent variable name everywhere.
  *
+ * DARK/LIGHT MODE PHILOSOPHY:
+ * The ONLY values that differ between dark and light mode are the two primary
+ * colors: --color-bg-primary and --color-text-primary. All other colors are
+ * derived from those two via color-mix() and CSS variable references.
+ * The light mode block (below) contains only those two overrides.
+ *
  * Portal-specific extensions (no main-site equivalent):
  * - --color-bg-raised/elevated/prominent/hover/readonly (extra bg ramp levels)
  * - --color-hover-bg/text/icon/border (hover state colors)
@@ -34,30 +40,38 @@
 [data-page="admin"],
 [data-page="client-portal"] {
   /* ----------------------------------------
-   * TEXT COLORS
+   * PRIMARY COLORS — only these are set explicitly.
+   * Everything else derives from these two values.
    * ---------------------------------------- */
   --color-text-primary: #ffffff;
-  --color-text-secondary: #ffffff;
-  --color-text-tertiary: #999999;
-  --color-text-inverse: #000000;
-
-  /* ----------------------------------------
-   * BACKGROUND COLORS
-   * ---------------------------------------- */
   --color-bg-primary: #000000;
-  --color-bg-secondary: #0a0a0a;
-  --color-bg-tertiary: #1a1a1a;
-  --color-bg-raised: #2a2a2a;
-  --color-bg-elevated: #3a3a3a;
-  --color-bg-prominent: #4a4a4a;
-  --color-bg-hover: #1a1a1a;
-  --color-bg-readonly: #0a0a0a;
 
   /* ----------------------------------------
-   * BORDER SYSTEM
+   * TEXT COLORS — derived from primaries
    * ---------------------------------------- */
-  --color-border-primary: #ffffff;
-  --color-border-secondary: rgba(255, 255, 255, 0.08);
+  --color-text-secondary: var(--color-text-primary);
+  --color-text-tertiary: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 60%);
+  --color-text-inverse: var(--color-bg-primary);
+
+  /* ----------------------------------------
+   * BACKGROUND RAMP — derived from primaries
+   * Each step mixes bg-primary toward text-primary by a fixed increment.
+   * In dark mode: steps from black toward white.
+   * In light mode (auto): steps from off-white toward off-black.
+   * ---------------------------------------- */
+  --color-bg-secondary: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
+  --color-bg-tertiary:  color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
+  --color-bg-raised:    color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 16.5%);
+  --color-bg-elevated:  color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 23%);
+  --color-bg-prominent: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 29%);
+  --color-bg-hover:     color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
+  --color-bg-readonly:  color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
+
+  /* ----------------------------------------
+   * BORDER SYSTEM — derived from primaries
+   * ---------------------------------------- */
+  --color-border-primary: var(--color-text-primary);
+  --color-border-secondary: color-mix(in srgb, var(--color-text-primary), transparent 92%);
 
   /* Portal border shorthand — convenience alias */
   --portal-border: var(--border-width) solid var(--color-border-primary);
@@ -67,17 +81,20 @@
 
   /* ----------------------------------------
    * ALPHA COLORS
+   * portal-alpha-white-* = text-primary at various opacities.
+   * Name is historical — these are always "foreground text at X opacity".
+   * portal-alpha-black-* = true black overlays (shadows, scrims); never inverted.
    * ---------------------------------------- */
-  --portal-alpha-white-02: rgba(255, 255, 255, 0.02);
-  --portal-alpha-white-04: rgba(255, 255, 255, 0.04);
-  --portal-alpha-white-05: rgba(255, 255, 255, 0.05);
-  --portal-alpha-white-08: rgba(255, 255, 255, 0.08);
-  --portal-alpha-white-10: rgba(255, 255, 255, 0.1);
-  --portal-alpha-white-15: rgba(255, 255, 255, 0.15);
-  --portal-alpha-white-20: rgba(255, 255, 255, 0.2);
-  --portal-alpha-white-25: rgba(255, 255, 255, 0.25);
-  --portal-alpha-white-30: rgba(255, 255, 255, 0.3);
-  --portal-alpha-white-50: rgba(255, 255, 255, 0.5);
+  --portal-alpha-white-02: color-mix(in srgb, var(--color-text-primary), transparent 98%);
+  --portal-alpha-white-04: color-mix(in srgb, var(--color-text-primary), transparent 96%);
+  --portal-alpha-white-05: color-mix(in srgb, var(--color-text-primary), transparent 95%);
+  --portal-alpha-white-08: color-mix(in srgb, var(--color-text-primary), transparent 92%);
+  --portal-alpha-white-10: color-mix(in srgb, var(--color-text-primary), transparent 90%);
+  --portal-alpha-white-15: color-mix(in srgb, var(--color-text-primary), transparent 85%);
+  --portal-alpha-white-20: color-mix(in srgb, var(--color-text-primary), transparent 80%);
+  --portal-alpha-white-25: color-mix(in srgb, var(--color-text-primary), transparent 75%);
+  --portal-alpha-white-30: color-mix(in srgb, var(--color-text-primary), transparent 70%);
+  --portal-alpha-white-50: color-mix(in srgb, var(--color-text-primary), transparent 50%);
   --portal-alpha-black-04: rgba(0, 0, 0, 0.04);
   --portal-alpha-black-05: rgba(0, 0, 0, 0.05);
   --portal-alpha-black-10: rgba(0, 0, 0, 0.1);
@@ -109,13 +126,14 @@
   --portal-radius-pill: 0;
 
   /* ----------------------------------------
-   * HOVER STATE COLORS - SEMANTIC CONTRAST
-   * Dark bg = light text/icons
+   * HOVER STATE COLORS — derived from primaries
+   * On hover: bg flips to text-primary, text flips to bg-primary.
+   * Works identically in both dark and light mode.
    * ---------------------------------------- */
-  --color-hover-bg: var(--color-text-primary);     /* White bg on hover */
-  --color-hover-text: var(--color-bg-primary);     /* Black text on hover */
-  --color-hover-icon: var(--color-bg-primary);     /* Black icons on hover */
-  --color-hover-border: var(--color-text-primary); /* White border on hover */
+  --color-hover-bg: var(--color-text-primary);
+  --color-hover-text: var(--color-bg-primary);
+  --color-hover-icon: var(--color-bg-primary);
+  --color-hover-border: var(--color-text-primary);
 
   /* ----------------------------------------
    * FOCUS STATE COLORS
@@ -141,7 +159,9 @@
    * FIELD/LABEL SPACING
    * ---------------------------------------- */
   --field-label-value-gap: 0.125rem;
-  --field-group-gap: 0.75rem;
+  --field-group-gap: var(--space-1-5); /* 12px */
+  /* Left padding for inputs with a positioned icon inside */
+  --input-icon-offset: calc(var(--icon-size-md) + var(--space-2-5)); /* icon + gap = ~36px */
 
   /* ----------------------------------------
    * LABEL STYLING
@@ -231,151 +251,70 @@
   --status-dropdown-width: 160px;
 
   /* ----------------------------------------
-   * OVERRIDE SEMANTIC COLOR TOKENS
-   * Portal uses inverted color scheme
+   * SEMANTIC COLOR TOKENS — derived from primaries
+   * Portal inverts the neutral scale: 100 = near-bg, 900 = near-text.
    * ---------------------------------------- */
-  --color-neutral-100: #1a1a1a;
-  --color-neutral-200: #0a0a0a;
-  --color-neutral-300: #000000;
-  --color-neutral-400: #787878;
-  --color-neutral-500: #a0a0a0;
-  --color-neutral-600: #c0c0c0;
-  --color-neutral-700: #e0e0e0;
-  --color-neutral-800: #f4f4f4;
-  --color-neutral-900: #ffffff;
-  --color-dark: #ffffff;
-  --color-light: #000000;
-  --color-nav-text: #ffffff;
-  --color-white: #ffffff;
-  --color-black: #000000;
+  --color-neutral-100: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
+  --color-neutral-200: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
+  --color-neutral-300: var(--color-bg-primary);
+  --color-neutral-400: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 47%);
+  --color-neutral-500: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 63%);
+  --color-neutral-600: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 75%);
+  --color-neutral-700: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 88%);
+  --color-neutral-800: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 96%);
+  --color-neutral-900: var(--color-text-primary);
+  --color-dark: var(--color-text-primary);
+  --color-light: var(--color-bg-primary);
+  --color-nav-text: var(--color-text-primary);
+  --color-white: var(--color-text-primary); /* Portal: "white" = most prominent text */
+  --color-black: var(--color-bg-primary);   /* Portal: "black" = base background */
 
-  /* App-level aliases for portal */
-  --app-color-primary: #ffffff;
-  --app-color-primary-hover: #000000;
+  /* App-level aliases — derived from primaries */
+  --app-color-primary: var(--color-text-primary);
+  --app-color-primary-hover: var(--color-bg-primary);
 
-  /* Form variables */
-  --form-input-border: #ffffff;
+  /* Form variables — derived from primaries */
+  --form-input-border: var(--color-text-primary);
   --form-input-placeholder: #787878;
-  --form-btn-bg: #ffffff;
-  --form-btn-fg: #000000;
+  --form-btn-bg: var(--color-text-primary);
+  --form-btn-fg: var(--color-bg-primary);
   --form-btn-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Button token variables — derived from primaries */
+  --btn-portal-primary-bg: transparent;
+  --btn-portal-primary-color: var(--color-text-primary);
+  --btn-portal-primary-border: var(--color-text-primary);
+  --btn-portal-primary-hover-bg: var(--color-text-primary);
+  --btn-portal-primary-hover-color: var(--color-bg-primary);
+  --btn-portal-primary-hover-border: var(--color-text-primary);
+
+  --btn-portal-secondary-bg: transparent;
+  --btn-portal-secondary-color: var(--color-text-primary);
+  --btn-portal-secondary-border: var(--color-text-primary);
+  --btn-portal-secondary-hover-bg: var(--color-text-primary);
+  --btn-portal-secondary-hover-color: var(--color-bg-primary);
+  --btn-portal-secondary-hover-border: var(--color-text-primary);
+
+  --btn-portal-border-color: var(--color-text-primary);
+  --btn-portal-color: var(--color-text-primary);
+  --btn-portal-hover-bg: var(--color-text-primary);
+  --btn-portal-hover-color: var(--color-bg-primary);
+  --btn-portal-hover-border: var(--color-text-primary);
 }
 
 /* ============================================
  * PORTAL LIGHT MODE - INVERTED DISCOTHÈQUE
- * Off-white background, off-black text
+ * Off-white background, off-black text.
+ *
+ * Only the two primary colors need to change — everything else
+ * is derived automatically via color-mix() in the block above.
  * ============================================ */
 html[data-theme="light"] body[data-page="admin"],
 html[data-theme="light"] body[data-page="client-portal"] {
-  /* ----------------------------------------
-   * TEXT COLORS - ALL OFF-BLACK (#333333, matches main site --color-dark)
-   * ---------------------------------------- */
   --color-text-primary: #333333;
-  --color-text-secondary: #333333;
-  --color-text-tertiary: #333333;
-  --color-text-inverse: #ffffff;
-
-  /* ----------------------------------------
-   * BACKGROUND COLORS - OFF-WHITE BASE (#fffefd, matches main site --color-off-white)
-   * ---------------------------------------- */
   --color-bg-primary: var(--color-off-white);
-  --color-bg-secondary: #f5f5f5;
-  --color-bg-tertiary: #e5e5e5;
-  --color-bg-raised: #d5d5d5;
-  --color-bg-elevated: #c5c5c5;
-  --color-bg-prominent: #b5b5b5;
-  --color-bg-hover: #e5e5e5;
-  --color-bg-readonly: #f5f5f5;
 
-  /* ----------------------------------------
-   * BORDER SYSTEM - OFF-BLACK BORDERS
-   * ---------------------------------------- */
-  --color-border-primary: #333333;
-  --color-border-secondary: rgba(0, 0, 0, 0.08);
-
-  /* ----------------------------------------
-   * HOVER STATE COLORS - SEMANTIC CONTRAST (Light Mode)
-   * ---------------------------------------- */
-  --color-hover-bg: var(--color-text-primary);     /* Off-black bg on hover */
-  --color-hover-text: var(--color-bg-primary);     /* Off-white text on hover */
-  --color-hover-icon: var(--color-bg-primary);     /* Off-white icons on hover */
-  --color-hover-border: var(--color-text-primary); /* Off-black border on hover */
-
-  /* ----------------------------------------
-   * FOCUS STATE COLORS (Light Mode)
-   * ---------------------------------------- */
-  --focus-ring-color: var(--color-primary);
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 0px;
-
-  /* ----------------------------------------
-   * ALPHA OVERRIDES (Light Mode)
-   * White alpha values invert to black for light mode
-   * ---------------------------------------- */
-  --portal-alpha-white-08: rgba(0, 0, 0, 0.08);
-  --portal-alpha-white-10: rgba(0, 0, 0, 0.1);
-  --portal-alpha-white-15: rgba(0, 0, 0, 0.15);
-  --portal-alpha-white-20: rgba(0, 0, 0, 0.2);
-  --portal-alpha-white-30: rgba(0, 0, 0, 0.3);
-
-  /* ----------------------------------------
-   * BUTTON COLORS (Light Mode)
-   * ---------------------------------------- */
-  --btn-portal-primary-bg: transparent;
-  --btn-portal-primary-color: #333333;
-  --btn-portal-primary-border: #333333;
-  --btn-portal-primary-hover-bg: #333333;
-  --btn-portal-primary-hover-color: #ffffff;
-  --btn-portal-primary-hover-border: #333333;
-
-  --btn-portal-secondary-bg: transparent;
-  --btn-portal-secondary-color: #333333;
-  --btn-portal-secondary-border: #333333;
-  --btn-portal-secondary-hover-bg: #333333;
-  --btn-portal-secondary-hover-color: #ffffff;
-  --btn-portal-secondary-hover-border: #333333;
-
-  --btn-portal-border-color: #333333;
-  --btn-portal-color: #333333;
-  --btn-portal-hover-bg: #333333;
-  --btn-portal-hover-color: #ffffff;
-  --btn-portal-hover-border: #333333;
-
-  /* ----------------------------------------
-   * OVERRIDE SEMANTIC COLOR TOKENS - INVERTED
-   * ---------------------------------------- */
-  --color-neutral-100: #f5f5f5;
-  --color-neutral-200: var(--color-off-white);
-  --color-neutral-300: var(--color-off-white);
-  --color-neutral-400: #333333;
-  --color-neutral-500: #333333;
-  --color-neutral-600: #333333;
-  --color-neutral-700: #333333;
-  --color-neutral-800: #333333;
-  --color-neutral-900: #333333;
-  --color-dark: #333333;
-  --color-light: var(--color-off-white);
-  --color-nav-text: #333333;
-  --color-white: #333333;
-  --color-black: var(--color-off-white);
-
-  /* Gray scale - ALL OFF-BLACK for text in light mode */
-  --color-gray-100: #333333;
-  --color-gray-200: #333333;
-  --color-gray-300: #333333;
-  --color-gray-400: #333333;
-  --color-gray-500: #333333;
-  --color-gray-600: #cccccc;
-
-  /* App-level aliases for portal light mode */
-  --app-color-primary: #333333;
-  --app-color-primary-hover: var(--color-off-white);
-
-  /* Form variables for portal light mode */
-  --form-input-border: #333333;
-  --form-input-placeholder: #787878;
-  --form-btn-bg: #333333;
-  --form-btn-fg: #ffffff;
+  /* Shadow intensity is lower in light mode */
   --form-btn-shadow: rgba(0, 0, 0, 0.15);
 }
 

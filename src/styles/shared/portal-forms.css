@@ -80,13 +80,13 @@
     select:not(.status-select)
   ) {
   width: 100%;
-  height: var(--space-7, 2.75rem);
-  padding: 0 var(--space-3, 0.75rem);
+  height: var(--space-7);
+  padding: 0 var(--space-3);
   border: var(--border-width) solid var(--color-border-primary);
   font-size: inherit;
   font-family: inherit;
   font-weight: var(--font-weight-medium);
-  line-height: var(--space-7, 2.75rem);
+  line-height: var(--space-7);
   background-color: inherit;
   color: var(--color-text-primary);
   box-sizing: border-box;
@@ -97,29 +97,28 @@
 /* Input with left icon - text must not overlap */
 .portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input,
 .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
-  --input-left-icon-padding: 2.25rem;
-  padding: 0.4rem 16px 0.4rem var(--input-left-icon-padding);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--input-icon-offset);
 }
 
 /* Universal: Any container with positioned icon + input - ensure proper left padding */
 .portal [class*="search-container"] input,
 .portal [class*="search-container"] .input {
-  padding-left: 2.5rem;
+  padding-left: var(--input-icon-offset);
 }
 
 /* Textarea - different height/padding */
 .portal :is(textarea, .form-textarea, textarea.form-input, .form-field-textarea),
 .modal-overlay :is(textarea, .form-textarea, textarea.form-input, .form-field-textarea) {
   height: auto;
-  min-height: calc(var(--space-6, 2.25rem) * 2);
-  padding: var(--space-1-5, 0.375rem) var(--space-2, 0.5rem);
+  min-height: calc(var(--space-6) * 2);
+  padding: var(--space-1-5) var(--space-2);
   line-height: var(--line-height-snug);
   resize: vertical;
 }
 
 /* Modal form groups */
 .modal-body .form-group {
-  margin-bottom: var(--space-4, 1rem);
+  margin-bottom: var(--space-4);
 }
 .modal-body .form-group:last-child {
   margin-bottom: 0;
@@ -128,7 +127,7 @@
 /* Placeholder text */
 .portal :is(.form-input, .form-textarea, .form-field-input, .form-field-textarea, input, textarea)::placeholder,
 .modal-overlay :is(.form-input, .form-textarea, .form-field-input, .form-field-textarea, input, textarea)::placeholder {
-  font-size: var(--font-size-base, 14px);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
   color: var(--portal-placeholder-color);
   font-family: var(--font-family-mono);
@@ -142,13 +141,13 @@
   border-color: var(--color-border-primary);
 }
 
-/* Focus state */
+/* Focus state - border shifts to primary, subtle ring for contrast */
 .portal :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):is(:focus, :focus-visible),
 .modal-overlay :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
-  border-color: var(--color-border-primary);
-  box-shadow: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 /* Form field wrapper - canonical container for label + input + error.
@@ -159,7 +158,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-2);
 }
 :is(.form-group, .form-field):last-child {
   margin-bottom: 0;
@@ -179,10 +178,10 @@
 }
 .form-group.label-inside label {
   position: absolute;
-  top: var(--space-1, 0.25rem);
-  left: var(--space-2, 0.5rem);
+  top: var(--space-1);
+  left: var(--space-2);
   z-index: var(--z-index-content);
-  font-size: var(--font-size-xs, 11px);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-transform: uppercase;
@@ -191,14 +190,14 @@
   margin: 0;
 }
 .form-group.label-inside :is(input, select, textarea) {
-  height: calc(var(--space-6, 2.25rem) + var(--space-1-5, 0.375rem));
-  padding: var(--space-3, 0.75rem) var(--space-2, 0.5rem) var(--space-1, 0.25rem)
-    var(--space-2, 0.5rem);
+  height: calc(var(--space-6) + var(--space-1-5));
+  padding: var(--space-3) var(--space-2) var(--space-1)
+    var(--space-2);
   line-height: normal;
 }
 .form-group.label-inside textarea {
   height: auto;
-  min-height: 100px;
+  min-height: var(--space-12);
 }
 
 /* Select dropdown arrow - uses theme-aware caret variable */
@@ -207,11 +206,11 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding-right: 2.5rem;
+  padding-right: var(--space-5);
   background-image: var(--select-caret);
   background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 12px;
+  background-position: right var(--space-1-5) center;
+  background-size: var(--icon-size-xs);
   cursor: pointer;
 }
 
@@ -225,12 +224,12 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 :is(input, textarea, select, .form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select):disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background-color: var(--color-bg-readonly, var(--portal-alpha-white-05));
+  background-color: var(--color-bg-readonly);
 }
 
 /* Readonly state */
 :is(input, textarea, .form-input, .form-textarea, .form-field-input, .form-field-textarea):read-only {
-  background-color: var(--color-bg-readonly, var(--portal-alpha-white-05));
+  background-color: var(--color-bg-readonly);
   cursor: default;
 }
 
@@ -245,8 +244,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
    .form-error-text    = used by NewRequestForm */
 :is(.form-error-message, .form-field-error, .form-error-text) {
   color: var(--color-danger);
-  font-size: var(--font-size-sm, 12px);
-  margin-top: var(--space-0-5, 0.125rem);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-0-5);
 }
 
 /* Required field indicator - consolidated aliases:
@@ -255,7 +254,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
    .form-field-required      = factory (createFormField.tsx) */
 :is(.form-required-indicator, .form-required, .form-field-required) {
   color: var(--color-danger);
-  margin-left: var(--space-0-5, 0.125rem);
+  margin-left: var(--space-0-5);
 }
 
 /* Helper text below inputs - consolidated aliases:
@@ -263,28 +262,28 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
    .form-field-helper = factory (createFormField.tsx) */
 :is(.form-helper-text, .form-field-helper) {
   color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm, 12px);
-  margin-top: var(--space-0-5, 0.125rem);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-0-5);
 }
 
 /* Mobile responsive */
 @media (--small-mobile) {
   .portal :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select),
   .modal-overlay :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select) {
-    height: calc(var(--space-5, 2rem) + var(--space-0-5, 0.125rem));
-    padding: 0 var(--space-1-5, 0.375rem);
-    font-size: var(--font-size-sm, 12px);
-    line-height: calc(var(--space-5, 2rem) + var(--space-0-5, 0.125rem));
+    height: calc(var(--space-5) + var(--space-0-5));
+    padding: 0 var(--space-1-5);
+    font-size: var(--font-size-sm);
+    line-height: calc(var(--space-5) + var(--space-0-5));
   }
   .portal :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input,
   .modal-overlay :is(.search-bar:has(.search-bar-icon), .field-with-left-icon) input {
-    padding-left: var(--input-left-icon-padding, 2.25rem);
+    padding-left: var(--input-icon-offset);
   }
   .portal :is(textarea, .form-textarea, .form-field-textarea),
   .modal-overlay :is(textarea, .form-textarea, .form-field-textarea) {
     height: auto;
-    min-height: var(--space-10, 3.5rem);
-    padding: var(--space-1, 0.25rem) var(--space-1-5, 0.375rem);
+    min-height: var(--space-10);
+    padding: var(--space-1) var(--space-1-5);
     line-height: var(--line-height-normal);
   }
 }
@@ -293,8 +292,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 .table-checkbox {
   display: grid;
   place-content: center;
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   flex-shrink: 0;
   border: var(--border-width) solid var(--color-border-primary);
   background: transparent;
@@ -342,17 +341,17 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   width: 100%;
 }
 .password-input-wrapper input {
-  padding-right: 3rem;
+  padding-right: var(--space-6); /* leave room for the toggle button */
 }
 .password-toggle {
   position: absolute;
-  right: 0.75rem;
+  right: var(--space-1-5);
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: var(--space-0-5);
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -363,8 +362,8 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   color: var(--color-primary);
 }
 .password-toggle svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
 }
 .password-toggle .password-icon-hide {
   display: none;
@@ -380,7 +379,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-2, 0.5rem);
+  gap: var(--space-2);
 }
 .form-row .form-group {
   margin-bottom: 0;
@@ -477,10 +476,10 @@ input.search-bar-input {
 /* Text input */
 .input {
   width: 100%;
-  padding: 0.5rem 0.75rem 0.5rem 1rem;
-  font-size: var(--font-size-sm, 14px);
+  padding: var(--space-1) var(--space-1-5) var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--font-family-mono);
   background: inherit;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
@@ -493,7 +492,8 @@ input.search-bar-input {
 }
 
 .input:focus {
-  border-color: var(--color-text-primary);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .input:disabled {
@@ -508,10 +508,10 @@ input.search-bar-input {
 
 /* Select dropdown */
 .select {
-  padding: 0.5rem 2.5rem 0.5rem 1rem;
-  font-size: var(--font-size-sm, 14px);
+  padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--font-family-mono);
   background-color: inherit;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
@@ -521,12 +521,13 @@ input.search-bar-input {
   outline: none;
   background-image: var(--select-caret);
   background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 12px;
+  background-position: right var(--space-1-5) center;
+  background-size: var(--icon-size-xs);
 }
 
 .select:focus {
-  border-color: var(--color-text-primary);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .select:disabled {
@@ -537,17 +538,17 @@ input.search-bar-input {
 /* Textarea */
 .textarea {
   width: 100%;
-  padding: 0.5rem 0.75rem 0.5rem 1rem;
-  font-size: var(--font-size-sm, 14px);
+  padding: var(--space-1) var(--space-1-5) var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--font-family-mono);
   background: inherit;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
   color: var(--color-text-primary);
   outline: none;
   resize: none;
-  min-height: 100px;
+  min-height: var(--space-12); /* 96px ≈ 100px, on 8px grid */
 }
 
 .textarea::placeholder {
@@ -565,8 +566,8 @@ input.search-bar-input {
 
 /* Checkbox - all checkbox variants use same border */
 .data-table-checkbox {
-  width: 1rem;
-  height: 1rem;
+  width: var(--space-2);
+  height: var(--space-2);
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);
   border-radius: 0;
@@ -601,13 +602,13 @@ input.search-bar-input {
 
 /* Form header row */
 .qform-header {
-  gap: 0.75rem;
+  gap: var(--space-1-5);
 }
 
 .qform-header-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-1-5);
 }
 
 .qform-heading {
@@ -622,13 +623,13 @@ input.search-bar-input {
 .qform-status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-1);
 }
 
 .qform-status-item {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--space-0-5);
   font-size: var(--font-size-2xs);
 }
 
@@ -641,7 +642,7 @@ input.search-bar-input {
 .qform-progress-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-1-5);
 }
 
 .qform-progress-text {
@@ -653,8 +654,8 @@ input.search-bar-input {
 .qform-question-label-row {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
 }
 
 .qform-question-number {
@@ -669,29 +670,29 @@ input.search-bar-input {
 
 .qform-question-help {
   font-size: var(--font-size-2xs);
-  margin-top: 0.125rem;
+  margin-top: var(--space-px);
 }
 
 .qform-question-input {
-  padding-left: 1.25rem;
+  padding-left: var(--space-2-5);
 }
 
 /* Action buttons row */
 .qform-actions {
-  gap: 0.75rem;
-  padding-top: 0.5rem;
+  gap: var(--space-1-5);
+  padding-top: var(--space-1);
 }
 
 .qform-btn-with-icon {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--space-0-5);
 }
 
 /* Read-only notice */
 .qform-readonly-notice {
   text-align: center;
-  padding: 0.75rem 0;
+  padding: var(--space-1-5) 0;
   font-size: var(--font-size-2xs);
 }
 
@@ -701,7 +702,7 @@ input.search-bar-input {
 }
 
 .qform-select-btn {
-  gap: 0.5rem;
+  gap: var(--space-1);
   text-align: left;
 }
 
@@ -709,15 +710,15 @@ input.search-bar-input {
   position: absolute;
   z-index: var(--z-index-50);
   width: 100%;
-  margin-top: 0.25rem;
-  max-height: 192px;
+  margin-top: var(--space-0-5);
+  max-height: var(--space-24); /* 192px = 24 * 8px */
   overflow: auto;
 }
 
 .qform-select-option {
   width: 100%;
   text-align: left;
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-1) var(--space-1-5);
 }
 
 .qform-chevron-icon {
@@ -728,29 +729,29 @@ input.search-bar-input {
 .qform-multiselect-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--space-1);
 }
 
 .qform-multiselect-btn {
   font-size: var(--font-size-2xs);
-  padding: 0.375rem 0.75rem;
+  padding: var(--space-0-5) var(--space-1-5);
 }
 
 /* File upload dropzone */
 .qform-file-upload {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-1);
 }
 
 .qform-file-selected {
-  gap: 0.75rem;
+  gap: var(--space-1-5);
 }
 
 .qform-file-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -768,8 +769,8 @@ input.search-bar-input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1.5rem;
+  gap: var(--space-1);
+  padding: var(--space-3);
   border: var(--border-width) dashed var(--color-border-primary);
   cursor: pointer;
 }
@@ -789,7 +790,7 @@ input.search-bar-input {
 
 .qform-dropzone-hint {
   font-size: var(--font-size-2xs);
-  margin-top: 0.25rem;
+  margin-top: var(--space-0-5);
 }
 
 /* Check icon success color */
@@ -848,11 +849,11 @@ input.search-bar-input {
 }
 
 .form-field-icon-left {
-  left: var(--space-1-5, 0.375rem);
+  left: var(--space-1-5);
 }
 
 .form-field-icon-right {
-  right: var(--space-1-5, 0.375rem);
+  right: var(--space-1-5);
 }
 
 /* NOTE: .form-field-input, .form-field-textarea, .form-field-select
@@ -862,11 +863,11 @@ input.search-bar-input {
 
 /* Input with icon padding adjustments */
 .form-field-input--icon-left {
-  padding-left: 2.25rem;
+  padding-left: var(--input-icon-offset);
 }
 
 .form-field-input--icon-right {
-  padding-right: 2.25rem;
+  padding-right: var(--input-icon-offset);
 }
 
 /* Textarea no-resize modifier */
@@ -878,20 +879,20 @@ input.search-bar-input {
 .form-field--checkbox {
   flex-direction: row;
   align-items: flex-start;
-  gap: var(--space-1, 0.25rem);
+  gap: var(--space-1);
 }
 
 .form-field-checkbox-label {
   display: flex;
   align-items: center;
-  gap: var(--space-1-5, 0.375rem);
+  gap: var(--space-1-5);
   cursor: pointer;
 }
 
 .form-field-checkbox {
   flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
+  width: var(--space-2);
+  height: var(--space-2);
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);
   cursor: pointer;
@@ -899,35 +900,35 @@ input.search-bar-input {
 }
 
 .form-field-checkbox-text {
-  font-size: var(--font-size-sm, 14px);
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
 }
 
 .form-field-checkbox-description {
   display: block;
-  font-size: var(--font-size-sm, 12px);
+  font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
-  margin-top: var(--space-0-5, 0.125rem);
-  padding-left: calc(1rem + var(--space-1-5, 0.375rem));
+  margin-top: var(--space-0-5);
+  padding-left: calc(var(--space-2) + var(--space-1-5));
 }
 
 /* Radio group */
 .form-field-radio-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1-5, 0.375rem);
+  gap: var(--space-1-5);
 }
 
 .form-field-radio-group--horizontal {
   flex-direction: row;
   flex-wrap: wrap;
-  gap: var(--space-3, 0.75rem);
+  gap: var(--space-3);
 }
 
 .form-field-radio-label {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-1-5, 0.375rem);
+  gap: var(--space-1-5);
   cursor: pointer;
 }
 
@@ -938,8 +939,8 @@ input.search-bar-input {
 
 .form-field-radio {
   flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
+  width: var(--space-2);
+  height: var(--space-2);
   margin-top: var(--space-px);
   accent-color: var(--color-primary);
   cursor: pointer;
@@ -948,21 +949,21 @@ input.search-bar-input {
 .form-field-radio-text {
   display: flex;
   flex-direction: column;
-  font-size: var(--font-size-sm, 14px);
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
 }
 
 .form-field-radio-description {
-  font-size: var(--font-size-sm, 12px);
+  font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
-  margin-top: var(--space-0-5, 0.125rem);
+  margin-top: var(--space-0-5);
 }
 
 /* Form field group (fieldset) */
 .form-field-group {
   border: none;
   padding: 0;
-  margin: 0 0 var(--space-3, 0.75rem) 0;
+  margin: 0 0 var(--space-3) 0;
 }
 
 .form-field-group:last-child {
@@ -971,9 +972,9 @@ input.search-bar-input {
 
 .form-field-group-label {
   display: block;
-  margin-bottom: var(--space-2, 0.5rem);
-  font-size: var(--font-size-sm, 14px);
-  font-weight: var(--font-weight-semibold, 600);
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
@@ -982,7 +983,7 @@ input.search-bar-input {
 .form-field-group-content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2, 0.5rem);
+  gap: var(--space-2);
 }
 
 /* ============================================
@@ -1053,15 +1054,15 @@ input.search-bar-input {
 }
 
 .file-upload-progress-track {
-  height: 0.25rem;
-  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  height: var(--space-0-5);
+  background: var(--portal-alpha-white-10);
   overflow: hidden;
 }
 
 .file-upload-progress-bar {
   height: 100%;
   background: var(--color-primary);
-  transition: width var(--transition-normal, 0.3s);
+  transition: width var(--transition-normal);
 }
 
 .file-upload-item-error {

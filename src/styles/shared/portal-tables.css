@@ -247,7 +247,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1-5) var(--table-cell-padding-x, 14px);
+  padding: var(--space-1-5) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
   background: transparent;
 }
@@ -365,7 +365,7 @@
 .table-pagination {
   display: flex;
   align-items: center;
-  padding: var(--space-1-5) var(--table-cell-padding-x, 14px);
+  padding: var(--space-1-5) var(--table-cell-padding-x);
   color: inherit;
   font-size: inherit;
 }
@@ -1631,7 +1631,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--table-cell-padding-x, 14px);
+  padding: var(--space-1) var(--table-cell-padding-x);
   border-bottom: var(--portal-border);
   background: var(--color-bg-raised);
 }
