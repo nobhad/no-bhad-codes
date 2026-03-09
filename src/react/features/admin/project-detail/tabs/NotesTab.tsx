@@ -66,7 +66,7 @@ export function NotesTab({
   );
 
   return (
-    <div className="section">
+    <div className="section tab-section">
       {/* Header */}
       <div className="layout-row-between">
         <div className="layout-row gap-2">
