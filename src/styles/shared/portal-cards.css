@@ -737,7 +737,7 @@ html[data-theme="light"] .portal :is(
 
 .portal .progress-card .progress-fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-accent);
   transition: width var(--transition-normal) ease;
 }
 

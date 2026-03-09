@@ -43,12 +43,12 @@ html {
  * ============================================ */
 
 ::selection {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
   color: var(--color-neutral-100);
 }
 
 ::-moz-selection {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
   color: var(--color-neutral-100);
 }
 
@@ -220,7 +220,7 @@ a {
 /* Uses --focus-ring-* variables from portal-theme.css */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--focus-ring-color, var(--color-primary));
+  box-shadow: 0 0 0 var(--focus-ring-width, 2px) var(--focus-ring-color, var(--color-accent));
 }
 
 /* Remove focus ring for mouse users (non-keyboard focus) */
@@ -350,7 +350,7 @@ summary::-webkit-details-marker {
 }
 
 details:focus-within {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
 
@@ -366,7 +366,7 @@ details > summary:focus-visible {
 
 /* Modal/form dropdowns - wrapper outline when open */
 .custom-dropdown.open:not(.table-dropdown):focus-within {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
 

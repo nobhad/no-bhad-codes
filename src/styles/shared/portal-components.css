@@ -38,6 +38,9 @@
 /* 4. React component shared styles (dropdown, badge, progress-bar-sm) */
 @import "./portal-react-components.css";
 
+/* 4a. Accordion component */
+@import "./portal-accordion.css";
+
 /* 5. System status panel */
 @import "./portal-status-panel.css";
 

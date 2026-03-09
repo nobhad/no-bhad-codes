@@ -82,7 +82,7 @@
   width: 100%;
   height: var(--space-7);
   padding: 0 var(--space-3);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-input-border);
   font-size: inherit;
   font-family: inherit;
   font-weight: var(--font-weight-medium);
@@ -146,7 +146,7 @@
 .modal-overlay :is(.form-input, .form-textarea, .form-select, .form-field-input, .form-field-textarea, .form-field-select, input, textarea, select):is(:focus, :focus-visible) {
   outline: none;
   outline-offset: 0;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -288,51 +288,6 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   }
 }
 
-/* Table checkbox - Radix UI based checkbox for React tables */
-.table-checkbox {
-  display: grid;
-  place-content: center;
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
-  flex-shrink: 0;
-  border: var(--border-width) solid var(--color-border-primary);
-  background: transparent;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.table-checkbox:hover {
-  border-color: var(--portal-border);
-}
-
-.table-checkbox:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-border-primary);
-}
-
-.table-checkbox:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.table-checkbox[data-state="checked"] {
-  background: var(--color-border-primary);
-  border-color: var(--color-border-primary);
-}
-
-.table-checkbox-indicator {
-  display: grid;
-  place-content: center;
-  color: var(--color-bg-primary);
-}
-
-.table-checkbox-icon {
-  width: 12px;
-  height: 12px;
-}
-
 /* Password input wrapper & toggle */
 .password-input-wrapper {
   position: relative;
@@ -359,7 +314,7 @@ html[data-theme="light"] .modal-overlay :is(select:not(.status-select), .form-se
   transition: color var(--transition-fast);
 }
 .password-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 .password-toggle svg {
   width: var(--icon-size-lg);
@@ -426,7 +381,7 @@ input.search-bar-input {
 .search-bar .search-bar-input:focus,
 .search-bar-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -457,7 +412,7 @@ input.search-bar-input {
 }
 
 .search-bar-clear:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -481,7 +436,7 @@ input.search-bar-input {
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
   background: inherit;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-input-border);
   border-radius: 0;
   color: var(--color-text-primary);
   outline: none;
@@ -492,7 +447,7 @@ input.search-bar-input {
 }
 
 .input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -513,7 +468,7 @@ input.search-bar-input {
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-mono);
   background-color: var(--color-bg-primary);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-input-border);
   border-radius: 0;
   color: var(--color-text-primary);
   cursor: pointer;
@@ -526,7 +481,7 @@ input.search-bar-input {
 }
 
 .select:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: var(--focus-ring);
 }
 
@@ -896,7 +851,7 @@ input.search-bar-input {
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);
   cursor: pointer;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-accent);
 }
 
 .form-field-checkbox-text {
@@ -942,7 +897,7 @@ input.search-bar-input {
   width: var(--space-2);
   height: var(--space-2);
   margin-top: var(--space-px);
-  accent-color: var(--color-primary);
+  accent-color: var(--color-accent);
   cursor: pointer;
 }
 
@@ -1061,7 +1016,7 @@ input.search-bar-input {
 
 .file-upload-progress-bar {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-accent);
   transition: width var(--transition-normal);
 }
 
@@ -1079,5 +1034,5 @@ input.search-bar-input {
   transition: color var(--transition-fast);
 }
 .file-upload-remove-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }

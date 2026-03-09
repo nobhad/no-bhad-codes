@@ -381,13 +381,13 @@
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   line-height: 1;
-  color: var(--color-primary);
+  color: var(--color-accent);
   margin-bottom: var(--space-0-5);
 }
 
 /* Highlight attention cards with values > 0 */
 .portal .attention-card.has-items .attention-count {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* =====================================================

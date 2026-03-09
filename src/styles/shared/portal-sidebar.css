@@ -139,7 +139,7 @@
 }
 
 .portal .sidebar > .sidebar-toggle-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   background: transparent;
 }
 

@@ -40,7 +40,7 @@
 }
 
 .portal-global-header .notification-bell-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   background: transparent;
 }
 
@@ -226,7 +226,7 @@
   width: var(--notification-unread-dot-size);
   height: var(--notification-unread-dot-size);
   border-radius: var(--border-radius-full);
-  background: var(--color-primary);
+  background: var(--color-accent);
   flex-shrink: 0;
   margin-top: var(--space-1);
 }

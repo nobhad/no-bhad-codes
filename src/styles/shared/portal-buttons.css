@@ -70,7 +70,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 .btn-link {
   background: transparent;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: var(--font-size-sm);
   cursor: pointer;
   padding: 0;
@@ -81,7 +81,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   box-shadow: none;
 }
 .btn-link:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: underline;
   background: transparent;
   box-shadow: none;
@@ -114,7 +114,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 .btn-ghost:hover {
   background: var(--color-bg-prominent);
-  color: var(--color-primary);
+  color: var(--color-accent);
   border-color: transparent;
 }
 
@@ -143,9 +143,9 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* Filled primary button - solid background with thick bottom border */
 .btn-filled {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-white);
-  border: var(--portal-btn-border-width) solid var(--color-primary);
+  border: var(--portal-btn-border-width) solid var(--color-accent);
   border-bottom-width: var(--portal-btn-border-bottom-width);
   border-bottom-color: var(--portal-btn-border-color, var(--color-white));
 }
@@ -231,10 +231,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   background: transparent;
   box-shadow: none;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 .portal :is(.nav-btn:hover, .nav-btn.active) .nav-icon {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 .portal .nav-btn .nav-icon {
   flex-shrink: 0;
@@ -274,7 +274,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   outline: none;
 }
 .icon-btn:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   background: transparent;
 }
 .icon-btn.icon-btn-danger:hover {
@@ -290,7 +290,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   color: var(--status-active);
 }
 .icon-btn.icon-btn-active:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 .icon-btn.icon-btn-warning {
   color: var(--color-warning);
@@ -303,7 +303,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   border: var(--border-width) solid var(--portal-border);
 }
 .icon-btn.icon-btn-outline:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 .icon-btn.icon-btn-outline.icon-btn-danger:hover {
   border-color: var(--color-danger);
@@ -336,16 +336,16 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* Icon button primary variant */
 .icon-btn.icon-btn-primary {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 .icon-btn.icon-btn-primary:hover {
-  color: var(--color-primary-hover, var(--color-primary));
+  color: var(--color-accent-hover, var(--color-accent));
 }
 
 /* Icon button with border active state */
 .icon-btn.icon-btn-outline.active {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* ============================================
@@ -362,7 +362,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   }
 
   .icon-btn:active {
-    color: var(--color-primary);
+    color: var(--color-accent);
     transform: scale(0.95);
   }
 
@@ -476,7 +476,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   .table-actions .icon-btn:hover,
   .data-table .icon-btn:hover,
   table .icon-btn:hover {
-    color: var(--color-primary);
+    color: var(--color-accent);
     background: transparent;
     box-shadow: none;
   }
@@ -543,7 +543,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   :is(.sidebar.collapsed, .sidebar.icon-only)
   .nav-btn:is(.active, :hover, :focus)
   .nav-icon {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Hidden text */
@@ -598,7 +598,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   }
 
   .portal .sidebar .nav-btn:is(.active, :hover) .nav-icon {
-    color: var(--color-primary);
+    color: var(--color-accent);
   }
 
   .portal .sidebar .nav-btn .nav-label {
@@ -675,7 +675,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 .btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.nav-btn):disabled {

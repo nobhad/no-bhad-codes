@@ -77,7 +77,7 @@ body:has(.portal) {
 }
 
 .portal-global-header .header-branding:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -122,7 +122,7 @@ body:has(.portal) {
 }
 
 .portal-global-header .header-logo:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -237,7 +237,7 @@ body:has(.portal) {
 }
 
 .portal-global-header .header-theme-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   background: transparent;
 }
 
@@ -584,7 +584,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal :is(.breadcrumb, .page-breadcrumb) a:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .portal .breadcrumb-separator {
@@ -648,8 +648,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal :is(.page-header-tabs, .tab-nav) .tab-btn.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
 /* =====================================================
@@ -743,8 +743,8 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
 }
 
 .portal .sidebar-buttons .nav-btn.active .sidebar-shortcut {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
   opacity: 0.8;
 }
 
@@ -818,7 +818,7 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
   top: 20%;
   bottom: 20%;
   width: var(--border-width-thick);
-  background: var(--color-primary);
+  background: var(--color-accent);
   border-radius: 0 2px 2px 0;
 }
 
@@ -1084,6 +1084,8 @@ html[data-theme="light"] .portal .funnel-value {
   background: transparent;
 }
 
+
+
 /* Loading/empty states inside section should not stretch to fill viewport */
 .section > .loading-state,
 .section > .empty-state {
@@ -1098,6 +1100,16 @@ html[data-theme="light"] .portal .funnel-value {
   background: var(--color-bg-primary);
   border: var(--border-width) solid var(--color-border-primary);
   padding: var(--portal-card-padding);
+}
+
+/* Nested cards/accordions inside a panel get a thinner 1px border.
+   .portal prefix raises specificity to (0,3,0,0) to beat
+   .portal :is(.stat-card, ...) defined in portal-stat-cards.css. */
+.portal .panel .panel,
+.portal .panel .stat-card,
+.portal .panel .card,
+.portal .panel .accordion-item-wrapper {
+  border-width: var(--border-width-px);
 }
 
 
@@ -1291,7 +1303,7 @@ html[data-theme="light"] .portal .funnel-value {
 
 /* Category/group label — small caps */
 .section-title {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
@@ -1559,7 +1571,7 @@ html[data-theme="light"] .portal .funnel-value {
 .page-title-icon {
   width: var(--icon-size-lg);
   height: var(--icon-size-lg);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .page-title {

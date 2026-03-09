@@ -14,6 +14,8 @@
  *   --dropdown-radius: border radius (default var(--border-radius-sm))
  */
 
+@layer components {
+
 /* ================================================
    Radix UI Portal Dropdown (PortalDropdown.tsx)
    ================================================ */
@@ -26,7 +28,7 @@
   overflow: hidden;
   border: var(--portal-border);
   background-color: var(--color-bg-primary);
-  padding: var(--space-1);
+  padding: 0;
   box-shadow: none;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
@@ -65,6 +67,20 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   display: inline-flex;
   align-items: center;
   gap: var(--dropdown-caret-gap, var(--space-2));
+  min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
+}
+
+/* All Radix PortalDropdown triggers (asChild pattern) get minimum width.
+   This catches btn-unstyled+badge triggers that don't have .dropdown-trigger.
+   Excludes icon-only triggers (.icon-btn) and notification bell. */
+.portal [aria-haspopup="menu"]:not(.icon-btn):not(.notification-bell-btn) {
+  min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
+}
+
+/* Badge child stretches to fill the trigger so closed width = open dropdown width */
+.portal [aria-haspopup="menu"]:not(.icon-btn):not(.notification-bell-btn) .badge {
+  min-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Caret icon — SINGLE source of truth for ALL dropdown carets.
@@ -78,6 +94,14 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   color: currentColor;
   transition: transform var(--transition-fast);
   margin-left: var(--dropdown-caret-gap, var(--space-1));
+}
+
+/* Root alignment fix: any .dropdown-trigger overrides its base button padding-left
+   to match portal-dropdown-item padding, keeping left content edges aligned open/closed.
+   Excludes status-dropdown-trigger (already uses --dropdown-padding-x) and icon-btns.
+   The caret pushes to far right via margin-left:auto regardless of trigger padding. */
+.dropdown-trigger:not(.status-dropdown-trigger):not(.icon-btn) {
+  padding-left: var(--dropdown-padding-x);
 }
 
 /* Caret in button triggers - push caret to far right */
@@ -137,9 +161,11 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
   color: inherit;
 }
 
-/* Dropdown content width matches trigger - Radix provides this variable */
+/* Dropdown content: exact trigger width (open = closed).
+   min-width matches trigger floor so both are always the same size. */
 .portal-dropdown-content {
-  min-width: var(--radix-dropdown-menu-trigger-width, 8rem);
+  width: var(--radix-dropdown-menu-trigger-width, var(--portal-dropdown-min-width, var(--status-dropdown-width)));
+  min-width: var(--portal-dropdown-min-width, var(--status-dropdown-width));
 }
 
 /* Remove top border when positioned below trigger - seamless connection */
@@ -200,6 +226,15 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 /* Ensure status indicators in dropdown items match font size */
 .portal-dropdown-item .status-indicator {
   font-size: inherit;
+}
+
+/* Badges used as labels inside dropdown items — strip the border box,
+   keep text styling (uppercase, letter-spacing, font-weight) */
+.portal-dropdown-item .badge {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
 }
 
 /* ================================================
@@ -334,7 +369,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   user-select: none;
   align-items: center;
   padding: var(--space-1) var(--space-2) var(--space-1) 28px;
-  font-size: var(--font-size-xs);
+  font-size: inherit;
   color: var(--color-text-primary);
   outline: none;
   transition: background-color var(--transition-faster);
@@ -382,7 +417,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 /* Separator */
 .portal-dropdown-separator {
-  margin: var(--space-1) calc(-1 * var(--space-1));
+  margin: var(--space-0-5) 0;
   height: 1px;
   background-color: var(--color-border-primary);
 }
@@ -423,7 +458,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--dropdown-bg);
   border: var(--dropdown-border-width) solid var(--dropdown-border-color);
   border-radius: var(--dropdown-radius);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   cursor: pointer;
@@ -437,12 +472,12 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-trigger:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 /* Trigger - OPEN state */
 .custom-dropdown[data-modal-dropdown].open .custom-dropdown-trigger {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   border-bottom: none;
   border-radius: var(--dropdown-radius) var(--dropdown-radius) 0 0;
   z-index: var(--z-index-portal-dropdown);
@@ -478,7 +513,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   max-height: 200px;
   overflow-y: auto;
   background-color: var(--dropdown-bg);
-  border: var(--dropdown-border-width) solid var(--color-primary);
+  border: var(--dropdown-border-width) solid var(--color-accent);
   border-top: none;
   border-radius: 0 0 var(--dropdown-radius) var(--dropdown-radius);
   z-index: var(--z-index-portal-dropdown);
@@ -501,7 +536,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   cursor: pointer;
   transition: background-color var(--transition-fast) ease;
@@ -509,7 +544,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 .custom-dropdown[data-modal-dropdown] .custom-dropdown-item:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
 }
 
 /* Item name text */
@@ -546,7 +581,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 /* When flipped above, adjust trigger border radius */
 .custom-dropdown[data-modal-dropdown].flip-above.open .custom-dropdown-trigger {
   border-radius: 0 0 var(--dropdown-radius) var(--dropdown-radius);
-  border-bottom: var(--dropdown-border-width) solid var(--color-primary);
+  border-bottom: var(--dropdown-border-width) solid var(--color-accent);
   border-top: none;
 }
 
@@ -554,7 +589,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .custom-dropdown[data-modal-dropdown].flip-above .custom-dropdown-menu {
   border-radius: var(--dropdown-radius) var(--dropdown-radius) 0 0;
   border-bottom: none;
-  border-top: var(--dropdown-border-width) solid var(--color-primary);
+  border-top: var(--dropdown-border-width) solid var(--color-accent);
 }
 
 /* ================================================
@@ -1206,7 +1241,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background-color: var(--color-black);
   border: var(--border-width) solid transparent;
   color: var(--color-text-primary);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-regular);
   line-height: 1;
@@ -1229,7 +1264,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal .modal-dropdown .custom-dropdown-trigger:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:hover,
 .portal-modal .modal-dropdown .custom-dropdown-trigger:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 /* Focus state */
@@ -1237,7 +1272,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .confirm-dialog .modal-dropdown .custom-dropdown-trigger:is(:focus, :focus-visible),
 .portal-modal .modal-dropdown .custom-dropdown-trigger:is(:focus, :focus-visible) {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: none;
 }
 
@@ -1252,7 +1287,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal .modal-dropdown.open .custom-dropdown-trigger,
 .confirm-dialog .modal-dropdown.open .custom-dropdown-trigger,
 .portal-modal .modal-dropdown.open .custom-dropdown-trigger {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   border-bottom-color: transparent;
   border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
@@ -1271,7 +1306,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   padding: 0;
   list-style: none;
   background-color: var(--color-black);
-  border: var(--border-width) solid var(--color-primary);
+  border: var(--border-width) solid var(--color-accent);
   border-top: none;
   border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
   max-height: 240px;
@@ -1293,7 +1328,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   align-items: center;
   padding: 0 var(--space-4);
   height: 44px;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   cursor: pointer;
@@ -1304,7 +1339,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal .modal-dropdown .custom-dropdown-item:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-item:hover,
 .portal-modal .modal-dropdown .custom-dropdown-item:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
 }
 
 .portal .modal-dropdown .custom-dropdown-item.selected,
@@ -1316,7 +1351,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .portal .modal-dropdown .custom-dropdown-item.selected:hover,
 .confirm-dialog .modal-dropdown .custom-dropdown-item.selected:hover,
 .portal-modal .modal-dropdown .custom-dropdown-item.selected:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
 }
 
 /* ================================================
@@ -1364,7 +1399,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 .modal-dropdown-trigger:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 .modal-dropdown-trigger.is-disabled {
   opacity: 0.5;
@@ -1460,7 +1495,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background: var(--portal-alpha-white-10);
 }
 .modal-dropdown-option.is-selected {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 .modal-dropdown-option.is-disabled {
   opacity: 0.5;
@@ -1477,8 +1512,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   flex-shrink: 0;
 }
 .modal-dropdown-checkbox.is-checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .modal-dropdown-check-icon {
@@ -1503,7 +1538,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 .modal-dropdown-selected-icon {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
-  color: var(--color-primary);
+  color: var(--color-accent);
   flex-shrink: 0;
 }
 
@@ -1520,3 +1555,5 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+} /* end @layer components */

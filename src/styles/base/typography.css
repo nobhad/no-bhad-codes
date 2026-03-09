@@ -270,7 +270,7 @@ p a:focus::before {
 
 @media (hover: hover) {
   .text-link:hover {
-    color: var(--color-primary);
+    color: var(--color-accent);
   }
 }
 
