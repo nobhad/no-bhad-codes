@@ -135,8 +135,8 @@
 
 .help-accordion-chevron {
   flex-shrink: 0;
-  width: var(--dropdown-caret-size, var(--icon-size-xs));
-  height: var(--dropdown-caret-size, var(--icon-size-xs));
+  width: 1em;
+  height: 1em;
   color: currentColor;
   transition: transform var(--transition-fast);
   margin-left: var(--dropdown-caret-gap, var(--space-1));
@@ -324,11 +324,9 @@
   margin: 0 0 var(--space-2);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
-  color: var(--color-text-primary);
 }
 
 .help-article-body {
-  color: var(--color-text-primary);
   line-height: 1.7;
 }
 

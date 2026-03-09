@@ -134,8 +134,8 @@
 }
 
 .kanban-card-type svg {
-  width: var(--icon-size-xs);
-  height: var(--icon-size-xs);
+  width: 1em;
+  height: 1em;
   opacity: 0.7;
 }
 

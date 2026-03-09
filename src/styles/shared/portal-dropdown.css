@@ -89,8 +89,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 .dropdown-caret,
 .custom-dropdown-caret {
   flex-shrink: 0;
-  width: var(--dropdown-caret-size, var(--icon-size-xs));
-  height: var(--dropdown-caret-size, var(--icon-size-xs));
+  width: var(--dropdown-caret-size, 1em);
+  height: var(--dropdown-caret-size, 1em);
   color: currentColor;
   transition: transform var(--transition-fast);
   margin-left: var(--dropdown-caret-gap, var(--space-1));
@@ -323,8 +323,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 
 .portal-dropdown-sub-trigger .chevron-icon {
   margin-left: auto;
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
 }
 
 /* Checkbox item */
@@ -675,8 +675,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 .portal .table-dropdown .custom-dropdown-menu .custom-dropdown-item svg {
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: 1em;
+  height: 1em;
   flex-shrink: 0;
 }
 
@@ -1414,8 +1414,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 .modal-dropdown-chevron {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
   flex-shrink: 0;
   margin-left: var(--space-1);
   transition: transform var(--transition-fast);
@@ -1457,8 +1457,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   left: var(--space-2);
   top: 50%;
   transform: translateY(-50%);
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
   color: var(--color-text-tertiary);
 }
 
@@ -1540,8 +1540,8 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
 }
 
 .modal-dropdown-selected-icon {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 1em;
+  height: 1em;
   color: var(--color-accent);
   flex-shrink: 0;
 }
