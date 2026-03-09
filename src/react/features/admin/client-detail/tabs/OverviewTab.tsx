@@ -183,9 +183,8 @@ export function OverviewTab({
             {unassignedTags.length > 0 && (
               <PortalDropdown>
                 <PortalDropdownTrigger asChild>
-                  <button className="btn-ghost">
-                    <Plus className="icon-xs" />
-                    Add Tag
+                  <button className="icon-btn" title="Add Tag" aria-label="Add Tag">
+                    <Plus className="icon-md" />
                   </button>
                 </PortalDropdownTrigger>
                 <PortalDropdownContent>
