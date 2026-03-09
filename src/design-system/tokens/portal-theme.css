@@ -139,8 +139,8 @@
    * FOCUS STATE COLORS
    * ---------------------------------------- */
   --focus-ring-color: var(--color-primary);
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 0px;
+  --focus-ring-width: var(--border-width);
+  --focus-ring-offset: var(--space-0);
   --focus-ring: 0 0 0 var(--focus-ring-width) var(--portal-alpha-primary-25);
 
   /* ----------------------------------------
@@ -158,7 +158,7 @@
   /* ----------------------------------------
    * FIELD/LABEL SPACING
    * ---------------------------------------- */
-  --field-label-value-gap: 0.125rem;
+  --field-label-value-gap: calc(var(--space-px) * 2); /* 2px */
   --field-group-gap: var(--space-1-5); /* 12px */
   /* Left padding for inputs with a positioned icon inside */
   --input-icon-offset: calc(var(--icon-size-md) + var(--space-2-5)); /* icon + gap = ~36px */
@@ -166,20 +166,20 @@
   /* ----------------------------------------
    * LABEL STYLING
    * ---------------------------------------- */
-  --label-font-size: 0.75rem;
+  --label-font-size: var(--font-size-xs);
   --label-color: var(--color-text-secondary);
-  --label-font-weight: 500;
+  --label-font-weight: var(--font-weight-medium);
   --label-text-transform: uppercase;
-  --label-letter-spacing: 0.05em;
+  --label-letter-spacing: var(--letter-spacing-label);
 
   /* ----------------------------------------
    * SUBTAB FONT STYLING
    * ---------------------------------------- */
-  --subtab-font-family: var(--font-family-mono, "Inconsolata", ui-monospace, monospace);
+  --subtab-font-family: var(--font-family-mono);
   --subtab-font-size: var(--font-size-base);
-  --subtab-font-weight: 500;
+  --subtab-font-weight: var(--font-weight-medium);
   --subtab-text-transform: uppercase;
-  --subtab-letter-spacing: 0.05em;
+  --subtab-letter-spacing: var(--letter-spacing-label);
 
   /* ----------------------------------------
    * DASHBOARD LAYOUT TOKENS
@@ -190,11 +190,11 @@
   /* ----------------------------------------
    * PORTAL HEADER / SIDEBAR LAYOUT TOKENS
    * ---------------------------------------- */
-  --portal-header-height: 56px;
-  --portal-header-top: 20px;
-  --portal-header-height-line: 32px;
+  --portal-header-height: var(--space-7);        /* 56px */
+  --portal-header-top: var(--space-2-5);         /* 20px */
+  --portal-header-height-line: var(--space-4);   /* 32px */
   --portal-nav-gap: var(--space-6);
-  --sidebar-icon-indent: 18px;
+  --sidebar-icon-indent: calc(var(--space-base) * 2.25); /* 18px */
   --portal-page-bottom: var(--space-6);
   --sidebar-collapsed-width: var(--space-7); /* 56px */
 
@@ -230,11 +230,11 @@
   --table-icon-size: var(--icon-size-md);
   --table-cell-icon-size: var(--table-icon-size);
   --table-action-icon-size: var(--table-icon-size);
-  --table-sort-indicator-size: calc(var(--icon-size-xs) - 2px);
-  --table-pagination-btn-size: 28px;
-  --table-pagination-btn-size-touch: 44px;
+  --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
+  --table-pagination-btn-size: var(--space-3-5);                 /* 28px */
+  --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
   --table-mobile-label-width: 48%;
-  --table-mobile-label-padding: 0.75em;
+  --table-mobile-label-padding: var(--space-1-5);
   --table-mobile-card-gap: var(--space-2);
   --table-mobile-card-padding: var(--space-2) var(--space-3);
   --table-col-xs: calc(var(--space-base) * 7.5);
@@ -248,7 +248,7 @@
    * ---------------------------------------- */
   --dropdown-padding-x: var(--space-1-5);
   --dropdown-padding-y: var(--space-1);
-  --status-dropdown-width: 160px;
+  --status-dropdown-width: var(--space-20); /* 160px */
 
   /* ----------------------------------------
    * SEMANTIC COLOR TOKENS — derived from primaries
@@ -275,10 +275,10 @@
 
   /* Form variables — derived from primaries */
   --form-input-border: var(--color-text-primary);
-  --form-input-placeholder: #787878;
+  --form-input-placeholder: var(--color-neutral-400); /* ~47% between bg and text */
   --form-btn-bg: var(--color-text-primary);
   --form-btn-fg: var(--color-bg-primary);
-  --form-btn-shadow: rgba(0, 0, 0, 0.3);
+  --form-btn-shadow: var(--portal-alpha-black-30);
 
   /* Button token variables — derived from primaries */
   --btn-portal-primary-bg: transparent;
@@ -315,7 +315,7 @@ html[data-theme="light"] body[data-page="client-portal"] {
   --color-bg-primary: var(--color-off-white);
 
   /* Shadow intensity is lower in light mode */
-  --form-btn-shadow: rgba(0, 0, 0, 0.15);
+  --form-btn-shadow: var(--portal-alpha-black-15);
 }
 
 /* ============================================
