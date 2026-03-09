@@ -34,44 +34,42 @@
  */
 
 /* ============================================
- * PORTAL DARK MODE (DEFAULT) - DISCOTHÈQUE THEME
- * Black background, white text
+ * PORTAL LIGHT MODE (DEFAULT) - INVERTED DISCOTHÈQUE
+ * Off-white background, off-black text. Matches main site default.
+ * Uses body[data-page] for higher specificity than :root in colors.css
  * ============================================ */
-[data-page="admin"],
-[data-page="client-portal"] {
+body[data-page="admin"],
+body[data-page="client-portal"] {
   /* ----------------------------------------
-   * PRIMARY COLORS — only these are set explicitly.
-   * Everything else derives from these two values.
+   * PRIMARY COLORS — solid hex, no mixing
    * ---------------------------------------- */
-  --color-text-primary: #ffffff;
-  --color-bg-primary: #000000;
+  --color-text-primary: #333333;
+  --color-bg-primary: #e0e0e0;
+  --color-bg-hover:   var(--color-off-white);
+  --form-btn-shadow: var(--color-text-primary);
 
   /* ----------------------------------------
    * TEXT COLORS — derived from primaries
    * ---------------------------------------- */
   --color-text-secondary: var(--color-text-primary);
-  --color-text-tertiary: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 60%);
+  --color-text-tertiary: var(--color-gray-500);
   --color-text-inverse: var(--color-bg-primary);
 
   /* ----------------------------------------
-   * BACKGROUND RAMP — derived from primaries
-   * Each step mixes bg-primary toward text-primary by a fixed increment.
-   * In dark mode: steps from black toward white.
-   * In light mode (auto): steps from off-white toward off-black.
+   * BACKGROUND RAMP — flat design: all steps equal bg-primary
    * ---------------------------------------- */
-  --color-bg-secondary: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
-  --color-bg-tertiary:  color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
-  --color-bg-raised:    color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 16.5%);
-  --color-bg-elevated:  color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 23%);
-  --color-bg-prominent: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 29%);
-  --color-bg-hover:     color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
-  --color-bg-readonly:  color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
+  --color-bg-secondary: var(--color-bg-primary);
+  --color-bg-tertiary:  var(--color-bg-primary);
+  --color-bg-raised:    var(--color-bg-primary);
+  --color-bg-elevated:  var(--color-bg-primary);
+  --color-bg-prominent: var(--color-bg-primary);
+  --color-bg-readonly:  var(--color-bg-primary);
 
   /* ----------------------------------------
    * BORDER SYSTEM — derived from primaries
    * ---------------------------------------- */
   --color-border-primary: var(--color-text-primary);
-  --color-border-secondary: color-mix(in srgb, var(--color-text-primary), transparent 92%);
+  --color-border-secondary: var(--color-text-primary);
 
   /* Portal border shorthand — convenience alias */
   --portal-border: var(--border-width) solid var(--color-border-primary);
@@ -322,19 +320,15 @@
 }
 
 /* ============================================
- * PORTAL LIGHT MODE - INVERTED DISCOTHÈQUE
- * Off-white background, off-black text.
- *
- * Only the two primary colors need to change — everything else
- * is derived automatically via color-mix() in the block above.
+ * PORTAL DARK MODE - DISCOTHÈQUE THEME
+ * Near-black background, white text.
  * ============================================ */
-html[data-theme="light"] body[data-page="admin"],
-html[data-theme="light"] body[data-page="client-portal"] {
-  --color-text-primary: var(--color-gray-900);
-  --color-bg-primary: var(--color-off-white);
-
-  /* Shadow intensity is lower in light mode */
-  --form-btn-shadow: var(--portal-alpha-black-15);
+html[data-theme="dark"] body[data-page="admin"],
+html[data-theme="dark"] body[data-page="client-portal"] {
+  --color-text-primary: #ffffff;
+  --color-bg-primary: #171717;
+  --color-bg-hover:   #000000;
+  --form-btn-shadow: var(--portal-alpha-black-30);
 }
 
 /* ============================================
