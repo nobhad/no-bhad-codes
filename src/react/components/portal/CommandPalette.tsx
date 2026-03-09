@@ -167,28 +167,28 @@ function CommandPaletteInner({ onClose }: CommandPaletteInnerProps) {
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
-        case KEYS.ARROW_DOWN:
-          e.preventDefault();
-          setSelectedIndex((prev) =>
-            prev < filtered.length - 1 ? prev + 1 : 0
-          );
-          break;
-        case KEYS.ARROW_UP:
-          e.preventDefault();
-          setSelectedIndex((prev) =>
-            prev > 0 ? prev - 1 : filtered.length - 1
-          );
-          break;
-        case KEYS.ENTER:
-          e.preventDefault();
-          if (filtered[selectedIndex]) {
-            handleSelect(filtered[selectedIndex]);
-          }
-          break;
-        case KEYS.ESCAPE:
-          e.preventDefault();
-          onClose();
-          break;
+      case KEYS.ARROW_DOWN:
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < filtered.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case KEYS.ARROW_UP:
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : filtered.length - 1
+        );
+        break;
+      case KEYS.ENTER:
+        e.preventDefault();
+        if (filtered[selectedIndex]) {
+          handleSelect(filtered[selectedIndex]);
+        }
+        break;
+      case KEYS.ESCAPE:
+        e.preventDefault();
+        onClose();
+        break;
       }
     },
     [filtered, selectedIndex, handleSelect, onClose]
@@ -316,10 +316,10 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-export const CommandPalette = React.memo(function CommandPalette({
+export const CommandPalette = React.memo(({
   open,
   onClose
-}: CommandPaletteProps) {
+}: CommandPaletteProps) => {
   if (!open) return null;
   return <CommandPaletteInner onClose={onClose} />;
 });
