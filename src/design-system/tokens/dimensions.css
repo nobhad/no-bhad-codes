@@ -13,6 +13,7 @@
    * SIDEBAR DIMENSIONS
    * ============================================ */
   --sidebar-width-open: 240px;
+  --sidebar-width-min: 200px;     /* minimum before collapse */
   --sidebar-width-collapsed: 56px;
   --sidebar-width-default: 280px;
 

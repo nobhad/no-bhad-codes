@@ -251,6 +251,25 @@
   --status-dropdown-width: var(--space-20); /* 160px */
 
   /* ----------------------------------------
+   * NOTIFICATION BELL TOKENS
+   * ---------------------------------------- */
+  --notification-badge-size: var(--icon-size-md);         /* 16px — corner count badge */
+  --notification-badge-offset: 2px;                       /* tight corner offset */
+  --notification-unread-dot-size: var(--space-1);         /* 8px — inline unread dot */
+  --notification-dropdown-gap: var(--space-1);            /* 8px gap above dropdown */
+  --notification-dropdown-width: 320px;
+  --notification-dropdown-max-height: 420px;
+  --notification-list-max-height: 360px;                  /* inner scroll area */
+  --notification-dropdown-mobile-bleed: 10px;             /* overhang on xs screens */
+
+  /* ----------------------------------------
+   * COMMAND PALETTE TOKENS
+   * ---------------------------------------- */
+  --cmd-palette-max-width: calc(var(--space-base) * 70); /* 560px */
+  --cmd-palette-search-icon-size: var(--icon-size-lg);   /* 20px */
+  --cmd-palette-item-icon-size: var(--icon-size-md);     /* 16px */
+
+  /* ----------------------------------------
    * SEMANTIC COLOR TOKENS — derived from primaries
    * Portal inverts the neutral scale: 100 = near-bg, 900 = near-text.
    * ---------------------------------------- */
