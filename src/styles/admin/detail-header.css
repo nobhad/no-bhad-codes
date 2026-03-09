@@ -131,7 +131,7 @@
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus,
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger:focus-visible {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: none;
 }
 

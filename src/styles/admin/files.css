@@ -52,7 +52,7 @@
 
 .folder-item.active {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .folder-item svg {
@@ -98,7 +98,7 @@
 }
 
 .file-item:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .file-item.locked {
@@ -121,7 +121,7 @@
 }
 
 .file-icon.document {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .file-icon.archive {

@@ -44,7 +44,7 @@
 .checkbox-label input[type="checkbox"] {
   width: var(--space-2);
   height: var(--space-2);
-  accent-color: var(--color-primary);
+  accent-color: var(--color-accent);
 }
 
 /* ============================================================================
