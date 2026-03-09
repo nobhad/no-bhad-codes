@@ -10,7 +10,7 @@ import {
   AlertTriangle,
   Shield
 } from 'lucide-react';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch } from '@/utils/api-client';
 
 // ============================================
 // TYPES
@@ -137,16 +137,19 @@ export function formatDate(dateStr: string): string {
 
 export async function fetchWithAuth<T>(
   url: string,
-  getAuthToken?: () => string | null,
+  _getAuthToken?: () => string | null,
   options?: RequestInit
 ): Promise<T> {
-  const token = getAuthToken?.();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
+  const fetchOptions: RequestInit = { ...options };
+  // Ensure Content-Type is set for requests with a body
+  if (options?.body) {
+    fetchOptions.headers = {
+      'Content-Type': 'application/json',
+      ...options?.headers
+    };
+  }
 
-  const response = await fetch(url, { ...options, headers: { ...headers, ...options?.headers } });
+  const response = await apiFetch(url, fetchOptions);
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || `Request failed with status ${response.status}`);
