@@ -136,6 +136,9 @@ export {
   type ExportButtonProps
 } from './TableFilters';
 
+// Copy Email Button
+export { CopyEmailButton } from './CopyEmailButton';
+
 // Empty State (re-exports from factories)
 export {
   EmptyState,

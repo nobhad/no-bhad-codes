@@ -13,6 +13,7 @@ import {
   X,
   Plus
 } from 'lucide-react';
+import { CopyEmailButton } from '@react/components/portal';
 import { cn } from '@react/lib/utils';
 import {
   PortalDropdown,
@@ -259,12 +260,15 @@ export function OverviewTab({
             {client.email && (
               <div className="layout-row">
                 <Mail className="icon-md text-muted" />
-                <a
-                  href={`mailto:${client.email}`}
-                  className="text-primary"
-                >
-                  {client.email}
-                </a>
+                <span className="meta-value meta-value-with-copy">
+                  <a
+                    href={`mailto:${client.email}`}
+                    className="text-primary"
+                  >
+                    {client.email}
+                  </a>
+                  <CopyEmailButton email={client.email} showNotification={showNotification} />
+                </span>
               </div>
             )}
 

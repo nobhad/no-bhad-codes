@@ -13,9 +13,9 @@ import {
   Check,
   Pin,
   Trash2,
-  Rocket,
-  Copy
+  Rocket
 } from 'lucide-react';
+import { CopyEmailButton } from '@react/components/portal';
 import { cn } from '@react/lib/utils';
 import { StatusBadge, getStatusVariant } from '@react/components/portal/StatusBadge';
 import { IconButton } from '@react/factories';
@@ -189,12 +189,6 @@ export function LeadDetailPanel({
     }
   }, [showNotification]);
 
-  // Copy email to clipboard
-  const handleCopyEmail = useCallback((email: string) => {
-    navigator.clipboard.writeText(email).then(() => {
-      showNotification?.('Email copied to clipboard', 'info');
-    });
-  }, [showNotification]);
 
   // Activate lead as project
   const handleActivate = useCallback(async () => {
@@ -350,14 +344,7 @@ export function LeadDetailPanel({
                   <span className="meta-value meta-value-with-copy">
                     {lead.email}
                     {lead.email && (
-                      <button
-                        className="copy-email-btn"
-                        onClick={() => handleCopyEmail(lead.email)}
-                        title="Copy email"
-                        aria-label="Copy email"
-                      >
-                        <Copy className="icon-xs" />
-                      </button>
+                      <CopyEmailButton email={lead.email} showNotification={showNotification} />
                     )}
                   </span>
                 </MetaItem>
