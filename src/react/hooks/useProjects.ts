@@ -13,8 +13,6 @@ const PROJECT_TEXT_FIELDS = ['project_name', 'description', 'notes'] as const;
 interface UseProjectsOptions {
   /** Auto-fetch on mount */
   autoFetch?: boolean;
-  /** Auth token getter */
-  getAuthToken?: () => string | null;
 }
 
 interface UseProjectsReturn {
@@ -38,7 +36,7 @@ interface UseProjectsReturn {
  * Hook for fetching and managing projects data
  */
 export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn {
-  const { autoFetch = true, getAuthToken } = options;
+  const { autoFetch = true } = options;
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(false);

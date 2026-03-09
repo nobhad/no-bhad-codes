@@ -24,7 +24,6 @@ import { WebhookFormModal } from './WebhookFormModal';
 import { WebhookTestModal } from './WebhookTestModal';
 
 export function WebhooksManager({
-  getAuthToken,
   showNotification,
   onNavigate: _onNavigate,
   defaultPageSize = 25
@@ -34,7 +33,7 @@ export function WebhooksManager({
   const testModal = useModal();
   const deleteDialog = useConfirmDialog();
 
-  const data = useWebhooksData({ getAuthToken, showNotification });
+  const data = useWebhooksData({ showNotification });
 
   // ---- Form modal wrappers ----
 

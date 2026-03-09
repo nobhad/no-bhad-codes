@@ -54,7 +54,6 @@ export interface NotificationFormData {
 
 export interface IntegrationsManagerProps {
   onNavigate?: (tab: string, entityId?: string) => void;
-  getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 

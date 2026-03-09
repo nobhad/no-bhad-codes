@@ -11,8 +11,6 @@ const logger = createLogger('useLeads');
 const LEAD_TEXT_FIELDS = ['contact_name', 'company_name', 'notes', 'source'] as const;
 
 interface UseLeadsOptions {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
   /** Whether to fetch immediately on mount */
   autoFetch?: boolean;
 }
@@ -40,7 +38,7 @@ interface UseLeadsReturn {
  * useLeads
  * Hook for fetching and managing leads data
  */
-export function useLeads({ getAuthToken, autoFetch = true }: UseLeadsOptions = {}): UseLeadsReturn {
+export function useLeads({ autoFetch = true }: UseLeadsOptions = {}): UseLeadsReturn {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

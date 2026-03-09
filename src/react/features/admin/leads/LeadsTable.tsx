@@ -123,9 +123,7 @@ export function LeadsTable({
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Data fetching
-  const { leads, isLoading, error, stats, refetch, updateLead, bulkUpdateStatus, bulkDelete } = useLeads({
-    getAuthToken
-  });
+  const { leads, isLoading, error, stats, refetch, updateLead, bulkUpdateStatus, bulkDelete } = useLeads();
 
   // Delete confirmation dialog
   const deleteDialog = useConfirmDialog();

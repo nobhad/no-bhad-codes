@@ -105,7 +105,6 @@ export interface WebhookFormData {
 }
 
 export interface WebhooksManagerProps {
-  getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   onNavigate?: (tab: string, entityId?: string) => void;
   defaultPageSize?: number;
