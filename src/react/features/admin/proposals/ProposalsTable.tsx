@@ -138,7 +138,7 @@ function sortProposals(a: Proposal, b: Proposal, sort: SortConfig): number {
   }
 }
 
-export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
+export function ProposalsTable({ getAuthToken, showNotification, onNavigate, defaultPageSize = 25, overviewMode = false }: ProposalsTableProps) {
   const containerRef = useFadeIn();
 
   // Data fetching via useListFetch
@@ -431,7 +431,19 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
                     <FileText className="cell-icon" />
                     <div className="cell-content">
                       <span className="cell-title">{proposal.title}</span>
-                      <span className="cell-subtitle">{proposal.clientName}</span>
+                      {proposal.clientId && onNavigate ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNavigate('client-detail', String(proposal.clientId));
+                          }}
+                          className="table-link cell-subtitle"
+                        >
+                          {proposal.clientName}
+                        </button>
+                      ) : (
+                        <span className="cell-subtitle">{proposal.clientName}</span>
+                      )}
                       {proposal.projectType && (
                         <span className="identity-company">{proposal.projectType}</span>
                       )}

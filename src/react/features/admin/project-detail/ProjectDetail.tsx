@@ -380,6 +380,7 @@ export function ProjectDetail({
       <TabPanel tabId="invoices" isActive={activeTab === 'invoices'}>
         <InvoicesTab
           invoices={invoices}
+          onViewInvoice={onNavigate ? (invoiceId) => onNavigate('invoice-detail', String(invoiceId)) : undefined}
           showNotification={showNotification}
         />
       </TabPanel>

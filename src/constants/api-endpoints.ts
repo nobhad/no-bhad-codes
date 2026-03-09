@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   PROPOSALS: '/api/proposals',
   PROPOSALS_MY: '/api/proposals/my',
   QUESTIONNAIRES: '/api/questionnaires',
+  QUESTIONNAIRES_RESPONSES: '/api/questionnaires/responses',
   QUESTIONNAIRES_BULK_DELETE: '/api/questionnaires/bulk-delete',
   QUESTIONNAIRES_MY_RESPONSES: '/api/questionnaires/my-responses',
   DOCUMENT_REQUESTS: '/api/document-requests',

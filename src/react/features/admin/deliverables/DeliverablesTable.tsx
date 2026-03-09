@@ -225,7 +225,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       logger.error('Failed to update deliverable status:', err);
       showNotification?.('Failed to update deliverable status', 'error');
     }
-  }, [showNotification]);
+  }, [setData, showNotification]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -244,7 +244,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
       logger.error('Failed to delete deliverables:', err);
       showNotification?.('Failed to delete deliverables', 'error');
     }
-  }, [selection, showNotification]);
+  }, [selection, setData, showNotification]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
@@ -421,7 +421,19 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
                     <Package className="cell-icon" />
                     <div className="cell-content">
                       <span className="cell-title">{deliverable.title}</span>
-                      <span className="cell-subtitle">{deliverable.clientName}</span>
+                      {deliverable.clientId && onNavigate ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNavigate('client-detail', String(deliverable.clientId));
+                          }}
+                          className="table-link cell-subtitle"
+                        >
+                          {deliverable.clientName}
+                        </button>
+                      ) : (
+                        <span className="cell-subtitle">{deliverable.clientName}</span>
+                      )}
                     </div>
                   </div>
                 </PortalTableCell>

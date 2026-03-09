@@ -136,7 +136,7 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
     return `${API_ENDPOINTS.ADMIN.TIME_ENTRIES}?${params}`;
   }, [projectId, dateRange]);
 
-  const { data, isLoading, error, refetch, setData } = useListFetch<TimeEntry, TimeStats>({
+  const { data, isLoading, error, refetch } = useListFetch<TimeEntry, TimeStats>({
     endpoint: timeEntriesEndpoint,
     getAuthToken,
     defaultStats: DEFAULT_TIME_STATS,
@@ -185,12 +185,12 @@ export function TimeTrackingTable({ projectId, onNavigate, getAuthToken, showNot
 
       if (!response.ok) throw new Error('Failed to start timer');
 
-      const data = unwrapApiData<Record<string, unknown>>(await response.json());
+      const result = unwrapApiData<Record<string, unknown>>(await response.json());
       setActiveTimer({
-        entryId: data.entryId as string,
+        entryId: result.entryId as string,
         startedAt: new Date(),
         description: '',
-        projectName: data.projectName as string | undefined
+        projectName: result.projectName as string | undefined
       });
     } catch (err) {
       logger.error('Failed to start timer:', err);

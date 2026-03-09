@@ -542,14 +542,38 @@ export function InvoicesTable({
                         <Receipt className="cell-icon" />
                         <div className="cell-content">
                           <span className="cell-title">{invoice.invoice_number}</span>
-                          {invoice.project_name && <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>}
+                          {invoice.project_name && invoice.project_id && onNavigate ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate('project-detail', String(invoice.project_id));
+                              }}
+                              className="table-link cell-subtitle"
+                            >
+                              {decodeHtmlEntities(invoice.project_name)}
+                            </button>
+                          ) : invoice.project_name ? (
+                            <span className="cell-subtitle">{decodeHtmlEntities(invoice.project_name)}</span>
+                          ) : null}
                         </div>
                       </div>
                     </PortalTableCell>
 
                     {/* Client */}
                     <PortalTableCell className="client-cell">
-                      {decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}
+                      {invoice.client_id && onNavigate ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNavigate('client-detail', String(invoice.client_id));
+                          }}
+                          className="table-link"
+                        >
+                          {decodeHtmlEntities(invoice.client_name) || 'Unknown Client'}
+                        </button>
+                      ) : (
+                        decodeHtmlEntities(invoice.client_name) || 'Unknown Client'
+                      )}
                     </PortalTableCell>
 
                     {/* Amount */}

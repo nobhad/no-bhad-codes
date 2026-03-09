@@ -9,13 +9,14 @@ import { formatDate } from '@/utils/format-utils';
 interface ProjectsTabProps {
   projects: ClientProject[];
   onViewProject?: (projectId: number) => void;
+  onNavigate?: (tab: string, entityId?: string) => void;
 }
 
 /**
  * ProjectsTab
  * Shows client's projects
  */
-export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
+export function ProjectsTab({ projects, onViewProject, onNavigate }: ProjectsTabProps) {
   // Group projects by status
   const activeProjects = projects.filter(
     (p) => p.status === 'active' || p.status === 'in-progress'
@@ -49,9 +50,18 @@ export function ProjectsTab({ projects, onViewProject }: ProjectsTabProps) {
         <div className="project-card-header">
           <div className="project-card-info">
             <div className="project-title-row">
-              <h4 className="heading truncate">
-                {project.project_name}
-              </h4>
+              {onNavigate ? (
+                <button
+                  className="heading truncate client-nav-link"
+                  onClick={() => onNavigate('project-detail', String(project.id))}
+                >
+                  {project.project_name}
+                </button>
+              ) : (
+                <h4 className="heading truncate">
+                  {project.project_name}
+                </h4>
+              )}
               <span className="badge">
                 {statusConfig?.label || project.status}
               </span>
