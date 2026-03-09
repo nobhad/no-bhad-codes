@@ -38,8 +38,13 @@
   }
 }
 
+/* Normalize stat value size — xl (20px) is too large alongside 12px labels */
+.project-overview-grid :is(.stat-value, .stat-number, .stat-card-value) {
+  font-size: var(--font-size-sm);
+}
+
 /* Field label with inline icon (e.g. Links section) */
-.project-info-field .field-label:has(svg) {
+:is(.project-info-field, .layout-form-field) .field-label:has(svg) {
   display: flex;
   align-items: center;
   gap: var(--icon-gap);

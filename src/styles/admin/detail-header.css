@@ -78,7 +78,13 @@
   align-items: center;
   gap: var(--space-4);
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
+}
+
+.detail-meta .meta-item {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .detail-meta .field-label {
