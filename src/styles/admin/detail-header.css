@@ -33,9 +33,7 @@
 
 .detail-title {
   margin: 0;
-  font-family: var(--font-family-sans);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -44,10 +42,12 @@
 .detail-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--table-actions-gap);
   flex-shrink: 0;
   overflow: visible;
   position: relative;
+  /* Scope icon-btn size to match icon — gap variable controls all visual spacing */
+  --portal-btn-icon-size: var(--icon-size-sm);
 }
 
 /* ===============================================
@@ -78,7 +78,6 @@
   align-items: center;
   gap: var(--space-4);
   font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
 }
 
 .detail-meta .meta-item {
@@ -107,9 +106,9 @@
 }
 
 [data-page="admin"] .detail-more-menu.table-dropdown .custom-dropdown-trigger {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: var(--icon-btn-size-md);
+  height: var(--icon-btn-size-md);
+  min-width: var(--icon-btn-size-md);
   padding: 0;
   display: flex;
   align-items: center;
@@ -227,7 +226,7 @@
   align-items: center;
   gap: var(--space-1-5);
   padding: var(--space-1-5) var(--space-3);
-  height: 36px;
+  height: var(--icon-btn-size-md);
   min-width: auto;
   background: transparent;
   border: none;
