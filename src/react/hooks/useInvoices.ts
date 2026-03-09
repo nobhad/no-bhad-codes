@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Invoice, InvoiceStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiDelete } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useInvoices');
@@ -98,12 +98,7 @@ export function useInvoices({
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.INVOICES, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include',
-        signal
-      });
+      const response = await apiFetch(API_ENDPOINTS.INVOICES, { signal });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch invoices: ${response.statusText}`);
@@ -120,18 +115,13 @@ export function useInvoices({
     } finally {
       setIsLoading(false);
     }
-  }, [getAuthToken]);
+  }, []);
 
   // Update a single invoice
   const updateInvoice = useCallback(
     async (id: number, updates: Partial<Invoice>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.INVOICES}/${id}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update invoice: ${response.statusText}`);
@@ -149,7 +139,7 @@ export function useInvoices({
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Mark invoice as paid
@@ -175,17 +165,7 @@ export function useInvoices({
   const downloadPdf = useCallback(
     async (id: number): Promise<void> => {
       try {
-        const token = getAuthToken?.();
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}/pdf`, {
-          method: 'GET',
-          headers,
-          credentials: 'include'
-        });
+        const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/${id}/pdf`);
 
         if (!response.ok) {
           throw new Error(`Failed to download PDF: ${response.statusText}`);
@@ -214,7 +194,7 @@ export function useInvoices({
         throw err;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Delete multiple invoices
@@ -225,11 +205,7 @@ export function useInvoices({
 
       for (const id of ids) {
         try {
-          const response = await fetch(`${API_ENDPOINTS.INVOICES}/${id}`, {
-            method: 'DELETE',
-            headers: buildAuthHeaders(getAuthToken),
-            credentials: 'include'
-          });
+          const response = await apiDelete(`${API_ENDPOINTS.INVOICES}/${id}`);
 
           if (response.ok) {
             success++;
@@ -248,7 +224,7 @@ export function useInvoices({
 
       return { success, failed };
     },
-    [getAuthToken]
+    []
   );
 
   // Bulk mark as paid

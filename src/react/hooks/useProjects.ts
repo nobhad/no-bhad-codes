@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project, ProjectStats } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '../../constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '../../utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiPost, apiDelete } from '../../utils/api-client';
 import { decodeArrayFields } from '../utils/decodeText';
 import { createLogger } from '../../utils/logger';
 
@@ -59,12 +59,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.PROJECTS, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include',
-        signal
-      });
+      const response = await apiFetch(API_ENDPOINTS.PROJECTS, { signal });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch projects: ${response.statusText}`);
@@ -84,18 +79,13 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
     } finally {
       setIsLoading(false);
     }
-  }, [getAuthToken]);
+  }, []);
 
   // Update a single project
   const updateProject = useCallback(
     async (id: number, updates: Partial<Project>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.PROJECTS}/${id}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update project: ${response.statusText}`);
@@ -112,7 +102,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   // Delete multiple projects
@@ -122,15 +112,8 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       let failed = 0;
 
       try {
-        const headers = buildAuthHeaders(getAuthToken);
-
         // Try bulk endpoint first
-        const response = await fetch(API_ENDPOINTS.ADMIN.PROJECTS_BULK_DELETE, {
-          method: 'POST',
-          headers,
-          credentials: 'include',
-          body: JSON.stringify({ projectIds: ids })
-        });
+        const response = await apiPost(API_ENDPOINTS.ADMIN.PROJECTS_BULK_DELETE, { projectIds: ids });
 
         if (response.ok) {
           const json = await response.json();
@@ -141,11 +124,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
         } else {
           // Fallback to individual deletes
           for (const id of ids) {
-            const deleteResponse = await fetch(`${API_ENDPOINTS.PROJECTS}/${id}`, {
-              method: 'DELETE',
-              headers,
-              credentials: 'include'
-            });
+            const deleteResponse = await apiDelete(`${API_ENDPOINTS.PROJECTS}/${id}`);
             if (deleteResponse.ok) {
               success++;
             } else {
@@ -164,7 +143,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
 
       return { success, failed };
     },
-    [getAuthToken]
+    []
   );
 
   // Auto-fetch on mount with AbortController cleanup

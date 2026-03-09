@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { unwrapApiData } from '../../utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiDelete } from '../../utils/api-client';
 import { createLogger } from '../../utils/logger';
 
 const logger = createLogger('useDataFetch');
@@ -295,11 +295,8 @@ export function useListFetch<T, S = Record<string, unknown>>(options: {
 
   return useDataFetch<ListFetchResult<T, S>>({
     getAuthToken,
-    fetchFn: async (_, headers) => {
-      const response = await fetch(endpoint, {
-        headers,
-        credentials: 'include'
-      });
+    fetchFn: async () => {
+      const response = await apiFetch(endpoint);
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}`);
       }
@@ -326,27 +323,11 @@ export interface UseCrudOptions<_T> {
 }
 
 export function useCrud<T extends { id: number | string }>(options: UseCrudOptions<T>) {
-  const { endpoint, getAuthToken, showNotification, itemName = 'item' } = options;
-
-  const getHeaders = useCallback((): HeadersInit => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthToken?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
+  const { endpoint, showNotification, itemName = 'item' } = options;
 
   const create = useCallback(async (data: Omit<T, 'id'>): Promise<T | null> => {
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(data)
-      });
+      const response = await apiPost(endpoint, data);
       if (!response.ok) throw new Error(`Failed to create ${itemName}`);
       const result = unwrapApiData<T>(await response.json());
       showNotification?.(`${itemName} created successfully`, 'success');
@@ -356,14 +337,13 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`Failed to create ${itemName}`, 'error');
       return null;
     }
-  }, [endpoint, getHeaders, showNotification, itemName]);
+  }, [endpoint, showNotification, itemName]);
 
   const update = useCallback(async (id: number | string, data: Partial<T>): Promise<T | null> => {
     try {
-      const response = await fetch(`${endpoint}/${id}`, {
+      const response = await apiFetch(`${endpoint}/${id}`, {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error(`Failed to update ${itemName}`);
@@ -375,15 +355,11 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`Failed to update ${itemName}`, 'error');
       return null;
     }
-  }, [endpoint, getHeaders, showNotification, itemName]);
+  }, [endpoint, showNotification, itemName]);
 
   const remove = useCallback(async (id: number | string): Promise<boolean> => {
     try {
-      const response = await fetch(`${endpoint}/${id}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiDelete(`${endpoint}/${id}`);
       if (!response.ok) throw new Error(`Failed to delete ${itemName}`);
       showNotification?.(`${itemName} deleted successfully`, 'success');
       return true;
@@ -392,7 +368,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
       showNotification?.(`Failed to delete ${itemName}`, 'error');
       return false;
     }
-  }, [endpoint, getHeaders, showNotification, itemName]);
+  }, [endpoint, showNotification, itemName]);
 
   return { create, update, remove };
 }
@@ -450,22 +426,10 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
     bulkDeleteEndpoint,
     bulkStatusEndpoint,
     itemEndpoint,
-    getAuthToken,
     showNotification,
     itemName = 'item',
     itemNamePlural = 'items'
   } = options;
-
-  const getHeaders = useCallback((): HeadersInit => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthToken?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
 
   /**
    * Delete multiple items at once.
@@ -477,12 +441,7 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
     try {
       // Try bulk endpoint first
       if (bulkDeleteEndpoint) {
-        const response = await fetch(bulkDeleteEndpoint, {
-          method: 'POST',
-          headers: getHeaders(),
-          credentials: 'include',
-          body: JSON.stringify({ ids })
-        });
+        const response = await apiPost(bulkDeleteEndpoint, { ids });
 
         if (response.ok) {
           const data = await response.json();
@@ -498,11 +457,7 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
       // Fallback to individual deletes
       for (const id of ids) {
         try {
-          const response = await fetch(`${itemEndpoint}/${id}`, {
-            method: 'DELETE',
-            headers: getHeaders(),
-            credentials: 'include'
-          });
+          const response = await apiDelete(`${itemEndpoint}/${id}`);
 
           if (response.ok) {
             success++;
@@ -529,7 +484,7 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
     }
 
     return { success, failed };
-  }, [bulkDeleteEndpoint, itemEndpoint, getHeaders, showNotification, itemName, itemNamePlural]);
+  }, [bulkDeleteEndpoint, itemEndpoint, showNotification, itemName, itemNamePlural]);
 
   /**
    * Update status of multiple items at once.
@@ -544,12 +499,7 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
     try {
       // Try bulk endpoint first
       if (bulkStatusEndpoint) {
-        const response = await fetch(bulkStatusEndpoint, {
-          method: 'POST',
-          headers: getHeaders(),
-          credentials: 'include',
-          body: JSON.stringify({ ids, status })
-        });
+        const response = await apiPost(bulkStatusEndpoint, { ids, status });
 
         if (response.ok) {
           const data = await response.json();
@@ -565,10 +515,9 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
       // Fallback to individual updates
       for (const id of ids) {
         try {
-          const response = await fetch(`${itemEndpoint}/${id}`, {
+          const response = await apiFetch(`${itemEndpoint}/${id}`, {
             method: 'PATCH',
-            headers: getHeaders(),
-            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status })
           });
 
@@ -597,7 +546,7 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
     }
 
     return { success, failed };
-  }, [bulkStatusEndpoint, itemEndpoint, getHeaders, showNotification, itemName, itemNamePlural]);
+  }, [bulkStatusEndpoint, itemEndpoint, showNotification, itemName, itemNamePlural]);
 
   return { bulkDelete, bulkUpdateStatus };
 }

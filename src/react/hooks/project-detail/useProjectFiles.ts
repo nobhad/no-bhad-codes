@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import type { ProjectFile } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiDelete, getCsrfToken, CSRF_HEADER_NAME } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ProjectDetailHookOptions } from './types';
 
@@ -22,18 +22,13 @@ interface UseProjectFilesReturn {
 }
 
 export function useProjectFiles({
-  projectId,
-  getAuthToken
+  projectId
 }: ProjectDetailHookOptions): UseProjectFilesReturn {
   const [files, setFiles] = useState<ProjectFile[]>([]);
 
   const fetchFiles = useCallback(async (): Promise<ProjectFile[]> => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/files`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/files`);
 
       if (!response.ok) {
         return [];
@@ -46,7 +41,7 @@ export function useProjectFiles({
       logger.error('Error fetching files:', err);
       return [];
     }
-  }, [projectId, getAuthToken]);
+  }, [projectId]);
 
   const uploadFile = useCallback(
     async (file: File, category?: string): Promise<boolean> => {
@@ -57,10 +52,11 @@ export function useProjectFiles({
           formData.append('category', category);
         }
 
-        const token = getAuthToken?.();
+        // FormData uploads skip apiPost (no JSON Content-Type); manually add CSRF
         const headers: Record<string, string> = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+          headers[CSRF_HEADER_NAME] = csrfToken;
         }
 
         const response = await fetch(`${API_ENDPOINTS.PROJECTS}/${projectId}/files`, {
@@ -83,17 +79,13 @@ export function useProjectFiles({
         return false;
       }
     },
-    [projectId, getAuthToken]
+    [projectId]
   );
 
   const deleteFile = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.FILES}/${id}`, {
-          method: 'DELETE',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include'
-        });
+        const response = await apiDelete(`${API_ENDPOINTS.FILES}/${id}`);
 
         if (!response.ok) {
           throw new Error(`Failed to delete file: ${response.statusText}`);
@@ -106,7 +98,7 @@ export function useProjectFiles({
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   const toggleFileSharing = useCallback(
@@ -115,12 +107,7 @@ export function useProjectFiles({
       if (!file) return false;
 
       try {
-        const response = await fetch(`${API_ENDPOINTS.FILES}/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify({ is_shared: !file.is_shared })
-        });
+        const response = await apiPut(`${API_ENDPOINTS.FILES}/${id}`, { is_shared: !file.is_shared });
 
         if (!response.ok) {
           throw new Error(`Failed to update file: ${response.statusText}`);
@@ -135,7 +122,7 @@ export function useProjectFiles({
         return false;
       }
     },
-    [files, getAuthToken]
+    [files]
   );
 
   return {
