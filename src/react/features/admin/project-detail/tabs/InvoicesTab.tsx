@@ -190,7 +190,7 @@ export function InvoicesTab({
   );
 
   return (
-    <div className="section">
+    <div className="section tab-section">
       {/* Header with stats and actions */}
       <div className="layout-row-between">
         <div className="invtab-stats">

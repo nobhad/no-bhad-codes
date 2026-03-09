@@ -1237,8 +1237,8 @@ body.modal-open .dashboard-content {
   min-height: 0;
 }
 
-/* Tab section border — wraps header row + content in a single bordered unit */
-[data-page="admin"] .portal-tab-panel > .section {
+/* Tab section border — only on tabs with a simple header+list structure */
+[data-page="admin"] .tab-section {
   border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }

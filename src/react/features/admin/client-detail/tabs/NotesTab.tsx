@@ -245,7 +245,7 @@ export function NotesTab({
   );
 
   return (
-    <div className="section">
+    <div className="section tab-section">
       {/* Header */}
       <div className="layout-row-between">
         <h2 className="heading text-lg">
