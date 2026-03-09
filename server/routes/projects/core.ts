@@ -460,7 +460,22 @@ router.put(
         'production_url',
         'deposit_amount',
         'contract_signed_at',
-        'contract_signed_date'
+        'contract_signed_date',
+        // Intake fields
+        'features',
+        'page_count',
+        'integrations',
+        'addons',
+        'design_level',
+        'content_status',
+        'brand_assets',
+        'tech_comfort',
+        'hosting_preference',
+        'current_site',
+        'inspiration',
+        'challenges',
+        'additional_info',
+        'referral_source'
       ]
       : ['description']; // Clients can only update description
 

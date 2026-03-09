@@ -163,7 +163,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:4000',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
@@ -200,7 +200,7 @@ app.use((req, res, next) => {
       httpOnly: false, // Must be readable by JavaScript
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days - matches longest session duration
     });
   }
   next();
@@ -213,7 +213,7 @@ app.use(
     sanitizeBody: true,
     sanitizeQuery: true,
     sanitizeParams: true,
-    skipPaths: ['/uploads'] // Skip file upload paths
+    skipPaths: ['/uploads', '/webhooks', '/integrations/stripe/webhook']
   })
 );
 

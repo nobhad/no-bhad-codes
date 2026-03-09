@@ -549,7 +549,7 @@ router.post('/logout', authenticateToken, (req, res) => {
   res.clearCookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: (process.env.NODE_ENV === 'production' ? 'strict' : 'lax') as 'strict' | 'lax',
     path: '/'
   });
   return sendSuccess(res, undefined, 'Logout successful');

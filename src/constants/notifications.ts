@@ -79,7 +79,9 @@ export const NOTIFICATIONS = {
 
   // Message messages
   message: {
-    SEND_FAILED: 'Failed to send message'
+    SEND_FAILED: 'Failed to send message',
+    EDIT_FAILED: 'Failed to edit message',
+    REACTION_FAILED: 'Failed to update reaction'
   },
 
   // Client messages

@@ -10,6 +10,7 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticateToken, requireAdmin, AuthenticatedRequest } from '../middleware/auth.js';
+import { getDatabase } from '../database/init.js';
 import { documentRequestService, RequestStatus } from '../services/document-request-service.js';
 import { workflowTriggerService } from '../services/workflow-trigger-service.js';
 import { errorResponse, sendSuccess, sendCreated, ErrorCodes } from '../utils/api-response.js';
@@ -501,6 +502,43 @@ router.get(
     const history = await documentRequestService.getRequestHistory(id);
 
     sendSuccess(res, { request, history });
+  })
+);
+
+/**
+ * PUT /api/document-requests/:id - Update a document request status
+ */
+router.put(
+  '/:id',
+  authenticateToken,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const id = parseInt(req.params.id, 10);
+
+    if (isNaN(id) || id <= 0) {
+      return errorResponse(res, 'Invalid request ID', 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const { status } = req.body;
+
+    if (!status) {
+      return errorResponse(res, 'Status is required', 400, ErrorCodes.MISSING_REQUIRED_FIELDS);
+    }
+
+    const db = getDatabase();
+
+    await db.run(
+      `UPDATE document_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      [status, id]
+    );
+
+    const updated = await db.get(`SELECT * FROM document_requests WHERE id = ?`, [id]);
+
+    if (!updated) {
+      return errorResponse(res, 'Document request not found', 404);
+    }
+
+    sendSuccess(res, { request: updated });
   })
 );
 

@@ -82,8 +82,8 @@ const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [key, data] of rateLimitCache.entries()) {
-    // Remove entries older than 1 hour
-    if (now - data.windowStart > 60 * 60 * 1000) {
+    // Remove entries older than 5 minutes
+    if (now - data.windowStart > 5 * 60 * 1000) {
       rateLimitCache.delete(key);
     }
   }

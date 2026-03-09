@@ -91,8 +91,15 @@ export const authenticateToken = (req: JWTAuthRequest, res: Response, next: Next
             : { expiresIn: expiry }
         ) as SignOptions;
 
-        const rotatedToken = jwt.sign(refreshedPayload, secret, signOptions);
-        res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, rotatedToken, cookieOptions);
+        try {
+          const rotatedToken = jwt.sign(refreshedPayload, secret, signOptions);
+          res.cookie(COOKIE_CONFIG.AUTH_TOKEN_NAME, rotatedToken, cookieOptions);
+        } catch (rotationError) {
+          logger.error('Token rotation failed', {
+            error: rotationError instanceof Error ? rotationError : undefined
+          });
+          // Continue without rotation - the existing token is still valid
+        }
       }
     }
 

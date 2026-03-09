@@ -123,9 +123,9 @@ router.get(
 );
 
 /**
- * PATCH /api/admin/contacts/:contactId - Update a contact
+ * PUT /api/admin/contacts/:contactId - Update a contact
  */
-router.patch(
+router.put(
   '/contacts/:contactId',
   authenticateToken,
   requireAdmin,
