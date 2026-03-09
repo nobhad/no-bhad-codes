@@ -1292,7 +1292,7 @@ html[data-theme="light"] .portal .funnel-value {
 .panel-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
 }
 
 /* Content stack (vertical flex) */

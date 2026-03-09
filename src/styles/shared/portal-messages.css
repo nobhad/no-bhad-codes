@@ -262,7 +262,7 @@
   top: 0;
   display: none;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
 }
 
 .portal .message:hover .message-actions {
@@ -286,12 +286,12 @@
   color: var(--color-text-inverse);
 }
 
-/* Anchor for reaction picker popup — must be position:relative */
-.tw-relative {
+/* Anchor for reaction picker — wraps the Smile button, picker positions relative to it */
+.msgtab-reaction-anchor {
   position: relative;
 }
 
-/* Reaction picker — floats above the message bubble, anchored to msgtab-bubble-group */
+/* Reaction picker — floats above the Smile button, centered on the anchor */
 .portal .reaction-picker {
   position: absolute;
   bottom: calc(100% + var(--space-1));
@@ -1026,7 +1026,7 @@
 
 /* Message edit form */
 .message-edit-form {
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
 }
 
 .message-edit-textarea {

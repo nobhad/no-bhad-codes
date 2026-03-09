@@ -60,10 +60,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: var(--space-4);
   background: var(--color-bg-prominent);
   border-radius: var(--border-radius-md);
-  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .contact-card.primary {
@@ -122,10 +120,8 @@
 /* Notes Tab */
 
 .note-card {
-  padding: var(--space-4);
   background: var(--color-bg-prominent);
   border-radius: var(--border-radius-md);
-  border: var(--border-width) solid var(--color-border-primary);
 }
 
 .note-card.pinned {
@@ -140,7 +136,7 @@
 
 .note-actions {
   display: flex;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
 }
 
 .note-content {

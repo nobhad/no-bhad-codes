@@ -348,7 +348,7 @@
 .note-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--action-btn-gap);
 }
 
 /* Note content with preserved whitespace */
