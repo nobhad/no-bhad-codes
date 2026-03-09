@@ -33,7 +33,10 @@ export const AUTH_STORAGE_KEYS = {
     SESSION_ID: 'nbw_auth_session_id',
 
     /** Auth mode flag */
-    AUTH_MODE: 'nbw_auth_mode'
+    AUTH_MODE: 'nbw_auth_mode',
+
+    /** First login flag */
+    IS_FIRST_LOGIN: 'nbw_auth_is_first_login'
   },
 
   // ============================================
@@ -85,8 +88,8 @@ export const AUTH_TIMING = {
   /** Session timeout in milliseconds (30 minutes) */
   SESSION_TIMEOUT_MS: 30 * 60 * 1000,
 
-  /** Admin session timeout in milliseconds (2 hours) */
-  ADMIN_SESSION_TIMEOUT_MS: 2 * 60 * 60 * 1000,
+  /** Admin session timeout in milliseconds (1 hour - matches server JWT expiry) */
+  ADMIN_SESSION_TIMEOUT_MS: 60 * 60 * 1000,
 
   /** Client session timeout in milliseconds (1 day - matches server JWT expiry) */
   CLIENT_SESSION_TIMEOUT_MS: 24 * 60 * 60 * 1000,

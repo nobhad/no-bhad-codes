@@ -366,7 +366,7 @@ function createAuthStore(): AuthStore {
         saveSession(data.user, expiresAt, sessionId);
 
         // Store isFirstLogin for greeting display
-        sessionStorage.setItem('nbw_auth_is_first_login', isFirstLogin ? 'true' : 'false');
+        sessionStorage.setItem(AUTH_STORAGE_KEYS.SESSION.IS_FIRST_LOGIN, isFirstLogin ? 'true' : 'false');
 
         setState({
           isAuthenticated: true,
@@ -653,7 +653,7 @@ function createAuthStore(): AuthStore {
 
     if (session && !isSessionExpired(session.expiresAt)) {
       // Restore isFirstLogin from session storage
-      const isFirstLoginStr = sessionStorage.getItem('nbw_auth_is_first_login');
+      const isFirstLoginStr = sessionStorage.getItem(AUTH_STORAGE_KEYS.SESSION.IS_FIRST_LOGIN);
       const isFirstLogin = isFirstLoginStr === 'true';
 
       setState({
@@ -678,7 +678,7 @@ function createAuthStore(): AuthStore {
       });
     } else {
       clearSession();
-      sessionStorage.removeItem('nbw_auth_is_first_login');
+      sessionStorage.removeItem(AUTH_STORAGE_KEYS.SESSION.IS_FIRST_LOGIN);
       setState({ isLoading: false });
     }
 
