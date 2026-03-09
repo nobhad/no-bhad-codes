@@ -9,7 +9,7 @@
 
 /* Shared sidebar - same for both admin and client portal */
 .portal .sidebar {
-  width: clamp(200px, 18vw, 240px);
+  width: clamp(var(--sidebar-width-min), 18vw, var(--sidebar-width-open));
   min-width: var(--sidebar-collapsed-width); /* Allow collapse to icon-only at breakpoints */
   background: var(--color-bg-primary);
   border-right: none;
@@ -23,7 +23,6 @@
   z-index: auto;
   box-shadow: none;
   flex-shrink: 0;
-  overflow: visible;
 }
 
 .sidebar.collapsed {
@@ -43,7 +42,6 @@
   gap: 0;
   flex: 1;
   min-height: 0; /* Allow flex shrinking */
-  overflow: visible;
 }
 
 /* Collapsed sidebar content — only override what changes from base .sidebar-content */
@@ -74,7 +72,6 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  overflow: visible;
   padding: 0;
   flex: 1;
 }
@@ -121,7 +118,7 @@
 .portal .sidebar > .sidebar-toggle-btn {
   position: absolute;
   right: 0;
-  top: calc(var(--portal-header-top) + 6px);
+  top: calc(var(--portal-header-top) + calc(var(--space-px) * 6));
   left: auto;
   transform: translateX(75%);
   display: flex;
@@ -302,7 +299,7 @@
   min-width: var(--icon-size-xl);
   height: var(--icon-size-xl);
   padding: 0 var(--space-0-5);
-  border-radius: var(--border-radius-full, 9999px);
+  border-radius: var(--border-radius-full);
   background: var(--color-danger);
   color: var(--color-text-inverse);
   font-family: var(

@@ -50,7 +50,7 @@
 }
 
 .portal-global-header .notification-bell-btn:focus-visible {
-  box-shadow: var(--portal-focus-ring);
+  box-shadow: var(--focus-ring);
 }
 
 .portal-global-header .notification-bell-btn svg {
@@ -64,14 +64,14 @@
 
 .notification-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 16px;
-  height: 16px;
+  top: var(--notification-badge-offset);
+  right: var(--notification-badge-offset);
+  min-width: var(--notification-badge-size);
+  height: var(--notification-badge-size);
   padding: 0 var(--space-0-5);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
-  line-height: 16px;
+  line-height: var(--notification-badge-size);
   text-align: center;
   color: var(--color-white);
   background: var(--color-danger);
@@ -84,10 +84,10 @@
 
 .notification-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + var(--notification-dropdown-gap));
   right: 0;
-  width: 320px;
-  max-height: 420px;
+  width: var(--notification-dropdown-width);
+  max-height: var(--notification-dropdown-max-height);
   background: var(--color-bg-secondary);
   border: var(--border-width) solid var(--color-border-primary);
   z-index: var(--z-index-portal-dropdown, 9700);
@@ -114,7 +114,7 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider, 0.05em);
+  letter-spacing: var(--letter-spacing-wider);
   margin: 0;
 }
 
@@ -127,7 +127,7 @@
   padding: 0;
   font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider, 0.05em);
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .notification-header .btn-link:hover {
@@ -141,7 +141,7 @@
 .notification-list {
   flex: 1;
   overflow-y: auto;
-  max-height: 360px;
+  max-height: var(--notification-list-max-height);
 }
 
 .notification-empty {
@@ -223,8 +223,8 @@
 
 /* Unread dot indicator */
 .notification-unread-dot {
-  width: 8px;
-  height: 8px;
+  width: var(--notification-unread-dot-size);
+  height: var(--notification-unread-dot-size);
   border-radius: var(--border-radius-full);
   background: var(--color-primary);
   flex-shrink: 0;
@@ -238,7 +238,7 @@
 @media (--xs-mobile) {
   .notification-dropdown {
     width: 100%;
-    right: -10px;
-    max-width: calc(100vw - 20px);
+    right: calc(-1 * var(--notification-dropdown-mobile-bleed));
+    max-width: calc(100vw - calc(var(--notification-dropdown-mobile-bleed) * 2));
   }
 }

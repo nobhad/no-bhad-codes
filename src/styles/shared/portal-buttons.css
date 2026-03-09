@@ -327,9 +327,10 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 }
 
 /* Icon button focus */
-/* Uses --portal-focus-* variables from portal-theme.css */
+/* .icon-btn = standalone icon-only <button> (focus ring via --focus-ring token) */
+/* .btn-icon = icon <span>/<svg> element INSIDE a regular button (not focusable itself) */
 .icon-btn:focus-visible {
-  box-shadow: var(--portal-focus-ring);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
