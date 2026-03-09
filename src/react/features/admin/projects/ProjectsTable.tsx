@@ -40,8 +40,6 @@ import { PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 
 interface ProjectsTableProps {
-  /** Auth token getter for API calls */
-  getAuthToken?: () => string | null;
   /** Navigation callback for detail views */
   onNavigate?: (tab: string, entityId?: string) => void;
   /** Show notification callback */
@@ -119,7 +117,6 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
  * React implementation of the admin projects table
  */
 export function ProjectsTable({
-  getAuthToken,
   onNavigate,
   showNotification,
   defaultPageSize = 25,
@@ -128,9 +125,7 @@ export function ProjectsTable({
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Data fetching
-  const { projects, isLoading, error, stats, refetch, updateProject, bulkDelete } = useProjects({
-    getAuthToken
-  });
+  const { projects, isLoading, error, stats, refetch, updateProject, bulkDelete } = useProjects();
 
   // Delete confirmation dialog
   const deleteDialog = useConfirmDialog();

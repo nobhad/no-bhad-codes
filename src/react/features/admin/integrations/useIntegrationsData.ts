@@ -19,18 +19,10 @@ import {
 const logger = createLogger('IntegrationsManager');
 
 interface UseIntegrationsDataParams {
-  getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function useIntegrationsData({ getAuthToken, showNotification }: UseIntegrationsDataParams) {
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }, [getAuthToken]);
-
+export function useIntegrationsData({ showNotification }: UseIntegrationsDataParams) {
   // Data state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +48,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
     } catch (err) {
       logger.error('Failed to load integrations', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -67,7 +59,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
     } catch (err) {
       logger.error('Failed to load notifications', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadStripeStatus = useCallback(async () => {
     try {
@@ -78,7 +70,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
     } catch (err) {
       logger.error('Failed to load Stripe status', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadCalendarStatus = useCallback(async () => {
     try {
@@ -89,7 +81,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
     } catch (err) {
       logger.error('Failed to load calendar status', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadAllData = useCallback(async () => {
     setIsLoading(true);
@@ -142,7 +134,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
     } finally {
       setIsSubmitting(false);
     }
-  }, [editingNotification, getHeaders, showNotification, loadNotifications]);
+  }, [editingNotification, showNotification, loadNotifications]);
 
   const handleDeleteNotification = useCallback(async () => {
     if (deletingNotificationId === null) return;
@@ -157,7 +149,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
         'error'
       );
     }
-  }, [deletingNotificationId, getHeaders, showNotification, loadNotifications]);
+  }, [deletingNotificationId, showNotification, loadNotifications]);
 
   const handleTestNotification = useCallback(async (id: number) => {
     setTestingId(id);
@@ -173,7 +165,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
     } finally {
       setTestingId(null);
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   const prepareDeleteNotification = useCallback((notification: NotificationConfig) => {
     setDeletingNotificationId(notification.id);
@@ -197,7 +189,7 @@ export function useIntegrationsData({ getAuthToken, showNotification }: UseInteg
         'error'
       );
     }
-  }, [calendarStatus, getHeaders, showNotification, loadCalendarStatus]);
+  }, [calendarStatus, showNotification, loadCalendarStatus]);
 
   // ---- Derived values ----
 

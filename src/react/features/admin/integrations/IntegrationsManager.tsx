@@ -28,14 +28,13 @@ import { CalendarSection } from './CalendarSection';
 
 export function IntegrationsManager({
   onNavigate: _onNavigate,
-  getAuthToken,
   showNotification
 }: IntegrationsManagerProps) {
   const containerRef = useFadeIn();
   const notificationModal = useModal();
   const deleteDialog = useConfirmDialog();
 
-  const data = useIntegrationsData({ getAuthToken, showNotification });
+  const data = useIntegrationsData({ showNotification });
 
   // ---- Modal wrappers ----
 

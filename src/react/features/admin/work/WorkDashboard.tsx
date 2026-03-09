@@ -40,7 +40,7 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
     return (
       <div className="subtab-content-wrapper">
         <React.Suspense fallback={<LoadingState message="Loading projects..." />}>
-          <ProjectsTable onNavigate={onNavigate} getAuthToken={getAuthToken} showNotification={showNotification} />
+          <ProjectsTable onNavigate={onNavigate} showNotification={showNotification} />
         </React.Suspense>
       </div>
     );
@@ -73,7 +73,6 @@ export function WorkDashboard({ onNavigate, getAuthToken, showNotification }: Wo
         <section className="overview-table-section">
           <ProjectsTable
             onNavigate={onNavigate}
-            getAuthToken={getAuthToken}
             showNotification={showNotification}
             defaultPageSize={10}
             overviewMode

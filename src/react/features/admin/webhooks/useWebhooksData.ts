@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData, apiFetch, apiPost, apiDelete } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import {
   EMPTY_FORM,
@@ -19,11 +19,10 @@ import {
 const logger = createLogger('WebhooksManager');
 
 interface UseWebhooksDataParams {
-  getAuthToken?: () => string | null;
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
-export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksDataParams) {
+export function useWebhooksData({ showNotification }: UseWebhooksDataParams) {
   // ---- View state ----
   const [view, setView] = useState<PanelView>('list');
   const [selectedWebhook, setSelectedWebhook] = useState<WebhookItem | null>(null);
@@ -188,7 +187,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
       };
       const isEditing = editingWebhook !== null;
       const endpoint = isEditing ? buildEndpoint.webhook(editingWebhook.id) : API_ENDPOINTS.ADMIN.WEBHOOKS;
-      const response = await apiFetch(endpoint);
+      const response = await (isEditing ? apiPut(endpoint, body) : apiPost(endpoint, body));
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || `Failed to ${isEditing ? 'update' : 'create'} webhook`);
