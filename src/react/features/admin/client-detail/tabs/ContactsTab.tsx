@@ -344,7 +344,7 @@ export function ContactsTab({
               {/* Contact Header */}
               <div className="contact-card-header">
                 <div className="contact-identity">
-                  <div className="contact-avatar contacts-avatar">
+                  <div className="contact-avatar">
                     <User className="icon-lg text-muted" />
                   </div>
                   <div>
@@ -427,7 +427,7 @@ export function ContactsTab({
 
               {/* Notes */}
               {contact.notes && (
-                <p className="text-muted contact-notes contacts-notes">
+                <p className="text-muted contact-notes">
                   {contact.notes}
                 </p>
               )}

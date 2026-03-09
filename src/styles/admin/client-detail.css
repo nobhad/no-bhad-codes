@@ -183,6 +183,7 @@
   width: var(--space-5);
   height: var(--space-5);
   border: var(--portal-border);
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,6 +221,8 @@
 .contact-notes {
   margin-top: var(--space-3);
   padding-top: var(--space-3);
+  font-size: var(--font-size-xs);
+  border-top: var(--border-width) solid var(--color-border-secondary);
 }
 
 /* Dropdown menu item with icon */
@@ -241,6 +244,7 @@
 .activity-date-divider {
   flex: 1;
   height: var(--space-px);
+  background-color: var(--color-border-primary);
 }
 
 /* Timeline wrapper: positioned container with left padding */
@@ -256,6 +260,7 @@
   top: 0;
   bottom: 0;
   width: var(--space-px);
+  background-color: var(--color-border-primary);
 }
 
 /* Timeline event row */
@@ -275,6 +280,8 @@
   align-items: center;
   justify-content: center;
   border: var(--portal-border);
+  background-color: transparent;
+  border-radius: 0;
 }
 
 /* Activity event content panel */
@@ -302,6 +309,7 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
   padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border-secondary);
 }
 
 /* --- Notes Tab --- */

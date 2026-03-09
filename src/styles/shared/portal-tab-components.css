@@ -54,19 +54,7 @@
   white-space: pre-wrap;
 }
 
-/* ============================================
-   CONTRACT TAB COMPONENT
-   ============================================ */
-
-/* Panel without padding */
-.contract-panel-no-padding {
-  padding: 0;
-}
-
-/* Warning card with white border */
-.contract-warning {
-  border-color: var(--color-white);
-}
+/* Contract tab styles in project-detail.css */
 
 /* ============================================
    SHARED PORTAL CARD LAYOUT CLASSES
@@ -102,20 +90,7 @@
   margin-bottom: 0.5rem;
 }
 
-/* ============================================
-   DELIVERABLES TAB COMPONENT
-   ============================================ */
-
-/* Milestone header border */
-.deliv-milestone-header {
-  border-bottom: var(--border-width) solid var(--color-border-secondary);
-}
-
-/* Milestone description */
-.deliv-milestone-desc {
-  font-size: var(--font-size-xs);
-  margin-top: var(--space-0-5);
-}
+/* Deliverables tab styles in project-detail.css */
 
 /* ============================================
    FILES TAB COMPONENT
@@ -177,30 +152,7 @@
   border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
 }
 
-/* ============================================
-   ACTIVITY TAB COMPONENT
-   ============================================ */
-
-/* Horizontal divider line */
-.activity-divider-line {
-  background-color: var(--color-border-primary);
-}
-
-/* Vertical timeline line */
-.activity-timeline-line {
-  background-color: var(--color-border-primary);
-}
-
-/* Timeline dot container */
-.activity-timeline-dot {
-  background-color: transparent;
-  border-radius: 0;
-}
-
-/* Metadata border top */
-.activity-border-top {
-  border-top: var(--border-width) solid var(--color-border-secondary);
-}
+/* Activity tab styles merged into client-detail.css */
 
 /* ============================================
    PORTAL MESSAGES COMPONENT
@@ -243,42 +195,7 @@
    MESSAGES TAB COMPONENT (Project Detail)
    ============================================ */
 
-/* Container height */
-.msgtab-container {
-  height: clamp(600px, 70vh, 900px);
-}
-
-/* Panel no radius */
-.msgtab-panel {
-  border-radius: 0;
-}
-
-/* Avatar no radius */
-.msgtab-avatar {
-  border-radius: 0;
-}
-
-/* Message bubble no radius */
-.msgtab-bubble {
-  border-radius: 0;
-}
-
-/* Message content */
-.msgtab-content {
-  font-size: var(--font-size-sm);
-  white-space: pre-wrap;
-}
-
-/* Input panel with top border */
-.msgtab-input-panel {
-  border-top: var(--border-width) solid var(--color-border-primary);
-  border-radius: 0;
-}
-
-/* Textarea min height */
-.msgtab-textarea {
-  min-height: 60px;
-}
+/* Full msgtab-* styles in project-detail.css */
 
 /* Keyboard shortcut — reset badge bold/uppercase styles */
 kbd.msgtab-kbd {
@@ -290,68 +207,8 @@ kbd.msgtab-kbd {
   border-color: var(--color-border-primary);
 }
 
-/* ============================================
-   CONTACTS TAB COMPONENT
-   ============================================ */
+/* Contacts tab styles merged into client-detail.css */
 
-/* Avatar no radius */
-.contacts-avatar {
-  border-radius: 0;
-}
+/* Invoices tab styles in project-detail.css */
 
-/* Notes with border top */
-.contacts-notes {
-  font-size: var(--font-size-xs);
-  border-top: var(--border-width) solid var(--color-border-secondary);
-}
-
-/* ============================================
-   INVOICES TAB COMPONENT
-   ============================================ */
-
-/* Stats container */
-.invtab-stats {
-  font-size: var(--font-size-sm);
-}
-
-/* Filter select */
-.invtab-filter {
-  height: 36px;
-  width: auto;
-}
-
-/* Panel no padding */
-.invtab-panel {
-  padding: 0;
-}
-
-/* Header row border */
-.invtab-header-row {
-  border-bottom: var(--border-width) solid var(--color-border-primary);
-}
-
-/* Table row display */
-.invtab-row {
-  display: table-row;
-}
-
-/* ============================================
-   NOTES TAB COMPONENT
-   ============================================ */
-
-/* Panel with small padding */
-.notes-panel {
-  padding: 0.25rem;
-}
-
-/* Textarea borderless */
-.notes-textarea {
-  border: none;
-  min-height: 300px;
-}
-
-/* Hint text aligned right */
-.notes-hint {
-  font-size: var(--font-size-xs);
-  text-align: right;
-}
+/* Notes tab styles in project-detail.css */

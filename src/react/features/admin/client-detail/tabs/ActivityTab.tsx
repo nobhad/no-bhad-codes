@@ -158,13 +158,13 @@ export function ActivityTab({ activities }: ActivityTabProps) {
               <span className="heading">
                 {group.label}
               </span>
-              <div className="activity-date-divider activity-divider-line" />
+              <div className="activity-date-divider" />
             </div>
 
             {/* Activities for this date */}
             <div className="activity-timeline-wrapper">
               {/* Timeline line */}
-              <div className="activity-timeline-vert activity-timeline-line" />
+              <div className="activity-timeline-vert" />
 
               <div className="detail-list--spaced">
                 {group.items.map((activity, index) => {
@@ -175,7 +175,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
                   return (
                     <div key={activity.id} className="activity-event-row">
                       {/* Timeline dot */}
-                      <div className="activity-dot activity-timeline-dot">
+                      <div className="activity-dot">
                         <Icon className="icon-sm" data-activity-type={activity.activityType} style={{ color: iconColorVar }} />
                       </div>
 
@@ -208,7 +208,7 @@ export function ActivityTab({ activities }: ActivityTabProps) {
 
                         {/* Activity metadata */}
                         {(activity.createdBy || activity.metadata) && (
-                          <div className="activity-metadata activity-border-top">
+                          <div className="activity-metadata">
                             {activity.createdBy && (
                               <span className="text-muted text-sm">
                                 by {activity.createdBy}
