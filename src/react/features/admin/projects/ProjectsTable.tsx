@@ -478,7 +478,7 @@ export function ProjectsTable({
                           <ChevronDown className="status-dropdown-caret" />
                         </button>
                       </PortalDropdownTrigger>
-                      <PortalDropdownContent sideOffset={0} align="start">
+                      <PortalDropdownContent align="start">
                         {Object.entries(PROJECT_STATUS_CONFIG)
                           .filter(([status]) => status !== project.status)
                           .map(([status, config]) => (

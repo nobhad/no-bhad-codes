@@ -205,7 +205,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
   const handleStatusChange = useCallback(async (deliverableId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.adminDeliverable(deliverableId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
@@ -233,7 +233,7 @@ export function DeliverablesTable({ projectId, getAuthToken, showNotification, o
 
     const ids = selection.selectedItems.map((d) => d.id);
     try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, { ids });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.DELIVERABLES_BULK_DELETE, { deliverableIds: ids });
 
       if (!response.ok) throw new Error('Failed to delete deliverables');
 

@@ -55,7 +55,7 @@ const DocumentsDashboard = lazyNamed(() => import('../features/admin/documents')
 const LeadsTable = lazyNamed(() => import('../features/admin/leads').then(m => ({ LeadsTable: m.LeadsTable })));
 const ContactsTable = lazyNamed(() => import('../features/admin/contacts').then(m => ({ ContactsTable: m.ContactsTable })));
 const ClientsTable = lazyNamed(() => import('../features/admin/clients').then(m => ({ ClientsTable: m.ClientsTable })));
-const MessagingView = lazyNamed(() => import('../features/admin/messaging').then(m => ({ MessagingView: m.MessagingView })));
+const MessageView = lazyNamed(() => import('../features/admin/messaging').then(m => ({ MessageView: m.MessageView })));
 
 // Admin Work
 const ProjectsTable = lazyNamed(() => import('../features/admin/projects').then(m => ({ ProjectsTable: m.ProjectsTable })));
@@ -235,7 +235,7 @@ export function PortalRoutes() {
         } />
         <Route path="/messages" element={
           <LazyTabRoute tabId="messages">
-            {role === 'admin' ? <MessagingView /> : <PortalMessagesView />}
+            {role === 'admin' ? <MessageView /> : <PortalMessagesView />}
           </LazyTabRoute>
         } />
         <Route path="/invoices" element={

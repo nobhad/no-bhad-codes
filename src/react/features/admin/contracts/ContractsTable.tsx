@@ -199,7 +199,7 @@ export function ContractsTable({ getAuthToken, showNotification, onNavigate, def
   const handleStatusChange = useCallback(async (contractId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.contract(contractId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });

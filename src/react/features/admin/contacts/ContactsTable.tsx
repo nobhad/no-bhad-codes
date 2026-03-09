@@ -190,7 +190,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   const handleStatusChange = useCallback(async (contactId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.adminContact(contactId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
@@ -215,7 +215,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   const togglePrimary = useCallback(async (contactId: number, isPrimary: boolean) => {
     try {
       const response = await apiFetch(buildEndpoint.adminContact(contactId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPrimary: !isPrimary })
       });
@@ -241,7 +241,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS_BULK_DELETE, { ids });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS_BULK_DELETE, { contactIds: ids });
 
       if (!response.ok) throw new Error('Failed to delete contacts');
 

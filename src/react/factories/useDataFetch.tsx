@@ -342,7 +342,7 @@ export function useCrud<T extends { id: number | string }>(options: UseCrudOptio
   const update = useCallback(async (id: number | string, data: Partial<T>): Promise<T | null> => {
     try {
       const response = await apiFetch(`${endpoint}/${id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
@@ -516,7 +516,7 @@ export function useBulkOperations(options: UseBulkOperationsOptions) {
       for (const id of ids) {
         try {
           const response = await apiFetch(`${itemEndpoint}/${id}`, {
-            method: 'PATCH',
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status })
           });

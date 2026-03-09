@@ -194,7 +194,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
   const handleStatusChange = useCallback(async (proposalId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.adminProposal(proposalId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
@@ -251,7 +251,7 @@ export function ProposalsTable({ getAuthToken, showNotification, onNavigate: _on
 
     const ids = selection.selectedItems.map((p) => p.id);
     try {
-      const response = await apiPost(API_ENDPOINTS.ADMIN.PROPOSALS_BULK_DELETE, { ids });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.PROPOSALS_BULK_DELETE, { proposalIds: ids });
 
       if (!response.ok) throw new Error('Failed to delete proposals');
 

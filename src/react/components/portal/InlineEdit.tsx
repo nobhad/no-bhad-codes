@@ -235,6 +235,7 @@ export function InlineEdit({
         />
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => saveValue()}
           disabled={isSaving}
           className="inline-edit-btn inline-edit-btn-save"
@@ -244,6 +245,7 @@ export function InlineEdit({
         </button>
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={cancelEditing}
           disabled={isSaving}
           className="inline-edit-btn inline-edit-btn-cancel"
@@ -569,6 +571,7 @@ export function InlineTextarea({
         <div className="inline-edit-actions">
           <button
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => saveValue()}
             disabled={isSaving}
             className="inline-edit-btn inline-edit-btn-save"
@@ -578,6 +581,7 @@ export function InlineTextarea({
           </button>
           <button
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={cancelEditing}
             disabled={isSaving}
             className="inline-edit-btn inline-edit-btn-cancel"

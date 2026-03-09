@@ -6,7 +6,7 @@ import { cn } from '@react/lib/utils';
 
 /**
  * Checkbox component using Radix primitives with vanilla CSS
- * Styles defined in portal-forms.css (.table-checkbox)
+ * Styles defined in portal-forms.css (.portal-checkbox)
  */
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
@@ -14,11 +14,11 @@ const Checkbox = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
-    className={cn('table-checkbox', className)}
+    className={cn('portal-checkbox', className)}
     {...props}
   >
-    <CheckboxPrimitive.Indicator className="table-checkbox-indicator">
-      <Check className="table-checkbox-icon" />
+    <CheckboxPrimitive.Indicator className="portal-checkbox-indicator">
+      <Check className="portal-checkbox-icon" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ));

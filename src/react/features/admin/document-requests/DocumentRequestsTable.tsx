@@ -197,7 +197,7 @@ export function DocumentRequestsTable({ getAuthToken, showNotification, onNaviga
   const handleStatusChange = useCallback(async (requestId: number, newStatus: string) => {
     try {
       const response = await apiFetch(buildEndpoint.documentRequest(requestId), {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
