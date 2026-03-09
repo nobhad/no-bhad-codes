@@ -51,6 +51,10 @@ router.get(
       query = `
       SELECT
         p.*,
+        p.estimated_end_date as end_date,
+        p.repository_url as repo_url,
+        p.contract_signed_at as contract_signed_date,
+        p.budget_range as budget,
         c.company_name,
         c.contact_name,
         c.email as client_email,
@@ -82,6 +86,10 @@ router.get(
       query = `
       SELECT
         p.*,
+        p.estimated_end_date as end_date,
+        p.repository_url as repo_url,
+        p.contract_signed_at as contract_signed_date,
+        p.budget_range as budget,
         COALESCE(f_stats.file_count, 0) as file_count,
         COALESCE(m_stats.message_count, 0) as message_count,
         COALESCE(m_stats.unread_count, 0) as unread_count
@@ -144,14 +152,25 @@ router.get(
     if (isAdmin) {
       query = `
       SELECT
-        p.*, c.company_name, c.contact_name, c.email as client_email
+        p.*,
+        p.estimated_end_date as end_date,
+        p.repository_url as repo_url,
+        p.contract_signed_at as contract_signed_date,
+        p.budget_range as budget,
+        c.company_name, c.contact_name, c.email as client_email
       FROM projects p
       JOIN clients c ON p.client_id = c.id AND ${notDeleted('c')}
       WHERE p.id = ? AND ${notDeleted('p')}
     `;
     } else {
       query = `
-      SELECT p.* FROM projects p
+      SELECT
+        p.*,
+        p.estimated_end_date as end_date,
+        p.repository_url as repo_url,
+        p.contract_signed_at as contract_signed_date,
+        p.budget_range as budget
+      FROM projects p
       WHERE p.id = ? AND p.client_id = ? AND ${notDeleted('p')}
     `;
       params = [projectId, req.user!.id];
@@ -520,7 +539,8 @@ router.put(
         p.*,
         p.estimated_end_date as end_date,
         p.repository_url as repo_url,
-        p.contract_signed_at as contract_signed_date
+        p.contract_signed_at as contract_signed_date,
+        p.budget_range as budget
       FROM projects p
       WHERE p.id = ?
     `,
