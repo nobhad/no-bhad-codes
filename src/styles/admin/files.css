@@ -184,3 +184,8 @@
     max-height: 150px;
   }
 }
+
+/* Spinner circle radius */
+.files-spinner {
+  border-radius: var(--border-radius-full);
+}

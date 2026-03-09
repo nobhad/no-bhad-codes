@@ -144,12 +144,10 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 }
 
 /* Remove bottom border on trigger when open - seamless connection.
-   Collapse the 3D bottom border (6px) to match the regular border (2px)
-   so the dropdown content sits flush with no visible gap. */
+   Only hide color — do NOT change border-bottom-width (would cause layout shift). */
 .dropdown-trigger[data-state="open"],
 :is(.btn, .btn-secondary, .btn-primary, .btn-outline).dropdown-trigger[data-state="open"] {
   border-bottom-color: transparent;
-  border-bottom-width: var(--portal-btn-border-width, 2px);
 }
 
 /* Hover state for button dropdown triggers - ensure text visible */
@@ -172,7 +170,9 @@ td:has(.status-dropdown-trigger) .portal-dropdown-content,
 }
 
 /* Remove top border when positioned below trigger - seamless connection.
-   margin-top offsets the trigger's normalized border-bottom-width (--portal-btn-border-width = 2px). */
+   margin-top: -2px compensates for the trigger's side/top border width (--portal-btn-border-width = 2px).
+   NOTE: .btn/.btn-secondary triggers also have --portal-btn-border-bottom-width: 6px (transparent 3D effect).
+   Those triggers require sideOffset={-4} at the usage site to close the remaining 4px gap. */
 .portal-dropdown-content[data-side="bottom"] {
   border-top: none;
   margin-top: calc(-1 * var(--portal-btn-border-width, 2px));

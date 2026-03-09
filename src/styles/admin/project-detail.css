@@ -1079,6 +1079,44 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   gap: var(--space-2);
 }
 
+/* Form section heading */
+.tasks-form-heading {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-3);
+}
+
+/* Textarea minimum height */
+.tasks-textarea {
+  min-height: 60px;
+}
+
+/* Date input width */
+.tasks-date-input {
+  width: auto;
+}
+
+/* Drag handle opacity */
+.tasks-drag-handle {
+  opacity: 0.5;
+}
+
+/* Progress track */
+.tasks-progress-track {
+  margin-top: var(--space-2);
+  max-width: 200px;
+}
+
+/* Expanded content border */
+.tasks-expanded-content {
+  border-top: var(--border-width) solid var(--color-border-primary);
+}
+
+/* Description text */
+.tasks-description {
+  font-size: var(--font-size-sm);
+  white-space: pre-wrap;
+}
+
 /* --- Contract Tab --- */
 
 /* Contract status header layout */
@@ -1094,7 +1132,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
-  border-color: var(--color-white);
+  border-color: var(--color-border-primary);
 }
 
 .contract-warning-icon {
@@ -1435,7 +1473,15 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   width: 100%;
 }
 
-/* kbd.msgtab-kbd overrides defined in portal-tab-components.css */
+/* Keyboard shortcut — reset badge bold/uppercase styles */
+kbd.msgtab-kbd {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 1px var(--space-1);
+  border-color: var(--color-border-primary);
+}
 
 /* Reacted reaction badge — highlight border with accent */
 .portal .reaction-badge.is-reacted {

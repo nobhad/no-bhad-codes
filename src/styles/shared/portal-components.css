@@ -23,7 +23,7 @@
  * - portal-status-panel.css: System status panel, grid column utilities
  * - portal-performance.css: Performance metrics component
  * - portal-analytics.css: Analytics component
- * - portal-tab-components.css: Tab-specific overrides (overview, tasks, etc.)
+ * - portal-tab-components.css: Shared portal card layout classes (title-group, status-group, etc.)
  */
 
 /* 1. Utilities first (foundational classes used everywhere) */

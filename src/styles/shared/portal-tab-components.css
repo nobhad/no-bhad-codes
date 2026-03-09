@@ -1,58 +1,20 @@
 /**
  * ===============================================
- * TAB-SPECIFIC COMPONENT STYLES
+ * SHARED PORTAL CARD LAYOUT CLASSES
  * ===============================================
  * @file src/styles/shared/portal-tab-components.css
  *
- * Per-tab overrides and helpers for admin/portal
- * detail views: Overview, Tasks, Client Detail,
- * Contract, Portal Card Layout, Deliverables, Files,
- * Overview Dashboard, Client Projects, Activity,
- * Portal Messages, Messages Tab, Contacts,
- * Invoices, and Notes.
+ * Shared layout classes used across admin and client portal
+ * card-based list views (projects, contracts, deliverables, etc.)
+ *
+ * Page-specific tab styles live in their canonical files:
+ * - Tasks, Messages, Contract, Invoices, Notes, Files → project-detail.css
+ * - Contacts, Activity → client-detail.css
+ * - Overview dashboard helpers → overview-layout.css
+ * - Message thread list items → portal-messages.css
  */
 
-/* ============================================
-   TASKS TAB COMPONENT
-   ============================================ */
-
-/* Form heading */
-.tasks-form-heading {
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-3);
-}
-
-/* Textarea height */
-.tasks-textarea {
-  min-height: 60px;
-}
-
-/* Date input width */
-.tasks-date-input {
-  width: auto;
-}
-
-/* Drag handle opacity */
-.tasks-drag-handle {
-  opacity: 0.5;
-}
-
-/* Progress track with styling */
-.tasks-progress-track {
-  margin-top: var(--space-2);
-  max-width: 200px;
-}
-
-/* Expanded content border */
-.tasks-expanded-content {
-  border-top: var(--border-width) solid var(--color-border-primary);
-}
-
-/* Description with pre-wrap */
-.tasks-description {
-  font-size: var(--font-size-sm);
-  white-space: pre-wrap;
-}
+/* Tasks tab styles in project-detail.css */
 
 /* Contract tab styles in project-detail.css */
 
@@ -92,120 +54,15 @@
 
 /* Deliverables tab styles in project-detail.css */
 
-/* ============================================
-   FILES TAB COMPONENT
-   ============================================ */
+/* Files tab styles in project-detail.css */
 
-/* Spinner */
-.files-spinner {
-  border-radius: var(--border-radius-full);
-}
-
-/* Files table styles moved to project-detail.css */
-
-/* ============================================
-   OVERVIEW DASHBOARD COMPONENT
-   ============================================ */
-
-/* Error state panel */
-.ovdash-error-panel {
-  text-align: center;
-  padding: var(--space-6);
-}
-
-/* Error message spacing */
-.ovdash-error-message {
-  margin-bottom: var(--space-2);
-}
-
-/* Clickable list item */
-.ovdash-clickable {
-  cursor: pointer;
-}
-
-/* Flex grow body */
-.ovdash-flex-1 {
-  flex: 1;
-}
-
-/* Progress bar container width */
-.ovdash-progress-width {
-  width: var(--space-7);
-}
-
-/* Quick actions grid - 2x2, collapses to single column on small screens */
-.ovdash-quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-1-5);
-}
-
-@media (--small-mobile) {
-  .ovdash-quick-actions {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Quick action buttons - ensure visible borders with thicker bottom */
-.ovdash-quick-actions .btn-secondary {
-  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
-  border-bottom-width: var(--portal-btn-border-bottom-width, 6px);
-}
+/* Overview dashboard styles in overview-layout.css */
 
 /* Activity tab styles merged into client-detail.css */
 
-/* ============================================
-   PORTAL MESSAGES COMPONENT
-   ============================================ */
+/* Portal messages styles in portal-messages.css */
 
-/* Thread content flex */
-.message-thread-content {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Thread header/footer row */
-.message-thread-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-/* Thread preview row with top margin */
-.message-thread-preview-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.125rem;
-}
-
-/* Thread list no gap */
-.message-thread-list {
-  gap: 0;
-}
-
-/* Timestamp no shrink */
-.message-timestamp {
-  flex-shrink: 0;
-}
-
-/* ============================================
-   MESSAGES TAB COMPONENT (Project Detail)
-   ============================================ */
-
-/* Full msgtab-* styles in project-detail.css */
-
-/* Keyboard shortcut — reset badge bold/uppercase styles */
-kbd.msgtab-kbd {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-normal);
-  text-transform: none;
-  letter-spacing: 0;
-  padding: 1px var(--space-1);
-  border-color: var(--color-border-primary);
-}
+/* Messages tab styles in project-detail.css */
 
 /* Contacts tab styles merged into client-detail.css */
 
