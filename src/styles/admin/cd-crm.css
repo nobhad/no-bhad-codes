@@ -41,7 +41,7 @@
 }
 
 #tab-client-detail #cd-tags-container .tag-input-wrapper:focus-within {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 #tab-client-detail #cd-tags-container .tag-input-field {

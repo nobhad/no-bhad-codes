@@ -38,7 +38,7 @@
 
 .lead-tab.active {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-weight: var(--font-weight-medium);
 }
 
@@ -50,7 +50,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--color-primary);
+  background: var(--color-accent);
 }
 
 .lead-tab-content {
@@ -112,7 +112,7 @@
 }
 
 #lead-details-panel .panel-link:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: underline;
 }
 
@@ -151,7 +151,7 @@
 }
 
 .lead-note-item.note-pinned {
-  border-left: var(--border-width-thick) solid var(--color-primary);
+  border-left: var(--border-width-thick) solid var(--color-accent);
 }
 
 /* ============================================

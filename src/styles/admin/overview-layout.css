@@ -36,7 +36,7 @@
 [data-page="admin"] .overview-greeting b {
   font-style: normal;
   font-weight: inherit;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-lg);
   letter-spacing: var(--letter-spacing-tight);
@@ -167,7 +167,7 @@
 }
 
 .overview-panel-action:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Remove margin from panel-icon in action buttons (gap handles spacing) */
@@ -268,7 +268,7 @@
 
 .progress-fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-accent);
   transition: width var(--transition-slow) ease;
 }
 

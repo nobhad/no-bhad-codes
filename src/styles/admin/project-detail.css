@@ -39,8 +39,10 @@
 }
 
 /* Normalize stat value size — xl (20px) is too large alongside 12px labels */
-.project-overview-grid :is(.stat-value, .stat-number, .stat-card-value) {
+.project-overview-grid :is(.stat-value, .stat-number, .stat-card-value),
+.contract-stats-grid :is(.stat-value, .stat-number, .stat-card-value) {
   font-size: var(--font-size-sm);
+  font-family: inherit;
 }
 
 /* Field label with inline icon (e.g. Links section) */
@@ -61,7 +63,7 @@
 
 /* Description divider within a panel card */
 .panel-description {
-  border-top: var(--border-width) solid var(--color-border-primary);
+  border-top: var(--portal-border);
   margin-top: var(--space-4);
   padding-top: var(--space-4);
 }
@@ -84,8 +86,8 @@
 
 /* Button-based checkbox — completed state (used when no native input) */
 .milestone-checkbox.is-completed {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 /* Milestone add form */
@@ -94,7 +96,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   margin-bottom: var(--space-3);
 }
 
@@ -137,12 +139,6 @@
 
 #tab-project-detail .page-title.page-title-with-badge .status-badge {
   margin-left: auto;
-}
-
-/* Shared page title for both detail views (client + project) */
-#tab-project-detail .page-title,
-#tab-client-detail .page-title {
-  margin-bottom: var(--space-3);
 }
 
 /* Page title h1/h2 — font-family from portal theme, only size override */
@@ -192,8 +188,6 @@
 /* Messages container keeps its light background styling */
 body[data-page="admin"] [id^="pd-tab-"] .messages-container {
   background: var(--color-neutral-200);
-  padding: 0;
-  margin: 0;
   box-shadow: var(--shadow-panel);
 }
 
@@ -202,11 +196,6 @@ body[data-page="admin"] [id^="pd-tab-"] .messages-container {
 /* Summary card — base from portal-cards.css, only layout tweaks */
 body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex: 1;
-}
-
-/* Summary card labels - styling from unified rule in portal-cards.css */
-[data-page="admin"] [id^="pd-tab-"] .summary-card h4 {
-  margin: 0;
 }
 
 /* Summary card values - match overview stat numbers */
@@ -220,13 +209,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 [data-page="admin"] [id^="pd-tab-"] .summary-card .summary-value.paid {
-  color: var(--color-primary);
-}
-
-/* Override any adjacent sibling margins inside tab content (both detail views) */
-[id^="pd-tab-"] .portal-project-card + .portal-project-card,
-[id^="cd-tab-"] .portal-project-card + .portal-project-card {
-  margin-top: 0;
+  color: var(--color-accent);
 }
 
 /* h3 styling centralized in admin.css */
@@ -241,7 +224,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 [data-page="admin"] #pd-tab-settings .settings-section {
   background: transparent;
-  padding: 0;
   height: 100%;
   grid-column: span 1;
   flex: 1;
@@ -249,12 +231,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* Form input base styles (including background-color) in shared/portal-forms.css */
-
-/* .form-row base styling from shared/portal-forms.css */
-/* Project-detail specific: add margin-bottom */
-[data-page="admin"] .project-detail .form-row {
-  margin-bottom: var(--space-1-5);
-}
 
 /* Readonly form value display */
 [data-page="admin"] .form-value-readonly {
@@ -274,7 +250,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"] textarea:focus,
 [data-page="admin"] select:not(.status-select):focus,
 [data-page="admin"] .form-select:not(.status-select):focus {
-  border: var(--border-width-thick) solid var(--color-primary);
+  border: var(--border-width-thick) solid var(--color-accent);
   outline: none;
 }
 
@@ -293,12 +269,12 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   background-image: var(--select-caret);
   background-repeat: no-repeat;
   background-position: right var(--space-4) center;
-  background-size: 12px;
+  background-size: var(--icon-size-xs);
   min-height: 60px;
 }
 
 #pd-setting-status:focus {
-  outline: var(--border-width-thick) solid var(--color-primary);
+  outline: var(--border-width-thick) solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -344,7 +320,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   flex-direction: column;
   gap: var(--space-0-5);
   position: relative;
-  margin-bottom: var(--space-4);
 }
 
 /* Settings form inputs — padding override only, font from portal-forms.css */
@@ -357,7 +332,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Form row for Account Status and Last Login - overrides from portal-forms.css */
 #pd-tab-settings .form-row {
   gap: var(--space-8);
-  margin-bottom: var(--space-4);
 }
 
 #pd-tab-settings .form-row .form-group {
@@ -399,7 +373,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 #pd-status-dropdown .custom-dropdown-option:hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
 }
 
 /* Text color inherited from portal theme — no overrides needed */
@@ -439,7 +413,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   height: var(--icon-size-lg);
   cursor: pointer;
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   position: relative;
   display: flex;
   align-items: center;
@@ -458,23 +432,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   z-index: var(--z-index-content);
 }
 
-/* Checked state - change wrapper background */
-.milestone-checkbox:has(input:checked) {
-  background: var(--color-primary);
-}
-
-/* Checkmark for checked state */
-.milestone-checkbox:has(input:checked)::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 10px;
-  border: solid var(--color-text-primary);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
 
 .milestone-content {
   flex: 1;
@@ -489,10 +446,23 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* .milestone-description, .milestone-due — font-size from portal theme */
 
+/* Expand/collapse caret — primary text color, zero padding so button aligns flush */
+.milestone-item > .icon-btn:last-child {
+  padding: 0;
+  color: var(--color-text-primary);
+}
+
+.milestone-item > svg:last-child {
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
 .milestone-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--space-1);
+  --portal-btn-icon-inner-size: var(--icon-size-md);
 }
 
 /* Project Description Row - description and preview URL on same line */
@@ -520,7 +490,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .project-notes {
   background: var(--color-bg-raised);
   padding: var(--space-2);
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   min-height: 100px;
   white-space: pre-wrap;
 }
@@ -632,13 +602,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
    Overview Stats Grid
    ================================================ */
 
-/* Recent activity - Base styles in shared/portal-cards.css */
-/* Admin-specific margin overrides */
-[data-page="admin"] .recent-activity {
-  margin-top: var(--space-2);
-  margin-bottom: 0;
-}
-
 /* .overview-stat — uses .summary-card from portal-cards.css */
 .overview-stat {
   text-align: center;
@@ -692,14 +655,14 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
   .custom-dropdown-trigger:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown)
   .custom-dropdown-trigger:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 [data-page="admin"] .custom-dropdown:not([data-modal-dropdown]) .custom-dropdown-text {
@@ -747,7 +710,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
   .custom-dropdown-menu {
   display: block;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   /* Only sides and bottom shadow - clip top shadow with clip-path */
   box-shadow: var(--shadow-spread);
   clip-path: inset(0 -20px -20px -20px);
@@ -757,7 +720,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 [data-page="admin"]
   .custom-dropdown:not([data-modal-dropdown]):not(.table-dropdown).open
   .custom-dropdown-trigger {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   border-bottom: none;
   /* Only top and side shadows - clip bottom shadow */
   box-shadow: var(--shadow-dropdown);
@@ -976,31 +939,29 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .panel.files-dropzone {
   border: var(--border-width) dashed var(--color-border-primary);
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .files-dropzone:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .files-dropzone.is-dragging {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   background-color: var(--color-bg-hover);
 }
 
-/* Upload icon sizing */
-.files-upload-icon {
-  width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-}
-
-.files-upload-icon.is-dragging {
-  color: var(--color-primary);
-}
-
-/* Upload text area */
-.files-upload-text {
+/* Dropzone inner content — centered column layout */
+.files-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
   text-align: center;
+  width: 100%;
 }
 
 /* Uploading spinner indicator */
@@ -1008,7 +969,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Files table column widths */
@@ -1034,7 +995,13 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Table header row styling */
 .files-table-header {
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
+}
+
+/* Files table — prevent header labels and data cells from wrapping */
+.files-table-header th,
+.files-table-row .pd-table-cell {
+  white-space: nowrap;
 }
 
 /* Table row — ensure table-row display (override any .list-item flex) */
@@ -1049,10 +1016,12 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Category dropdown trigger — clean button style matching InlineSelect pattern */
 .files-category-trigger {
-  height: 32px;
+  height: var(--space-4);
+  /* Use --dropdown-padding-x on left so trigger content aligns with open items */
   padding: var(--space-1) var(--space-2);
+  padding-left: var(--dropdown-padding-x);
   background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   font-family: inherit;
@@ -1065,30 +1034,16 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 .files-category-trigger[data-state="open"] {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
+  border-bottom-color: transparent;
 }
 
 /* --- Tasks Tab --- */
 
-/* Milestone checkbox */
-.tasks-checkbox {
-  width: 20px;
-  height: 20px;
-  border: var(--border-width) solid var(--color-border-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color var(--transition-fast), background-color var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.tasks-checkbox.is-completed {
-  background-color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-.tasks-checkbox:not(.is-completed):hover {
-  border-color: var(--color-primary);
+/* Progress header block — wraps stats row + progress bar with border */
+.tasks-progress-block {
+  border: var(--portal-border);
+  padding: var(--space-2) var(--space-3) var(--space-2);
 }
 
 /* Milestone order indicator */
@@ -1099,10 +1054,11 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 }
 
 /* Tasks expanded content area — overrides milestone-expanded-content padding
-   to account for drag handle + checkbox indent */
+   to account for drag handle + checkbox indent.
+   Right padding matches milestone-item right padding (var(--space-3)) for alignment. */
 .milestone-expanded-content.tasks-expanded-content {
-  padding: var(--space-3) var(--space-4) var(--space-4);
-  padding-left: calc(var(--icon-size-md) + 20px + var(--space-1-5) * 3);
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  padding-left: calc(var(--icon-size-md) + var(--space-2-5) + var(--space-1-5) * 3);
 }
 
 /* Tasks deliverable list */
@@ -1133,17 +1089,6 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   gap: var(--space-4);
 }
 
-/* Contract files header bar */
-.contract-files-header {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
-}
-
-/* Contract empty state padding */
-.contract-empty-state {
-  padding: var(--space-4);
-}
-
 /* Contract warning card */
 .contract-warning {
   display: flex;
@@ -1154,7 +1099,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .contract-warning-icon {
   flex-shrink: 0;
   margin-top: 2px;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Panel without padding (for tables) */
@@ -1183,7 +1128,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Invoice table header row */
 .invtab-header-row {
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 /* Invoice table row - clickable, ensure table-row display */
@@ -1207,7 +1152,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Deliverables milestone header */
 .deliv-milestone-header {
   padding: var(--space-4);
-  border-bottom: var(--border-width) solid var(--color-border-primary);
+  border-bottom: var(--portal-border);
 }
 
 /* Deliverables milestone description */
@@ -1257,7 +1202,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 .msgtab-container {
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: clamp(600px, 70vh, 900px);
 }
 
 /* Messages scrollable panel */
@@ -1277,6 +1222,7 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 /* Message row (avatar + bubble) */
 .msgtab-row {
   display: flex;
+  align-items: flex-end;
   gap: var(--space-3);
 }
 
@@ -1286,56 +1232,136 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
 
 /* Message avatar */
 .msgtab-avatar {
-  width: var(--icon-size-xl);
-  height: var(--icon-size-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: var(--icon-size-2xl);
+  height: var(--icon-size-2xl);
   flex-shrink: 0;
 }
 
+/* Admin avatar — CSS mask matching header branding avatar */
 .msgtab-avatar.is-admin {
-  background-color: var(--color-white);
+  background-color: var(--color-text-primary);
+  mask-image: url('/images/avatar_small_sidebar.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/images/avatar_small_sidebar.svg');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
 .msgtab-avatar.is-client {
   background-color: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
+  border: var(--portal-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Message content wrapper */
+/* Date separator between messages from different days */
+.msgtab-date-sep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+
+.msgtab-date-sep::before,
+.msgtab-date-sep::after {
+  content: '';
+  flex: 1;
+  height: var(--border-width);
+  background: var(--color-border-primary);
+}
+
+.msgtab-date-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  padding: 0 var(--space-1);
+}
+
+/* Spacer to keep bubble aligned when avatar is hidden (continuation rows) */
+.msgtab-avatar-spacer {
+  width: var(--icon-size-2xl);
+  flex-shrink: 0;
+}
+
+/* Reduce gap for continuation rows (same sender, no avatar/name) */
+.msgtab-row.is-continuation {
+  gap: var(--space-1);
+}
+
+/* Message content wrapper — outer column (sender name → bubble-row → footer) */
 .msgtab-content-wrap {
   max-width: 70%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-0-5);
 }
 
 .msgtab-content-wrap.is-admin {
   align-items: flex-end;
 }
 
-/* Message meta (sender + time) */
-.msgtab-meta {
+/* Sender name above bubble (client messages only) */
+.msgtab-sender {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding-left: var(--space-1);
+}
+
+/* Bubble row: flex row — actions + bubble side by side, no absolute positioning */
+.msgtab-bubble-row {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
+  gap: var(--space-1);
 }
 
-/* Message bubble */
+/* Inline hover actions: always in-flow (visibility:hidden), bubble never shifts */
+.msgtab-inline-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0-5);
+  visibility: hidden;
+  /* Client messages: actions sit to the RIGHT of the bubble */
+  order: 1;
+}
+
+/* Admin messages: actions sit to the LEFT of the bubble */
+.msgtab-content-wrap.is-admin .msgtab-inline-actions {
+  order: -1;
+}
+
+.msgtab-row:hover .msgtab-inline-actions {
+  visibility: visible;
+}
+
+/* Action buttons: small, scaled to thread text */
+.msgtab-inline-actions .message-action-btn {
+  width: var(--font-size-sm);
+  height: var(--font-size-sm);
+  min-width: unset;
+  padding: 0;
+}
+
+.msgtab-inline-actions .message-action-btn svg {
+  width: var(--font-size-sm);
+  height: var(--font-size-sm);
+}
+
+/* Bubble + footer stacked vertically */
+.msgtab-bubble-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+/* Message bubble — border and color shared by both admin and client */
 .msgtab-bubble {
   padding: var(--space-2) var(--space-4);
-}
-
-.msgtab-bubble.is-admin {
-  background-color: var(--color-white);
-  color: var(--color-text-inverse);
-}
-
-.msgtab-bubble.is-client {
-  border: var(--border-width) solid var(--color-border-primary);
-  color: var(--color-text-primary);
+  border: var(--portal-border);
 }
 
 /* Message content text */
@@ -1345,43 +1371,75 @@ body[data-page="admin"] [id^="pd-tab-"] .summary-card {
   word-wrap: break-word;
 }
 
-/* Message input area */
-.msgtab-input-panel {
-  border-top: var(--border-width) solid var(--color-border-primary);
-  padding-top: var(--space-4);
-}
-
-/* Message input row */
-.msgtab-input-row {
+/* Footer below bubble: timestamp + edited + read receipt */
+.msgtab-footer {
   display: flex;
-  gap: var(--space-3);
-}
-
-/* Message textarea flex fill */
-.msgtab-textarea {
-  flex: 1;
-}
-
-/* Send button alignment */
-.msgtab-send-btn {
-  align-self: flex-end;
-}
-
-/* Keyboard shortcut hint */
-.msgtab-kbd {
+  align-items: center;
+  gap: var(--space-1);
   font-size: var(--font-size-xs);
-  padding: var(--space-0-5) var(--space-1);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-1);
+}
+
+.msgtab-footer.is-admin {
+  justify-content: flex-end;
+}
+
+/* Timestamp in footer — font-size and color inherited from .msgtab-footer */
+.msgtab-time {
+  white-space: nowrap;
+}
+
+/* Read receipt icon (own messages) — color inherited from .msgtab-footer */
+.msgtab-receipt {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.msgtab-receipt.is-read {
+  color: var(--color-accent);
+}
+
+/* Message input area — stacked column layout */
+.msgtab-input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: var(--portal-border);
+  /* Bleed border-top to panel edges by cancelling parent horizontal padding */
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
+  padding: var(--space-2);
+}
+
+/* Message textarea full width */
+.msgtab-textarea {
+  width: 100%;
+}
+
+/* Send button spans full width matching textarea */
+.msgtab-send-btn {
+  width: 100%;
+}
+
+/* kbd.msgtab-kbd overrides defined in portal-tab-components.css */
+
+/* Reacted reaction badge — highlight border with accent */
+.portal .reaction-badge.is-reacted {
+  border-color: var(--color-primary);
+  background: var(--color-bg-elevated);
 }
 
 /* --- Notes Tab --- */
 
-/* Notes panel */
+/* Notes panel — no padding, border inherited from .panel (2px) */
 .notes-panel {
   padding: 0;
 }
 
-/* Notes textarea full-bleed */
-.notes-textarea {
+/* Notes textarea full-bleed — two-class specificity beats .textarea in portal-forms.css */
+.notes-panel .notes-textarea {
   width: 100%;
   border: none;
   resize: vertical;

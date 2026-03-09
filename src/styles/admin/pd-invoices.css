@@ -83,7 +83,7 @@
 
 .invoice-amount {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: var(--color-accent);
   min-width: 80px;
   text-align: right;
 }
@@ -189,7 +189,7 @@
 #view-project-invoice-modal .total-row.total-main {
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-lg);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 #view-project-invoice-modal .total-row.balance-due {
