@@ -198,7 +198,7 @@ html[data-theme="dark"]:not([data-page="admin"]):not([data-page="client-portal"]
   --color-form-input-bg: var(--color-gray-800);
 
   /* Border Colors */
-  --color-border-primary: var(--color-gray-600);
+  --color-border-primary: var(--color-text-primary);
   --color-border-secondary: var(--color-gray-700);
   --color-border-tertiary: var(--color-gray-800);
 

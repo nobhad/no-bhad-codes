@@ -351,3 +351,13 @@
     display: none;
   }
 }
+
+/* Unlayered — overrides base .icon-btn for detail action toolbar */
+.detail-actions .icon-btn {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  min-width: var(--icon-size-lg);
+  min-height: var(--icon-size-lg);
+  max-width: var(--icon-size-lg);
+  max-height: var(--icon-size-lg);
+}

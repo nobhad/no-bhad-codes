@@ -302,6 +302,8 @@
   align-items: center;
   margin-left: auto;
   flex-shrink: 0;
+  /* Scope icon-btn size to match icon — gap controls all visual spacing */
+  --portal-btn-icon-size: var(--icon-size-sm);
 }
 
 /* ==============================================
@@ -1963,3 +1965,30 @@
 }
 
 } /* end @layer components */
+
+/* =====================================================
+   TABLE ACTION BUTTON SIZES — UNLAYERED
+   Unlayered + higher specificity (0,2,0) definitively
+   overrides the base .icon-btn (0,1,0) in portal-buttons.css.
+   ===================================================== */
+
+/* Row action buttons: compact, tightly grouped */
+.table-actions .icon-btn,
+.data-table-row-actions .icon-btn {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  min-width: var(--icon-size-sm);
+  min-height: var(--icon-size-sm);
+  max-width: var(--icon-size-sm);
+  max-height: var(--icon-size-sm);
+}
+
+/* Toolbar buttons: visually larger than row actions */
+.data-table-actions .icon-btn {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  min-width: var(--icon-size-lg);
+  min-height: var(--icon-size-lg);
+  max-width: var(--icon-size-lg);
+  max-height: var(--icon-size-lg);
+}
