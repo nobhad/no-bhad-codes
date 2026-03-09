@@ -28,6 +28,8 @@ interface Message {
   senderType: 'admin' | 'client';
   timestamp: string;
   status: 'sent' | 'delivered' | 'read';
+  isEdited?: boolean;
+  reactions?: Array<{ emoji: string; count: number; reacted: boolean }>;
   attachments?: { id: number; name: string; url: string }[];
 }
 
@@ -134,6 +136,32 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
     }
   }, [selectedConversation]);
 
+  const handleEdit = useCallback(async (messageId: number, content: string): Promise<boolean> => {
+    try {
+      const response = await apiFetch(buildEndpoint.messageItem(messageId), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      });
+      if (!response.ok) return false;
+      setMessages((prev) =>
+        prev.map((m) => m.id === messageId ? { ...m, content, isEdited: true } : m)
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const handleReact = useCallback(async (messageId: number, emoji: string): Promise<boolean> => {
+    try {
+      const response = await apiPost(buildEndpoint.messageReactions(messageId), { emoji });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const toggleStar = useCallback(async (conversationId: number, isStarred: boolean) => {
     try {
       await apiFetch(buildEndpoint.adminConversationStar(conversationId), {
@@ -193,8 +221,16 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
       ref={containerRef as React.RefObject<HTMLDivElement>}
       className="panel messaging-panel-container"
     >
-      {/* Full-width search top bar */}
+      {/* Title + search bar above both columns */}
       <div className="messaging-top-bar">
+        <h2 className="heading messaging-heading-with-badge">
+          Messages
+          {totalUnread > 0 && (
+            <span className="badge ml-2">
+              {totalUnread}
+            </span>
+          )}
+        </h2>
         <div className="messaging-search-container">
           <Search className="messaging-search-icon" />
           <input
@@ -212,18 +248,8 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
       <div className="messaging-columns">
         {/* Conversation List */}
         <div className="messaging-sidebar">
-          {/* Header */}
+          {/* Filter Tabs */}
           <div className="messaging-section-header">
-            <h2 className="heading messaging-heading-with-badge">
-              Messages
-              {totalUnread > 0 && (
-                <span className="badge ml-2">
-                  {totalUnread}
-                </span>
-              )}
-            </h2>
-
-            {/* Filter Tabs */}
             <div className="tab-list messaging-filter-tabs">
               {[
                 { id: 'all', label: 'All', icon: Inbox },
@@ -342,10 +368,14 @@ export function MessageView({ getAuthToken: _getAuthToken, showNotification, onN
                   isOwn: m.senderType === 'admin',
                   senderName: m.senderName,
                   timestamp: m.timestamp,
-                  readReceipt: m.status
+                  readReceipt: m.status,
+                  isEdited: m.isEdited,
+                  reactions: m.reactions
                 }))}
                 isLoading={messagesLoading}
                 onSend={handleSend}
+                onEdit={handleEdit}
+                onReact={handleReact}
                 showNotification={showNotification}
                 className="messaging-main-area-thread"
               />
