@@ -13,7 +13,7 @@ import type {
   ClientProject
 } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPut, apiPost } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ClientDetailHookOptions } from './types';
 
@@ -35,16 +35,12 @@ const INITIAL_STATE: ClientCoreState = {
   projects: []
 };
 
-export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOptions) {
+export function useClientCore({ clientId }: ClientDetailHookOptions) {
   const [state, setState] = useState<ClientCoreState>(INITIAL_STATE);
 
   const fetchClient = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch client: ${response.statusText}`);
@@ -60,15 +56,11 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientCore] Error fetching client:', err);
       throw err;
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchHealth = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/health`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/health`);
 
       if (!response.ok) {
         return null;
@@ -81,15 +73,11 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientCore] Error fetching health:', err);
       return null;
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchActivities = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/activities`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/activities`);
 
       if (!response.ok) {
         return [];
@@ -102,15 +90,11 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientCore] Error fetching activities:', err);
       return [];
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/stats`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/stats`);
 
       if (!response.ok) {
         return null;
@@ -123,15 +107,11 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientCore] Error fetching stats:', err);
       return null;
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchProjects = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/projects`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/projects`);
 
       if (!response.ok) {
         return [];
@@ -144,7 +124,7 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientCore] Error fetching projects:', err);
       return [];
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchAll = useCallback(async () => {
     const [client, health, activities, stats, projects] = await Promise.all([
@@ -161,12 +141,7 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
   const updateClient = useCallback(
     async (updates: Partial<Client>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.CLIENTS}/${clientId}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update client: ${response.statusText}`);
@@ -184,16 +159,12 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
         return false;
       }
     },
-    [clientId, getAuthToken]
+    [clientId]
   );
 
   const sendInvitation = useCallback(async (): Promise<boolean> => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/invite`, {
-        method: 'POST',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${clientId}/invite`);
 
       if (!response.ok) {
         throw new Error(`Failed to send invitation: ${response.statusText}`);
@@ -215,7 +186,7 @@ export function useClientCore({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientCore] Send invitation error:', err);
       return false;
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   return {
     client: state.client,

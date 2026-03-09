@@ -6,7 +6,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { Invoice } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ProjectDetailHookOptions } from './types';
 
@@ -36,8 +36,7 @@ function parseAmount(value: string | number | undefined | null): number {
 }
 
 export function useProjectInvoices({
-  projectId,
-  getAuthToken
+  projectId
 }: ProjectDetailHookOptions): UseProjectInvoicesReturn {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
@@ -62,11 +61,7 @@ export function useProjectInvoices({
 
   const fetchInvoices = useCallback(async (): Promise<Invoice[]> => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.INVOICES}/project/${projectId}`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.INVOICES}/project/${projectId}`);
 
       if (!response.ok) {
         return [];
@@ -79,7 +74,7 @@ export function useProjectInvoices({
       logger.error('Error fetching invoices:', err);
       return [];
     }
-  }, [projectId, getAuthToken]);
+  }, [projectId]);
 
   return {
     invoices,

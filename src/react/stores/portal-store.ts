@@ -68,9 +68,15 @@ export interface PortalStoreState {
 
 function getInitialTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light';
+  // Prefer the DOM attribute already set by the inline head script (handles OS preference + localStorage).
+  // Fall back to localStorage directly, then default to light.
+  const domTheme = document.documentElement.getAttribute(THEME_ATTRIBUTE);
+  if (domTheme === 'light' || domTheme === 'dark') return domTheme;
   const stored = localStorage.getItem(STORAGE_KEYS.THEME);
-  if (stored === 'light' || stored === 'dark') return stored;
-  return 'light';
+  const theme: 'light' | 'dark' = stored === 'light' || stored === 'dark' ? stored : 'light';
+  // Apply to DOM so CSS selectors match if head script didn't run (e.g. SSR hydration edge cases).
+  document.documentElement.setAttribute(THEME_ATTRIBUTE, theme);
+  return theme;
 }
 
 function getInitialSidebarState(): boolean {

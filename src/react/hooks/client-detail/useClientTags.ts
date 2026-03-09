@@ -6,23 +6,19 @@
 import { useState, useCallback } from 'react';
 import type { ClientTag } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiDelete } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ClientDetailHookOptions } from './types';
 
 const logger = createLogger('useClientTags');
 
-export function useClientTags({ clientId, getAuthToken }: ClientDetailHookOptions) {
+export function useClientTags({ clientId }: ClientDetailHookOptions) {
   const [tags, setTags] = useState<ClientTag[]>([]);
   const [availableTags, setAvailableTags] = useState<ClientTag[]>([]);
 
   const fetchTags = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`);
 
       if (!response.ok) {
         return [];
@@ -35,15 +31,11 @@ export function useClientTags({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientTags] Error fetching tags:', err);
       return [];
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchAvailableTags = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/tags`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/tags`);
 
       if (!response.ok) {
         return [];
@@ -56,7 +48,7 @@ export function useClientTags({ clientId, getAuthToken }: ClientDetailHookOption
       logger.error('[useClientTags] Error fetching available tags:', err);
       return [];
     }
-  }, [getAuthToken]);
+  }, []);
 
   const fetchAll = useCallback(async () => {
     const [tagResult, availableResult] = await Promise.all([fetchTags(), fetchAvailableTags()]);
@@ -67,12 +59,7 @@ export function useClientTags({ clientId, getAuthToken }: ClientDetailHookOption
   const addTag = useCallback(
     async (tagId: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify({ tag_id: tagId })
-        });
+        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags`, { tag_id: tagId });
 
         if (!response.ok) {
           throw new Error(`Failed to add tag: ${response.statusText}`);
@@ -87,17 +74,13 @@ export function useClientTags({ clientId, getAuthToken }: ClientDetailHookOption
         return false;
       }
     },
-    [clientId, getAuthToken]
+    [clientId]
   );
 
   const removeTag = useCallback(
     async (tagId: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags/${tagId}`, {
-          method: 'DELETE',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include'
-        });
+        const response = await apiDelete(`${API_ENDPOINTS.CLIENTS}/${clientId}/tags/${tagId}`);
 
         if (!response.ok) {
           throw new Error(`Failed to remove tag: ${response.statusText}`);
@@ -110,7 +93,7 @@ export function useClientTags({ clientId, getAuthToken }: ClientDetailHookOption
         return false;
       }
     },
-    [clientId, getAuthToken]
+    [clientId]
   );
 
   return {

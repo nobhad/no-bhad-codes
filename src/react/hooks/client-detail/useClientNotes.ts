@@ -6,22 +6,18 @@
 import { useState, useCallback } from 'react';
 import type { ClientNote } from '@react/features/admin/types';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData, buildAuthHeaders } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 import type { ClientDetailHookOptions } from './types';
 
 const logger = createLogger('useClientNotes');
 
-export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptions) {
+export function useClientNotes({ clientId }: ClientDetailHookOptions) {
   const [notes, setNotes] = useState<ClientNote[]>([]);
 
   const fetchNotes = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/notes`, {
-        method: 'GET',
-        headers: buildAuthHeaders(getAuthToken),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/notes`);
 
       if (!response.ok) {
         return [];
@@ -34,7 +30,7 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
       logger.error('[useClientNotes] Error fetching notes:', err);
       return [];
     }
-  }, [clientId, getAuthToken]);
+  }, [clientId]);
 
   const fetchAll = useCallback(async () => {
     const result = await fetchNotes();
@@ -44,12 +40,7 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
   const addNote = useCallback(
     async (content: string): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENTS}/${clientId}/notes`, {
-          method: 'POST',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify({ content })
-        });
+        const response = await apiPost(`${API_ENDPOINTS.CLIENTS}/${clientId}/notes`, { content });
 
         if (!response.ok) {
           throw new Error(`Failed to add note: ${response.statusText}`);
@@ -64,18 +55,13 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
         return false;
       }
     },
-    [clientId, getAuthToken]
+    [clientId]
   );
 
   const updateNote = useCallback(
     async (id: number, updates: Partial<ClientNote>): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`, {
-          method: 'PUT',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include',
-          body: JSON.stringify(updates)
-        });
+        const response = await apiPut(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`, updates);
 
         if (!response.ok) {
           throw new Error(`Failed to update note: ${response.statusText}`);
@@ -90,17 +76,13 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   const deleteNote = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`, {
-          method: 'DELETE',
-          headers: buildAuthHeaders(getAuthToken),
-          credentials: 'include'
-        });
+        const response = await apiDelete(`${API_ENDPOINTS.CLIENT_NOTES}/${id}`);
 
         if (!response.ok) {
           throw new Error(`Failed to delete note: ${response.statusText}`);
@@ -113,7 +95,7 @@ export function useClientNotes({ clientId, getAuthToken }: ClientDetailHookOptio
         return false;
       }
     },
-    [getAuthToken]
+    []
   );
 
   const toggleNotePin = useCallback(

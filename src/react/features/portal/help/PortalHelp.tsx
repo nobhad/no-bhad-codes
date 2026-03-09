@@ -15,7 +15,7 @@ import { GSAP } from '@react/config/portal-constants';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { BUSINESS_INFO } from '@/constants/business';
 import { TIMING } from '@/constants/timing';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import type { PortalViewProps } from '../types';
 import { createLogger } from '@/utils/logger';
 
@@ -73,7 +73,7 @@ export interface PortalHelpProps extends PortalViewProps {
 // HOOK: usePortalHelp
 // ============================================================================
 
-function usePortalHelp(getAuthToken?: () => string | null) {
+function usePortalHelp(_getAuthToken?: () => string | null) {
   const [viewMode, setViewMode] = useState<HelpViewMode>('browse');
   const [featuredArticles, setFeaturedArticles] = useState<KBArticle[]>([]);
   const [categories, setCategories] = useState<ExpandedCategory[]>([]);
@@ -85,30 +85,12 @@ function usePortalHelp(getAuthToken?: () => string | null) {
   const [error, setError] = useState<string | null>(null);
 
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const getAuthTokenRef = useRef(getAuthToken);
-
-  useEffect(() => {
-    getAuthTokenRef.current = getAuthToken;
-  }, [getAuthToken]);
-
-  /** Build headers with auth token */
-  const buildHeaders = useCallback((): HeadersInit => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    const token = getAuthTokenRef.current?.();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, []);
 
   /** Fetch featured articles */
   const fetchFeatured = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/featured?limit=6`,
-        { headers: buildHeaders(), credentials: 'include' }
+      const response = await apiFetch(
+        `${API_ENDPOINTS.KNOWLEDGE_BASE}/featured?limit=6`
       );
       if (!response.ok) throw new Error('Failed to load featured articles');
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -116,14 +98,13 @@ function usePortalHelp(getAuthToken?: () => string | null) {
     } catch (err) {
       logger.error('Error fetching featured articles:', err);
     }
-  }, [buildHeaders]);
+  }, []);
 
   /** Fetch categories */
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories`,
-        { headers: buildHeaders(), credentials: 'include' }
+      const response = await apiFetch(
+        `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories`
       );
       if (!response.ok) throw new Error('Failed to load categories');
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -138,7 +119,7 @@ function usePortalHelp(getAuthToken?: () => string | null) {
     } catch (err) {
       logger.error('Error fetching categories:', err);
     }
-  }, [buildHeaders]);
+  }, []);
 
   /** Load initial data */
   const loadInitialData = useCallback(async () => {
@@ -177,9 +158,8 @@ function usePortalHelp(getAuthToken?: () => string | null) {
 
     // Fetch articles for this category
     try {
-      const response = await fetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories/${categorySlug}`,
-        { headers: buildHeaders(), credentials: 'include' }
+      const response = await apiFetch(
+        `${API_ENDPOINTS.KNOWLEDGE_BASE}/categories/${categorySlug}`
       );
       if (!response.ok) throw new Error('Failed to load category articles');
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -198,15 +178,14 @@ function usePortalHelp(getAuthToken?: () => string | null) {
         )
       );
     }
-  }, [buildHeaders]);
+  }, []);
 
   /** View article detail */
   const viewArticle = useCallback(async (categorySlug: string, articleSlug: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${API_ENDPOINTS.KNOWLEDGE_BASE}/articles/${categorySlug}/${articleSlug}`,
-        { headers: buildHeaders(), credentials: 'include' }
+      const response = await apiFetch(
+        `${API_ENDPOINTS.KNOWLEDGE_BASE}/articles/${categorySlug}/${articleSlug}`
       );
       if (!response.ok) throw new Error('Failed to load article');
       const data = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -218,7 +197,7 @@ function usePortalHelp(getAuthToken?: () => string | null) {
     } finally {
       setIsLoading(false);
     }
-  }, [buildHeaders]);
+  }, []);
 
   /** Search articles with debounce */
   const handleSearchChange = useCallback((query: string) => {
@@ -241,9 +220,8 @@ function usePortalHelp(getAuthToken?: () => string | null) {
       setIsSearching(true);
       setViewMode('search');
       try {
-        const response = await fetch(
-          `${API_ENDPOINTS.KNOWLEDGE_BASE}/search?q=${encodeURIComponent(query.trim())}`,
-          { headers: buildHeaders(), credentials: 'include' }
+        const response = await apiFetch(
+          `${API_ENDPOINTS.KNOWLEDGE_BASE}/search?q=${encodeURIComponent(query.trim())}`
         );
         if (!response.ok) throw new Error('Search failed');
         const data = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -255,7 +233,7 @@ function usePortalHelp(getAuthToken?: () => string | null) {
         setIsSearching(false);
       }
     }, TIMING.SEARCH_DEBOUNCE);
-  }, [buildHeaders]);
+  }, []);
 
   /** Clear search and return to browse */
   const clearSearch = useCallback(() => {

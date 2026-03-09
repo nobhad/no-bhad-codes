@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { useFadeIn } from '@react/hooks/useGsap';
 import { EmptyState, LoadingState, ErrorState } from '@react/components/portal/EmptyState';
@@ -13,6 +13,7 @@ import { formatDate } from '@react/utils/formatDate';
 import { useListFetch } from '@react/factories/useDataFetch';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost } from '@/utils/api-client';
 
 const logger = createLogger('ApprovalsTable');
 
@@ -59,26 +60,9 @@ export function ApprovalsTable({ getAuthToken, showNotification }: ApprovalsTabl
   });
   const approvals = useMemo(() => data?.items ?? [], [data]);
 
-  // Auth headers helper (kept for mutation calls)
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   async function handleRespond(approvalId: number, action: 'approve' | 'decline') {
     try {
-      const response = await fetch(buildEndpoint.approvalRespond(approvalId), {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ action })
-      });
+      const response = await apiPost(buildEndpoint.approvalRespond(approvalId), { action });
       if (!response.ok) throw new Error(`Failed to ${action} request`);
 
       setData((prev) => prev ? { ...prev, items: prev.items.filter((a) => a.id !== approvalId) } : prev);

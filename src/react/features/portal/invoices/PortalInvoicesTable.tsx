@@ -28,6 +28,7 @@ import { PORTAL_INVOICES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { PortalInvoice, PortalViewProps } from '../types';
 import { formatCardDate, formatCurrency } from '@react/utils/cardFormatters';
 import { createLogger } from '@/utils/logger';
+import { apiFetch } from '@/utils/api-client';
 import { downloadInvoicePdf } from '@/utils/file-download';
 import { buildEndpoint } from '@/constants/api-endpoints';
 
@@ -115,16 +116,6 @@ export function PortalInvoicesTable({
 
   const filteredInvoices = useMemo(() => applyFilters(invoices), [applyFilters, invoices]);
 
-  // Auth headers helper for downloads
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Handle preview invoice
   const handlePreview = (invoice: PortalInvoice) => {
     window.open(`${buildEndpoint.invoicePdf(invoice.id)}?preview=true`, '_blank');
@@ -142,10 +133,7 @@ export function PortalInvoicesTable({
   // Handle download receipt
   const handleDownloadReceipt = async (invoice: PortalInvoice) => {
     try {
-      const receiptsResponse = await fetch(buildEndpoint.receiptsByInvoice(invoice.id), {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const receiptsResponse = await apiFetch(buildEndpoint.receiptsByInvoice(invoice.id));
 
       if (!receiptsResponse.ok) {
         throw new Error('Failed to fetch receipts');
@@ -160,10 +148,7 @@ export function PortalInvoicesTable({
       }
 
       const latestReceipt = receipts[0];
-      const pdfResponse = await fetch(buildEndpoint.receiptPdf(latestReceipt.id), {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const pdfResponse = await apiFetch(buildEndpoint.receiptPdf(latestReceipt.id));
 
       if (!pdfResponse.ok) {
         throw new Error('Failed to download receipt');

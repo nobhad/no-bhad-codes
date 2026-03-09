@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createLogger } from '@/utils/logger';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiDelete } from '@/utils/api-client';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
 import {
   EMPTY_FORM,
@@ -24,13 +24,6 @@ interface UseWebhooksDataParams {
 }
 
 export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksDataParams) {
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }, [getAuthToken]);
-
   // ---- View state ----
   const [view, setView] = useState<PanelView>('list');
   const [selectedWebhook, setSelectedWebhook] = useState<WebhookItem | null>(null);
@@ -71,9 +64,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.WEBHOOKS, {
-        method: 'GET', headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.WEBHOOKS);
       if (!response.ok) throw new Error('Failed to load webhooks');
       const payload = unwrapApiData<{ webhooks?: WebhookItem[] }>(await response.json());
       setWebhooks(payload.webhooks || []);
@@ -82,15 +73,13 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadDeliveries = useCallback(async (webhookId: number) => {
     setDeliveriesLoading(true);
     setDeliveriesError(null);
     try {
-      const response = await fetch(buildEndpoint.webhookDeliveries(webhookId), {
-        method: 'GET', headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(buildEndpoint.webhookDeliveries(webhookId));
       if (!response.ok) throw new Error('Failed to load deliveries');
       const payload = unwrapApiData<{ deliveries?: WebhookDelivery[] }>(await response.json());
       setDeliveries(payload.deliveries || []);
@@ -99,20 +88,18 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
     } finally {
       setDeliveriesLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   const loadStats = useCallback(async (webhookId: number) => {
     try {
-      const response = await fetch(buildEndpoint.webhookStats(webhookId), {
-        method: 'GET', headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(buildEndpoint.webhookStats(webhookId));
       if (!response.ok) throw new Error('Failed to load stats');
       const payload = unwrapApiData<WebhookStats>(await response.json());
       setWebhookStats(payload);
     } catch (err) {
       logger.error('Failed to load webhook stats:', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => { loadWebhooks(); }, [loadWebhooks]);
 
@@ -120,9 +107,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
 
   const handleToggleActive = useCallback(async (webhook: WebhookItem) => {
     try {
-      const response = await fetch(buildEndpoint.webhookToggle(webhook.id), {
-        method: 'PATCH', headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiFetch(buildEndpoint.webhookToggle(webhook.id), { method: 'PATCH' });
       if (!response.ok) throw new Error('Failed to toggle webhook');
       setWebhooks((prev) =>
         prev.map((w) => w.id === webhook.id ? { ...w, is_active: !w.is_active } : w)
@@ -132,14 +117,12 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
       logger.error('Failed to toggle webhook:', err);
       showNotification?.('Failed to toggle webhook', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   const handleDelete = useCallback(async () => {
     if (!deletingWebhook) return;
     try {
-      const response = await fetch(buildEndpoint.webhook(deletingWebhook.id), {
-        method: 'DELETE', headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiDelete(buildEndpoint.webhook(deletingWebhook.id));
       if (!response.ok) throw new Error('Failed to delete webhook');
       setWebhooks((prev) => prev.filter((w) => w.id !== deletingWebhook.id));
       showNotification?.('Webhook deleted', 'success');
@@ -147,13 +130,11 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
       logger.error('Failed to delete webhook:', err);
       showNotification?.('Failed to delete webhook', 'error');
     }
-  }, [deletingWebhook, getHeaders, showNotification]);
+  }, [deletingWebhook, showNotification]);
 
   const handleRetryDelivery = useCallback(async (webhookId: number) => {
     try {
-      const response = await fetch(buildEndpoint.webhookRetry(webhookId), {
-        method: 'POST', headers: getHeaders(), credentials: 'include'
-      });
+      const response = await apiPost(buildEndpoint.webhookRetry(webhookId));
       if (!response.ok) throw new Error('Failed to retry delivery');
       showNotification?.('Delivery retry queued', 'success');
       if (selectedWebhook) loadDeliveries(selectedWebhook.id);
@@ -161,7 +142,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
       logger.error('Failed to retry delivery:', err);
       showNotification?.('Failed to retry delivery', 'error');
     }
-  }, [getHeaders, showNotification, selectedWebhook, loadDeliveries]);
+  }, [showNotification, selectedWebhook, loadDeliveries]);
 
   // ---- Form handlers ----
 
@@ -207,11 +188,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
       };
       const isEditing = editingWebhook !== null;
       const endpoint = isEditing ? buildEndpoint.webhook(editingWebhook.id) : API_ENDPOINTS.ADMIN.WEBHOOKS;
-      const response = await fetch(endpoint, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: getHeaders(), credentials: 'include',
-        body: JSON.stringify(body)
-      });
+      const response = await apiFetch(endpoint);
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || `Failed to ${isEditing ? 'update' : 'create'} webhook`);
@@ -226,7 +203,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
     } finally {
       setFormSaving(false);
     }
-  }, [formData, editingWebhook, getHeaders, showNotification, loadWebhooks]);
+  }, [formData, editingWebhook, showNotification, loadWebhooks]);
 
   const handleEventToggle = useCallback((event: string) => {
     setFormData((prev) => ({
@@ -252,10 +229,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
 
     setTestSending(true);
     try {
-      const response = await fetch(buildEndpoint.webhookTest(testingWebhook.id), {
-        method: 'POST', headers: getHeaders(), credentials: 'include',
-        body: JSON.stringify({ eventType: testEventType, sampleData: parsedData })
-      });
+      const response = await apiPost(buildEndpoint.webhookTest(testingWebhook.id), { eventType: testEventType, sampleData: parsedData });
       if (!response.ok) throw new Error('Failed to send test');
       showNotification?.('Test webhook sent', 'success');
       onClose();
@@ -265,7 +239,7 @@ export function useWebhooksData({ getAuthToken, showNotification }: UseWebhooksD
     } finally {
       setTestSending(false);
     }
-  }, [testingWebhook, testEventType, testSampleData, getHeaders, showNotification]);
+  }, [testingWebhook, testEventType, testSampleData, showNotification]);
 
   // ---- View navigation ----
 

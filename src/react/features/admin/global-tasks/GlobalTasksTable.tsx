@@ -47,7 +47,7 @@ import { GLOBAL_TASKS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost } from '@/utils/api-client';
 
 const logger = createLogger('GlobalTasksTable');
 
@@ -152,17 +152,6 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
   const containerRef = useFadeIn();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Build headers helper with auth token
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
   const [error, setError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<TaskStats>({
@@ -218,11 +207,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.TASKS, {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.ADMIN.TASKS);
       if (!response.ok) throw new Error('Failed to load tasks');
 
       const payload = unwrapApiData<Record<string, unknown>>(await response.json());
@@ -239,7 +224,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   useEffect(() => {
     loadTasks();
@@ -248,10 +233,9 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
   // Status change handler
   const handleStatusChange = useCallback(async (taskId: number, newStatus: string) => {
     try {
-      const response = await fetch(buildEndpoint.adminTask(taskId), {
+      const response = await apiFetch(buildEndpoint.adminTask(taskId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -267,7 +251,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
       logger.error('Failed to update task status:', err);
       showNotification?.('Failed to update task status', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -275,12 +259,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
 
     const ids = selection.selectedItems.map((t) => t.id);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.TASKS_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.TASKS_BULK_DELETE, { ids });
 
       if (!response.ok) throw new Error('Failed to delete tasks');
 
@@ -291,7 +270,7 @@ export function GlobalTasksTable({ getAuthToken, showNotification, onNavigate, d
       logger.error('Failed to delete tasks:', err);
       showNotification?.('Failed to delete tasks', 'error');
     }
-  }, [selection, getHeaders, showNotification]);
+  }, [selection, showNotification]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

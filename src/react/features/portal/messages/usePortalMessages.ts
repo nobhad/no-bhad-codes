@@ -61,7 +61,7 @@ export function usePortalMessages({
   const [messagesError, setMessagesError] = useState<string | null>(null);
 
   // Shared authenticated fetch
-  const { buildHeaders, portalFetch } = usePortalFetch({ getAuthToken });
+  const { portalFetch } = usePortalFetch({ getAuthToken });
 
   // Refs for cleanup
   const abortControllerRef = useRef<AbortController | null>(null);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Folder,
   File,
@@ -33,6 +33,7 @@ import { FILES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiDelete, apiPost } from '@/utils/api-client';
 
 const logger = createLogger('FilesManager');
 
@@ -161,18 +162,6 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
   const files = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_FILE_STATS, [data]);
 
-  // Auth headers helper (kept for mutation calls)
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const {
     filterValues,
     setFilter,
@@ -215,11 +204,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
-      const response = await fetch(buildEndpoint.adminFile(fileId), {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiDelete(buildEndpoint.adminFile(fileId));
 
       if (!response.ok) throw new Error('Failed to delete file');
 
@@ -236,11 +221,7 @@ export function FilesManager({ projectId, clientId, onNavigate, getAuthToken, sh
     const action = isCurrentlyShared ? 'unshare' : 'share';
 
     try {
-      const response = await fetch(buildEndpoint.fileAction(file.id, action), {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(buildEndpoint.fileAction(file.id, action));
 
       if (!response.ok) throw new Error(`Failed to ${action} file`);
 

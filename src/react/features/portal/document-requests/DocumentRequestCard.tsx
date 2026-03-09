@@ -10,6 +10,7 @@ import { cn } from '@react/lib/utils';
 import { formatCardDate, formatFileSize, isOverdue, getDaysUntilDue } from '@react/utils/cardFormatters';
 import { IconButton } from '@react/factories';
 import { createLogger } from '@/utils/logger';
+import { getCsrfToken, CSRF_HEADER_NAME, apiPost } from '@/utils/api-client';
 import { buildEndpoint } from '@/constants/api-endpoints';
 
 const logger = createLogger('DocumentRequestCard');
@@ -158,16 +159,14 @@ export function DocumentRequestCard({
     setIsUploading(true);
 
     try {
-      const headers: Record<string, string> = {};
-      const token = getAuthToken?.();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      // Step 1: Upload file to project
+      // Step 1: Upload file to project (FormData — raw fetch with CSRF)
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('category', 'document_request');
+
+      const csrfToken = getCsrfToken();
+      const headers: Record<string, string> = {};
+      if (csrfToken) headers[CSRF_HEADER_NAME] = csrfToken;
 
       const uploadResponse = await fetch(buildEndpoint.projectUpload(request.project_id), {
         method: 'POST',
@@ -189,15 +188,7 @@ export function DocumentRequestCard({
       }
 
       // Step 2: Link uploaded file to document request
-      const linkResponse = await fetch(buildEndpoint.documentRequestUpload(request.id), {
-        method: 'POST',
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ file_id: fileId })
-      });
+      const linkResponse = await apiPost(buildEndpoint.documentRequestUpload(request.id), { file_id: fileId });
 
       if (!linkResponse.ok) {
         const errorData = await linkResponse.json().catch(() => ({}));
@@ -216,7 +207,7 @@ export function DocumentRequestCard({
     } finally {
       setIsUploading(false);
     }
-  }, [selectedFile, request.id, request.project_id, getAuthToken, showNotification, onUploadSuccess]);
+  }, [selectedFile, request.id, request.project_id, showNotification, onUploadSuccess]);
 
   // Get status display info
   const getStatusInfo = () => {

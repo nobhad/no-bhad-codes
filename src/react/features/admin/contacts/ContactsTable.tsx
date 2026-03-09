@@ -41,6 +41,7 @@ import { CONTACTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost, apiFetch } from '@/utils/api-client';
 
 const logger = createLogger('ContactsTable');
 
@@ -146,18 +147,6 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   const contacts = useMemo(() => data?.items ?? [], [data]);
   const stats = useMemo(() => data?.stats ?? DEFAULT_CONTACT_STATS, [data]);
 
-  // Build headers helper for mutation calls (POST/PATCH/DELETE)
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Filtering and sorting
   const {
     filterValues,
@@ -200,10 +189,9 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
   // Status change handler
   const handleStatusChange = useCallback(async (contactId: number, newStatus: string) => {
     try {
-      const response = await fetch(buildEndpoint.adminContact(contactId), {
+      const response = await apiFetch(buildEndpoint.adminContact(contactId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -222,14 +210,13 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
       logger.error('Failed to update contact status:', err);
       showNotification?.('Failed to update contact status', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   const togglePrimary = useCallback(async (contactId: number, isPrimary: boolean) => {
     try {
-      const response = await fetch(buildEndpoint.adminContact(contactId), {
+      const response = await apiFetch(buildEndpoint.adminContact(contactId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isPrimary: !isPrimary })
       });
 
@@ -246,7 +233,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
       logger.error('Failed to update contact:', err);
       showNotification?.('Failed to update contact', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -254,12 +241,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
 
     const ids = selection.selectedItems.map((c) => c.id);
     try {
-      const response = await fetch(API_ENDPOINTS.ADMIN.CONTACTS_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.ADMIN.CONTACTS_BULK_DELETE, { ids });
 
       if (!response.ok) throw new Error('Failed to delete contacts');
 
@@ -270,7 +252,7 @@ export function ContactsTable({ getAuthToken, showNotification, onNavigate, defa
       logger.error('Failed to delete contacts:', err);
       showNotification?.('Failed to delete contacts', 'error');
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

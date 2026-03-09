@@ -42,7 +42,7 @@ import {
 import { useFadeIn } from '@react/hooks/useGsap';
 import { ErrorState, LoadingState } from '@react/factories';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
 // Register Chart.js components + controllers
@@ -334,13 +334,6 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     };
   }, []);
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }, [getAuthToken]);
-
   const MAX_RETRIES = 3;
   const RETRY_DELAY_MS = 2000;
 
@@ -348,10 +341,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.ANALYTICS}?range=${dateRange}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.ANALYTICS}?range=${dateRange}`);
 
       // Retry on 503 (backend still starting up)
       if (response.status === 503 && retryCount < MAX_RETRIES) {
@@ -370,7 +360,7 @@ export function AnalyticsDashboard({ getAuthToken }: AnalyticsDashboardProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [dateRange, getHeaders]);
+  }, [dateRange]);
 
   useEffect(() => {
     loadAnalytics();

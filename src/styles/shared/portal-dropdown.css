@@ -1339,7 +1339,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--portal-alpha-black-50, rgba(0, 0, 0, 0.5));
+  background: var(--portal-alpha-black-50);
 }
 
 /* ============================================
@@ -1457,7 +1457,7 @@ td:has(.status-dropdown-trigger) .portal-dropdown-item .status-indicator,
   background: var(--portal-alpha-white-05);
 }
 .modal-dropdown-option.is-focused {
-  background: var(--portal-alpha-white-10, rgba(255, 255, 255, 0.1));
+  background: var(--portal-alpha-white-10);
 }
 .modal-dropdown-option.is-selected {
   color: var(--color-primary);

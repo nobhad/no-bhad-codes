@@ -34,6 +34,7 @@ import { QUESTIONNAIRES_FILTER_CONFIG } from '../shared/filterConfigs';
 import type { SortConfig } from '../types';
 import { createLogger } from '@/utils/logger';
 import { API_ENDPOINTS, buildEndpoint } from '@/constants/api-endpoints';
+import { apiPost, apiFetch } from '@/utils/api-client';
 
 const logger = createLogger('QuestionnairesTable');
 
@@ -151,18 +152,6 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   });
   const questionnaires = useMemo(() => data?.items ?? [], [data]);
 
-  // Build headers helper for mutation calls (POST/PATCH/DELETE)
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Filtering and sorting
   const {
     filterValues,
@@ -205,10 +194,9 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
   // Status change handler
   const handleStatusChange = useCallback(async (questionnaireId: number, newStatus: string) => {
     try {
-      const response = await fetch(buildEndpoint.questionnaire(questionnaireId), {
+      const response = await apiFetch(buildEndpoint.questionnaire(questionnaireId), {
         method: 'PATCH',
-        headers: getHeaders(),
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -227,15 +215,11 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       logger.error('Failed to update questionnaire status:', err);
       showNotification?.('Failed to update questionnaire status', 'error');
     }
-  }, [getHeaders, showNotification, setData]);
+  }, [showNotification, setData]);
 
   const handleSendQuestionnaire = useCallback(async (id: number) => {
     try {
-      const response = await fetch(buildEndpoint.questionnaireSend(id), {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(buildEndpoint.questionnaireSend(id));
       if (!response.ok) throw new Error('Failed to send questionnaire');
       refetch();
       showNotification?.('Questionnaire sent', 'success');
@@ -243,7 +227,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       logger.error('Failed to send questionnaire:', err);
       showNotification?.('Failed to send questionnaire', 'error');
     }
-  }, [getHeaders, showNotification, refetch]);
+  }, [showNotification, refetch]);
 
   // Bulk delete handler
   const handleBulkDelete = useCallback(async () => {
@@ -251,12 +235,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
 
     const ids = selection.selectedItems.map((q) => q.id);
     try {
-      const response = await fetch(API_ENDPOINTS.QUESTIONNAIRES_BULK_DELETE, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ ids })
-      });
+      const response = await apiPost(API_ENDPOINTS.QUESTIONNAIRES_BULK_DELETE, { ids });
 
       if (!response.ok) throw new Error('Failed to delete questionnaires');
 
@@ -267,7 +246,7 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
       logger.error('Failed to delete questionnaires:', err);
       showNotification?.('Failed to delete questionnaires', 'error');
     }
-  }, [selection, getHeaders, showNotification, setData]);
+  }, [selection, showNotification, setData]);
 
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(

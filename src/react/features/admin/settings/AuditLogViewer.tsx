@@ -11,7 +11,7 @@ import { TableLayout, TableStats } from '@react/components/portal/TableLayout';
 import { LoadingState, ErrorState } from '@react/components/portal/EmptyState';
 import { IconButton } from '@react/factories';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 
 interface AuditEntry {
   id: number;
@@ -86,13 +86,6 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
   const [filterUser, setFilterUser] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }, [getAuthToken]);
-
   const loadLogs = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -104,10 +97,7 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
       if (filterEntity) params.set('entityType', filterEntity);
       if (filterUser) params.set('userEmail', filterUser);
 
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.AUDIT_LOG}?${params}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.AUDIT_LOG}?${params}`);
       if (!response.ok) throw new Error('Failed to load audit log');
       const result = unwrapApiData<{ data: AuditEntry[]; count: number }>(await response.json());
       setEntries(result.data);
@@ -117,7 +107,7 @@ export function AuditLogViewer({ getAuthToken, showNotification: _showNotificati
     } finally {
       setIsLoading(false);
     }
-  }, [getHeaders, page, filterAction, filterEntity, filterUser]);
+  }, [page, filterAction, filterEntity, filterUser]);
 
   useEffect(() => { loadLogs(); }, [loadLogs]);
 

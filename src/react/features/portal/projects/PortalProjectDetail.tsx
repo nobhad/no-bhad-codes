@@ -34,6 +34,7 @@ import type {
 } from '../types';
 import { createLogger } from '@/utils/logger';
 import { buildEndpoint } from '@/constants/api-endpoints';
+import { apiFetch } from '@/utils/api-client';
 
 const logger = createLogger('PortalProjectDetail');
 
@@ -122,7 +123,6 @@ const TABS: Array<{ id: PortalProjectTab; label: string }> = [
  */
 export function PortalProjectDetail({
   projectId,
-  getAuthToken,
   onBack,
   showNotification: _showNotification
 }: PortalProjectDetailProps) {
@@ -141,18 +141,6 @@ export function PortalProjectDetail({
   const [error, setError] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<PortalProjectTab>('milestones');
 
-  // Build headers helper
-  const getHeaders = React.useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   // Fetch project details
   const fetchProjectDetails = React.useCallback(async () => {
     setIsLoading(true);
@@ -160,11 +148,7 @@ export function PortalProjectDetail({
 
     try {
       // Fetch project
-      const projectResponse = await fetch(buildEndpoint.project(projectId), {
-        method: 'GET',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const projectResponse = await apiFetch(buildEndpoint.project(projectId));
 
       if (!projectResponse.ok) {
         throw new Error(`Failed to fetch project: ${projectResponse.statusText}`);
@@ -188,11 +172,7 @@ export function PortalProjectDetail({
 
       // Fetch milestones
       try {
-        const milestonesResponse = await fetch(buildEndpoint.projectMilestones(projectId), {
-          method: 'GET',
-          headers: getHeaders(),
-          credentials: 'include'
-        });
+        const milestonesResponse = await apiFetch(buildEndpoint.projectMilestones(projectId));
 
         if (milestonesResponse.ok) {
           const milestonesData = await milestonesResponse.json();
@@ -207,11 +187,7 @@ export function PortalProjectDetail({
 
       // Fetch updates/activity
       try {
-        const updatesResponse = await fetch(buildEndpoint.projectUpdates(projectId), {
-          method: 'GET',
-          headers: getHeaders(),
-          credentials: 'include'
-        });
+        const updatesResponse = await apiFetch(buildEndpoint.projectUpdates(projectId));
 
         if (updatesResponse.ok) {
           const updatesData = await updatesResponse.json();
@@ -226,11 +202,7 @@ export function PortalProjectDetail({
 
       // Fetch files
       try {
-        const filesResponse = await fetch(buildEndpoint.projectFiles(projectId), {
-          method: 'GET',
-          headers: getHeaders(),
-          credentials: 'include'
-        });
+        const filesResponse = await apiFetch(buildEndpoint.projectFiles(projectId));
 
         if (filesResponse.ok) {
           const filesData = await filesResponse.json();
@@ -245,11 +217,7 @@ export function PortalProjectDetail({
 
       // Fetch message threads
       try {
-        const threadsResponse = await fetch(buildEndpoint.projectMessages(projectId), {
-          method: 'GET',
-          headers: getHeaders(),
-          credentials: 'include'
-        });
+        const threadsResponse = await apiFetch(buildEndpoint.projectMessages(projectId));
 
         if (threadsResponse.ok) {
           const threadsData = await threadsResponse.json();
@@ -264,11 +232,7 @@ export function PortalProjectDetail({
 
       // Fetch invoices
       try {
-        const invoicesResponse = await fetch(buildEndpoint.projectInvoices(projectId), {
-          method: 'GET',
-          headers: getHeaders(),
-          credentials: 'include'
-        });
+        const invoicesResponse = await apiFetch(buildEndpoint.projectInvoices(projectId));
 
         if (invoicesResponse.ok) {
           const invoicesData = await invoicesResponse.json();
@@ -283,11 +247,7 @@ export function PortalProjectDetail({
 
       // Fetch time summary
       try {
-        const timeResponse = await fetch(buildEndpoint.projectTimeSummary(projectId), {
-          method: 'GET',
-          headers: getHeaders(),
-          credentials: 'include'
-        });
+        const timeResponse = await apiFetch(buildEndpoint.projectTimeSummary(projectId));
 
         if (timeResponse.ok) {
           const timeData = await timeResponse.json();
@@ -304,7 +264,7 @@ export function PortalProjectDetail({
     } finally {
       setIsLoading(false);
     }
-  }, [projectId, getHeaders]);
+  }, [projectId]);
 
   // Fetch on mount and when projectId changes
   React.useEffect(() => {

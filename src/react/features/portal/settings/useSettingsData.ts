@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch } from '@/utils/api-client';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { createLogger } from '@/utils/logger';
 import { usePortalFetch } from '@react/hooks/usePortalFetch';
@@ -64,7 +64,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
   const [billing, setBilling] = useState<BillingAddress>({});
   const [notifications, setNotifications] = useState<NotificationPreferences>(DEFAULT_NOTIFICATION_PREFS);
 
-  const { buildHeaders, portalFetch } = usePortalFetch({ getAuthToken });
+  const { portalFetch } = usePortalFetch({ getAuthToken });
 
   // Stable ref for showNotification to avoid dependency churn
   const showNotificationRef = useRef(showNotification);
@@ -79,10 +79,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
     setError(null);
 
     try {
-      const response = await fetch(API_ENDPOINTS.CLIENTS_ME, {
-        headers: buildHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(API_ENDPOINTS.CLIENTS_ME);
 
       if (!response.ok) {
         throw new Error('Failed to load profile');
@@ -109,7 +106,7 @@ export function useSettingsData(options: UseSettingsDataOptions = {}): UseSettin
     } finally {
       setIsLoading(false);
     }
-  }, [buildHeaders]);
+  }, []);
 
   // Initial fetch on mount
   useEffect(() => {

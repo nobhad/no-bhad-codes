@@ -60,7 +60,6 @@ function isOverdue(invoice: Invoice): boolean {
  * Hook for fetching and managing invoices data
  */
 export function useInvoices({
-  getAuthToken,
   autoFetch = true
 }: UseInvoicesOptions = {}): UseInvoicesReturn {
   const [invoices, setInvoices] = useState<Invoice[]>([]);

@@ -18,7 +18,7 @@ import { useFadeIn } from '@react/hooks/useGsap';
 import { LoadingState } from '@react/components/portal/EmptyState';
 import { formatCurrencyCompact as formatCurrency } from '@/utils/format-utils';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { unwrapApiData } from '@/utils/api-client';
+import { apiFetch, unwrapApiData } from '@/utils/api-client';
 
 interface PerformanceKPI {
   id: string;
@@ -87,25 +87,11 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
   });
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
 
-  const getHeaders = useCallback(() => {
-    const token = getAuthToken?.();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  }, [getAuthToken]);
-
   const loadPerformance = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.PERFORMANCE}?period=${period}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.PERFORMANCE}?period=${period}`);
       if (!response.ok) throw new Error('Failed to load performance data');
       const payload = unwrapApiData<PerformanceData>(await response.json());
       setData(payload);
@@ -114,7 +100,7 @@ export function PerformanceMetrics({ onNavigate, getAuthToken }: PerformanceMetr
     } finally {
       setIsLoading(false);
     }
-  }, [period, getHeaders]);
+  }, [period]);
 
   useEffect(() => {
     loadPerformance();

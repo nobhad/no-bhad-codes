@@ -32,7 +32,7 @@ import { formatDate } from '@react/utils/formatDate';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import { KEYS } from '@/constants/keyboard';
-import { unwrapApiData } from '@/utils/api-client';
+import { unwrapApiData, apiFetch, apiPost, apiPut, apiDelete } from '@/utils/api-client';
 import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('LeadDetailPanel');
@@ -94,22 +94,11 @@ export function LeadDetailPanel({
 
   const isOpen = lead !== null;
 
-  // Auth headers
-  const getHeaders = useCallback((): Record<string, string> => {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    const token = getAuthToken?.();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }, [getAuthToken]);
-
   // Fetch tasks for lead
   const fetchTasks = useCallback(async (leadId: number) => {
     setIsLoadingTasks(true);
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/${leadId}/tasks`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.LEADS}/${leadId}/tasks`);
       if (response.ok) {
         const data = unwrapApiData<Record<string, unknown>>(await response.json());
         setTasks((data.tasks as LeadTask[]) || []);
@@ -119,16 +108,13 @@ export function LeadDetailPanel({
     } finally {
       setIsLoadingTasks(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   // Fetch notes for lead
   const fetchNotes = useCallback(async (leadId: number) => {
     setIsLoadingNotes(true);
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/${leadId}/notes`, {
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiFetch(`${API_ENDPOINTS.ADMIN.LEADS}/${leadId}/notes`);
       if (response.ok) {
         const data = unwrapApiData<Record<string, unknown>>(await response.json());
         setNotes((data.notes as LeadNote[]) || []);
@@ -138,7 +124,7 @@ export function LeadDetailPanel({
     } finally {
       setIsLoadingNotes(false);
     }
-  }, [getHeaders]);
+  }, []);
 
   // Load tasks + notes when lead changes
   useEffect(() => {
@@ -166,11 +152,7 @@ export function LeadDetailPanel({
   const handleCompleteTask = useCallback(async (taskId: number) => {
     if (!lead) return;
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/tasks/${taskId}/complete`, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(`${API_ENDPOINTS.ADMIN.LEADS}/tasks/${taskId}/complete`);
       if (response.ok) {
         setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, status: 'completed' } : t));
         showNotification?.('Task completed', 'success');
@@ -179,32 +161,24 @@ export function LeadDetailPanel({
       logger.error('Failed to complete task:', err);
       showNotification?.('Failed to complete task', 'error');
     }
-  }, [lead, getHeaders, showNotification]);
+  }, [lead, showNotification]);
 
   // Toggle note pin
   const handleTogglePin = useCallback(async (noteId: number) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}/toggle-pin`, {
-        method: 'POST',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiPost(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}/toggle-pin`);
       if (response.ok) {
         setNotes((prev) => prev.map((n) => n.id === noteId ? { ...n, is_pinned: !n.is_pinned } : n));
       }
     } catch (err) {
       logger.error('Failed to toggle pin:', err);
     }
-  }, [getHeaders]);
+  }, []);
 
   // Delete a note
   const handleDeleteNote = useCallback(async (noteId: number) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-        credentials: 'include'
-      });
+      const response = await apiDelete(`${API_ENDPOINTS.ADMIN.LEADS}/notes/${noteId}`);
       if (response.ok) {
         setNotes((prev) => prev.filter((n) => n.id !== noteId));
         showNotification?.('Note deleted', 'success');
@@ -213,7 +187,7 @@ export function LeadDetailPanel({
       logger.error('Failed to delete note:', err);
       showNotification?.('Failed to delete note', 'error');
     }
-  }, [getHeaders, showNotification]);
+  }, [showNotification]);
 
   // Copy email to clipboard
   const handleCopyEmail = useCallback((email: string) => {
@@ -226,12 +200,7 @@ export function LeadDetailPanel({
   const handleActivate = useCallback(async () => {
     if (!lead) return;
     try {
-      const response = await fetch(`${API_ENDPOINTS.ADMIN.LEADS}/${lead.id}/status`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ status: 'in-progress' })
-      });
+      const response = await apiPut(`${API_ENDPOINTS.ADMIN.LEADS}/${lead.id}/status`, { status: 'in-progress' });
       if (response.ok) {
         onStatusChange?.(lead.id, 'in-progress');
         showNotification?.('Lead activated as project', 'success');
@@ -241,7 +210,7 @@ export function LeadDetailPanel({
       logger.error('Failed to activate lead:', err);
       showNotification?.('Failed to activate lead', 'error');
     }
-  }, [lead, getHeaders, onStatusChange, showNotification, onClose]);
+  }, [lead, onStatusChange, showNotification, onClose]);
 
   if (!isOpen || !lead) return null;
 
