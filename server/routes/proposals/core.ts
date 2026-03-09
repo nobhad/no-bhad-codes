@@ -34,8 +34,7 @@ import {
   VALID_PROJECT_TYPES,
   VALID_TIERS,
   VALID_MAINTENANCE,
-  VALID_STATUSES,
-  proposalService
+  VALID_STATUSES
 } from './helpers.js';
 import type {
   AuthenticatedRequest,

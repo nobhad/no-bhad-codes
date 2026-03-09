@@ -8,7 +8,7 @@
  */
 
 import crypto from 'crypto';
-import express from 'express';
+
 import multer from 'multer';
 import path from 'path';
 import { getDatabase } from '../../database/init.js';

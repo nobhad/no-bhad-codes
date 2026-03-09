@@ -23,7 +23,6 @@ import {
   getPdfLogoBytes,
   PDFLibDocument,
   StandardFonts,
-  rgb,
   degrees,
   getPdfCacheKey,
   getCachedPdf,
