@@ -52,6 +52,7 @@ export function SearchFilter({ value, onChange, placeholder = 'Search...' }: Sea
         <Search />
       </button>
       <div className="filter-search-dropdown search-bar">
+        <Search className="search-bar-icon" aria-hidden="true" />
         <input
           ref={inputRef}
           type="text"
