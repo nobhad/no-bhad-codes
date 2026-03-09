@@ -298,9 +298,9 @@ html[data-theme="dark"] .portal-global-header .header-theme-toggle .moon-icon {
    PORTAL COLOR HIERARCHY
    Defined in: src/design-system/tokens/portal-theme.css
    ================================================
-   Canvas (body): --color-bg-primary  - base page background
+   Canvas (body): --color-bg-primary  - #1a1a1a dark / #e7e6e6 light
    Sidebar:       --color-bg-primary  - matches canvas
-   Cards/Panels:  --color-bg-primary  - matches canvas
+   Cards/Panels:  --color-bg-primary  - flat design, same as canvas
    Nested:        --color-bg-tertiary - inside cards
    Hover:         --color-bg-hover    - interactive states
    Inputs:        inherit from container
