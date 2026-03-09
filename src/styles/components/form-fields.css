@@ -116,8 +116,8 @@ select::-ms-expand {
 .form-container select:focus,
 .login-form select:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.25);
 }
 
 /* Focus indicators inherited from global :focus-visible rule in reset.css */

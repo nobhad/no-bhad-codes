@@ -102,7 +102,7 @@ body[data-page="admin"]:not(.admin-logged-in) .nav-logo-row:hover,
 body[data-page="admin"]:not(.admin-logged-in) .theme-button:hover,
 body[data-page="admin"]:not(.admin-logged-in) .menu-button:hover,
 body[data-page="admin"]:not(.admin-logged-in) .portal-button:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 body.admin-logged-in[data-page="admin"] .admin-header {
@@ -134,7 +134,7 @@ body[data-page="admin"]:not(.admin-logged-in) .admin-footer a {
 }
 
 body[data-page="admin"]:not(.admin-logged-in) .admin-footer a:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 body.admin-logged-in[data-page="admin"] .admin-footer {
@@ -184,7 +184,7 @@ body[data-page="admin"]:not(.admin-logged-in) {
 /* Dashboard Content Area — admin-specific overrides only.
    Base layout (flex, height, min-width) set in shared/portal-layout.css */
 [data-page="admin"] .dashboard-content {
-  padding: 0 clamp(var(--space-1-5), 2vw, var(--space-3)) clamp(var(--space-1-5), 2vw, var(--space-3));
+  padding: 0 clamp(var(--space-1-5), 2vw, var(--space-3)) var(--portal-page-bottom);
   overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -327,7 +327,7 @@ body[data-page="admin"] #tab-analytics .stat-card {
 
 [data-page="admin"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
-  background-color: rgba(var(--color-primary-rgb), 0.2);
+  background-color: rgba(var(--color-accent-rgb), 0.2);
 }
 
 [data-page="admin"] input[type="date"]::-moz-calendar-picker-indicator {
@@ -366,11 +366,11 @@ body[data-page="admin"] .project-detail-overview {
 }
 
 [data-page="admin"] .page-header h2 {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 [data-page="admin"] .page-header .header-sidebar-toggle {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Admin Dashboard Layout */
@@ -476,7 +476,7 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .icon-btn-invite:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 [data-page="admin"] .icon-btn-invite:disabled {
@@ -694,7 +694,7 @@ body.modal-open .dashboard-content {
 
 .set-password-form .form-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .set-password-form .form-input[readonly] {
@@ -744,7 +744,7 @@ body.modal-open .dashboard-content {
   width: var(--icon-btn-size-lg);
   height: var(--icon-btn-size-lg);
   border: var(--border-width-heavy) solid var(--color-border-primary);
-  border-top: var(--border-width-heavy) solid var(--color-primary);
+  border-top: var(--border-width-heavy) solid var(--color-accent);
   border-radius: var(--border-radius-full);
   animation: spin 1s linear infinite;
   margin-bottom: var(--space-4);
@@ -1175,10 +1175,7 @@ body.modal-open .dashboard-content {
 }
 
 [data-page="admin"] .data-table-card,
-[data-page="admin"] .data-table-card,
-[data-page="admin"] .stat-card,
-[data-page="admin"] .stat-card,
-[data-page="admin"] .panel {
+[data-page="admin"] .stat-card {
   border: var(--portal-border);
 }
 
@@ -1239,7 +1236,7 @@ body.modal-open .dashboard-content {
 
 /* Tab section border — only on tabs with a simple header+list structure */
 [data-page="admin"] .tab-section {
-  border: 1px solid var(--color-border-primary);
+  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
 }
 

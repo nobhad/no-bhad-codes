@@ -106,7 +106,7 @@ li {
 
 .nav-logo-row:hover,
 .nav-logo-row:active {
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -118,7 +118,7 @@ li {
 
 /* Focus-visible: red color for keyboard navigation */
 .nav-logo-row:focus-visible {
-  color: var(--color-primary);
+  color: var(--color-accent);
   outline: none;
   box-shadow: none;
 }
@@ -238,7 +238,7 @@ li {
 }
 
 .bg-panel.first {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
 }
 
 .bg-panel.second {
@@ -380,7 +380,7 @@ li {
   top: 50%;
   right: 40%;
   transform: translateY(-40%);
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-dark);
   padding: var(--space-1) var(--space-3);
   border-radius: 1rem;
@@ -391,14 +391,14 @@ li {
   z-index: 10;
   font-family: monospace;
   text-shadow: none;
-  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.3);
   /* GSAP handles pulse-glow animation - see navigation.ts */
 }
 
 /* Dark theme adjustments for coming soon banner */
 html[data-theme="dark"] .coming-soon-banner {
   color: var(--color-neutral-100);
-  background: var(--color-primary);
+  background: var(--color-accent);
 }
 
 /* =====================================================
@@ -406,7 +406,7 @@ html[data-theme="dark"] .coming-soon-banner {
    ===================================================== */
 .menu-link .eyebrow {
   z-index: 1;
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-transform: uppercase;
   font-family: monospace;
   font-weight: 400;
@@ -441,7 +441,7 @@ html[data-theme="dark"] .coming-soon-banner {
     bottom: 0;
     width: 100%;
     height: 1px;
-    background: var(--color-primary);
+    background: var(--color-accent);
     transform-origin: right center;
     transform: scaleX(0);
     transition: transform 0.4s var(--cubic-default);
@@ -481,15 +481,15 @@ html[data-theme="dark"] .coming-soon-banner {
 .theme-button:active,
 .menu-button:hover,
 .menu-button:active {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Focus-visible: red color + subtle background for better visibility (WCAG 2.4.7 compliance) */
 /* Remove outline border from global focus-visible rule */
 .theme-button:focus-visible,
 .menu-button:focus-visible {
-  color: var(--color-primary);
-  background-color: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-accent);
+  background-color: rgba(var(--color-accent-rgb), 0.1);
   outline: none;
   box-shadow: none;
 }
@@ -649,7 +649,7 @@ html[data-theme="dark"] .coming-soon-banner {
 }
 
 .social-link:hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-text-on-primary);
   transform: translateY(-2px);
 }
@@ -716,7 +716,7 @@ html[data-theme="dark"] .menu-button:hover {
   background: transparent;
   border: none;
   box-shadow: none;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Dark mode menu link text shadow - use darkest panel color for duplicate text, no drop shadow */
@@ -730,7 +730,7 @@ html[data-theme="dark"] .bg-panel {
 }
 
 html[data-theme="dark"] .bg-panel.first {
-  background-color: var(--color-primary); /* Keep green accent */
+  background-color: var(--color-accent); /* Keep green accent */
 }
 
 html[data-theme="dark"] .bg-panel.second {

@@ -48,7 +48,7 @@
 [data-page="admin"] .inline-edit-input {
   width: 100%;
   padding: var(--space-0-5) var(--space-1);
-  border: var(--border-width) solid var(--color-primary);
+  border: var(--border-width) solid var(--color-accent);
   border-radius: var(--border-radius-sm);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
@@ -61,7 +61,7 @@
 }
 
 [data-page="admin"] .inline-edit-input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 2px var(--portal-alpha-primary-20);
 }
 
@@ -195,7 +195,7 @@
   padding: 0 6px;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  border: var(--border-width) solid var(--color-brand-primary, var(--color-primary));
+  border: var(--border-width) solid var(--color-brand-primary, var(--color-accent));
   border-radius: var(--border-radius-sm, 4px);
   font-size: var(--font-size-xs);
   outline: none;
@@ -272,7 +272,7 @@
 }
 
 .portal .inline-link-external:hover {
-  color: var(--color-brand-primary, var(--color-primary));
+  color: var(--color-brand-primary, var(--color-accent));
 }
 
 /* ===============================================
@@ -322,7 +322,7 @@
 }
 
 .portal .inline-edit-required {
-  color: var(--color-primary);
+  color: var(--color-accent);
   margin-left: 2px;
 }
 
@@ -351,7 +351,7 @@
 }
 
 .portal .inline-edit-row .inline-edit-value.editable:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -386,7 +386,7 @@
 .portal .inline-edit-row .inline-edit-input {
   width: 100%;
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-primary);
+  border: var(--border-width) solid var(--color-accent);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   font-size: var(--font-size-base, 14px);
@@ -396,7 +396,7 @@
 }
 
 .portal .inline-edit-row .inline-edit-input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .portal .inline-edit-row .inline-edit-input::placeholder {
@@ -416,7 +416,7 @@
 .portal .inline-edit-row .inline-edit-select {
   width: 100%;
   padding: var(--space-1) var(--space-2);
-  border: var(--border-width) solid var(--color-primary);
+  border: var(--border-width) solid var(--color-accent);
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   font-size: var(--font-size-base, 14px);
