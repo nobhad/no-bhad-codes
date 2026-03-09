@@ -123,14 +123,13 @@ export function DeliverablesTab({
                 >
                   {/* Milestone Header */}
                   <div className="layout-row-between deliv-milestone-header">
-                    <div className="layout-row">
-                      {milestone.is_completed ? (
-                        <Check className="icon-md" />
-                      ) : (
-                        <Package className="icon-md" />
-                      )}
-
-                      <div>
+                    <div>
+                      <div className="layout-row deliv-milestone-title-row">
+                        {milestone.is_completed ? (
+                          <Check className="deliv-milestone-icon" />
+                        ) : (
+                          <Package className="deliv-milestone-icon" />
+                        )}
                         <h4
                           className={cn(
                             milestone.is_completed
@@ -140,12 +139,12 @@ export function DeliverablesTab({
                         >
                           {milestone.title}
                         </h4>
-                        {milestone.description && (
-                          <p className="text-muted deliv-milestone-desc">
-                            {milestone.description}
-                          </p>
-                        )}
                       </div>
+                      {milestone.description && (
+                        <p className="text-muted deliv-milestone-desc">
+                          {milestone.description}
+                        </p>
+                      )}
                     </div>
 
                     {/* Due Date */}

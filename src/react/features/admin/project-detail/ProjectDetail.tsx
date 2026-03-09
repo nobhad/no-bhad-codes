@@ -60,6 +60,8 @@ interface ProjectDetailProps {
   onNavigate?: (tab: string, entityId?: string) => void;
   /** Show notification callback */
   showNotification?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  /** Initial tab to display */
+  initialTab?: string;
 }
 
 // Tab icon components mapping
@@ -98,10 +100,13 @@ export function ProjectDetail({
   onBack,
   onEdit,
   onNavigate,
-  showNotification
+  showNotification,
+  initialTab
 }: ProjectDetailProps) {
   const containerRef = useFadeIn<HTMLDivElement>();
-  const [activeTab, setActiveTab] = useState<ProjectDetailTab>('overview');
+  const validTabs: ProjectDetailTab[] = ['overview', 'files', 'deliverables', 'messages', 'invoices', 'tasks', 'contract', 'notes', 'intake'];
+  const resolvedInitialTab = validTabs.includes(initialTab as ProjectDetailTab) ? (initialTab as ProjectDetailTab) : 'overview';
+  const [activeTab, setActiveTab] = useState<ProjectDetailTab>(resolvedInitialTab);
 
   // Project data
   const {

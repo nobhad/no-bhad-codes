@@ -91,38 +91,35 @@ export function ContractTab({
       {/* Contract Status Card */}
       <div className="panel">
         <div className="contract-status-layout">
-          <div className="layout-row-top gap-4">
-            {isSigned ? (
-              <Check className="icon-md" />
-            ) : (
-              <FileSignature className="icon-md" />
+          <div>
+            <div className="layout-row">
+              {isSigned ? (
+                <Check className="icon-md" />
+              ) : (
+                <FileSignature className="icon-md" />
+              )}
+              <h3 className="heading">
+                Contract Status
+              </h3>
+              <span className="badge">
+                {contractStatus.label}
+              </span>
+            </div>
+
+            {isSigned && project.contract_signed_date && (
+              <div className="layout-row gap-2 text-muted pd-mt-2">
+                <Calendar className="icon-md" />
+                <span>Signed on {formatDate(project.contract_signed_date, 'label')}</span>
+              </div>
             )}
 
-            <div>
-              <div className="layout-row">
-                <h3 className="heading">
-                  Contract Status
-                </h3>
-                <span className="badge">
-                  {contractStatus.label}
-                </span>
-              </div>
-
-              {isSigned && project.contract_signed_date && (
-                <div className="layout-row gap-2 text-muted pd-mt-2">
-                  <Calendar className="icon-md" />
-                  <span>Signed on {formatDate(project.contract_signed_date, 'label')}</span>
-                </div>
-              )}
-
-              {!isSigned && (
-                <p className="text-muted pd-mt-1">
-                  {contractStatus.status === 'pending'
-                    ? 'Contract has been sent and is awaiting client signature.'
-                    : 'Contract has not been sent to the client yet.'}
-                </p>
-              )}
-            </div>
+            {!isSigned && (
+              <p className="text-muted pd-mt-1">
+                {contractStatus.status === 'pending'
+                  ? 'Contract has been sent and is awaiting client signature.'
+                  : 'Contract has not been sent to the client yet.'}
+              </p>
+            )}
           </div>
 
           {/* Actions */}
