@@ -1,41 +1,43 @@
 # Admin Dashboard
 
-**Last Updated:** February 17, 2026 (Portal Rebuild complete - all 28 modules render dynamically)
+**Status:** Complete
+**Last Updated:** March 8, 2026
 
-> **Part of "The Backend"** - The portal system consisting of both the Admin Dashboard and Client Portal.
+> Part of "The Backend" — the portal system serving both the Admin Dashboard and Client Portal as a single React SPA.
 
 ## Table of Contents
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
-3. [Tab Navigation](#tab-navigation)
-4. [Leads Management](#leads-management)
-5. [Projects Management](#projects-management)
-6. [Project Detail View](#project-detail-view)
-7. [Client Invitation Flow](#client-invitation-flow)
-8. [Messaging](#messaging)
-9. [File Locations](#file-locations)
-10. [Related Documentation](#related-documentation)
+3. [Entry Point Flow](#entry-point-flow)
+4. [React SPA Structure](#react-spa-structure)
+5. [Route Map](#route-map)
+6. [Feature Components](#feature-components)
+7. [State Management](#state-management)
+8. [Auth Guard](#auth-guard)
+9. [Client Invitation Flow](#client-invitation-flow)
+10. [Server Routes](#server-routes)
+11. [Related Documentation](#related-documentation)
 
 ---
 
 ## Overview
 
-The Admin Dashboard is the administrative side of "The Backend" portal system. It provides comprehensive capabilities for managing leads, projects, clients, and analytics. This is a **solo operation** — a single admin (the business owner) manages everything. There is no team management or multi-user admin.
+The Admin Dashboard is the administrative side of "The Backend" portal system. It is a **solo-operator** tool — a single admin (the business owner) manages everything. There is no multi-user admin or team management.
 
-**Key Features:**
+Key capabilities:
 
-- [x] Leads management with status tracking
-- [x] Contact form submissions viewing
-- [x] Projects management with full lifecycle support
-- [x] Client invitation flow with magic link password setup
-- [x] Full project detail view (mirrors client portal)
-- [x] Client messaging system
-- [x] Global tasks Kanban (tasks across all projects)
-- [x] Analytics and visitor tracking
-- [x] System information
+- Leads and contact form submission management
+- Full project lifecycle management with a detail view
+- Client management and invitation flow
+- Messaging with clients
+- Invoices, contracts, and proposals
+- Analytics, performance metrics, and KPIs
+- File management, document requests, and questionnaires
+- Workflows, integrations, webhooks, and email templates
+- System settings, data quality, and audit logs
 
-**Access:** `/admin/index.html`
+**Access:** The portal is served at `/dashboard` (server-rendered EJS shell, React SPA mounts inside).
 
 ---
 
@@ -43,361 +45,278 @@ The Admin Dashboard is the administrative side of "The Backend" portal system. I
 
 ### Technology Stack
 
-|Component|Technology|
+| Component | Technology |
 |-----------|------------|
-|Frontend|Vanilla TypeScript|
-|Styling|CSS with CSS Variables|
-|Charts|Chart.js|
-|Build Tool|Vite|
-|Authentication|HttpOnly cookies with bcrypt|
+| Frontend | React 18 + TypeScript |
+| Routing | React Router v6 (hash-based) |
+| State | Zustand |
+| Build | Vite with code splitting |
+| Authentication | HttpOnly cookies with JWT |
+| Charts | TBD — verify current usage in `AnalyticsDashboard.tsx` |
+| Backend | Express + SQLite (better-sqlite3) |
 
-### Module Structure
+### Shared SPA
+
+Both admin and client portals share the same React SPA. Role (`admin` or `client`) is decoded from the JWT on the server and passed into the session. `usePortalAuth` reads it and sets `portal-store.role`. Routes and navigation items are filtered by role.
+
+---
+
+## Entry Point Flow
 
 ```text
-admin/
-└── index.html                    # Admin HTML entry point
-
-src/features/admin/
-├── admin-dashboard.ts            # Main dashboard coordinator (~2749 lines)
-├── admin-project-details.ts      # Project detail view handler (~1642 lines)
-├── admin-auth.ts                 # Admin authentication
-└── admin-security.ts             # Rate limiting and security
-
-src/features/admin/services/      # Extracted services (January 2026 refactor)
-├── admin-data.service.ts         # Data fetching and caching with TTL
-├── admin-chart.service.ts        # Chart.js integration and rendering
-└── admin-export.service.ts       # CSV/data export functionality
-
-src/features/admin/renderers/     # Extracted UI renderers (January 2026 refactor)
-├── admin-contacts.renderer.ts    # Contact table and modal rendering
-├── admin-messaging.renderer.ts   # Messaging UI and thread rendering
-└── admin-performance.renderer.ts # Performance monitoring UI
-
-src/features/admin/modules/       # Extracted modules (28 modules)
-├── admin-ad-hoc-analytics.ts     # Ad hoc request analytics
-├── admin-ad-hoc-requests.ts      # Ad hoc requests management
-├── admin-analytics.ts            # Analytics and charts
-├── admin-client-details.ts       # Client detail view
-├── admin-clients.ts              # Client management
-├── admin-contacts.ts             # Contact form submissions
-├── admin-contracts.ts            # Contracts management
-├── admin-deleted-items.ts        # Soft-deleted items management
-├── admin-deliverables.ts         # Deliverables workflow
-├── admin-design-review.ts        # Design review system
-├── admin-document-requests.ts    # Document requests
-├── admin-email-templates.ts      # Email template management
-├── admin-files.ts                # File management
-├── admin-global-tasks.ts         # Global tasks Kanban (all projects)
-├── admin-invoices.ts             # Invoice management
-├── admin-knowledge-base.ts       # Knowledge base (KB)
-├── admin-leads.ts                # Leads management
-├── admin-messaging.ts            # Messaging system
-├── admin-overview.ts             # Dashboard overview
-├── admin-performance.ts          # Performance monitoring
-├── admin-projects.ts             # Projects management
-├── admin-proposals.ts            # Proposals
-├── admin-questionnaires.ts       # Questionnaires management
-├── admin-system-status.ts        # System status display
-├── admin-tasks.ts                # Tasks
-├── admin-time-tracking.ts        # Time tracking
-├── admin-workflows.ts            # Workflows and approvals
-└── index.ts                      # Module exports
-
-src/styles/pages/
-└── admin.css                     # Admin-specific styles
-
-server/routes/
-├── admin/                        # Admin API (split into modules)
-│   ├── index.ts                  # Router mounting
-│   ├── dashboard.ts              # Stats and overview
-│   ├── leads.ts                  # Lead management
-│   ├── projects.ts               # Admin project creation
-│   ├── kpi.ts                    # KPI endpoints
-│   ├── workflows.ts              # Workflow admin
-│   ├── settings.ts               # Admin settings
-│   ├── notifications.ts          # Notification management
-│   ├── tags.ts                   # Tag management
-│   ├── cache.ts                  # Cache management
-│   ├── activity.ts               # Recent activity
-│   └── misc.ts                   # Miscellaneous endpoints
-├── projects/                     # Projects API (split into modules)
-│   ├── index.ts                  # Router mounting
-│   ├── core.ts                   # CRUD operations
-│   ├── milestones.ts             # Milestone management
-│   ├── tasks.ts                  # Task endpoints
-│   └── ...                       # Other project subroutes
-├── invoices/                     # Invoice API (split into modules)
-│   ├── index.ts                  # Router mounting
-│   ├── core.ts                   # CRUD operations
-│   ├── pdf.ts                    # PDF generation
-│   └── ...                       # Other invoice subroutes
-├── auth.ts                       # Authentication (login, set-password, magic-link)
-├── clients.ts                    # Clients management API
-├── messages.ts                   # Messaging API
-├── uploads.ts                    # File upload API
-├── analytics.ts                  # Visitor analytics
-├── proposals.ts                  # Proposal builder API
-└── ... (intake, approvals, triggers, document-requests, knowledge-base)
-
-server/database/migrations/       # 001_initial_schema through 045_knowledge_base.sql
-├── 001_initial_schema.sql
-├── 002_client_intakes.sql
-├── 009_contact_submissions.sql
-├── 010_client_invitation.sql
-├── 016_uploaded_files.sql
-├── 020_project_price.sql
-├── 021_project_additional_fields.sql
-└── ... (see directory for full list)
+src/admin.ts  (Vite entry — registers the admin bundle)
+     |
+     v
+server/views/layouts/portal.ejs  (EJS shell rendered by server at GET /dashboard)
+     |
+     v
+src/react/app/mount-portal.tsx  (mounts React SPA into .dashboard-container.portal)
+     |
+     v
+PortalApp.tsx  (root component — wraps providers: Router, Zustand, Suspense)
+     |
+     v
+PortalRoutes.tsx  (all routes — lazy-loaded per feature)
+     |
+     v
+PortalLayout.tsx  (shared shell: PortalSidebar + PortalHeader + <Outlet />)
+     |
+     v
+Individual feature component (e.g. LeadsTable, ProjectDetail, InvoicesTable)
 ```
+
+The server validates the JWT cookie before rendering the EJS shell. If the cookie is missing or invalid, the server redirects before the React SPA ever loads.
 
 ---
 
-## Tab Navigation
+## React SPA Structure
 
-The admin dashboard uses a sidebar navigation system with the following tabs:
+### Core App Files
 
-|Tab|Button ID|Content ID|Description|
-|-----|-----------|------------|-------------|
-|Overview|`btn-overview`|`tab-overview`|Quick stats, upcoming tasks, and recent leads|
-|Work|`btn-work`|`tab-work`|Work management (projects, tasks, deliverables)|
-|CRM|`btn-crm`|`tab-crm`|Customer relationship management|
-|Documents|`btn-documents`|`tab-documents`|Document requests and management|
-|Workflows|`btn-workflows`|`tab-workflows`|Approvals, triggers, and automation|
-|Analytics|`btn-analytics`|`tab-analytics`|Visitor and page analytics|
-|Support|`btn-support`|`tab-support`|Support and help desk|
-|System|`btn-system`|`tab-system`|System information and settings|
-|Tasks|`btn-tasks`|`tab-tasks`|Global tasks Kanban across all projects|
-|Leads|`btn-leads`|`tab-leads`|Lead and contact management|
-|Projects|`btn-projects`|`tab-projects`|Active projects management|
-|Clients|`btn-clients`|`tab-clients`|Client management|
-|Invoices|`btn-invoices`|`tab-invoices`|Invoice management|
-|Messages|`btn-messages`|`tab-messages`|Client communication|
-|Access|`btn-access`|`tab-access`|Access control and permissions|
-|Comments|`btn-comments`|`tab-comments`|Comments and feedback|
-|Info|`btn-info`|`tab-info`|Information and metadata|
-|Versions|`btn-versions`|`tab-versions`|Version history and rollbacks|
-|Project Detail|-|`tab-project-detail`|Individual project view (hidden from sidebar)|
-|Client Detail|-|`tab-client-detail`|Individual client view (hidden from sidebar)|
+| File | Purpose |
+|------|---------|
+| `src/admin.ts` | Vite entry point |
+| `src/react/app/PortalApp.tsx` | Root component with providers |
+| `src/react/app/mount-portal.tsx` | Mounts SPA into DOM |
+| `src/react/app/PortalRoutes.tsx` | All route definitions |
+| `src/react/app/PortalLayout.tsx` | Shared layout (sidebar + header + outlet) |
+| `src/react/app/PortalSidebar.tsx` | Sidebar navigation |
+| `src/react/app/PortalHeader.tsx` | Global header |
+| `src/react/stores/portal-store.ts` | Zustand store |
+| `src/react/hooks/usePortalAuth.ts` | Auth hook (bridges cookie-based JWT to React) |
+| `server/config/unified-navigation.ts` | Navigation config consumed by portal-store |
 
-### Tab Switching
+### Code Splitting
 
-```typescript
-private switchTab(tabName: string): void {
-  // Update active tab button
-  document.querySelectorAll('.sidebar-buttons .btn[data-tab]').forEach((btn) => {
-    btn.classList.toggle('active', (btn as HTMLElement).dataset.tab === tabName);
-  });
+Every feature component is loaded with `React.lazy()`. The `lazyNamed` helper in `PortalRoutes.tsx` maps named exports to the default export format React.lazy requires:
 
-  // Update active tab content
-  document.querySelectorAll('.tab-content').forEach((content) => {
-    content.classList.remove('active');
-  });
-  const tabContent = document.getElementById(`tab-${tabName}`);
-  tabContent?.classList.add('active');
-
-  this.currentTab = tabName;
-  this.loadTabData(tabName);
-}
+```tsx
+const LeadsTable = lazyNamed(() =>
+  import('../features/admin/leads').then(m => ({ LeadsTable: m.LeadsTable }))
+);
 ```
+
+All routes are wrapped in `<LazyTabRoute>` which provides a `<Suspense>` boundary.
 
 ---
 
-## Leads Management
+## Route Map
 
-### Leads Table
+### Group Dashboards (sidebar top-level)
 
-The Leads tab displays all intake form submissions with the following columns:
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/dashboard` | `OverviewDashboard` | Quick stats, recent activity, upcoming tasks |
+| `/analytics` | `AnalyticsDashboard` | Visitor and page analytics |
+| `/performance` | `PerformanceMetrics` | Server and app performance metrics |
+| `/work` | `WorkDashboard` | Work group overview (projects, tasks, deliverables) |
+| `/crm` | `CRMDashboard` | CRM group overview (leads, contacts, clients) |
+| `/documents` | `DocumentsDashboard` | Documents group overview |
 
-|Column|Description|
-|--------|-------------|
-|Date|Submission timestamp|
-|Name|Contact name|
-|Company|Company name|
-|Email|Contact email|
-|Project Type|Type of project requested|
-|Budget|Budget range selected|
-|Status|Current lead status|
+### CRM
 
-### Lead Status Values
+| Path | Component |
+|------|-----------|
+| `/leads` | `LeadsTable` |
+| `/contacts` | `ContactsTable` |
+| `/clients` | `ClientsTable` |
+| `/messages` | `MessagingView` |
 
-|Status|Description|Badge Color|
-|--------|-------------|-------------|
-|`pending`|New lead, not yet reviewed|Yellow|
-|`active`|Lead converted to project|Blue|
-|`in_progress`|Project work started|Blue|
-|`completed`|Project delivered|Green|
-|`cancelled`|Lead/project cancelled|Red|
+### Work
 
-### Contact Form Submissions
+| Path | Component |
+|------|-----------|
+| `/projects` | `ProjectsTable` |
+| `/tasks` | `GlobalTasksTable` |
+| `/requests` | `AdHocRequestsTable` |
+| `/deliverables` | `DeliverablesTable` |
 
-A separate table shows contact form submissions from the website:
+### Finance
 
-|Column|Description|
-|--------|-------------|
-|Date|Submission timestamp|
-|Name|Sender name|
-|Email|Sender email|
-|Subject|Message subject|
-|Message|Message preview (truncated)|
-|Status|Read/unread status|
+| Path | Component |
+|------|-----------|
+| `/invoices` | `InvoicesTable` |
+| `/contracts` | `ContractsTable` |
+| `/proposals` | `ProposalsTable` |
 
-### Clicking Lead Rows
+### Documents
 
-Clicking a lead row opens a detail modal showing:
+| Path | Component |
+|------|-----------|
+| `/document-requests` | `DocumentRequestsTable` |
+| `/files` | `FilesManager` |
+| `/questionnaires` | `QuestionnairesTable` |
 
-- Full lead information
-- Project description
-- Features requested
-- Contact details
-- **Invite to Client Portal** button (for pending leads)
+### Settings / System
 
----
+| Path | Component |
+|------|-----------|
+| `/support` | `KnowledgeBase` |
+| `/system` | `SettingsManager` |
+| `/email-templates` | `EmailTemplatesManager` |
 
-## Projects Management
+### Direct-Access Only (not in sidebar)
 
-### Projects Table
+These routes are reachable via deep link or command palette but do not appear in the sidebar.
 
-The Projects tab shows all leads that have been converted to active projects:
+| Path | Component |
+|------|-----------|
+| `/deleted-items` | `DeletedItemsTable` |
+| `/time-tracking` | `TimeTrackingTable` |
+| `/design-review` | `DesignReviewTable` |
+| `/ad-hoc-analytics` | `AdHocAnalytics` |
+| `/data-quality` | `DataQualityDashboard` |
+| `/integrations` | `IntegrationsManager` |
+| `/webhooks` | `WebhooksManager` |
+| `/workflows` | `WorkflowsManager` |
 
-|Column|Description|
-|--------|-------------|
-|Project Name|Name or description excerpt|
-|Client|Contact name and company|
-|Type|Project type|
-|Budget|Budget range|
-|Timeline|Expected timeline|
-|Status|Project status dropdown|
-|Actions|View button|
+### Detail Views
 
-### Project Status Dropdown
-
-Inline status changes via dropdown:
-
-```typescript
-private async updateProjectStatus(id: number, status: string): Promise<void> {
-  const response = await fetch(`/api/projects/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ status })
-  });
-
-  if (response.ok) {
-    this.loadLeads();
-    this.loadProjects();
-  }
-}
-```
+| Path | Component | Notes |
+|------|-----------|-------|
+| `/client-detail/:clientId` | `ClientDetail` | Navigates back to `/clients` |
+| `/project-detail/:projectId` | `ProjectDetail` | Navigates back to `/projects` |
 
 ---
 
-## Project Detail View
+## Feature Components
 
-**NEW in v10.0:** Clicking a project row navigates to a full project detail view instead of a modal. This mirrors what clients see in their portal, allowing admins to manage all aspects of a project.
+All admin feature components live under `src/react/features/admin/`.
 
-### Project Detail Sub-Tabs
+### CRM Features
 
-|Sub-Tab|Content|
-|---------|---------|
-|Overview|Progress, milestones, notes, activity|
-|Files|Upload/manage project files|
-|Messages|Communicate with client|
-|Invoices|Create/manage invoices|
-|Settings|Project settings and client account|
+- `clients/ClientsTable.tsx` — Client list with filters
+- `client-detail/ClientDetail.tsx` — Full client view with tabs: Overview, Projects, Contacts, Activity
+- `contacts/ContactsTable.tsx` — Contact form submissions
+- `crm/CRMDashboard.tsx` — CRM group overview
+- `leads/LeadsTable.tsx` — Leads table
+- `leads/LeadDetailPanel.tsx` — Slide-in lead detail panel
+- `messaging/MessagingView.tsx` — Client thread messaging
 
-### Overview Sub-Tab
+### Work Features
 
-- **Project Progress**: Visual progress bar with percentage
-- **Milestones**: Track project milestones with completion status
-- **Project Notes**: Description and feature requests
-- **Recent Activity**: Timeline of project events
+- `projects/ProjectsTable.tsx` — Projects list
+- `project-detail/ProjectDetail.tsx` — Full project view with tabs:
+  - `tabs/OverviewTab.tsx` — Progress, milestones, project details, links
+  - `tabs/FilesTab.tsx` — File uploads and management
+  - `tabs/MessagesTab.tsx` — Per-project client messages
+  - `tabs/TasksTab.tsx` — Project-scoped tasks
+  - `tabs/InvoicesTab.tsx` — Project invoices
+  - `tabs/ContractTab.tsx` — Project contract
+  - `tabs/NotesTab.tsx` — Admin and client notes
+  - `tabs/DeliverablesTab.tsx` — Deliverables for the project
+  - `tabs/IntakeTab.tsx` — Original intake form data
+- `global-tasks/GlobalTasksTable.tsx` — Tasks across all projects
+- `ad-hoc-requests/AdHocRequestsTable.tsx` — One-off client requests
+- `deliverables/DeliverablesTable.tsx` — Deliverables across all projects
 
-### Files Sub-Tab
+### Finance Features
 
-- Upload files for client access
-- View all project files
-- Download/preview files
+- `invoices/InvoicesTable.tsx` — All invoices
+- `contracts/ContractsTable.tsx` — All contracts
+- `proposals/ProposalsTable.tsx` — All proposals
 
-### Messages Sub-Tab
+### Document Features
 
-- View conversation history with client
-- Send messages to client
-- Messages appear in client portal
+- `document-requests/DocumentRequestsTable.tsx`
+- `files/FilesManager.tsx`
+- `questionnaires/QuestionnairesTable.tsx`
 
-### Invoices Sub-Tab
+### System / Settings Features
 
-- View outstanding and paid amounts
-- Create new invoices
-- View invoice history
+- `settings/SettingsManager.tsx` — Business configuration, system settings
+- `settings/AuditLogViewer.tsx` — Audit log viewer (embedded in settings)
+- `email-templates/EmailTemplatesManager.tsx`
+- `knowledge-base/KnowledgeBase.tsx`
+- `deleted-items/DeletedItemsTable.tsx`
 
-### Project Edit Modal
+### Advanced Features
 
-The edit button opens a modal with all project fields:
+- `analytics/AnalyticsDashboard.tsx`
+- `performance/PerformanceMetrics.tsx`
+- `time-tracking/TimeTrackingTable.tsx`
+- `design-review/DesignReviewTable.tsx`
+- `ad-hoc-analytics/AdHocAnalytics.tsx`
+- `data-quality/DataQualityDashboard.tsx` — Includes MetricsHistoryTab, RateLimitingTab, ValidationErrorsTab
+- `integrations/IntegrationsManager.tsx` — Includes StripeSection, CalendarSection, NotificationsSection
+- `webhooks/WebhooksManager.tsx` — Includes WebhookFormModal, WebhookTestModal, WebhookStatsView
+- `workflows/WorkflowsManager.tsx`
 
-**Basic Info:**
+### Modals
 
-- Project name
-- Project type
-- Status dropdown
-- Budget and Price
+`modals/AdminModalsProvider.tsx` is a global modal provider that wraps the admin layout and surfaces:
 
-**Dates:**
+- `AddClientModal.tsx`
+- `AddProjectModal.tsx`
+- `EditClientInfoModal.tsx`
+- `EditBillingModal.tsx`
+- `DetailModal.tsx`
 
-- Start date
-- Target end date (estimated_end_date)
-- Timeline
+### Shared
 
-**URLs:**
+- `shared/filterConfigs.ts` — Reusable filter configuration objects used across table components
 
-- Preview URL
-- Repository URL
-- Staging URL
-- Production URL
+---
 
-**Financial/Contract:**
+## State Management
 
-- Deposit amount
-- Contract signed date
+### Zustand Store (`portal-store.ts`)
 
-**Internal:**
+| State Key | Type | Description |
+|-----------|------|-------------|
+| `role` | `'admin' \| 'client'` | Current user role, set from JWT on auth |
+| `currentTab` | `string` | Active route/tab ID |
+| `currentGroup` | `string \| null` | Active group (e.g. `'work'`, `'crm'`) |
+| `navItems` | `UnifiedNavItem[]` | Sidebar nav items for current role |
+| `subtabGroups` | `UnifiedSubtabGroup[]` | Grouped sub-navigation for current role |
+| `features` | `PortalFeatures` | Feature flags for current role |
+| `capabilities` | `FeatureCapabilities` | Capability flags for current role |
+| `pageTitle` | `string` | Title of the current page |
+| `sidebarCollapsed` | `boolean` | Sidebar collapse state (persisted to localStorage) |
+| `theme` | `'light' \| 'dark'` | Current theme (persisted to localStorage) |
 
-- Admin notes (not visible to clients)
+Navigation data is sourced from `server/config/unified-navigation.ts` and filtered by role at store initialisation. When `setRole` is called (by `usePortalAuth` after verifying the JWT), all navigation, features, and capabilities are refreshed in a single atomic update.
 
-### Settings Sub-Tab
+---
 
-**Client Account:**
+## Auth Guard
 
-- Client email
-- Account status (Active/Not Invited)
-- Last login timestamp
-- Resend Invitation button
-- Reset Password button
+`RequireAuth` in `PortalRoutes.tsx` wraps the entire route tree:
 
-### Back Navigation
-
-The "Back to Projects" button returns to the projects list:
-
-```typescript
-const backBtn = document.getElementById('btn-back-to-projects');
-if (backBtn) {
-  backBtn.addEventListener('click', () => {
-    this.currentProjectId = null;
-    this.switchTab('projects');
-  });
-}
-```
+- Reads auth state from `usePortalAuth`
+- Renders a loading spinner while auth state is resolving
+- Redirects to `/#/portal` via `SessionExpiredRedirect` if unauthenticated
+- `usePortalAuth` bridges the HttpOnly cookie-based JWT to React state — `getAuthToken()` always returns `null` (cookies are not readable from JS); auth validity is confirmed by the session established server-side
 
 ---
 
 ## Client Invitation Flow
 
-The admin can invite leads to create client portal accounts using a magic link system.
+The admin invites a lead to create a client portal account using a magic link.
 
 ### Database Schema
 
-Migration `010_client_invitation.sql` adds:
+Migration `server/database/migrations/010_client_invitation.sql` adds:
 
 ```sql
 ALTER TABLE clients ADD COLUMN invitation_token TEXT;
@@ -408,200 +327,79 @@ ALTER TABLE clients ADD COLUMN last_login_at DATETIME;
 CREATE INDEX IF NOT EXISTS idx_clients_invitation_token ON clients(invitation_token);
 ```
 
-### Invitation Process
+### Invitation Steps
 
-1. **Admin clicks "Invite to Client Portal"** on a lead
-2. **System generates secure token** (64 character hex)
-3. **Client account created** with hashed token
-4. **Email sent** with magic link to `/client/set-password.html?token=...`
-5. **Lead status updated** to `active`
+1. Admin clicks "Invite" in `ClientDetail` (Settings sub-tab or Overview)
+2. Server generates a 64-character hex token
+3. Client account is created (or updated) with the hashed token and a 7-day expiry
+4. Email is sent with a magic link to `/api/auth/verify-invitation` and `/api/auth/set-password`
+5. Lead status is updated to `active`
 
-### API Endpoint: Invite Lead
+### API Endpoints
 
-```typescript
-// POST /api/admin/leads/:id/invite
-router.post('/leads/:id/invite', authenticateAdmin, async (req, res) => {
-  const { id } = req.params;
+Verify invitation token:
 
-  // Get lead data
-  const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(id);
-
-  // Generate secure invitation token
-  const invitationToken = crypto.randomBytes(32).toString('hex');
-  const tokenHash = await bcrypt.hash(invitationToken, 10);
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-
-  // Create or update client account
-  db.prepare(`
-    INSERT INTO clients (email, contact_name, company_name, phone, invitation_token, invitation_expires_at, invitation_sent_at)
-    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(email) DO UPDATE SET
-      invitation_token = excluded.invitation_token,
-      invitation_expires_at = excluded.invitation_expires_at,
-      invitation_sent_at = excluded.invitation_sent_at
-  `).run(lead.email, lead.contact_name, lead.company_name, lead.phone, tokenHash, expiresAt.toISOString());
-
-  // Update lead status to active
-  db.prepare('UPDATE leads SET status = ? WHERE id = ?').run('active', id);
-
-  // Send invitation email with magic link
-  const inviteLink = `${process.env.WEBSITE_URL}/client/set-password.html?token=${invitationToken}`;
-  // ... send email
-});
+```text
+POST /api/auth/verify-invitation
+Body: { "token": "<hex>" }
+Response: { "success": true, "email": "...", "name": "..." }
 ```
 
-### Set Password Page
+Set password:
 
-`client/set-password.html` handles password setup:
-
-1. **Token Verification** - Validates token on page load
-2. **Password Form** - User enters new password
-3. **Password Set** - Activates account with hashed password
-4. **Redirect** - User redirected to client portal login
-
-### API Endpoints: Password Setup
-
-**Verify Invitation Token:**
-
-```typescript
-// POST /api/auth/verify-invitation
-{
-  "token": "abc123..."
-}
-// Returns: { success: true, email: "client@example.com", name: "John" }
-```
-
-**Set Password:**
-
-```typescript
-// POST /api/auth/set-password
-{
-  "token": "abc123...",
-  "password": "newSecurePassword"
-}
-// Returns: { success: true, message: "Password set successfully" }
+```text
+POST /api/auth/set-password
+Body: { "token": "<hex>", "password": "<new password>" }
+Response: { "success": true, "message": "Password set successfully" }
 ```
 
 ---
 
-## Messaging
+## Server Routes
 
-### Custom Client Dropdown
+All backend routes remain unchanged from the previous architecture.
 
-The Messages tab uses a custom dropdown component for better styling:
+### Admin Routes (`server/routes/admin/`)
 
-```html
-<div class="custom-dropdown" id="admin-client-dropdown">
-  <button class="custom-dropdown-trigger" id="admin-client-trigger">
-    <span class="custom-dropdown-text">Select a client...</span>
-    <span class="custom-dropdown-caret">▼</span>
-  </button>
-  <ul class="custom-dropdown-menu" id="admin-client-menu">
-    <!-- Client items with unread counts populated dynamically -->
-  </ul>
-</div>
-```
-
-### Unread Message Counts
-
-The dropdown displays unread message counts from clients:
-
-- Only shows count badge when unread > 0
-- Clients with unread messages sorted first
-- Badge displays number of unread messages
-
-### Loading Messages
-
-```typescript
-// src/features/admin/modules/admin-messaging.ts
-export async function loadClientThreads(ctx: AdminDashboardContext): Promise<void> {
-  // Fetch both clients and threads in parallel
-  const [clientsResponse, threadsResponse] = await Promise.all([
-    fetch('/api/clients', { credentials: 'include' }),
-    fetch('/api/messages/threads', { credentials: 'include' })
-  ]);
-
-  // Merge clients with their thread data
-  // Sort: clients with unread messages first
-}
-```
-
-### Cache Busting
-
-Messages are fetched with cache-busting after sending to ensure fresh data:
-
-```typescript
-// After sending, bust cache to get latest messages
-const url = bustCache
-  ? `/api/messages/threads/${threadId}/messages?_=${Date.now()}`
-  : `/api/messages/threads/${threadId}/messages`;
-```
-
-### Admin Avatar
-
-Admin messages display an SVG avatar with inverted colors:
-
-```html
-<img src="/images/avatar_small_sidebar.svg" alt="Admin" class="avatar-img" />
-```
-
-```css
-.messages-thread .message-avatar .avatar-img {
-  filter: invert(1);  /* Dark body with light eye */
-}
-```
-
-**Note:** Use self-contained SVGs for `<img>` tags. SVGs with external `<image>` references will not load.
-
-### Keyboard Navigation
-
-|Shortcut|Action|
-|----------|--------|
-|Tab|Move focus from textarea to send button|
-|Enter|Send message|
-|Shift+Enter|New line in message|
-
-### Module Architecture
-
-The messaging module (`admin-messaging.ts`) manages its own state:
-
-```typescript
-let selectedClientId: number | null = null;
-let selectedThreadId: number | null = null;
-let selectedClientName: string = 'Client';
-
-export function getSelectedThreadId(): number | null {
-  return selectedThreadId;
-}
-```
-
-The main dashboard delegates to this module's `setupMessagingListeners()` for proper state tracking.
-
----
-
-## File Locations
-
-|File|Purpose|
+| File | Handles |
 |------|---------|
-|`admin/index.html`|Admin dashboard HTML|
-|`src/features/admin/admin-dashboard.ts`|Main coordinator|
-|`src/features/admin/admin-security.ts`|Rate limiting|
-|`src/features/admin/services/admin-data.service.ts`|Data fetching and caching|
-|`src/features/admin/services/admin-chart.service.ts`|Chart.js integration|
-|`src/features/admin/services/admin-export.service.ts`|Data export functionality|
-|`src/features/admin/renderers/admin-contacts.renderer.ts`|Contact table rendering|
-|`src/features/admin/renderers/admin-messaging.renderer.ts`|Messaging UI rendering|
-|`src/styles/pages/admin.css`|Admin styles|
-|`client/set-password.html`|Password setup page|
-|`server/routes/admin/`|Admin API endpoints (split into modules)|
-|`server/routes/auth.ts`|Auth including set-password|
-|`server/database/migrations/010_client_invitation.sql`|Invitation schema|
+| `dashboard.ts` | Stats overview and recent activity |
+| `leads.ts` | Lead CRUD and invite endpoint |
+| `projects.ts` | Admin project creation |
+| `kpi.ts` | KPI data |
+| `workflows.ts` | Workflow management |
+| `notifications.ts` | Notification management |
+| `cache.ts` | Cache control |
+| `performance.ts` | Performance monitoring |
+| `analytics.ts` | Analytics data |
+| `contacts.ts` | Contact submissions |
+| `files.ts` | File metadata |
+| `time-entries.ts` | Time tracking entries |
+| `messages.ts` | Messaging admin endpoints |
+| `deleted-items.ts` | Soft-delete recovery |
+| `deliverables.ts` | Deliverables admin endpoints |
+| `design-reviews.ts` | Design review management |
+| `email-templates.ts` | Email template CRUD |
+| `ad-hoc-analytics.ts` | Ad hoc request analytics |
+
+### Projects Routes (`server/routes/projects/`)
+
+`core.ts`, `milestones.ts`, `tasks.ts`, `files.ts`, `messages.ts`, `templates.ts`, `time-tracking.ts`, `file-versions.ts`, `file-folders.ts`, `file-comments.ts`, `health.ts`, `escalation.ts`, `activity.ts`, `archive.ts`, `contracts.ts`, `intake.ts`, `tags.ts`
+
+### Invoice Routes (`server/routes/invoices/`)
+
+`core.ts`, `pdf.ts`, `batch.ts`, `recurring.ts`, `scheduled.ts`, `reminders.ts`, `credits.ts`, `deposits.ts`, `payment-plans.ts`, `aging.ts`, `client-routes.ts`
+
+### Other Routes
+
+`server/routes/auth.ts`, `clients.ts`, `messages.ts`, `uploads.ts`, `analytics.ts`, `proposals.ts`, `intake.ts`, `approvals.ts`, `triggers.ts`, `document-requests.ts`, `knowledge-base.ts`, `contracts.ts`, `receipts.ts`, `questionnaires.ts`, `webhooks.ts`, `integrations.ts`, `data-quality.ts`, `ad-hoc-requests.ts`
 
 ---
 
 ## Related Documentation
 
-- [Client Portal](./CLIENT_PORTAL.md) - Client-facing portal
-- [Messages](./MESSAGING.md) - Messaging system
-- [Files](./FILES.md) - File management
-- [API Documentation](../API_DOCUMENTATION.md) - Full API reference
+- [Client Portal](./CLIENT_PORTAL.md) — Client-facing portal
+- [Messaging](./MESSAGING.md) — Messaging system
+- [Files](./FILES.md) — File management
+- [API Documentation](../api/ENDPOINTS.md) — Full API reference
+- [Architecture](../architecture/ARCHITECTURE.md) — System design overview
