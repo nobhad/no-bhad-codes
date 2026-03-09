@@ -331,6 +331,20 @@ export type {
 } from './createTabs';
 
 // ============================================
+// ACCORDION
+// ============================================
+
+export { AccordionItem } from './createAccordion';
+export type { AccordionItemProps } from './createAccordion';
+
+// ============================================
+// MESSAGE THREAD
+// ============================================
+
+export { MessageThread } from './MessageThread';
+export type { ThreadMessage, MessageThreadProps } from './MessageThread';
+
+// ============================================
 // SECTION/CONTAINER COMPONENTS
 // ============================================
 
