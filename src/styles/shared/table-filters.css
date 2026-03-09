@@ -33,10 +33,10 @@
   max-width: var(--table-col-md);
 }
 
-/* Search dropdown wrapper */
+/* Search inline wrapper — trigger on right, input expands left */
 .filter-search-wrapper {
-  position: relative;
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
   height: var(--portal-btn-icon-size, 36px);
 }
@@ -44,6 +44,7 @@
 /* Search trigger button */
 .filter-search-trigger {
   position: relative;
+  flex-shrink: 0;
 }
 
 /* Show indicator when has value */
@@ -59,21 +60,40 @@
   z-index: var(--z-index-content);
 }
 
-/* Search dropdown - higher specificity to override .search-bar display:flex */
+/* Search input — hidden when closed, expands inline to the left of trigger when open */
 .filter-search-dropdown,
 .filter-search-dropdown.search-bar {
-  position: absolute;
-  top: calc(100% + var(--space-1));
-  right: 0;
   display: none;
+  position: relative;
   width: var(--table-col-xl);
-  z-index: var(--z-index-portal-dropdown, 9700);
-  box-shadow: var(--shadow-elevated-md);
 }
 
 .filter-search-wrapper.open .filter-search-dropdown,
 .filter-search-wrapper.open .filter-search-dropdown.search-bar {
   display: flex;
+}
+
+/* Hide trigger when open — icon inside the input covers it */
+.filter-search-wrapper.open .filter-search-trigger {
+  display: none;
+}
+
+/* Search icon inside the input — left-aligned with proper padding */
+.filter-search-dropdown .search-bar-icon {
+  position: absolute;
+  left: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Input padding to clear the left icon */
+.filter-search-dropdown .search-bar-input {
+  padding-left: var(--input-icon-offset);
 }
 
 /* Filter dropdown wrapper */
