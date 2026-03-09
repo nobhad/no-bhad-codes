@@ -26,7 +26,11 @@ import {
 } from '@react/components/portal/PortalDropdown';
 import { BulkActionsToolbar } from '@react/components/portal/BulkActionsToolbar';
 import { ConfirmDialog, useConfirmDialog } from '@react/components/portal/ConfirmDialog';
+import { AddProjectModal } from '../modals/AddProjectModal';
+import type { AddProjectFormData } from '../modals/AddProjectModal';
+import type { ModalDropdownOption } from '@react/components/portal/ModalDropdown';
 import { useProjects } from '@react/hooks/useProjects';
+import { useClients } from '@react/hooks/useClients';
 import { useSelection } from '@react/hooks/useSelection';
 import { useTableFilters } from '@react/hooks/useTableFilters';
 import { usePagination } from '@react/hooks/usePagination';
@@ -38,6 +42,33 @@ import { formatDate } from '@react/utils/formatDate';
 import { formatCurrency } from '@/utils/format-utils';
 import { PROJECTS_FILTER_CONFIG } from '../shared/filterConfigs';
 import { decodeHtmlEntities } from '@react/utils/decodeText';
+
+// Static dropdown options for the Add Project modal
+const PROJECT_TYPE_OPTIONS: ModalDropdownOption[] = [
+  { value: 'simple-site', label: 'Simple Site' },
+  { value: 'business-site', label: 'Business Site' },
+  { value: 'portfolio', label: 'Portfolio' },
+  { value: 'e-commerce', label: 'E-Commerce' },
+  { value: 'web-app', label: 'Web App' },
+  { value: 'browser-extension', label: 'Browser Extension' },
+  { value: 'other', label: 'Other' }
+];
+
+const BUDGET_OPTIONS: ModalDropdownOption[] = [
+  { value: 'under-2k', label: 'Under $2,000' },
+  { value: '2k-5k', label: '$2,000 – $5,000' },
+  { value: '5k-10k', label: '$5,000 – $10,000' },
+  { value: '10k-25k', label: '$10,000 – $25,000' },
+  { value: '25k+', label: '$25,000+' }
+];
+
+const TIMELINE_OPTIONS: ModalDropdownOption[] = [
+  { value: 'asap', label: 'ASAP' },
+  { value: '1-month', label: 'Within 1 month' },
+  { value: '1-3-months', label: '1 – 3 months' },
+  { value: '3-6-months', label: '3 – 6 months' },
+  { value: 'flexible', label: 'Flexible' }
+];
 
 interface ProjectsTableProps {
   /** Navigation callback for detail views */
@@ -96,7 +127,7 @@ function sortProjects(a: Project, b: Project, sort: SortConfig): number {
   case 'type':
     return multiplier * (a.project_type || '').localeCompare(b.project_type || '');
   case 'budget':
-    return multiplier * ((a.budget || 0) - (b.budget || 0));
+    return multiplier * (a.budget || '').localeCompare(b.budget || '');
   case 'start_date':
     return (
       multiplier *
@@ -125,7 +156,24 @@ export function ProjectsTable({
   const containerRef = useFadeIn<HTMLDivElement>();
 
   // Data fetching
-  const { projects, isLoading, error, stats, refetch, updateProject, bulkDelete } = useProjects();
+  const { projects, isLoading, error, stats, refetch, createProject, updateProject, bulkDelete } = useProjects();
+
+  // Client list for the Add Project modal dropdown
+  const { clients } = useClients();
+  const clientOptions: ModalDropdownOption[] = useMemo(
+    () =>
+      clients.map((c) => ({
+        value: String(c.id),
+        label: c.company_name
+          ? `${c.contact_name || c.email} (${c.company_name})`
+          : (c.contact_name || c.email)
+      })),
+    [clients]
+  );
+
+  // Add Project modal state
+  const [addProjectOpen, setAddProjectOpen] = useState(false);
+  const [addProjectLoading, setAddProjectLoading] = useState(false);
 
   // Delete confirmation dialog
   const deleteDialog = useConfirmDialog();
@@ -246,6 +294,25 @@ export function ProjectsTable({
     refetch();
   }, [selection, bulkDelete, showNotification, refetch]);
 
+  // Handle add project form submission
+  const handleAddProjectSubmit = useCallback(
+    async (data: AddProjectFormData) => {
+      setAddProjectLoading(true);
+      try {
+        const result = await createProject(data);
+        if (result) {
+          showNotification?.(`Project "${result.projectName}" created successfully`, 'success');
+          setAddProjectOpen(false);
+        } else {
+          showNotification?.('Failed to create project', 'error');
+        }
+      } finally {
+        setAddProjectLoading(false);
+      }
+    },
+    [createProject, showNotification]
+  );
+
   // Status options for bulk actions
   const bulkStatusOptions = useMemo(
     () =>
@@ -325,6 +392,11 @@ export function ProjectsTable({
               onClick={refetch}
               disabled={isLoading}
               loading={isLoading}
+            />
+            <IconButton
+              action="add"
+              onClick={() => setAddProjectOpen(true)}
+              title="Add New Project"
             />
           </>
         }
@@ -540,6 +612,18 @@ export function ProjectsTable({
         onConfirm={handleBulkDelete}
         variant="danger"
         loading={deleteDialog.isLoading}
+      />
+
+      {/* Add Project Modal */}
+      <AddProjectModal
+        open={addProjectOpen}
+        onOpenChange={setAddProjectOpen}
+        onSubmit={handleAddProjectSubmit}
+        clientOptions={clientOptions}
+        projectTypeOptions={PROJECT_TYPE_OPTIONS}
+        budgetOptions={BUDGET_OPTIONS}
+        timelineOptions={TIMELINE_OPTIONS}
+        loading={addProjectLoading}
       />
     </>
   );
