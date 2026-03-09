@@ -35,7 +35,7 @@
   letter-spacing: var(--portal-btn-letter-spacing, normal);
   text-transform: var(--portal-btn-text-transform, uppercase);
   cursor: pointer;
-  background: var(--portal-btn-bg, transparent);
+  background: inherit;
   color: var(--portal-btn-color, var(--color-dark));
   box-shadow: var(--portal-btn-shadow, none);
   transition: var(--portal-btn-transition, all 0.2s ease);

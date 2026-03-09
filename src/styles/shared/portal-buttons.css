@@ -56,7 +56,7 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
 
 /* Success button */
 .btn-success {
-  background: var(--color-black);
+  background: inherit;
   color: var(--color-success-500);
   border-color: var(--color-success-500);
 }
@@ -94,9 +94,9 @@ button:not(.overview-panel-action):not(.custom-dropdown-trigger):not(.dropdown-t
   min-height: var(--portal-btn-sm-min-height);
 }
 
-/* Outline button - transparent with border, uses button border tokens */
+/* Outline button - inherits bg, uses button border tokens */
 .btn-outline {
-  background: transparent;
+  background: inherit;
   color: var(--portal-btn-color);
   border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
 }
