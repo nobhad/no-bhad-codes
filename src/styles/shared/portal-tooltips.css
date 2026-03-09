@@ -43,7 +43,7 @@
 .portal [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + var(--space-1));
   left: 50%;
   transform: translateX(-50%);
   padding: var(--space-1) var(--space-1-5);
@@ -66,7 +66,7 @@
   letter-spacing: normal;
   white-space: pre-line;
   width: max-content;
-  max-width: 280px;
+  max-width: var(--tooltip-max-width);
   text-align: left;
   box-shadow: none;
   z-index: var(--z-index-portal-dropdown);
@@ -88,10 +88,10 @@
 .portal [data-tooltip]::before {
   content: "";
   position: absolute;
-  bottom: calc(100% + 2px);
+  bottom: calc(100% + calc(var(--space-px) * 2));
   left: 50%;
   transform: translateX(-50%);
-  border: 6px solid transparent;
+  border: var(--tooltip-arrow-size) solid transparent;
   border-top-color: var(--color-bg-secondary);
   z-index: var(--z-index-portal-dropdown);
   pointer-events: none;
@@ -113,11 +113,11 @@
   left: 0;
   transform: none;
   white-space: normal;
-  max-width: 250px;
+  max-width: var(--tooltip-max-width-sm);
 }
 
 .portal td[data-tooltip]::before,
 .portal .table-cell[data-tooltip]::before {
-  left: 20px;
+  left: var(--space-2-5);
   transform: none;
 }
