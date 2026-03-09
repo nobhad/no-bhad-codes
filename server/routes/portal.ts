@@ -5,12 +5,13 @@
  * Uses EJS templates for the shell, with client-side TypeScript for interactivity.
  *
  * Architecture:
- *   /portal       → unified login page (no auth required)
- *   /dashboard    → role-based dashboard (requires valid JWT)
- *   /admin/login  → 301 redirect to /portal
- *   /client/login → 301 redirect to /portal
- *   /admin        → 301 redirect to /dashboard
- *   /client       → 301 redirect to /dashboard
+ *   /portal          → unified login page (no auth required)
+ *   /client/portal   → client entry point (auth-gated → /dashboard or /#/portal)
+ *   /dashboard       → role-based dashboard (requires valid JWT)
+ *   /admin/login     → 301 redirect to /portal
+ *   /client/login    → 301 redirect to /portal
+ *   /admin           → 301 redirect to /dashboard
+ *   /client          → 301 redirect to /dashboard
  */
 
 import { Router, Request, Response } from 'express';
@@ -182,6 +183,36 @@ router.get('/dashboard/tab/:tabId', tabDataRateLimiter, async (req: Request, res
     });
     return sendServerError(res);
   }
+});
+
+// ============================================
+// Client Portal Entry Point
+// ============================================
+
+/**
+ * GET /client/portal
+ * Primary entry point used by main site login buttons, email links,
+ * password-set flow, and email verification redirects.
+ * Redirects to /dashboard if authenticated, or /#/portal (login) if not.
+ */
+router.get('/client/portal', (req: Request, res: Response) => {
+  const decoded = decodePortalJwt(req);
+  if (decoded) {
+    return res.redirect('/dashboard');
+  }
+  return res.redirect('/#/portal');
+});
+
+/**
+ * GET /client/portal.html
+ * Legacy .html variant used in some email templates.
+ */
+router.get('/client/portal.html', (req: Request, res: Response) => {
+  const decoded = decodePortalJwt(req);
+  if (decoded) {
+    return res.redirect('/dashboard');
+  }
+  return res.redirect('/#/portal');
 });
 
 // ============================================
