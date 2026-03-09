@@ -102,12 +102,12 @@
 
 /* Valid form state */
 .form-button.form-valid {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
   color: var(--color-black);
   border-color: var(--color-border);
 }
 
 .form-button.form-valid:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
   color: var(--color-black);
 }

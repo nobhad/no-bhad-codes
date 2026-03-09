@@ -32,7 +32,7 @@ body[data-page="client-portal"]:not(.portal-logged-in) .menu-button {
 body[data-page="client-portal"]:not(.portal-logged-in) .nav-logo-row:hover,
 body[data-page="client-portal"]:not(.portal-logged-in) .theme-button:hover,
 body[data-page="client-portal"]:not(.portal-logged-in) .menu-button:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Footer visible on login page */

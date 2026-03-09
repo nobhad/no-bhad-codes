@@ -59,7 +59,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 }
 
 .hero-title .accent {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -113,18 +113,18 @@ div.page-hero-desktop[data-hero-page="projects"] {
 }
 
 .filter-btn:hover {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg);
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
+  box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.2);
 }
 
 .filter-btn.active {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg);
-  border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.2);
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.2);
 }
 
 .filter-count {
@@ -179,7 +179,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 .project-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-elevated-md);
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .project-card-link {
@@ -214,7 +214,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(var(--color-primary-rgb), 0.9);
+  background: rgba(var(--color-accent-rgb), 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -257,7 +257,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
 }
 
 .project-card-category {
-  background: var(--color-primary);
+  background: var(--color-accent);
   color: var(--color-bg);
   padding: 0.25rem 0.5rem;
   border-radius: var(--border-radius-xs, 2px);
@@ -323,7 +323,7 @@ div.page-hero-desktop[data-hero-page="projects"] {
   width: 40px;
   height: 40px;
   border: var(--border-width-thick) solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border-top-color: var(--color-accent);
   border-radius: var(--border-radius-full, 50%);
   margin: 0 auto 1rem;
   /* Animation controlled by GSAP - see gsap-animations.ts createSpinner() */
@@ -427,16 +427,16 @@ div.page-hero-desktop {
   background: linear-gradient(
     135deg,
     var(--color-bg) 0%,
-    rgba(var(--color-primary-rgb), 0.02) 100%
+    rgba(var(--color-accent-rgb), 0.02) 100%
   );
 }
 
 [data-theme="dark"] .filter-btn:hover {
-  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.3);
 }
 
 [data-theme="dark"] .filter-btn.active {
-  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.3);
 }
 
 [data-theme="dark"] .project-card:hover {

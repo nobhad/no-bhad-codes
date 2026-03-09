@@ -37,7 +37,7 @@
 
 .help-search-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .help-search-clear {
@@ -91,7 +91,7 @@
 }
 
 .help-accordion-item.expanded {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .help-accordion-header {
@@ -118,7 +118,7 @@
   width: 32px;
   height: 32px;
   margin-right: var(--space-1);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .help-accordion-title {
@@ -178,7 +178,7 @@
 
 .help-accordion-article:hover {
   background: var(--color-bg-hover);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* ==============================================
@@ -197,7 +197,7 @@
 }
 
 .help-featured-card:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .help-featured-card-icon {
@@ -206,7 +206,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .help-featured-card-content {
@@ -281,11 +281,11 @@
 }
 
 .help-result-item:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .help-result-icon {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .help-result-content {
@@ -353,7 +353,7 @@
 }
 
 .help-article-body a {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .help-article-body code {

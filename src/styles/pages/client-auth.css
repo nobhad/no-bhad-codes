@@ -52,8 +52,8 @@
 
 body[data-page="client-landing"] .auth-form .form-input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.25);
 }
 
 .auth-form .form-input::placeholder {
@@ -106,7 +106,7 @@ body[data-page="client-landing"] .auth-form .form-input:focus {
 }
 
 .auth-form .password-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .auth-form .password-toggle .password-icon-hide {
@@ -248,7 +248,7 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
 
 .login-form .form-input:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .login-form .btn {
@@ -432,5 +432,5 @@ html[data-theme="dark"] body[data-page="client-landing"] .login-form {
 }
 
 .forgot-password-link:hover {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }

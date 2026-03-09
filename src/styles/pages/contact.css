@@ -258,7 +258,7 @@ p.contact-options {
 
 .contact-card-link:hover,
 .contact-card-link:focus {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Contact options links - extra bold and underlined */
@@ -318,7 +318,7 @@ p.contact-options {
   border: none;
   border-radius: 0;
   color: var(--color-text-primary);
-  caret-color: var(--color-primary);
+  caret-color: var(--color-accent);
   font-family: inherit;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
@@ -457,7 +457,7 @@ p.contact-options {
 html[data-theme="dark"] .input-item input,
 html[data-theme="dark"] .input-item textarea {
   color: var(--color-text-primary);
-  caret-color: var(--color-primary);
+  caret-color: var(--color-accent);
   -webkit-text-fill-color: var(--color-text-primary);
 }
 
@@ -513,7 +513,7 @@ html[data-theme="dark"] .input-item textarea {
 
 .email-box .a-wrapper a:hover,
 .email-box .a-wrapper a:focus {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* ==========================================
