@@ -93,9 +93,9 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
+      <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
         <section className="overview-table-section">
-          <ContactsTable
+          <MessagesTable
             onNavigate={onNavigate}
             getAuthToken={getAuthToken}
             showNotification={showNotification}
@@ -117,9 +117,9 @@ export function CRMDashboard({ onNavigate, getAuthToken, showNotification }: CRM
         </section>
       </React.Suspense>
 
-      <React.Suspense fallback={<LoadingState message="Loading messages..." />}>
+      <React.Suspense fallback={<LoadingState message="Loading contacts..." />}>
         <section className="overview-table-section">
-          <MessagesTable
+          <ContactsTable
             onNavigate={onNavigate}
             getAuthToken={getAuthToken}
             showNotification={showNotification}

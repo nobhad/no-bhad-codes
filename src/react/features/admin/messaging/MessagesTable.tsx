@@ -231,15 +231,15 @@ export function MessagesTable({ onNavigate, getAuthToken, defaultPageSize = 25, 
                 </PortalTableCell>
                 <PortalTableCell>
                   {conversation.projectName && (
-                    <button
+                    <span
                       onClick={(e) => {
                         e.stopPropagation();
-                        onNavigate?.('projects', conversation.projectId != null ? String(conversation.projectId) : undefined);
+                        onNavigate?.('project-detail', conversation.projectId != null ? String(conversation.projectId) : undefined);
                       }}
-                      className="cell-link-btn"
+                      className="table-link"
                     >
                       {conversation.projectName}
-                    </button>
+                    </span>
                   )}
                 </PortalTableCell>
                 <PortalTableCell className="message-preview-cell">

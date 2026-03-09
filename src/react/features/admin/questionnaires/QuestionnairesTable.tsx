@@ -436,15 +436,15 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                       {questionnaire.project_name && (
                         <span className="cell-subtitle">
                           {questionnaire.project_id && onNavigate ? (
-                            <button
+                            <span
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onNavigate('project-detail', String(questionnaire.project_id));
                               }}
-                              className="cell-link-btn"
+                              className="table-link"
                             >
                               {decodeHtmlEntities(questionnaire.project_name)}
-                            </button>
+                            </span>
                           ) : (
                             decodeHtmlEntities(questionnaire.project_name)
                           )}
@@ -455,15 +455,15 @@ export function QuestionnairesTable({ clientId, projectId, getAuthToken, showNot
                 </PortalTableCell>
                 <PortalTableCell>
                   {questionnaire.client_id && onNavigate ? (
-                    <button
+                    <span
                       onClick={(e) => {
                         e.stopPropagation();
                         onNavigate('client-detail', String(questionnaire.client_id));
                       }}
-                      className="cell-link-btn"
+                      className="table-link"
                     >
                       {decodeHtmlEntities(questionnaire.client_name)}
-                    </button>
+                    </span>
                   ) : (
                     decodeHtmlEntities(questionnaire.client_name)
                   )}

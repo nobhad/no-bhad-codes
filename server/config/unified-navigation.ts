@@ -428,9 +428,9 @@ export const UNIFIED_SUBTAB_GROUPS: UnifiedSubtabGroup[] = [
     subtabs: [
       { id: 'overview', label: 'Overview', roles: ['admin'], active: true },
       { id: 'leads', label: 'Leads', roles: ['admin'] },
-      { id: 'contacts', label: 'Contacts', roles: ['admin'] },
       { id: 'messages', label: 'Messages', roles: ['admin'] },
-      { id: 'clients', label: 'Clients', roles: ['admin'] }
+      { id: 'clients', label: 'Clients', roles: ['admin'] },
+      { id: 'contacts', label: 'Contacts', roles: ['admin'] }
     ]
   },
   // Admin: Documents group subtabs
