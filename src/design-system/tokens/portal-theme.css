@@ -165,7 +165,7 @@ body[data-page="client-portal"] {
    * LABEL STYLING
    * ---------------------------------------- */
   --label-font-size: var(--font-size-xs);
-  --label-color: var(--color-text-secondary);
+  --label-color: var(--color-text-primary);
   --label-font-weight: var(--font-weight-medium);
   --label-text-transform: uppercase;
   --label-letter-spacing: var(--letter-spacing-label);

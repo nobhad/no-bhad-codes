@@ -82,7 +82,7 @@
   padding: var(--space-0-5) var(--space-1-5);
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-family: var(--portal-subtab-family);
   font-size: var(--portal-subtab-size);
   font-weight: var(--portal-subtab-weight);

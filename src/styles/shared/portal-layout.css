@@ -1289,13 +1289,13 @@ html[data-theme="light"] .portal .funnel-value {
   letter-spacing: var(--letter-spacing-wide);
 }
 
-/* Category/group label — small caps, muted */
+/* Category/group label — small caps */
 .section-title {
-  font-size: var(--font-size-2xs, 11px);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
