@@ -326,6 +326,57 @@ router.post(
   })
 );
 
+// ===================================
+// CLIENT-FACING CONTRACTS
+// ===================================
+
+/**
+ * @swagger
+ * /api/contracts/my:
+ *   get:
+ *     tags:
+ *       - Contracts
+ *     summary: Get client contracts
+ *     description: Retrieve all non-cancelled contracts for the authenticated client.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Client contracts list
+ *       401:
+ *         description: Not authenticated
+ */
+router.get(
+  '/my',
+  authenticateToken,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const db = getDatabase();
+    const clientId = req.user?.id;
+
+    if (!clientId || req.user?.type === 'admin') {
+      return sendSuccess(res, { contracts: [] });
+    }
+
+    const contracts = await db.all(`
+      SELECT
+        c.id,
+        c.project_id as projectId,
+        p.project_name as projectName,
+        c.status,
+        c.signed_at as signedAt,
+        c.created_at as createdAt,
+        c.expires_at as expiresAt
+      FROM contracts c
+      LEFT JOIN projects p ON c.project_id = p.id
+      WHERE c.client_id = ?
+        AND c.status != 'cancelled'
+      ORDER BY c.created_at DESC
+    `, [clientId]);
+
+    sendSuccess(res, { contracts });
+  })
+);
+
 /**
  * @swagger
  * /api/contracts/{contractId}:
@@ -1072,57 +1123,6 @@ router.delete(
 
     const contract = await contractService.updateContract(contractId, { status: 'cancelled' });
     sendSuccess(res, { contract }, 'Contract cancelled successfully');
-  })
-);
-
-// ===================================
-// CLIENT-FACING CONTRACTS
-// ===================================
-
-/**
- * @swagger
- * /api/contracts/my:
- *   get:
- *     tags:
- *       - Contracts
- *     summary: Get client contracts
- *     description: Retrieve all non-cancelled contracts for the authenticated client.
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Client contracts list
- *       401:
- *         description: Not authenticated
- */
-router.get(
-  '/my',
-  authenticateToken,
-  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const db = getDatabase();
-    const clientId = req.user?.id;
-
-    if (!clientId || req.user?.type === 'admin') {
-      return sendSuccess(res, { contracts: [] });
-    }
-
-    const contracts = await db.all(`
-      SELECT
-        c.id,
-        c.project_id as projectId,
-        p.project_name as projectName,
-        c.status,
-        c.signed_at as signedAt,
-        c.created_at as createdAt,
-        c.expires_at as expiresAt
-      FROM contracts c
-      LEFT JOIN projects p ON c.project_id = p.id
-      WHERE c.client_id = ?
-        AND c.status != 'cancelled'
-      ORDER BY c.created_at DESC
-    `, [clientId]);
-
-    sendSuccess(res, { contracts });
   })
 );
 

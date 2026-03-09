@@ -204,7 +204,7 @@ router.get('/my', async (req: AuthenticatedRequest, res: Response) => {
     const deliverables = await db.all(
       `SELECT d.id, d.title, d.type, d.status, d.approval_status,
               d.review_deadline, d.round_number, d.created_at,
-              p.name AS project_name
+              p.project_name
        FROM deliverables d
        JOIN projects p ON d.project_id = p.id
        WHERE p.client_id = ? AND d.deleted_at IS NULL

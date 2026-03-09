@@ -52,6 +52,7 @@ const commonGlobals = {
   File: 'readonly',
   FileList: 'readonly',
   DataTransfer: 'readonly',
+  EventSource: 'readonly',
   ShadowRoot: 'readonly',
   EventListener: 'readonly',
   NodeJS: 'readonly',
