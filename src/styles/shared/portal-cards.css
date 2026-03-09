@@ -41,9 +41,12 @@
 /* =====================================================
    PORTAL SECTION - BASE CONTAINER STYLE
    Single source of truth for ALL bordered section containers.
-   Applies uniform structure: border, no padding (content handles padding).
+   Applies uniform structure: border, transparent background.
+   Individual selectors add their own padding/layout.
    ===================================================== */
-.portal-section {
+.portal-section,
+.analytics-chart-card,
+.kpi-card {
   background: transparent;
   border: var(--border-width) solid var(--color-border-primary);
   overflow: hidden;

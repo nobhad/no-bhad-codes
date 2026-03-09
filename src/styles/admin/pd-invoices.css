@@ -19,10 +19,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin-top: 0;
   padding: 0;
-  background: transparent;
-  box-shadow: none;
   min-height: 80px;
 }
 
@@ -42,8 +39,6 @@
   display: flex;
   gap: var(--space-3);
   margin: 0;
-  background: transparent;
-  box-shadow: none;
 }
 
 /* =====================================================
@@ -68,7 +63,6 @@
 
 .invoice-info strong {
   display: block;
-  color: var(--color-text-primary);
 }
 
 .invoice-date {
@@ -134,7 +128,6 @@
 }
 
 #view-project-invoice-modal .field-value {
-  color: var(--color-text-primary);
   font-size: var(--font-size-base);
 }
 
@@ -167,7 +160,6 @@
 #view-project-invoice-modal .invoice-line-items td {
   padding: var(--space-1);
   border-bottom: var(--border-width) solid var(--portal-alpha-white-20);
-  color: var(--color-text-primary);
 }
 
 #view-project-invoice-modal .invoice-line-items td.text-right {
@@ -204,9 +196,7 @@
 }
 
 #view-project-invoice-modal .invoice-notes-section p {
-  color: var(--color-text-primary);
   line-height: var(--line-height-normal);
-  margin: 0;
 }
 
 /* =====================================================

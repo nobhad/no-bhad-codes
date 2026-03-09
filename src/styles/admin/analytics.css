@@ -83,8 +83,6 @@
    ============================================ */
 
 .analytics-chart-card {
-  background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
@@ -92,28 +90,14 @@
 }
 
 .analytics-chart-card h3 {
-  margin: 0;
-  font-family: var(--font-family-sans);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
 }
 
 .analytics-view .layout-row-between svg {
   color: var(--color-text-primary);
 }
 
-/* ============================================
-   Analytics Section Container
-   ============================================ */
-
-.analytics-section {
-  background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
-  overflow: hidden;
-}
+/* .analytics-section base styles provided by .portal-section in portal-cards.css */
 
 /* Ad Hoc Analytics Widget - consistent min-height with chart containers */
 #ad-hoc-analytics-widget {
@@ -248,8 +232,6 @@
   justify-content: center;
   gap: var(--space-1);
   padding: var(--space-3);
-  background: transparent;
-  border: var(--border-width) solid var(--color-border-primary);
   text-align: center;
   min-height: 120px;
   transition: border-color var(--transition-faster);
@@ -271,14 +253,7 @@
   height: var(--icon-size-xl);
 }
 
-.kpi-card-label {
-  font-family: var(--font-family-sans);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-label);
-}
+/* .kpi-card-label styles provided by unified label system in portal-cards.css */
 
 .kpi-card-value {
   font-family: var(--font-family-sans);
