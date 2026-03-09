@@ -66,7 +66,7 @@
 
 /* h3 styling from unified rule in portal-cards.css - only layout here */
 .portal .documents-detail-wrap h3 {
-  margin: 0 0 var(--space-1) 0;
+  margin-bottom: var(--space-1);
 }
 
 .portal .documents-detail-description,

@@ -3,10 +3,7 @@
    Dashboard structure, containers, page framework
    ===================================================== */
 
-/* Prevent scroll on portal root — only .dashboard-content scrolls */
-.portal {
-  overflow: hidden;
-}
+/* Scroll prevention on .portal — shared/portal-layout.css */
 
 /* Client portal body defaults - match admin portal */
 body[data-page="client-portal"] {
@@ -49,16 +46,10 @@ body[data-page="client-portal"] {
     padding-right: var(--space-1);
   }
 
-  .portal-header-subtabs {
-    padding-left: 0;
-    padding-right: 0;
-  }
+  /* .portal-header-subtabs padding reset — shared/portal-layout.css @media (--xs-mobile) */
 }
 
-/* Messages layout - no gap between search bar and columns (all screen sizes) */
-.portal .messages-layout {
-  gap: 0;
-}
+/* Messages layout gap: 0 — shared/portal-layout.css */
 
 /* Messages page: remove ALL outer padding on mobile so content fills width */
 /* Specificity increased via .portal ancestor to override .dashboard-content base padding */
@@ -127,10 +118,7 @@ body[data-page="client-portal"] {
   }
 }
 
-/* Portal Dashboard - uses shared portal styles */
-.portal .dashboard-content {
-  color: var(--color-text-primary);
-}
+/* .dashboard-content color — inherited from .portal base in shared/portal-layout.css */
 
 /* Portal theme variables are defined in variables.css */
 
@@ -138,6 +126,7 @@ body[data-page="client-portal"] {
    PORTAL TYPOGRAPHY
    Overrides global Acme headings with serif for portals
    ================================================ */
+/* Client portal heading font override — base letter-spacing/text-shadow/color in shared/portal-layout.css */
 .portal h1,
 .portal h2,
 .portal h3,
@@ -145,65 +134,13 @@ body[data-page="client-portal"] {
 .portal h5,
 .portal h6 {
   font-family: var(--font-family-serif, "Cormorant Garamond", Georgia, serif);
-  letter-spacing: var(--letter-spacing-tightest, -0.09em);
-  text-shadow: none;
-  color: var(--color-text-primary);
 }
 
-/* Portal page header specific */
-.portal .page-header h2,
-.portal .client-name {
-  text-shadow: none;
-}
+/* .page-header h2 / .client-name text-shadow: none — shared/portal-layout.css */
 
-/* ================================================
-   PORTAL BRUTALIST DESIGN - SHARP CORNERS
-   Only applies to portal pages, not main site
-   ================================================ */
-.portal *,
-.portal *::before,
-.portal *::after {
-  border-radius: 0;
-}
+/* Brutalist border-radius + hr — shared/portal-layout.css */
 
-/* Portal HR styling - sharp corners */
-.portal hr {
-  height: 2px;
-  border-radius: 0;
-  background-color: var(--color-text-primary);
-}
-
-/* ================================================
-   PORTAL - CARD SHADOWS
-   Base shadows in shared/portal-cards.css & shared/portal-files.css
-   ================================================ */
-.portal .file-section,
-.portal .content-section {
-  /* No shadows - flat design */
-}
-
-/* No shadows on child divs */
-.portal .content-section > div {
-  box-shadow: none;
-}
-
-/* ================================================
-   PORTAL - GLOBAL BUTTON STYLES
-   Base styles in shared/portal-buttons.css
-   ================================================ */
-
-/* Remove card backgrounds */
-.portal .card,
-.portal .cp-card,
-.portal .cp-stat,
-.portal .content-section,
-.portal .timeline-content,
-.portal .update-item,
-.portal .content-item,
-.portal .settings-form {
-  background: transparent;
-  border: none;
-}
+/* Card shadows + card backgrounds — shared/portal-layout.css */
 
 /* .content-wrapper REMOVED from DOM — subtabs and tab-content
    are now direct children of .dashboard-content */
@@ -256,15 +193,11 @@ body[data-page="client-portal"] {
    Page header element removed - styles deprecated
    ============================================ */
 
-/* Page title in unified global header */
+/* Page title in unified global header — overrides shared base font/size/spacing */
 .portal .portal-global-header .header-page-title {
   font-family: var(--font-family-mono);
   font-size: clamp(1rem, 3vw, 1.25rem);
-  color: var(--color-text-primary);
-  margin: 0;
-  text-transform: uppercase;
   letter-spacing: var(--letter-spacing-title, 0.02em);
-  white-space: nowrap;
 }
 
 /* Client name span styling - inline with greeting, "!" follows name */
@@ -273,14 +206,7 @@ body[data-page="client-portal"] {
   white-space: nowrap;
 }
 
-/* Subtabs container below unified header */
-.portal-header-subtabs {
-  display: flex;
-  align-items: center;
-  padding: 0;
-}
-
-/* Header subtabs visibility/styling moved to shared/portal-layout.css */
+/* Subtabs container base — shared/portal-layout.css (.portal .portal-header-subtabs) */
 
 /* ============================================
    Shared header elements (admin + client portal)
