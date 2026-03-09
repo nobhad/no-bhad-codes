@@ -77,7 +77,7 @@ export interface Project {
   email?: string;
   project_type?: ProjectType | string;
   budget_range?: string;
-  budget?: number;
+  budget?: string;
   timeline?: string;
   status: ProjectStatus;
   description?: string;

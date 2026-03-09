@@ -15,6 +15,41 @@ interface UseProjectsOptions {
   autoFetch?: boolean;
 }
 
+export interface CreateProjectData {
+  clientId?: string | number;
+  newClient?: {
+    contactName: string;
+    email: string;
+    companyName?: string;
+    phone?: string;
+  } | null;
+  projectType: string;
+  description: string;
+  budget: string;
+  timeline: string;
+  notes?: string;
+  features?: string;
+  pageCount?: string;
+  integrations?: string;
+  addons?: string;
+  designLevel?: string;
+  contentStatus?: string;
+  brandAssets?: string;
+  techComfort?: string;
+  hostingPreference?: string;
+  currentSite?: string;
+  inspiration?: string;
+  challenges?: string;
+  additionalInfo?: string;
+  referralSource?: string;
+}
+
+export interface CreateProjectResult {
+  projectId: number;
+  projectName: string;
+  clientId: number;
+}
+
 interface UseProjectsReturn {
   /** Project data */
   projects: Project[];
@@ -26,6 +61,8 @@ interface UseProjectsReturn {
   stats: ProjectStats;
   /** Refetch data */
   refetch: () => Promise<void>;
+  /** Create a new project */
+  createProject: (data: CreateProjectData) => Promise<CreateProjectResult | null>;
   /** Update a single project */
   updateProject: (id: number, updates: Partial<Project>) => Promise<boolean>;
   /** Delete multiple projects */
@@ -78,6 +115,27 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
       setIsLoading(false);
     }
   }, []);
+
+  // Create a new project
+  const createProject = useCallback(
+    async (data: CreateProjectData): Promise<CreateProjectResult | null> => {
+      try {
+        const response = await apiPost(API_ENDPOINTS.ADMIN.PROJECTS, data);
+        if (!response.ok) {
+          throw new Error(`Failed to create project: ${response.statusText}`);
+        }
+        const json = await response.json();
+        const result = unwrapApiData<CreateProjectResult>(json);
+        await fetchProjects();
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'An error occurred';
+        logger.error('[useProjects] Create error:', message);
+        return null;
+      }
+    },
+    [fetchProjects]
+  );
 
   // Update a single project
   const updateProject = useCallback(
@@ -158,6 +216,7 @@ export function useProjects(options: UseProjectsOptions = {}): UseProjectsReturn
     error,
     stats,
     refetch: fetchProjects,
+    createProject,
     updateProject,
     bulkDelete
   };

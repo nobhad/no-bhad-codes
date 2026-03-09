@@ -1,6 +1,7 @@
 /**
  * AddProjectModal
  * Form modal to add a new project with client selection and new-client toggle.
+ * Captures all intake form fields so the project record is fully populated.
  * Uses shared PortalModal + PortalInput for consistent UI.
  * Uses ModalDropdown for client, project type, budget, and timeline selections.
  */
@@ -11,6 +12,7 @@ import { FolderPlus } from 'lucide-react';
 import { PortalModal } from '@react/components/portal/PortalModal';
 import { PortalInput } from '@react/components/portal/PortalInput';
 import { ModalDropdown } from '@react/components/portal/ModalDropdown';
+import { DESIGN_STYLES } from '@react/features/portal/onboarding/types';
 import type { ModalDropdownOption } from '@react/components/portal/ModalDropdown';
 
 // ============================================
@@ -27,11 +29,29 @@ export interface NewClientData {
 export interface AddProjectFormData {
   clientId: string;
   newClient: NewClientData | null;
+  // Core project fields
   projectType: string;
   description: string;
   budget: string;
   timeline: string;
   notes: string;
+  // Intake scope fields
+  features: string;
+  pageCount: string;
+  integrations: string;
+  addons: string;
+  // Design & content fields
+  designLevel: string;
+  contentStatus: string;
+  brandAssets: string;
+  // Technical fields
+  techComfort: string;
+  hostingPreference: string;
+  currentSite: string;
+  // Background fields
+  inspiration: string;
+  challenges: string;
+  referralSource: string;
 }
 
 export interface AddProjectModalProps {
@@ -72,8 +92,53 @@ const INITIAL_FORM_STATE = {
   description: '',
   budget: '',
   timeline: '',
-  notes: ''
+  notes: '',
+  features: '',
+  pageCount: '',
+  integrations: '',
+  addons: '',
+  designLevel: '',
+  contentStatus: '',
+  brandAssets: '',
+  techComfort: '',
+  hostingPreference: '',
+  currentSite: '',
+  inspiration: '',
+  challenges: '',
+  referralSource: ''
 };
+
+const DESIGN_LEVEL_OPTIONS: ModalDropdownOption[] = DESIGN_STYLES.map((style) => ({
+  value: style,
+  label: style
+}));
+
+const CONTENT_STATUS_OPTIONS: ModalDropdownOption[] = [
+  { value: 'Ready', label: 'Ready' },
+  { value: 'In Progress', label: 'In Progress' },
+  { value: 'Need Help', label: 'Need Help' },
+  { value: 'Not Started', label: 'Not Started' }
+];
+
+const BRAND_ASSETS_OPTIONS: ModalDropdownOption[] = [
+  { value: 'Have Full Brand Kit', label: 'Have Full Brand Kit' },
+  { value: 'Have Logo Only', label: 'Have Logo Only' },
+  { value: 'Need Brand Design', label: 'Need Brand Design' },
+  { value: 'Not Sure', label: 'Not Sure' }
+];
+
+const TECH_COMFORT_OPTIONS: ModalDropdownOption[] = [
+  { value: 'Very Comfortable', label: 'Very Comfortable' },
+  { value: 'Somewhat Comfortable', label: 'Somewhat Comfortable' },
+  { value: 'Not Very Comfortable', label: 'Not Very Comfortable' },
+  { value: 'Prefer Not To', label: 'Prefer Not To' }
+];
+
+const HOSTING_OPTIONS: ModalDropdownOption[] = [
+  { value: 'Have Hosting', label: 'Have Hosting' },
+  { value: 'Need Hosting', label: 'Need Hosting' },
+  { value: 'Not Sure', label: 'Not Sure' }
+];
 
 // ============================================
 // COMPONENT
@@ -143,7 +208,20 @@ export function AddProjectModal({
         description: formState.description,
         budget: formState.budget,
         timeline: formState.timeline,
-        notes: formState.notes
+        notes: formState.notes,
+        features: formState.features,
+        pageCount: formState.pageCount,
+        integrations: formState.integrations,
+        addons: formState.addons,
+        designLevel: formState.designLevel,
+        contentStatus: formState.contentStatus,
+        brandAssets: formState.brandAssets,
+        techComfort: formState.techComfort,
+        hostingPreference: formState.hostingPreference,
+        currentSite: formState.currentSite,
+        inspiration: formState.inspiration,
+        challenges: formState.challenges,
+        referralSource: formState.referralSource
       };
       await onSubmit(data);
       resetForm();
@@ -244,7 +322,7 @@ export function AddProjectModal({
         </fieldset>
       )}
 
-      {/* Project Fields */}
+      {/* Core Project Fields */}
       <div className="form-group">
         <label className="field-label">Project Type *</label>
         <ModalDropdown
@@ -303,6 +381,176 @@ export function AddProjectModal({
           onChange={handleTextChange('notes')}
         />
       </div>
+
+      {/* ---- Project Scope ---- */}
+      <fieldset>
+        <legend>Project Scope</legend>
+
+        <div className="form-group">
+          <label className="field-label" htmlFor="new-project-features">
+            Features Requested
+          </label>
+          <textarea
+            id="new-project-features"
+            className="form-textarea"
+            rows={2}
+            placeholder="Contact forms, booking system, payment processing..."
+            value={formState.features}
+            onChange={handleTextChange('features')}
+          />
+        </div>
+
+        <div className="form-group">
+          <PortalInput
+            type="text"
+            label="Page Count"
+            placeholder="e.g. 5-10 pages"
+            value={formState.pageCount}
+            onChange={handleTextChange('pageCount')}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="field-label" htmlFor="new-project-integrations">
+            Integrations
+          </label>
+          <textarea
+            id="new-project-integrations"
+            className="form-textarea"
+            rows={2}
+            placeholder="Stripe, CRM, Google Calendar..."
+            value={formState.integrations}
+            onChange={handleTextChange('integrations')}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="field-label" htmlFor="new-project-addons">
+            Add-ons
+          </label>
+          <textarea
+            id="new-project-addons"
+            className="form-textarea"
+            rows={2}
+            placeholder="SEO optimization, analytics setup, maintenance plan..."
+            value={formState.addons}
+            onChange={handleTextChange('addons')}
+          />
+        </div>
+      </fieldset>
+
+      {/* ---- Design & Content ---- */}
+      <fieldset>
+        <legend>Design &amp; Content</legend>
+
+        <div className="form-group">
+          <label className="field-label">Design Level</label>
+          <ModalDropdown
+            options={DESIGN_LEVEL_OPTIONS}
+            value={formState.designLevel}
+            onChange={handleDropdownChange('designLevel')}
+            placeholder="Select design style"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="field-label">Content Status</label>
+          <ModalDropdown
+            options={CONTENT_STATUS_OPTIONS}
+            value={formState.contentStatus}
+            onChange={handleDropdownChange('contentStatus')}
+            placeholder="Is content ready?"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="field-label">Brand Assets</label>
+          <ModalDropdown
+            options={BRAND_ASSETS_OPTIONS}
+            value={formState.brandAssets}
+            onChange={handleDropdownChange('brandAssets')}
+            placeholder="What brand assets are available?"
+          />
+        </div>
+      </fieldset>
+
+      {/* ---- Technical ---- */}
+      <fieldset>
+        <legend>Technical</legend>
+
+        <div className="form-group">
+          <label className="field-label">Client Tech Comfort</label>
+          <ModalDropdown
+            options={TECH_COMFORT_OPTIONS}
+            value={formState.techComfort}
+            onChange={handleDropdownChange('techComfort')}
+            placeholder="How comfortable with tech?"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="field-label">Hosting Preference</label>
+          <ModalDropdown
+            options={HOSTING_OPTIONS}
+            value={formState.hostingPreference}
+            onChange={handleDropdownChange('hostingPreference')}
+            placeholder="Hosting situation?"
+          />
+        </div>
+
+        <div className="form-group">
+          <PortalInput
+            type="text"
+            label="Current Site URL"
+            placeholder="https://current-site.com (if any)"
+            value={formState.currentSite}
+            onChange={handleTextChange('currentSite')}
+          />
+        </div>
+      </fieldset>
+
+      {/* ---- Background ---- */}
+      <fieldset>
+        <legend>Background</legend>
+
+        <div className="form-group">
+          <label className="field-label" htmlFor="new-project-inspiration">
+            Inspiration / Examples
+          </label>
+          <textarea
+            id="new-project-inspiration"
+            className="form-textarea"
+            rows={2}
+            placeholder="Links or examples of designs the client likes..."
+            value={formState.inspiration}
+            onChange={handleTextChange('inspiration')}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="field-label" htmlFor="new-project-challenges">
+            Known Challenges
+          </label>
+          <textarea
+            id="new-project-challenges"
+            className="form-textarea"
+            rows={2}
+            placeholder="What problems need solving?"
+            value={formState.challenges}
+            onChange={handleTextChange('challenges')}
+          />
+        </div>
+
+        <div className="form-group">
+          <PortalInput
+            type="text"
+            label="Referral Source"
+            placeholder="How did they hear about you?"
+            value={formState.referralSource}
+            onChange={handleTextChange('referralSource')}
+          />
+        </div>
+      </fieldset>
     </PortalModal>
   );
 }
