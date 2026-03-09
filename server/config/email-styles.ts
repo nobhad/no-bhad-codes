@@ -104,7 +104,7 @@ export const EMAIL_COLORS = {
   /** Danger / error / overdue color */
   danger: '#dc3545',
   /** Success / paid color */
-  success: '#28a745',
+  success: '#28a745'
 } as const;
 
 // ============================================
@@ -126,7 +126,7 @@ export const EMAIL_LAYOUT = {
   /** Button border radius */
   buttonRadius: '4px',
   /** Contract button border radius */
-  buttonContractRadius: '6px',
+  buttonContractRadius: '6px'
 } as const;
 
 // ============================================
@@ -138,9 +138,9 @@ export const EMAIL_LAYOUT = {
  */
 export const EMAIL_TYPOGRAPHY = {
   /** Primary font stack (email-safe) */
-  fontFamily: "Arial, sans-serif",
+  fontFamily: 'Arial, sans-serif',
   /** Enhanced font stack for modern clients */
-  fontFamilyFull: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  fontFamilyFull: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif',
   /** Standard line height */
   lineHeight: '1.6',
   /** Footer font size */
@@ -148,7 +148,7 @@ export const EMAIL_TYPOGRAPHY = {
   /** Small text (fine print, legal) */
   smallFontSize: '14px',
   /** Feature badge font size */
-  badgeFontSize: '14px',
+  badgeFontSize: '14px'
 } as const;
 
 // ============================================
@@ -163,5 +163,5 @@ export const EMAIL_TYPOGRAPHY = {
 export const EMAIL_STYLES = {
   colors: EMAIL_COLORS,
   layout: EMAIL_LAYOUT,
-  typography: EMAIL_TYPOGRAPHY,
+  typography: EMAIL_TYPOGRAPHY
 } as const;

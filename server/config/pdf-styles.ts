@@ -94,7 +94,7 @@ export const PDF_COLORS = {
   /** Continuation header on subsequent pages */
   continuationHeader: c(0.5, 0.5, 0.5),
   /** Page header on subsequent pages (SOW) */
-  pageHeader: c(0.5, 0.5, 0.5),
+  pageHeader: c(0.5, 0.5, 0.5)
 } as const;
 
 // ============================================
@@ -137,7 +137,7 @@ export const PDF_TYPOGRAPHY = {
   /** Typed signature size */
   typedSignatureSize: 24,
   /** Watermark text size */
-  watermarkSize: 72,
+  watermarkSize: 72
 } as const;
 
 // ============================================
@@ -207,7 +207,7 @@ export const PDF_SPACING = {
   /** Receipt details box height */
   receiptBoxHeight: 140,
   /** Receipt box header height */
-  receiptBoxHeaderHeight: 25,
+  receiptBoxHeaderHeight: 25
 } as const;
 
 // ============================================
@@ -222,5 +222,5 @@ export const PDF_SPACING = {
 export const PDF_STYLES = {
   colors: PDF_COLORS,
   typography: PDF_TYPOGRAPHY,
-  spacing: PDF_SPACING,
+  spacing: PDF_SPACING
 } as const;
