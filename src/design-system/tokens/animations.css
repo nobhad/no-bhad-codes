@@ -9,13 +9,54 @@
 
 :root {
   /* ============================================
+   * BASE DURATION & TRANSITION TOKENS
+   * ============================================
+   * Migrated from variables.css.
+   * These are consumed by animations.css component tokens (--animation-*) below.
+   */
+
+  /* Duration-only tokens — for complex multi-property transitions */
+  --duration-faster: 0.15s;
+  --duration-fast: 0.2s;
+  --duration-medium: 0.3s;
+  --duration-slow: 0.4s;
+  --duration-slower: 0.5s;
+
+  /* Shorthand transition tokens — duration + ease combined */
+  --transition-faster: 0.15s ease;
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.4s ease;
+  --transition-slower: 0.5s ease;
+
+  /* ============================================
+   * EASING ALIASES (from variables.css)
+   * ============================================ */
+
+  /* Default cubic-bezier — matches --easing-smooth */
+  --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Menu open/close easing */
+  --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
+
+  /* ============================================
+   * PAGE & SECTION TRANSITION TOKENS
+   * ============================================
+   * Consumed by page-transitions.css and GSAP modules.
+   */
+
+  --blur-amount: 4px;
+  --drop-distance: 20px;
+  --transition-enter: 0.3s;
+  --transition-exit: 0.2s;
+  --stagger-delay: 0.05s;
+  --page-transition-duration: var(--transition-length);
+  --page-blur-amount: 12px;
+
+  /* ============================================
    * DURATION & TRANSITION TOKENS
    * ============================================
-   * Base durations defined in variables.css:
-   *   --duration-faster/fast/medium/slow/slower
-   *   --transition-faster/fast/medium/slow/slower
-   *
-   * Semantic timing tokens below for specific use cases.
+   * Semantic timing tokens for specific use cases.
    */
 
   /* Theme color transitions (slower for smooth color changes) */

@@ -10,6 +10,135 @@
 
 :root {
   /* ============================================
+   * LAYOUT CONSTANTS (migrated from variables.css)
+   * ============================================ */
+  --header-height: 60px;
+  --footer-height: 40px;
+  --size-container: min(1200px, 100vw - 2rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  --gap: clamp(0.75rem, 3vw, 1.5rem);
+  --section-padding: clamp(1rem, 5vw, 2rem);
+
+  /* ============================================
+   * MODAL SIZES (migrated from variables.css)
+   * ============================================ */
+  --modal-width-sm: 400px;
+  --modal-width-md: 560px;
+  --modal-width-lg: 860px;
+
+  /* ============================================
+   * ICON GLYPH SIZES (migrated from variables.css)
+   * Container sizes are below (--icon-btn-size-*)
+   * ============================================ */
+  --icon-size-xs: 12px;
+  --icon-size-sm: 14px;
+  --icon-size-md: 16px;
+  --icon-size-lg: 20px;
+  --icon-size-xl: 24px;
+  --icon-size-2xl: 32px;
+
+  /* Icon-text size matching — icon in same row as text must match text size */
+  --icon-text-size: var(--font-size-sm); /* 14px — matches body text */
+
+  /* ============================================
+   * PORTAL NAVIGATION FONT SIZE (migrated from variables.css)
+   * ============================================ */
+
+  /* Shared by header logo text + sidebar buttons */
+  --portal-nav-font-size: 1.25rem;
+
+  /* ============================================
+   * SIDEBAR ICON SIZE (migrated from variables.css)
+   * ============================================
+   * Single value for both open and collapsed states.
+   */
+  --sidebar-icon-size: 20px;
+
+  /* ============================================
+   * PORTAL BUTTON ICON SIZES (migrated from variables.css)
+   * ============================================ */
+  --btn-portal-icon-size: 32px;
+  --btn-portal-icon-size-sm: 28px;
+  --btn-portal-icon-size-xs: 24px;
+  --btn-table-icon-size: 24px;
+  --btn-portal-icon-inner-size: 14px; /* Icon SVG size inside buttons — matches text */
+
+  /* ============================================
+   * DROPDOWN SIZING (migrated from variables.css)
+   * ============================================ */
+
+  /* Dropdown caret sizing */
+  --dropdown-caret-size: var(--icon-size-xs);
+  --dropdown-caret-gap: var(--space-2);
+
+  /* Dropdown text styling — single source of truth for all dropdowns */
+  --dropdown-font-size: inherit;
+  --dropdown-font-weight: inherit;
+  --dropdown-font-family: inherit;
+  --dropdown-letter-spacing: inherit;
+  --dropdown-text-transform: none;
+
+  /* ============================================
+   * STATUS DOT (migrated from variables.css)
+   * ============================================ */
+  --status-dot-size: 8px;
+  --status-dot-gap: var(--space-2);
+
+  /* ============================================
+   * NAVIGATION SIZING (migrated from variables.css)
+   * ============================================ */
+  --menu-padding: clamp(0.5rem, 2vw, 1rem);
+  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
+  --menu-multiplier: 0.15;
+  --list-multiplier: 0.12;
+  --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
+  --menu-button-size: clamp(2rem, 4vw, 2.5rem);
+  --theme-button-size: clamp(2rem, 4vw, 2.5rem);
+  --menu-width-desktop: 35rem;
+  --menu-width-tablet: 32rem;
+  --menu-width-mobile: 100vw;
+  --menu-border-radius: 1.25rem;
+  --menu-height: 100vh;
+  --menu-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--menu-multiplier)));
+  --list-gap: max(var(--nav-base-gap), calc(var(--menu-heading-size) * var(--list-multiplier)));
+
+  /* ============================================
+   * BUSINESS CARD DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --business-card-width-svg: 1069.5;
+  --business-card-height-svg: 599.3;
+  --business-card-aspect-ratio: 1.784582;
+  --business-card-base-width: 35vw;
+  --business-card-base-height: calc(var(--business-card-base-width) / var(--business-card-aspect-ratio));
+  --business-card-large-width: 525px;
+  --business-card-large-height: calc(var(--business-card-large-width) / var(--business-card-aspect-ratio));
+  --business-card-medium-width: 420px;
+  --business-card-medium-height: calc(var(--business-card-medium-width) / var(--business-card-aspect-ratio));
+  --business-card-small-width: 350px;
+  --business-card-small-height: calc(var(--business-card-small-width) / var(--business-card-aspect-ratio));
+  --business-card-tiny-width: 280px;
+  --business-card-tiny-height: calc(var(--business-card-tiny-width) / var(--business-card-aspect-ratio));
+
+  /* ============================================
+   * CONTACT FORM DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --contact-input-height: clamp(52px, 14vw, 60px);
+  --contact-input-width: min(520px, 100%);
+  --contact-textarea-height: 175px;
+  --contact-textarea-width: min(520px, 100%);
+  --contact-field-gap: 0;
+  --contact-row-gap: 0;
+  --contact-layout-height: 480px;
+  --contact-field-border-width: var(--border-width);
+  --contact-field-border-color: var(--color-text-primary);
+
+  /* ============================================
+   * TERMINAL DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --terminal-font-family: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --terminal-line-height: 1.7;
+
+  /* ============================================
    * SIDEBAR DIMENSIONS
    * ============================================ */
   --sidebar-width-open: 240px;

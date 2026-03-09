@@ -16,6 +16,10 @@
    * - Body/UI: Inconsolata (monospace)
    */
 
+  /* Acme display font (main site headings) */
+  --font--acme: "Acme", sans-serif;
+  --font-family-acme: var(--font--acme);
+
   /* Body/UI: Inconsolata monospace */
   --font-family-sans:
     "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
@@ -59,6 +63,8 @@
 
   --font-weight-light: 300;
   --font-weight-regular: 400;
+  --font-weight-normal: 400;  /* Alias for regular — used by legacy variables.css consumers */
+  --font-weight-base: 400;    /* Alias for regular — used by portal components */
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
@@ -91,6 +97,12 @@
   /* Semantic aliases */
   --letter-spacing-label: var(--letter-spacing-wider); /* 0.05em */
   --letter-spacing-title: var(--letter-spacing-wide);  /* 0.025em */
+
+  /* Main-site overrides — variables.css intentionally uses wider tracking
+     than the design-system defaults above. Kept here as documented overrides. */
+  --letter-spacing-label-wide: 0.05em;   /* 0.05em — same as --letter-spacing-wider */
+  --letter-spacing-title-wide: 0.02em;   /* Slightly tighter than --letter-spacing-wide */
+  --letter-spacing-extra-wide: 0.08em;   /* Widest tracking — nav/display contexts */
 
 }
 

@@ -18,6 +18,19 @@
   --border-width-4: 4px;
   --border-width-8: 8px;
 
+  /* Semantic aliases (migrated from variables.css)
+   * DISCOTHÈQUE uses 2px borders consistently */
+  --border-width: 2px;         /* Default border width */
+  --border-width-thick: 3px;   /* Focus states, emphasized borders */
+  --border-width-heavy: 4px;   /* Strong visual emphasis */
+
+  /* ============================================
+   * SVG STROKE WIDTH (migrated from variables.css)
+   * ============================================
+   * Matches border thickness for visual consistency.
+   */
+  --svg-stroke-width: 2.5;
+
   /* ============================================
    * BORDER RADIUS - BRUTALIST DESIGN
    * All scale values set to 0 (sharp corners)
